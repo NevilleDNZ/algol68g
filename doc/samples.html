@@ -1,0 +1,440 @@
+<html>
+<head>
+<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
+<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css">
+a:link    {color: blue; text-decoration: none;}
+a:visited {color: blue; text-decoration: none;}
+a:active  {color: blue; text-decoration: none;}
+a:hover   {text-decoration: underline;}
+p {font-size: 10pt; font-family: Arial,Helvetica;}
+u {font-size: 10pt; font-family: Arial,Helvetica;}
+dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h2 {font-size: 14pt; font-family: Arial,Helvetica;}
+h3 {font-size: 12pt; font-family: Arial,Helvetica;}
+h4 {font-size: 12pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
+ul {font-size: 10pt; font-family: Arial,Helvetica;}
+body {font-size: 10pt; font-family: Arial,Helvetica;}
+code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 10pt; font-family: Fixed,"Lucida","Courier New",Courier;}
+</style>
+</head>
+<body background="bg.jpg">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=12>
+<td valign=top bgcolor="white">
+<table cellspacing=1 cellpadding=3 border=0>
+<td bgcolor="black">
+<a href="environ.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
+</td>
+<td bgcolor="black">
+<a href="resources.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
+</td>
+<td bgcolor="black">
+<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
+</td>
+<td bgcolor="black">
+<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
+</td>
+</table>
+<h2>Sample Algol68G programs</h2>
+<ul>
+<li><a href="#p0">Lucas numbers</a>
+<li><a href="#p1">Ackermann numbers</a>
+<li><a href="#p2">Quicksort</a>
+<li><a href="#p3">Determinant of Hilbert matrix</a>
+<li><a href="#p4">Fast Fourier Transform</a>
+<li><a href="#p5">Decision tree</a>
+</ul>
+</td>
+<td bgcolor=white valign=top>
+<img src="logo.jpg" align=right>
+</td>
+</table>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=12>
+<td width="80%" valign=top bgcolor=white>
+
+<h3><a name="p0">Lucas numbers</a></h3>
+<table border=0 cellpadding=12>
+<td bgcolor="#f0f0f0">
+<pre>
+CO Using refinements CO
+
+determine first generation;
+WHILE can represent next generation
+DO calculate next generation;
+   print next generation
+OD.
+
+   determine first generation:
+      INT previous := 1, current := 3.
+
+   can represent next generation:
+      current <= max int - previous.
+
+   calculate next generation:
+      INT new = current + previous;
+      previous := current;
+      current := new.
+
+   print next generation:
+      printf (($lz","3z","3z","2z-d$, current, $xz","3z","3z","2z-d$, previous,
+               $xd.n(real width - 1)d$, current / previous)).
+</pre>
+</td>
+</table>
+
+<h3><a name="p1">Ackermann numbers</a></h3>
+<table border=0 cellpadding=12>
+<td bgcolor="#f0f0f0">
+<pre>
+# A naive approach to calculating Ackermann numbers. 
+  This program will easily overflow.                 #
+
+MODE ANT = LONG INT;
+
+OP ACK = (INT n) ANT:
+   BEGIN PROC pow = (ANT a, ANT n, ANT k) ANT:
+              # a ^n k = a ^(n-1) [a ^n (k - 1)] with
+                a ^1 k = a ^ k, a ^n 1 = a.           #
+              IF n = 1
+              THEN a ^ SHORTEN k
+              ELIF k = 1
+              THEN a
+              ELSE pow (a, n - 1, pow (a, n, k - 1))
+              FI;
+         pow (n, n, n);
+   END;
+
+INT n = read int;
+printf (($l"A["g(0)"] = "g(0)$, n, ACK n))
+</pre>
+</td>
+</table>
+
+<h3><a name="p2">Quicksort</a></h3>
+<table border=0 cellpadding=12>
+<td bgcolor="#f0f0f0">
+<pre>
+BEGIN MODE NODE = STRUCT (INT k, REF NODE smaller, larger);
+
+      PROC add = (REF REF NODE root, INT k) VOID:
+           IF root IS REF NODE (NIL)
+           THEN root := HEAP NODE := (k, NIL, NIL)
+           ELSE IF k < k OF root
+                THEN add (smaller OF root, k)
+                ELSE add (larger OF root, k)
+                FI
+           FI;
+
+      PROC write = (REF NODE root) VOID:
+           IF root ISNT NIL
+           THEN write (smaller OF root);
+                print ((whole (k OF root, 0), " "));
+                write (larger OF root)
+           FI;
+
+      REF NODE root := NIL;
+      WHILE INT n = read int;
+            n > 0
+      DO add (root, n)
+      OD;
+      write (root)
+END
+</pre>
+</td>
+</table>
+
+<h3><a name="p3">Determinant of Hilbert matrix</a></h3>
+<table border=0 cellpadding=12>
+<td bgcolor="#f0f0f0">
+<pre>
+COMMENT
+An application for multi-precision LONG LONG INT. 
+Calculate the determinant of Hilbert matrices using fractions.
+A comprehensive implementation of fractions is in the MC Algol 68 test set (appl08).
+COMMENT
+
+BEGIN
+
+# Data structure. #
+
+      MODE FRAC = STRUCT (LINT n, d), LINT = LONG LONG INT;
+
+      OP NOM = (FRAC u) LINT: n OF u,
+         DEN = (FRAC u) LINT: d OF u;
+
+      PR precision 101 PR # Now LINT holds a googol. #
+ 
+# Basic operations. #
+ 
+      OP RECIPROCAL = (LINT i) FRAC: IF i >= 0 THEN (1, i) ELSE (-1, -i) FI;
+  
+      OP - = (FRAC u) FRAC: (-NOM u, DEN u);
+  
+      OP + = (FRAC u, FRAC v) FRAC:
+         BEGIN LINT k = DEN u GCD DEN v;
+               LINT du = DEN u OVER k, dv = DEN v OVER k;
+               LINT n = NOM u * dv + NOM v * du;
+               LINT l = n GCD k, d = dv * du;
+               (n OVER l, k OVER l * d)
+         END;
+
+      OP +:= = (REF FRAC u, FRAC v) REF FRAC: u := u + v;
+  
+      OP - = (FRAC u, FRAC v) FRAC:
+         BEGIN LINT k = DEN u GCD DEN v;
+               LINT du = DEN u OVER k, dv = DEN v OVER k;
+               LINT n = NOM u * dv - NOM v * du;
+               LINT l = n GCD k, d = dv * du;
+               (n OVER l, k OVER l * d)
+         END;
+
+      OP -:= = (REF FRAC u, FRAC v) REF FRAC: u := u - v;
+  
+      OP * = (FRAC u, v) FRAC:
+         BEGIN LINT i = NOM u GCD DEN v, j = NOM v GCD DEN u;
+               ((NOM u OVER i) * (NOM v OVER j), (DEN u OVER j) * (DEN v OVER i))
+         END;
+
+      OP *:= = (REF FRAC u, FRAC v) REF FRAC: u := u * v;
+  
+      OP / = (FRAC u, FRAC v) FRAC:
+         IF LINT i = NOM u GCD NOM v, j = DEN v GCD DEN u;
+            NOM v >= 0
+         THEN ((NOM u OVER i) * (DEN v OVER j), (DEN u OVER j) * (NOM v OVER i))
+         ELSE (- (NOM u OVER i) * (DEN v OVER j), - (DEN u OVER j) * (NOM v OVER i))
+         FI;
+
+      OP /:= = (REF FRAC u, FRAC v) REF FRAC: u := u / v;
+  
+# Comparing rationals with integrals. #
+  
+      OP = = (FRAC u, LINT i) BOOL: NOM u = i ANDF DEN u = 1;
+  
+      OP /= = (FRAC u, LINT i) BOOL: NOT (u = i);
+  
+# Matrix algebra. #
+
+      OP INNER = ([] FRAC u, v) FRAC:
+         # Innerproduct of two arrays of rationals #
+         BEGIN FRAC s := (0, 1);
+               FOR i TO UPB u
+               DO s +:= u[i] * v[i]
+               OD;
+               s
+         END;
+
+      PRIO INNER = 8;
+  
+      PROC lu decomposition = (REF [, ] FRAC a, REF [] INT p) VOID:
+           # LU-decomposition cf. Crout, of a matrix of rationals. #
+           BEGIN INT n = 1 UPB a;
+                 FOR k TO n
+                 DO FRAC piv := (0, 1), INT k1 := k - 1;
+                    REF INT pk = p[k];
+                    REF [] FRAC aik = a[, k], aki = a[k,];
+                    FOR i FROM k TO n
+                    DO aik[i] -:= a[i, 1 : k1] INNER aik[1 : k1];
+                       IF piv = LINT (0) AND aik[i] /= LINT (0)
+                       THEN piv := aik[i]; 
+                            pk := i
+                       FI
+                    OD;
+                    IF piv = LINT (0)
+                    THEN print((newline, newline, "Singular matrix"));
+                         stop
+                    FI;
+                    IF pk /= k
+                    THEN FOR i TO n
+                         DO FRAC r = aki[i];
+                            aki[i] := a[pk, i]; 
+                            a[pk, i] := -r
+                         OD
+                    FI;
+                    FOR i FROM k + 1 TO n
+                    DO aki[i] -:= aki[1 : k1] INNER a[1 : k1, i] /:= piv
+                    OD 
+                 OD
+           END;
+  
+      PROC determinant = ([,] FRAC a) FRAC:
+           # Determinant of a decomposed matrix is its trace. #
+           BEGIN FRAC d := (1, 1);
+                 FOR i TO 1 UPB a
+                 DO d *:= a[i, i]
+                 OD;
+                 d
+           END;
+
+# Recursive definition of greatest common divisor. #
+
+      OP GCD = (LINT a, b) LINT:
+         IF b = 0 
+         THEN (a > 0 | a | -a)
+         ELSE b GCD (a MOD b)
+         FI;
+  
+      PRIO GCD = 8;
+
+# Table of required results. #  
+  
+      [] LINT table = BEGIN
+         LONG LONG 1,
+         LONG LONG 12,
+         LONG LONG 2160,
+         LONG LONG 6048000,
+         LONG LONG 266716800000,
+         LONG LONG 186313420339200000, 
+         LONG LONG 2067909047925770649600000,
+         LONG LONG 365356847125734485878112256000000, 
+         LONG LONG 1028781784378569697887052962909388800000000, 
+         LONG LONG 46206893947914691316295628839036278726983680000000000
+      END;
+
+# Compute determinant of Hilbert matrix of increasing rank. #
+   
+      printf(($"Determinant of the Hilbert matrix"$));
+      FOR n TO UPB table
+      DO [1 : n, 1 : n] FRAC a;
+         FOR i TO n
+         DO a[i,i] := RECIPROCAL LINT (i * 2 - 1);
+            FOR j FROM i + 1 TO n
+            DO a[i, j] := a[j, i] := RECIPROCAL LINT (i + j - 1)
+            OD
+         OD;
+         lu decomposition(a, LOC [1 : n] INT);
+         FORMAT small int = $2z-d$,
+                huge int = $z","3z","3z","3z","3z","3z","3z","3z","3z","3z","3z",
+                               "3z","3z","3z","3z","3z","3z","3z","2z-d$;
+         FRAC det = determinant (a);
+         printf(($2l"Order : "$, small int, n));
+         printf(($l "Result: "$, small int, NOM det, $" / "$, huge int, DEN det));
+         printf(($l "Table : "$, small int, 1, $" / "$, huge int, table[n]))
+     OD
+END
+</pre>
+</td>
+</table>
+
+<h3><a name="p4">Fast Fourier Transform</a></h3>
+<table border=0 cellpadding=12>
+<td bgcolor="#f0f0f0">
+<pre>
+PROC fft = (REF () COMPLEX f, INT dir) VOID:
+
+     IF COMMENT 
+        Unnormalised Fast Fourier Transform in recursive form:
+           F (k) = F even (k) + exp (2 pi i k / n) * F odd (k).
+        Parameter dir = +- 1 determines direction of the transform. 
+        Assume lower bound of f to be zero.
+        COMMENT
+     
+        INT length = UPB f + 1;
+        length > 1
+     THEN INT half length = length OVER 2;
+          # Calculate transforms at sublevels #
+          (0 .. half length - 1) COMPLEX even, odd;
+          FOR i FROM 0 TO half length - 1
+          DO even (i) := f (2 * i); 
+             odd (i) := f (2 * i + 1)
+          OD;
+          fft (even, dir); 
+          fft (odd, dir);
+          # Calculate transform at this level #
+          FOR k FROM 0 TO half length - 1
+          DO REAL phi = dir * 2 * pi * k / length;
+             COMPLEX exp i phi = cos (phi) +*  sin (phi);
+             f (k) := even (k) + exp i phi * odd (k); 
+             f (k + half length) := even (k) - exp i phi * odd (k)
+          OD
+     FI;
+
+SKIP
+</pre>
+</td>
+</table>
+
+<h3><a name="p5">Decision tree</a></h3>
+<table border=0 cellpadding=12>
+<td bgcolor="#f0f0f0">
+<pre>
+CO Paradigm for building decision trees in Algol 68.
+   We wrote programs like this for ALGOL68C on TOPS-20.
+CO
+
+BEGIN # Q&A game #
+
+      CELL library := get answer("give an initial answer");
+      
+      WHILE guess object(library);
+            put question("again")
+      DO SKIP
+      OD;
+
+      # Data structure #
+
+      MODE CELL = UNION (STRING, FORK), 
+           FORK = STRUCT (STRING text, REF CELL has, hasnt);
+
+      OP TEXT  = (FORK d) STRING: text OF d,
+         HAS   = (FORK d) REF CELL: has OF d,
+         HASNT = (FORK d) REF CELL: hasnt OF d;
+
+      PROC new fork = (STRING text, CELL has, hasnt) FORK:
+           (HEAP STRING := text, HEAP CELL := has, HEAP CELL := hasnt);
+
+      # Guessing and extending library #
+
+      PROC guess object = (REF CELL sub lib) VOID: # How to guess an object #
+           CASE sub lib
+           IN (STRING s): (put question(s) | SKIP | sub lib := learn(s)),
+              (FORK d):   guess object((put question(TEXT d) | HAS d | HASNT d))
+           ESAC;
+
+      PROC learn = (STRING guess) CELL: # Introduce new cell in tree #
+           IF STRING answer = get answer("what is the answer"),
+                     question = get answer("give a question that distinguishes " + answer);
+              put question("does " + question + " apply to " + answer)
+           THEN new fork(question, answer, guess)
+           ELSE new fork(question, guess, answer)
+           FI;
+
+      # Interaction #
+
+      PROC get answer = (STRING prompt) STRING:
+           BEGIN STRING s; 
+                 printf(($gl$, prompt)); 
+                 readf(($gl$, s)); 
+                 s
+           END;
+                
+      PROC put question = (STRING question) BOOL:
+           IF STRING s = get answer(question);
+              UPB s > 0
+           THEN s[1] = "y" ORF s[1] = "Y"
+           ELSE put question (question)
+           FI;
+
+      SKIP
+
+END
+</pre>
+</td>
+</table>
+
+</td>
+</table>
+
+<p style="font-size: 8pt;">
+<font color="black">
+Copyright &copy; 2001-2004 J. Marcel van der Veer.
+</font>
+</p>
+
+</body>
+</html>
