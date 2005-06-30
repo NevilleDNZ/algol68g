@@ -1,4 +1,4 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 4)
+ALGOL68G - ALGOL 68 GENIE (MARK 8)
 
 * A garbage collector cannot solve all memory allocation issues. It is 
   therefore possible to get an unexpected "out of memory" diagnostic. Two
@@ -12,6 +12,9 @@ ALGOL68G - ALGOL 68 GENIE (MARK 4)
   - Deep recursion.
   - Garbage collection of deeply recursive data structures.
   - Using jumps to move between incarnations of recursive procedures.
+
+* When the stack overhead is set to a too small value, a segment violation may
+  occur. Refer to the documentation on option -overhead=value.
 
 * Algorithms for extended precision (LONG LONG INT, LONG LONG REAL and 
   LONG LONG COMPLEX) are not really suited for precisions larger than about a 

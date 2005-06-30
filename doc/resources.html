@@ -1,149 +1,225 @@
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
-<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
-<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
-<meta http-equiv="Content-Style-Type" content="text/css">
+<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: blue; text-decoration: none;}
-a:visited {color: blue; text-decoration: none;}
-a:active  {color: blue; text-decoration: none;}
-a:hover   {text-decoration: underline;}
+a:link    {color: navy; text-decoration: underline;}
+a:visited {color: navy; text-decoration: underline;}
+a:active  {color: navy; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 12pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </style>
 </head>
-<body background="bg.jpg">
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td valign=top bgcolor="white">
-<table cellspacing=1 cellpadding=3 border=0>
-<td bgcolor="black">
-<a href="samples.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
-</td>
-<td bgcolor="black">
-<a href="license.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
-</td>
-<td bgcolor="black">
-<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
-</td>
-<td bgcolor="black">
-<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
-</td>
-</table>
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
 <h2>Algol 68 resources</h2>
-<ul>
-<li><a href="#history">History</a>
-<li><a href="#implementations">Algol 68 implementations</a>
-<li><a href="#documentation">Readily available Algol 68 documentation</a>
-<li><a href="#ref">Referenced sources</a>
-</ul>
 </td>
-<td bgcolor=white valign=top>
-<img src="logo.jpg" valign=top align=right>
+<td width="30%" bgcolor=white valign=top align=center>
+<img src="logo.gif" valign=top align=center>
+<p>
+<div align=right>
+{<i>... 'Languages take such a time, and so do<br>
+all the things one wants to know about.'</i><br>
+<small>J. R. R. Tolkien, The Lost Road.</small> }
+</div>
+</td>
+<td width="5%" valign=top bgcolor="white">
+</td>
+<td  width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td bgcolor="skyblue">
+&nbsp;&nbsp;<b>Manual</b>
+</td>
+</tr>
+<tr>
+<td bgcolor="powderblue">
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
 </td>
 </table>
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td width="70%" valign=top bgcolor="white">
+<h3><a name="history"></a>A brief history of Algol 68</h3>
 
-<h3><a name="history">History</a></h3>
 <p>
-When <a href="http://web.comlab.ox.ac.uk/oucl/work/jeremy.gibbons/wg21/">IFIP Working Group 2.1</a> discussed a successor for Algol 60 in 1965, Van Wijngaarden presented his proposal
-<i>Orthogonal design and description of a formal language</i> (available from <a href="#kk">Karl Kleine's collection</a>). 
-This paper formed the basis from which WG 2.1 worked on <i>Algol X</i>, which would develop into Algol 68. Wirth left the project to work on <i>Algol W</i> and later on <i>Pascal</i>.
+ALGOrithmic Language Algol 68 was designed by 
+<a href="http://web.comlab.ox.ac.uk/oucl/work/jeremy.gibbons/wg21/">IFIP Working Group 2.1</a> (Algorithmic Languages and Calculi) as a general-purpose programming language. 
+This working group has continuing responsibility for Algol 60 and Algol 68.
+A formal defining report appeared in 1968 and the revised report was issued in 1976. Algol 68 is a rather lean orthogonal general-purpose language, that even today is a beautiful means for denoting algorithms.
+<p>
+In the early 1960's Working Group 2.1 started discussing the development of Algol X, a successor to Algol 60. At its 1965 meeting in Princeton, WG 2.1 invited written descriptions of the language based on the previous discussions. At the meeting in St. Pierre de Chartreuse, also in 1965, three reports describing more or less complete languages, by Wirth, Seegm&uuml;ller, and Van Wijngaarden, were amongst the contributions. 
+Other significant contributions were papers by Hoare and Naur. 
+Van Wijngaarden's paper "Orthogonal design and description of a formal language" 
+(available from <a href="#documentation">Karl Kleine's collection</a>) featured a new technique for language design and definition. 
+This paper formed the basis for what would develop into Algol 68. Wirth left the project to work on Algol W which influenced his later language Pascal.
 <p>
 Algol 68 was defined in a formal document, first published in January 1969,
-and later published in <a href="#rr">Acta Informatica</a> and also printed in <a href="#rr">Sigplan Notices</a>.
+and later published in <a href="#ref">Acta Informatica</a> and also printed in <a href="#ref">Sigplan Notices</a>.
 Algol 68 was the first major language for which a full formal definition was made before it was implemented.
 <p>
-Probably because of the formal defining document, which requires some study to comprehend, the misconception got hold that Algol 68 is a complex language. In fact, Algol 68 is a rather lean orthogonal language, that even today is a beautiful means for denoting algorithms. 
+Probably because of the formal character of the defining document, which requires some study to comprehend, the misconception got hold that Algol 68 is a complex language, while in fact it is rather lean. The reason that its definition (a "two-level grammar" or "W-grammar") looks complex is that the W-grammar describes only semantically correct programs. 
+For example, Algol 68's W-grammar cannot describe programs that use identifiers or operators that are not declared, or that define modes resulting in objects that are infinitely large or require infinite coercion, etcetera. A context-free syntax (C, C++, Pascal, ...) describes both semantically correct and - incorrect programs, and many rules are needed besides the syntax to reject the incorrect ones. This is less elegant, but the resulting defining document looks much simpler than the Algol 68 report. You can judge this for yourself by having a look at both a <a href="syntax.html">context-free Algol68G syntax</a>, and also the <a href="resources.html#rr">Algol 68's W-grammar</a>.
+<p>
+Another factor that hindered Algol 68 from spreading more widely is that Algol 68 was designed for programmers, not for compiler writers, in a time when the field of compiler construction was not as advanced as it is today. 
+Implementation efforts based on formal methods generally failed; Algol 68's context-dependent grammar requires some invention to parse (consider for instance <code>x(y, z)</code> that can be either a call or a slice depending on the mode of <code>x</code>, or the overloading of parentheses).
+Pragmatically, Algol 68 can be parsed in multiple stages, following Mailloux's scheme <a href="#ref">[Lindsey 1993]</a>. Algol 68 Genie follows this scheme: it first identifies lexical levels, then constructs symbol tables and completes the syntax tree using bottom-up parsing and mode-checking.
+<p>
+Besides abovementioned reasons, perhaps the era of universal programming languages had already passed when Algol 68 was presented [<a href="resources.html#ref">Koster 1996</a>].
+Although the world has moved on since the 1970's and 80's, and Algol 68 is now considered a <i>succ&egrave;s d'estime</i>, there still is an active interest in it.
 </p>
 
 <br>
-<h3><a name="documentation">Readily available Algol 68 documentation</a></h3>
+<h3><a name="documentation"></a>Readily available information on Algol 68</h3>
 
+<p>
 <ul>
-<li>This manual contains an <a href="syntax.html">Algol68G syntax summary</a> for quick reference.
-<li>Wilhelm Kloke has made available an on-line version of the formal
-    <a href="http://members.dokom.net/w.kloke/RR/">Revised Report</a>.
-<li>Sian Leitch wrote a good informal textbook on Algol 68:
-    <a href="http://www.sleitch.nildram.co.uk/">Programming Algol 68 Made Easy</a>.
-<li><a name="kk">Karl Kleine collects and posts
+<li><a name="nunan"></a>Greg Nunan maintains a page on
+<a href="http://www.algol68.org/">Algol 68 web resources</a>. 
+<li><a name="rr"></a>
+Wilhelm Kloke has made available an on-line version of the formal
+<a href="http://members.dokom.net/w.kloke/">Revised Report</a>,
+<a href="http://members.dokom.net/w.kloke/syntax.txt">Algol 68's W-grammar</a> extracted from same report, and
+<a href="http://members.dokom.net/w.kloke/RR/rrE.html#E">
+C.H. Lindsey's partial parametrisation proposal</a>.
+<li>HOPL - History of programming languages. 
+    On-line encyclopedia of programming languages has an 
+<a href="http://hopl.murdoch.edu.au/showlanguage2.prx?exp=311">entry for Algol 68</a>.
+<li>Roy Fullmer has posted a
+    <a href="http://www.geocities.com/ernobe/pame.pdf">pdf version</a> of
+    <i>Programming Algol 68 Made Easy</i>, 
+    a good informal textbook on Algol 68 written by Sian Leitch.
+    The source files are in the <code>a68toc</code> distribution which is available from
+    <a href="#nunan">Greg Nunan's site</a>.
+<li><a name="kk"></a>Karl Kleine collects and posts
     <a href="http://www.fh-jena.de/~kleine/history/history.html">Algol 68 historic documents</a>.
 <li>Brian Wichmann maintains 
     <a href="http://www.softeng.ox.ac.uk/Jeremy.Gibbons/wg21/algol-bulletin/INDEX.HTM">
     The Algol Bulletin</a> on-line archive.
+<li>The Wikipedia Project has entries for 
+<a href="http://en.wikipedia.org/wiki/ALGOL_68">Algol 68</a>,
+<a href="http://en.wikipedia.org/wiki/Adriaan_van_Wijngaarden">Adriaan van Wijngaarden</a>, and
+<a href="http://en.wikipedia.org/wiki/Van_Wijngaarden_grammar">two-level grammars</a>.
+<li>The <a href="http://dmoz.org/Computers/Programming/Languages/Algol_68/">Algol 68 directory</a> from the Open Directory Project.
 <li>Dick Grune has posted an 
     <a href="http://www.cs.vu.nl/pub/dick/Algol68/">Algol 68 program collection</a>.
+<li>Norman Hardy has a page explaining 
+    <a href="http://www.cap-lore.com/Languages/Algol68.html">ideas behind Algol 68</a>,
+    and an elaborated example of <a href="http://www.cap-lore.com/MathPhys/Tumble/Exampler.html">
+    Algol 68 applied in tensor calculations</a>.
 </ul>
+</p>
+
 <br>
-<h3><a name="implementations">Algol 68 implementations</a></h3>
+<h3><a name="implementations"></a>Algol 68 implementations</h3>
 <h4>Current other implementations</h4>
 <ul>
-<li><a href="http://www.sleitch.nildram.co.uk/">Algol 68 to C translator</a> (<code>a68toc</code>), a ported compiler by Sian Leitch. 
+<li><a href="http://www.cs.man.ac.uk/~chl/">Algol 68S compiler</a> by Charles Lindsey.
+<li>Algol 68 to C translator (<code>a68toc</code>), a ported compiler by Sian Leitch. 
 The front-end essentially is the Algol 68 RS portable
 compiler originally written by the Defence Research Agency when it
 was known as the RSRE (Royal Signals and Radar Establishment). Only
 that part of Algol 68 needed for the ELLA compiler was implemented by
-<code>a68toc</code> with the result that formats are unavailable. Algol 68 RS did not
+<code>a68toc</code>; therefore formats are unavailable. Algol 68 RS did not
 implement the parallel-clause.
-<li><a href="http://www.cs.man.ac.uk/~chl/">Algol 68S compiler</a> by Charles Lindsey.
-<li>Other options from <a href="http://www.algol68.org/">Algol 68 web resources</a> (maintained by Greg Nunan), or the
-    <a href="http://dmoz.org/Computers/Programming/Languages/Algol_68/">Algol 68 directory</a> from the Open Directory Project.
+The <code>a68toc</code> distribution is available from
+<a href="#nunan">Greg Nunan's site</a>.
+<li>Others from 
+<a href="#nunan">Greg Nunan's site</a>
+or the
+<a href="http://dmoz.org/Computers/Programming/Languages/Algol_68/">Algol 68 directory</a> from the Open Directory Project.
 </ul>
+
 <h4>Former implementations</h4>
-See for instance <a href="ab51.3.1">[AB51.3.1]</a> or <a href="short_history">[Koster 1994]</a>:
+<p>
+See for instance <a href="#ref">[AB51.3.1]</a> or <a href="#ref">[Koster 1994]</a>:
 <ul>
 <li>ALGOL68R. Currie et al., RSRE (Royal Signals and Radar Establishment, Malvern) 1970.
-One-pass subset, used extensively in military and scientific circles in the UK on ICL machines.
+Single-pass comiler, used extensively in military and scientific circles in the UK on ICL machines.
 <li>CONTROL DATA ALGOL 68. Zoethout et al., CDC Netherlands 1974.
-Full implementation, used mainly in teaching in Germany and the Netherlands on CDC mainframes.
+Full implementation (apparently it only lacked the format-pattern),
+used mainly in teaching in Germany and the Netherlands on CDC mainframes.
 <li>ALGOL68S. Hibbard et al., UK and Carnegie Mellon 1976.
-Subset, ported to small machines as the PDP-11, (apparantly) mostly used in teaching.
+Subset, ported to small machines as the PDP-11, (apparently) mostly used in teaching.
 <li>ALGOL68RS. For ICL 2900, VAX/VMS and other systems.
 <li>FLACC Full Language Algol 68 Checkout Compiler. Mailloux et al., Edmonton, Canada 1978. 
 An interpreter for the full language, available on IBM mainframes and used in teaching, both in North America and in Europe.
 <li>ALGOL68C. Bourne et al., Cambridge 1980.
-Subset implementation for IBM mainframes, DECsystems 10 and 20, VAX/UNIX, CYBER 205 and other systems.
+Subset implementation for IBM mainframes, DECsystems 10 and 20, VAX/UNIX, CYBER 205 and other systems. Compiler front-end that generated code for a ZCODE back-end.
 </ul>
+</p>
 
-<h3><a name="ref">Referenced sources</a></h3>
+<h3><a name="ref"></a>References</h3>
 <ul>
 <li>
-<a name="ab51.1.3">[AB51.1.3] Survey of Viable ALGOL 68 implementations. Algol Bulletin 51 pp. 5-8.
+[AB51.1.3] <i>Survey of Viable ALGOL 68 implementations</i>. Algol Bulletin 51 pp. 5-8.
 <li>
-<a name="mc">[Grune 1979]</a> D. Grune, <i>The Revised MC Algol 68 Test Set, IW XX/79</i>, Mathematical Centre, Amsterdam [1979].
+[Lindsey 1971] C.H. Lindsey, S.G. van der Meulen. <i>Informal introduction to ALGOL 68</i>. North Holland Publishing Company [1971]. 
 <li>
-<a name="programmeren">[Koster 1978, 1981] C.H.A. Koster, H. Meijer. <i>Systematisch programmeren in Algol 68. Deel 1, 2.</i> (Dutch). Kluwer, Deventer [1978][1981]. 
+[Brailsford 1979] D.F. Brailsford, A.N. Walker. <i>Introductory Algol 68 programming</i>. Ellis Horwood Ltd, Chichester [1979].
 <li>
-<a name="making_of">[Koster 1993]</a> C.H.A. Koster, <i>The Making of Algol 68</i>. Presented at the conference "25 years Algol 68" at the CWI [1993].
+[Grune 1979] D. Grune, <i>The Revised MC Algol 68 Test Set, IW XX/79</i>, Mathematical Centre, Amsterdam [1979].
 <li>
-<a name="short_history"[Koster 1994]</a> C.H.A. Koster, A shorter history of Algol 68.
-<a name="chl">[Lindsey 1993]</a> C.H. Lindsey, <i>A History of Algol 68</i>. ACM SIGPLAN Notices <b>28</b>(3) 97-132 [1993]
+[Koster 1978, 1981] C.H.A. Koster, H. Meijer. <i>Systematisch programmeren in Algol 68. Deel 1, 2.</i> (Dutch). Kluwer, Deventer [1978][1981]. 
 <li>
-<a name="flacc">[Mailloux 1978]</a> B.J. Mailloux et al., <i>FLACC Full Language Algol 68 Checkout Compiler</i>, an interpreter for the full language, available on IBM mainframes and used in teaching, both in North America and in Europe. Edmonton, Canada [1978].
+[Koster 1994] C.H.A. Koster, A shorter history of Algol 68.
 <li>
-<a name="mcgettrick">[McGettrick 1978] A. D. McGettrick. <i>Algol 68: a first and second course.</i> Cambridge University Press [1978].
+[Koster 1996] C.H.A. Koster, <a href="http://www.cs.ru.nl/~kees/home/biblio.html"><i>The Making of Algol 68</i></a> in ps or pdf format.
 <li>
-<a name="rr">[Revised Report 1975]</a> A. van Wijngaarden et al., editors, <i>Revised Report on the Algorithmic Language Algol 68</i>. Acta Informatica <b>5</b> 1-236 [1975]; SIGPLAN Notices <b>12</b>(5) 1-70 [1977].
+[Lindsey 1993] C.H. Lindsey, <i>A History of Algol 68</i>. ACM SIGPLAN Notices <b>28</b>(3) 97-132 [1993]
+<li>
+[Mailloux 1978] B.J. Mailloux et al., <i>FLACC Full Language Algol 68 Checkout Compiler</i>, an interpreter for the full language, available on IBM mainframes and used in teaching, both in North America and in Europe. Edmonton, Canada [1978].
+<li>
+[McGettrick 1978] A. D. McGettrick. <i>Algol 68: a first and second course.</i> Cambridge University Press [1978].
+<li>
+[Revised Report 1976] A. van Wijngaarden et al., editors, <i>Revised Report on the Algorithmic Language Algol 68</i>. Acta Informatica <b>5</b> 1-236 [1976]; SIGPLAN Notices <b>12</b>(5) 1-70 [1977].
 </ul>
+
+<p>
+<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<font color="black">
+<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
+</font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+<small>Documentation for Algol 68 Genie Mark 8</small>
+</font>
 </td>
 </table>
-
-<p style="font-size: 8pt;">
-<font color="black">
-Copyright &copy; 2001-2004 J. Marcel van der Veer.
-</font>
 </p>
 
 </body>

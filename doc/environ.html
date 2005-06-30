@@ -1,84 +1,94 @@
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
-<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
-<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
-<meta http-equiv="Content-Style-Type" content="text/css">
+<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: blue; text-decoration: none;}
-a:visited {color: blue; text-decoration: none;}
-a:active  {color: blue; text-decoration: none;}
-a:hover   {text-decoration: underline;}
+a:link    {color: navy; text-decoration: underline;}
+a:visited {color: navy; text-decoration: underline;}
+a:active  {color: navy; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 12pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </style>
 </head>
-<body background="bg.jpg">
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td valign=top bgcolor="white">
-<table border=0 cellspacing=1 cellpadding=3>
-<td bgcolor="black">
-<a href="syntax.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<h2>The standard environment</h2>
 </td>
-<td bgcolor="black">
-<a href="samples.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
+<td width="30%" bgcolor=white valign=top align=center>
+<img src="logo.gif">
 </td>
-<td bgcolor="black">
-<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
+<td width="5%" valign=top bgcolor="white">
 </td>
-<td bgcolor="black">
-<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
+<td  width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td bgcolor="skyblue">
+&nbsp;&nbsp;<b>Manual</b>
+</td>
+</tr>
+<tr>
+<td bgcolor="powderblue">
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
 </td>
 </table>
-<h2>Coercions and standard environment</h2>
-<ul>
-<li><a href="#envenq">Enquiries</a>
-<li><a href="#envmath">Math constants</a>
-<li><a href="#envmathfun">Math procedures</a>
-<li><a href="#envmode">Modes</a>
-<li><a href="#envio">Transput</a>
-<li><a href="#envalt">Operator synonyms</a>
-<li><a href="#envprio">Operator priorities</a>
-<li><a href="#envmonad">Monadic operators</a>
-<li><a href="#envdyad">Dyadic operators</a>
-<li><a href="#envrng">Random number generator</a>
-<li><a href="#envmisc">Miscellaneous</a>
-<li><a href="#envwiden">Widenings</a>
-</ul>
-</td>
-<td bgcolor=white valign=top>
-<img src="logo.jpg" align=right>
-</td>
-</table>
-
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td width="80%" valign=top bgcolor="white">
 
 <p>
-This chapter describes the predefined tags that are available in Algol68G.
+This chapter lists the predefined tags in the standard prelude of Algol68G.
+<p>
+Optional extensions to the standard prelude are described in other chapters:
+<p>
+<li><a href="drawing.html">Graphical procedures</a>
+<li><a href="extensions.html">Unix -, curses - and vector routines</a>
+<li><a href="numerical.html">Numerical procedures</a>
 <br>
-<h3><a name="envenq">Enquiries</a></h3>
+<h3><a name="envenq"></a>Enquiries</h3>
 <dl>
 <dt><code>INT int lengths, int shorts, max int, real lengths, real shorts, bits lengths, bits shorts, bytes lengths, bytes shorts, max abs char, int width, long int width, long long int width, real width, long real width, long long real width, exp width, long exp width, long long exp width, bits width, long bits width, long long bits width, bytes width, long bytes width</code>
 <dt><code>REAL max real, small real</code>
 <dt><code>LONG INT long max int</code>
+<dt><code>LONG LONG INT long long max int</code>
 <dt><code>LONG REAL long max real, long small real</code>
 <dt><code>LONG LONG REAL long long max real, long long small real</code>
-<dt><code>CHAR error char, exp char, flip, flop</code>
+<dt><code>LONG BITS long max bits</code>
+<dt><code>LONG LONG BITS long long max bits</code>
+<dt><code>CHAR null character, blank, flip, flop, error char, exp char, newline char, formfeed char, tab char</code>
 </dl>
 
 <br>
-<h3><a name="envmode">Modes</a></h3>
+<h3><a name="envmode"></a>Modes</h3>
 <dl>
 <dt><code>MODE COMPLEX = STRUCT (REAL re, im), LONG COMPLEX = STRUCT (LONG REAL re, im), LONG LONG COMPLEX = STRUCT (LONG LONG REAL re, im)</code>
 <dt><code>MODE STRING = FLEX [1 : 0] CHAR</code>
@@ -86,11 +96,11 @@ This chapter describes the predefined tags that are available in Algol68G.
 </dl>
 
 <br>
-<h3><a name="envio">Transput</a></h3>
+<h3><a name="envio"></a>Transput</h3>
 <dl>
 <dt><code>MODE NUMBER = UNION (INT, REAL, LONG INT, LONG REAL, LONG LONG INT, LONG LONG REAL)</code>
-<dt><code>MODE ?SIMPLIN = UNION (REF INT, REF REAL, REF COMPLEX, REF LONG INT, REF LONG REAL, REF LONG COMPLEX, REF LONG LONG INT, REF LONG LONG REAL, REF LONG LONG COMPLEX, REF BOOL, REF BITS, REF LONG BITS, REF LONG LONG BITS, REF CHAR, REF [] CHAR, REF BYTES, REF LONG BYTES, PROC (REF FILE) VOID, FORMAT)</code>
-<dt><code>MODE ?SIMPLOUT = UNION (INT, REAL, COMPLEX, LONG INT, LONG REAL, LONG COMPLEX, LONG LONG INT, LONG LONG REAL, LONG LONG COMPLEX, BOOL, BITS, LONG BITS, LONG LONG BITS, CHAR, [] CHAR, STRING, BYTES, LONG BYTES, PROC (REF FILE) VOID, FORMAT)</code>
+<dt><code>MODE ?SIMPLIN = UNION (REF INT, REF REAL, REF COMPLEX, REF LONG INT, REF LONG REAL, REF LONG COMPLEX, REF LONG LONG INT, REF LONG LONG REAL, REF LONG LONG COMPLEX, REF BOOL, REF BITS, REF LONG BITS, REF LONG LONG BITS, REF CHAR, REF [] CHAR, PROC (REF FILE) VOID, FORMAT)</code>
+<dt><code>MODE ?SIMPLOUT = UNION (INT, REAL, COMPLEX, LONG INT, LONG REAL, LONG COMPLEX, LONG LONG INT, LONG LONG REAL, LONG LONG COMPLEX, BOOL, BITS, LONG BITS, LONG LONG BITS, CHAR, [] CHAR, STRING, PROC (REF FILE) VOID, FORMAT)</code>
 </dl>
 
 <dl>
@@ -99,11 +109,12 @@ This chapter describes the predefined tags that are available in Algol68G.
 </dl>
 
 <dl>
-<dt><code>PROC (REF FILE) BOOL put possible, get possible, bin possible, set possible, reset possible, reidf possible, draw possible</code>
+<dt><code>PROC (REF FILE) BOOL put possible, get possible, bin possible, set possible, reset possible, reidf possible, draw possible, compressible</code>
 <dt><code>PROC (REF FILE, PROC (REF FILE) BOOL) VOID on logical file end, on physical file end, on line end, on page end, on format end</code>
 <dt><code>PROC (REF FILE, PROC (REF FILE) BOOL) VOID on value error, on open error, on transput error, on format error</code>
 <dt><code>PROC (REF FILE, STRING, CHANNEL) INT open, establish</code>
 <dt><code>PROC (REF FILE, CHANNEL) INT create</code>
+<dt><code>PROC (REF FILE, REF STRING) VOID associate</code>
 <dt><code>PROC (REF FILE) VOID close, lock, scratch, space, new line</code>
 </dl>
 
@@ -136,8 +147,6 @@ This chapter describes the predefined tags that are available in Algol68G.
 <dt><code>PROC BITS read bits</code>
 <dt><code>PROC LONG BITS read long bits</code>
 <dt><code>PROC LONG LONG BITS read long long bits</code>
-<dt><code>PROC BYTES read bytes</code>
-<dt><code>PROC LONG BYTES read long bytes</code>
 <dt><code>PROC CHAR read char</code>
 <dt><code>PROC STRING read string</code>
 </dl>
@@ -156,8 +165,6 @@ This chapter describes the predefined tags that are available in Algol68G.
 <dt><code>PROC (BITS) VOID print bits</code>
 <dt><code>PROC (LONG BITS) VOID print long bits</code>
 <dt><code>PROC (LONG LONG BITS) VOID print long long bits</code>
-<dt><code>PROC (BYTES) VOID print bytes</code>
-<dt><code>PROC (LONG BYTES) VOID print long bytes</code>
 <dt><code>PROC (CHAR) VOID print char</code>
 <dt><code>PROC (STRING) VOID print string</code>
 </dl>
@@ -169,7 +176,7 @@ This chapter describes the predefined tags that are available in Algol68G.
 </dl>
 
 <br>
-<h3><a name="envmath">Math constants</a></h3>
+<h3><a name="envmath"></a>Math constants</h3>
 <dl>
 <dt><code>REAL pi </code>
 <dt><code>LONG REAL long pi</code>
@@ -177,7 +184,7 @@ This chapter describes the predefined tags that are available in Algol68G.
 </dl>
 
 <br>
-<h3><a name="envmathfun">Math procedures</a></h3>
+<h3><a name="envmathfun"></a>Math procedures</h3>
 <dl>
 <dt><code>PROC (REAL) REAL</code>
 <dd><code>sqrt, curt (cbrt), exp, ln, log, sin, arc sin, cos, arc cos, tan, arc tan</code>
@@ -192,227 +199,232 @@ This chapter describes the predefined tags that are available in Algol68G.
 </dl>
 
 <br>
-<h3><a name="envalt">Operator synonyms</a></h3>
-<table border=0 cellspacing=6>
+<h3><a name="envalt"></a>Operator synonyms</h3>
+<table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="beige">Operator tag</td>
-<td bgcolor="beige">Alternative tag</td></tr>
-<tr><td bgcolor="beige"><code>=</code></td><td bgcolor="beige"><code>EQ</code></td></tr>
-<tr><td bgcolor="beige"><code>/=</code></td><td bgcolor="beige"><code>NE, ~=, ^=</code></td></tr>
-<tr><td bgcolor="beige"><code><</code></td><td bgcolor="beige"><code>LT</code></td></tr>
-<tr><td bgcolor="beige"><code><=</code></td><td bgcolor="beige"><code>LE</code></td></tr>
-<tr><td bgcolor="beige"><code>></code></td><td bgcolor="beige"><code>GT</code></td></tr>
-<tr><td bgcolor="beige"><code>>=</code></td><td bgcolor="beige"><code>GE</code></td></tr>
-<tr><td bgcolor="beige"><code>&</code></td><td bgcolor="beige"><code>AND</code></td></tr>
-<tr><td bgcolor="beige"><code>+*</code></td><td bgcolor="beige"><code>I</code></td></tr>
-<tr><td bgcolor="beige"><code>%*</code></td><td bgcolor="beige"><code>MOD</code></td></tr>
-<tr><td bgcolor="beige"><code>~</code></td><td bgcolor="beige"><code>NOT</code></td></tr>
-<tr><td bgcolor="beige"><code>%</code></td><td bgcolor="beige"><code>OVER</code></td></tr>
-<tr><td bgcolor="beige"><code>**</code></td><td bgcolor="beige"><code>UP, ^</code></td></tr>
-<tr><td bgcolor="beige"><code>+:=</code></td><td bgcolor="beige"><code>PLUSAB</code></td></tr>
-<tr><td bgcolor="beige"><code>-:=</code></td><td bgcolor="beige"><code>MINUSAB</code></td></tr>
-<tr><td bgcolor="beige"><code>*:=</code></td><td bgcolor="beige"><code>TIMESAB</code></td></tr>
-<tr><td bgcolor="beige"><code>/:=</code></td><td bgcolor="beige"><code>DIVAB</code></td></tr>
-<tr><td bgcolor="beige"><code>%:=</code></td><td bgcolor="beige"><code>OVERAB</code></td></tr>
-<tr><td bgcolor="beige"><code>%*:=</code></td><td bgcolor="beige"><code>MODAB</code></td></tr>
-<tr><td bgcolor="beige"><code>+=: </code></td><td bgcolor="beige"><code>PLUSTO</code></td></tr>
+<td bgcolor=skyblue><b>Operator tag</b></td><td bgcolor=skyblue><b>Alternative tag</b></td></tr>
+<tr><td bgcolor=powderblue><code>=</code></td><td bgcolor=powderblue><code>EQ</code></td></tr>
+<tr><td bgcolor=powderblue><code>/=</code></td><td bgcolor=powderblue><code>NE, ~=, ^=</code></td></tr>
+<tr><td bgcolor=powderblue><code><</code></td><td bgcolor=powderblue><code>LT</code></td></tr>
+<tr><td bgcolor=powderblue><code><=</code></td><td bgcolor=powderblue><code>LE</code></td></tr>
+<tr><td bgcolor=powderblue><code>></code></td><td bgcolor=powderblue><code>GT</code></td></tr>
+<tr><td bgcolor=powderblue><code>>=</code></td><td bgcolor=powderblue><code>GE</code></td></tr>
+<tr><td bgcolor=powderblue><code>&</code></td><td bgcolor=powderblue><code>AND</code></td></tr>
+<tr><td bgcolor=powderblue><code>+*</code></td><td bgcolor=powderblue><code>I</code></td></tr>
+<tr><td bgcolor=powderblue><code>%*</code></td><td bgcolor=powderblue><code>MOD</code></td></tr>
+<tr><td bgcolor=powderblue><code>~</code></td><td bgcolor=powderblue><code>NOT</code></td></tr>
+<tr><td bgcolor=powderblue><code>%</code></td><td bgcolor=powderblue><code>OVER</code></td></tr>
+<tr><td bgcolor=powderblue><code>**</code></td><td bgcolor=powderblue><code>UP, ^</code></td></tr>
+<tr><td bgcolor=powderblue><code>+:=</code></td><td bgcolor=powderblue><code>PLUSAB</code></td></tr>
+<tr><td bgcolor=powderblue><code>-:=</code></td><td bgcolor=powderblue><code>MINUSAB</code></td></tr>
+<tr><td bgcolor=powderblue><code>*:=</code></td><td bgcolor=powderblue><code>TIMESAB</code></td></tr>
+<tr><td bgcolor=powderblue><code>/:=</code></td><td bgcolor=powderblue><code>DIVAB</code></td></tr>
+<tr><td bgcolor=powderblue><code>%:=</code></td><td bgcolor=powderblue><code>OVERAB</code></td></tr>
+<tr><td bgcolor=powderblue><code>%*:=</code></td><td bgcolor=powderblue><code>MODAB</code></td></tr>
+<tr><td bgcolor=powderblue><code>+=: </code></td><td bgcolor=powderblue><code>PLUSTO</code></td></tr>
 </table>
 </p>
 
 <br>
-<h3><a name="envprio">Operator priorities</a></h3>
-<table border=0 cellspacing=6>
+<h3><a name="envprio"></a>Operator priorities</h3>
+<table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="beige">Priority</td>
-<td bgcolor="beige">Operators</td></tr>
-<tr><td bgcolor="beige"><code>1</code></td><td bgcolor="beige"><code>+:=, -:=, *:=, /:=, %:=, %*:=, +=: </code></td></tr>
-<tr><td bgcolor="beige"><code>2</code></td><td bgcolor="beige"><code>OR</code></td></tr>
-<tr><td bgcolor="beige"><code>3</code></td><td bgcolor="beige"><code>&, XOR</code></td></tr>
-<tr><td bgcolor="beige"><code>4</code></td><td bgcolor="beige"><code>=, /=</code></td></tr>
-<tr><td bgcolor="beige"><code>5</code></td><td bgcolor="beige"><code><, <=, >, >=</code></td></tr>
-<tr><td bgcolor="beige"><code>6</code></td><td bgcolor="beige"><code>+, -</code></td></tr>
-<tr><td bgcolor="beige"><code>7</code></td><td bgcolor="beige"><code>*, /, %, %*, ELEM</code></td></tr>
-<tr><td bgcolor="beige"><code>8</code></td><td bgcolor="beige"><code>**, LWB, UPB</code></td></tr>
-<tr><td bgcolor="beige"><code>9</code></td><td bgcolor="beige"><code>+*</code></td></tr>
+<td bgcolor=skyblue><b>Priority</b></td><td bgcolor=skyblue><b>Operators</b></td></tr>
+<tr><td bgcolor=powderblue><code>1</code></td><td bgcolor=powderblue><code>+:=, -:=, *:=, /:=, %:=, %*:=, +=: </code></td></tr>
+<tr><td bgcolor=powderblue><code>2</code></td><td bgcolor=powderblue><code>OR</code></td></tr>
+<tr><td bgcolor=powderblue><code>3</code></td><td bgcolor=powderblue><code>&, XOR</code></td></tr>
+<tr><td bgcolor=powderblue><code>4</code></td><td bgcolor=powderblue><code>=, /=</code></td></tr>
+<tr><td bgcolor=powderblue><code>5</code></td><td bgcolor=powderblue><code><, <=, >, >=</code></td></tr>
+<tr><td bgcolor=powderblue><code>6</code></td><td bgcolor=powderblue><code>+, -</code></td></tr>
+<tr><td bgcolor=powderblue><code>7</code></td><td bgcolor=powderblue><code>*, /, %, %*, ELEM</code></td></tr>
+<tr><td bgcolor=powderblue><code>8</code></td><td bgcolor=powderblue><code>**, LWB, UPB</code></td></tr>
+<tr><td bgcolor=powderblue><code>9</code></td><td bgcolor=powderblue><code>+*</code></td></tr>
 </table>
 
 <br>
-<h3><a name="envmonad">Monadic operators</a></h3>
-<table border=0 cellspacing=6>
+<h3><a name="envmonad"></a>Monadic operators</h3>
+<table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="beige">Mode A</td>
-<td bgcolor="beige">Implemented operators</td></tr>
+<td bgcolor=skyblue><b>Mode A</b></td><td bgcolor=skyblue><b>Implemented operators</b></td></tr>
 <tr>
-<td bgcolor="beige"><code>INT<br>REAL<br>COMPLEX</code><br>
-<code>LONG INT</code><br> <code>LONG REAL</code><br> <code>LONG COMPLEX</code><br>
-<code>LONG LONG INT<br>LONG LONG REAL<br>LONG LONG COMPLEX</code></td>
-<td bgcolor="beige"><code>OP (A) A +, -, ABS</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>INT<br>REAL</code><br>
-<code>LONG INT</code><br> <code>LONG REAL</code><br>
-<code>LONG LONG INT<br>LONG LONG REAL</code><br></td>
-<td bgcolor="beige"><code>OP (A) INT SIGN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>REAL</code></td>
-<td bgcolor="beige"><code>OP (A) INT ROUND, ENTIER</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG REAL</code></td>
-<td bgcolor="beige"><code>OP (A) LONG INT ROUND, ENTIER</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG REAL</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG INT ROUND, ENTIER</code></td>
-</tr>
-<tr>
-<td bgcolor="beige">
-<code>COMPLEX</code><br>
-<code>LONG COMPLEX</code><br>
-<code>LONG LONG COMPLEX</code>
+<td bgcolor=powderblue><code>INT<br>REAL</code><br>
+<code>LONG INT</code><br> <code>LONG REAL</code></code><br>
+<code>LONG LONG INT<br>LONG LONG REAL</code></td>
+<td bgcolor=powderblue>
+<code>OP (A) A +, -, ABS</code><br>
+<code>OP (A) INT SIGN</code>
 </td>
-<td bgcolor="beige"><code>OP (A) REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor="beige">
-<code>COMPLEX</code><br>
+<td bgcolor=powderblue><code>REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) INT ROUND, ENTIER</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG INT ROUND, ENTIER</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG LONG REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG INT ROUND, ENTIER</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>COMPLEX</code><br>
 <code>LONG COMPLEX</code><br>
-<code>LONG LONG COMPLEX</code>
+<code>LONG LONG COMPLEX</code></td>
+<td bgcolor=powderblue>
+<code>OP (A) A +, -, CONJ</code>
 </td>
-<td bgcolor="beige"><code>OP (A) A CONJ</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>BOOL<br>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A) A ~</code></td>
+<td bgcolor=powderblue><code>COMPLEX</code><br></td>
+<td bgcolor=powderblue><code>OP (A) REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>CHAR<br>BITS</code></td>
-<td bgcolor="beige"><code>OP (A) INT ABS</code></td>
+<td bgcolor=powderblue><code>LONG COMPLEX</code><br></td>
+<td bgcolor=powderblue><code>OP (A) LONG REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A) LONG INT ABS</code></td>
+<td bgcolor=powderblue><code>LONG LONG COMPLEX</code><br></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG INT ABS</code></td>
+<td bgcolor=powderblue><code>BOOL<br>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) A ~</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>OP (A) CHAR REPR<br><code>OP (A) BITS BIN</code></td>
+<td bgcolor=powderblue><code>CHAR<br>BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) INT ABS</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG INT</code></td>
-<td bgcolor="beige"><code>OP (A) LONG BITS BIN</code></td>
+<td bgcolor=powderblue><code>LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG INT ABS</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG LONG INT</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG BITS BIN</code></td>
+<td bgcolor=powderblue><code>LONG LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG INT ABS</code></td>
 </tr>
 <tr>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>OP (A) CHAR REPR<br>
+                    <code>OP (A) BITS BIN</code><br>
+                    <code>OP (A) SEMA LEVEL</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>SEMA</code></td>
+<td bgcolor=powderblue><code>OP (A) INT LEVEL</code><br>
+<code>OP (A) VOID UP</code><br>
+<code>OP (A) VOID DOWN</code>
+</td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG INT</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG BITS BIN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG LONG INT</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG BITS BIN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue>
 <code>INT</code><br>
 <code>LONG INT</code><br>
 <code>LONG LONG INT</code>
 </td>
-<td bgcolor="beige"><code>OP (A) BOOL ODD</code></td>
+<td bgcolor=powderblue><code>OP (A) BOOL ODD</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>?ROWS</code></td>
-<td bgcolor="beige"><code>OP (A) INT LWB, UPB</code></td>
-</tr>
-</table>
-<br>
-<table border=0 cellspacing=6>
-<tr>
-<td bgcolor="beige">Mode A</td>
-<td bgcolor="beige">Implemented operators</td></tr>
-<tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>OP (A) LONG INT LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG INT</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG INT LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG INT</code></td>
-<td bgcolor="beige"><code>OP (A) INT SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG INT</code></td>
-<td bgcolor="beige"><code>OP (A) LONG INT SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>REAL</code></td>
-<td bgcolor="beige"><code>OP (A) LONG REAL LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG REAL</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG REAL LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG REAL</code></td>
-<td bgcolor="beige"><code>OP (A) REAL SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG REAL</code></td>
-<td bgcolor="beige"><code>OP (A) LONG REAL SHORTEN</td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>COMPLEX</code></td>
-<td bgcolor="beige"><code>OP (A) LONG COMPLEX LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG COMPLEX</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG COMPLEX LENG</td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG COMPLEX</code></td>
-<td bgcolor="beige"><code>OP (A) COMPLEX SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG COMPLEX</code></td>
-<td bgcolor="beige"><code>OP (A) LONG COMPLEX SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>BITS</code></td>
-<td bgcolor="beige"><code>OP (A) LONG BITS LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A) LONG LONG BITS LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A) BITS SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A) LONG BITS SHORTEN</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>BYTES</code></td>
-<td bgcolor="beige"><code>OP (A) LONG BYTES LENG</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG BYTES</code></td>
-<td bgcolor="beige"><code>OP (A) BYTES SHORTEN</code></td>
+<td bgcolor=powderblue><code>?ROWS</code></td>
+<td bgcolor=powderblue><code>OP (A) INT ELEMS, LWB, UPB</code></td>
 </tr>
 </table>
 
 <br>
-<h3><a name="envdyad">Dyadic operators</a></h3>
-<table border=0 cellspacing=6>
+<table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="beige">Mode A</td>
-<td bgcolor="beige">Mode B</td>
-<td bgcolor="beige">Implemented operators</td></tr>
+<td bgcolor=skyblue><b>Mode A</b></td><td bgcolor=skyblue><b>Implemented operators</b></td></tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG INT LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG INT</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG INT LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG INT</code></td>
+<td bgcolor=powderblue><code>OP (A) INT SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG LONG INT</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG INT SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG REAL LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG REAL LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) REAL SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG LONG REAL</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG REAL SHORTEN</td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>COMPLEX</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG COMPLEX LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG COMPLEX</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG COMPLEX LENG</td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG COMPLEX</code></td>
+<td bgcolor=powderblue><code>OP (A) COMPLEX SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG LONG COMPLEX</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG COMPLEX SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG BITS LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG LONG BITS LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) BITS SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG BITS SHORTEN</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>BYTES</code></td>
+<td bgcolor=powderblue><code>OP (A) LONG BYTES LENG</code></td>
+</tr>
+<tr>
+<td bgcolor=powderblue><code>LONG BYTES</code></td>
+<td bgcolor=powderblue><code>OP (A) BYTES SHORTEN</code></td>
+</tr>
+</table>
+
+<br>
+<h3><a name="envdyad"></a>Dyadic operators</h3>
+<table border=0 cellspacing=0 cellpadding=6>
+<tr>
+<td bgcolor=skyblue><b>Mode A</b></td><td bgcolor=skyblue><b>Mode B</b></td><td bgcolor=skyblue><b>Implemented operators</b></td></tr>
+<tr>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) INT +, -, *, %, *%, **</code><br>
 <code>OP (A, B) REAL /</code><br>
 <code>OP (A, B) COMPLEX +*</code><br>
@@ -421,9 +433,9 @@ This chapter describes the predefined tags that are available in Algol68G.
 </td>
 </tr>
 </tr>
-<tr><td bgcolor="beige"><code>REAL</code></td>
-<td bgcolor="beige"><code>REAL<br>INT</code></td>
-<td bgcolor="beige">
+<tr><td bgcolor=powderblue><code>REAL</code></td>
+<td bgcolor=powderblue><code>REAL<br>INT</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) REAL +, -, *, /, **</code><br>
 <code>OP (B, A) REAL +, -, *, /, **</code><br>
 <code>OP (A, B) COMPLEX +*</code><br>
@@ -433,9 +445,9 @@ This chapter describes the predefined tags that are available in Algol68G.
 <code>OP (REF A, B) REF A +:=, -:=, *:=, /:=</code>
 </td>
 </tr>
-<tr><td bgcolor="beige"><code>COMPLEX</code></td>
-<td bgcolor="beige"><code>COMPLEX<br>REAL<br>INT</code></td>
-<td bgcolor="beige">
+<tr><td bgcolor=powderblue><code>COMPLEX</code></td>
+<td bgcolor=powderblue><code>COMPLEX<br>REAL<br>INT</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) COMPLEX +, -, *, /</code><br>
 <code>OP (B, A) COMPLEX +, -, *, /</code><br>
 <code>OP (A, B) BOOL =, /=</code><br>
@@ -443,18 +455,18 @@ This chapter describes the predefined tags that are available in Algol68G.
 <code>OP (REF A, B) REF A +:=, -:=, *:=, /:=</code>
 </td>
 </tr>
-<tr><td bgcolor="beige"><code>COMPLEX</code></td>
-<td bgcolor="beige">
+<tr><td bgcolor=powderblue><code>COMPLEX</code></td>
+<td bgcolor=powderblue>
 <code>INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) COMPLEX **</code><br>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG INT</code></td>
-<td bgcolor="beige"><code>LONG INT<br>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>LONG INT</code></td>
+<td bgcolor=powderblue><code>LONG INT<br>INT</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG INT +, -, *, %, *%</code><br>
 <code>OP (B, A) LONG INT +, -, *, %, *%</code><br>
 <code>OP (A, B) LONG REAL /</code><br>
@@ -467,19 +479,19 @@ This chapter describes the predefined tags that are available in Algol68G.
 </td>
 </tr>
 <tr>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>LONG INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG INT **</code><br>
 </td>
 <tr>
-<td bgcolor="beige"><code>LONG REAL</code></td>
-<td bgcolor="beige"><code>LONG REAL<br>LONG INT<br>REAL<br>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>LONG REAL</code></td>
+<td bgcolor=powderblue><code>LONG REAL<br>LONG INT<br>REAL<br>INT</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG REAL +, -, *, /, **</code><br>
 <code>OP (B, A) LONG REAL +, -, *, /, **</code><br>
 <code>OP (A, B) LONG COMPLEX +*</code><br>
@@ -490,31 +502,31 @@ This chapter describes the predefined tags that are available in Algol68G.
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG COMPLEX</code></td>
-<td bgcolor="beige"><code>LONG COMPLEX<br>LONG REAL<br>LONG INT</code><br>
+<td bgcolor=powderblue><code>LONG COMPLEX</code></td>
+<td bgcolor=powderblue><code>LONG COMPLEX<br>LONG REAL<br>LONG INT</code><br>
 <code>COMPLEX<br>REAL<br>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG COMPLEX +, -, *, /</code><br>
 <code>OP (B, A) LONG COMPLEX +, -, *, /</code><br>
 <code>OP (A, B) BOOL =, /=</code><br>
 <code>OP (B, A) BOOL =, /=</code><br>
 <code>OP (REF A, B) REF A +:=, -:=, *:=, /:=</code>
 </td>
-<tr><td bgcolor="beige"><code>LONG COMPLEX</code></td>
-<td bgcolor="beige">
+<tr><td bgcolor=powderblue><code>LONG COMPLEX</code></td>
+<td bgcolor=powderblue>
 <code>INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG COMPLEX **</code><br>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG LONG INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>LONG LONG INT</code></td>
+<td bgcolor=powderblue>
 <code>LONG LONG INT</code><br>
 <code>LONG INT</code><br>
 <code>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG INT +, -, *, %, *%</code><br>
 <code>OP (B, A) LONG INT +, -, *, %, *%</code><br>
 <code>OP (A, B) LONG REAL /</code><br>
@@ -527,19 +539,19 @@ This chapter describes the predefined tags that are available in Algol68G.
 </td>
 </tr>
 <tr>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>LONG LONG INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG LONG INT **</code><br>
 </td>
-<tr><td bgcolor="beige"><code>LONG LONG REAL</code></td>
-<td bgcolor="beige"><code>LONG LONG REAL<br>LONG REAL</code><br>
+<tr><td bgcolor=powderblue><code>LONG LONG REAL</code></td>
+<td bgcolor=powderblue><code>LONG LONG REAL<br>LONG REAL</code><br>
 <code>LONG INT<br>REAL<br>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG LONG REAL +, -, *, /, **</code><br>
 <code>OP (B, A) LONG LONG REAL +, -, *, /, **</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code><br>
@@ -548,8 +560,8 @@ This chapter describes the predefined tags that are available in Algol68G.
 </td>
 </tr>
 </tr>
-<tr><td bgcolor="beige"><code>LONG LONG COMPLEX</code></td>
-<td bgcolor="beige">
+<tr><td bgcolor=powderblue><code>LONG LONG COMPLEX</code></td>
+<td bgcolor=powderblue>
 <code>LONG LONG COMPLEX</code><br>
 <code>LONG LONG REAL</code><br>
 <code>LONG LONG INT</code><br>
@@ -560,7 +572,7 @@ This chapter describes the predefined tags that are available in Algol68G.
 <code>REAL</code><br>
 <code>INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG LONG COMPLEX +, -, *, /</code><br>
 <code>OP (B, A) LONG LONG COMPLEX +, -, *, /</code><br>
 <code>OP (A, B) BOOL =, /=</code><br>
@@ -569,128 +581,128 @@ This chapter describes the predefined tags that are available in Algol68G.
 </td>
 </tr>
 </tr>
-<tr><td bgcolor="beige"><code>LONG LONG COMPLEX</code></td>
-<td bgcolor="beige">
+<tr><td bgcolor=powderblue><code>LONG LONG COMPLEX</code></td>
+<td bgcolor=powderblue>
 <code>INT</code>
 </td>
-<td bgcolor="beige">
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG LONG COMPLEX **</code><br>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>BOOL</code></td>
-<td bgcolor="beige"><code>BOOL</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>BOOL</code></td>
+<td bgcolor=powderblue><code>BOOL</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) BOOL &, OR, XOR, =, /=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor="beige"><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) STRING +</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code><br>
 </td>
 <tr>
-<td bgcolor="beige"><code>STRING</code></td>
-<td bgcolor="beige"><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>STRING</code></td>
+<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor=powderblue>
 <code>OP (REF A, B) REF A +:=</code><br>
 <code>OP (B, REF A) REF A +=:</code>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) STRING *</code><br>
 <code>OP (B, A) STRING *</code>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>STRING<br>[] CHAR</code></td>
-<td bgcolor="beige"><code>OP (A, B) CHAR ELEM</code><br></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>STRING<br>[] CHAR</code></td>
+<td bgcolor=powderblue><code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>STRING</code></td>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>OP (REF A, B) REF A *:=</code><br>
+<td bgcolor=powderblue><code>STRING</code></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>OP (REF A, B) REF A *:=</code><br>
 <code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 </tr>
 <tr>
-<td bgcolor="beige"><code>BITS</code></td>
-<td bgcolor="beige"><code>BITS</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>BITS</code></td>
+<td bgcolor=powderblue><code>BITS</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) BITS &, OR, XOR</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG BITS</code></td>
-<td bgcolor="beige"><code>BITS<br>LONG BITS</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>LONG BITS</code></td>
+<td bgcolor=powderblue><code>BITS<br>LONG BITS</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG BITS &, OR, XOR</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>LONG LONG BITS</code></td>
+<td bgcolor=powderblue><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG LONG BITS &, OR, XOR</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>OP (A, B) A SHL, SHR</code></td>
+<td bgcolor=powderblue><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>OP (A, B) A SHL, SHR</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>OP (A, B) BOOL ELEM</code><br></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor=powderblue><code>OP (A, B) BOOL ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>BYTES</code></td>
-<td bgcolor="beige"><code>BYTES</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>BYTES</code></td>
+<td bgcolor=powderblue><code>BYTES</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) BYTES +</code><br>
 <code>OP (REF A, B) REF BYTES +:=</code><br>
 <code>OP (A, REF B) REF BYTES +=:</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>BYTES</code></td>
-<td bgcolor="beige"><code>OP (A, B) CHAR ELEM</code><br></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>BYTES</code></td>
+<td bgcolor=powderblue><code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>LONG BYTES</code></td>
-<td bgcolor="beige"><code>LONG BYTES</code></td>
-<td bgcolor="beige">
+<td bgcolor=powderblue><code>LONG BYTES</code></td>
+<td bgcolor=powderblue><code>LONG BYTES</code></td>
+<td bgcolor=powderblue>
 <code>OP (A, B) LONG BYTES +</code><br>
 <code>OP (REF A, B) REF LONG BYTES +:=</code><br>
 <code>OP (A, REF B) REF LONG BYTES +=:</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>LONG BYTES</code></td>
-<td bgcolor="beige"><code>OP (A, B) CHAR ELEM</code><br></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>LONG BYTES</code></td>
+<td bgcolor=powderblue><code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>?ROWS</code></td>
-<td bgcolor="beige"><code>OP (A, B) INT LWB, UPB</code><br></td>
+<td bgcolor=powderblue><code>INT</code></td>
+<td bgcolor=powderblue><code>?ROWS</code></td>
+<td bgcolor=powderblue><code>OP (A, B) INT ELEMS, LWB, UPB</code><br></td>
 </tr>
 </table>
 
 <br>
 <br>
-<h3><a name="envrng">Random number generator</a></h3>
+<h3><a name="envrng"></a>Random number generator</h3>
 <p>The current revision of Algol68G implements a <a href="http://choices.cs.uiuc.edu/~akapadia/project2/node9.html">Tausworthe generator</a> that has a period of order 2 ** 113, from the <a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a>.
 </p>
 <dl>
@@ -705,7 +717,7 @@ This chapter describes the predefined tags that are available in Algol68G.
 </dl>
 
 <br>
-<h3><a name="envmisc">Miscellaneous</a></h3>
+<h3><a name="envmisc"></a>Miscellaneous</h3>
 <dl>
 <dt><code>PROC bits pack = ([] BOOL row) BITS</code>
 <dd>Converts <var>row</var> to a <code>BITS</code> representation.
@@ -728,7 +740,15 @@ This chapter describes the predefined tags that are available in Algol68G.
 <br>
 <br>
 <dt><code>PROC char in string = (CHAR sought, REF INT pos, STRING text) BOOL</code>
-<dd>Looks up <var>sought</var> in <var>text</var> and assigns its position to <var>pos</var> if found. Returns <code>TRUE</code> if the character is found.
+<dd>If found, assigns position of first occurence of <var>sought</var> in <var>text</var> to <var>pos</var> if <var>pos</var> is not <code>NIL</code>. Returns whether <var>sought</var> is found. 
+<br>
+<br>
+<dt><code>PROC last char in string = (CHAR sought, REF INT pos, STRING text) BOOL</code>
+<dd>If found, assigns position of last occurence of <var>sought</var> in <var>text</var> to <var>pos</var> if <var>pos</var> is not <code>NIL</code>. Returns whether <var>sought</var> is found. 
+<br>
+<br>
+<dt><code>PROC string in string = (STRING sought, REF INT pos, STRING text) BOOL</code>
+<dd>If found, assigns position of first occurence of <var>sought</var> in <var>text</var> to <var>pos</var> if <var>pos</var> is not <code>NIL</code>. Returns whether <var>sought</var> is found. 
 <br>
 <br>
 <dt><code>PROC system = (STRING command) INT</code>
@@ -736,7 +756,7 @@ This chapter describes the predefined tags that are available in Algol68G.
 <br>
 <br>
 <dt><code>PROC break = VOID</code>
-<dd>Algol68G will stop in a primitive monitor routine that allows for instance for inspection of stack frames. Hence, calling <code>break</code> can be useful for debugging purposes. The same monitor is entered when Algol68G receives <code>SIGINT</code>.
+<dd>Algol68G will stop in its <a href="synopsis.html#monitor">monitor routine</a>. The same monitor is entered when Algol68G receives <code>SIGINT</code>.
 <br>
 <br>
 <dt><code>PROC program idf = STRING</code>
@@ -754,6 +774,10 @@ This chapter describes the predefined tags that are available in Algol68G.
 <br>
 <dt><code>PROC sweep heap = VOID</code>
 <dd>Invokes the garbage collector immediately. Sometimes the interpreter cannot sweep the heap when memory is required, for instance when copying stowed objects. In rare occasions this may lead to a program running out of memory. Calling this routine just before the position where the program ran out of memory might help to keep it running. Otherwise (or, alternatively) a larger heap size should be given to the program.
+<br>
+<br>
+<dt><code>PROC preemptive sweep heap = VOID</code>
+<dd>Invokes the garbage collector if the heap is "sufficiently full". Sometimes the interpreter cannot sweep the heap when memory is required, for instance when copying stowed objects. In rare occasions this may lead to a program running out of memory. Calling this routine just before the position where the program ran out of memory might help to keep it running. Otherwise (or, alternatively) a larger heap size should be given to the program.
 <br>
 <br>
 <dt><code>PROC garbage = LONG INT</code>
@@ -780,72 +804,20 @@ This chapter describes the predefined tags that are available in Algol68G.
 <dd>Returns the value of the evaluation stack pointer. (Note: this is an Algol 68 stack, not the system stack)
 </dl>
 
-<h3><a name="envwiden">Widenings</a></h3>
-In a <a href="syntax.html#coercions">strong context</a>, next widenings are possible to coerce modes.
 <p>
-<table border=0 cellspacing=6>
-<tr>
-<td bgcolor="beige">From</td></td><td bgcolor="beige">To</td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>INT</code></td>
-<td bgcolor="beige"><code>REAL</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG INT</code></td>
-<td bgcolor="beige"><code>LONG LONG INT</code><br><code>LONG LONG REAL</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG INT</code></td>
-<td bgcolor="beige"><code>LONG LONG REAL</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>REAL</code></td>
-<td bgcolor="beige"><code>COMPLEX</code><br><code>LONG REAL</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG REAL</code></td>
-<td bgcolor="beige"> <code>LONG LONG REAL</code><br><code>LONG COMPLEX</code>
-</td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG LONG REAL</code></td>
-<td bgcolor="beige"><code>LONG LONG COMPLEX</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>COMPLEX</code></td>
-<td bgcolor="beige"><code>LONG COMPLEX</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG COMPLEX</code></td>
-<td bgcolor="beige"><code>LONG LONG COMPLEX</code></td>
-</tr>
-</tr>
-<tr>
-<td bgcolor="beige"><code>BITS</code></td>
-<td bgcolor="beige"><code>LONG BITS</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>LONG BITS</code></td>
-<td bgcolor="beige"><code>LONG LONG BITS</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>BITS</code><br><code>LONG BITS</code><br><code>LONG LONG BITS</code></td>
-<td bgcolor="beige"><code>[] BOOL</code></td>
-</tr>
-<tr>
-<td bgcolor="beige"><code>BYTES</code><br><code>LONG BYTES</code></td>
-<td bgcolor="beige"><code>[] CHAR</code></td>
-</tr>
-</table>
-
-</td>
-</table>
-
-<p style="font-size: 8pt;">
+<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
 <font color="black">
-Copyright &copy; 2001-2004 J. Marcel van der Veer.
+<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
 </font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+<small>Documentation for Algol 68 Genie Mark 8</small>
+</font>
+</td>
+</table>
 </p>
 
 </body>

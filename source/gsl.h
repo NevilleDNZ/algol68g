@@ -1,25 +1,49 @@
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*!
+\file gsl.h
+\brief contains gsl and calculus related definitions
+**/
+
+/*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      */
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 #ifndef A68G_GSL_H
 #define A68G_GSL_H
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-*/
+extern GENIE_PROCEDURE genie_exp_complex;
+extern GENIE_PROCEDURE genie_cos_complex;
+extern GENIE_PROCEDURE genie_cosh_complex;
+extern GENIE_PROCEDURE genie_arccos_complex;
+extern GENIE_PROCEDURE genie_arccosh_complex;
+extern GENIE_PROCEDURE genie_arccosh_real;
+extern GENIE_PROCEDURE genie_arcsin_complex;
+extern GENIE_PROCEDURE genie_arcsinh_complex;
+extern GENIE_PROCEDURE genie_arcsinh_real;
+extern GENIE_PROCEDURE genie_arctan_complex;
+extern GENIE_PROCEDURE genie_arctanh_complex;
+extern GENIE_PROCEDURE genie_arctanh_real;
+extern GENIE_PROCEDURE genie_inverf_real;
+extern GENIE_PROCEDURE genie_inverfc_real;
+extern GENIE_PROCEDURE genie_ln_complex;
+extern GENIE_PROCEDURE genie_sin_complex;
+extern GENIE_PROCEDURE genie_sinh_complex;
+extern GENIE_PROCEDURE genie_sqrt_complex;
+extern GENIE_PROCEDURE genie_tan_complex;
+extern GENIE_PROCEDURE genie_tanh_complex;
 
 #ifdef HAVE_GSL
 extern GENIE_PROCEDURE genie_cgs_speed_of_light;
@@ -240,15 +264,6 @@ extern GENIE_PROCEDURE genie_airy_ai_deriv_real;
 extern GENIE_PROCEDURE genie_airy_ai_real;
 extern GENIE_PROCEDURE genie_airy_bi_deriv_real;
 extern GENIE_PROCEDURE genie_airy_bi_real;
-extern GENIE_PROCEDURE genie_arccos_complex;
-extern GENIE_PROCEDURE genie_arccosh_complex;
-extern GENIE_PROCEDURE genie_arccosh_real;
-extern GENIE_PROCEDURE genie_arcsin_complex;
-extern GENIE_PROCEDURE genie_arcsinh_complex;
-extern GENIE_PROCEDURE genie_arcsinh_real;
-extern GENIE_PROCEDURE genie_arctan_complex;
-extern GENIE_PROCEDURE genie_arctanh_complex;
-extern GENIE_PROCEDURE genie_arctanh_real;
 extern GENIE_PROCEDURE genie_bessel_exp_il_real;
 extern GENIE_PROCEDURE genie_bessel_exp_in_real;
 extern GENIE_PROCEDURE genie_bessel_exp_inu_real;
@@ -267,27 +282,16 @@ extern GENIE_PROCEDURE genie_bessel_yn_real;
 extern GENIE_PROCEDURE genie_bessel_ynu_real;
 extern GENIE_PROCEDURE genie_beta_inc_real;
 extern GENIE_PROCEDURE genie_beta_real;
-extern GENIE_PROCEDURE genie_cos_complex;
-extern GENIE_PROCEDURE genie_cosh_complex;
 extern GENIE_PROCEDURE genie_elliptic_integral_e_real;
 extern GENIE_PROCEDURE genie_elliptic_integral_k_real;
 extern GENIE_PROCEDURE genie_elliptic_integral_rc_real;
 extern GENIE_PROCEDURE genie_elliptic_integral_rd_real;
 extern GENIE_PROCEDURE genie_elliptic_integral_rf_real;
 extern GENIE_PROCEDURE genie_elliptic_integral_rj_real;
-extern GENIE_PROCEDURE genie_exp_complex;
 extern GENIE_PROCEDURE genie_factorial_real;
 extern GENIE_PROCEDURE genie_gamma_inc_real;
 extern GENIE_PROCEDURE genie_gamma_real;
-extern GENIE_PROCEDURE genie_inverf_real;
-extern GENIE_PROCEDURE genie_inverfc_real;
-extern GENIE_PROCEDURE genie_ln_complex;
 extern GENIE_PROCEDURE genie_lngamma_real;
-extern GENIE_PROCEDURE genie_sin_complex;
-extern GENIE_PROCEDURE genie_sinh_complex;
-extern GENIE_PROCEDURE genie_sqrt_complex;
-extern GENIE_PROCEDURE genie_tan_complex;
-extern GENIE_PROCEDURE genie_tanh_complex;
 #endif
 
 extern GENIE_PROCEDURE genie_erf_real;

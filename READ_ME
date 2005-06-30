@@ -1,8 +1,11 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 4)
+ALGOL68G - ALGOL 68 GENIE (MARK 8)
 
-Algol68G is a fairly fully featured implementation of Algol 68 as defined by 
+Algol68G is a nearly fully featured implementation of Algol 68 as defined by 
 the Revised Report. It provides multi-precision arithmetic, (optionally) 
 graphical support and (optionally) extended mathematical support.
+
+Author of Algol68G is Marcel van der Veer <algol68g@xs4all.nl>.
+Web pages for Algol68G are at <http://www.xs4all.nl/~jmvdveer>.
 
 Algol68G's front-end parses an entire Algol 68 source program. If parsing is 
 successful, the syntax tree (that serves as an intermediate program 
@@ -21,11 +24,9 @@ This distribution contains following files and directories:
 * CHANGE_LOG                  Revision history.
 * COPYING                     License information (GNU GPL).
 * INSTALL                     How to build and install Algol68G.
-* KNOWN_PROBLEMS              Known problems in this release.
+* LIMITATIONS                 Known limitations.
 * THANKS                      Credits.
 * configure                   Shell script to generate a makefile.
 * doc                         Directory with documentation.
 * foreign	              Directory with third party source code.
 * source                      Directory with source files.
-
-Web pages for Algol68G are at <http://www.xs4all.nl/~jmvdveer>.

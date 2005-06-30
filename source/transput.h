@@ -1,25 +1,28 @@
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*!
+\file transput.h
+\brief contains transput related definitions
+**/
+
+/*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      */
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 #ifndef A68G_TRANSPUT_H
 #define A68G_TRANSPUT_H
-
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-*/
 
 #define ITEM_NOT_USED		(-1)
 #define EMBEDDED_FORMAT 	A_TRUE
@@ -27,7 +30,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define WANT_PATTERN    	A_TRUE
 #define SKIP_PATTERN    	A_FALSE
 
-#define IS_NIL_FORMAT(f) ((f)->top == NULL && IS_NIL ((f)->environ))
+#define IS_NIL_FORMAT(f) ((f)->body == NULL && (f)->environ == 0)
 #define NON_TERM(p) (find_non_terminal (top_non_terminal, ATTRIBUTE (p)))
 
 #undef DEBUG
@@ -37,21 +40,27 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define INSERTION_NORMAL	0x10
 #define INSERTION_BLANK		0x20
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-*/
 
-#define MAX_TRANSPUT_BUFFER	64	/* Some OS's open only 64 files */
+#define MAX_TRANSPUT_BUFFER	64	/* Some OS's open only 64 files. */
 
 enum
-{ INPUT_BUFFER = 0, OUTPUT_BUFFER, EDIT_BUFFER, UNFORMATTED_BUFFER, FORMATTED_BUFFER, FIXED_TRANSPUT_BUFFERS };
+{ INPUT_BUFFER = 0, OUTPUT_BUFFER, EDIT_BUFFER, UNFORMATTED_BUFFER, FORMATTED_BUFFER, DOMAIN_BUFFER, PATH_BUFFER, REQUEST_BUFFER, CONTENT_BUFFER, FIXED_TRANSPUT_BUFFERS
+};
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-*/
-
+extern GENIE_PROCEDURE genie_associate;
+extern GENIE_PROCEDURE genie_bin_possible;
+extern GENIE_PROCEDURE genie_get_possible;
+extern GENIE_PROCEDURE genie_put_possible;
+extern GENIE_PROCEDURE genie_reset_possible;
+extern GENIE_PROCEDURE genie_set_possible;
+extern GENIE_PROCEDURE genie_draw_possible;
+extern GENIE_PROCEDURE genie_compressible;
 extern GENIE_PROCEDURE genie_blank_char;
+extern GENIE_PROCEDURE genie_newline_char;
+extern GENIE_PROCEDURE genie_formfeed_char;
+extern GENIE_PROCEDURE genie_tab_char;
 extern GENIE_PROCEDURE genie_close;
 extern GENIE_PROCEDURE genie_create;
-extern GENIE_PROCEDURE genie_draw_possible;
 extern GENIE_PROCEDURE genie_erase;
 extern GENIE_PROCEDURE genie_error_char;
 extern GENIE_PROCEDURE genie_establish;
@@ -75,12 +84,10 @@ extern GENIE_PROCEDURE genie_on_value_error;
 extern GENIE_PROCEDURE genie_open;
 extern GENIE_PROCEDURE genie_print_bits;
 extern GENIE_PROCEDURE genie_print_bool;
-extern GENIE_PROCEDURE genie_print_bytes;
 extern GENIE_PROCEDURE genie_print_char;
 extern GENIE_PROCEDURE genie_print_complex;
 extern GENIE_PROCEDURE genie_print_int;
 extern GENIE_PROCEDURE genie_print_long_bits;
-extern GENIE_PROCEDURE genie_print_long_bytes;
 extern GENIE_PROCEDURE genie_print_long_complex;
 extern GENIE_PROCEDURE genie_print_long_int;
 extern GENIE_PROCEDURE genie_print_long_real;
@@ -94,7 +101,6 @@ extern GENIE_PROCEDURE genie_read;
 extern GENIE_PROCEDURE genie_read_bin_file;
 extern GENIE_PROCEDURE genie_read_bits;
 extern GENIE_PROCEDURE genie_read_bool;
-extern GENIE_PROCEDURE genie_read_bytes;
 extern GENIE_PROCEDURE genie_read_char;
 extern GENIE_PROCEDURE genie_read_complex;
 extern GENIE_PROCEDURE genie_read_file;
@@ -102,7 +108,6 @@ extern GENIE_PROCEDURE genie_read_file_format;
 extern GENIE_PROCEDURE genie_read_format;
 extern GENIE_PROCEDURE genie_read_int;
 extern GENIE_PROCEDURE genie_read_long_bits;
-extern GENIE_PROCEDURE genie_read_long_bytes;
 extern GENIE_PROCEDURE genie_read_long_complex;
 extern GENIE_PROCEDURE genie_read_long_int;
 extern GENIE_PROCEDURE genie_read_long_real;
@@ -149,6 +154,7 @@ extern GENIE_PROCEDURE genie_make_device;
 
 extern FILE_T open_physical_file (NODE_T *, A68_REF, int, mode_t);
 extern NODE_T *get_next_format_pattern (NODE_T *, A68_REF, BOOL_T);
+extern unsigned long a68g_strtoul (char *, char **, int);
 extern char *error_chars (char *, int);
 extern char *fixed (NODE_T * p);
 extern char *fleet (NODE_T * p);
@@ -193,5 +199,6 @@ extern void transput_error (NODE_T *, A68_REF, MOID_T *);
 extern void unchar_scanner (NODE_T *, A68_FILE *, char);
 extern void value_error (NODE_T *, MOID_T *, A68_REF);
 extern void write_insertion (NODE_T *, A68_REF, unsigned);
+extern void write_purge_buffer (NODE_T *, A68_REF, int);
 
 #endif

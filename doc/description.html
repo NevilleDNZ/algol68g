@@ -1,154 +1,313 @@
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
-<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
-<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
-<meta http-equiv="Content-Style-Type" content="text/css">
+<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: blue; text-decoration: none;}
-a:visited {color: blue; text-decoration: none;}
-a:active  {color: blue; text-decoration: none;}
-a:hover   {text-decoration: underline;}
+a:link    {color: navy; text-decoration: underline;}
+a:visited {color: navy; text-decoration: underline;}
+a:active  {color: navy; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 12pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </style>
 </head>
-<body background="bg.jpg">
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td valign=top bgcolor="white">
-<table cellspacing=1 cellpadding=3 border=0>
-<td bgcolor="black">
-<a href="algol.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
-</td>
-<td bgcolor="black">
-<a href="drawing.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
-</td>
-<td bgcolor="black">
-<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
-</td>
-<td bgcolor="black">
-<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
-</td>
-</table>
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
 <h2>Description of Algol68G</h2>
-<ul>
-<li><a href="#high">About this Algol 68 implementation</a>
-<li><a href="#diff">Algol68G compared to the Revised Report description</a>
-<li><a href="#io">Transput implementation</a>
-<ul>
-<li><a href="#genio">Transput in general</a>
-<li><a href="#fmtio">Formatted transput</a>
-</ul>
-<li><a href="#speed">Interpreter speed</a>
-<li><a href="#bugs">Known problems</a>
-</ul>
 </td>
-<td bgcolor=white valign=top>
-<img src="logo.jpg" align=right>
+<td width="30%" valign=top align=center>
+<img src="logo.gif">
+</td>
+<td width="5%" valign=top bgcolor="white">
+</td>
+<td width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td bgcolor="skyblue">
+&nbsp;&nbsp;<b>Manual</b>
+</td>
+</tr>
+<tr>
+<td bgcolor="powderblue">
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
 </td>
 </table>
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td width="80%" valign=top bgcolor="white">
+<table border=0 cellspacing=0 cellpadding=12>
+<td valign=top bgcolor="white">
 
-<h3><a name="high">About this Algol 68 implementation</a></h3>
-<p>Algol68G is a fairly fully featured implementation of Algol 68 as defined by <a name="rr_1" href="resources.html#rr">[Revised Report 1975]</a>. After successful parsing of an entire Algol 68 source program, the syntax tree, that serves as an intermediate program representation, is interpreted. The interpreter performs many runtime checks, therefore Algol68G resembles FLACC <a name="flacc_1" href="resources.html#flacc">[Mailloux 1978]</a>. Algol68G employs the classical multipass scheme to parse Algol 68 <a name="chl_1" href="resources.html#chl">[Lindsey 1993]</a>.
+<h3><a name="high"></a>About this Algol 68 implementation</h3>
+
+<p>
+<i>Algol 68 Genie</i> (Algol68G) is a nearly full implementation of Algol 68 as defined by <a href="resources.html#ref">[Revised Report 1976]</a> and also implements partial parametrisation, which is an extension of Algol 68. 
+
+<p>
+After successful parsing of an entire source program, the syntax tree, that serves as an intermediate program representation, is interpreted. The interpreter performs many runtime checks, therefore Algol68G resembles FLACC <a href="resources.html#ref">[Mailloux 1978]</a>. Algol68G employs the classical multipass scheme to parse Algol 68 <a href="resources.html#ref">[Lindsey 1993]</a>.
 </p>
 
 <br>
-<h3><a name="diff">Algol68G compared to the Revised Report description</a></h3>
+<h3><a name="diff"></a>Algol68G compared to the Revised Report description</h3>
 <p>
 This manual contains an <a href="syntax.html">Algol68G syntax summary</a> for quick reference.
 <p>
 <i>Features of this implementation</i>
 <ul>
-<li>The interpreter checks on many events, notably:
+<li>The interpreter checks on many events, for example:
 <ul>
 <li>Assigning to, or dereferencing of, <code>NIL</code>.
 <li>Using uninitialised values.
 <li>Invalid operands to standard prelude operators and procedures.
 <li>Bounds check when manipulating arrays.
 <li>Overflow of arithmetic modes.
-<li>Dynamic scope checking.
+<li>"Dangling references", that are names that refer to deallocated storage.
 </ul>
 <li>Precision of numeric modes:
 <ul>
 <li>Implementation of <code>LONG INT, LONG REAL</code> and <code>LONG COMPLEX</code> with roughly doubled precision with respect to <code>INT, REAL, COMPLEX</code>.
 <li>Implementation of multiprecision arithmetic through <code>LONG LONG INT, LONG LONG REAL</code> and <code>LONG LONG COMPLEX</code> which are modes with user defined precision which is set by an option.
 </ul>
+<li>On systems that support them, <a href="extensions.html#envunix">UNIX extensions</a> that allow e.g. for executing child processes that communicate through pipes, matching regular expressions or fetching web page contents.
 <li>Procedures for <a href="drawing.html">drawing</a> using the GNU Plotting Utilities.
 <li>Various <a href="numerical.html">numerical procedures</a> from the GNU Scientific Library.
-<li>Implementation of mode <code>FORMAT</code>, format texts, straightening and <a href="#fmtio">formatted transput</a>.
-<li><a href="extensions.html#envunix">UNIX extensions</a> that allow for instance for executing child processes that communicate through pipes.
-<li>A simple <a href="extensions.html#refine">refinement preprocessor</a> to facilitate top-down program construction.
+<li>Format texts, straightening and <a href="#fmtio">formatted transput</a>. 
+Transput routines work generically on files, (dynamic) strings and UNIX pipes.
+<li>Parallel clause on platforms that support POSIX threads.
+<li>Upper stropping is the default, quote stropping is optional.
 </ul>
 
-<i>Deviations from the Revised Report</i>
+<p>
+<i>Extra features compared to the Revised Report language</i>
 <ul>
-<li>Algol68G transput deviates from the Revised Report specification.
-The important difference with the Revised Report transput model is that Algol68G transput does not operate on a <code>BOOK</code>, but on a <code>[] CHAR</code>.
-Details can be found <a name="io_1" href="#io">here</a>.
-<li>The parallel-clause is recognised but is executed as a strong-void-collateral-clause.
-Consequently, <code>SEMA</code> is not implemented.
-However, Algol68G implements <a href="extensions.html#envunix">UNIX extensions</a> that allow for executing child processes that communicate through pipes.
-<li>The interpreter does not implement so-called ghost-elements, hence it cannot check bounds when assigning to rows of mode flexible-rows-of-rows-of-... when the destination has a flat descriptor, as in 
+<li>Implementation of C.H. Lindsey's <a href="extensions.html#params">partial parametrisation proposal</a>, which allows for currying in Algol 68, giving it a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
+<li>A simple <a href="extensions.html#refine">refinement preprocessor</a> to facilitate top-down program construction.
+<li>Implementation of pseudo-operators <code>ANDF</code> and <code>ORF</code> (or their respective alternatives <code>ANDTH</code> and <code>OREL</code>), defined as
 <br>
 <ul>
 <pre>
-FLEX [1 : 0] [1 : 3] CHAR s := "A string with more than three characters" </pre>
-</ul> 
-Effectively, those mixed cases are treated as if they were flexible in all dimensions. The scope checker recognises the potential introduction of transient references resulting from this peculiarity in Algol68G.
-<li>Implementation of pseudo-operators <code>ANDF</code> and <code>ORF</code>, defined as
-<br>
-<ul>
-<pre>
-tertiary 1 ANDF tertiary 2 = IF tertiary 1 THEN tertiary 2 ELSE FALSE FI
-tertiary 1 ORF tertiary 2 = IF tertiary 1 THEN TRUE ELSE tertiary 2 FI
+tertiary 1 ANDF tertiary 2:
+  IF tertiary 1 THEN tertiary 2 ELSE FALSE FI
+
+tertiary 1 ORF tertiary 2:
+  IF tertiary 1 THEN TRUE ELSE tertiary 2 FI
 </pre>
 </ul>
-The syntactic position of those pseudo-operator expressions is a bool-unit, the same as an identity relation. The tertiaries are meek-bool-tertiaries.
+The syntactic position of those pseudo-operator expressions is a boolean-unit, the same as an identity relation. The tertiaries are meek-boolean-tertiaries.
+<li>Implementation of <code>DOWNTO</code> with comparable function as <code>TO</code> in loop clauses; <code>DOWNTO</code> <i>decreases</i>, whereas <code>TO</code> <i>increases</i>, the loop counter by the value of the (implicit) by-part. 
+For example
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+# Find last occurence of character in STRING s #
+
+FOR i FROM UPB s DOWNTO 1
+DO (s[i] = "a" | print (i))
+OD
+</pre>
+</font>
+</td>
+</table>
+<p>
+<li>Implementation of a post-checked loop. A do-part may enclose a serial clause followed by an optional until-part, or just enclose an until-part. This is an alternative to the paradigm Algol 68 post-check loop <code>WHILE ... DO SKIP OD</code>. An until-part consists of the keyword <code>UNTIL</code> followed by a meek-boolean-enquiry-clause. The loop-clause terminates when the enquiry-clause yields <code>TRUE</code>.
+For example
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+DO UNTIL read string = "continue" OD
+</pre>
+</font>
+</td>
+</table>
+<p>
+<li>Implementation of monadic- and dyadic operator <code>ELEMS</code> that operate on any row, defined as
+<ul>
+<pre>
+OP ELEMS = ("ROWS" z) INT        # total number of elements in "z" #
+OP ELEMS = (INT d, "ROWS" z) INT # number of elements in dimension "d" of "z" #
+</pre>
+</ul>
+For example
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+[1 : 10, -5 : 5] INT r;<br>
+print ((1 ELEMS r, 2 ELEMS r, ELEMS r)) # prints +10 +11 +110 #
+</tt>
+</font>
+</td>
+</table>
+<p>
+The monadic operator returns the total number of elements while the dyadic operator returns the number of elements in the specified dimension, if this is a valid dimension.
 <li>When option <code>brackets</code> is specified, 
 <code>(..)</code>, <code>[..]</code> and <code>{..}</code> 
 are equivalent to the parser and any pair can be used where Algol 68 requires open-symbols and close-symbols. This allows for clearer coding when parenthesis are nested. For example:
-<ul>
-<pre>
-poly := a0 + x * (a1 + x * {a2 + x * [a3 + x * a4]});
-COMPL z := {cos (phi), -sin (phi)};
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+poly := a0 + x * (a1 + x * {a2 + x * [a3 + x * a4]});<br>
+COMPL z := {cos (phi), -sin (phi)};<br>
 ln [x + sqrt {x^2 + 1}]
-</pre>
-</ul>
+</tt>
+</font>
+</td>
+</table>
+<p>
 If <code>brackets</code> is not specified, <code>(..)</code> is an alternative for <code>[..]</code> in bounds and indexers, which is traditional Algol 68 syntax. 
 <li>The parser allows for colons, used in bounds and indexers, to be replaced by '<code>..</code>' which is the Pascal style. For instance
-<br>
-<ul>
-<pre>
-[1 .. n] INT z; 
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+[1 .. n] INT z;<br>
 z [1 .. n OVER 2]
-</pre>
+</tt>
+</font>
+</td>
+</table>
 </ul>
+
+<p>
+<i>Deviations from the Revised Report language</i>
+<ul>
+<li>The important difference with the Revised Report transput model is that
+Algol68G transput does not operate on <code>FLEX [] FLEX [] FLEX [] CHAR</code>,
+but on a <code>FLEX [] CHAR</code>.
+Details can be found <a name="io_1" href="#io">here</a>.
+<li><a name="par"></a>The Algol68G parallel clause deviates from the Algol 68 parallel clause when parallel clauses are nested. In Algol68G, stack frames inside a parallel unit are private, therefore if parallel units modify a shared variable then this variable must be declared outside the outermost parallel clause, and a jump out of a parallel unit can only be targeted at a label outside the outermost parallel clause.
+<li>The interpreter does not implement so-called ghost-elements <a href="resources.html#rr">{RR 2.1.3.4}</a>, hence it cannot check bounds when assigning to rows of mode flexible-rows-of-rows-of-... when the destination has a flat descriptor, as in 
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+FLEX [1 : 0] [1 : 3] CHAR s := "more than 3 characters"
+</tt>
+</font>
+</td>
+</table>
+<p>
+A mode flexible-row-of-...-row-of-... is treated as if it were flexible throughout. The scope checker recognises the potential introduction of transient references resulting from this peculiarity in Algol68G.
+<br>
+<li>Algol68G does not recognise nonlocal environs <a href="resources.html#rr">{RR 5.2.3.2}</a>. All environs are local. Hence constructs as
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+REF INT i = (... | LOC INT | SKIP);<br>
+...<br>
+[n] REF INT a; FOR k TO n DO a[k] := LOC INT OD
+</tt>
+</font>
+</td>
+</table>
+<p>
+result in a scope violation error with Algol68G. 
+<br>
+<li>It is not possible to declare in a <code>[WHILE ...] DO ... [UNTIL ...] OD</code> part an identifier with equal spelling as the loop counter identifier. For instance
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+FOR i TO n DO INT i := 2 * n; ... OD;<br>
+...<br>
+FOR i TO n WHILE INT i := n OVER 2; ... DO ... OD
+</tt>
+</font>
+</td>
+</table>
+<p>
+are not accepted by Algol68G.
+<br>
+<li>Algol68G will map a declarer whose length is not implemented onto the most appropriate length available <a href="resources.html#rr">{RR 2.1.3.1}</a>. Algol68G considers mapped modes equivalent to the modes they are mapped onto. Routines or operators for not-implemented lengths are mapped accordingly.
 </ul>
 
 <br>
-<h3><a name="io">Transput implementation</a></h3>
-<h4><a name="genio">Transput in general</a></h4>
+<h3><a name="io"></a>Transput implementation</h3>
+
+<h4><a name="genio"></a>Transput in general</h4>
 <p>Algol68G transput deviates from the Revised Report specification, as described below.
 For an overview of implemented procedures refer to the <a name="envio_1" href="environ.html#envio">standard environment reference</a>.
 </p>
+
+<p>
 <i>Features of this implementation</i>
 <ul>
 <li>Algol68G implements mode <code>FORMAT</code>, format texts, straightening and <a href="#fmtio">formatted transput</a>.
-<li>Transput procedures operate on pipes (see <a href="extensions.html#envunix">UNIX extensions</a>).
+<li>Transput procedures operate generically on files, 
+<a href="description.html#stringio">strings</a>
+and <a href="extensions.html#envunix">UNIX pipes</a>.
+For example, next program reads a filename and filters file contents using the UNIX program "od".
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+PIPE p = execve child pipe ("/usr/bin/od", ("/usr/bin/od", "-c", read string), "");
+on logical file end (read OF p, (REF FILE f) BOOL: GOTO end);
+DO STRING s;
+   get (read OF p, (s, new line));
+   put (stand out, ("From pipe: """, s, """", new line))
+OD;
+end: close (read OF p); close (write OF p)
+</pre>
+</font>
+</td>
+</table>
+<p>
 <li>Algol68G implements Algol68C routines as <code>read int</code> and <code>print int</code>, but not routines as <code>get int</code> and <code>put int</code>.
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+INT k = read int; COMPL z := read compl;
+</tt>
+</font>
+</td>
+</table>
+<p>
 <li>There are two extra procedures to examine a file:
 <p>
 <dl>
@@ -163,34 +322,77 @@ For an overview of implemented procedures refer to the <a name="envio_1" href="e
 <li>If a file exists upon calling <code>establish</code>, the event handler set by <code>on open error</code> will be invoked.
 <li>Algol68G can write to file <code>stand error</code> with associated channel <code>stand error channel</code>. This file is linked to the standard error stream that is usually directed at the console.
 </ul>
+
+<p>
 <i>Deviations from the Revised Report</i>
 <ul>
-<li>The important difference with the Revised Report transput model is that Algol68G transput does not operate on a <code>BOOK</code>, but on a <code>[] CHAR</code>.
-<li>Reading and writing a file is essentially sequential. Only <code>reset</code> can intervene with sequential processing.
-<li>Algol68G currently does not permit switching between <i>read mood</i> and <i>write mood</i> unless the file is <code>reset</code> first (and the file was opened with <code>standback channel</code>). Whether a file is in <i>read mood</i> or <i>write mood</i> is determined by the first actual transput operation (read or write) on a file after opening it.
+<li>The important difference with the Revised Report transput model is that Algol68G transput does not operate on a <code>FLEX [] FLEX [] FLEX [] CHAR</code>, but on a <code>FLEX [] CHAR</code>.
+<li>Getting and putting a file is essentially sequential. Only <code>reset</code> can intervene with sequential processing.
+<li>Algol68G currently does not permit switching between <i>read mood</i> and <i>write mood</i> unless the file is <code>reset</code> first (and the file was opened with <code>standback channel</code>). Whether a file is in <i>read mood</i> or <i>write mood</i> is determined by the first actual transput operation (put or get) on a file after opening it.
+<li><a name="stringio"></a>Since Algol68G transput operates on a <code>FLEX [] CHAR</code>, routine <code>associate</code> is declared as
+<p>
+<ul><code>PROC associate = (REF FILE, REF STRING) VOID</code></ul>
+<p>
+Note that RR specifies a <code>REF [][][] CHAR</code> argument where Algol68G specifies a <code>REF STRING</code> argument. On putting, the string is dynamically lengthened and output is added at the end of the string. 
+Attempted getting outside the string provokes an end of file condition, and <code>on file end</code> is invoked.
+When a file that is associated with a string is <code>reset</code>, getting restarts from the start of the associated string.
+Next (trivial) code fragment illustrates the use of <code>associate</code> in transput.
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+[n] COMPL u, v;
+...
+FILE in, out, STRING z; 
+associate (in, z); associate (out, z);
+putf (out, ($g$, u)); getf (in, ($g$, v));
+</pre></font>
+</td>
+</table>
+<p>
 <li>Since a file is accessed sequentially, <code>backspace</code> is not implemented.
-<li>Procedure <code>on char error</code> is not provided.
+<li>Since an end on file event handler cannot move the filepointer to a good position (<code>reset</code> also resets a file's <i>read mood</i> and <i>write mood</i>),
+encountering end of file terminates getting of a <code>STRING</code> value.
+Conform RR, getting of a <code>STRING</code> value will resume if the end of line event handler or the end of page handler returns <code>TRUE</code>.
+<li>There is no event routine <code>on char error mended</code>. Attempted conversion of an invalid value for a required mode, or attempted transput of a value that cannot be converted by the current format-pattern, evokes the event routine set by <code>on value error</code>. 
 </ul>
+
+<p>
 <i>Event handlers</i>
-<ul>
-<li>Algol68G implements transput-event handlers 
+<p>
+Algol 68 transput uses event handlers to handle conditions as end of file, end of line, transput error, etcetera. For example, next program will read a filename and echo file contents to standout:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+open (standin, read string , standin channel);
+on logical file end (standin, (REF FILE f) BOOL: stop);
+DO STRING s;
+   read ((s, newline)); 
+   print ((s, newline))
+OD
+</pre></font>
+</td>
+</table>
+<p>
+Algol68G implements transput-event handlers 
 with mode <code>PROC (REF FILE) BOOL</code> that can be set by the procedures listed below. 
 An event handler must return <code>TRUE</code> when it can appropriately handle the event or 
-<code>FALSE</code> when it cannot. When <code>TRUE</code> is returned, execution resumes, 
-otherwise a runtime error is produced. The default handler always returns <code>FALSE</code>. 
+<code>FALSE</code> when it cannot. When <code>TRUE</code> is returned, transput resumes, 
+otherwise either a runtime error is produced, or a standard corrective action is taken (where specified in below list). Default handlers always return <code>FALSE</code>. 
 <p>
 <dl>
 <dt><code>PROC on file end = (REF FILE, PROC (REF FILE) BOOL) VOID</code>
 <dt><code>PROC on logical file end = (REF FILE, PROC (REF FILE) BOOL) VOID</code>
 <dt><code>PROC on physical file end = (REF FILE, PROC (REF FILE) BOOL) VOID</code>
-<dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when end of file is reached upon reading.
-In Algol 68, <code>on logical file end</code> differs from <code>on physical file end</code>. In Algol68G, these are identical since Algol68G cannot reposition the file pointer other than through <code>reset</code>.
+<dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when end of file is reached upon getting.
+In Algol 68, <code>on logical file end</code> differs from <code>on physical file end</code> while in Algol68G these are identical, since one cannot position the filepointer outside the file.
 <br><br>
 <dt><code>PROC on page end = (REF FILE, PROC (REF FILE) BOOL) VOID</code>
-<dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when end of page is reached upon reading.
+<dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when end of page is reached upon getting. Standard corrective action is to take a new page.
 <br><br>
 <dt><code>PROC on line end = (REF FILE, PROC (REF FILE) BOOL) VOID</code>
-<dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when end of line is reached upon reading.
+<dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when end of line is reached upon getting. Standard corrective action is to take a new line.
 <br><br>
 <dt><code>PROC on value error = (REF FILE, PROC (REF FILE) BOOL) VOID</code>
 <dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when attempting to convert an invalid value for the required mode, or when attempting to transput a value that cannot be converted by the current format-pattern. The latter is non-standard, and is provided because <code>on char error</code> is not provided in Algol68G.
@@ -214,75 +416,91 @@ Next event handlers are not specified by the Revised Report.
 <dd>The <code>PROC (REF FILE) BOOL</code> event handler will be called when the file's associated format has more pictures than there are arguments to be read or written with that format in a call of <code>readf, printf, writef, getf</code> or <code>putf</code>.
 </dl>
 </p>
-</ul>
 
-<h4><a name="fmtio">Formatted transput</a></h4>
+<h4><a name="fmtio"></a>Formatted transput</h4>
 <p> Algol68G implements mode <code>FORMAT</code>, format texts, straightening and formatted transput.
 The syntax of formats is described in the <a href="syntax.html#formats">Algol68G syntax summary</a>. 
 The Algol68G implementation deviates from the Revised Report specification, as described below.
 </p>
+
+<p>
 <i>Features of this implementation</i>
 <ul>
 <li>Insertions can be any combination of alignments and literals.
 <li>The argument for a general-pattern is an enclosed-clause yielding <code>[] INT</code> (which is a superset of the RR specification). 
 <li>The radix for a bits-pattern can be 2 .. 16. The radix can be dynamic, by specifying 
 <ul><code>n integral-enclosed-clause r</code></ul> 
-<li>The Revised Report specification of reading using an integral choice pattern has the peculiarity that when two literals start with the same sequence of characters, the longer literal should appear first in the list. Algol68G makes no such demand, and will select the correct literal from the list whatever their order.
+<li>The Revised Report specification of getting using an integral choice pattern has the peculiarity that when two literals start with the same sequence of characters, the longer literal should appear first in the list. Algol68G makes no such demand, and will select the correct literal from the list whatever their order.
 </ul>
+
+<p>
 <i>Deviations from the Revised Report</i>
 <ul>
-<li>When all arguments in a call of <code>readf, printf, writef, getf</code> or <code>putf</code> are processed, the format associated with the corresponding file is purged - that is, remaining insertions are processed. If a pattern is encountered while purging, then there was no associated argument and the event routine set by <code>on format error</code> is called.
-When this event routine returns <code>FALSE</code> (the default routine always returns <code>FALSE</code>) a runtime error will be produced. If one wants (for a file <code>f</code>) remaining patterns to be silently ignored, one can specify
-<ul><pre>
-on format error (f, (REF FILE g) BOOL: TRUE)
-</ul></pre>
+<li>When all arguments in a call of <code>readf, printf, writef, getf</code> or <code>putf</code> are processed, the format associated with the corresponding file is purged - that is, remaining insertions are processed and the format is discarded. 
+If a pattern is encountered while purging, then there was no associated argument and the event routine set by <code>on format error</code> is called.
+When this event routine returns <code>FALSE</code> (the default routine always returns <code>FALSE</code>) a runtime error will be produced. If one wants  remaining patterns to be silently ignored for a file <code>f</code>, one can specify
+<ul><code>on format error (f, (REF FILE g) BOOL: TRUE)</code></ul>
 <li><code>SIMPLIN</code> and <code>SIMPLOUT</code> are generic for both formatted and unformatted transput. Therefore <code>SIMPLIN</code> and <code>SIMPLOUT</code> include both mode <code>FORMAT</code> and <code>PROC (REF FILE) VOID</code>. Unformatted transput routines <code>read, print, write, get</code> and <code>put</code> ignore eventual <code>FORMAT</code> arguments. Formatted transput routines <code>readf, printf, writef, getf</code> and <code>putf</code> ignore eventual <code>PROC (REF FILE) VOID</code> arguments.
 <li>Insertion <i>x</i> has the same effect as insertion <i>q</i>; both call <code>space</code>.
 <li>Insertion <i>y</i> is not implemented since <code>backspace</code> is not implemented (see <a href="#genio">Transput in general</a>). Consequently, insertion <i>k</i> can only move forward.
 <li>When a sign is shifted in a sign-mould, any character output by literal insertions in that sign-mould is replaced with a space as well, starting from the first z-frame until the sign is put.
-<li>When reading a literal insertion, <code>space</code> is performed for every character in that literal. It is therefore not checked whether read characters actually match the literal.
-<li>There is no event routine <code>on char error mended</code>. Unexpected characters are treated like failures in conversion of a value according to its associated pattern: both events evoke the event routine set by <code>on value error</code>. 
-When this event routine returns <code>FALSE</code> (the default routine always returns <code>FALSE</code>) a runtime error will be produced.
+<li>When getting a literal insertion, <code>space</code> is performed for every character in that literal. It is not checked whether read characters actually match the literal.
 </ul>
 
 <br>
-<h3><a name="speed">Interpreter speed</a></h3>
-<p>The speed of the interpreter will depend on platform and application. To have a crude comparison, Algol68G was rated with the Whetstone benchmark. Next table compiles Whetstone ratings for some personal computers running Algol68G and approximate ratings for compiled Fortran code on various machines from the past which ran 
-<a href="resources.html#implementations">legacy Algol 68 implementations</a>. 
-When reading results below, keep in mind that Algol68G has runtime checks enabled, and Fortran had not. 
+<br>
+<h3><a name="speed"></a>Interpreter speed</h3>
+<p>The speed of the interpreter will depend on platform and application. To have a crude comparison, Algol68G was rated with the Whetstone benchmark. Next table compiles approximate Whetstone ratings for some personal computers running Algol68G and ratings for compiled FORTRAN code on various machines from the past (many of which ran 
+<a href="resources.html#implementations">legacy Algol 68 implementations</a>). 
 <p>
-<table border=0 cellspacing=6>
-<tr><td bgcolor="beige"><var>System</var></td><td bgcolor="beige"><var>MWhets</var></td><td bgcolor="beige"><var>Remarks</var></td></tr>
-<tr><td bgcolor="beige">DECsystem 2060<br>VAX 11/780<br>IBM 4341</td><td bgcolor="beige">&plusmn;1</td><td bgcolor="beige">Fortran</td>
-<tr><td bgcolor="beige"><b>PowerPC (233 MHz)</b></td><td bgcolor="beige">&plusmn;1.8</td><td bgcolor="beige">Algol68G/LinuxPPC/gcc 2.95</td></tr>
-<tr><td bgcolor="beige">ICL 2972<br>IBM 370/165</td><td bgcolor="beige">&plusmn;2</td><td bgcolor="beige">Fortran</td></tr>
-<tr><td bgcolor="beige">Cyber 7600<br>Intel 80486DX (25 MHz)</td><td bgcolor="beige">&plusmn;9</td><td bgcolor="beige">Fortran</td></tr>
-<tr><td bgcolor="beige"><b>Pentium III (1200 MHz)</b></td><td bgcolor="beige">&plusmn;11</td><td bgcolor="beige">Algol68G/Windows XP/gcc</td></tr>
-<tr><td bgcolor="beige">Cyber 205 (Scalar)<br>Cray-1A (Scalar)<br></td><td bgcolor="beige">&plusmn;12</td><td bgcolor="beige">Fortran</td></tr>
+Algol 68 Genie speed approximately scales linearly in clock speed when run on PowerPC or ix86.
+<p>
+<table border=0 cellspacing=0 cellpadding=6>
+<tr><td bgcolor=skyblue><b>System</b></td><td bgcolor=skyblue><b>MWhets</b></td><td bgcolor=skyblue><b>Remarks</b></td></tr>
+<tr><td bgcolor=powderblue>VAX 11/785<br>IBM 4341-2</td><td bgcolor=powderblue>1</td><td bgcolor=powderblue>FORTRAN</td>
+<tr><td bgcolor=powderblue>ICL 2980<br>IBM 370/168</td><td bgcolor=powderblue>2</td><td bgcolor=powderblue>FORTRAN</td></tr>
+<tr><td bgcolor=powderblue>PowerPC G3 (233 MHz)</td><td bgcolor=powderblue>2</td><td bgcolor=powderblue>Algol68G/Linux/gcc</td></tr>
+<tr><td bgcolor=powderblue>Cyber 7600</td><td bgcolor=powderblue>9</td><td bgcolor=powderblue>FORTRAN</td></tr>
+<tr><td bgcolor=powderblue>Pentium III (1200 MHz)</td><td bgcolor=powderblue>10</td><td bgcolor=powderblue>Algol68G/Windows XP/gcc</td></tr>
+<tr><td bgcolor=powderblue>Cyber 205 (Scalar)<br>Cray-1A (Scalar)<br></td><td bgcolor=powderblue>12</td><td bgcolor=powderblue>FORTRAN</td></tr>
+<tr><td bgcolor=powderblue>PowerPC G5 (Dual 2.5 GHz)</td><td bgcolor=powderblue>20</td><td bgcolor=powderblue>Algol68G/MacOS X/gcc</td></tr>
 </table>
 </p>
 
 <br>
-<h3><a name="bugs">Known problems</a></h3>
+<br>
+<h3><a name="limitations"></a>Limitations and bugs</h3>
 <ul>
-<li>A garbage collector cannot solve all memory allocation issues. It is therefore possible to get an unexpected "out of memory" diagnostic. Two options in such case are (1) to increase heap size or (2) to call standard prelude routine "sweep heap" at strategic positions in the program.
 <li>The interpreter offers optional checking of the system stack. When this check is not activated, or on systems where this check would not work, the following may result in a segment violation: 
 <ul>
 <li>Deep recursion.
 <li>Garbage collection of deeply recursive data structures.
 <li>Using jumps to move between incarnations of recursive procedures.
 </ul>
-<li>Algorithms for extended precision (<code>LONG LONG INT</code>, <code>LONG LONG REAL</code> and <code>LONG LONG COMPLEX)</code> are not really suited for precisions larger than about a thousand digits. State of the art in the field offers more efficient algorithms than implemented here.
-<li>Overflow- and underflow checks on <code>REAL</code> and <code>COMPLEX</code> operations require IEEE-754 compatibility.
+<li>When the <a href="synopsis.html#optionmem">stack overhead</a> is set to a too small value, a segment violation may occur.
+<li>Algorithms for extended precision (<code>LONG LONG</code> arithmetic modes)</code> are not really suited for precisions larger than about a thousand digits. State of the art in the field offers more efficient algorithms than implemented here.
+<li>Overflow- and underflow checks on <code>REAL</code> and <code>COMPLEX</code> operations require IEEE-754 compatibility. Many processor types, notably ix86's and PowerPC processors, are IEEE-754 compatible.
+<li>A garbage collector cannot solve all memory allocation issues. It is therefore possible to get an unexpected "out of memory" diagnostic. Two options in such case are (1) to increase heap size or (2) to call standard prelude routine "sweep heap" at strategic positions in the program.
 </ul>
+</td>
+
 </td>
 </table>
 
-<p style="font-size: 8pt;">
+<p>
+<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
 <font color="black">
-Copyright &copy; 2001-2004 J. Marcel van der Veer.
+<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
 </font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+<small>Documentation for Algol 68 Genie Mark 8</small>
+</font>
+</td>
+</table>
 </p>
-
 </body>
 </html>

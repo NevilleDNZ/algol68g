@@ -1,35 +1,43 @@
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*!
+\file plotutils.c
+\brief interface to libplot
+*/
+
+/*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      */
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 #include "algol68g.h"
 #include "genie.h"
 #include "transput.h"
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-This file contains the Algol68G interface to libplot. Note that Algol68G is not 
-a binding for libplot. When GNU plotutils are not installed then the routines in 
-this file will give a runtime error when called. You can also choose to not 
-define them in "prelude.c".                                                   */
+/*
+This file contains the Algol68G interface to libplot. Note that Algol68G is not
+a binding for libplot. When GNU plotutils are not installed then the routines in
+this file will give a runtime error when called. You can also choose to not
+define them in "prelude.c". 
+*/
 
 #ifdef HAVE_PLOTUTILS
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-To use titles in an X-window you must enable HAVE_MODIFIABLE_X_TITLE and edit 
-GNU libplot. See the INSTALL file.                                            */
+/*
+To use titles in an X-window you must enable HAVE_MODIFIABLE_X_TITLE and edit
+GNU libplot. See the INSTALL file. 
+*/
 
 #ifdef HAVE_MODIFIABLE_X_TITLE
 extern char *XPLOT_APP_NAME;
@@ -37,9 +45,10 @@ extern char *XPLOT_APP_NAME;
 
 #define MAXIMUM(x, y) ((x) > (y) ? (x) : (y))
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*
 This part contains names for 24-bit colours recognised by libplot.
-The table below is based on the `rgb.txt' file distributed with X11R6.        */
+The table below is based on the `rgb.txt' file distributed with X11R6. 
+*/
 
 struct COLOUR_INFO
 {
@@ -725,481 +734,432 @@ const colour_info A_COLOURS[COLOUR_NAMES + 1] = {
 };
 
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-string_to_colour: searches colour in the list                                 */
+/*!
+\brief searches colour in the list
+\param p
+\param name
+\param index
+\return
+**/
 
-static BOOL_T
-string_to_colour (NODE_T * p, char *name, int *index)
+static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
 {
   A68_REF z_ref = heap_generator (p, MODE (C_STRING), (int) (1 + strlen (name)));
   char *z = (char *) ADDRESS (&z_ref);
   int i, j;
   BOOL_T k;
-/* First remove formatting from name: spaces and capitals are irrelevant */
+/* First remove formatting from name: spaces and capitals are irrelevant. */
   j = 0;
-  for (i = 0; name[i] != '\0'; i++)
-    {
-      if (name[i] != ' ')
-	{
-	  z[j++] = TO_LOWER (name[i]);
-	}
-      z[j] = 0;
+  for (i = 0; name[i] != '\0'; i++) {
+    if (name[i] != ' ') {
+      z[j++] = TO_LOWER (name[i]);
     }
-/* Now search with the famous British Library Method */
+    z[j] = 0;
+  }
+/* Now search with the famous British Library Method. */
   k = A_FALSE;
-  for (i = 0; i < COLOUR_NAMES && !k; i++)
-    {
-      if (!strcmp (A_COLOURS[i].name, z))
-	{
-	  k = A_TRUE;
-	  *index = i;
-	}
+  for (i = 0; i < COLOUR_NAMES && !k; i++) {
+    if (!strcmp (A_COLOURS[i].name, z)) {
+      k = A_TRUE;
+      *index = i;
     }
+  }
   return (k);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-scan_int: scans string for an integer                                         */
+/*!
+\brief scans string for an integer
+\param buffer
+\param current
+\param k
+\return
+**/
 
-static int
-scan_int (char *buffer, char **current, int *k)
+static int scan_int (char *buffer, char **current, int *k)
 {
   char *z = *current;
   (void) buffer;
-  while (z[0] != '\0' && !IS_DIGIT (z[0]))
-    {
-      z++;
-    }
-  if (z[0] != 0)
-    {
-      (*k) = strtol (z, current, 10);
-      return (1);
-    }
-  else
-    {
-      return (0);
-    }
+  while (z[0] != '\0' && !IS_DIGIT (z[0])) {
+    z++;
+  }
+  if (z[0] != 0) {
+    (*k) = strtol (z, current, 10);
+    return (1);
+  } else {
+    return (0);
+  }
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, STRING, STRING) make device.                                  */
+/*!
+\brief PROC (REF FILE, STRING, STRING) make device
+\param p
+**/
 
-void
-genie_make_device (NODE_T * p)
+void genie_make_device (NODE_T * p)
 {
   int size;
   A68_REF ref_device, ref_page, ref_file;
   A68_FILE *file;
-/* Pop arguments */
+/* Pop arguments. */
   POP_REF (p, &ref_page);
   POP_REF (p, &ref_device);
   POP_REF (p, &ref_file);
   TEST_NIL (p, ref_file, MODE (REF_FILE));
   file = (A68_FILE *) ADDRESS (&ref_file);
-  if (file->device.device_made)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "device parameters already set");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
-/* Fill in page_size */
+  if (file->device.device_made) {
+    diagnostic (A_RUNTIME_ERROR, p, "device parameters already set");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+/* Fill in page_size. */
   size = a68_string_size (p, ref_page);
-  if (((file->device.page_size.status & INITIALISED_MASK) != 0) & !IS_NIL (file->device.page_size))
-    {
-      unprotect_sweep_handle (&file->device.page_size);
-    }
+  if (((file->device.page_size.status & INITIALISED_MASK) != 0) & !IS_NIL (file->device.page_size)) {
+    UNPROTECT_SWEEP_HANDLE (&file->device.page_size);
+  }
   file->device.page_size = heap_generator (p, MODE (STRING), 1 + size);
   a_to_c_string (p, (char *) ADDRESS (&(file->device.page_size)), ref_page);
-/* Fill in device */
+/* Fill in device. */
   size = a68_string_size (p, ref_device);
-  if (((file->device.device.status & INITIALISED_MASK) != 0) & !IS_NIL (file->device.device))
-    {
-      unprotect_sweep_handle (&file->device.device);
-    }
+  if (((file->device.device.status & INITIALISED_MASK) != 0) & !IS_NIL (file->device.device)) {
+    UNPROTECT_SWEEP_HANDLE (&file->device.device);
+  }
   file->device.device = heap_generator (p, MODE (STRING), 1 + size);
   a_to_c_string (p, (char *) ADDRESS (&(file->device.device)), ref_device);
   file->device.device_made = A_TRUE;
   PUSH_BOOL (p, A_TRUE);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-close_device: closes the plotter.                                             */
+/*!
+\brief closes the plotter
+\param p
+\param f
+\return
+**/
 
-BOOL_T
-close_device (NODE_T * p, A68_FILE * f)
+BOOL_T close_device (NODE_T * p, A68_FILE * f)
 {
   TEST_INIT (p, *f, MODE (FILE));
-  if (!f->opened)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "file is not open");
-      exit_genie (p, A_RUNTIME_ERROR);
+  if (!f->opened) {
+    diagnostic (A_RUNTIME_ERROR, p, "file is not open");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!(f->device.device_opened)) {
+    diagnostic (A_RUNTIME_ERROR, p, "device is not open");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (f->device.device_made) {
+    if (!IS_NIL (f->device.device)) {
+      UNPROTECT_SWEEP_HANDLE (&(f->device.device));
     }
-  if (!(f->device.device_opened))
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "device is not open");
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (!IS_NIL (f->device.page_size)) {
+      UNPROTECT_SWEEP_HANDLE (&(f->device.page_size));
     }
-  if (f->device.device_made)
-    {
-      if (!IS_NIL (f->device.device))
-	{
-	  unprotect_sweep_handle (&(f->device.device));
-	}
-      if (!IS_NIL (f->device.page_size))
-	{
-	  unprotect_sweep_handle (&(f->device.page_size));
-	}
-    }
-  if (pl_closepl_r (f->device.plotter) < 0)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "error while closing plotter");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
-  if (pl_deletepl_r (f->device.plotter) < 0)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "error while deleting plotter");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
-  if (f->device.stream != NULL && fclose (f->device.stream) != 0)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "error while closing output stream");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
+  }
+  if (pl_closepl_r (f->device.plotter) < 0) {
+    diagnostic (A_RUNTIME_ERROR, p, "error while closing plotter");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (pl_deletepl_r (f->device.plotter) < 0) {
+    diagnostic (A_RUNTIME_ERROR, p, "error while deleting plotter");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (f->device.stream != NULL && fclose (f->device.stream) != 0) {
+    diagnostic (A_RUNTIME_ERROR, p, "error while closing output stream");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   f->device.device_opened = A_FALSE;
   return (A_TRUE);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-set_up_device: sets up the plotter prior to using it.                         */
+/*!
+\brief sets up the plotter prior to using it
+\param p
+\param f
+\return
+**/
 
-static plPlotter *
-set_up_device (NODE_T * p, A68_FILE * f)
+static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 {
   A68_REF ref_filename;
   char *filename, *device_type;
-/* First set up the general device, then plotter-specific things */
+/* First set up the general device, then plotter-specific things. */
   TEST_INIT (p, *f, MODE (FILE));
   ref_filename = f->identification;
-/* This one in front as to quickly select the plotter */
-  if (f->device.device_opened)
-    {
-      if (f->device.device_handle < 0)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      return (f->device.plotter);
-    }
-/* Device not set up yet */
-  if (!f->opened)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "file is not open");
+/* This one in front as to quickly select the plotter. */
+  if (f->device.device_opened) {
+    if (f->device.device_handle < 0) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
       exit_genie (p, A_RUNTIME_ERROR);
     }
-  if (f->read_mood)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "file is in read mood");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
-  if (f->write_mood)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "file is in write mood");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
-  if (!f->channel.draw)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "channel does not allow drawing");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
-  if (!f->device.device_made)
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "device parameters not set");
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
+    return (f->device.plotter);
+  }
+/* Device not set up yet. */
+  if (!f->opened) {
+    diagnostic (A_RUNTIME_ERROR, p, "file is not open");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (f->read_mood) {
+    diagnostic (A_RUNTIME_ERROR, p, "file is in read mood");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (f->write_mood) {
+    diagnostic (A_RUNTIME_ERROR, p, "file is in write mood");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!f->channel.draw) {
+    diagnostic (A_RUNTIME_ERROR, p, "channel does not allow drawing");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!f->device.device_made) {
+    diagnostic (A_RUNTIME_ERROR, p, "device parameters not set");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   device_type = (char *) ADDRESS (&(f->device.device));
-  if (!strcmp (device_type, "X"))
-    {
+  if (!strcmp (device_type, "X")) {
 /*-----------------------------------------+
 | Supported plotter type - X Window System |
 +-----------------------------------------*/
-      char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
-      char *page_size = z;
-/* Establish page size */
-      if (!scan_int (page_size, &z, &(f->device.window_x_size)))
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (!scan_int (page_size, &z, &(f->device.window_y_size)))
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (z[0] != '\0')
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-/* Make the X window */
-      f->fd = -1;
-      f->device.plotter_params = pl_newplparams ();
-      if (f->device.plotter_params == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
-      pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
-      pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
-      pl_setplparam (f->device.plotter_params, "VANISH_ON_DELETE", "no");
-      pl_setplparam (f->device.plotter_params, "X_AUTO_FLUSH", "no");
-      pl_setplparam (f->device.plotter_params, "USE_DOUBLE_BUFFERING", "no");
-      f->device.plotter = pl_newpl_r ("X", NULL, NULL, stderr, f->device.plotter_params);
-      if (f->device.plotter == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-#ifdef HAVE_MODIFIABLE_X_TITLE
-/* To use this you must enable HAVE_MODIFIABLE_X_TITLE and edit GNU libplot. 
-   See the INSTALL file.                                                     */
-      TEST_INIT (p, ref_filename, MODE (ROWS));
-      TEST_NIL (p, ref_filename, MODE (ROWS));
-      filename = (char *) ADDRESS (&ref_filename);
-      XPLOT_APP_NAME = filename;
-#endif
-      if (pl_openpl_r (f->device.plotter) < 0)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
-      pl_bgcolorname_r (f->device.plotter, "black");
-      pl_colorname_r (f->device.plotter, "white");
-      pl_pencolorname_r (f->device.plotter, "white");
-      pl_fillcolorname_r (f->device.plotter, "white");
-      pl_filltype_r (f->device.plotter, 1);
-      f->draw_mood = A_TRUE;
-      f->device.device_opened = A_TRUE;
-      f->device.x_coord = 0;
-      f->device.y_coord = 0;
-      return (f->device.plotter);
+    char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
+    char *page_size = z;
+/* Establish page size. */
+    if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
     }
-  else if (!strcmp (device_type, "pnm"))
-    {
+    if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    if (z[0] != '\0') {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+/* Make the X window. */
+    f->fd = -1;
+    f->device.plotter_params = pl_newplparams ();
+    if (f->device.plotter_params == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
+    pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
+    pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
+    pl_setplparam (f->device.plotter_params, "VANISH_ON_DELETE", "no");
+    pl_setplparam (f->device.plotter_params, "X_AUTO_FLUSH", "no");
+    pl_setplparam (f->device.plotter_params, "USE_DOUBLE_BUFFERING", "no");
+    f->device.plotter = pl_newpl_r ("X", NULL, NULL, stderr, f->device.plotter_params);
+    if (f->device.plotter == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+#ifdef HAVE_MODIFIABLE_X_TITLE
+/* To use this you must enable HAVE_MODIFIABLE_X_TITLE and edit GNU libplot.
+   See the INSTALL file. */
+    TEST_INIT (p, ref_filename, MODE (ROWS));
+    TEST_NIL (p, ref_filename, MODE (ROWS));
+    filename = (char *) ADDRESS (&ref_filename);
+    XPLOT_APP_NAME = filename;
+#endif
+    if (pl_openpl_r (f->device.plotter) < 0) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
+    pl_bgcolorname_r (f->device.plotter, "black");
+    pl_colorname_r (f->device.plotter, "white");
+    pl_pencolorname_r (f->device.plotter, "white");
+    pl_fillcolorname_r (f->device.plotter, "white");
+    pl_filltype_r (f->device.plotter, 1);
+    f->draw_mood = A_TRUE;
+    f->device.device_opened = A_TRUE;
+    f->device.x_coord = 0;
+    f->device.y_coord = 0;
+    return (f->device.plotter);
+  } else if (!strcmp (device_type, "pnm")) {
 /*-----------------------------------------+
 | Supported plotter type - Portable aNyMap |
 +-----------------------------------------*/
-      char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
-      char *page_size = z;
-/* Establish page size */
-      if (!scan_int (page_size, &z, &(f->device.window_x_size)))
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (!scan_int (page_size, &z, &(f->device.window_y_size)))
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (z[0] != '\0')
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-/* Open the output file for drawing */
-      TEST_INIT (p, ref_filename, MODE (ROWS));
-      TEST_NIL (p, ref_filename, MODE (ROWS));
-      filename = (char *) ADDRESS (&ref_filename);
-      errno = 0;
-      if ((f->device.stream = fopen (filename, "wb")) == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      else
-	{
-	  f->read_mood = A_FALSE;
-	  f->write_mood = A_FALSE;
-	  f->char_mood = A_FALSE;
-	  f->draw_mood = A_TRUE;
-	}
-/* Set up plotter */
-      sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
-      f->device.plotter_params = pl_newplparams ();
-      if (f->device.plotter_params == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
-      pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
-      pl_setplparam (f->device.plotter_params, "PNM_PORTABLE", "no");
-      f->device.plotter = pl_newpl_r ("pnm", NULL, f->device.stream, stderr, f->device.plotter_params);
-      if (f->device.plotter == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (pl_openpl_r (f->device.plotter) < 0)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
-      pl_bgcolorname_r (f->device.plotter, "black");
-      pl_colorname_r (f->device.plotter, "white");
-      pl_pencolorname_r (f->device.plotter, "white");
-      pl_fillcolorname_r (f->device.plotter, "white");
-      pl_filltype_r (f->device.plotter, 1);
-      f->draw_mood = A_TRUE;
-      f->device.device_opened = A_TRUE;
-      f->device.x_coord = 0;
-      f->device.y_coord = 0;
-      return (f->device.plotter);
+    char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
+    char *page_size = z;
+/* Establish page size. */
+    if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
     }
-  else if (!strcmp (device_type, "gif"))
-    {
+    if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    if (z[0] != '\0') {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+/* Open the output file for drawing. */
+    TEST_INIT (p, ref_filename, MODE (ROWS));
+    TEST_NIL (p, ref_filename, MODE (ROWS));
+    filename = (char *) ADDRESS (&ref_filename);
+    RESET_ERRNO;
+    if ((f->device.stream = fopen (filename, "wb")) == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
+      exit_genie (p, A_RUNTIME_ERROR);
+    } else {
+      f->read_mood = A_FALSE;
+      f->write_mood = A_FALSE;
+      f->char_mood = A_FALSE;
+      f->draw_mood = A_TRUE;
+    }
+/* Set up plotter. */
+    sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
+    f->device.plotter_params = pl_newplparams ();
+    if (f->device.plotter_params == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
+    pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
+    pl_setplparam (f->device.plotter_params, "PNM_PORTABLE", "no");
+    f->device.plotter = pl_newpl_r ("pnm", NULL, f->device.stream, stderr, f->device.plotter_params);
+    if (f->device.plotter == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (f->device.plotter) < 0) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
+    pl_bgcolorname_r (f->device.plotter, "black");
+    pl_colorname_r (f->device.plotter, "white");
+    pl_pencolorname_r (f->device.plotter, "white");
+    pl_fillcolorname_r (f->device.plotter, "white");
+    pl_filltype_r (f->device.plotter, 1);
+    f->draw_mood = A_TRUE;
+    f->device.device_opened = A_TRUE;
+    f->device.x_coord = 0;
+    f->device.y_coord = 0;
+    return (f->device.plotter);
+  } else if (!strcmp (device_type, "gif")) {
 /*------------------------------------+
 | Supported plotter type - pseudo GIF |
 +------------------------------------*/
-      char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
-      char *page_size = z;
-/* Establish page size */
-      if (!scan_int (page_size, &z, &(f->device.window_x_size)))
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (!scan_int (page_size, &z, &(f->device.window_y_size)))
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (z[0] != '\0')
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "error in page size");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-/* Open the output file for drawing */
-      TEST_INIT (p, ref_filename, MODE (ROWS));
-      TEST_NIL (p, ref_filename, MODE (ROWS));
-      filename = (char *) ADDRESS (&ref_filename);
-      errno = 0;
-      if ((f->device.stream = fopen (filename, "wb")) == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      else
-	{
-	  f->read_mood = A_FALSE;
-	  f->write_mood = A_FALSE;
-	  f->char_mood = A_FALSE;
-	  f->draw_mood = A_TRUE;
-	}
-/* Set up plotter */
-      f->device.plotter_params = pl_newplparams ();
-      if (f->device.plotter_params == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
-      pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
-      pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
-      pl_setplparam (f->device.plotter_params, "GIF_ANIMATION", "no");
-      f->device.plotter = pl_newpl_r ("gif", NULL, f->device.stream, stderr, f->device.plotter_params);
-      if (f->device.plotter == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (pl_openpl_r (f->device.plotter) < 0)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
-      pl_bgcolorname_r (f->device.plotter, "black");
-      pl_colorname_r (f->device.plotter, "white");
-      pl_pencolorname_r (f->device.plotter, "white");
-      pl_fillcolorname_r (f->device.plotter, "white");
-      pl_filltype_r (f->device.plotter, 1);
-      f->draw_mood = A_TRUE;
-      f->device.device_opened = A_TRUE;
-      f->device.x_coord = 0;
-      f->device.y_coord = 0;
-      return (f->device.plotter);
+    char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
+    char *page_size = z;
+/* Establish page size. */
+    if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
     }
-  else if (!strcmp (device_type, "ps"))
-    {
+    if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    if (z[0] != '\0') {
+      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+/* Open the output file for drawing. */
+    TEST_INIT (p, ref_filename, MODE (ROWS));
+    TEST_NIL (p, ref_filename, MODE (ROWS));
+    filename = (char *) ADDRESS (&ref_filename);
+    RESET_ERRNO;
+    if ((f->device.stream = fopen (filename, "wb")) == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
+      exit_genie (p, A_RUNTIME_ERROR);
+    } else {
+      f->read_mood = A_FALSE;
+      f->write_mood = A_FALSE;
+      f->char_mood = A_FALSE;
+      f->draw_mood = A_TRUE;
+    }
+/* Set up plotter. */
+    f->device.plotter_params = pl_newplparams ();
+    if (f->device.plotter_params == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
+    pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
+    pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
+    pl_setplparam (f->device.plotter_params, "GIF_ANIMATION", "no");
+    f->device.plotter = pl_newpl_r ("gif", NULL, f->device.stream, stderr, f->device.plotter_params);
+    if (f->device.plotter == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (f->device.plotter) < 0) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
+    pl_bgcolorname_r (f->device.plotter, "black");
+    pl_colorname_r (f->device.plotter, "white");
+    pl_pencolorname_r (f->device.plotter, "white");
+    pl_fillcolorname_r (f->device.plotter, "white");
+    pl_filltype_r (f->device.plotter, 1);
+    f->draw_mood = A_TRUE;
+    f->device.device_opened = A_TRUE;
+    f->device.x_coord = 0;
+    f->device.y_coord = 0;
+    return (f->device.plotter);
+  } else if (!strcmp (device_type, "ps")) {
 /*------------------------------------+
 | Supported plotter type - Postscript |
 +------------------------------------*/
-/* Open the output file for drawing */
-      TEST_INIT (p, ref_filename, MODE (ROWS));
-      TEST_NIL (p, ref_filename, MODE (ROWS));
-      filename = (char *) ADDRESS (&ref_filename);
-      errno = 0;
-      if ((f->device.stream = fopen (filename, "w")) == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      else
-	{
-	  f->read_mood = A_FALSE;
-	  f->write_mood = A_FALSE;
-	  f->char_mood = A_FALSE;
-	  f->draw_mood = A_TRUE;
-	}
-/* Set up ps plotter */
-      f->device.plotter_params = pl_newplparams ();
-      if (f->device.plotter_params == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      pl_setplparam (f->device.plotter_params, "PAGESIZE", (char *) ADDRESS (&(f->device.page_size)));
-      f->device.plotter = pl_newpl_r ("ps", NULL, f->device.stream, stderr, f->device.plotter_params);
-      if (f->device.plotter == NULL)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      if (pl_openpl_r (f->device.plotter) < 0)
-	{
-	  diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
-	  exit_genie (p, A_RUNTIME_ERROR);
-	}
-      f->device.window_x_size = 1000;
-      f->device.window_y_size = 1000;
-      pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
-      pl_bgcolorname_r (f->device.plotter, "black");
-      pl_colorname_r (f->device.plotter, "white");
-      pl_pencolorname_r (f->device.plotter, "white");
-      pl_fillcolorname_r (f->device.plotter, "white");
-      pl_filltype_r (f->device.plotter, 1);
+/* Open the output file for drawing. */
+    TEST_INIT (p, ref_filename, MODE (ROWS));
+    TEST_NIL (p, ref_filename, MODE (ROWS));
+    filename = (char *) ADDRESS (&ref_filename);
+    RESET_ERRNO;
+    if ((f->device.stream = fopen (filename, "w")) == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
+      exit_genie (p, A_RUNTIME_ERROR);
+    } else {
+      f->read_mood = A_FALSE;
+      f->write_mood = A_FALSE;
+      f->char_mood = A_FALSE;
       f->draw_mood = A_TRUE;
-      f->device.device_opened = A_TRUE;
-      f->device.x_coord = 0;
-      f->device.y_coord = 0;
-      return (f->device.plotter);
     }
-  else
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "unrecognised or unsupported plotter type");
+/* Set up ps plotter. */
+    f->device.plotter_params = pl_newplparams ();
+    if (f->device.plotter_params == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
       exit_genie (p, A_RUNTIME_ERROR);
     }
+    pl_setplparam (f->device.plotter_params, "PAGESIZE", (char *) ADDRESS (&(f->device.page_size)));
+    f->device.plotter = pl_newpl_r ("ps", NULL, f->device.stream, stderr, f->device.plotter_params);
+    if (f->device.plotter == NULL) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (f->device.plotter) < 0) {
+      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    f->device.window_x_size = 1000;
+    f->device.window_y_size = 1000;
+    pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
+    pl_bgcolorname_r (f->device.plotter, "black");
+    pl_colorname_r (f->device.plotter, "white");
+    pl_pencolorname_r (f->device.plotter, "white");
+    pl_fillcolorname_r (f->device.plotter, "white");
+    pl_filltype_r (f->device.plotter, 1);
+    f->draw_mood = A_TRUE;
+    f->device.device_opened = A_TRUE;
+    f->device.x_coord = 0;
+    f->device.y_coord = 0;
+    return (f->device.plotter);
+  } else {
+    diagnostic (A_RUNTIME_ERROR, p, "unrecognised or unsupported plotter type");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   return (NULL);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE) VOID draw erase.                                              */
+/*!
+\brief PROC (REF FILE) VOID draw erase
+\param p
+**/
 
-void
-genie_draw_clear (NODE_T * p)
+void genie_draw_clear (NODE_T * p)
 {
   A68_REF ref_file;
   A68_FILE *f;
@@ -1212,11 +1172,12 @@ genie_draw_clear (NODE_T * p)
   pl_erase_r (plotter);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE) VOID draw show.                                               */
+/*!
+\brief PROC (REF FILE) VOID draw show
+\param p
+**/
 
-void
-genie_draw_show (NODE_T * p)
+void genie_draw_show (NODE_T * p)
 {
   A68_REF ref_file;
   A68_FILE *f;
@@ -1228,11 +1189,12 @@ genie_draw_show (NODE_T * p)
   pl_flushpl_r (plotter);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE) REAL draw aspect.                                             */
+/*!
+\brief PROC (REF FILE) REAL draw aspect
+\param p
+**/
 
-void
-genie_draw_aspect (NODE_T * p)
+void genie_draw_aspect (NODE_T * p)
 {
   A68_REF ref_file;
   A68_FILE *f;
@@ -1244,11 +1206,12 @@ genie_draw_aspect (NODE_T * p)
   PUSH_REAL (p, (double) f->device.window_y_size / (double) f->device.window_x_size);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, INT) VOID draw filltype.                                      */
+/*!
+\brief PROC (REF FILE, INT) VOID draw filltype
+\param p
+**/
 
-void
-genie_draw_filltype (NODE_T * p)
+void genie_draw_filltype (NODE_T * p)
 {
   A68_INT z;
   A68_REF ref_file;
@@ -1262,11 +1225,12 @@ genie_draw_filltype (NODE_T * p)
   pl_filltype_r (plotter, (int) z.value);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, INT) STRING draw get colour name.                             */
+/*!
+\brief PROC (INT) STRING draw get colour name
+\param p
+**/
 
-void
-genie_draw_get_colour_name (NODE_T * p)
+void genie_draw_get_colour_name (NODE_T * p)
 {
   A68_INT z;
   int j;
@@ -1277,11 +1241,12 @@ genie_draw_get_colour_name (NODE_T * p)
   PUSH_REF (p, c_to_a_string (p, str));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL, REAL) VOID draw colour.                           */
+/*!
+\brief PROC (REF FILE, REAL, REAL, REAL) VOID draw colour
+\param p
+**/
 
-void
-genie_draw_colour (NODE_T * p)
+void genie_draw_colour (NODE_T * p)
 {
   A68_REAL x, y, z;
   A68_REF ref_file;
@@ -1302,11 +1267,12 @@ genie_draw_colour (NODE_T * p)
   pl_fillcolor_r (plotter, (int) (x.value * COLOUR_MAX), (int) (y.value * COLOUR_MAX), (int) (z.value * COLOUR_MAX));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL, REAL) VOID draw background colour.                */
+/*!
+\brief PROC (REF FILE, REAL, REAL, REAL) VOID draw background colour
+\param p
+**/
 
-void
-genie_draw_background_colour (NODE_T * p)
+void genie_draw_background_colour (NODE_T * p)
 {
   A68_REAL x, y, z;
   A68_REF ref_file;
@@ -1322,11 +1288,12 @@ genie_draw_background_colour (NODE_T * p)
   pl_bgcolor_r (plotter, (int) (x.value * COLOUR_MAX), (int) (y.value * COLOUR_MAX), (int) (z.value * COLOUR_MAX));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, STRING) VOID draw colour name.                                */
+/*!
+\brief PROC (REF FILE, STRING) VOID draw colour name
+\param p
+**/
 
-void
-genie_draw_colour_name (NODE_T * p)
+void genie_draw_colour_name (NODE_T * p)
 {
   A68_REF ref_c, ref_file;
   A68_FILE *f;
@@ -1342,11 +1309,10 @@ genie_draw_colour_name (NODE_T * p)
   name_ref = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, ref_c));
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
-  if (!string_to_colour (p, name, &index))
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "unrecognised colour name", NULL);
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
+  if (!string_to_colour (p, name, &index)) {
+    diagnostic (A_RUNTIME_ERROR, p, "unrecognised colour name", NULL);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   x = (double) (A_COLOURS[index].r) / (double) (0xff);
   y = (double) (A_COLOURS[index].g) / (double) (0xff);
   z = (double) (A_COLOURS[index].b) / (double) (0xff);
@@ -1359,11 +1325,12 @@ genie_draw_colour_name (NODE_T * p)
   pl_fillcolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, STRING) VOID draw background colour name.                     */
+/*!
+\brief PROC (REF FILE, STRING) VOID draw background colour name
+\param p
+**/
 
-void
-genie_draw_background_colour_name (NODE_T * p)
+void genie_draw_background_colour_name (NODE_T * p)
 {
   A68_REF ref_c, ref_file;
   A68_FILE *f;
@@ -1379,11 +1346,10 @@ genie_draw_background_colour_name (NODE_T * p)
   name_ref = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, ref_c));
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
-  if (!string_to_colour (p, name, &index))
-    {
-      diagnostic (A_RUNTIME_ERROR, p, "unrecognised colour name", NULL);
-      exit_genie (p, A_RUNTIME_ERROR);
-    }
+  if (!string_to_colour (p, name, &index)) {
+    diagnostic (A_RUNTIME_ERROR, p, "unrecognised colour name", NULL);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   x = (double) (A_COLOURS[index].r) / (double) (0xff);
   y = (double) (A_COLOURS[index].g) / (double) (0xff);
   z = (double) (A_COLOURS[index].b) / (double) (0xff);
@@ -1394,11 +1360,12 @@ genie_draw_background_colour_name (NODE_T * p)
   pl_bgcolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, STRING) VOID draw linestyle.                                  */
+/*!
+\brief PROC (REF FILE, STRING) VOID draw linestyle
+\param p
+**/
 
-void
-genie_draw_linestyle (NODE_T * p)
+void genie_draw_linestyle (NODE_T * p)
 {
   A68_REF txt, ref_file;
   A68_FILE *f;
@@ -1418,11 +1385,12 @@ genie_draw_linestyle (NODE_T * p)
   pl_linemod_r (plotter, z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, INT) VOID draw linewidth.                                     */
+/*!
+\brief PROC (REF FILE, INT) VOID draw linewidth
+\param p
+**/
 
-void
-genie_draw_linewidth (NODE_T * p)
+void genie_draw_linewidth (NODE_T * p)
 {
   A68_INT width;
   A68_REF ref_file;
@@ -1436,11 +1404,12 @@ genie_draw_linewidth (NODE_T * p)
   pl_linewidth_r (plotter, (int) ((int) width.value * f->device.window_y_size));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL) VOID draw move.                                   */
+/*!
+\brief PROC (REF FILE, REAL, REAL) VOID draw move
+\param p
+**/
 
-void
-genie_draw_move (NODE_T * p)
+void genie_draw_move (NODE_T * p)
 {
   A68_REAL x, y;
   A68_REF ref_file;
@@ -1457,11 +1426,12 @@ genie_draw_move (NODE_T * p)
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL) VOID draw line.                                   */
+/*!
+\brief PROC (REF FILE, REAL, REAL) VOID draw line
+\param p
+**/
 
-void
-genie_draw_line (NODE_T * p)
+void genie_draw_line (NODE_T * p)
 {
   A68_REAL x, y;
   A68_REF ref_file;
@@ -1478,11 +1448,13 @@ genie_draw_line (NODE_T * p)
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL) VOID draw point.                                  */
+/*!
+\brief PROC (REF FILE, REAL, REAL) VOID draw point
+\param p
+\return
+**/
 
-void
-genie_draw_point (NODE_T * p)
+void genie_draw_point (NODE_T * p)
 {
   A68_REAL x, y;
   A68_REF ref_file;
@@ -1499,11 +1471,13 @@ genie_draw_point (NODE_T * p)
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL) VOID draw rect.                                   */
+/*!
+\brief PROC (REF FILE, REAL, REAL) VOID draw rect
+\param p
+\return
+**/
 
-void
-genie_draw_rect (NODE_T * p)
+void genie_draw_rect (NODE_T * p)
 {
   A68_REAL x, y;
   A68_REF ref_file;
@@ -1520,11 +1494,12 @@ genie_draw_rect (NODE_T * p)
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL, REAL) VOID draw circle.                           */
+/*!
+\brief PROC (REF FILE, REAL, REAL, REAL) VOID draw circle
+\param p
+**/
 
-void
-genie_draw_circle (NODE_T * p)
+void genie_draw_circle (NODE_T * p)
 {
   A68_REAL x, y, r;
   A68_REF ref_file;
@@ -1542,11 +1517,12 @@ genie_draw_circle (NODE_T * p)
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL, REAL) VOID draw atom.                             */
+/*!
+\brief PROC (REF FILE, REAL, REAL, REAL) VOID draw atom
+\param p
+**/
 
-void
-genie_draw_atom (NODE_T * p)
+void genie_draw_atom (NODE_T * p)
 {
   A68_REAL x, y, r;
   double frac;
@@ -1562,22 +1538,22 @@ genie_draw_atom (NODE_T * p)
   f = (A68_FILE *) ADDRESS (&ref_file);
   plotter = set_up_device (p, f);
   k = (int) (r.value * MAXIMUM (f->device.window_x_size, f->device.window_y_size));
-  for (j = k; j >= 0; j--)
-    {
-      frac = 1.0 - ((double) j / (double) k);
-      pl_color_r (plotter, (int) (frac * f->device.red * COLOUR_MAX), (int) (frac * f->device.green * COLOUR_MAX), (int) (frac * f->device.blue * COLOUR_MAX));
-      pl_fcircle_r (plotter, x.value * f->device.window_x_size, y.value * f->device.window_y_size, (double) j);
-    }
+  for (j = k; j >= 0; j--) {
+    frac = 1.0 - ((double) j / (double) k);
+    pl_color_r (plotter, (int) (frac * f->device.red * COLOUR_MAX), (int) (frac * f->device.green * COLOUR_MAX), (int) (frac * f->device.blue * COLOUR_MAX));
+    pl_fcircle_r (plotter, x.value * f->device.window_x_size, y.value * f->device.window_y_size, (double) j);
+  }
   pl_color_r (plotter, (int) (f->device.red * COLOUR_MAX), (int) (f->device.green * COLOUR_MAX), (int) (f->device.blue * COLOUR_MAX));
   f->device.x_coord = x.value;
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, REAL, REAL, REAL) VOID draw atom.                             */
+/*!
+\brief PROC (REF FILE, REAL, REAL, REAL) VOID draw atom
+\param p
+**/
 
-void
-genie_draw_star (NODE_T * p)
+void genie_draw_star (NODE_T * p)
 {
   A68_REAL x, y, r;
   double z, frac;
@@ -1593,32 +1569,29 @@ genie_draw_star (NODE_T * p)
   f = (A68_FILE *) ADDRESS (&ref_file);
   plotter = set_up_device (p, f);
   k = (int) (r.value * MAXIMUM (f->device.window_x_size, f->device.window_y_size));
-  for (j = k; j >= 0; j--)
-    {
-      z = (double) j / (double) k;
-      if (z < 0.2)
-	{
-	  z = z / 0.2;
-	  frac = 0.5 * (1 + (cos (A68G_PI / 2 * z)));
-	}
-      else
-	{
-	  z = (z - 0.2) / 0.8;
-	  frac = (1 - z) * 0.3;
-	}
-      pl_color_r (plotter, (int) (frac * f->device.red * COLOUR_MAX), (int) (frac * f->device.green * COLOUR_MAX), (int) (frac * f->device.blue * COLOUR_MAX));
-      pl_fcircle_r (plotter, x.value * f->device.window_x_size, y.value * f->device.window_y_size, (double) j);
+  for (j = k; j >= 0; j--) {
+    z = (double) j / (double) k;
+    if (z < 0.2) {
+      z = z / 0.2;
+      frac = 0.5 * (1 + (cos (A68G_PI / 2 * z)));
+    } else {
+      z = (z - 0.2) / 0.8;
+      frac = (1 - z) * 0.3;
     }
+    pl_color_r (plotter, (int) (frac * f->device.red * COLOUR_MAX), (int) (frac * f->device.green * COLOUR_MAX), (int) (frac * f->device.blue * COLOUR_MAX));
+    pl_fcircle_r (plotter, x.value * f->device.window_x_size, y.value * f->device.window_y_size, (double) j);
+  }
   pl_color_r (plotter, (int) (f->device.red * COLOUR_MAX), (int) (f->device.green * COLOUR_MAX), (int) (f->device.blue * COLOUR_MAX));
   f->device.x_coord = x.value;
   f->device.y_coord = y.value;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, CHAR, CHAR, STRING) VOID draw text.                           */
+/*!
+\brief PROC (REF FILE, CHAR, CHAR, STRING) VOID draw text
+\param p
+**/
 
-void
-genie_draw_text (NODE_T * p)
+void genie_draw_text (NODE_T * p)
 {
   A68_CHAR just_v, just_h;
   A68_REF txt, ref_file;
@@ -1641,11 +1614,12 @@ genie_draw_text (NODE_T * p)
   size = pl_alabel_r (plotter, just_h.value, just_v.value, z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, STRING) VOID draw fontname.                                   */
+/*!
+\brief PROC (REF FILE, STRING) VOID draw fontname
+\param p
+**/
 
-void
-genie_draw_fontname (NODE_T * p)
+void genie_draw_fontname (NODE_T * p)
 {
   A68_REF txt, ref_file;
   A68_FILE *f;
@@ -1665,11 +1639,12 @@ genie_draw_fontname (NODE_T * p)
   pl_fontname_r (plotter, z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, INT) VOID draw fontsize.                                      */
+/*!
+\brief PROC (REF FILE, INT) VOID draw fontsize
+\param p
+**/
 
-void
-genie_draw_fontsize (NODE_T * p)
+void genie_draw_fontsize (NODE_T * p)
 {
   A68_INT size;
   A68_REF ref_file;
@@ -1683,11 +1658,12 @@ genie_draw_fontsize (NODE_T * p)
   pl_fontsize_r (plotter, (int) size.value);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-PROC (REF FILE, INT) VOID draw textangle.                                     */
+/*!
+\brief PROC (REF FILE, INT) VOID draw textangle
+\param p
+**/
 
-void
-genie_draw_textangle (NODE_T * p)
+void genie_draw_textangle (NODE_T * p)
 {
   A68_INT angle;
   A68_REF ref_file;

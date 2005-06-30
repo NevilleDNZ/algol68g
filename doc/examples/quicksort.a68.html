@@ -1,0 +1,36 @@
+<html>
+<body bgcolor="black">
+<font color="lime">
+<pre>
+BEGIN MODE NODE = STRUCT (INT k, TREE smaller, larger),
+           TREE = REF NODE;
+
+      TREE empty tree = NIL;
+
+      PROC add = (REF TREE root, INT k) VOID:
+           IF root IS empty tree
+           THEN root := HEAP NODE := (k, NIL, NIL)
+           ELSE IF k < k OF root
+                THEN add (smaller OF root, k)
+                ELSE add (larger OF root, k)
+                FI
+           FI;
+
+      PROC write = (TREE root) VOID:
+           IF root ISNT NIL
+           THEN write (smaller OF root);
+                print ((whole (k OF root, 0), " "));
+                write (larger OF root)
+           FI;
+
+      TREE root := empty tree;
+      WHILE INT n = read int;
+            n > 0
+      DO add (root, n)
+      OD;
+      write (root)
+END
+</pre>
+</font>
+</body>
+</html>
