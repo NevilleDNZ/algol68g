@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -330,7 +330,7 @@ static MOID_T *get_mode_from_standard_moid (int sizety, NODE_T * indicant, BOOL_
     if (supported_precision) {
       return (q);
     } else {
-      /* diagnostic (A_WARNING, indicant, PRECISION_NOT_IMPLEMENTED, q); */
+      /* diagnostic_node (A_WARNING, indicant, ERROR_UNIMPLEMENTED_PRECISION, q); */
       return (q);
     }
   } else {
@@ -650,7 +650,7 @@ static void get_mode_from_denoter (NODE_T * p, int sizety)
 	}
       default:
 	{
-	  /* diagnostic (A_WARNING, p, PRECISION_NOT_IMPLEMENTED, MODE (INT)); */
+	  /* diagnostic_node (A_WARNING, p, ERROR_UNIMPLEMENTED_PRECISION, MODE (INT)); */
 	  MOID (p) = sizety > 0 ? MODE (LONGLONG_INT) : MODE (INT);
 	  break;
 	}
@@ -674,7 +674,7 @@ static void get_mode_from_denoter (NODE_T * p, int sizety)
 	}
       default:
 	{
-	  /* diagnostic (A_WARNING, p, PRECISION_NOT_IMPLEMENTED, MODE (REAL)); */
+	  /* diagnostic_node (A_WARNING, p, ERROR_UNIMPLEMENTED_PRECISION, MODE (REAL)); */
 	  MOID (p) = sizety > 0 ? MODE (LONGLONG_REAL) : MODE (REAL);
 	  break;
 	}
@@ -698,7 +698,7 @@ static void get_mode_from_denoter (NODE_T * p, int sizety)
 	}
       default:
 	{
-	  /* diagnostic (A_WARNING, p, PRECISION_NOT_IMPLEMENTED, MODE (BITS)); */
+	  /* diagnostic_node (A_WARNING, p, ERROR_UNIMPLEMENTED_PRECISION, MODE (BITS)); */
 	  MOID (p) = MODE (BITS);
 	  break;
 	}
@@ -805,7 +805,7 @@ static void check_flex_modes (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, FLEX_SYMBOL) && ATTRIBUTE (MOID (NEXT (p))) != ROW_SYMBOL) {
-      diagnostic (A_ERROR, p, "only rows can be flexible", NULL);
+      diagnostic_node (A_ERROR, p, ERROR_FLEX_ROW, NULL);
     }
     check_flex_modes (SUB (p));
   }
@@ -875,7 +875,7 @@ static void check_relation_to_void (NODE_T * p)
       for (m = SYMBOL_TABLE (SUB (p))->moids; m != NULL; FORWARD (m)) {
 	reset_postulates ();
 	if (NODE (m) != NULL && whether_mode_has_void (m)) {
-	  diagnostic (A_ERROR, NODE (m), "M is related to M", m, MODE (VOID));
+	  diagnostic_node (A_ERROR, NODE (m), ERROR_RELATED_MODES, m, MODE (VOID));
 	}
       }
     }
@@ -1026,7 +1026,7 @@ static void check_cyclic_modes (NODE_T * p)
       for (z = table; z != NULL; FORWARD (z)) {
 	reset_postulates ();
 	if (cyclic_declaration (table, MOID (z))) {
-	  diagnostic (A_ERROR, NODE (z), "M specifies a cyclic mode", MOID (z));
+	  diagnostic_node (A_ERROR, NODE (z), ERROR_CYCLIC_MODE, MOID (z));
 	}
       }
     }
@@ -1120,7 +1120,7 @@ static void check_well_formedness (NODE_T * p)
 	z = MOID (NEXT (NEXT (p)));
       }
       if (!check_yin_yang (p, z, A_FALSE, A_FALSE)) {
-	diagnostic (A_ERROR, p, "S is not a well formed mode");
+	diagnostic_node (A_ERROR, p, ERROR_NOT_WELL_FORMED);
 	z->well_formed = A_FALSE;
       }
     }
@@ -1318,7 +1318,7 @@ static void bind_indicants_to_modes (NODE_T * p)
 	  if (y != NULL && NODE (y) != NULL) {
 	    EQUIVALENT (z) = MOID (NEXT (NEXT (NODE (y))));
 	  } else {
-	    diagnostic (A_ERROR, p, "no declaration for tag Z in this range", SYMBOL (NODE (z)));
+	    diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_2, SYMBOL (NODE (z)));
 	  }
 	}
       }
@@ -2268,20 +2268,27 @@ static void moid_to_string_3 (char *dst, char *str, int w)
 
 static void pack_to_string (char *b, PACK_T * p, int w, BOOL_T text)
 {
+  MOID_T *last = NULL;
   if (w > (int) strlen ("..")) {
     while (p != NULL && w > 0) {
-      if (w > (int) strlen ("..")) {
-	int l = (int) strlen (b);
-	moid_to_string_2 (b, MOID (p), w);
-	if (text && TEXT (p) != NULL) {
-	  strcat (b, " ");
-	  strcat (b, TEXT (p));
-	}
+      int l = (int) strlen (b);
+      if (text && TEXT (p) != NULL && last != NULL && MOID (p) == last) {
+	strcat (b, TEXT (p));
 	w -= (int) strlen (b) - l;
       } else {
-	strcat (b, "..");
-	w = 0;
+	if (w > (int) strlen ("..")) {
+	  moid_to_string_2 (b, MOID (p), w);
+	  if (text && TEXT (p) != NULL) {
+	    strcat (b, " ");
+	    strcat (b, TEXT (p));
+	  }
+	  w -= (int) strlen (b) - l;
+	} else {
+	  strcat (b, "..");
+	  w = 0;
+	}
       }
+      last = MOID (p);
       FORWARD (p);
       if (p != NULL) {
 	strcat (b, ", ");

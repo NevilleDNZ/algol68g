@@ -4,9 +4,9 @@
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: navy; text-decoration: underline;}
-a:visited {color: navy; text-decoration: underline;}
-a:active  {color: navy; text-decoration: underline;}
+a:link    {color: blue; text-decoration: underline;}
+a:visited {color: blue; text-decoration: underline;}
+a:active  {color: blue; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
@@ -25,8 +25,29 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <body bgcolor="white">
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="100%" background="lines.gif">
+<img src="lines.gif" align=right>
+<small>Documentation for Algol 68 Genie Mark 9</small>
+</td>
+</table>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
+<br>
 <h2>The standard environment</h2>
+<small>
+&nbsp;&middot;&nbsp;<a href="#envenq">Enquiries</a><br>
+&nbsp;&middot;&nbsp;<a href="#envmath">Math constants</a><br>
+&nbsp;&middot;&nbsp;<a href="#envmathfun">Math procedures</a><br>
+&nbsp;&middot;&nbsp;<a href="#envmode">Modes</a><br>
+&nbsp;&middot;&nbsp;<a href="#envio">Transput</a><br>
+&nbsp;&middot;&nbsp;<a href="#envalt">Operator synonyms</a><br>
+&nbsp;&middot;&nbsp;<a href="#envprio">Operator priorities</a><br>
+&nbsp;&middot;&nbsp;<a href="#envmonad">Monadic operators</a><br>
+&nbsp;&middot;&nbsp;<a href="#envdyad">Dyadic operators</a><br>
+&nbsp;&middot;&nbsp;<a href="#envrng">Random number generator</a><br>
+&nbsp;&middot;&nbsp;<a href="#envmisc">Miscellaneous</a><br>
+</small>
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
 <img src="logo.gif">
@@ -37,27 +58,28 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <!-- Navigation bar -->
 <table border="0" cellspacing="0" width="100%">
 <tr>
-<td bgcolor="skyblue">
-&nbsp;&nbsp;<b>Manual</b>
-</td>
-</tr>
-<tr>
-<td bgcolor="powderblue">
+<td background="lines.gif">
+<small><b>Algol68G Mark 9</b></small>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+<small><b>Extensions</b></small>
+<br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
 </td>
 </tr>
 </table>
@@ -70,8 +92,9 @@ This chapter lists the predefined tags in the standard prelude of Algol68G.
 <p>
 Optional extensions to the standard prelude are described in other chapters:
 <p>
+<li><a href="extensions.html">Unix - and curses routines</a>
+<li><a href="postgresql.html">PostgreSQL client routines</a>
 <li><a href="drawing.html">Graphical procedures</a>
-<li><a href="extensions.html">Unix -, curses - and vector routines</a>
 <li><a href="numerical.html">Numerical procedures</a>
 <br>
 <h3><a name="envenq"></a>Enquiries</h3>
@@ -119,12 +142,12 @@ Optional extensions to the standard prelude are described in other chapters:
 </dl>
 
 <dl>
-<dt><code>PROC ([] ?SIMPLOUT) VOID write, print, write f, print f</code>
-<dt><code>PROC ([] ?SIMPLIN) VOID read, read f</code>
+<dt><code>PROC ([] ?SIMPLOUT) VOID write, print, write f, print f, write bin, print bin</code>
+<dt><code>PROC ([] ?SIMPLIN) VOID read, read f, read bin</code>
 <dt><code>PROC (REF FILE, [] ?SIMPLOUT) VOID put, put f</code>
 <dt><code>PROC (REF FILE, [] ?SIMPLIN) VOID get, get f</code>
-<dt><code>PROC (REF FILE, [] ?SIMPLOUT) VOID put bin, print bin, write bin</code>
-<dt><code>PROC (REF FILE, [] ?SIMPLIN) VOID get bin, read bin</code>
+<dt><code>PROC (REF FILE, [] ?SIMPLOUT) VOID put bin</code>
+<dt><code>PROC (REF FILE, [] ?SIMPLIN) VOID get bin</code>
 </dl>
 
 <dl>
@@ -202,26 +225,26 @@ Optional extensions to the standard prelude are described in other chapters:
 <h3><a name="envalt"></a>Operator synonyms</h3>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor=skyblue><b>Operator tag</b></td><td bgcolor=skyblue><b>Alternative tag</b></td></tr>
-<tr><td bgcolor=powderblue><code>=</code></td><td bgcolor=powderblue><code>EQ</code></td></tr>
-<tr><td bgcolor=powderblue><code>/=</code></td><td bgcolor=powderblue><code>NE, ~=, ^=</code></td></tr>
-<tr><td bgcolor=powderblue><code><</code></td><td bgcolor=powderblue><code>LT</code></td></tr>
-<tr><td bgcolor=powderblue><code><=</code></td><td bgcolor=powderblue><code>LE</code></td></tr>
-<tr><td bgcolor=powderblue><code>></code></td><td bgcolor=powderblue><code>GT</code></td></tr>
-<tr><td bgcolor=powderblue><code>>=</code></td><td bgcolor=powderblue><code>GE</code></td></tr>
-<tr><td bgcolor=powderblue><code>&</code></td><td bgcolor=powderblue><code>AND</code></td></tr>
-<tr><td bgcolor=powderblue><code>+*</code></td><td bgcolor=powderblue><code>I</code></td></tr>
-<tr><td bgcolor=powderblue><code>%*</code></td><td bgcolor=powderblue><code>MOD</code></td></tr>
-<tr><td bgcolor=powderblue><code>~</code></td><td bgcolor=powderblue><code>NOT</code></td></tr>
-<tr><td bgcolor=powderblue><code>%</code></td><td bgcolor=powderblue><code>OVER</code></td></tr>
-<tr><td bgcolor=powderblue><code>**</code></td><td bgcolor=powderblue><code>UP, ^</code></td></tr>
-<tr><td bgcolor=powderblue><code>+:=</code></td><td bgcolor=powderblue><code>PLUSAB</code></td></tr>
-<tr><td bgcolor=powderblue><code>-:=</code></td><td bgcolor=powderblue><code>MINUSAB</code></td></tr>
-<tr><td bgcolor=powderblue><code>*:=</code></td><td bgcolor=powderblue><code>TIMESAB</code></td></tr>
-<tr><td bgcolor=powderblue><code>/:=</code></td><td bgcolor=powderblue><code>DIVAB</code></td></tr>
-<tr><td bgcolor=powderblue><code>%:=</code></td><td bgcolor=powderblue><code>OVERAB</code></td></tr>
-<tr><td bgcolor=powderblue><code>%*:=</code></td><td bgcolor=powderblue><code>MODAB</code></td></tr>
-<tr><td bgcolor=powderblue><code>+=: </code></td><td bgcolor=powderblue><code>PLUSTO</code></td></tr>
+<td bgcolor="#e8e8e8"><b>Operator tag</b></td><td bgcolor="#e8e8e8"><b>Alternative tag</b></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>=</code></td><td bgcolor="#e8e8e8"><code>EQ</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>/=</code></td><td bgcolor="#e8e8e8"><code>NE, ~=, ^=</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code><</code></td><td bgcolor="#e8e8e8"><code>LT</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code><=</code></td><td bgcolor="#e8e8e8"><code>LE</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>></code></td><td bgcolor="#e8e8e8"><code>GT</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>>=</code></td><td bgcolor="#e8e8e8"><code>GE</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>&</code></td><td bgcolor="#e8e8e8"><code>AND</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>+*</code></td><td bgcolor="#e8e8e8"><code>I</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>%*</code></td><td bgcolor="#e8e8e8"><code>MOD</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>~</code></td><td bgcolor="#e8e8e8"><code>NOT</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>%</code></td><td bgcolor="#e8e8e8"><code>OVER</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>**</code></td><td bgcolor="#e8e8e8"><code>UP, ^</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>+:=</code></td><td bgcolor="#e8e8e8"><code>PLUSAB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>-:=</code></td><td bgcolor="#e8e8e8"><code>MINUSAB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>*:=</code></td><td bgcolor="#e8e8e8"><code>TIMESAB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>/:=</code></td><td bgcolor="#e8e8e8"><code>DIVAB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>%:=</code></td><td bgcolor="#e8e8e8"><code>OVERAB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>%*:=</code></td><td bgcolor="#e8e8e8"><code>MODAB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>+=: </code></td><td bgcolor="#e8e8e8"><code>PLUSTO</code></td></tr>
 </table>
 </p>
 
@@ -229,190 +252,190 @@ Optional extensions to the standard prelude are described in other chapters:
 <h3><a name="envprio"></a>Operator priorities</h3>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor=skyblue><b>Priority</b></td><td bgcolor=skyblue><b>Operators</b></td></tr>
-<tr><td bgcolor=powderblue><code>1</code></td><td bgcolor=powderblue><code>+:=, -:=, *:=, /:=, %:=, %*:=, +=: </code></td></tr>
-<tr><td bgcolor=powderblue><code>2</code></td><td bgcolor=powderblue><code>OR</code></td></tr>
-<tr><td bgcolor=powderblue><code>3</code></td><td bgcolor=powderblue><code>&, XOR</code></td></tr>
-<tr><td bgcolor=powderblue><code>4</code></td><td bgcolor=powderblue><code>=, /=</code></td></tr>
-<tr><td bgcolor=powderblue><code>5</code></td><td bgcolor=powderblue><code><, <=, >, >=</code></td></tr>
-<tr><td bgcolor=powderblue><code>6</code></td><td bgcolor=powderblue><code>+, -</code></td></tr>
-<tr><td bgcolor=powderblue><code>7</code></td><td bgcolor=powderblue><code>*, /, %, %*, ELEM</code></td></tr>
-<tr><td bgcolor=powderblue><code>8</code></td><td bgcolor=powderblue><code>**, LWB, UPB</code></td></tr>
-<tr><td bgcolor=powderblue><code>9</code></td><td bgcolor=powderblue><code>+*</code></td></tr>
+<td bgcolor="#e8e8e8"><b>Priority</b></td><td bgcolor="#e8e8e8"><b>Operators</b></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>1</code></td><td bgcolor="#e8e8e8"><code>+:=, -:=, *:=, /:=, %:=, %*:=, +=: </code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>2</code></td><td bgcolor="#e8e8e8"><code>OR</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>3</code></td><td bgcolor="#e8e8e8"><code>&, XOR</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>4</code></td><td bgcolor="#e8e8e8"><code>=, /=</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>5</code></td><td bgcolor="#e8e8e8"><code><, <=, >, >=</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>6</code></td><td bgcolor="#e8e8e8"><code>+, -</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>7</code></td><td bgcolor="#e8e8e8"><code>*, /, %, %*, ELEM</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>8</code></td><td bgcolor="#e8e8e8"><code>**, LWB, UPB</code></td></tr>
+<tr><td bgcolor="#e8e8e8"><code>9</code></td><td bgcolor="#e8e8e8"><code>+*</code></td></tr>
 </table>
 
 <br>
 <h3><a name="envmonad"></a>Monadic operators</h3>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor=skyblue><b>Mode A</b></td><td bgcolor=skyblue><b>Implemented operators</b></td></tr>
+<td bgcolor="#e8e8e8"><b>Mode A</b></td><td bgcolor="#e8e8e8"><b>Implemented operators</b></td></tr>
 <tr>
-<td bgcolor=powderblue><code>INT<br>REAL</code><br>
+<td bgcolor="#e8e8e8"><code>INT<br>REAL</code><br>
 <code>LONG INT</code><br> <code>LONG REAL</code></code><br>
 <code>LONG LONG INT<br>LONG LONG REAL</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A) A +, -, ABS</code><br>
 <code>OP (A) INT SIGN</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) INT ROUND, ENTIER</code></td>
+<td bgcolor="#e8e8e8"><code>REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) INT ROUND, ENTIER</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG INT ROUND, ENTIER</code></td>
+<td bgcolor="#e8e8e8"><code>LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG INT ROUND, ENTIER</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG INT ROUND, ENTIER</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG INT ROUND, ENTIER</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>COMPLEX</code><br>
+<td bgcolor="#e8e8e8"><code>COMPLEX</code><br>
 <code>LONG COMPLEX</code><br>
 <code>LONG LONG COMPLEX</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A) A +, -, CONJ</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>COMPLEX</code><br></td>
-<td bgcolor=powderblue><code>OP (A) REAL RE, IM, ABS, ARG</code></td>
+<td bgcolor="#e8e8e8"><code>COMPLEX</code><br></td>
+<td bgcolor="#e8e8e8"><code>OP (A) REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG COMPLEX</code><br></td>
-<td bgcolor=powderblue><code>OP (A) LONG REAL RE, IM, ABS, ARG</code></td>
+<td bgcolor="#e8e8e8"><code>LONG COMPLEX</code><br></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG COMPLEX</code><br></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG REAL RE, IM, ABS, ARG</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG COMPLEX</code><br></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG REAL RE, IM, ABS, ARG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BOOL<br>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) A ~</code></td>
+<td bgcolor="#e8e8e8"><code>BOOL<br>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) A ~</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>CHAR<br>BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) INT ABS</code></td>
+<td bgcolor="#e8e8e8"><code>CHAR<br>BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) INT ABS</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG INT ABS</code></td>
+<td bgcolor="#e8e8e8"><code>LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG INT ABS</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG INT ABS</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG INT ABS</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>OP (A) CHAR REPR<br>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) CHAR REPR<br>
                     <code>OP (A) BITS BIN</code><br>
                     <code>OP (A) SEMA LEVEL</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>SEMA</code></td>
-<td bgcolor=powderblue><code>OP (A) INT LEVEL</code><br>
+<td bgcolor="#e8e8e8"><code>SEMA</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) INT LEVEL</code><br>
 <code>OP (A) VOID UP</code><br>
 <code>OP (A) VOID DOWN</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG INT</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG BITS BIN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG BITS BIN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG INT</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG BITS BIN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG BITS BIN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>INT</code><br>
 <code>LONG INT</code><br>
 <code>LONG LONG INT</code>
 </td>
-<td bgcolor=powderblue><code>OP (A) BOOL ODD</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) BOOL ODD</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>?ROWS</code></td>
-<td bgcolor=powderblue><code>OP (A) INT ELEMS, LWB, UPB</code></td>
+<td bgcolor="#e8e8e8"><code>?ROWS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) INT ELEMS, LWB, UPB</code></td>
 </tr>
 </table>
 
 <br>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor=skyblue><b>Mode A</b></td><td bgcolor=skyblue><b>Implemented operators</b></td></tr>
+<td bgcolor="#e8e8e8"><b>Mode A</b></td><td bgcolor="#e8e8e8"><b>Implemented operators</b></td></tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG INT LENG</code></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG INT LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG INT</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG INT LENG</code></td>
+<td bgcolor="#e8e8e8"><code>LONG INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG INT LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG INT</code></td>
-<td bgcolor=powderblue><code>OP (A) INT SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) INT SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG INT</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG INT SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG INT SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG REAL LENG</code></td>
+<td bgcolor="#e8e8e8"><code>REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG REAL LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG REAL LENG</code></td>
+<td bgcolor="#e8e8e8"><code>LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG REAL LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) REAL SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) REAL SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG REAL</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG REAL SHORTEN</td>
+<td bgcolor="#e8e8e8"><code>LONG LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG REAL SHORTEN</td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>COMPLEX</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG COMPLEX LENG</code></td>
+<td bgcolor="#e8e8e8"><code>COMPLEX</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG COMPLEX LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG COMPLEX</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG COMPLEX LENG</td>
+<td bgcolor="#e8e8e8"><code>LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG COMPLEX LENG</td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG COMPLEX</code></td>
-<td bgcolor=powderblue><code>OP (A) COMPLEX SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) COMPLEX SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG COMPLEX</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG COMPLEX SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG COMPLEX SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG BITS LENG</code></td>
+<td bgcolor="#e8e8e8"><code>BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG BITS LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG LONG BITS LENG</code></td>
+<td bgcolor="#e8e8e8"><code>LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG LONG BITS LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) BITS SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) BITS SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG BITS SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG BITS SHORTEN</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BYTES</code></td>
-<td bgcolor=powderblue><code>OP (A) LONG BYTES LENG</code></td>
+<td bgcolor="#e8e8e8"><code>BYTES</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) LONG BYTES LENG</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG BYTES</code></td>
-<td bgcolor=powderblue><code>OP (A) BYTES SHORTEN</code></td>
+<td bgcolor="#e8e8e8"><code>LONG BYTES</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A) BYTES SHORTEN</code></td>
 </tr>
 </table>
 
@@ -420,11 +443,11 @@ Optional extensions to the standard prelude are described in other chapters:
 <h3><a name="envdyad"></a>Dyadic operators</h3>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor=skyblue><b>Mode A</b></td><td bgcolor=skyblue><b>Mode B</b></td><td bgcolor=skyblue><b>Implemented operators</b></td></tr>
+<td bgcolor="#e8e8e8"><b>Mode A</b></td><td bgcolor="#e8e8e8"><b>Mode B</b></td><td bgcolor="#e8e8e8"><b>Implemented operators</b></td></tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) INT +, -, *, %, *%, **</code><br>
 <code>OP (A, B) REAL /</code><br>
 <code>OP (A, B) COMPLEX +*</code><br>
@@ -433,9 +456,9 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 </tr>
 </tr>
-<tr><td bgcolor=powderblue><code>REAL</code></td>
-<td bgcolor=powderblue><code>REAL<br>INT</code></td>
-<td bgcolor=powderblue>
+<tr><td bgcolor="#e8e8e8"><code>REAL</code></td>
+<td bgcolor="#e8e8e8"><code>REAL<br>INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) REAL +, -, *, /, **</code><br>
 <code>OP (B, A) REAL +, -, *, /, **</code><br>
 <code>OP (A, B) COMPLEX +*</code><br>
@@ -445,9 +468,9 @@ Optional extensions to the standard prelude are described in other chapters:
 <code>OP (REF A, B) REF A +:=, -:=, *:=, /:=</code>
 </td>
 </tr>
-<tr><td bgcolor=powderblue><code>COMPLEX</code></td>
-<td bgcolor=powderblue><code>COMPLEX<br>REAL<br>INT</code></td>
-<td bgcolor=powderblue>
+<tr><td bgcolor="#e8e8e8"><code>COMPLEX</code></td>
+<td bgcolor="#e8e8e8"><code>COMPLEX<br>REAL<br>INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) COMPLEX +, -, *, /</code><br>
 <code>OP (B, A) COMPLEX +, -, *, /</code><br>
 <code>OP (A, B) BOOL =, /=</code><br>
@@ -455,18 +478,18 @@ Optional extensions to the standard prelude are described in other chapters:
 <code>OP (REF A, B) REF A +:=, -:=, *:=, /:=</code>
 </td>
 </tr>
-<tr><td bgcolor=powderblue><code>COMPLEX</code></td>
-<td bgcolor=powderblue>
+<tr><td bgcolor="#e8e8e8"><code>COMPLEX</code></td>
+<td bgcolor="#e8e8e8">
 <code>INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) COMPLEX **</code><br>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG INT</code></td>
-<td bgcolor=powderblue><code>LONG INT<br>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>LONG INT</code></td>
+<td bgcolor="#e8e8e8"><code>LONG INT<br>INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG INT +, -, *, %, *%</code><br>
 <code>OP (B, A) LONG INT +, -, *, %, *%</code><br>
 <code>OP (A, B) LONG REAL /</code><br>
@@ -479,19 +502,19 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>LONG INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG INT **</code><br>
 </td>
 <tr>
-<td bgcolor=powderblue><code>LONG REAL</code></td>
-<td bgcolor=powderblue><code>LONG REAL<br>LONG INT<br>REAL<br>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>LONG REAL<br>LONG INT<br>REAL<br>INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG REAL +, -, *, /, **</code><br>
 <code>OP (B, A) LONG REAL +, -, *, /, **</code><br>
 <code>OP (A, B) LONG COMPLEX +*</code><br>
@@ -502,31 +525,31 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG COMPLEX</code></td>
-<td bgcolor=powderblue><code>LONG COMPLEX<br>LONG REAL<br>LONG INT</code><br>
+<td bgcolor="#e8e8e8"><code>LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8"><code>LONG COMPLEX<br>LONG REAL<br>LONG INT</code><br>
 <code>COMPLEX<br>REAL<br>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG COMPLEX +, -, *, /</code><br>
 <code>OP (B, A) LONG COMPLEX +, -, *, /</code><br>
 <code>OP (A, B) BOOL =, /=</code><br>
 <code>OP (B, A) BOOL =, /=</code><br>
 <code>OP (REF A, B) REF A +:=, -:=, *:=, /:=</code>
 </td>
-<tr><td bgcolor=powderblue><code>LONG COMPLEX</code></td>
-<td bgcolor=powderblue>
+<tr><td bgcolor="#e8e8e8"><code>LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8">
 <code>INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG COMPLEX **</code><br>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>LONG LONG INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>LONG LONG INT</code><br>
 <code>LONG INT</code><br>
 <code>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG INT +, -, *, %, *%</code><br>
 <code>OP (B, A) LONG INT +, -, *, %, *%</code><br>
 <code>OP (A, B) LONG REAL /</code><br>
@@ -539,19 +562,19 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>LONG LONG INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG LONG INT **</code><br>
 </td>
-<tr><td bgcolor=powderblue><code>LONG LONG REAL</code></td>
-<td bgcolor=powderblue><code>LONG LONG REAL<br>LONG REAL</code><br>
+<tr><td bgcolor="#e8e8e8"><code>LONG LONG REAL</code></td>
+<td bgcolor="#e8e8e8"><code>LONG LONG REAL<br>LONG REAL</code><br>
 <code>LONG INT<br>REAL<br>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG LONG REAL +, -, *, /, **</code><br>
 <code>OP (B, A) LONG LONG REAL +, -, *, /, **</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code><br>
@@ -560,8 +583,8 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 </tr>
 </tr>
-<tr><td bgcolor=powderblue><code>LONG LONG COMPLEX</code></td>
-<td bgcolor=powderblue>
+<tr><td bgcolor="#e8e8e8"><code>LONG LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8">
 <code>LONG LONG COMPLEX</code><br>
 <code>LONG LONG REAL</code><br>
 <code>LONG LONG INT</code><br>
@@ -572,7 +595,7 @@ Optional extensions to the standard prelude are described in other chapters:
 <code>REAL</code><br>
 <code>INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG LONG COMPLEX +, -, *, /</code><br>
 <code>OP (B, A) LONG LONG COMPLEX +, -, *, /</code><br>
 <code>OP (A, B) BOOL =, /=</code><br>
@@ -581,122 +604,122 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 </tr>
 </tr>
-<tr><td bgcolor=powderblue><code>LONG LONG COMPLEX</code></td>
-<td bgcolor=powderblue>
+<tr><td bgcolor="#e8e8e8"><code>LONG LONG COMPLEX</code></td>
+<td bgcolor="#e8e8e8">
 <code>INT</code>
 </td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG LONG COMPLEX **</code><br>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BOOL</code></td>
-<td bgcolor=powderblue><code>BOOL</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>BOOL</code></td>
+<td bgcolor="#e8e8e8"><code>BOOL</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) BOOL &, OR, XOR, =, /=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor="#e8e8e8"><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) STRING +</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code><br>
 </td>
 <tr>
-<td bgcolor=powderblue><code>STRING</code></td>
-<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>STRING</code></td>
+<td bgcolor="#e8e8e8"><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (REF A, B) REF A +:=</code><br>
 <code>OP (B, REF A) REF A +=:</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>STRING<br>[] CHAR<br>CHAR</code></td>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>STRING<br>[] CHAR<br>CHAR</code></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) STRING *</code><br>
 <code>OP (B, A) STRING *</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>STRING<br>[] CHAR</code></td>
-<td bgcolor=powderblue><code>OP (A, B) CHAR ELEM</code><br></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>STRING<br>[] CHAR</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>STRING</code></td>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>OP (REF A, B) REF A *:=</code><br>
+<td bgcolor="#e8e8e8"><code>STRING</code></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (REF A, B) REF A *:=</code><br>
 <code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BITS</code></td>
-<td bgcolor=powderblue><code>BITS</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>BITS</code></td>
+<td bgcolor="#e8e8e8"><code>BITS</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) BITS &, OR, XOR</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG BITS</code></td>
-<td bgcolor=powderblue><code>BITS<br>LONG BITS</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>BITS<br>LONG BITS</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG BITS &, OR, XOR</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG LONG BITS</code></td>
-<td bgcolor=powderblue><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG LONG BITS &, OR, XOR</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code>
 </td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>OP (A, B) A SHL, SHR</code></td>
+<td bgcolor="#e8e8e8"><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A, B) A SHL, SHR</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
-<td bgcolor=powderblue><code>OP (A, B) BOOL ELEM</code><br></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>BITS<br>LONG BITS<br>LONG LONG BITS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A, B) BOOL ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>BYTES</code></td>
-<td bgcolor=powderblue><code>BYTES</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>BYTES</code></td>
+<td bgcolor="#e8e8e8"><code>BYTES</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) BYTES +</code><br>
 <code>OP (REF A, B) REF BYTES +:=</code><br>
 <code>OP (A, REF B) REF BYTES +=:</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>BYTES</code></td>
-<td bgcolor=powderblue><code>OP (A, B) CHAR ELEM</code><br></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>BYTES</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>LONG BYTES</code></td>
-<td bgcolor=powderblue><code>LONG BYTES</code></td>
-<td bgcolor=powderblue>
+<td bgcolor="#e8e8e8"><code>LONG BYTES</code></td>
+<td bgcolor="#e8e8e8"><code>LONG BYTES</code></td>
+<td bgcolor="#e8e8e8">
 <code>OP (A, B) LONG BYTES +</code><br>
 <code>OP (REF A, B) REF LONG BYTES +:=</code><br>
 <code>OP (A, REF B) REF LONG BYTES +=:</code><br>
 <code>OP (A, B) BOOL =, /=, <, <=, >, >=</code></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>LONG BYTES</code></td>
-<td bgcolor=powderblue><code>OP (A, B) CHAR ELEM</code><br></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>LONG BYTES</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A, B) CHAR ELEM</code><br></td>
 </tr>
 <tr>
-<td bgcolor=powderblue><code>INT</code></td>
-<td bgcolor=powderblue><code>?ROWS</code></td>
-<td bgcolor=powderblue><code>OP (A, B) INT ELEMS, LWB, UPB</code><br></td>
+<td bgcolor="#e8e8e8"><code>INT</code></td>
+<td bgcolor="#e8e8e8"><code>?ROWS</code></td>
+<td bgcolor="#e8e8e8"><code>OP (A, B) INT ELEMS, LWB, UPB</code><br></td>
 </tr>
 </table>
 
@@ -809,12 +832,12 @@ Optional extensions to the standard prelude are described in other chapters:
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
+<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 8</small>
+<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
 </font>
 </td>
 </table>

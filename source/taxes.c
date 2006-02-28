@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,7 +21,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-
 /* This file contains routines that work with TAXes and symbol tables. */
 
 #include "algol68g.h"
@@ -31,15 +30,41 @@ static void tax_specifier_list (NODE_T *);
 static void tax_parameter_list (NODE_T *);
 static void tax_format_texts (NODE_T *);
 
-#define ACCEPT(u, v) if (strlen (u) >= strlen (v)) \
-                     {if (strcmp (&u[strlen (u) - strlen (v)], v) == 0) \
-                     {return (A_TRUE);} }
+#define PORTCHECK_TAX(p, q) if (q == A_FALSE) {diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_NOT_PORTABLE, NULL);}
+
+/*!
+\brief check portability of sub tree
+\param p
+**/
+
+void portcheck (NODE_T * p)
+{
+  for (; p != NULL; FORWARD (p)) {
+    portcheck (SUB (p));
+    if (p->info->module->options.portcheck) {
+      if (WHETHER (p, INDICANT) && MOID (p) != NULL) {
+	PORTCHECK_TAX (p, MOID (p)->portable);
+	MOID (p)->portable = A_TRUE;
+      } else if (WHETHER (p, IDENTIFIER)) {
+	PORTCHECK_TAX (p, TAX (p)->portable);
+	TAX (p)->portable = A_TRUE;
+      } else if (WHETHER (p, OPERATOR)) {
+	PORTCHECK_TAX (p, TAX (p)->portable);
+	TAX (p)->portable = A_TRUE;
+      }
+    }
+  }
+}
 
 /*!
 \brief whether routine can be "lengthety-mapped"
 \param z
 \return torf
 **/
+
+#define ACCEPT(u, v) if (strlen (u) >= strlen (v)) \
+                     {if (strcmp (&u[strlen (u) - strlen (v)], v) == 0) \
+                     {return (A_TRUE);} }
 
 static BOOL_T whether_mappable_routine (char *z)
 {
@@ -139,7 +164,7 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
       } else if ((z = bind_lengthety_identifier (SYMBOL (p))) != NULL) {
 	MOID (p) = MOID (z);
       } else {
-	diagnostic (A_ERROR, p, "identifier S has not been declared in this range");
+	diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_1);
 	z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
 	MOID (p) = MODE (ERROR);
       }
@@ -376,7 +401,7 @@ static void structure_fields_test (NODE_T * p)
 	    BOOL_T k = A_TRUE;
 	    for (t = NEXT (s); t != NULL && k; FORWARD (t)) {
 	      if (s->text == t->text) {
-		diagnostic (A_ERROR, p, "multiple declaration of field S");
+		diagnostic_node (A_ERROR, p, ERROR_MULTIPLE_FIELD);
 		while (NEXT (s) != NULL && NEXT (s)->text == t->text) {
 		  FORWARD (s);
 		}
@@ -412,7 +437,7 @@ static void incestuous_union_test (NODE_T * p)
 	  if (count_pack_members (s) == 1) {
 	    SOID_T a;
 	    make_soid (&a, NO_SORT, m, 0);
-	    diagnostic (A_ERROR, NODE (m), "M must have at least two components", m);
+	    diagnostic_node (A_ERROR, NODE (m), ERROR_COMPONENT_NUMBER, m);
 	    x = A_FALSE;
 	  }
 /* Discard unions with firmly related modes. */
@@ -421,7 +446,7 @@ static void incestuous_union_test (NODE_T * p)
 	    for (; t != NULL; FORWARD (t)) {
 	      if (MOID (t) != MOID (s)) {
 		if (whether_firm (MOID (s), MOID (t))) {
-		  diagnostic (A_ERROR, p, "M has firmly related components", m);
+		  diagnostic_node (A_ERROR, p, ERROR_COMPONENT_RELATED, m);
 		}
 	      }
 	    }
@@ -432,7 +457,7 @@ static void incestuous_union_test (NODE_T * p)
 	    if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, NO_DEFLEXING)) {
 	      SOID_T z;
 	      make_soid (&z, NO_SORT, n, 0);
-	      diagnostic (A_ERROR, p, "M contains firmly related subset M", m, n);
+	      diagnostic_node (A_ERROR, p, ERROR_SUBSET_RELATED, m, n);
 	    }
 	  }
 	}
@@ -493,10 +518,10 @@ static void test_firmly_related_ops_local (NODE_T * p, TAG_T * s)
     TAG_T *t = find_firmly_related_op (SYMBOL_TABLE (s), SYMBOL (NODE (s)), l, r, s);
     if (t != NULL) {
       if (SYMBOL_TABLE (t) == stand_env) {
-	diagnostic (A_ERROR, p, "M Z is firmly related to M Z in standard environ", MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
+	diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
 	ABNORMAL_END (A_TRUE, "standard environ error", NULL);
       } else {
-	diagnostic (A_ERROR, p, "M Z is firmly related to M Z", MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
+	diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
       }
     }
     if (NEXT (s) != NULL) {
@@ -555,7 +580,7 @@ void collect_taxes (NODE_T * p)
 static void already_declared (NODE_T * n, int a)
 {
   if (find_tag_local (SYMBOL_TABLE (n), a, SYMBOL (n)) != NULL) {
-    diagnostic (A_ERROR, n, "multiple declaration of tag S");
+    diagnostic_node (A_ERROR, n, ERROR_MULTIPLE_TAG);
   }
 }
 
@@ -575,7 +600,6 @@ TAG_T *add_tag (SYMBOL_TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
 {
   if (s != NULL) {
     TAG_T *z = new_tag ();
-    ACCESS (z) = PRIVATE_SYMBOL;
     SYMBOL_TABLE (z) = s;
     PRIO (z) = p;
     MOID (z) = m;
@@ -604,7 +628,7 @@ TAG_T *add_tag (SYMBOL_TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
     } else if (a == ANONYMOUS) {
       INSERT_TAG (&s->anonymous, z);
     } else {
-      ABNORMAL_END (A_TRUE, INTERNAL_ERROR, "add tag");
+      ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "add tag");
     }
     return (z);
   } else {
@@ -740,32 +764,28 @@ static int tab_qualifier (NODE_T * p)
 \param access
 **/
 
-static void tax_identity_dec (NODE_T * p, MOID_T ** m, int *access)
+static void tax_identity_dec (NODE_T * p, MOID_T ** m)
 {
   if (p != NULL) {
     if (WHETHER (p, IDENTITY_DECLARATION)) {
-      tax_identity_dec (SUB (p), m, access);
-      tax_identity_dec (NEXT (p), m, access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_identity_dec (NEXT (p), m, access);
+      tax_identity_dec (SUB (p), m);
+      tax_identity_dec (NEXT (p), m);
     } else if (WHETHER (p, DECLARER)) {
       tax_tags (SUB (p));
       *m = MOID (p);
-      tax_identity_dec (NEXT (p), m, access);
+      tax_identity_dec (NEXT (p), m);
     } else if (WHETHER (p, COMMA_SYMBOL)) {
-      tax_identity_dec (NEXT (p), m, access);
+      tax_identity_dec (NEXT (p), m);
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *entry = find_tag_local (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       MOID (p) = *m;
       HEAP (entry) = LOC_SYMBOL;
-      ACCESS (entry) = *access;
       TAX (p) = entry;
       MOID (entry) = *m;
       if ((*m)->attribute == REF_SYMBOL) {
 	HEAP (entry) = tab_qualifier (NEXT (NEXT (p)));
       }
-      tax_identity_dec (NEXT (NEXT (p)), m, access);
+      tax_identity_dec (NEXT (NEXT (p)), m);
     } else {
       tax_tags (p);
     }
@@ -780,30 +800,26 @@ static void tax_identity_dec (NODE_T * p, MOID_T ** m, int *access)
 \param access
 **/
 
-static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m, int *access)
+static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
 {
   if (p != NULL) {
     if (WHETHER (p, VARIABLE_DECLARATION)) {
-      tax_variable_dec (SUB (p), q, m, access);
-      tax_variable_dec (NEXT (p), q, m, access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_variable_dec (NEXT (p), q, m, access);
+      tax_variable_dec (SUB (p), q, m);
+      tax_variable_dec (NEXT (p), q, m);
     } else if (WHETHER (p, DECLARER)) {
       tax_tags (SUB (p));
       *m = MOID (p);
-      tax_variable_dec (NEXT (p), q, m, access);
+      tax_variable_dec (NEXT (p), q, m);
     } else if (WHETHER (p, QUALIFIER)) {
       *q = ATTRIBUTE (SUB (p));
-      tax_variable_dec (NEXT (p), q, m, access);
+      tax_variable_dec (NEXT (p), q, m);
     } else if (WHETHER (p, COMMA_SYMBOL)) {
-      tax_variable_dec (NEXT (p), q, m, access);
+      tax_variable_dec (NEXT (p), q, m);
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *entry = find_tag_local (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       MOID (p) = *m;
       TAX (p) = entry;
       HEAP (entry) = *q;
-      ACCESS (entry) = *access;
       if (*q == LOC_SYMBOL) {
 	TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (*m), GENERATOR);
 	HEAP (z) = LOC_SYMBOL;
@@ -813,7 +829,7 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m, int *access)
 	entry->body = NULL;
       }
       MOID (entry) = *m;
-      tax_variable_dec (NEXT (p), q, m, access);
+      tax_variable_dec (NEXT (p), q, m);
     } else {
       tax_tags (p);
     }
@@ -827,25 +843,21 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m, int *access)
 \param access
 **/
 
-static void tax_proc_variable_dec (NODE_T * p, int *q, int *access)
+static void tax_proc_variable_dec (NODE_T * p, int *q)
 {
   if (p != NULL) {
     if (WHETHER (p, PROCEDURE_VARIABLE_DECLARATION)) {
-      tax_proc_variable_dec (SUB (p), q, access);
-      tax_proc_variable_dec (NEXT (p), q, access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_proc_variable_dec (NEXT (p), q, access);
+      tax_proc_variable_dec (SUB (p), q);
+      tax_proc_variable_dec (NEXT (p), q);
     } else if (WHETHER (p, QUALIFIER)) {
       *q = ATTRIBUTE (SUB (p));
-      tax_proc_variable_dec (NEXT (p), q, access);
+      tax_proc_variable_dec (NEXT (p), q);
     } else if (WHETHER (p, PROC_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
-      tax_proc_variable_dec (NEXT (p), q, access);
+      tax_proc_variable_dec (NEXT (p), q);
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *entry = find_tag_local (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       TAX (p) = entry;
       HEAP (entry) = *q;
-      ACCESS (entry) = *access;
       MOID (entry) = MOID (p);
       if (*q == LOC_SYMBOL) {
 	TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (p)),
@@ -856,7 +868,7 @@ static void tax_proc_variable_dec (NODE_T * p, int *q, int *access)
       } else {
 	entry->body = NULL;
       }
-      tax_proc_variable_dec (NEXT (p), q, access);
+      tax_proc_variable_dec (NEXT (p), q);
     } else {
       tax_tags (p);
     }
@@ -869,26 +881,22 @@ static void tax_proc_variable_dec (NODE_T * p, int *q, int *access)
 \param access
 **/
 
-static void tax_proc_dec (NODE_T * p, int *access)
+static void tax_proc_dec (NODE_T * p)
 {
   if (p != NULL) {
     if (WHETHER (p, PROCEDURE_DECLARATION)) {
-      tax_proc_dec (SUB (p), access);
-      tax_proc_dec (NEXT (p), access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_proc_dec (NEXT (p), access);
+      tax_proc_dec (SUB (p));
+      tax_proc_dec (NEXT (p));
     } else if (WHETHER (p, PROC_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
-      tax_proc_dec (NEXT (p), access);
+      tax_proc_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *entry = find_tag_local (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       MOID_T *m = MOID (NEXT (NEXT (p)));
       MOID (p) = m;
       TAX (p) = entry;
       HEAP (entry) = LOC_SYMBOL;
-      ACCESS (entry) = *access;
       MOID (entry) = m;
-      tax_proc_dec (NEXT (p), access);
+      tax_proc_dec (NEXT (p));
     } else {
       tax_tags (p);
     }
@@ -930,13 +938,13 @@ static void check_operator_dec (NODE_T * p)
   }
   k = 1 + count_operands (pack);
   if (!(k == 1 || k == 2)) {
-    diagnostic (A_SYNTAX_ERROR, p, "operator S cannot have D operands", k);
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_OPERAND_NUMBER);
     k = 0;
   }
   if (k == 1 && strchr (NOMADS, *(SYMBOL (p))) != NULL) {
-    diagnostic (A_SYNTAX_ERROR, p, "monadic operator S cannot begin with a character from S", NOMADS);
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_OPERATOR_INVALID, NOMADS);
   } else if (k == 2 && !find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) {
-    diagnostic (A_SYNTAX_ERROR, p, "dyadic operator S has no priority declaration");
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_DYADIC_PRIORITY);
   }
 }
 
@@ -947,23 +955,20 @@ static void check_operator_dec (NODE_T * p)
 \param access
 **/
 
-static void tax_op_dec (NODE_T * p, MOID_T ** m, int *access)
+static void tax_op_dec (NODE_T * p, MOID_T ** m)
 {
   if (p != NULL) {
     if (WHETHER (p, OPERATOR_DECLARATION)) {
-      tax_op_dec (SUB (p), m, access);
-      tax_op_dec (NEXT (p), m, access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_op_dec (NEXT (p), m, access);
+      tax_op_dec (SUB (p), m);
+      tax_op_dec (NEXT (p), m);
     } else if (WHETHER (p, OPERATOR_PLAN)) {
       tax_tags (SUB (p));
       *m = MOID (p);
-      tax_op_dec (NEXT (p), m, access);
+      tax_op_dec (NEXT (p), m);
     } else if (WHETHER (p, OP_SYMBOL)) {
-      tax_op_dec (NEXT (p), m, access);
+      tax_op_dec (NEXT (p), m);
     } else if (WHETHER (p, COMMA_SYMBOL)) {
-      tax_op_dec (NEXT (p), m, access);
+      tax_op_dec (NEXT (p), m);
     } else if (WHETHER (p, DEFINING_OPERATOR)) {
       TAG_T *entry = SYMBOL_TABLE (p)->operators;
       check_operator_dec (p);
@@ -973,9 +978,8 @@ static void tax_op_dec (NODE_T * p, MOID_T ** m, int *access)
       MOID (p) = *m;
       TAX (p) = entry;
       HEAP (entry) = LOC_SYMBOL;
-      ACCESS (entry) = *access;
       MOID (entry) = *m;
-      tax_op_dec (NEXT (p), m, access);
+      tax_op_dec (NEXT (p), m);
     } else {
       tax_tags (p);
     }
@@ -988,17 +992,14 @@ static void tax_op_dec (NODE_T * p, MOID_T ** m, int *access)
 \param access
 **/
 
-static void tax_brief_op_dec (NODE_T * p, int *access)
+static void tax_brief_op_dec (NODE_T * p)
 {
   if (p != NULL) {
     if (WHETHER (p, BRIEF_OPERATOR_DECLARATION)) {
-      tax_brief_op_dec (SUB (p), access);
-      tax_brief_op_dec (NEXT (p), access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_brief_op_dec (NEXT (p), access);
+      tax_brief_op_dec (SUB (p));
+      tax_brief_op_dec (NEXT (p));
     } else if (WHETHER (p, OP_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
-      tax_brief_op_dec (NEXT (p), access);
+      tax_brief_op_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_OPERATOR)) {
       TAG_T *entry = SYMBOL_TABLE (p)->operators;
       MOID_T *m = MOID (NEXT (NEXT (p)));
@@ -1009,9 +1010,8 @@ static void tax_brief_op_dec (NODE_T * p, int *access)
       MOID (p) = m;
       TAX (p) = entry;
       HEAP (entry) = LOC_SYMBOL;
-      ACCESS (entry) = *access;
       MOID (entry) = m;
-      tax_brief_op_dec (NEXT (p), access);
+      tax_brief_op_dec (NEXT (p));
     } else {
       tax_tags (p);
     }
@@ -1024,17 +1024,14 @@ static void tax_brief_op_dec (NODE_T * p, int *access)
 \param access
 **/
 
-static void tax_prio_dec (NODE_T * p, int *access)
+static void tax_prio_dec (NODE_T * p)
 {
   if (p != NULL) {
     if (WHETHER (p, PRIORITY_DECLARATION)) {
-      tax_prio_dec (SUB (p), access);
-      tax_prio_dec (NEXT (p), access);
-    } else if (WHETHER (p, ACCESS)) {
-      *access = ATTRIBUTE (SUB (p));
-      tax_prio_dec (NEXT (p), access);
+      tax_prio_dec (SUB (p));
+      tax_prio_dec (NEXT (p));
     } else if (WHETHER (p, PRIO_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
-      tax_prio_dec (NEXT (p), access);
+      tax_prio_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_OPERATOR)) {
       TAG_T *entry = PRIO (SYMBOL_TABLE (p));
       while (entry != NULL && NODE (entry) != p) {
@@ -1043,8 +1040,7 @@ static void tax_prio_dec (NODE_T * p, int *access)
       MOID (p) = NULL;
       TAX (p) = entry;
       HEAP (entry) = LOC_SYMBOL;
-      ACCESS (entry) = *access;
-      tax_prio_dec (NEXT (p), access);
+      tax_prio_dec (NEXT (p));
     } else {
       tax_tags (p);
     }
@@ -1059,22 +1055,22 @@ static void tax_prio_dec (NODE_T * p, int *access)
 static void tax_tags (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
-    int heap = LOC_SYMBOL, access = PRIVATE_SYMBOL;
+    int heap = LOC_SYMBOL;
     MOID_T *m = NULL;
     if (WHETHER (p, IDENTITY_DECLARATION)) {
-      tax_identity_dec (p, &m, &access);
+      tax_identity_dec (p, &m);
     } else if (WHETHER (p, VARIABLE_DECLARATION)) {
-      tax_variable_dec (p, &heap, &m, &access);
+      tax_variable_dec (p, &heap, &m);
     } else if (WHETHER (p, PROCEDURE_DECLARATION)) {
-      tax_proc_dec (p, &access);
+      tax_proc_dec (p);
     } else if (WHETHER (p, PROCEDURE_VARIABLE_DECLARATION)) {
-      tax_proc_variable_dec (p, &heap, &access);
+      tax_proc_variable_dec (p, &heap);
     } else if (WHETHER (p, OPERATOR_DECLARATION)) {
-      tax_op_dec (p, &m, &access);
+      tax_op_dec (p, &m);
     } else if (WHETHER (p, BRIEF_OPERATOR_DECLARATION)) {
-      tax_brief_op_dec (p, &access);
+      tax_brief_op_dec (p);
     } else if (WHETHER (p, PRIORITY_DECLARATION)) {
-      tax_prio_dec (p, &access);
+      tax_prio_dec (p);
     } else {
       tax_tags (SUB (p));
     }
@@ -1224,7 +1220,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
   for (q = p; q != NULL && !not_a_for_range; FORWARD (q)) {
     if (SUB (q) != NULL) {
 /* BEGIN ... END, CODE ... EDOC, DEF ... FED, DO ... OD, $ ... $, { ... } are ranges. */
-      if (WHETHER (q, BEGIN_SYMBOL) || WHETHER (q, CODE_SYMBOL) || WHETHER (q, DEF_SYMBOL) || WHETHER (q, DO_SYMBOL) || WHETHER (q, ALT_DO_SYMBOL) || WHETHER (q, FORMAT_DELIMITER_SYMBOL) || WHETHER (q, ACCO_SYMBOL)) {
+      if (WHETHER (q, BEGIN_SYMBOL) || WHETHER (q, DO_SYMBOL) || WHETHER (q, ALT_DO_SYMBOL) || WHETHER (q, FORMAT_DELIMITER_SYMBOL) || WHETHER (q, ACCO_SYMBOL)) {
 	SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
 	preliminary_symbol_table_setup (SUB (q));
       }
@@ -1423,7 +1419,7 @@ static void unused (TAG_T * s)
 {
   for (; s != NULL; FORWARD (s)) {
     if (!s->use) {
-      diagnostic (A_WARNING, NODE (s), "#tag S is not used", NODE (s));
+      diagnostic_node (A_WARNING, NODE (s), WARNING_TAG_UNUSED, NODE (s));
     }
   }
 }

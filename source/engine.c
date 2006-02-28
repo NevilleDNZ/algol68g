@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -186,19 +186,11 @@ void initialise_frame (NODE_T * p)
   if (scope > limit) {\
     char txt[BUFFER_SIZE];\
     if (info == NULL) {\
-      if (limit == frame_pointer) {\
-        sprintf (txt, "M value is exported out of its scope");\
-      } else {\
-        sprintf (txt, "destination has larger scope than M source");\
-      }\
+      sprintf (txt, ERROR_SCOPE_DYNAMIC_1);\
     } else {\
-      if (limit == frame_pointer) {\
-        sprintf (txt, "M %s is exported out of its scope", info);\
-      } else {\
-        sprintf (txt, "destination has larger scope than M %s source", info);\
-      }\
+      sprintf (txt, ERROR_SCOPE_DYNAMIC_2, info);\
     }\
-    diagnostic (A_RUNTIME_ERROR, p, txt, mode);\
+    diagnostic_node (A_RUNTIME_ERROR, p, txt, mode);\
     exit_genie (p, A_RUNTIME_ERROR);\
   }
 
@@ -665,7 +657,7 @@ PROPAGATOR_T genie_widening (NODE_T * p)
     PUSH_REF (p, z);
     UNPROTECT_SWEEP_HANDLE (&row);
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, "cannot widen M to M", MOID (SUB (p)), MOID (p));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CANNOT_WIDEN, MOID (SUB (p)), MOID (p));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   return (self);
@@ -761,7 +753,7 @@ PROPAGATOR_T genie_dereference_slice_name_quick (NODE_T * p)
     EXECUTE_UNIT (q);
     stack_pointer = pop_sp;
     if (*k < t->lower_bound || *k > t->upper_bound) {
-      diagnostic (A_RUNTIME_ERROR, q, INDEX_OUT_OF_BOUNDS);
+      diagnostic_node (A_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
       exit_genie (q, A_RUNTIME_ERROR);
     }
     index += (t->span * (*k - t->shift));
@@ -784,9 +776,12 @@ PROPAGATOR_T genie_dereference_slice_name_quick (NODE_T * p)
 
 PROPAGATOR_T genie_dereferencing (NODE_T * p)
 {
-  PROPAGATOR_T self;
   A68_REF z;
-  self = EXECUTE_UNIT (SUB (p));
+  PROPAGATOR_T self = EXECUTE_UNIT (SUB (p));
+  POP (p, &z, SIZE_OF (A68_REF));
+  TEST_NIL (p, z, MOID (SUB (p)));
+  PUSH (p, ADDRESS (&z), MOID_SIZE (MOID (p)));
+  GENIE_CHECK_INITIALISATION (p, STACK_OFFSET (-MOID_SIZE (MOID (p))), MOID (p));
   if (self.unit == genie_loc_identifier) {
     self.unit = genie_dereference_loc_identifier;
     self.source->genie.propagator.unit = self.unit;
@@ -797,10 +792,6 @@ PROPAGATOR_T genie_dereferencing (NODE_T * p)
     self.unit = genie_dereferencing_quick;
     self.source = p;
   }
-  POP (p, &z, SIZE_OF (A68_REF));
-  TEST_NIL (p, z, MOID (SUB (p)));
-  PUSH (p, ADDRESS (&z), MOID_SIZE (MOID (p)));
-  GENIE_CHECK_INITIALISATION (p, STACK_OFFSET (-MOID_SIZE (MOID (p))), MOID (p));
   return (self);
 }
 
@@ -982,6 +973,7 @@ void genie_partial_call (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * 
       FORWARD (s);
     }
   }
+  stack_pointer = pop_sp;
   z.locale = loc;
 /* Is closure complete? */
   if (voids == 0) {
@@ -999,7 +991,7 @@ void genie_partial_call (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * 
     }
     genie_call_procedure (p, pr_mode, pproc, MODE (VOID), &z, pop_sp, pop_fp);
   } else {
-/* Closure is not complete. Return procedure body. */
+/*  Closure is not complete. Return procedure body. */
     PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
   }
 }
@@ -1007,12 +999,12 @@ void genie_partial_call (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * 
 /*!
 \brief closure and deproceduring of routines with PARAMSETY
 \param p position in the syntax tree, should not be NULL
-\param p position in the syntax tree, should not be NULLr_mode
-\param p position in the syntax tree, should not be NULLproc
-\param p position in the syntax tree, should not be NULLmap
+\param pr_mode
+\param pproc
+\param pmap
 \param z
-\param p position in the syntax tree, should not be NULLop_sp
-\param p position in the syntax tree, should not be NULLop_fp
+\param pop_sp
+\param pop_fp
 **/
 
 void genie_call_procedure (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * pmap, A68_PROCEDURE * z, ADDR_T pop_sp, ADDR_T pop_fp)
@@ -1033,12 +1025,12 @@ void genie_call_procedure (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T 
 /* Copy arguments from stack to frame. */
       OPEN_PROC_FRAME (entry, z->environ);
       FRAME_DYNAMIC_SCOPE (frame_pointer) = pop_fp;
-      stack_pointer = pop_sp;
       for (; args != NULL; FORWARD (args)) {
 	int size = MOID_SIZE (MOID (args));
 	COPY ((FRAME_OFFSET (FRAME_INFO_SIZE + fp0)), STACK_ADDRESS (pop_sp + fp0), (unsigned) size);
 	fp0 += size;
       }
+      stack_pointer = pop_sp;
       p->genie.argsize = fp0;
 /* Interpret routine text. */
       PREEMPTIVE_SWEEP;
@@ -1070,12 +1062,16 @@ void genie_call_procedure (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T 
 
 PROPAGATOR_T genie_call (NODE_T * p)
 {
-  PROPAGATOR_T self, pr_prop;
+  PROPAGATOR_T self;
   A68_PROCEDURE z;
   NODE_T *pr = SUB (p);
   ADDR_T pop_sp = stack_pointer, pop_fp = frame_pointer;
   self.unit = genie_call;
   self.source = p;
+/* Get procedure. */
+  EXECUTE_UNIT (pr);
+  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+/* Get arguments. */
   if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A_FALSE) {
     NODE_T top_seq;
     NODE_T *seq = &top_seq;
@@ -1088,8 +1084,6 @@ PROPAGATOR_T genie_call (NODE_T * p)
       EXECUTE_UNIT (q);
     }
   }
-  pr_prop = EXECUTE_UNIT (pr);
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
   genie_call_procedure (p, z.proc_mode, pr->partial_proc, pr->partial_locale, &z, pop_sp, pop_fp);
   PROTECT_FROM_SWEEP (p);
   return (self);
@@ -1113,7 +1107,7 @@ static void genie_trimmer (NODE_T * p, BYTE_T * *ref_new, BYTE_T * *ref_old, int
       POP_INT (p, &k);
       t = (A68_TUPLE *) * ref_old;
       if (k.value < t->lower_bound || k.value > t->upper_bound) {
-	diagnostic (A_RUNTIME_ERROR, p, INDEX_OUT_OF_BOUNDS);
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
       (*offset) += t->span * (k.value - t->shift);
@@ -1138,7 +1132,7 @@ static void genie_trimmer (NODE_T * p, BYTE_T * *ref_new, BYTE_T * *ref_old, int
 	  EXECUTE_UNIT (q);
 	  POP_INT (p, &k);
 	  if (k.value < old_tup->lower_bound) {
-	    diagnostic (A_RUNTIME_ERROR, p, INDEX_OUT_OF_BOUNDS);
+	    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
 	    exit_genie (p, A_RUNTIME_ERROR);
 	  }
 	  L = k.value;
@@ -1156,7 +1150,7 @@ static void genie_trimmer (NODE_T * p, BYTE_T * *ref_new, BYTE_T * *ref_old, int
 	  EXECUTE_UNIT (q);
 	  POP_INT (p, &k);
 	  if (k.value > old_tup->upper_bound) {
-	    diagnostic (A_RUNTIME_ERROR, p, INDEX_OUT_OF_BOUNDS);
+	    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
 	    exit_genie (p, A_RUNTIME_ERROR);
 	  }
 	  U = k.value;
@@ -1211,7 +1205,7 @@ void genie_subscript (NODE_T * p, ADDR_T * ref_heap, int *sum, NODE_T ** seq)
 	POP_ADDRESS (p, k, A68_INT);
 	t = (A68_TUPLE *) HEAP_ADDRESS (*ref_heap);
 	if (k->value < t->lower_bound || k->value > t->upper_bound) {
-	  diagnostic (A_RUNTIME_ERROR, p, INDEX_OUT_OF_BOUNDS);
+	  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
 	  exit_genie (p, A_RUNTIME_ERROR);
 	}
 	(*ref_heap) += SIZE_OF (A68_TUPLE);
@@ -1260,7 +1254,7 @@ PROPAGATOR_T genie_slice_name_quick (NODE_T * p)
     EXECUTE_UNIT (q);
     stack_pointer = pop_sp;
     if (*k < t->lower_bound || *k > t->upper_bound) {
-      diagnostic (A_RUNTIME_ERROR, q, INDEX_OUT_OF_BOUNDS);
+      diagnostic_node (A_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
       exit_genie (q, A_RUNTIME_ERROR);
     }
     index += (t->span * (*k - t->shift));
@@ -1328,7 +1322,7 @@ PROPAGATOR_T genie_slice (NODE_T * p)
 	EXECUTE_UNIT (q);
 	POP_ADDRESS (q, k, A68_INT);
 	if (k->value < t->lower_bound || k->value > t->upper_bound) {
-	  diagnostic (A_RUNTIME_ERROR, q, INDEX_OUT_OF_BOUNDS);
+	  diagnostic_node (A_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
 	  exit_genie (q, A_RUNTIME_ERROR);
 	}
 	ref_heap += SIZE_OF (A68_TUPLE);
@@ -1410,7 +1404,7 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     A68_INT z;
     NODE_T *s = WHETHER (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
     if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     self.unit = genie_constant_int;
@@ -1423,7 +1417,7 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     A68_REAL z;
     NODE_T *s = WHETHER (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
     if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     z.status = INITIALISED_MASK | CONSTANT_MASK;
@@ -1438,7 +1432,7 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     int size = get_mp_size (moid);
     STACK_MP (z, p, digits);
     if (genie_string_to_value_internal (p, moid, SYMBOL (NEXT_SUB (p)), (BYTE_T *) z) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     z[0] = INITIALISED_MASK | CONSTANT_MASK;
@@ -1452,7 +1446,7 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     int size = get_mp_size (moid);
     STACK_MP (z, p, digits);
     if (genie_string_to_value_internal (p, moid, SYMBOL (NEXT_SUB (p)), (BYTE_T *) z) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     z[0] = INITIALISED_MASK | CONSTANT_MASK;
@@ -1464,7 +1458,7 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     A68_BITS z;
     NODE_T *s = WHETHER (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
     if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     self.unit = genie_constant;
@@ -1479,7 +1473,7 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     int size = get_mp_size (moid);
     STACK_MP (z, p, digits);
     if (genie_string_to_value_internal (p, moid, SYMBOL (NEXT_SUB (p)), (BYTE_T *) z) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     z[0] = INITIALISED_MASK | CONSTANT_MASK;
@@ -1618,7 +1612,7 @@ PROPAGATOR_T genie_assertion (NODE_T * p)
     EXECUTE_UNIT (NEXT_SUB (p));
     POP_BOOL (p, &z);
     if (z.value == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, "false assertion");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FALSE_ASSERTION);
       exit_genie (p, A_RUNTIME_ERROR);
     }
   }
@@ -2318,7 +2312,7 @@ static void genie_jump (NODE_T * p)
 #ifdef HAVE_POSIX_THREADS
   if (PAR_LEVEL (p) > 0) {
     if (PAR_LEVEL (p) > PAR_LEVEL (FRAME_TREE (f)) && PAR_LEVEL (FRAME_TREE (f)) != 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "target label is inside a parallel clause");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_LABEL_IN_PAR_CLAUSE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     zap_all_threads (p, FRAME_JUMP_STAT (f), label);
@@ -2647,7 +2641,9 @@ void genie_serial_clause (NODE_T * p, jmp_buf * exit_buf)
       NODE_T *jump_to = SYMBOL_TABLE (p)->jump_to;
 /* If we jumped from a parallel clause we zap all units. */
 #ifdef HAVE_POSIX_THREADS
-      ABNORMAL_END (!is_main_thread (), "target label not in main thread", NULL);
+      if (parallel_clauses > 0) {
+	ABNORMAL_END (!is_main_thread (), "target label not in main thread", NULL);
+      }
 #endif
       stack_pointer = pop_sp;
       frame_pointer = pop_fp;
@@ -3297,7 +3293,6 @@ PROPAGATOR_T genie_loop (volatile NODE_T *);
 void genie_conditional (volatile NODE_T *, volatile MOID_T *);
 void genie_int_case (volatile NODE_T *, volatile MOID_T *);
 void genie_united_case (volatile NODE_T *, volatile MOID_T *);
-
 #define LABEL_FREE(p) {\
   NODE_T *m_q; ADDR_T pop_sp = stack_pointer;\
   for (m_q = SEQUENCE (p); m_q != NULL; m_q = SEQUENCE (m_q)) {\
@@ -3316,7 +3311,6 @@ void genie_united_case (volatile NODE_T *, volatile MOID_T *);
     }\
     }\
   }}
-
 #define SERIAL_CLAUSE(p)\
   if (MASK (p) & OPTIMAL_MASK) {\
     EXECUTE_UNIT (SEQUENCE (p));\
@@ -3326,7 +3320,6 @@ void genie_united_case (volatile NODE_T *, volatile MOID_T *);
     if (!setjmp (exit_buf)) {\
       genie_serial_clause ((NODE_T *) p, (jmp_buf *) exit_buf);\
   }}
-
 #define SERIAL_CLAUSE_TRACE(p)\
   if (MASK (p) & OPTIMAL_MASK) {\
     EXECUTE_UNIT_TRACE (SEQUENCE (p));\
@@ -3336,7 +3329,6 @@ void genie_united_case (volatile NODE_T *, volatile MOID_T *);
     if (!setjmp (exit_buf)) {\
       genie_serial_clause ((NODE_T *) p, (jmp_buf *) exit_buf);\
   }}
-
 #define ENQUIRY_CLAUSE(p)\
   if (MASK (p) & OPTIMAL_MASK) {\
     EXECUTE_UNIT (SEQUENCE (p));\
@@ -3345,13 +3337,11 @@ void genie_united_case (volatile NODE_T *, volatile MOID_T *);
   } else {\
     genie_enquiry_clause ((NODE_T *) p);\
   }
-
 /*!
 \brief execute enclosed clause
 \param p position in the syntax tree, should not be NULL
 \return a propagator for this action
 **/
-
 PROPAGATOR_T genie_enclosed (volatile NODE_T * p)
 {
   volatile PROPAGATOR_T self;

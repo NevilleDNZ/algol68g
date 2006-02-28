@@ -1,6 +1,20 @@
 ALGOL68G - ALGOL 68 GENIE
+-------------------------
 
-July 2005		Algol68G Mark 8
+February 2006		Mark 9
+			- Basic PostgreSQL support
+			- Improved diagnostic messages
+			- Added procedure `utc time' (UNIX)
+			- Added procedure `local time' (UNIX)
+			- Fixed minor bugs
+
+November 2005		Mark 8.1
+			- Added procedure `sub in string' for substituting regular expressions in a string (UNIX)
+			- Implementation of option PORTCHECK cf. "Standard ALGOL 68 Hardware Representation"
+			- Implementation of option PEDANTIC
+			- Fixed bug in partial parametrisation
+
+July 2005		Mark 8
 			- Added procedure `http content' for fetching web page contents (UNIX)
 			- Added procedure `tcp request' for sending requests via TCP (UNIX)
 			- Added procedure `grep in string' for matching regular expressions in a string (UNIX)
@@ -10,12 +24,12 @@ July 2005		Algol68G Mark 8
 			- Made ~ mean SKIP when used as a unit (cf. RR)
 			- Fixed minor bugs
 
-May 2005		Algol68G Mark 7
+May 2005		Mark 7
 			- Partial parametrisation following C. H. Lindsey's proposal
 			- Elementary and trigonometric functions for COMPLEX arguments
 			- Fixed minor bugs
 
-March 2005:		Algol68G Mark 6
+March 2005:		Mark 6
 			- Parallel clause on platforms that support POSIX threads
 			- Fixed minor bugs
 
@@ -27,7 +41,7 @@ October 2004:		Algol68g Mark 5
 			- Curses support
 			- Fixed minor bugs
 
-June 2004:		Algol68G Mark 4
+June 2004:		Mark 4
 			- Added more GSL support
 			- Added mode LONG BITS and LONG LONG BITS
 			- Made parser accept ( .. ) as alternative for [ .. ]
@@ -38,21 +52,21 @@ June 2004:		Algol68G Mark 4
 			- Simplified core management
 			- Fixed minor bugs
 
-March 2004:		Algol68G Mark 3.2
+March 2004:		Mark 3.2
 			- Added overflow checks for primitive modes
 
-January 2004:		Algol68G Mark 3.1
+January 2004:		Mark 3.1
 			- Added optional system stack overflow handling to interpreter
 			- Improved multiprecision library
 			- Fixed various bugs
 
-September 2003:    	Algol68G Mark 3
+September 2003:    	Mark 3
 			- Added formatted transput
 			- Improved speed of multiprecision library
 			- Fixed bug in garbage collector
 			- Fixed minor bugs
 
-March 2003:     	Algol68G Mark 2
+March 2003:     	Mark 2
 			- Added mode BYTES and LONG BYTES
 			- Added mode FORMAT and parsing of FORMAT texts
 			- Added straightening in unformatted transput
@@ -60,4 +74,4 @@ March 2003:     	Algol68G Mark 2
 			- Integrated Sian Leitch's mode PIPE and Linux support
 			- Fixed various bugs
 
-November 2002:  	Algol68G
+November 2002:  	Mark 1

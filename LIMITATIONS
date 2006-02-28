@@ -1,4 +1,5 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 8)
+ALGOL68G - ALGOL 68 GENIE (MARK 9)
+----------------------------------
 
 * A garbage collector cannot solve all memory allocation issues. It is 
   therefore possible to get an unexpected "out of memory" diagnostic. Two

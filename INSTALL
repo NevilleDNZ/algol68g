@@ -1,4 +1,4 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 8)
+ALGOL68G - ALGOL 68 GENIE (MARK 9)
 ----------------------------------
 
 Algol68G is free software distributed under GNU GPL. This software is 
@@ -28,7 +28,7 @@ A. GENERIC INSTALLATION
 compatible) for its graphics routines.
 
 * If available on your system, Algol68G uses the GNU scientific library 
-(version 1.6 or compatible) to implement extensions of the standard prelude.  
+(version 1.7 or compatible) to implement extensions of the standard prelude.  
 
 * If available on your system, Algol68G uses POSIX threads to implement the 
 parallel clause. However, you need to specify when configuring that you wish 
@@ -36,10 +36,12 @@ to use POSIX threads - see instructions below.
 
 * If available on your system, Algol68G links to the curses library.
 
-The 'configure' script checks '/usr/local/lib' and '/usr/local/include' for shared 
-libraries and necessary includes. If necessary files are not detected then 
-Algol68G builds without support for absent libraries - Algol68G can run without 
-GNU plotutils, the GNU scientific library, POSIX threads or curses.
+* If available on your system, Algol68G links to the PostgreSQL library 
+(version 8.1.2 or compatible).
+
+The 'configure' script checks your system for shared libraries and necessary 
+includes. If necessary files are not detected then Algol68G builds without 
+support for absent libraries.
 
 For a generic installation, follow next instructions.
 
@@ -120,7 +122,7 @@ B. CUSTOMISED INSTALLATION
 For a customised installation some configuration is required, that cannot be 
 reliably automated. Configuration switches in file 'source/config.h' are 
 set to default values that should work on Linux and FreeBSD in a generic 
-installation.
+installation. Notable options in 'source/config.h' are listed below.
 
 (B.1)  If you want the interpreter to check system stack size then define
        DO_SYSTEM_STACK_CHECK in file 'config.h'. This check assumes that 

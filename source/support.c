@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -40,16 +40,6 @@ KEYWORD_T *top_keyword;
 TOKEN_T *top_token;
 
 /*!
-\brief give an error upon getting low on core
-\return
-**/
-
-void low_core_alert (void)
-{
-  ABNORMAL_END (A_TRUE, OUT_OF_CORE, NULL);
-}
-
-/*!
 \brief get_fixed_heap_space
 \param s
 \return
@@ -58,11 +48,9 @@ void low_core_alert (void)
 BYTE_T *get_fixed_heap_space (size_t s)
 {
   BYTE_T *z = HEAP_ADDRESS (fixed_heap_pointer);
-  s = ALIGN (s);
-  fixed_heap_pointer += s;
-  if (fixed_heap_pointer >= temp_heap_pointer) {
-    low_core_alert ();
-  }
+  fixed_heap_pointer += ALIGN (s);
+  ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
+  ABNORMAL_END (((long) z) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   return (z);
 }
 
@@ -74,12 +62,12 @@ BYTE_T *get_fixed_heap_space (size_t s)
 
 BYTE_T *get_temp_heap_space (size_t s)
 {
-  s = ALIGN (s);
-  temp_heap_pointer -= s;
-  if (temp_heap_pointer <= fixed_heap_pointer) {
-    low_core_alert ();
-  }
-  return (HEAP_ADDRESS (temp_heap_pointer));
+  BYTE_T *z;
+  temp_heap_pointer -= ALIGN (s);
+  ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
+  z = HEAP_ADDRESS (temp_heap_pointer);
+  ABNORMAL_END (((long) z) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+  return (z);
 }
 
 /*!
@@ -172,9 +160,9 @@ NODE_T *new_node (void)
   NEXT (z) = NULL;
   PREVIOUS (z) = NULL;
   SUB (z) = NULL;
+  NEST (z) = NULL;
   z->inits = NULL;
   PACK (z) = NULL;
-  z->msg = NULL;
   z->tag = NULL;
   z->protect_sweep = NULL;
   return (z);
@@ -229,6 +217,7 @@ MOID_T *new_moid ()
   z->has_rows = A_FALSE;
   z->in_standard_environ = A_FALSE;
   z->size = 0;
+  z->portable = A_TRUE;
   NODE (z) = NULL;
   PACK (z) = NULL;
   SUB (z) = NULL;
@@ -281,13 +270,13 @@ TAG_T *new_tag ()
   z->use = A_FALSE;
   z->in_proc = A_FALSE;
   HEAP (z) = A_FALSE;
-  z->access = 0;
   z->size = 0;
   z->offset = 0;
   z->youngest_environ = PRIMAL_SCOPE;
   z->loc_assigned = A_FALSE;
   NEXT (z) = NULL;
   z->body = NULL;
+  z->portable = A_TRUE;
   return (z);
 }
 
@@ -301,14 +290,10 @@ SOURCE_LINE_T *new_source_line ()
   SOURCE_LINE_T *z = (SOURCE_LINE_T *) get_fixed_heap_space (SIZE_OF (SOURCE_LINE_T));
   z->string = NULL;
   z->filename = NULL;
-  z->messages = NULL;
+  z->diagnostics = NULL;
   z->number = 0;
   z->print_status = 0;
-  z->min_level = 0;
-  z->max_level = 0;
-  z->min_proc_level = 0;
-  z->max_proc_level = 0;
-  z->list = A_FALSE;
+  z->list = A_TRUE;
   z->top_node = NULL;
   z->module = NULL;
   NEXT (z) = NULL;
@@ -393,7 +378,7 @@ BOOL_T whether (NODE_T * p, ...)
 void make_sub (NODE_T * p, NODE_T * q, int t)
 {
   NODE_T *z = new_node ();
-  ABNORMAL_END (p == NULL || q == NULL, INTERNAL_ERROR, "make_sub");
+  ABNORMAL_END (p == NULL || q == NULL, ERROR_INTERNAL_CONSISTENCY, "make_sub");
   MOVE (z, p, SIZE_OF (NODE_T));
   PREVIOUS (z) = NULL;
   if (p == q) {
@@ -472,7 +457,6 @@ BOOL_T whether_new_lexical_level (NODE_T * p)
   case DO_PART:
   case ELIF_PART:
   case ELSE_PART:
-  case EXPORT_CLAUSE:
   case FORMAT_TEXT:
   case INTEGER_CASE_CLAUSE:
   case INTEGER_CHOICE_CLAUSE:
@@ -616,15 +600,17 @@ void init_heap (void)
   int handle_a_size = ALIGN (handle_pool_size);
   int frame_a_size = ALIGN (frame_stack_size);
   int expr_a_size = ALIGN (expr_stack_size);
-  int total_size = heap_a_size + handle_a_size + frame_a_size + expr_a_size;
-  BYTE_T *core = (BYTE_T *) malloc ((size_t) total_size);
-  if (core == NULL) {
-    low_core_alert ();
-  }
+  int total_size = ALIGN (heap_a_size + handle_a_size + frame_a_size + expr_a_size);
+  BYTE_T *core = (BYTE_T *) (ALIGN_T *) malloc ((size_t) total_size);
+  ABNORMAL_END (core == NULL, ERROR_OUT_OF_CORE, NULL);
   heap_segment = &core[0];
   handle_segment = &heap_segment[heap_a_size];
   frame_segment = &handle_segment[handle_a_size];
   stack_segment = &frame_segment[frame_a_size];
+  ABNORMAL_END (((long) heap_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+  ABNORMAL_END (((long) handle_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+  ABNORMAL_END (((long) frame_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+  ABNORMAL_END (((long) stack_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   fixed_heap_pointer = ALIGNMENT;
   temp_heap_pointer = total_size;
 }
@@ -646,10 +632,8 @@ void free_heap (void)
 
 void *get_heap_space (size_t s)
 {
-  char *z = (char *) malloc (ALIGN (s));
-  if (z == NULL) {
-    low_core_alert ();
-  }
+  char *z = (char *) (ALIGN_T *) malloc (ALIGN (s));
+  ABNORMAL_END (z == NULL, ERROR_OUT_OF_CORE, NULL);
   return ((void *) z);
 }
 
@@ -808,9 +792,6 @@ void set_up_tables ()
   add_keyword (&top_keyword, POINT_SYMBOL, ".");
   add_keyword (&top_keyword, ACCO_SYMBOL, "{");
   add_keyword (&top_keyword, OCCA_SYMBOL, "}");
-  add_keyword (&top_keyword, PUBLIC_SYMBOL, "PUBLIC");
-  add_keyword (&top_keyword, DEF_SYMBOL, "DEF");
-  add_keyword (&top_keyword, FED_SYMBOL, "FED");
   add_keyword (&top_keyword, CODE_SYMBOL, "CODE");
   add_keyword (&top_keyword, EDOC_SYMBOL, "EDOC");
   add_keyword (&top_keyword, ENVIRON_SYMBOL, "ENVIRON");
@@ -825,7 +806,6 @@ void set_up_tables ()
   add_keyword (&top_keyword, STYLE_I_COMMENT_SYMBOL, "CO");
   add_keyword (&top_keyword, END_SYMBOL, "END");
   add_keyword (&top_keyword, GO_SYMBOL, "GO");
-  add_keyword (&top_keyword, PRIVATE_SYMBOL, "PRIVATE");
   add_keyword (&top_keyword, TO_SYMBOL, "TO");
   add_keyword (&top_keyword, ELSE_BAR_SYMBOL, "|:");
   add_keyword (&top_keyword, THEN_SYMBOL, "THEN");
@@ -842,7 +822,6 @@ void set_up_tables ()
   add_keyword (&top_keyword, COMPL_SYMBOL, "COMPL");
   add_keyword (&top_keyword, FROM_SYMBOL, "FROM");
   add_keyword (&top_keyword, BOLD_PRAGMAT_SYMBOL, "PRAGMAT");
-  add_keyword (&top_keyword, POSTLUDE_SYMBOL, "POSTLUDE");
   add_keyword (&top_keyword, BOLD_COMMENT_SYMBOL, "COMMENT");
   add_keyword (&top_keyword, DO_SYMBOL, "DO");
   add_keyword (&top_keyword, STYLE_II_COMMENT_SYMBOL, "#");
@@ -851,7 +830,6 @@ void set_up_tables ()
   add_keyword (&top_keyword, CHAR_SYMBOL, "CHAR");
   add_keyword (&top_keyword, ISNT_SYMBOL, ":/=:");
   add_keyword (&top_keyword, REF_SYMBOL, "REF");
-  add_keyword (&top_keyword, PRELUDE_SYMBOL, "PRELUDE");
   add_keyword (&top_keyword, NIL_SYMBOL, "NIL");
   add_keyword (&top_keyword, ASSIGN_SYMBOL, ":=");
   add_keyword (&top_keyword, FI_SYMBOL, "FI");
