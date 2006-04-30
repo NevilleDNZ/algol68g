@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9</small>
+<small>Documentation for Algol 68 Genie Mark 9.1</small>
 </td>
 </table>
 
@@ -59,11 +59,12 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9</b></small>
+<small><b>Algol68G Mark 9.1</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
@@ -76,7 +77,6 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 &nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
 <br>
 &nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
@@ -99,7 +99,7 @@ Optional extensions to the standard prelude are described in other chapters:
 <br>
 <h3><a name="envenq"></a>Enquiries</h3>
 <dl>
-<dt><code>INT int lengths, int shorts, max int, real lengths, real shorts, bits lengths, bits shorts, bytes lengths, bytes shorts, max abs char, int width, long int width, long long int width, real width, long real width, long long real width, exp width, long exp width, long long exp width, bits width, long bits width, long long bits width, bytes width, long bytes width</code>
+<dt><code>INT int lengths, int shorths, max int, real lengths, real shorths, bits lengths, bits shorths, bytes lengths, bytes shorths, max abs char, int width, long int width, long long int width, real width, long real width, long long real width, exp width, long exp width, long long exp width, bits width, long bits width, long long bits width, bytes width, long bytes width</code>
 <dt><code>REAL max real, small real</code>
 <dt><code>LONG INT long max int</code>
 <dt><code>LONG LONG INT long long max int</code>
@@ -779,7 +779,12 @@ Optional extensions to the standard prelude are described in other chapters:
 <br>
 <br>
 <dt><code>PROC break = VOID</code>
-<dd>Algol68G will stop in its <a href="synopsis.html#monitor">monitor routine</a>. The same monitor is entered when Algol68G receives <code>SIGINT</code>.
+<dd>Raises SIGINT, after which Algol68G will stop in its <a href="synopsis.html#monitor">monitor routine</a>. The monitor may be entered on a unit executed after the actual call to <code>break</code>; see <a href="synopsis.html#monitor">details on breakpoints</a>. To enter the monitor immediately, call <code>debug</code> or <code>monitor</code>.
+<br>
+<br>
+<dt><code>PROC debug = VOID</code>
+<dt><code>PROC monitor = VOID</code>
+<dd>Algol68G will stop in its <a href="synopsis.html#monitor">monitor routine</a> immediately. 
 <br>
 <br>
 <dt><code>PROC program idf = STRING</code>
@@ -837,7 +842,7 @@ Optional extensions to the standard prelude are described in other chapters:
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
 </font>
 </td>
 </table>

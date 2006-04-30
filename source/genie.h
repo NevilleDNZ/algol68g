@@ -65,23 +65,25 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Activation records in the frame stack. */
 
-typedef struct ACTIVATION ACTIVATION;
+typedef struct ACTIVATION_RECORD ACTIVATION_RECORD;
 
-struct ACTIVATION
+struct ACTIVATION_RECORD
 {
   ADDR_T static_link, dynamic_link, dynamic_scope;
   NODE_T *node;
   jmp_buf *jump_stat;
+  BOOL_T proc_frame;
 };
 
-#define FRAME_DYNAMIC_LINK(n) (((ACTIVATION *) FRAME_ADDRESS(n))->dynamic_link)
-#define FRAME_DYNAMIC_SCOPE(n) (((ACTIVATION *) FRAME_ADDRESS(n))->dynamic_scope)
+#define FRAME_DYNAMIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_link)
+#define FRAME_DYNAMIC_SCOPE(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_scope)
+#define FRAME_PROC_FRAME(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->proc_frame)
 #define FRAME_INCREMENT(n) (SYMBOL_TABLE (FRAME_TREE(n))->ap_increment)
-#define FRAME_JUMP_STAT(n) (((ACTIVATION *) FRAME_ADDRESS(n))->jump_stat)
+#define FRAME_JUMP_STAT(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->jump_stat)
 #define FRAME_LEXICAL_LEVEL(n) (SYMBOL_TABLE (FRAME_TREE(n))->level)
-#define FRAME_STATIC_LINK(n) (((ACTIVATION *) FRAME_ADDRESS(n))->static_link)
-#define FRAME_TREE(n) (NODE ((ACTIVATION *) FRAME_ADDRESS(n)))
-#define FRAME_INFO_SIZE (ALIGN (SIZE_OF (ACTIVATION)))
+#define FRAME_STATIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->static_link)
+#define FRAME_TREE(n) (NODE ((ACTIVATION_RECORD *) FRAME_ADDRESS(n)))
+#define FRAME_INFO_SIZE (ALIGN (SIZE_OF (ACTIVATION_RECORD)))
 #define FRAME_SHORTCUT(p) (& ((p)->genie.offset[DESCENT ((p)->genie.level)]))
 #define FRAME_ADDRESS(n) ((BYTE_T *) &frame_segment[n])
 #define FRAME_LOCAL(n, m) (FRAME_ADDRESS ((n) + FRAME_INFO_SIZE + (m)))
@@ -156,8 +158,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
     diagnostic_node (A_RUNTIME_ERROR, (NODE_T *) p, ERROR_TIME_LIMIT_EXCEEDED);\
     exit_genie ((NODE_T *) p, A_RUNTIME_ERROR);\
   } else if (sys_request_flag) {\
-    sys_request_flag = A_FALSE;\
-    single_step ((NODE_T *) p);\
+    single_step ((NODE_T *) p, A_TRUE, A_FALSE);\
   } else if (m_trace_mood) {\
     where (STDOUT_FILENO, (NODE_T *) p);\
   }}
@@ -450,12 +451,6 @@ still is sufficient overhead to make it to the next check.
     diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }}
-#elif defined HAVE_SYSTEM_STACK_CHECK && defined PRE_MACOS_X_VERSION
-#define LOW_STACK_ALERT(p) {\
-  ABNORMAL_END (stack_size > 0 && StackSpace () < stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
-  ABNORMAL_END (stack_pointer > expr_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
-  ABNORMAL_END (frame_pointer > frame_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
-  }
 #else
 #define LOW_STACK_ALERT(p) {\
   (void) (p);\
@@ -468,16 +463,17 @@ still is sufficient overhead to make it to the next check.
 
 #define OPEN_STATIC_FRAME(p) {\
   ADDR_T dynamic_link = frame_pointer, static_link;\
-  ACTIVATION *act;\
+  ACTIVATION_RECORD *act;\
   LOW_STACK_ALERT (p);\
   STATIC_LINK_FOR_FRAME (static_link, LEX_LEVEL (p));\
   frame_pointer += FRAME_SIZE (dynamic_link);\
-  act = (ACTIVATION *) FRAME_ADDRESS (frame_pointer);\
+  act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
   act->static_link = static_link;\
   act->dynamic_link = dynamic_link;\
   act->dynamic_scope = frame_pointer;\
   act->node = p;\
   act->jump_stat = NULL;\
+  act->proc_frame = A_FALSE;\
   FRAME_CLEAR (SYMBOL_TABLE (p)->ap_increment);\
   if (SYMBOL_TABLE (p)->initialise_frame) {\
     if (global_pointer == 0 && LEX_LEVEL (p) == global_level) {\
@@ -488,7 +484,7 @@ still is sufficient overhead to make it to the next check.
 
 #define OPEN_PROC_FRAME(p, environ) {\
   ADDR_T dynamic_link = frame_pointer, static_link;\
-  ACTIVATION *act;\
+  ACTIVATION_RECORD *act;\
   LOW_STACK_ALERT (p);\
   static_link = (environ > 0 ? environ : frame_pointer);\
   if (frame_pointer < static_link) {\
@@ -496,12 +492,13 @@ still is sufficient overhead to make it to the next check.
     exit_genie (p, A_RUNTIME_ERROR);\
   }\
   frame_pointer += FRAME_SIZE (dynamic_link);\
-  act = (ACTIVATION *) FRAME_ADDRESS (frame_pointer);\
+  act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
   act->static_link = static_link;\
   act->dynamic_link = dynamic_link;\
   act->dynamic_scope = frame_pointer;\
   act->node = p;\
   act->jump_stat = NULL;\
+  act->proc_frame = A_TRUE;\
   FRAME_CLEAR (SYMBOL_TABLE (p)->ap_increment);\
   if (SYMBOL_TABLE (p)->initialise_frame) {\
     if (global_pointer == 0 && LEX_LEVEL (p) == global_level) {\
@@ -591,7 +588,7 @@ extern BYTE_T *frame_segment, *stack_segment, *heap_segment, *handle_segment;
 extern MOID_T *top_expr_moid;
 extern double cputime_0;
 extern int global_level, max_lex_lvl, ret_code;
-extern jmp_buf genie_exit_label;
+extern jmp_buf genie_exit_label, monitor_exit_label;
 
 extern int frame_stack_size, expr_stack_size, heap_size, handle_pool_size;
 extern int stack_limit, frame_stack_limit, expr_stack_limit;
@@ -652,16 +649,17 @@ extern GENIE_PROCEDURE genie_bin_int;
 extern GENIE_PROCEDURE genie_bin_long_mp;
 extern GENIE_PROCEDURE genie_bits_lengths;
 extern GENIE_PROCEDURE genie_bits_pack;
-extern GENIE_PROCEDURE genie_bits_shorts;
+extern GENIE_PROCEDURE genie_bits_shorths;
 extern GENIE_PROCEDURE genie_bits_width;
 extern GENIE_PROCEDURE genie_break;
+extern GENIE_PROCEDURE genie_debug;
 extern GENIE_PROCEDURE genie_bytes_lengths;
-extern GENIE_PROCEDURE genie_bytes_shorts;
+extern GENIE_PROCEDURE genie_bytes_shorths;
 extern GENIE_PROCEDURE genie_bytes_width;
 extern GENIE_PROCEDURE genie_bytespack;
 extern GENIE_PROCEDURE genie_char_in_string;
 extern GENIE_PROCEDURE genie_complex_lengths;
-extern GENIE_PROCEDURE genie_complex_shorts;
+extern GENIE_PROCEDURE genie_complex_shorths;
 extern GENIE_PROCEDURE genie_conj_complex;
 extern GENIE_PROCEDURE genie_conj_long_complex;
 extern GENIE_PROCEDURE genie_cos_long_complex;
@@ -702,6 +700,7 @@ extern GENIE_PROCEDURE genie_eq_long_complex;
 extern GENIE_PROCEDURE genie_eq_long_mp;
 extern GENIE_PROCEDURE genie_eq_real;
 extern GENIE_PROCEDURE genie_eq_string;
+extern GENIE_PROCEDURE genie_evaluate;
 extern GENIE_PROCEDURE genie_exp_long_complex;
 extern GENIE_PROCEDURE genie_exp_long_mp;
 extern GENIE_PROCEDURE genie_exp_real;
@@ -733,7 +732,7 @@ extern GENIE_PROCEDURE genie_iint_complex;
 extern GENIE_PROCEDURE genie_im_complex;
 extern GENIE_PROCEDURE genie_im_long_complex;
 extern GENIE_PROCEDURE genie_int_lengths;
-extern GENIE_PROCEDURE genie_int_shorts;
+extern GENIE_PROCEDURE genie_int_shorths;
 extern GENIE_PROCEDURE genie_int_width;
 extern GENIE_PROCEDURE genie_last_char_in_string;
 extern GENIE_PROCEDURE genie_le_bits;
@@ -870,7 +869,7 @@ extern GENIE_PROCEDURE genie_program_idf;
 extern GENIE_PROCEDURE genie_re_complex;
 extern GENIE_PROCEDURE genie_re_long_complex;
 extern GENIE_PROCEDURE genie_real_lengths;
-extern GENIE_PROCEDURE genie_real_shorts;
+extern GENIE_PROCEDURE genie_real_shorths;
 extern GENIE_PROCEDURE genie_real_width;
 extern GENIE_PROCEDURE genie_repr_char;
 extern GENIE_PROCEDURE genie_round_long_mp;
@@ -1037,6 +1036,7 @@ extern A68_REF genie_copy_stowed (A68_REF, NODE_T *, MOID_T *);
 extern A68_REF genie_make_ref_row_of_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
 extern A68_REF genie_make_ref_row_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
 extern A68_REF genie_make_row (NODE_T *, MOID_T *, int, ADDR_T);
+extern BOOL_T breakpoint_expression (NODE_T *);
 extern BOOL_T close_device (NODE_T *, A68_FILE *);
 extern BOOL_T genie_int_case_unit (NODE_T *, int, int *);
 extern BOOL_T genie_no_user_symbols (SYMBOL_TABLE_T *);
@@ -1078,7 +1078,7 @@ extern void install_signal_handlers (void);
 extern void show_data_item (FILE_T, NODE_T *, MOID_T *, BYTE_T *);
 extern void show_frame (NODE_T *, FILE_T);
 extern void show_stack_frame (FILE_T, NODE_T *, ADDR_T);
-extern void single_step (NODE_T *);
+extern void single_step (NODE_T *, BOOL_T, BOOL_T);
 extern void stack_dump (FILE_T, ADDR_T, int);
 extern void stack_dump_light (ADDR_T);
 extern void un_init_frame (NODE_T *);

@@ -291,7 +291,7 @@ static char *phrase_to_text (NODE_T * p, NODE_T * q)
 #define MAX_TERMINALS 8
   int length = 0, count = 0;
   static char buffer[BUFFER_SIZE];
-  buffer[0] = '\0';
+  buffer[0] = NULL_CHAR;
   for (; p != NULL && (q != NULL ? p != NEXT (q) : count < MAX_TERMINALS)
        && length < BUFFER_SIZE / 2; FORWARD (p)) {
     char *z = non_terminal_string (edit_line, get_good_attribute (p));
@@ -435,7 +435,7 @@ static char *bracket_check_diagnose (NODE_T * p)
       }
     }
   }
-  bracket_check_error_text[0] = '\0';
+  bracket_check_error_text[0] = NULL_CHAR;
   bracket_check_error (bracket_check_error_text, begins, "BEGIN", "END");
   bracket_check_error (bracket_check_error_text, opens, "(", ")");
   bracket_check_error (bracket_check_error_text, format_opens, "(", ")");
@@ -3614,7 +3614,7 @@ static void extract_priorities (NODE_T * p)
 	    NODE_T *y = q;
 	    char *sym = (char *) get_temp_heap_space (len);
 	    strncpy (sym, SYMBOL (q), len - 1);
-	    sym[len] = '\0';
+	    sym[len] = NULL_CHAR;
 	    SYMBOL (q) = TEXT (add_token (&top_token, sym));
 	    ATTRIBUTE (q) = DEFINING_OPERATOR;
 	    insert_node (q, ALT_EQUALS_SYMBOL);
@@ -3683,7 +3683,7 @@ static void extract_operators (NODE_T * p)
 	    if (len > 1 && SYMBOL (q)[len - 1] == '=') {
 	      char *sym = (char *) get_temp_heap_space (len);
 	      strncpy (sym, SYMBOL (q), len - 1);
-	      sym[len] = '\0';
+	      sym[len] = NULL_CHAR;
 	      SYMBOL (q) = TEXT (add_token (&top_token, sym));
 	      ATTRIBUTE (q) = DEFINING_OPERATOR;
 	      insert_node (q, ALT_EQUALS_SYMBOL);

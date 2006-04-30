@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9</small>
+<small>Documentation for Algol 68 Genie Mark 9.1</small>
 </td>
 </table>
 
@@ -36,11 +36,10 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <br>
 <h2>UNIX extensions</h2>
 <small>
-&middot;&nbsp;<a href="#envunix">UNIX extensions</a><br>
-&nbsp;&nbsp;&middot;&nbsp;<a href="#unixgen">General definitions</a><br>
-&nbsp;&nbsp;&middot;&nbsp;<a href="#unixproc">Processes</a><br>
-&nbsp;&nbsp;&middot;&nbsp;<a href="#unixfetch">Fetching web page contents and sending requests</a><br>
-&nbsp;&nbsp;&middot;&nbsp;<a href="#unixregex">Regular expressions in string manipulation</a><br>
+&middot;&nbsp;<a href="#unixgen">General definitions</a><br>
+&middot;&nbsp;<a href="#unixproc">Processes</a><br>
+&middot;&nbsp;<a href="#unixfetch">Fetching web page contents and sending requests</a><br>
+&middot;&nbsp;<a href="#unixregex">Regular expressions in string manipulation</a><br>
 &middot;&nbsp;<a href="#curses">Curses support</a><br>
 </small>
 </td>
@@ -54,11 +53,12 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9</b></small>
+<small><b>Algol68G Mark 9.1</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
@@ -71,7 +71,6 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 &nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
 <br>
 &nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
@@ -83,8 +82,6 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </table>
 
 <p>
-<h3><a name="envunix"></a>UNIX extensions</h3>
-<p>
 Algol68G maps to UNIX/Linux as to provide basic means with which a program can
 <ul>
 <li>access command line arguments,
@@ -94,14 +91,14 @@ Algol68G maps to UNIX/Linux as to provide basic means with which a program can
 <li>send a request to a HTTP server, fetch web page contents, and
 <lcode>match regular expressions in a string.
 </ul>
-  
-<h4><a name="unixgen"></a>General definitions</h4>
+
+<br>  
+<h3><a name="unixgen"></a>General definitions</h3>
 <dl>
 <dt><code>MODE PIPE = STRUCT (REF FILE read, write, INT pid)</code>
 <dd>Used to set up communication between processes. See for instance <code>execve child pipe</code>.
-</dl>
-
-<dl>
+<br>
+<br>
 <dt><code>PROC utc time = [] INT</code>
 <dd>Returns UTC calendar time, or an empty row if the function fails. Respective array elements are year, month, day, hours, minutes, seconds, day of week and daylight-saving-time flag. 
 <br>
@@ -136,7 +133,8 @@ Accessing system error information through <code>errno</code> is of limited inte
 <dd>Returns a string describing the error code passed as <code>errno</code>.
 </dl>
 
-<h4><a name="unixproc"></a>Processes</h4>
+<br>  
+<h3><a name="unixproc"></a>Processes</h3>
 <dl>
 <dt><code>PROC fork = INT</code>
 <dd>Creates a child process that differs from the parent process only in its <code>PID</code> and <code>PPID</code>, and that resource utilisations are set to zero. File locks and pending signals are not inherited. Under Linux, fork is implemented using copy-on-write pages, so the only penalty incurred by fork is the time and memory required to duplicate the parent's page tables, and to create a unique task structure for the child. On success, the <code>PID</code> of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and <code>errno</code> will be set appropriately.
@@ -216,7 +214,8 @@ close (write OF p)
 </table>
 </dl>
 
-<h4><a name="unixfetch"></a>Fetching web page contents and sending requests</h4>
+<br>  
+<h3><a name="unixfetch"></a>Fetching web page contents and sending requests</h3>
 <dl>
 <dt><code>PROC http content = (REF STRING content, STRING domain, STRING path, INT port) INT</code>
 <dd>Gets content from web page specified by <code>domain</code> and <code>path</code>, and stores it in <code>content</code>. Both <code>domain</code> and <code>path</code> must be properly <code>MIME</code> encoded. The routine connects to server <code>domain</code> using TCP and sends a straightforward <code>GET</code> request for <code>path</code> using HTTP 1.0, and reads the reply from the server. If port number <code>port</code> is 0 the default port number (80) will be used. The procedure returns 0 on success or an appropriate error code upon failure. For example:
@@ -249,7 +248,7 @@ FI
 </table>
 <p>
 <dt><code>PROC tcp request = (REF STRING reply, STRING domain, STRING request, INT port) INT</code>
-<dd>Send request <code>request</code> to server specified by <code>domain</code>, and stores the server's reply in <code>content</code>. Both <code>domain</code> and <code>request</code> must be properly <code>MIME</code> encoded. The routine connects to server <code>domain</code> using TCP. If port number <code>port</code> is 0 the default port number (80) will be used. The procedure returns 0 on success or an appropriate error code upon failure. For example:
+<dd>Send request <code>request</code> to server specified by <code>domain</code>, and stores the server's reply in <code>reply</code>. Both <code>domain</code> and <code>request</code> must be properly <code>MIME</code> encoded. The routine connects to server <code>domain</code> using TCP. If port number <code>port</code> is 0 the default port number (80) will be used. The procedure returns 0 on success or an appropriate error code upon failure. For example:
 <p>
 <table border=0 cellpadding=12>
 <td>
@@ -266,7 +265,8 @@ FI;
 </td>
 </table></dl>
 
-<h4><a name="unixregex"></a>Regular expressions in string manipulation</h4>
+<br>  
+<h3><a name="unixregex"></a>Regular expressions in string manipulation</h3>
 <dl>
 <dt><code>PROC grep in string = (STRING pattern, string, REF INT start, end) INT</code>
 <dd>Matches <code>pattern</code> with <code>string</code> and assigns first character position (counting from 1) and last character position of the widest leftmost matching substring to <code>start</code> and <code>end</code> when they are not <code>NIL</code>. 
@@ -461,7 +461,7 @@ On systems that have installed the curses library, Algol68G can link with that l
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
 </font>
 </td>
 </table>

@@ -457,7 +457,7 @@ MP_DIGIT_T *string_to_mp (NODE_T * p, MP_DIGIT_T * z, char *s, int digits)
   comma = -1;
   power = 0;
   weight = MP_RADIX / 10;
-  while (s[i] != '\0' && j <= digits && (IS_DIGIT (s[i]) || s[i] == '.')) {
+  while (s[i] != NULL_CHAR && j <= digits && (IS_DIGIT (s[i]) || s[i] == '.')) {
     if (s[i] == '.') {
       comma = i;
     } else {
@@ -479,12 +479,12 @@ MP_DIGIT_T *string_to_mp (NODE_T * p, MP_DIGIT_T * z, char *s, int digits)
   }
 /* See if there is an exponent. */
   expo = 0;
-  if (s[i] != '\0' && TO_UPPER (s[i]) == EXPONENT_CHAR) {
+  if (s[i] != NULL_CHAR && TO_UPPER (s[i]) == EXPONENT_CHAR) {
     char *end;
     expo = strtol (&(s[++i]), &end, 10);
-    ok = (end[0] == '\0');
+    ok = (end[0] == NULL_CHAR);
   } else {
-    ok = (s[i] == '\0');
+    ok = (s[i] == NULL_CHAR);
   }
 /* Calculate effective exponent. */
   expo += (comma >= 0 ? comma - 1 : power - 1);

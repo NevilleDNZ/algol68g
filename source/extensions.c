@@ -554,7 +554,7 @@ int rgetchar (void)
     /* FD_ISSET(0, &rfds) will be true. */
     return (getch ());
   } else {
-    return ('\0');
+    return (NULL_CHAR);
   }
 #endif
 }
@@ -1192,20 +1192,20 @@ static char *pq_edit (char *str)
     int newlines = 0, len = strlen (str);
     BOOL_T suppress_blank = A_FALSE;
     q = edt;
-    while (len > 0 && str[len - 1] == '\n') {
-      str[len - 1] = '\0';
+    while (len > 0 && str[len - 1] == NEWLINE_CHAR) {
+      str[len - 1] = NULL_CHAR;
       len = strlen (str);
     }
-    while (str[0] != '\0') {
-      if (str[0] == '\r') {
+    while (str[0] != NULL_CHAR) {
+      if (str[0] == CR_CHAR) {
 	str++;
-      } else if (str[0] == '\n') {
+      } else if (str[0] == NEWLINE_CHAR) {
 	if (newlines++ == 0) {
 	  *(q++) = '.';
-	  *(q++) = ' ';
+	  *(q++) = BLANK_CHAR;
 	  *(q++) = '(';
 	} else {
-	  *(q++) = ' ';
+	  *(q++) = BLANK_CHAR;
 	}
 	suppress_blank = A_TRUE;
 	str++;
@@ -1213,8 +1213,8 @@ static char *pq_edit (char *str)
 	if (suppress_blank) {
 	  str++;
 	} else {
-	  if (str[1] != '\n') {
-	    *(q++) = ' ';
+	  if (str[1] != NEWLINE_CHAR) {
+	    *(q++) = BLANK_CHAR;
 	  }
 	  str++;
 	  suppress_blank = A_TRUE;
@@ -1227,7 +1227,7 @@ static char *pq_edit (char *str)
     if (newlines > 0) {
       *(q++) = ')';
     }
-    q[0] = '\0';
+    q[0] = NULL_CHAR;
     return (edt);
   }
 }
@@ -1255,8 +1255,8 @@ void genie_pq_errormessage (NODE_T * p)
     if (PQerrorMessage (file->connection) != NULL) {
       strcpy (str, pq_edit (PQerrorMessage (file->connection)));
       upb = strlen (str);
-      if (upb > 0 && str[upb - 1] == '\n') {
-	str[upb - 1] = '\0';
+      if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
+	str[upb - 1] = NULL_CHAR;
       }
     } else {
       strcpy (str, "no error message available");
@@ -1296,8 +1296,8 @@ void genie_pq_resulterrormessage (NODE_T * p)
     if (PQresultErrorMessage (file->result) != NULL) {
       strcpy (str, pq_edit (PQresultErrorMessage (file->result)));
       upb = strlen (str);
-      if (upb > 0 && str[upb - 1] == '\n') {
-	str[upb - 1] = '\0';
+      if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
+	str[upb - 1] = NULL_CHAR;
       }
     } else {
       strcpy (str, "no error message available");

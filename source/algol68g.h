@@ -34,12 +34,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <errno.h>
 #include <float.h>
 #include <limits.h>
-
-#if defined PRE_MACOS_X_VERSION && defined HAVE_IEEE_754
-#include <fp.h>
-#else
 #include <math.h>
-#endif
 
 #include <setjmp.h>
 #include <signal.h>
@@ -80,36 +75,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #undef _environ
 #endif
 
-#ifdef PRE_MACOS_X_VERSION
-#define ssize_t size_t
-#define STDIN_FILENO 1
-#define STDOUT_FILENO 2
-#define STDERR_FILENO 3
-#define S_IRUSR 0x400
-#define S_IWUSR 0x200
-#define S_IRGRP 0x040
-#define S_IROTH 0x004
-#include <unix.h>
-#include <fcntl.h>
-#include <types.h>
-#include <stat.h>
-#include <unistd.h>
-/* Floating point handling on the Macintosh. */
-#ifdef HAVE_IEEE_754
-#ifdef isinf
-#undef isinf
-#endif
-#define isinf(u) (!isfinite(u))
-#endif
-#endif
-
-#ifdef OS2_VERSION
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
-
 #ifdef HAVE_PLOTUTILS
 #include <plot.h>
 #endif
@@ -148,17 +113,24 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define MIN_INT 	(INT_MIN)
 #define MAX_UNT 	(UINT_MAX)
 #define MAX_BITS	(UINT_MAX)
+
+#define TO_UCHAR(c) ((c) >= 0 ? (int) (c) : (int) (UCHAR_MAX + (int) (c) + 1))
+
+#define BLANK_CHAR      ' '
+#define CR_CHAR		'\r'
+#define EOF_CHAR	TO_UCHAR (EOF)
+#define ERROR_CHAR      '*'
+#define ESC_CHAR	27
+#define EXPONENT_CHAR   'E'
 #define FLIP_CHAR       'T'
 #define FLOP_CHAR       'F'
-#define ERROR_CHAR      '*'
-#define EXPONENT_CHAR   'E'
-#define RADIX_CHAR      'R'
-#define BLANK_CHAR      ' '
-#define NEWLINE_CHAR	'\n'
 #define FORMFEED_CHAR	'\f'
+#define NEWLINE_CHAR	'\n'
+#define NEWLINE_STRING	"\n"
 #define NULL_CHAR	'\0'
+#define QUOTE_CHAR	'"'
+#define RADIX_CHAR      'R'
 #define TAB_CHAR	'\t'
-#define CR_CHAR		'\r'
 
 #define A68G_PI 	3.1415926535897932384626433832795029L	/* pi*/
 
@@ -181,7 +153,6 @@ char on various systems. PDP-11s and IBM 370s are still haunting us with this.
 #define IS_UPPER(c) isupper ((unsigned char) (c))
 #define IS_XDIGIT(c) isxdigit ((unsigned char) (c))
 #define TO_LOWER(c) tolower ((unsigned char) (c))
-#define TO_UCHAR(c) ((c) >= 0 ? (int) (c) : (int) (UCHAR_MAX + (int) (c) + 1))
 #define TO_UPPER(c) toupper ((unsigned char) (c))
 
 /* Type definitions. */
@@ -472,7 +443,7 @@ struct NODE_INFO_T
 {
   MODULE_T *module;
   int PROCEDURE_LEVEL, PROCEDURE_NUMBER, priority;
-  char *char_in_line, *symbol;
+  char *char_in_line, *symbol, *expr;
   SOURCE_LINE_T *line;
 };
 
@@ -552,7 +523,7 @@ struct OPTIONS_T
 {
   OPTION_LIST_T *list;
   BOOL_T source_listing, standard_prelude_listing, tree_listing, verbose, version, cross_reference, check_only, statistics_listing, pragmat_sema, moid_listing, unused, trace, regression_test, stropping, brackets, reductions, portcheck;
-  int time_limit, run;
+  int time_limit, run, debug;
   STATUS_MASK nodemask;
 };
 
@@ -965,7 +936,7 @@ enum
 { NOT_PRINTED, TO_PRINT, PRINTED };
 
 enum
-{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_ALL_DIAGNOSTICS, FORCE_DIAGNOSTIC = 128 };
+{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_ALL_DIAGNOSTICS, FORCE_DIAGNOSTIC = 128, A_FORCE_QUIT = 256 };
 
 enum
 { NO_DEFLEXING = 1, SAFE_DEFLEXING, ALIAS_DEFLEXING, FORCE_DEFLEXING, SKIP_DEFLEXING };
@@ -1028,10 +999,12 @@ enum
 #define FORWARD(p) ((p) = NEXT (p))
 #define GENIE_INFO(p) ((p)->genie_info)
 #define HEAP(p) ((p)->heap)
+#define INFO(p) ((p)->info)
 #define LEX_LEVEL(p) (SYMBOL_TABLE (p)->level)
 #define LINE(p) ((p)->info->line)
 #define MASK(p) ((p)->mask)
 #define MODE(p) (a68_modes.p)
+#define MODULE(p) (INFO (p)->module)
 #define MOID(p) ((p)->type)
 #define MULTIPLE(p) ((p)->multiple_mode)
 #define NAME(p) ((p)->name)
@@ -1138,12 +1111,15 @@ extern TAG_T *find_tag_local (SYMBOL_TABLE_T *, int, char *);
 extern TAG_T *new_tag (void);
 extern TOKEN_T *add_token (TOKEN_T **, char *);
 extern TOKEN_T *find_token (TOKEN_T **, char *);
+extern char *a68g_strchr (char *, int);
+extern char *a68g_strrchr (char *, int);
 extern char *ctrl_char (int);
 extern char *moid_to_string (MOID_T *, int);
 extern char *new_fixed_string (char *);
 extern char *new_string (char *);
 extern char *non_terminal_string (char *, int);
 extern char *read_string_from_tty (char *);
+extern char *standard_environ_proc_name (GENIE_PROCEDURE);
 extern char digit_to_char (int);
 extern double seconds (void);
 extern double ten_to_the_power (int);
@@ -1217,9 +1193,11 @@ extern void mark_auxilliary (NODE_T *);
 extern void mark_moids (NODE_T *);
 extern void math_rte (NODE_T *, BOOL_T, MOID_T *, const char *);
 extern void mode_checker (NODE_T *);
+extern void monitor_error (char *, char *);
 extern void msg (int, int, NODE_T *, SOID_T *, SOID_T *, char *);
 extern void portcheck (NODE_T *);
 extern void preliminary_symbol_table_setup (NODE_T *);
+extern void print_internal_index (FILE_T, A68_TUPLE *, int);
 extern void protect_from_sweep (NODE_T *);
 extern void prune_echoes (MODULE_T *, OPTION_LIST_T *);
 extern void put_refinements (MODULE_T *);
@@ -1249,6 +1227,6 @@ extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
 extern void where (FILE_T, NODE_T *);
 extern void write_listing (MODULE_T *);
-extern void write_source_line (FILE_T, SOURCE_LINE_T *);
+extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, BOOL_T);
 
 #endif

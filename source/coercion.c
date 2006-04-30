@@ -100,7 +100,7 @@ static char *mode_error_text (MOID_T * p, MOID_T * q, int context, int deflex, i
 {
   static char txt[BUFFER_SIZE];
   if (depth == 1) {
-    txt[0] = '\0';
+    txt[0] = NULL_CHAR;
   }
   if (WHETHER (p, SERIES_MODE)) {
     PACK_T *u = PACK (p);

@@ -85,15 +85,15 @@ void genie_f_and_becomes (NODE_T * p, MOID_T * ref, GENIE_PROCEDURE * f)
 /* Environment enquiries. */
 
 A68_ENV_INT (genie_int_lengths, 3);
-A68_ENV_INT (genie_int_shorts, 1);
+A68_ENV_INT (genie_int_shorths, 1);
 A68_ENV_INT (genie_real_lengths, 3);
-A68_ENV_INT (genie_real_shorts, 1);
+A68_ENV_INT (genie_real_shorths, 1);
 A68_ENV_INT (genie_complex_lengths, 3);
-A68_ENV_INT (genie_complex_shorts, 1);
+A68_ENV_INT (genie_complex_shorths, 1);
 A68_ENV_INT (genie_bits_lengths, 3);
-A68_ENV_INT (genie_bits_shorts, 1);
+A68_ENV_INT (genie_bits_shorths, 1);
 A68_ENV_INT (genie_bytes_lengths, 2);
-A68_ENV_INT (genie_bytes_shorts, 1);
+A68_ENV_INT (genie_bytes_shorths, 1);
 A68_ENV_INT (genie_int_width, INT_WIDTH);
 A68_ENV_INT (genie_long_int_width, LONG_INT_WIDTH);
 A68_ENV_INT (genie_longlong_int_width, LONGLONG_INT_WIDTH);
@@ -2045,141 +2045,6 @@ A68_CMP_STRING (genie_lt_string, p, <);
 A68_CMP_STRING (genie_gt_string, p, >);
 A68_CMP_STRING (genie_le_string, p, <=);
 A68_CMP_STRING (genie_ge_string, p, >=);
-
-/* Operators for ROWS. */
-
-/*!
-\brief OP ELEMS = (ROWS) INT
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_monad_elems (NODE_T * p)
-{
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  POP_REF (p, &z);
-/* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
-  TEST_INIT (p, z, MODE (ROWS));
-  TEST_NIL (p, z, MODE (ROWS));
-  GET_DESCRIPTOR (x, t, &z);
-  PUSH_INT (p, get_row_size (t, x->dimensions));
-}
-
-/*!
-\brief OP LWB = (ROWS) INT
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_monad_lwb (NODE_T * p)
-{
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  POP_REF (p, &z);
-/* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
-  TEST_INIT (p, z, MODE (ROWS));
-  TEST_NIL (p, z, MODE (ROWS));
-  GET_DESCRIPTOR (x, t, &z);
-  PUSH_INT (p, t->lower_bound);
-}
-
-/*!
-\brief OP UPB = (ROWS) INT
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_monad_upb (NODE_T * p)
-{
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  POP_REF (p, &z);
-/* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
-  TEST_INIT (p, z, MODE (ROWS));
-  TEST_NIL (p, z, MODE (ROWS));
-  GET_DESCRIPTOR (x, t, &z);
-  PUSH_INT (p, t->upper_bound);
-}
-
-/*!
-\brief OP ELEMS = (INT, ROWS) INT
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_dyad_elems (NODE_T * p)
-{
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t, *u;
-  A68_INT k;
-  POP_REF (p, &z);
-/* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
-  TEST_INIT (p, z, MODE (ROWS));
-  TEST_NIL (p, z, MODE (ROWS));
-  POP_INT (p, &k);
-  GET_DESCRIPTOR (x, t, &z);
-  if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  u = &(t[k.value - 1]);
-  PUSH_INT (p, ROW_SIZE (u));
-}
-
-/*!
-\brief OP LWB = (INT, ROWS) INT
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_dyad_lwb (NODE_T * p)
-{
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  A68_INT k;
-  POP_REF (p, &z);
-/* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
-  TEST_INIT (p, z, MODE (ROWS));
-  TEST_NIL (p, z, MODE (ROWS));
-  POP_INT (p, &k);
-  GET_DESCRIPTOR (x, t, &z);
-  if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  PUSH_INT (p, t[k.value - 1].lower_bound);
-}
-
-/*!
-\brief OP UPB = (INT, ROWS) INT
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_dyad_upb (NODE_T * p)
-{
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  A68_INT k;
-  POP_REF (p, &z);
-/* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
-  TEST_INIT (p, z, MODE (ROWS));
-  TEST_NIL (p, z, MODE (ROWS));
-  POP_INT (p, &k);
-  GET_DESCRIPTOR (x, t, &z);
-  if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  PUSH_INT (p, t[k.value - 1].upper_bound);
-}
 
 /* RNG functions are in gsl.c.*/
 

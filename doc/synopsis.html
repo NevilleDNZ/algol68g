@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9</small>
+<small>Documentation for Algol 68 Genie Mark 9.1</small>
 </td>
 </table>
 
@@ -43,7 +43,8 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionlist">Listing options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionint">Interpreter options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionmisc">Miscellaneous options</a><br>
-&middot;&nbsp;<a href="synopsis.html#monitor">Monitor commands</a>
+&middot;&nbsp;<a href="synopsis.html#monitor">The monitor</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#monexp">Monitor expressions</a>
 </small>
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
@@ -56,11 +57,12 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9</b></small>
+<small><b>Algol68G Mark 9.1</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
@@ -73,7 +75,6 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 &nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
 <br>
 &nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
@@ -160,13 +161,13 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 
 <h4><a name="optionone"></a>One-liners</h4>
 <dl compact>
-<dt><b>p</b>rint <var>unit</var>
-<dd><var>Command-line only</var>. Prints the value yielded by Algol 68 unit <var>unit</var>. In this way Algol68G can execute one-liners from the command-line. The one-liner is written in file <i>.a68g.x</i> in the working directory.
+<dt><b>p</b>rint <i>unit</i>
+<dd><i>Command-line only</i>. Prints the value yielded by Algol 68 unit <i>unit</i>. In this way Algol68G can execute one-liners from the command-line. The one-liner is written in file <i>.a68g.x</i> in the working directory.
 <ul>
 <li><code>$ a68g -p "sqrt (2 * pi)"</code>
 </ul>
-<dt><b>e</b>xecute <var>unit</var>
-<dd><var>Command-line only</var>. Executes Algol 68 unit <var>unit</var>. In this way Algol68G can execute one-liners from the command-line. The one-liner is written in file <i>.a68g.x</i> in the working directory.
+<dt><b>e</b>xecute <i>unit</i>
+<dd><i>Command-line only</i>. Executes Algol 68 unit <i>unit</i>. In this way Algol68G can execute one-liners from the command-line. The one-liner is written in file <i>.a68g.x</i> in the working directory.
 <ul>
 <li><code>$ a68g -e "# Young Gauss # INT sum := 0; FOR i TO 99 DO sum +:= i OD; print (sum)"</code>
 </ul>
@@ -177,27 +178,27 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <p>Algol 68 relieves the programmer from managing memory, hence Algol68G manages allocation and de-allocation of heap space. However, if memory size were not bounded, Algol68G might claim all available memory before the garbage collector is called. Since this could impede overall system performance, memory size is bounded. 
 </p>
 <dl compact>
-<dt><b>heap</b> <var>number</var>
-<dd>Sets heap size to <var>number</var> bytes. This is the size of the block that will actually hold data, not handles. At runtime Algol68G will use the heap to store temporary arrays, so even a program that has no heap generators requires heap space, and can invoke the garbage collector.
+<dt><b>heap</b> <i>number</i>
+<dd>Sets heap size to <i>number</i> bytes. This is the size of the block that will actually hold data, not handles. At runtime Algol68G will use the heap to store temporary arrays, so even a program that has no heap generators requires heap space, and can invoke the garbage collector.
 <ul>
 <li><code>PR heap=32M PR
 </code></ul>
-<dt><b>handles</b> <var>number</var>
-<dd>Sets handle space size to <var>number</var> bytes. This is the size of the block that hold handles that point to data in the heap. A reference to the heap does not point to the heap, but to a handle as to make it possible for the garbage collector to compact the heap. 
+<dt><b>handles</b> <i>number</i>
+<dd>Sets handle space size to <i>number</i> bytes. This is the size of the block that hold handles that point to data in the heap. A reference to the heap does not point to the heap, but to a handle as to make it possible for the garbage collector to compact the heap. 
 <ul>
 <li><code>PR handles=2M PR
 </code></ul>
-<dt><b>frame</b> <var>number</var>
-<dd>Sets frame stack size to <var>number</var> bytes. A deeply recursive program with many local variables may require a large frame stack space.
+<dt><b>frame</b> <i>number</i>
+<dd>Sets frame stack size to <i>number</i> bytes. A deeply recursive program with many local variables may require a large frame stack space.
 <ul>
 <li><code>PR frame=1M PR
 </code></ul>
-<dt><b>stack</b> <var>number</var>
-<dd>Sets expression stack size to <var>number</var> bytes. A deeply recursive program may require a large expression stack space.
+<dt><b>stack</b> <i>number</i>
+<dd>Sets expression stack size to <i>number</i> bytes. A deeply recursive program may require a large expression stack space.
 <ul>
 <li><code>PR stack=512k PR
 </code></ul>
-<dt><b>overhead</b> <var>number</var>
+<dt><b>overhead</b> <i>number</i>
 <dd>Sets the overhead, which is a safety margin, for the expression stack and the frame stack. Since stacks grow by relatively small amounts at a time, the interpreter checks stack sizes only where recursion may set in. It is checked whether stacks have grown into the overhead. For example, if the frame stack size is 512 kB and the overhead is set to 128 kB, the interpreter will signal an imminent stack overflow when the frame stack pointer exceeds 512&nbsp;-&nbsp;128&nbsp;=&nbsp;384 kB.
 <ul>
 <li><code>PR overhead=64k PR
@@ -230,19 +231,21 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <br>
 <h4><a name="optionint"></a>Interpreter options</h4>
 <dl compact>
+<dt><b>mon</b>itor, <b>debug</b>
+<dd>Upon encountering a runtime error, instead of terminating execution, the <a href="#monitor">monitor</a> will be entered.
 <dt><b>a</b>ssertions, <b>noa</b>ssertions
 <dd>Starts (or stops) elaboration of assertions.
 <dt><b>br</b>eakpoint, <b>nobr</b>eakpoint
-<dd>Starts (or stops) setting breakpoints on following program lines..
+<dd>Starts (or stops) setting breakpoints on following program lines.
 <dt><b>tr</b>ace, <b>notr</b>ace
 <dd>Starts (or stops) tracing of a program.
-<dt><b>prec</b>ision <var>number</var>
-<dd>Sets precision for LONG LONG modes to <var>number</var> significant digits. The precision cannot be less than the precision of LONG modes.
+<dt><b>prec</b>ision <i>number</i>
+<dd>Sets precision for LONG LONG modes to <i>number</i> significant digits. The precision cannot be less than the precision of LONG modes.
 <ul><i>
 <li><code>$ a68g -prec=1000 -p "long long pi"
 </code></i></ul>
-<dt><b>ti</b>melimit <var>number</var>
-<dd>Interrupts the interpreter after <var>number</var> seconds; a <var>time limit exceeded</var> runtime error will be given.
+<dt><b>ti</b>melimit <i>number</i>
+<dd>Interrupts the interpreter after <i>number</i> seconds; a <i>time limit exceeded</i> runtime error will be given.
 </dl>
 
 <br>
@@ -282,49 +285,110 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <dd>Enables warning messages.
 </dl>
 
-<h3><a name="monitor"></a>Monitor commands</h3>
+<br>
+<h3><a name="monitor"></a>The monitor</h3>
 
 <p>
-Algol68G has a monitor for basic debugging of a running program. The monitor is invoked when Algol68G receives signal SIGINT (which usually comes from typing CTRL-C) or when standard procedure <code>break</code> is called. Note that breakpoints can be indicated a&nbsp;priori through pragmats as well.
+Algol68G has a monitor for basic debugging of a running program. The monitor is invoked when Algol68G receives signal SIGINT (which usually comes from typing CTRL-C), when standard procedures <code>debug</code> or <code>break</code> are called, or when a runtime error occurs when option <code>monitor</code> is in effect. Breakpoints can be indicated a&nbsp;priori through pragmats as well.
+
+<p>
+Currently, the monitor recognises next commands:
 <p>
 <dl compact>
-<dt><b>b</b>reakpoint <var>n</var>
-<dd>Set breakpoints on units in line <var>n</var>.
+
+<dt><b>b</b>reakpoint <i>n</i> <i>[expression]</i>
+<dd>Set breakpoints on units in line <i>n</i>. 
+If you supply <a href="#monexp"><i>expression</i></a> then interruption will only take place if this expression yields <code>TRUE</code>.
+The interpreter can only break units in serial-clauses and enquiry-clauses, collateral-clauses, and unit-lists in in-parts of integer-case-clauses and united-case-clauses.
+Units in other positions cannot trigger a breakpoint, unless they contain a call to <code>monitor</code> or <code>debug</code>.
+
 <dt><b>b</b>reakpoint
 <dd>Clear all breakpoints.
-<dt><b>c</b>ontinue
+
+<dt><b>ca</b>lls <i>n</i>
+<dd>Print <i>n</i> frames in the call stack
+(default <i>n</i>=3).
+
+<dt><b>c</b>ontinue, <b>r</b>esume
 <dd>Continue execution.
-<dt><b>e</b>xamine <var>n</var>
-<dd>Write value of symbols named <var>n</var> in the call stack.
+
+<dt><b>do</b> <i>command</i>, <b>exec</b> <i>command</i>
+<dd>Pass <i>command</i> to the shell and print the return code.
+
+<dt><b>e</b>valuate <i>expression</i>, <b>x</b> <i>expression</i>
+<dd>Evaluate <a href="#monexp"><i>expression</i></a> and show its result.
+
+<dt><b>e</b>xamine <i>n</i>
+<dd>Print value of all identifiers named <i>n</i> in the call stack.
+
+<dt><b>exi</b>t, <b>hx</b>, <b>q</b>uit
+<dd>Terminates the program.
+
 <dt><b>f</b>rame
-<dd>Write the current call stack frame.
-<dt><b>hea</b>p
-<dd>Write contents of the heap.
+<dd>Print contents of the current stack frame. This is equivalent to <code>stack 1</code>.
+
+<dt><b>hea</b>p <i>n</i>
+<dd>Print contents of the heap with address not greater than <i>n</i>.
+
 <dt><b>hel</b>p
 <dd>Print brief help text.
+
 <dt><b>ht</b>
-<dd>Suppress program output to tty.
-<dt><b>hx</b>
-<dd>Terminates the program.
-<dt><b>l</b>ist <var>n</var>
-<dd>Show <var>n</var> lines around the interrupted line 
-(default <var>n</var>=10).
-<dt><b>n</b>ext
-<dd>single step.
-<dt><b>sta</b>ck <var>n</var>
-<dd>Write <var>n</var> frames in the call stack frames 
-(default <var>n</var>=3).
-<dt><b>ste</b>p
-<dd>Single step.
-<dt><b>q</b>uit
-<dd>Terminates the program.
-<dt><b>r</b>esume
-<dd>Same as continue.
+<dd>Suppress program output to standard output.
+
+<dt><b>l</b>ist <i>n</i> <i>m</i>
+<dd>If <i>m</i> is omitted, show <i>n</i> lines around the interrupted line 
+(default <i>n</i>=10).
+If <i>n</i> and <i>m</i> are supplied, show lines <i>n</i> upto <i>m</i>.
+
+<dt><b>n</b>ext, <b>ste</b>p
+<dd>Resume execution until the next unit in the program that can be a breakpoint (coarse single-stepping). 
+
+<dt><b>sta</b>ck <i>n</i>
+<dd>Print <i>n</i> frames in the stack
+(default <i>n</i>=3).
+
 <dt><b>w</b>here
-<dd>Show the interrupted line.
+<dd>Show the line where interruption took place.
+
 </dl>
-</td>
-</table>
+
+<h4><a name="monexp"></a>Monitor expressions</h4>
+<p>
+Monitor expressions provide basic means to do arithmetic in the monitor, and to change stored values.
+Monitor expression syntax is similar to Algol 68 syntax.
+Important points are:
+<ul>
+<li>Expressions, assignment sources and assignment destinations are strictly evaluated from left to right.
+<li>Actual assignment is done from right to left.
+<pre>
+===> <b>x a[1] := 0</b>
+(REF INT) refers to heap(892000)
+(INT) +0
+===> <b>x a[2] := a[1] := 1</b>
+(REF INT) refers to heap(892016)
+(INT) +1
+</pre>
+<li>Only procedures and operators from standard environ can be called, and operator priorities are taken from standard environ.
+<li>Operands are denoters, identifiers, closed-clauses, calls and slices. Casts are also operands but can only be made to mode <code>[LONG][LONG] REAL</code> or to a (multiple) reference to an indicant:
+<pre>
+===> <b>x REAL (1)</b>
+(REAL) +1.00000000000000E  +0
+===> <b>x REF TREE (k) IS NIL</b>
+(BOOL) F
+===> <b>x REF TREE (k) := NIL</b>
+(REF REF STRUCT (INT f, REF SELF next)) refers to heap(600000)
+(REF STRUCT (INT f, REF SELF next)) NIL
+</pre>
+<li>Slicing does not support trimmers. Only <code>[</code> and <code>]</code>  are allowed as brackets for indexers.
+<li>Selections are allowed, but not multiple selections.
+<pre>
+===> <b>x im OF z[n + 1]</b>
+(REF LONG REAL) refers to frame(80)
+(LONG REAL) +3.1415926535897932384626433832795029
+</pre>
+<li>Dereferencing is the only coercion in arithmetic. Names can be compared through <code>IS</code> and <code>ISNT</code>, and <code>NIL</code> is supplied, but there is no soft coercion of operands.
+</ul>
 
 <p>
 <br>
@@ -336,7 +400,7 @@ Algol68G has a monitor for basic debugging of a running program. The monitor is 
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
 </font>
 </td>
 </table>

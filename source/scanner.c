@@ -83,16 +83,7 @@ static void unworthy (SOURCE_LINE_T * u, char *v, char ch)
 
 static void to_unix_nl (char *b)
 {
-#ifdef PRE_MACOS_X_VERSION
-/* On the Mac, newlines are \r in stead of \n. */
-  for (; b[0] != NULL_CHAR; b++) {
-    if (b[0] == CR_CHAR) {
-      b[0] = NEWLINE_CHAR;
-    }
-  }
-#else
   (void) b;
-#endif
 }
 
 /*!
@@ -157,11 +148,11 @@ static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
   v++;
   while (u != NULL) {
     while (v[0] != NULL_CHAR) {
-      if (v[0] == '"' && v[1] != '"') {
+      if (v[0] == QUOTE_CHAR && v[1] != QUOTE_CHAR) {
 	*top = u;
 	*ch = &v[1];
 	return (A_TRUE);
-      } else if (v[0] == '"' && v[1] == '"') {
+      } else if (v[0] == QUOTE_CHAR && v[1] == QUOTE_CHAR) {
 	v += 2;
       } else {
 	v++;
@@ -330,7 +321,7 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
       SOURCE_LINE_T *start_l = u;
       char *start_c = v;
 /* STRINGs must be skipped. */
-      if (v[0] == '"') {
+      if (v[0] == QUOTE_CHAR) {
 	SCAN_ERROR (!skip_string (&u, &v), start_l, start_c, ERROR_UNTERMINATED_STRING);
       }
 /* COMMENTS must be skipped. */
@@ -448,7 +439,7 @@ been included will not be included a second time - it will be ignored.
 	  v++;
 	}
 /* Scan quoted filename. */
-	SCAN_ERROR ((v[0] != '"' && v[0] != '\''), start_l, start_c, ERROR_INCORRECT_FILENAME);
+	SCAN_ERROR ((v[0] != QUOTE_CHAR && v[0] != '\''), start_l, start_c, ERROR_INCORRECT_FILENAME);
 	delim = (v++)[0];
 	n = 0;
 	fnb[0] = NULL_CHAR;
@@ -604,7 +595,7 @@ static void append_environ (MODULE_T * module, char *str, SOURCE_LINE_T ** ref_l
   char *text = new_string (str);
   while (text != NULL && text[0] != NULL_CHAR) {
     char *car = text;
-    char *cdr = strchr (text, '!');
+    char *cdr = a68g_strchr (text, '!');
     int zero_line_num = 0;
     cdr[0] = NULL_CHAR;
     text = &cdr[1];
@@ -732,7 +723,7 @@ static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s)
 
 static void get_char (MODULE_T * module, char *ref_c, SOURCE_LINE_T ** ref_l, char **ref_s)
 {
-  while (*ref_c != STOP_CHAR && (IS_SPACE (*ref_c) || (*ref_c == '\0'))) {
+  while (*ref_c != STOP_CHAR && (IS_SPACE (*ref_c) || (*ref_c == NULL_CHAR))) {
     if (*ref_l != NULL) {
       (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A_TRUE : A_FALSE);
     }
@@ -791,7 +782,7 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
   while (stop == A_FALSE) {
     SCAN_ERROR (c == STOP_CHAR, start_l, start_c, "unterminated pragment");
 /* A ".." or '..' delimited string in a PRAGMAT. */
-    if ((c == '"' || (c == '\'' && module->options.stropping == UPPER_STROPPING)) && (type == STYLE_I_PRAGMAT_SYMBOL || type == BOLD_PRAGMAT_SYMBOL)) {
+    if ((c == QUOTE_CHAR || (c == '\'' && module->options.stropping == UPPER_STROPPING)) && (type == STYLE_I_PRAGMAT_SYMBOL || type == BOLD_PRAGMAT_SYMBOL)) {
       char delim = c;
       BOOL_T eos = A_FALSE;
       ADD_ONE_CHAR (c);
@@ -1053,7 +1044,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     } else {			/* if (module->options.stropping == QUOTE_STROPPING) */
       format_items = "/%\\+-.ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     }
-    if (strchr (format_items, c) != NULL) {
+    if (a68g_strchr (format_items, c) != NULL) {
 /* General format items. */
       (sym++)[0] = c;
       sym[0] = NULL_CHAR;
@@ -1193,27 +1184,27 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       *att = INT_DENOTER;
     }
     sym[0] = NULL_CHAR;
-  } else if (c == '"') {
+  } else if (c == QUOTE_CHAR) {
 /* STRING denoter. */
     BOOL_T stop = A_FALSE;
     while (!stop) {
       c = next_char (module, ref_l, ref_s);
-      while (c != '"' && c != STOP_CHAR) {
+      while (c != QUOTE_CHAR && c != STOP_CHAR) {
 	SCAN_ERROR (EOL (c), *start_l, *start_c, "string exceeds end of line");
 	(sym++)[0] = c;
 	c = next_char (module, ref_l, ref_s);
       }
       SCAN_ERROR (*ref_l == NULL, *start_l, *start_c, "unterminated string");
       c = next_char (module, ref_l, ref_s);
-      if (c == '"') {
-	(sym++)[0] = '\"';
+      if (c == QUOTE_CHAR) {
+	(sym++)[0] = QUOTE_CHAR;
       } else {
 	stop = A_TRUE;
       }
     }
     sym[0] = NULL_CHAR;
     *att = in_format ? LITERAL : ROW_CHAR_DENOTER;
-  } else if (strchr ("#$()[]{},;@", c) != NULL) {
+  } else if (a68g_strchr ("#$()[]{},;@", c) != NULL) {
 /* Single character symbols. */
     (sym++)[0] = c;
     next_char (module, ref_l, ref_s);
@@ -1267,7 +1258,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     char *scanned = sym;
     (sym++)[0] = c;
     c = next_char (module, ref_l, ref_s);
-    if (strchr (NOMADS, c) != NULL) {
+    if (a68g_strchr (NOMADS, c) != NULL) {
       (sym++)[0] = c;
       c = next_char (module, ref_l, ref_s);
     }
@@ -1297,12 +1288,12 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     } else {
       *att = OPERATOR;
     }
-  } else if (strchr (MONADS, c) != NULL || strchr (NOMADS, c) != NULL) {
+  } else if (a68g_strchr (MONADS, c) != NULL || a68g_strchr (NOMADS, c) != NULL) {
 /* Operator. */
     char *scanned = sym;
     (sym++)[0] = c;
     c = next_char (module, ref_l, ref_s);
-    if (strchr (NOMADS, c) != NULL) {
+    if (a68g_strchr (NOMADS, c) != NULL) {
       (sym++)[0] = c;
       c = next_char (module, ref_l, ref_s);
     }

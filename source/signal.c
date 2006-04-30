@@ -25,6 +25,12 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
+static void sigttin_handler (int i)
+{
+  (void) i;
+  ABNORMAL_END (A_TRUE, "background process attempts reading from disconnected terminal", NULL);
+}
+
 /*!
 \brief raise SYSREQUEST so you get to a monitor
 \param i
@@ -36,11 +42,10 @@ static void sigint_handler (int i)
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
   if (!(sys_request_flag || in_monitor)) {
     sys_request_flag = A_TRUE;
-#ifdef HAVE_CURSES
-    genie_curses_end (NULL);
-#endif
+/*
   } else {
-    a68g_exit (EXIT_SUCCESS);	/* or FAILURE :-) */
+    a68g_exit (EXIT_FAILURE);
+*/
   }
 }
 
@@ -51,4 +56,7 @@ static void sigint_handler (int i)
 void install_signal_handlers (void)
 {
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
+#ifdef HAVE_UNIX
+  ABNORMAL_END (signal (SIGTTIN, sigttin_handler) == SIG_ERR, "cannot install SIGTTIN handler", NULL);
+#endif
 }
