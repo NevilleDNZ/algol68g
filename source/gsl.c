@@ -315,6 +315,16 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
 
+#define GSL_2_INT_FUNCTION(p, f)\
+  A68_REAL *x, *y;\
+  gsl_sf_result r;\
+  int status;\
+  POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);\
+  (void) gsl_set_error_handler_off ();\
+  status = f ((int) x->value, y->value, &r);\
+  math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
+  x->value = r.val
+
 #define GSL_3_FUNCTION(p, f)\
   A68_REAL *x, *y, *z;\
   gsl_sf_result r;\
@@ -468,17 +478,8 @@ double inverfc (double y)
     x = u * (1.0 - s * (s * 0.124610454613712 + 0.5)) - ((((-0.0728846765585675 * t + 0.269999308670029) * t + 0.150689047360223) * t + 0.116065025341614) * t + 0.499999303439796) * t;
     t = 3.97886080735226 / (x + 3.97886080735226);
     u = t - 0.5;
-    s =
-      (((((((((0.00112648096188977922
-	       * u + 1.05739299623423047e-4) * u -
-	      0.00351287146129100025) * u - 7.71708358954120939e-4) * u +
-	    0.00685649426074558612) * u + 0.00339721910367775861) * u - 0.011274916933250487) * u - 0.0118598117047771104) * u + 0.0142961988697898018) * u + 0.0346494207789099922) * u + 0.00220995927012179067;
-    s =
-      ((((((((((((s
-		  * u - 0.0743424357241784861) * u -
-		 0.105872177941595488) * u + 0.0147297938331485121) * u +
-	       0.316847638520135944) * u + 0.713657635868730364) * u +
-	     1.05375024970847138) * u + 1.21448730779995237) * u + 1.16374581931560831) * u + 0.956464974744799006) * u + 0.686265948274097816) * u + 0.434397492331430115) * u + 0.244044510593190935) * t - z * exp (x * x - 0.120782237635245222);
+    s = (((((((((0.00112648096188977922 * u + 1.05739299623423047e-4) * u - 0.00351287146129100025) * u - 7.71708358954120939e-4) * u + 0.00685649426074558612) * u + 0.00339721910367775861) * u - 0.011274916933250487) * u - 0.0118598117047771104) * u + 0.0142961988697898018) * u + 0.0346494207789099922) * u + 0.00220995927012179067;
+    s = ((((((((((((s * u - 0.0743424357241784861) * u - 0.105872177941595488) * u + 0.0147297938331485121) * u + 0.316847638520135944) * u + 0.713657635868730364) * u + 1.05375024970847138) * u + 1.21448730779995237) * u + 1.16374581931560831) * u + 0.956464974744799006) * u + 0.686265948274097816) * u + 0.434397492331430115) * u + 0.244044510593190935) * t - z * exp (x * x - 0.120782237635245222);
     x += s * (x * s + 1.0);
     return (y <= 1.0 ? x : -x);
   }
@@ -902,7 +903,7 @@ void genie_airy_bi_deriv_real (NODE_T * p)
 
 void genie_bessel_jn_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_Jn_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_Jn_e);
 }
 
 /*!
@@ -912,7 +913,7 @@ void genie_bessel_jn_real (NODE_T * p)
 
 void genie_bessel_yn_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_Yn_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_Yn_e);
 }
 
 /*!
@@ -922,7 +923,7 @@ void genie_bessel_yn_real (NODE_T * p)
 
 void genie_bessel_in_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_In_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_In_e);
 }
 
 /*!
@@ -933,7 +934,7 @@ void genie_bessel_in_real (NODE_T * p)
 
 void genie_bessel_exp_in_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_In_scaled_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_In_scaled_e);
 }
 
 /*!
@@ -944,7 +945,7 @@ void genie_bessel_exp_in_real (NODE_T * p)
 
 void genie_bessel_kn_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_Kn_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_Kn_e);
 }
 
 /*!
@@ -954,7 +955,7 @@ void genie_bessel_kn_real (NODE_T * p)
 
 void genie_bessel_exp_kn_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_Kn_scaled_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_Kn_scaled_e);
 }
 
 /*!
@@ -964,7 +965,7 @@ void genie_bessel_exp_kn_real (NODE_T * p)
 
 void genie_bessel_jl_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_jl_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_jl_e);
 }
 
 /*!
@@ -974,7 +975,7 @@ void genie_bessel_jl_real (NODE_T * p)
 
 void genie_bessel_yl_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_yl_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_yl_e);
 }
 
 /*!
@@ -984,7 +985,7 @@ void genie_bessel_yl_real (NODE_T * p)
 
 void genie_bessel_exp_il_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_il_scaled_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_il_scaled_e);
 }
 
 /*!
@@ -994,7 +995,7 @@ void genie_bessel_exp_il_real (NODE_T * p)
 
 void genie_bessel_exp_kl_real (NODE_T * p)
 {
-  GSL_2_FUNCTION (p, gsl_sf_bessel_kl_scaled_e);
+  GSL_2_INT_FUNCTION (p, gsl_sf_bessel_kl_scaled_e);
 }
 
 /*!
@@ -1169,11 +1170,9 @@ the online version of the latter contains corrections to the print version.
 #define LCG(n) ((69069UL * n) & 0xffffffffUL)
 #define TAUSWORTHE_MASK 0xffffffffUL
 
-typedef struct
-{
+typedef struct {
   unsigned long int z1, z2, z3, z4;
-}
-taus113_state_t;
+} taus113_state_t;
 
 static taus113_state_t rng_state;
 

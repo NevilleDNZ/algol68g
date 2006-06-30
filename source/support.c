@@ -25,12 +25,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
-#ifdef HAVE_UNIX
-#ifndef WIN32_VERSION
+#if ! defined WIN32_VERSION
 #include <sys/resource.h>
 #endif
+
 #include <sys/time.h>
-#endif
 
 ADDR_T fixed_heap_pointer, temp_heap_pointer;
 
@@ -76,7 +75,7 @@ BYTE_T *get_temp_heap_space (size_t s)
 
 void get_stack_size (void)
 {
-#if defined HAVE_UNIX && !defined WIN32_VERSION
+#if !defined WIN32_VERSION
   struct rlimit limits;
   RESET_ERRNO;
   ABNORMAL_END (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0), "getrlimit fails", NULL);
@@ -90,7 +89,7 @@ void get_stack_size (void)
 #elif defined WIN32_VERSION
   stack_size = MEGABYTE;
 #else
-  stack_size = 0;		/* No stack check. */
+  stack_size = 0;               /* No stack check. */
 #endif
   stack_limit = (stack_size > (128 * KILOBYTE) ? (stack_size - storage_overhead) : stack_size / 2);
 }
@@ -352,8 +351,7 @@ BOOL_T whether (NODE_T * p, ...)
   va_list vl;
   int a;
   va_start (vl, p);
-  while ((a = va_arg (vl, int)) != 0)
-  {
+  while ((a = va_arg (vl, int)) != 0) {
     if (p != NULL && (a == WILDCARD || (a >= 0 ? a == ATTRIBUTE (p) : -a != ATTRIBUTE (p)))) {
       p = NEXT (p);
     } else {
@@ -643,8 +641,10 @@ void *get_heap_space (size_t s)
 
 char *new_string (char *t)
 {
-  char *z = (char *) get_heap_space ((size_t) (strlen (t) + 1));
-  return (strcpy (z, t));
+  int n = (int) (strlen (t) + 1);
+  char *z = (char *) get_heap_space (n);
+  bufcpy (z, t, n);
+  return (z);
 }
 
 /*!
@@ -655,8 +655,10 @@ char *new_string (char *t)
 
 char *new_fixed_string (char *t)
 {
-  char *z = (char *) get_fixed_heap_space ((size_t) (strlen (t) + 1));
-  return (strcpy (z, t));
+  int n = (int) (strlen (t) + 1);
+  char *z = (char *) get_fixed_heap_space (n);
+  bufcpy (z, t, n);
+  return (z);
 }
 
 /*!
@@ -949,7 +951,7 @@ double a68g_log1p (double x)
 {
   volatile double y;
   y = 1 + x;
-  return log (y) - ((y - 1) - x) / y;	/* cancel errors with IEEE arithmetic. */
+  return log (y) - ((y - 1) - x) / y;   /* cancel errors with IEEE arithmetic. */
 }
 
 /*!
@@ -1043,4 +1045,62 @@ char *a68g_strchr (char *str, int c)
 char *a68g_strrchr (char *str, int c)
 {
   return (strrchr (str, c));
+}
+
+/*!
+\brief safely append to buffer
+\param dst
+\param src
+\param siz size of dst
+**/
+
+void bufcat (char *dst, char *src, int len)
+{
+  char *d = dst, *s = src;
+  int n = len, dlen;
+/* Find end of dst and left-adjust; do not go past end */
+  for (; n-- != 0 && d[0] != NULL_CHAR; d++) {
+    ;
+  }
+  dlen = d - dst;
+  n = len - dlen;
+  if (n > 0) {
+    while (s[0] != NULL_CHAR) {
+      if (n != 1) {
+        (d++)[0] = s[0];
+        n--;
+      }
+      s++;
+    }
+    d[0] = NULL_CHAR;
+  }
+/* Better sure than sorry */
+  dst[len - 1] = NULL_CHAR;
+}
+
+/*!
+\brief safely copy to buffer
+\param dst
+\param src
+\param siz size of dst
+**/
+
+void bufcpy (char *dst, char *src, int len)
+{
+  char *d = dst, *s = src;
+  int n = len;
+/* Copy as many fits */
+  if (n > 0 && --n != 0) {
+    do {
+      if (((d++)[0] = (s++)[0]) == NULL_CHAR) {
+        break;
+      }
+    } while (--n > 0);
+  }
+  if (n == 0 && len > 0) {
+/* Not enough room in dst, so terminate */
+    d[0] = NULL_CHAR;
+  }
+/* Better sure than sorry */
+  dst[len - 1] = NULL_CHAR;
 }

@@ -1,4 +1,4 @@
-.Dd April 2006
+.Dd July 2006
 .Dt A68G 1
 .
 .Sh NAME
@@ -46,9 +46,11 @@ The interpreter offers many runtime checks and is pedantic rather than fast.
 .
 .Sh OPTIONS
 Options are passed to a68g either from the file .a68g.rc in the 
-working directory, the command-line or through pragmats. 
-Precedence is as follows: 
-pragmats supersede command-line options, 
+working directory, the environment variable A68G_OPTIONS, 
+the command-line or from pragmats. 
+.Pp
+Option precedence is as follows: 
+pragmat options supersede command-line options, 
 command-line options supersede options in environment variable A68G_OPTIONS, 
 A68G_OPTIONS supersedes options in .a68g.rc. 
 .Pp
@@ -59,7 +61,13 @@ thus be used, for example, to generate a cross reference for a
 particular part of the program. 
 .Pp
 Options are not case sensitive. In the list below, uppercase letters are
-mandatory for recognition.
+mandatory for recognition. For instance
+.Pp
+        a68g -prec 200 -ti 60 ...
+.Pp
+means
+.Pp
+        a68g -precision 200 -timelimit 60 ...
 .Pp
 Where numeric arguments are required, suffix 'k', 'M' or 'G' is allowed
 for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.

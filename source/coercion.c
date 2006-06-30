@@ -98,6 +98,7 @@ static void coerce_unit (NODE_T *, SOID_T *);
 
 static char *mode_error_text (MOID_T * p, MOID_T * q, int context, int deflex, int depth)
 {
+#define TAIL(z) (&(z)[strlen (z)])
   static char txt[BUFFER_SIZE];
   if (depth == 1) {
     txt[0] = NULL_CHAR;
@@ -106,73 +107,74 @@ static char *mode_error_text (MOID_T * p, MOID_T * q, int context, int deflex, i
     PACK_T *u = PACK (p);
     for (; u != NULL; FORWARD (u)) {
       if (MOID (u) != NULL) {
-	if (WHETHER (MOID (u), SERIES_MODE)) {
-	  mode_error_text (MOID (u), q, context, deflex, depth + 1);
-	} else if (!whether_coercible (MOID (u), q, context, deflex)) {
-	  int len = strlen (txt);
-	  if (len > BUFFER_SIZE / 2) {
-	    sprintf (&txt[strlen (txt)], " etcetera");
-	  } else {
-	    if (strlen (txt) > 0) {
-	      sprintf (&txt[strlen (txt)], " and ");
-	    }
-	    sprintf (&txt[strlen (txt)], moid_to_string (MOID (u), MOID_ERROR_WIDTH));
-	  }
-	}
+        if (WHETHER (MOID (u), SERIES_MODE)) {
+          mode_error_text (MOID (u), q, context, deflex, depth + 1);
+        } else if (!whether_coercible (MOID (u), q, context, deflex)) {
+          int len = strlen (txt);
+          if (len > BUFFER_SIZE / 2) {
+            snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
+          } else {
+            if (strlen (txt) > 0) {
+              snprintf (TAIL (txt), BUFFER_SIZE, " and ");
+            }
+            snprintf (TAIL (txt), BUFFER_SIZE, moid_to_string (MOID (u), MOID_ERROR_WIDTH));
+          }
+        }
       }
     }
     if (depth == 1) {
-      sprintf (&txt[strlen (txt)], " cannot be coerced to %s", moid_to_string (q, MOID_ERROR_WIDTH));
+      snprintf (TAIL (txt), BUFFER_SIZE, " cannot be coerced to %s", moid_to_string (q, MOID_ERROR_WIDTH));
     }
   } else if (WHETHER (p, STOWED_MODE) && WHETHER (q, FLEX_SYMBOL)) {
     PACK_T *u = PACK (p);
     for (; u != NULL; FORWARD (u)) {
       if (!whether_coercible (MOID (u), SLICE (SUB (q)), context, deflex)) {
-	int len = strlen (txt);
-	if (len > BUFFER_SIZE / 2) {
-	  sprintf (&txt[strlen (txt)], " etcetera");
-	} else {
-	  if (strlen (txt) > 0) {
-	    sprintf (&txt[strlen (txt)], " and ");
-	  }
-	  sprintf (&txt[strlen (txt)], moid_to_string (MOID (u), MOID_ERROR_WIDTH));
-	}
+        int len = strlen (txt);
+        if (len > BUFFER_SIZE / 2) {
+          snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
+        } else {
+          if (strlen (txt) > 0) {
+            snprintf (TAIL (txt), BUFFER_SIZE, " and ");
+          }
+          snprintf (TAIL (txt), BUFFER_SIZE, moid_to_string (MOID (u), MOID_ERROR_WIDTH));
+        }
       }
     }
-    sprintf (&txt[strlen (txt)], " cannot be coerced to %s", moid_to_string (SLICE (SUB (q)), MOID_ERROR_WIDTH));
+    snprintf (TAIL (txt), BUFFER_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (SUB (q)), MOID_ERROR_WIDTH));
   } else if (WHETHER (p, STOWED_MODE) && WHETHER (q, ROW_SYMBOL)) {
     PACK_T *u = PACK (p);
     for (; u != NULL; FORWARD (u)) {
       if (!whether_coercible (MOID (u), SLICE (q), context, deflex)) {
-	int len = strlen (txt);
-	if (len > BUFFER_SIZE / 2) {
-	  sprintf (&txt[strlen (txt)], " etcetera");
-	} else {
-	  if (strlen (txt) > 0) {
-	    sprintf (&txt[strlen (txt)], " and ");
-	  }
-	  sprintf (&txt[strlen (txt)], moid_to_string (MOID (u), MOID_ERROR_WIDTH));
-	}
+        int len = strlen (txt);
+        if (len > BUFFER_SIZE / 2) {
+          snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
+        } else {
+          if (strlen (txt) > 0) {
+            snprintf (TAIL (txt), BUFFER_SIZE, " and ");
+          }
+          snprintf (TAIL (txt), BUFFER_SIZE, moid_to_string (MOID (u), MOID_ERROR_WIDTH));
+        }
       }
     }
-    sprintf (&txt[strlen (txt)], " cannot be coerced to %s", moid_to_string (SLICE (q), MOID_ERROR_WIDTH));
+    snprintf (TAIL (txt), BUFFER_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (q), MOID_ERROR_WIDTH));
   } else if (WHETHER (p, STOWED_MODE) && (WHETHER (q, PROC_SYMBOL) || WHETHER (q, STRUCT_SYMBOL))) {
     PACK_T *u, *v;
     for (u = PACK (p), v = PACK (q); u != NULL && v != NULL; FORWARD (u), FORWARD (v)) {
       if (!whether_coercible (MOID (u), MOID (v), context, deflex)) {
-	int len = strlen (txt);
-	if (len > BUFFER_SIZE / 2) {
-	  sprintf (&txt[strlen (txt)], " etcetera");
-	} else {
-	  if (strlen (txt) > 0) {
-	    sprintf (&txt[strlen (txt)], " and ");
-	  }
-	  sprintf (&txt[strlen (txt)], "%s cannot be coerced to %s", moid_to_string (MOID (u), MOID_ERROR_WIDTH), moid_to_string (MOID (v), MOID_ERROR_WIDTH));
-	}
+        int len = strlen (txt);
+        if (len > BUFFER_SIZE / 2) {
+          snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
+        } else {
+          if (strlen (txt) > 0) {
+            snprintf (TAIL (txt), BUFFER_SIZE, " and ");
+          }
+          snprintf (TAIL (txt), BUFFER_SIZE, "%s cannot be coerced to %s", moid_to_string (MOID (u), MOID_ERROR_WIDTH), moid_to_string (MOID (v), MOID_ERROR_WIDTH));
+        }
       }
     }
   }
   return (txt);
+#undef TAIL
 }
 
 /*!
@@ -248,7 +250,7 @@ static BOOL_T whether_mode_isnt_well (MOID_T * p)
     PACK_T *q = PACK (p);
     for (; q != NULL; FORWARD (q)) {
       if (!WHETHER_MODE_IS_WELL (MOID (q))) {
-	return (A_TRUE);
+        return (A_TRUE);
       }
     }
   }
@@ -305,13 +307,13 @@ static void absorb_series_pack (MOID_T ** p)
     go_on = A_FALSE;
     for (t = PACK (*p); t != NULL; FORWARD (t)) {
       if (MOID (t) != NULL && WHETHER (MOID (t), SERIES_MODE)) {
-	PACK_T *s;
-	go_on = A_TRUE;
-	for (s = PACK (MOID (t)); s != NULL; FORWARD (s)) {
-	  add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
-	}
+        PACK_T *s;
+        go_on = A_TRUE;
+        for (s = PACK (MOID (t)); s != NULL; FORWARD (s)) {
+          add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
+        }
       } else {
-	add_mode_to_pack (&z, MOID (t), NULL, NODE (t));
+        add_mode_to_pack (&z, MOID (t), NULL, NODE (t));
       }
     }
     PACK (*p) = z;
@@ -362,13 +364,13 @@ which is used in balancing conformity clauses.
       MOID_T *n = depref_completely (MOID (v));
       if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, SAFE_DEFLEXING)) {
 /* Unpack it. */
-	PACK_T *w;
-	for (w = PACK (n); w != NULL; FORWARD (w)) {
-	  add_mode_to_pack (&u, MOID (w), NULL, NODE (w));
-	}
-	mods++;
+        PACK_T *w;
+        for (w = PACK (n); w != NULL; FORWARD (w)) {
+          add_mode_to_pack (&u, MOID (w), NULL, NODE (w));
+        }
+        mods++;
       } else {
-	add_mode_to_pack (&u, MOID (v), NULL, NODE (v));
+        add_mode_to_pack (&u, MOID (v), NULL, NODE (v));
       }
     }
     PACK (m) = absorb_union_pack (u, &mods);
@@ -600,8 +602,8 @@ static BOOL_T whether_rows_type (MOID_T * p)
       PACK_T *t = PACK (p);
       BOOL_T go_on = A_TRUE;
       while (t != NULL && go_on) {
-	go_on &= whether_rows_type (MOID (t));
-	FORWARD (t);
+        go_on &= whether_rows_type (MOID (t));
+        FORWARD (t);
       }
       return (go_on);
     }
@@ -668,7 +670,7 @@ static BOOL_T whether_transput_mode (MOID_T * p)
   } else if (p == MODE (ROW_CHAR)) {
     return (A_TRUE);
   } else if (p == MODE (STRING)) {
-    return (A_TRUE);		/* Not conform RR. */
+    return (A_TRUE);            /* Not conform RR. */
   } else if (WHETHER (p, UNION_SYMBOL) || WHETHER (p, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (p);
     BOOL_T k = A_TRUE;
@@ -742,27 +744,27 @@ BOOL_T whether_modes_equal (MOID_T * u, MOID_T * v, int deflex)
     case FORCE_DEFLEXING:
       {
 /* Allow any interchange between FLEX [] A and [] A. */
-	return (DEFLEX (u) == DEFLEX (v));
+        return (DEFLEX (u) == DEFLEX (v));
       }
     case ALIAS_DEFLEXING:
 /* Cannot alias [] A to FLEX [] A, but vice versa is ok. */
       {
-	if (u->has_ref) {
-	  return (DEFLEX (u) == v);
-	} else {
-	  return (whether_modes_equal (u, v, SAFE_DEFLEXING));
-	}
+        if (u->has_ref) {
+          return (DEFLEX (u) == v);
+        } else {
+          return (whether_modes_equal (u, v, SAFE_DEFLEXING));
+        }
       }
     case SAFE_DEFLEXING:
       {
 /* Cannot alias [] A to FLEX [] A but values are ok. */
-	if (!u->has_ref && !v->has_ref) {
-	  return (whether_modes_equal (u, v, FORCE_DEFLEXING));
-	} else {
-	  return (A_FALSE);
-	}
+        if (!u->has_ref && !v->has_ref) {
+          return (whether_modes_equal (u, v, FORCE_DEFLEXING));
+        } else {
+          return (A_FALSE);
+        }
     case NO_DEFLEXING:
-	return (A_FALSE);
+        return (A_FALSE);
       }
     }
   }
@@ -1188,28 +1190,28 @@ static BOOL_T whether_coercible_stowed (MOID_T * p, MOID_T * q, int c, int defle
       PACK_T *u = PACK (p);
       BOOL_T j = A_TRUE;
       for (; u != NULL && j; FORWARD (u)) {
-	j &= whether_coercible (MOID (u), SLICE (SUB (q)), c, deflex);
+        j &= whether_coercible (MOID (u), SLICE (SUB (q)), c, deflex);
       }
       return (j);
     } else if (WHETHER (q, ROW_SYMBOL)) {
       PACK_T *u = PACK (p);
       BOOL_T j = A_TRUE;
       for (; u != NULL && j; FORWARD (u)) {
-	j &= whether_coercible (MOID (u), SLICE (q), c, deflex);
+        j &= whether_coercible (MOID (u), SLICE (q), c, deflex);
       }
       return (j);
     } else if (WHETHER (q, PROC_SYMBOL) || WHETHER (q, STRUCT_SYMBOL)) {
       PACK_T *u = PACK (p), *v = PACK (q);
       if (p->dimensions != q->dimensions) {
-	return (A_FALSE);
+        return (A_FALSE);
       } else {
-	BOOL_T j = A_TRUE;
-	while (u != NULL && v != NULL && j) {
-	  j &= whether_coercible (MOID (u), MOID (v), c, deflex);
-	  FORWARD (u);
-	  FORWARD (v);
-	}
-	return (j);
+        BOOL_T j = A_TRUE;
+        while (u != NULL && v != NULL && j) {
+          j &= whether_coercible (MOID (u), MOID (v), c, deflex);
+          FORWARD (u);
+          FORWARD (v);
+        }
+        return (j);
       }
     } else {
       return (A_FALSE);
@@ -1235,7 +1237,7 @@ static BOOL_T whether_coercible_series (MOID_T * p, MOID_T * q, int c, int defle
     BOOL_T j = A_TRUE;
     for (; u != NULL && j; FORWARD (u)) {
       if (MOID (u) != NULL) {
-	j &= whether_coercible (MOID (u), q, c, deflex);
+        j &= whether_coercible (MOID (u), q, c, deflex);
       }
     }
     return (j);
@@ -1387,40 +1389,40 @@ MOID_T *get_balanced_mode (MOID_T * m, int sort, BOOL_T return_depreffed, int de
 /* Test the whole pack. */
       for (p = PACK (m); p != NULL; FORWARD (p)) {
 /* HIPs are not eligible of course. */
-	if (MOID (p) != MODE (HIP)) {
-	  MOID_T *candidate = MOID (p);
-	  int k;
+        if (MOID (p) != MODE (HIP)) {
+          MOID_T *candidate = MOID (p);
+          int k;
 /* Depref as far as allowed. */
-	  for (k = depref_level; k > 0 && whether_deprefable (candidate); k--) {
-	    candidate = depref_once (candidate);
-	  }
+          for (k = depref_level; k > 0 && whether_deprefable (candidate); k--) {
+            candidate = depref_once (candidate);
+          }
 /* Only need testing if all allowed deprefs succeeded. */
-	  if (k == 0) {
-	    PACK_T *q;
-	    MOID_T *to = return_depreffed ? depref_completely (candidate) : candidate;
-	    BOOL_T all_coercible = A_TRUE;
-	    go_on = A_TRUE;
-	    for (q = PACK (m); q != NULL && all_coercible; FORWARD (q)) {
-	      MOID_T *from = MOID (q);
-	      if (p != q && from != to) {
-		all_coercible &= whether_coercible (from, to, sort, deflex);
-	      }
-	    }
+          if (k == 0) {
+            PACK_T *q;
+            MOID_T *to = return_depreffed ? depref_completely (candidate) : candidate;
+            BOOL_T all_coercible = A_TRUE;
+            go_on = A_TRUE;
+            for (q = PACK (m); q != NULL && all_coercible; FORWARD (q)) {
+              MOID_T *from = MOID (q);
+              if (p != q && from != to) {
+                all_coercible &= whether_coercible (from, to, sort, deflex);
+              }
+            }
 /* If the pack is coercible to the candidate, we mark the candidate.
    We continue searching for longest series of REF REF PROC REF .. */
-	    if (all_coercible) {
-	      MOID_T *mark = (return_depreffed ? MOID (p) : candidate);
-	      if (common == NULL) {
-		common = mark;
-	      } else if (WHETHER (candidate, FLEX_SYMBOL) && DEFLEX (candidate) == common) {
+            if (all_coercible) {
+              MOID_T *mark = (return_depreffed ? MOID (p) : candidate);
+              if (common == NULL) {
+                common = mark;
+              } else if (WHETHER (candidate, FLEX_SYMBOL) && DEFLEX (candidate) == common) {
 /* We prefer FLEX. */
-		common = mark;
-	      }
-	    }
-	  }
-	}
-      }				/* for. */
-    }				/* for. */
+                common = mark;
+              }
+            }
+          }
+        }
+      }                         /* for. */
+    }                           /* for. */
   }
   return (common == NULL ? m : common);
 }
@@ -1488,9 +1490,9 @@ static void warn_for_voiding (NODE_T * p, SOID_T * x, SOID_T * y, int c)
   if (x->cast == A_FALSE) {
     if (MOID (x) == MODE (VOID) && !(MOID (y) == MODE (VOID) || !whether_nonproc (MOID (y)))) {
       if (WHETHER (p, FORMULA)) {
-	diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_VOIDED, MOID (y));
+        diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_VOIDED, MOID (y));
       } else {
-	diagnostic_node (A_WARNING, p, WARNING_VOIDED, MOID (y));
+        diagnostic_node (A_WARNING, p, WARNING_VOIDED, MOID (y));
       }
     }
   }
@@ -1697,24 +1699,24 @@ static void make_void (NODE_T * p, MOID_T * q)
     {
 /* A nonproc moid value is eliminated directly. */
       if (whether_nonproc (q)) {
-	make_coercion (p, VOIDING, MODE (VOID));
-	return;
+        make_coercion (p, VOIDING, MODE (VOID));
+        return;
       } else {
 /* Descend the chain of e.g. REF PROC .. until a nonproc moid remains. */
-	MOID_T *z = q;
-	while (!whether_nonproc (z)) {
-	  if (WHETHER (z, REF_SYMBOL)) {
-	    make_coercion (p, DEREFERENCING, SUB (z));
-	  }
-	  if (WHETHER (z, PROC_SYMBOL) && PACK (p) == NULL) {
-	    make_coercion (p, DEPROCEDURING, SUB (z));
-	  }
-	  z = SUB (z);
-	}
-	if (z != MODE (VOID)) {
-	  make_coercion (p, VOIDING, MODE (VOID));
-	}
-	return;
+        MOID_T *z = q;
+        while (!whether_nonproc (z)) {
+          if (WHETHER (z, REF_SYMBOL)) {
+            make_coercion (p, DEREFERENCING, SUB (z));
+          }
+          if (WHETHER (z, PROC_SYMBOL) && PACK (p) == NULL) {
+            make_coercion (p, DEPROCEDURING, SUB (z));
+          }
+          z = SUB (z);
+        }
+        if (z != MODE (VOID)) {
+          make_coercion (p, VOIDING, MODE (VOID));
+        }
+        return;
       }
     }
   }
@@ -1790,28 +1792,28 @@ static void mode_check_identity_declaration (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case DECLARER:
       {
-	mode_check_declarer (SUB (p));
-	mode_check_identity_declaration (NEXT (p));
-	break;
+        mode_check_declarer (SUB (p));
+        mode_check_identity_declaration (NEXT (p));
+        break;
       }
     case DEFINING_IDENTIFIER:
       {
-	SOID_T x, y;
-	make_soid (&x, STRONG, MOID (p), 0);
-	mode_check_unit (NEXT (NEXT (p)), &x, &y);
-	if (!whether_coercible_in_context (&y, &x, SAFE_DEFLEXING)) {
-	  cannot_coerce (NEXT (NEXT (p)), MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, UNIT);
-	} else if (MOID (&x) != MOID (&y)) {
+        SOID_T x, y;
+        make_soid (&x, STRONG, MOID (p), 0);
+        mode_check_unit (NEXT (NEXT (p)), &x, &y);
+        if (!whether_coercible_in_context (&y, &x, SAFE_DEFLEXING)) {
+          cannot_coerce (NEXT (NEXT (p)), MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, UNIT);
+        } else if (MOID (&x) != MOID (&y)) {
 /* Check for instance, REF INT i = LOC REF INT. */
-	  semantic_pitfall (NEXT (NEXT (p)), MOID (&x), IDENTITY_DECLARATION, GENERATOR);
-	}
-	break;
+          semantic_pitfall (NEXT (NEXT (p)), MOID (&x), IDENTITY_DECLARATION, GENERATOR);
+        }
+        break;
       }
     default:
       {
-	mode_check_identity_declaration (SUB (p));
-	mode_check_identity_declaration (NEXT (p));
-	break;
+        mode_check_identity_declaration (SUB (p));
+        mode_check_identity_declaration (NEXT (p));
+        break;
       }
     }
   }
@@ -1828,30 +1830,30 @@ static void mode_check_variable_declaration (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case DECLARER:
       {
-	mode_check_declarer (SUB (p));
-	mode_check_variable_declaration (NEXT (p));
-	break;
+        mode_check_declarer (SUB (p));
+        mode_check_variable_declaration (NEXT (p));
+        break;
       }
     case DEFINING_IDENTIFIER:
       {
-	if (whether (p, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
-	  SOID_T x, y;
-	  make_soid (&x, STRONG, (SUB (MOID (p))), 0);
-	  mode_check_unit (NEXT (NEXT (p)), &x, &y);
-	  if (!whether_coercible_in_context (&y, &x, FORCE_DEFLEXING)) {
-	    cannot_coerce (p, MOID (&y), MOID (&x), STRONG, FORCE_DEFLEXING, UNIT);
-	  } else if (SUB (MOID (&x)) != MOID (&y)) {
+        if (whether (p, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
+          SOID_T x, y;
+          make_soid (&x, STRONG, (SUB (MOID (p))), 0);
+          mode_check_unit (NEXT (NEXT (p)), &x, &y);
+          if (!whether_coercible_in_context (&y, &x, FORCE_DEFLEXING)) {
+            cannot_coerce (p, MOID (&y), MOID (&x), STRONG, FORCE_DEFLEXING, UNIT);
+          } else if (SUB (MOID (&x)) != MOID (&y)) {
 /* Check for instance, REF INT i = LOC REF INT. */
-	    semantic_pitfall (NEXT (NEXT (p)), MOID (&x), VARIABLE_DECLARATION, GENERATOR);
-	  }
-	}
-	break;
+            semantic_pitfall (NEXT (NEXT (p)), MOID (&x), VARIABLE_DECLARATION, GENERATOR);
+          }
+        }
+        break;
       }
     default:
       {
-	mode_check_variable_declaration (SUB (p));
-	mode_check_variable_declaration (NEXT (p));
-	break;
+        mode_check_variable_declaration (SUB (p));
+        mode_check_variable_declaration (NEXT (p));
+        break;
       }
     }
   }
@@ -1955,40 +1957,40 @@ static void mode_check_declaration_list (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case IDENTITY_DECLARATION:
       {
-	mode_check_identity_declaration (SUB (p));
-	break;
+        mode_check_identity_declaration (SUB (p));
+        break;
       }
     case VARIABLE_DECLARATION:
       {
-	mode_check_variable_declaration (SUB (p));
-	break;
+        mode_check_variable_declaration (SUB (p));
+        break;
       }
     case MODE_DECLARATION:
       {
-	mode_check_declarer (SUB (p));
-	break;
+        mode_check_declarer (SUB (p));
+        break;
       }
     case PROCEDURE_DECLARATION:
     case PROCEDURE_VARIABLE_DECLARATION:
       {
-	mode_check_proc_declaration (SUB (p));
-	break;
+        mode_check_proc_declaration (SUB (p));
+        break;
       }
     case BRIEF_OPERATOR_DECLARATION:
       {
-	mode_check_brief_op_declaration (SUB (p));
-	break;
+        mode_check_brief_op_declaration (SUB (p));
+        break;
       }
     case OPERATOR_DECLARATION:
       {
-	mode_check_op_declaration (SUB (p));
-	break;
+        mode_check_op_declaration (SUB (p));
+        break;
       }
     default:
       {
-	mode_check_declaration_list (SUB (p));
-	mode_check_declaration_list (NEXT (p));
-	break;
+        mode_check_declaration_list (SUB (p));
+        mode_check_declaration_list (NEXT (p));
+        break;
       }
     }
   }
@@ -2016,9 +2018,9 @@ static void mode_check_serial (SOID_LIST_T ** r, NODE_T * p, SOID_T * x, BOOL_T 
   } else if (WHETHER (p, SERIAL_CLAUSE) || WHETHER (p, ENQUIRY_CLAUSE)) {
     if (NEXT (p) != NULL) {
       if (WHETHER (NEXT (p), EXIT_SYMBOL) || WHETHER (NEXT (p), END_SYMBOL) || WHETHER (NEXT (p), CLOSE_SYMBOL)) {
-	mode_check_serial (r, SUB (p), x, A_TRUE);
+        mode_check_serial (r, SUB (p), x, A_TRUE);
       } else {
-	mode_check_serial (r, SUB (p), x, A_FALSE);
+        mode_check_serial (r, SUB (p), x, A_FALSE);
       }
       mode_check_serial (r, NEXT (p), x, k);
     } else {
@@ -2039,7 +2041,7 @@ static void mode_check_serial (SOID_LIST_T ** r, NODE_T * p, SOID_T * x, BOOL_T 
       mode_check_serial (r, NEXT (p), x, k);
     } else {
       if (k) {
-	add_to_soid_list (r, p, &y);
+        add_to_soid_list (r, p, &y);
       }
     }
   }
@@ -2154,7 +2156,7 @@ static void mode_check_specified_unit_list (SOID_LIST_T ** r, NODE_T * p, SOID_T
     } else if (WHETHER (p, SPECIFIER)) {
       MOID_T *m = MOID (NEXT_SUB (p));
       if (u != NULL && !whether_unitable (m, u, SAFE_DEFLEXING)) {
-	diagnostic_node (A_ERROR, p, ERROR_NO_COMPONENT, m, u);
+        diagnostic_node (A_ERROR, p, ERROR_NO_COMPONENT, m, u);
       }
     } else if (WHETHER (p, UNIT)) {
       SOID_T y;
@@ -2196,15 +2198,15 @@ static void mode_check_united_case_parts (SOID_LIST_T ** ry, NODE_T * p, SOID_T 
       investigate_firm_relations (PACK (v), PACK (u), &vu, &some);
       if (uv && vu) {
 /* Every component has a specifier. */
-	w = u;
+        w = u;
       } else if (!uv && !vu) {
 /* Hmmmm ... let the coercer sort it out. */
-	w = u;
+        w = u;
       } else {
 /*  This is all the balancing we allow here for the moment. Firmly related
 subsets are not valid so we absorb them. If this doesn't solve it then we
 get a coercion-error later. */
-	w = absorb_related_subsets (u);
+        w = absorb_related_subsets (u);
       }
     } else {
       diagnostic_node (A_ERROR, NEXT_SUB (p), ERROR_NO_UNION, u);
@@ -2471,7 +2473,7 @@ static void mode_check_loop_2 (NODE_T * p, SOID_T * y)
       make_soid (&enq_expct, STRONG, MODE (BOOL), 0);
       mode_check_serial_units (NEXT_SUB (un_p), &enq_expct, &enq_yield, ENQUIRY_CLAUSE);
       if (!whether_coercible_in_context (&enq_yield, &enq_expct, SAFE_DEFLEXING)) {
-	cannot_coerce (un_p, MOID (&enq_yield), MOID (&enq_expct), MEEK, SAFE_DEFLEXING, ENQUIRY_CLAUSE);
+        cannot_coerce (un_p, MOID (&enq_yield), MOID (&enq_expct), MEEK, SAFE_DEFLEXING, ENQUIRY_CLAUSE);
       }
     }
   }
@@ -2543,14 +2545,14 @@ static TAG_T *search_table_for_operator (TAG_T * t, char *n, MOID_T * x, MOID_T 
     if (SYMBOL (NODE (t)) == n) {
       PACK_T *p = PACK (MOID (t));
       if (whether_coercible (x, MOID (p), FIRM, context)) {
-	FORWARD (p);
-	if (p == NULL && y == NULL) {
+        FORWARD (p);
+        if (p == NULL && y == NULL) {
 /* Matched in case of a monad. */
-	  return (t);
-	} else if (p != NULL && y != NULL && whether_coercible (y, MOID (p), FIRM, context)) {
+          return (t);
+        } else if (p != NULL && y != NULL && whether_coercible (y, MOID (p), FIRM, context)) {
 /* Matched in case of a nomad. */
-	  return (t);
-	}
+          return (t);
+        }
       }
     }
   }
@@ -2652,19 +2654,19 @@ static void mode_check_monadic_operator (NODE_T * p, SOID_T * x, SOID_T * y)
     } else {
       t = find_operator (SYMBOL_TABLE (p), SYMBOL (p), u, NULL);
       if (t == NULL) {
-	diagnostic_node (A_ERROR, p, ERROR_NO_MONADIC, u);
-	make_soid (y, SORT (x), MODE (ERROR), 0);
+        diagnostic_node (A_ERROR, p, ERROR_NO_MONADIC, u);
+        make_soid (y, SORT (x), MODE (ERROR), 0);
       }
       if (t != NULL) {
-	MOID (p) = MOID (t);
+        MOID (p) = MOID (t);
       }
       TAX (p) = t;
       if (t != NULL && t != error_tag) {
-	MOID (p) = MOID (t);
-	make_soid (y, SORT (x), SUB (MOID (t)), 0);
+        MOID (p) = MOID (t);
+        make_soid (y, SORT (x), SUB (MOID (t)), 0);
       } else {
-	MOID (p) = MODE (ERROR);
-	make_soid (y, SORT (x), MODE (ERROR), 0);
+        MOID (p) = MODE (ERROR);
+        make_soid (y, SORT (x), MODE (ERROR), 0);
       }
     }
   }
@@ -2735,17 +2737,17 @@ static void mode_check_formula (NODE_T * p, SOID_T * x, SOID_T * y)
     } else {
       op = find_operator (SYMBOL_TABLE (NEXT (p)), SYMBOL (NEXT (p)), u, v);
       if (op == NULL) {
-	diagnostic_node (A_ERROR, NEXT (p), ERROR_NO_DYADIC, u, v);
-	make_soid (y, SORT (x), MODE (ERROR), 0);
+        diagnostic_node (A_ERROR, NEXT (p), ERROR_NO_DYADIC, u, v);
+        make_soid (y, SORT (x), MODE (ERROR), 0);
       }
       if (op != NULL) {
-	MOID (NEXT (p)) = MOID (op);
+        MOID (NEXT (p)) = MOID (op);
       }
       TAX (NEXT (p)) = op;
       if (op != NULL && op != error_tag) {
-	make_soid (y, SORT (x), SUB (MOID (op)), 0);
+        make_soid (y, SORT (x), SUB (MOID (op)), 0);
       } else {
-	make_soid (y, SORT (x), MODE (ERROR), 0);
+        make_soid (y, SORT (x), MODE (ERROR), 0);
       }
     }
   }
@@ -2888,7 +2890,7 @@ static void mode_check_assertion (NODE_T * p)
   SOID_T w, y;
   make_soid (&w, STRONG, MODE (BOOL), 0);
   mode_check_enclosed (SUB_NEXT (p), &w, &y);
-  SORT (&y) = SORT (&w);	/* Patch. */
+  SORT (&y) = SORT (&w);        /* Patch. */
   if (!whether_coercible_in_context (&y, &w, NO_DEFLEXING)) {
     cannot_coerce (NEXT (p), MOID (&y), MOID (&w), MEEK, NO_DEFLEXING, ENCLOSED_CLAUSE);
   }
@@ -2914,29 +2916,29 @@ static void mode_check_argument_list (SOID_LIST_T ** r, NODE_T * p, PACK_T ** x,
     } else if (WHETHER (p, UNIT)) {
       SOID_T y, z;
       if (*x != NULL) {
-	make_soid (&z, STRONG, MOID (*x), 0);
-	add_mode_to_pack_end (v, MOID (*x), NULL, p);
-	*x = NEXT (*x);
+        make_soid (&z, STRONG, MOID (*x), 0);
+        add_mode_to_pack_end (v, MOID (*x), NULL, p);
+        *x = NEXT (*x);
       } else {
-	make_soid (&z, STRONG, NULL, 0);
+        make_soid (&z, STRONG, NULL, 0);
       }
       mode_check_unit (p, &z, &y);
       add_to_soid_list (r, p, &y);
     } else if (WHETHER (p, TRIMMER)) {
       SOID_T z;
       if (SUB (p) != NULL) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_SYNTAX, ARGUMENT);
-	make_soid (&z, STRONG, MODE (ERROR), 0);
-	add_mode_to_pack_end (v, MODE (VOID), NULL, p);
-	add_mode_to_pack_end (w, MOID (*x), NULL, p);
-	*x = NEXT (*x);
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_SYNTAX, ARGUMENT);
+        make_soid (&z, STRONG, MODE (ERROR), 0);
+        add_mode_to_pack_end (v, MODE (VOID), NULL, p);
+        add_mode_to_pack_end (w, MOID (*x), NULL, p);
+        *x = NEXT (*x);
       } else if (*x != NULL) {
-	make_soid (&z, STRONG, MOID (*x), 0);
-	add_mode_to_pack_end (v, MODE (VOID), NULL, p);
-	add_mode_to_pack_end (w, MOID (*x), NULL, p);
-	*x = NEXT (*x);
+        make_soid (&z, STRONG, MOID (*x), 0);
+        add_mode_to_pack_end (v, MODE (VOID), NULL, p);
+        add_mode_to_pack_end (w, MOID (*x), NULL, p);
+        *x = NEXT (*x);
       } else {
-	make_soid (&z, STRONG, NULL, 0);
+        make_soid (&z, STRONG, NULL, 0);
       }
       add_to_soid_list (r, p, &z);
     } else if (WHETHER (p, SUB_SYMBOL) && !p->info->module->options.brackets) {
@@ -3123,7 +3125,7 @@ static int mode_check_slice (NODE_T * p, SOID_T * x, SOID_T * y)
     }
     if (n == NULL || !(SLICE (DEFLEX (n)) != NULL || whether_ref_row (n))) {
       if (WHETHER_MODE_IS_WELL (n)) {
-	diagnostic_node (A_ERROR, p, ERROR_NO_ROW_OR_PROC, ori, ATTRIBUTE (SUB (p)));
+        diagnostic_node (A_ERROR, p, ERROR_NO_ROW_OR_PROC, ori, ATTRIBUTE (SUB (p)));
       }
       make_soid (y, SORT (x), MODE (ERROR), 0);
       return (PRIMARY);
@@ -3141,25 +3143,25 @@ static int mode_check_slice (NODE_T * p, SOID_T * x, SOID_T * y)
       make_soid (y, SORT (x), MODE (ERROR), 0);
     } else {
       if (subs > 0 && trims == 0) {
-	ANNOTATION (NEXT (p)) = SLICE;
-	m = n;
+        ANNOTATION (NEXT (p)) = SLICE;
+        m = n;
       } else {
-	ANNOTATION (NEXT (p)) = TRIMMER;
-	m = n;
+        ANNOTATION (NEXT (p)) = TRIMMER;
+        m = n;
       }
       while (subs > 0) {
-	if (whether_ref) {
-	  m = m->name;
-	} else {
-	  if (WHETHER (m, FLEX_SYMBOL)) {
-	    m = SUB (m);
-	  }
-	  m = SLICE (m);
-	}
-	if (m == NULL) {
-	  ABNORMAL_END (m == NULL, "NULL mode in mode_check_slice", NULL);
-	}
-	subs--;
+        if (whether_ref) {
+          m = m->name;
+        } else {
+          if (WHETHER (m, FLEX_SYMBOL)) {
+            m = SUB (m);
+          }
+          m = SLICE (m);
+        }
+        if (m == NULL) {
+          ABNORMAL_END (m == NULL, "NULL mode in mode_check_slice", NULL);
+        }
+        subs--;
       }
 /* A trim cannot be but deflexed
       make_soid (y, SORT (x), ANNOTATION (NEXT (p)) == TRIMMER && m->deflexed_mode != NULL ? m->deflexed_mode : m,0);
@@ -3261,21 +3263,21 @@ static void mode_check_format_text (NODE_T * p)
       make_soid (&x, STRONG, MODE (FORMAT), 0);
       mode_check_enclosed (SUB (NEXT_SUB (p)), &x, &y);
       if (!whether_coercible_in_context (&y, &x, SAFE_DEFLEXING)) {
-	cannot_coerce (p, MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
+        cannot_coerce (p, MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
       }
     } else if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) != NULL) {
       SOID_T x, y;
       make_soid (&x, STRONG, MODE (ROW_INT), 0);
       mode_check_enclosed (SUB (NEXT_SUB (p)), &x, &y);
       if (!whether_coercible_in_context (&y, &x, SAFE_DEFLEXING)) {
-	cannot_coerce (p, MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
+        cannot_coerce (p, MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
       }
     } else if (WHETHER (p, DYNAMIC_REPLICATOR)) {
       SOID_T x, y;
       make_soid (&x, STRONG, MODE (INT), 0);
       mode_check_enclosed (SUB (NEXT_SUB (p)), &x, &y);
       if (!whether_coercible_in_context (&y, &x, SAFE_DEFLEXING)) {
-	cannot_coerce (p, MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
+        cannot_coerce (p, MOID (&y), MOID (&x), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
       }
     }
   }
@@ -3401,22 +3403,22 @@ static void coerce_identity_declaration (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case DECLARER:
       {
-	coerce_declarer (SUB (p));
-	coerce_identity_declaration (NEXT (p));
-	break;
+        coerce_declarer (SUB (p));
+        coerce_identity_declaration (NEXT (p));
+        break;
       }
     case DEFINING_IDENTIFIER:
       {
-	SOID_T q;
-	make_soid (&q, STRONG, MOID (p), 0);
-	coerce_unit (NEXT (NEXT (p)), &q);
-	break;
+        SOID_T q;
+        make_soid (&q, STRONG, MOID (p), 0);
+        coerce_unit (NEXT (NEXT (p)), &q);
+        break;
       }
     default:
       {
-	coerce_identity_declaration (SUB (p));
-	coerce_identity_declaration (NEXT (p));
-	break;
+        coerce_identity_declaration (SUB (p));
+        coerce_identity_declaration (NEXT (p));
+        break;
       }
     }
   }
@@ -3433,24 +3435,24 @@ static void coerce_variable_declaration (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case DECLARER:
       {
-	coerce_declarer (SUB (p));
-	coerce_variable_declaration (NEXT (p));
-	break;
+        coerce_declarer (SUB (p));
+        coerce_variable_declaration (NEXT (p));
+        break;
       }
     case DEFINING_IDENTIFIER:
       {
-	if (whether (p, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
-	  SOID_T q;
-	  make_soid (&q, STRONG, SUB (MOID (p)), 0);
-	  coerce_unit (NEXT (NEXT (p)), &q);
-	  break;
-	}
+        if (whether (p, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
+          SOID_T q;
+          make_soid (&q, STRONG, SUB (MOID (p)), 0);
+          coerce_unit (NEXT (NEXT (p)), &q);
+          break;
+        }
       }
     default:
       {
-	coerce_variable_declaration (SUB (p));
-	coerce_variable_declaration (NEXT (p));
-	break;
+        coerce_variable_declaration (SUB (p));
+        coerce_variable_declaration (NEXT (p));
+        break;
       }
     }
   }
@@ -3536,40 +3538,40 @@ static void coerce_declaration_list (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case IDENTITY_DECLARATION:
       {
-	coerce_identity_declaration (SUB (p));
-	break;
+        coerce_identity_declaration (SUB (p));
+        break;
       }
     case VARIABLE_DECLARATION:
       {
-	coerce_variable_declaration (SUB (p));
-	break;
+        coerce_variable_declaration (SUB (p));
+        break;
       }
     case MODE_DECLARATION:
       {
-	coerce_declarer (SUB (p));
-	break;
+        coerce_declarer (SUB (p));
+        break;
       }
     case PROCEDURE_DECLARATION:
     case PROCEDURE_VARIABLE_DECLARATION:
       {
-	coerce_proc_declaration (SUB (p));
-	break;
+        coerce_proc_declaration (SUB (p));
+        break;
       }
     case BRIEF_OPERATOR_DECLARATION:
       {
-	coerce_brief_op_declaration (SUB (p));
-	break;
+        coerce_brief_op_declaration (SUB (p));
+        break;
       }
     case OPERATOR_DECLARATION:
       {
-	coerce_op_declaration (SUB (p));
-	break;
+        coerce_op_declaration (SUB (p));
+        break;
       }
     default:
       {
-	coerce_declaration_list (SUB (p));
-	coerce_declaration_list (NEXT (p));
-	break;
+        coerce_declaration_list (SUB (p));
+        coerce_declaration_list (NEXT (p));
+        break;
       }
     }
   }
@@ -3597,9 +3599,9 @@ static void coerce_serial (NODE_T * p, SOID_T * q, int k)
     NODE_T *z = NEXT (p);
     if (z != NULL) {
       if (WHETHER (z, EXIT_SYMBOL) || WHETHER (z, END_SYMBOL) || WHETHER (z, CLOSE_SYMBOL) || WHETHER (z, OCCA_SYMBOL)) {
-	coerce_serial (SUB (p), q, 1);
+        coerce_serial (SUB (p), q, 1);
       } else {
-	coerce_serial (SUB (p), q, 0);
+        coerce_serial (SUB (p), q, 0);
       }
     } else {
       coerce_serial (SUB (p), q, 1);
@@ -4224,5 +4226,62 @@ static void coerce_unit (NODE_T * p, SOID_T * q)
   } else if (WHETHER (p, ASSERTION)) {
     coerce_assertion (SUB (p));
     INSERT_COERCIONS (p, MOID (p), q);
+  }
+}
+
+/*!
+\brief portability check for implicit denoter widening
+\param p position in syntax tree, should not be NULL
+\param in
+\param out
+**/
+
+static void portcheck_widening (NODE_T * p, MOID_T * in, MOID_T * out)
+{
+  if (p->info->module->options.portcheck) {
+    if (in != out) {
+      diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_WIDENING_NOT_PORTABLE, in, out);
+    }
+  }
+}
+
+/*!
+\brief widen_denoter
+\param p position in syntax tree, should not be NULL
+**/
+
+void widen_denoter (NODE_T * p)
+{
+  for (; p != NULL; FORWARD (p)) {
+    widen_denoter (SUB (p));
+    if (WHETHER (p, WIDENING) && WHETHER (SUB (p), DENOTER)) {
+      MOID_T *lm = MOID (p), *m = MOID (SUB (p));
+      BOOL_T widen = A_FALSE;
+      if (lm == MODE (LONGLONG_INT) && m == MODE (LONG_INT)) {
+        widen = A_TRUE;
+      }
+      if (lm == MODE (LONG_INT) && m == MODE (INT)) {
+        widen = A_TRUE;
+      }
+      if (lm == MODE (LONGLONG_REAL) && m == MODE (LONG_REAL)) {
+        widen = A_TRUE;
+      }
+      if (lm == MODE (LONG_REAL) && m == MODE (REAL)) {
+        widen = A_TRUE;
+      }
+      if (lm == MODE (LONGLONG_BITS) && m == MODE (LONG_BITS)) {
+        widen = A_TRUE;
+      }
+      if (lm == MODE (LONG_BITS) && m == MODE (BITS)) {
+        widen = A_TRUE;
+      }
+      if (widen) {
+        portcheck_widening (p, m, lm);
+        *p = *(SUB (p));
+        ATTRIBUTE (p) = DENOTER;
+        MOID (p) = lm;
+      }
+      return;
+    }
   }
 }

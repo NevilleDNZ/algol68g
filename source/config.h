@@ -72,9 +72,8 @@ Undefining it means that clock () will be called, which is portable.
 #undef HAVE_UNIX_CLOCK
 
 /*
-Theo Vosse made a Win32 executable of Algol68G. To select his modifications,
-define WIN32_VERSION. When defining WIN32_VERSION you may want to change
-directives following the definition below to reflect your particular system.
+When defining WIN32_VERSION you may want to change directives following the 
+definition below to reflect your particular system.
 HAVE_IEEE_754 is ok for Pentiums.
 */
 
@@ -83,16 +82,21 @@ HAVE_IEEE_754 is ok for Pentiums.
 #endif
 
 #ifdef WIN32_VERSION
-#define HAVE_CURSES 1
-#define HAVE_PLOTUTILS 1
-#define HAVE_UNIX 1
-#define HAVE_IEEE_754 1
+#undef HAVE_CURSES
+#undef HAVE_PLOTUTILS
+#undef HAVE_GSL
+#undef HAVE_CURSES
+#undef HAVE_POSTGRESQL
 #undef HAVE_MODIFIABLE_X_TITLE
 #undef HAVE_UNIX_CLOCK
 #undef HAVE_POSIX_THREADS
 #undef HAVE_HTTP
 #undef HAVE_REGEX
 #undef HAVE_POSTGRESQL
+#define HAVE_IEEE_754 1
+#ifdef HAVE_PLOTUTILS
+#define X_DISPLAY_MISSING 1
+#endif
 #endif
 
 /*

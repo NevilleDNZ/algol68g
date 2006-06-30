@@ -17,8 +17,8 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
@@ -46,7 +46,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -74,7 +74,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </td>
 </table>
 
-<h3>Algol 68 Genie Mark 9.1</h3>
+<h3>Algol 68 Genie Mark 9.2</h3>
 <p>
 Algol 68 Genie (Algol68G) is free software distributed under GNU GPL. This software is 
 distributed in the hope that it will be useful, but without any warranty. 
@@ -88,8 +88,8 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <p>
 The following list of commands may suffice to help you on your way (if not, follow the detailed instructions in next paragraphs):
 <pre>
-tar -xzf algol68g-mk9.1.tar.gz
-cd algol68g-mk9.1
+tar -xzf algol68g-mk9.2.tar.gz
+cd algol68g-mk9.2
 ./configure -O --threads
 make depend
 make
@@ -101,9 +101,7 @@ make clean
 <h3>B. Detailed installation guide</h3>
 
 <p>
-This page describes how to install Algol68G on GNU/Linux. The procedure 
-should work equally well on related operating systems as Unix, FreeBSD or 
-MacOS X.
+This page describes how to install Algol68G on UNIX/Linux.
 
 <br>
 <h3>Optional libraries</h3>
@@ -114,13 +112,13 @@ If available on your system, Algol68G can use next libraries to extend its funct
 <li><a href="http://www.gnu.org/software/plotutils/">GNU plotutils</a> for drawing from Algol 68
 <li><a href="http://www.gnu.org/software/gsl/">GNU scientific library</a> to extend the mathematical capabilities of the standard environ
 <li><a href="http://www.postgresql.org/">PostgreSQL</a> for writing PostgreSQL database client applications
-<li><a href="http://www.gnu.org/software/libc/">GNU C library</a>
-<ul>
-<li>various (UNIX) system calls
-<li>regular expressions for grepping strings
-<li>POSIX threads to support the parallel clause
-<li>interprocess communication via sockets for fetching webpage contents
 </ul>
+<p>
+Algol 68 Genie Mark 9.2 was developed using next versions of optional libraries:
+<ul>
+<li><a href="http://www.gnu.org/software/plotutils/">GNU plotutils</a> version 2.5
+<li><a href="http://www.gnu.org/software/gsl/">GNU scientific library</a> version 1.8
+<li><a href="http://www.postgresql.org/">PostgreSQL</a> version 8.1.4
 </ul>
 
 <p>
@@ -156,7 +154,7 @@ Suppose you are user <code>algol68g</code> at your GNU/Linux machine, and your p
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g> tar -xzf algol68g-mk9.1.tar.gz
+/home/algol68g> tar -xzf algol68g-mk9.2.tar.gz
 </tt>
 </font>
 </td>
@@ -170,7 +168,7 @@ Suppose you are user <code>algol68g</code> at your GNU/Linux machine, and your p
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g> cd algol68g-mk9.1
+/home/algol68g> cd algol68g-mk9.2
 </tt>
 </font>
 </td>
@@ -182,7 +180,7 @@ Suppose you are user <code>algol68g</code> at your GNU/Linux machine, and your p
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> ./configure
+/home/algol68g/algol68g-mk9.2> ./configure
 </tt>
 </font>
 </td>
@@ -197,7 +195,7 @@ options. For an overview of options, type:
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> ./configure --help
+/home/algol68g/algol68g-mk9.2> ./configure --help
 </tt>
 </font>
 </td>
@@ -213,7 +211,7 @@ build using POSIX threads. To build with POSIX threads, type:
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> ./configure --threads
+/home/algol68g/algol68g-mk9.2> ./configure --threads
 </tt>
 </font>
 </td>
@@ -236,7 +234,7 @@ can be safely ignored.
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make depend
+/home/algol68g/algol68g-mk9.2> make depend
 </tt>
 </font>
 </td>
@@ -251,7 +249,7 @@ This will register dependencies needed to build Algol68G.
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make all
+/home/algol68g/algol68g-mk9.2> make all
 </tt>
 </font>
 </td>
@@ -263,7 +261,7 @@ or, simply:
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make
+/home/algol68g/algol68g-mk9.2> make
 </tt>
 </font>
 </td>
@@ -277,7 +275,7 @@ If you want to install Algol68G for all users on your system, type:
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make install
+/home/algol68g/algol68g-mk9.2> make install
 </tt>
 </font>
 </td>
@@ -294,7 +292,7 @@ are tried.
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make uninstall
+/home/algol68g/algol68g-mk9.2> make uninstall
 </tt>
 </font>
 </td>
@@ -308,7 +306,7 @@ for instance type:
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make CFLAGS="-O"
+/home/algol68g/algol68g-mk9.2> make CFLAGS="-O"
 </tt>
 </font>
 </td>
@@ -323,7 +321,7 @@ to optimise the code.
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make clean
+/home/algol68g/algol68g-mk9.2> make clean
 </tt>
 </font>
 </td>
@@ -335,7 +333,7 @@ To remove all files used for building, type:
 <td bgcolor=#e8e8e8>
 <font color=black>
 <tt>
-/home/algol68g/algol68g-mk9.1> make distclean
+/home/algol68g/algol68g-mk9.2> make distclean
 </tt>
 </font>
 </td>
@@ -349,19 +347,24 @@ When you install <code>a68g</code> in the present working directory, you may wan
 <td bgcolor=#e8e8e8>
 <font color=black>
 <pre>
-/home/algol68g/algol68g-mk9.1> ./a68g --version
-++++ Algol 68 Genie Mark 9.1, released April 2006
-++++ Image "a68g" compiled by algol68g on 1 April 2006 22:43:40 with gcc 2.95
-++++ GNU Plotutils libplot 4.0
-++++ GNU Scientific Library 1.7
-++++ PostgreSQL libpq 8.1.2
-++++ Alignment: 4 bytes
-++++ Default frame stack size: 2048 kB
-++++ Default expression stack size: 1024 kB
-++++ Default heap size: 15360 kB
-++++ Default handle pool size: 2048 kB
-++++ Default stack overhead: 256 kB
-/home/algol68g/algol68g-mk9.1>
+/home/algol68g/algol68g-mk9.2> ./a68g --version
+Algol 68 Genie Mark 9.2, copyright 2006 J. Marcel van der Veer.
+Algol 68 Genie is free software covered by the GNU General Public License.
+There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.
+See the GNU General Public License for more details.
+
+Algol 68 Genie Mark 9.2, released July 2006
+Image "a68g" compiled by a68g on Jul  1 2006 22:17:12 with gcc 3.3.5
+GNU Plotutils libplot 4.2
+GNU Scientific Library 1.8
+PostgreSQL libpq 8.1.4
+Alignment 4 bytes
+Default frame stack size: 2048 kB
+Default expression stack size: 1024 kB
+Default heap size: 25600 kB
+Default handle pool size: 4096 kB
+Default stack overhead: 256 kB
+/home/algol68g/algol68g-mk9.2>
 </pre>
 </font>
 </td>
@@ -374,10 +377,10 @@ If instead of above version statement you get a message like
 <td bgcolor=#e8e8e8>
 <font color=black>
 <pre>
-/home/algol68g/algol68g-mk9.1> ./a68g --version
+/home/algol68g/algol68g-mk9.2> ./a68g --version
 psql: error in loading shared libraries
 libpq.so.4.1: cannot open shared object file: No such file or directory
-/home/algol68g/algol68g-mk9.1>
+/home/algol68g/algol68g-mk9.2>
 </pre>
 </font>
 </td>
@@ -411,7 +414,7 @@ If in doubt, refer to the manual pages of your system.
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>

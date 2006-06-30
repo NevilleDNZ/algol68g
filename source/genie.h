@@ -84,7 +84,6 @@ struct ACTIVATION_RECORD
 #define FRAME_STATIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->static_link)
 #define FRAME_TREE(n) (NODE ((ACTIVATION_RECORD *) FRAME_ADDRESS(n)))
 #define FRAME_INFO_SIZE (ALIGN (SIZE_OF (ACTIVATION_RECORD)))
-#define FRAME_SHORTCUT(p) (& ((p)->genie.offset[DESCENT ((p)->genie.level)]))
 #define FRAME_ADDRESS(n) ((BYTE_T *) &frame_segment[n])
 #define FRAME_LOCAL(n, m) (FRAME_ADDRESS ((n) + FRAME_INFO_SIZE + (m)))
 #define FRAME_OFFSET(n) (FRAME_ADDRESS (frame_pointer + (n)))
@@ -151,19 +150,23 @@ returns: static link for stack frame at 'new_lex_lvl'.
 
 /* Macros for execution. */
 
+extern unsigned check_time_limit_count;
+
 #define CHECK_TIME_LIMIT(p) {\
   double m_t = p->info->module->options.time_limit;\
   BOOL_T m_trace_mood = (MASK (p) & TRACE_MASK) != 0;\
-  if (m_t > 0 && (seconds () - cputime_0) > m_t) {\
-    diagnostic_node (A_RUNTIME_ERROR, (NODE_T *) p, ERROR_TIME_LIMIT_EXCEEDED);\
-    exit_genie ((NODE_T *) p, A_RUNTIME_ERROR);\
+  if (m_t > 0 && (((check_time_limit_count++) % 100) == 0)) {\
+    if ((seconds () - cputime_0) > m_t) {\
+      diagnostic_node (A_RUNTIME_ERROR, (NODE_T *) p, ERROR_TIME_LIMIT_EXCEEDED);\
+      exit_genie ((NODE_T *) p, A_RUNTIME_ERROR);\
+    }\
   } else if (sys_request_flag) {\
     single_step ((NODE_T *) p, A_TRUE, A_FALSE);\
   } else if (m_trace_mood) {\
     where (STDOUT_FILENO, (NODE_T *) p);\
   }}
 
-#define EXECUTE_UNIT(p) ((p)->genie.propagator.unit ((p)->genie.propagator.source))
+#define EXECUTE_UNIT(p) (last_unit = p, (p)->genie.propagator.unit ((p)->genie.propagator.source))
 
 #define EXECUTE_UNIT_TRACE(p) genie_unit_trace (p);
 
@@ -212,11 +215,11 @@ returns: static link for stack frame at 'new_lex_lvl'.
   A68_REAL *_z_ = (A68_REAL *) STACK_TOP;\
   _z_->status = INITIALISED_MASK;\
   _z_->value = (x);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_REAL));\
+  INCREMENT_STACK_POINTER((p), MOID_SIZE (MODE (REAL)));\
 }
 
 #define POP_REAL(p, x) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_REAL));\
+  DECREMENT_STACK_POINTER((p), MOID_SIZE (MODE (REAL)));\
   (*(x)) = *((A68_REAL *) STACK_TOP);\
 }
 
@@ -412,11 +415,12 @@ still is sufficient overhead to make it to the next check.
 
 #define TOO_COMPLEX "program too complex"
 
-#if defined HAVE_SYSTEM_STACK_CHECK && defined HAVE_UNIX && defined HAVE_POSIX_THREADS
-#define SYSTEM_STACK_USED  (ABS ((int) system_stack_offset - (int) &stack_offset))
+#if defined HAVE_SYSTEM_STACK_CHECK && defined HAVE_POSIX_THREADS
+#define SYSTEM_STACK_USED (ABS ((int) system_stack_offset - (int) &stack_offset))
 #define LOW_STACK_ALERT(p) {\
   BYTE_T stack_offset;\
   if (stack_size > 0 && SYSTEM_STACK_USED > stack_limit) {\
+    errno = 0;\
     if ((p) == NULL) {\
       ABNORMAL_END (A_TRUE, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
     } else {\
@@ -425,17 +429,20 @@ still is sufficient overhead to make it to the next check.
     }\
   }\
   if ((p) != NULL && stack_pointer > expr_stack_limit) {\
+    errno = 0;\
     diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }\
   if ((p) != NULL && frame_pointer > frame_stack_limit) { \
+    errno = 0;\
     diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }}
-#elif defined HAVE_SYSTEM_STACK_CHECK && defined HAVE_UNIX
+#elif defined HAVE_SYSTEM_STACK_CHECK
 #define LOW_STACK_ALERT(p) {\
   BYTE_T stack_offset;\
   if (stack_size > 0 && ABS ((int) system_stack_offset - (int) &stack_offset) > stack_limit) {\
+    errno = 0;\
     if ((p) == NULL) {\
       ABNORMAL_END (A_TRUE, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
     } else {\
@@ -444,16 +451,19 @@ still is sufficient overhead to make it to the next check.
     }\
   }\
   if ((p) != NULL && stack_pointer > expr_stack_limit) {\
+    errno = 0;\
     diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }\
   if ((p) != NULL && frame_pointer > frame_stack_limit) { \
+    errno = 0;\
     diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }}
 #else
 #define LOW_STACK_ALERT(p) {\
   (void) (p);\
+  errno = 0;\
   ABNORMAL_END (stack_pointer > expr_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
   ABNORMAL_END (frame_pointer > frame_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
   }
@@ -1044,7 +1054,6 @@ extern BOOL_T genie_string_to_value_internal (NODE_T *, MOID_T *, char *, BYTE_T
 extern BOOL_T genie_united_case_unit (NODE_T *, MOID_T *);
 extern char *a_to_c_string (NODE_T *, char *, A68_REF);
 extern char *genie_standard_format (NODE_T *, MOID_T *, void *);
-extern char *string_plusab_char (char *, char);
 extern double dabs (double);
 extern double dmod (double, double);
 extern double dsign (double);
@@ -1052,6 +1061,7 @@ extern double rng_53_bit (void);
 extern int a68_string_size (NODE_T *, A68_REF);
 extern int iabs (int);
 extern int isign (int);
+extern NODE_T *last_unit;
 extern void dump_frame (int);
 extern void dump_stack (int);
 extern void exit_genie (NODE_T *, int);
@@ -1063,6 +1073,8 @@ extern void genie_declaration (NODE_T *);
 extern void genie_dump_frames ();
 extern void genie_enquiry_clause (NODE_T *);
 extern void genie_f_and_becomes (NODE_T *, MOID_T *, GENIE_PROCEDURE *);
+extern void genie_generator_bounds (NODE_T *);
+extern void genie_generator_internal (NODE_T *, MOID_T *, TAG_T *, LEAP_T, ADDR_T);
 extern void genie_init_lib (NODE_T *);
 extern void genie_prepare_declarer (NODE_T *);
 extern void genie_push_undefined (NODE_T *, MOID_T *);
@@ -1084,7 +1096,6 @@ extern void stack_dump_light (ADDR_T);
 extern void un_init_frame (NODE_T *);
 extern void where (FILE_T, NODE_T *);
 
-#ifdef HAVE_UNIX
 extern void genie_argc (NODE_T *);
 extern void genie_argv (NODE_T *);
 extern void genie_create_pipe (NODE_T *);
@@ -1099,10 +1110,12 @@ extern void genie_getenv (NODE_T *);
 extern void genie_reset_errno (NODE_T *);
 extern void genie_strerror (NODE_T *);
 extern void genie_waitpid (NODE_T *);
+
 #ifdef HAVE_HTTP
 extern void genie_http_content (NODE_T *);
 extern void genie_tcp_request (NODE_T *);
 #endif
+
 #ifdef HAVE_REGEX
 extern void genie_grep_in_string (NODE_T *);
 extern void genie_sub_in_string (NODE_T *);
@@ -1111,7 +1124,6 @@ extern void genie_sub_in_string (NODE_T *);
 
 #ifdef HAVE_CURSES
 extern BOOL_T curses_active;
-
 extern void genie_curses_clear (NODE_T *);
 extern void genie_curses_columns (NODE_T *);
 extern void genie_curses_end (NODE_T *);
@@ -1156,5 +1168,4 @@ extern void genie_pq_user (NODE_T *);
 #ifdef HAVE_IEEE_754
 #define NAN_STRING "NOT_A_NUMBER"
 #define INF_STRING "INFINITY"
-#endif
 #endif

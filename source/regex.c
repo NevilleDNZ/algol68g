@@ -121,7 +121,7 @@ void genie_string_in_string (NODE_T * p)
   }
 }
 
-#if defined HAVE_UNIX && defined HAVE_REGEX
+#if defined HAVE_REGEX
 
 #include <regex.h>
 

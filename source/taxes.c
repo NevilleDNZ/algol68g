@@ -30,7 +30,7 @@ static void tax_specifier_list (NODE_T *);
 static void tax_parameter_list (NODE_T *);
 static void tax_format_texts (NODE_T *);
 
-#define PORTCHECK_TAX(p, q) if (q == A_FALSE) {diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_NOT_PORTABLE, NULL);}
+#define PORTCHECK_TAX(p, q) if (q == A_FALSE) {diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_TAG_NOT_PORTABLE, NULL);}
 
 /*!
 \brief check portability of sub tree
@@ -43,14 +43,14 @@ void portcheck (NODE_T * p)
     portcheck (SUB (p));
     if (p->info->module->options.portcheck) {
       if (WHETHER (p, INDICANT) && MOID (p) != NULL) {
-	PORTCHECK_TAX (p, MOID (p)->portable);
-	MOID (p)->portable = A_TRUE;
+        PORTCHECK_TAX (p, MOID (p)->portable);
+        MOID (p)->portable = A_TRUE;
       } else if (WHETHER (p, IDENTIFIER)) {
-	PORTCHECK_TAX (p, TAX (p)->portable);
-	TAX (p)->portable = A_TRUE;
+        PORTCHECK_TAX (p, TAX (p)->portable);
+        TAX (p)->portable = A_TRUE;
       } else if (WHETHER (p, OPERATOR)) {
-	PORTCHECK_TAX (p, TAX (p)->portable);
-	TAX (p)->portable = A_TRUE;
+        PORTCHECK_TAX (p, TAX (p)->portable);
+        TAX (p)->portable = A_TRUE;
       }
     }
   }
@@ -124,7 +124,7 @@ We can only map routines blessed by "whether_mappable_routine", so there is no
       v = add_token (&top_token, u)->text;
       w = find_tag_local (stand_env, IDENTIFIER, v);
       if (w != NULL && whether_mappable_routine (v)) {
-	return (w);
+        return (w);
       }
     }
     while (CAR (u, "short"));
@@ -136,7 +136,7 @@ We can only map routines blessed by "whether_mappable_routine", so there is no
       v = add_token (&top_token, u)->text;
       w = find_tag_local (stand_env, IDENTIFIER, v);
       if (w != NULL && whether_mappable_routine (v)) {
-	return (w);
+        return (w);
       }
     }
     while (CAR (u, "long"));
@@ -158,19 +158,21 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
     if (WHETHER (p, IDENTIFIER) || WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       if (z != NULL) {
-	MOID (p) = MOID (z);
+        MOID (p) = MOID (z);
       } else if ((z = find_tag_global (SYMBOL_TABLE (p), LABEL, SYMBOL (p))) != NULL) {
-	/* skip. */ ;
+        /*
+         * skip. 
+         */ ;
       } else if ((z = bind_lengthety_identifier (SYMBOL (p))) != NULL) {
-	MOID (p) = MOID (z);
+        MOID (p) = MOID (z);
       } else {
-	diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_1);
-	z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
-	MOID (p) = MODE (ERROR);
+        diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_1);
+        z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
+        MOID (p) = MODE (ERROR);
       }
       TAX (p) = z;
       if (WHETHER (p, DEFINING_IDENTIFIER)) {
-	NODE (z) = p;
+        NODE (z) = p;
       }
     }
   }
@@ -189,11 +191,11 @@ static void bind_indicant_tag_to_symbol_table (NODE_T * p)
     if (WHETHER (p, INDICANT) || WHETHER (p, DEFINING_INDICANT)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), INDICANT, SYMBOL (p));
       if (z != NULL) {
-	MOID (p) = MOID (z);
-	TAX (p) = z;
-	if (WHETHER (p, DEFINING_INDICANT)) {
-	  NODE (z) = p;
-	}
+        MOID (p) = MOID (z);
+        TAX (p) = z;
+        if (WHETHER (p, DEFINING_INDICANT)) {
+          NODE (z) = p;
+        }
       }
     }
   }
@@ -228,14 +230,14 @@ static void tax_specifier_list (NODE_T * p)
 /* skip. */ ;
     } else if (WHETHER (p, IDENTIFIER)) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, NULL,
-			  SPECIFIER_IDENTIFIER);
+          SPECIFIER_IDENTIFIER);
       HEAP (z) = LOC_SYMBOL;
     } else if (WHETHER (p, DECLARER)) {
       tax_specifiers (SUB (p));
       tax_specifier_list (NEXT (p));
 /* last identifier entry is identifier with this declarer. */
       if (SYMBOL_TABLE (p)->identifiers != NULL && PRIO (SYMBOL_TABLE (p)->identifiers) == SPECIFIER_IDENTIFIER)
-	MOID (SYMBOL_TABLE (p)->identifiers) = MOID (p);
+        MOID (SYMBOL_TABLE (p)->identifiers) = MOID (p);
     }
   }
 }
@@ -251,7 +253,7 @@ static void tax_parameters (NODE_T * p)
     if (SUB (p) != NULL) {
       tax_parameters (SUB (p));
       if (WHETHER (p, PARAMETER_PACK)) {
-	tax_parameter_list (SUB (p));
+        tax_parameter_list (SUB (p));
       }
     }
   }
@@ -279,7 +281,7 @@ static void tax_parameter_list (NODE_T * p)
       tax_parameter_list (NEXT (p));
 /* last identifier entries are identifiers with this declarer. */
       for (s = SYMBOL_TABLE (p)->identifiers; s != NULL && MOID (s) == NULL; FORWARD (s)) {
-	MOID (s) = MOID (p);
+        MOID (s) = MOID (p);
       }
       tax_parameters (SUB (p));
     }
@@ -297,7 +299,7 @@ static void tax_for_identifiers (NODE_T * p)
     tax_for_identifiers (SUB (p));
     if (WHETHER (p, FOR_SYMBOL)) {
       if ((FORWARD (p)) != NULL) {
-	add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (INT), LOOP_IDENTIFIER);
+        add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (INT), LOOP_IDENTIFIER);
       }
     }
   }
@@ -332,12 +334,12 @@ static void tax_format_texts (NODE_T * p)
     tax_format_texts (SUB (p));
     if (WHETHER (p, FORMAT_TEXT)) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
-			  FORMAT_TEXT);
+          FORMAT_TEXT);
       TAX (p) = z;
       z->use = A_TRUE;
     } else if (WHETHER (p, FORMAT_DELIMITER_SYMBOL) && NEXT (p) != NULL) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
-			  FORMAT_IDENTIFIER);
+          FORMAT_IDENTIFIER);
       TAX (p) = z;
       z->use = A_TRUE;
     }
@@ -370,11 +372,11 @@ static void tax_generators (NODE_T * p)
     tax_generators (SUB (p));
     if (WHETHER (p, GENERATOR)) {
       if (WHETHER (SUB (p), LOC_SYMBOL)) {
-	TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))),
-			    GENERATOR);
-	HEAP (z) = LOC_SYMBOL;
-	z->use = A_TRUE;
-	TAX (p) = z;
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))),
+            GENERATOR);
+        HEAP (z) = LOC_SYMBOL;
+        z->use = A_TRUE;
+        TAX (p) = z;
       }
     }
   }
@@ -393,23 +395,23 @@ static void structure_fields_test (NODE_T * p)
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       MOID_T *m = SYMBOL_TABLE (SUB (p))->moids;
       for (; m != NULL; m = NEXT (m)) {
-	if (WHETHER (m, STRUCT_SYMBOL) && m->equivalent_mode == NULL) {
+        if (WHETHER (m, STRUCT_SYMBOL) && m->equivalent_mode == NULL) {
 /* check on identically named fields. */
-	  PACK_T *s = PACK (m);
-	  for (; s != NULL; FORWARD (s)) {
-	    PACK_T *t = NEXT (s);
-	    BOOL_T k = A_TRUE;
-	    for (t = NEXT (s); t != NULL && k; FORWARD (t)) {
-	      if (s->text == t->text) {
-		diagnostic_node (A_ERROR, p, ERROR_MULTIPLE_FIELD);
-		while (NEXT (s) != NULL && NEXT (s)->text == t->text) {
-		  FORWARD (s);
-		}
-		k = A_FALSE;
-	      }
-	    }
-	  }
-	}
+          PACK_T *s = PACK (m);
+          for (; s != NULL; FORWARD (s)) {
+            PACK_T *t = NEXT (s);
+            BOOL_T k = A_TRUE;
+            for (t = NEXT (s); t != NULL && k; FORWARD (t)) {
+              if (s->text == t->text) {
+                diagnostic_node (A_ERROR, p, ERROR_MULTIPLE_FIELD);
+                while (NEXT (s) != NULL && NEXT (s)->text == t->text) {
+                  FORWARD (s);
+                }
+                k = A_FALSE;
+              }
+            }
+          }
+        }
       }
     }
     structure_fields_test (SUB (p));
@@ -430,37 +432,37 @@ static void incestuous_union_test (NODE_T * p)
       SYMBOL_TABLE_T *symbol_table = SYMBOL_TABLE (SUB (p));
       MOID_T *m = symbol_table->moids;
       for (; m != NULL; m = NEXT (m)) {
-	if (WHETHER (m, UNION_SYMBOL) && m->equivalent_mode == NULL) {
-	  PACK_T *s = PACK (m);
-	  BOOL_T x = A_TRUE;
+        if (WHETHER (m, UNION_SYMBOL) && m->equivalent_mode == NULL) {
+          PACK_T *s = PACK (m);
+          BOOL_T x = A_TRUE;
 /* Discard unions with one member. */
-	  if (count_pack_members (s) == 1) {
-	    SOID_T a;
-	    make_soid (&a, NO_SORT, m, 0);
-	    diagnostic_node (A_ERROR, NODE (m), ERROR_COMPONENT_NUMBER, m);
-	    x = A_FALSE;
-	  }
+          if (count_pack_members (s) == 1) {
+            SOID_T a;
+            make_soid (&a, NO_SORT, m, 0);
+            diagnostic_node (A_ERROR, NODE (m), ERROR_COMPONENT_NUMBER, m);
+            x = A_FALSE;
+          }
 /* Discard unions with firmly related modes. */
-	  for (; s != NULL && x; FORWARD (s)) {
-	    PACK_T *t = NEXT (s);
-	    for (; t != NULL; FORWARD (t)) {
-	      if (MOID (t) != MOID (s)) {
-		if (whether_firm (MOID (s), MOID (t))) {
-		  diagnostic_node (A_ERROR, p, ERROR_COMPONENT_RELATED, m);
-		}
-	      }
-	    }
-	  }
+          for (; s != NULL && x; FORWARD (s)) {
+            PACK_T *t = NEXT (s);
+            for (; t != NULL; FORWARD (t)) {
+              if (MOID (t) != MOID (s)) {
+                if (whether_firm (MOID (s), MOID (t))) {
+                  diagnostic_node (A_ERROR, p, ERROR_COMPONENT_RELATED, m);
+                }
+              }
+            }
+          }
 /* Discard unions with firmly related subsets. */
-	  for (s = PACK (m); s != NULL && x; FORWARD (s)) {
-	    MOID_T *n = depref_completely (MOID (s));
-	    if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, NO_DEFLEXING)) {
-	      SOID_T z;
-	      make_soid (&z, NO_SORT, n, 0);
-	      diagnostic_node (A_ERROR, p, ERROR_SUBSET_RELATED, m, n);
-	    }
-	  }
-	}
+          for (s = PACK (m); s != NULL && x; FORWARD (s)) {
+            MOID_T *n = depref_completely (MOID (s));
+            if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, NO_DEFLEXING)) {
+              SOID_T z;
+              make_soid (&z, NO_SORT, n, 0);
+              diagnostic_node (A_ERROR, p, ERROR_SUBSET_RELATED, m, n);
+            }
+          }
+        }
       }
     }
     incestuous_union_test (SUB (p));
@@ -483,20 +485,20 @@ static TAG_T *find_firmly_related_op (SYMBOL_TABLE_T * c, char *n, MOID_T * l, M
     TAG_T *s = c->operators;
     for (; s != NULL; FORWARD (s)) {
       if (s != self && SYMBOL (NODE (s)) == n) {
-	PACK_T *t = PACK (MOID (s));
-	if (t != NULL && whether_firm (MOID (t), l)) {
+        PACK_T *t = PACK (MOID (s));
+        if (t != NULL && whether_firm (MOID (t), l)) {
 /* catch monadic operator. */
-	  if ((FORWARD (t)) == NULL) {
-	    if (r == NULL) {
-	      return (s);
-	    }
-	  } else {
+          if ((FORWARD (t)) == NULL) {
+            if (r == NULL) {
+              return (s);
+            }
+          } else {
 /* catch dyadic operator. */
-	    if (r != NULL && whether_firm (MOID (t), r)) {
-	      return (s);
-	    }
-	  }
-	}
+            if (r != NULL && whether_firm (MOID (t), r)) {
+              return (s);
+            }
+          }
+        }
       }
     }
   }
@@ -518,10 +520,10 @@ static void test_firmly_related_ops_local (NODE_T * p, TAG_T * s)
     TAG_T *t = find_firmly_related_op (SYMBOL_TABLE (s), SYMBOL (NODE (s)), l, r, s);
     if (t != NULL) {
       if (SYMBOL_TABLE (t) == stand_env) {
-	diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
-	ABNORMAL_END (A_TRUE, "standard environ error", NULL);
+        diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
+        ABNORMAL_END (A_TRUE, "standard environ error", NULL);
       } else {
-	diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
+        diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
       }
     }
     if (NEXT (s) != NULL) {
@@ -541,7 +543,7 @@ static void test_firmly_related_ops (NODE_T * p)
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       TAG_T *oops = SYMBOL_TABLE (SUB (p))->operators;
       if (oops != NULL) {
-	test_firmly_related_ops_local (NODE (oops), oops);
+        test_firmly_related_ops_local (NODE (oops), oops);
       }
     }
     test_firmly_related_ops (SUB (p));
@@ -665,7 +667,7 @@ TAG_T *find_tag_global (SYMBOL_TABLE_T * table, int a, char *name)
     }
     for (; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
-	return (s);
+        return (s);
       }
     }
     return (find_tag_global (PREVIOUS (table), a, name));
@@ -687,12 +689,12 @@ int whether_identifier_or_label_global (SYMBOL_TABLE_T * table, char *name)
     TAG_T *s;
     for (s = table->identifiers; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
-	return (IDENTIFIER);
+        return (IDENTIFIER);
       }
     }
     for (s = table->labels; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
-	return (LABEL);
+        return (LABEL);
       }
     }
     return (whether_identifier_or_label_global (PREVIOUS (table), name));
@@ -728,7 +730,7 @@ TAG_T *find_tag_local (SYMBOL_TABLE_T * table, int a, char *name)
     }
     for (; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
-	return (s);
+        return (s);
       }
     }
   }
@@ -783,7 +785,7 @@ static void tax_identity_dec (NODE_T * p, MOID_T ** m)
       TAX (p) = entry;
       MOID (entry) = *m;
       if ((*m)->attribute == REF_SYMBOL) {
-	HEAP (entry) = tab_qualifier (NEXT (NEXT (p)));
+        HEAP (entry) = tab_qualifier (NEXT (NEXT (p)));
       }
       tax_identity_dec (NEXT (NEXT (p)), m);
     } else {
@@ -821,12 +823,12 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
       TAX (p) = entry;
       HEAP (entry) = *q;
       if (*q == LOC_SYMBOL) {
-	TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (*m), GENERATOR);
-	HEAP (z) = LOC_SYMBOL;
-	z->use = A_TRUE;
-	entry->body = z;
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (*m), GENERATOR);
+        HEAP (z) = LOC_SYMBOL;
+        z->use = A_TRUE;
+        entry->body = z;
       } else {
-	entry->body = NULL;
+        entry->body = NULL;
       }
       MOID (entry) = *m;
       tax_variable_dec (NEXT (p), q, m);
@@ -860,13 +862,13 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
       HEAP (entry) = *q;
       MOID (entry) = MOID (p);
       if (*q == LOC_SYMBOL) {
-	TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (p)),
-			    GENERATOR);
-	HEAP (z) = LOC_SYMBOL;
-	z->use = A_TRUE;
-	entry->body = z;
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (p)),
+            GENERATOR);
+        HEAP (z) = LOC_SYMBOL;
+        z->use = A_TRUE;
+        entry->body = z;
       } else {
-	entry->body = NULL;
+        entry->body = NULL;
       }
       tax_proc_variable_dec (NEXT (p), q);
     } else {
@@ -932,7 +934,7 @@ static int count_operands (NODE_T * p)
 static void check_operator_dec (NODE_T * p)
 {
   int k = 0;
-  NODE_T *pack = SUB (SUB (NEXT (NEXT (p))));	/* That's where the parameter pack is. */
+  NODE_T *pack = SUB (SUB (NEXT (NEXT (p))));   /* That's where the parameter pack is. */
   if (ATTRIBUTE (NEXT (NEXT (p))) != ROUTINE_TEXT) {
     pack = SUB (pack);
   }
@@ -973,7 +975,7 @@ static void tax_op_dec (NODE_T * p, MOID_T ** m)
       TAG_T *entry = SYMBOL_TABLE (p)->operators;
       check_operator_dec (p);
       while (entry != NULL && NODE (entry) != p) {
-	FORWARD (entry);
+        FORWARD (entry);
       }
       MOID (p) = *m;
       TAX (p) = entry;
@@ -1005,7 +1007,7 @@ static void tax_brief_op_dec (NODE_T * p)
       MOID_T *m = MOID (NEXT (NEXT (p)));
       check_operator_dec (p);
       while (entry != NULL && NODE (entry) != p) {
-	FORWARD (entry);
+        FORWARD (entry);
       }
       MOID (p) = m;
       TAX (p) = entry;
@@ -1035,7 +1037,7 @@ static void tax_prio_dec (NODE_T * p)
     } else if (WHETHER (p, DEFINING_OPERATOR)) {
       TAG_T *entry = PRIO (SYMBOL_TABLE (p));
       while (entry != NULL && NODE (entry) != p) {
-	FORWARD (entry);
+        FORWARD (entry);
       }
       MOID (p) = NULL;
       TAX (p) = entry;
@@ -1140,9 +1142,9 @@ static void flood_with_symbol_table_restricted (NODE_T * p, SYMBOL_TABLE_T * s)
     SYMBOL_TABLE (p) = s;
     if (ATTRIBUTE (p) != ROUTINE_TEXT && ATTRIBUTE (p) != SPECIFIED_UNIT) {
       if (whether_new_lexical_level (p)) {
-	PREVIOUS (SYMBOL_TABLE (SUB (p))) = s;
+        PREVIOUS (SYMBOL_TABLE (SUB (p))) = s;
       } else {
-	flood_with_symbol_table_restricted (SUB (p), s);
+        flood_with_symbol_table_restricted (SUB (p), s);
       }
     }
   }
@@ -1170,21 +1172,21 @@ void finalise_symbol_table_setup (NODE_T * p, int l)
 /* level count and recursion. */
     if (SUB (q) != NULL) {
       if (whether_new_lexical_level (q)) {
-	LEX_LEVEL (SUB (q)) = l + 1;
-	PREVIOUS (SYMBOL_TABLE (SUB (q))) = s;
-	finalise_symbol_table_setup (SUB (q), l + 1);
-	if (WHETHER (q, WHILE_PART)) {
-	  if ((FORWARD (q)) == NULL) {
-	    return;
-	  }
-	  if (WHETHER (q, ALT_DO_PART)) {
-	    LEX_LEVEL (SUB (q)) = l + 2;
-	    finalise_symbol_table_setup (SUB (q), l + 2);
-	  }
-	}
+        LEX_LEVEL (SUB (q)) = l + 1;
+        PREVIOUS (SYMBOL_TABLE (SUB (q))) = s;
+        finalise_symbol_table_setup (SUB (q), l + 1);
+        if (WHETHER (q, WHILE_PART)) {
+          if ((FORWARD (q)) == NULL) {
+            return;
+          }
+          if (WHETHER (q, ALT_DO_PART)) {
+            LEX_LEVEL (SUB (q)) = l + 2;
+            finalise_symbol_table_setup (SUB (q), l + 2);
+          }
+        }
       } else {
-	SYMBOL_TABLE (SUB (q)) = s;
-	finalise_symbol_table_setup (SUB (q), l);
+        SYMBOL_TABLE (SUB (q)) = s;
+        finalise_symbol_table_setup (SUB (q), l);
       }
     }
     SYMBOL_TABLE (q) = s;
@@ -1221,103 +1223,103 @@ void preliminary_symbol_table_setup (NODE_T * p)
     if (SUB (q) != NULL) {
 /* BEGIN ... END, CODE ... EDOC, DEF ... FED, DO ... OD, $ ... $, { ... } are ranges. */
       if (WHETHER (q, BEGIN_SYMBOL) || WHETHER (q, DO_SYMBOL) || WHETHER (q, ALT_DO_SYMBOL) || WHETHER (q, FORMAT_DELIMITER_SYMBOL) || WHETHER (q, ACCO_SYMBOL)) {
-	SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	preliminary_symbol_table_setup (SUB (q));
+        SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+        preliminary_symbol_table_setup (SUB (q));
       }
 /* ( ... ) is a range. */
       else if (WHETHER (q, OPEN_SYMBOL)) {
-	if (whether (q, OPEN_SYMBOL, THEN_BAR_SYMBOL, 0)) {
-	  SYMBOL_TABLE (SUB (q)) = s;
-	  preliminary_symbol_table_setup (SUB (q));
-	  FORWARD (q);
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	  preliminary_symbol_table_setup (SUB (q));
-	  if ((FORWARD (q)) == NULL) {
-	    not_a_for_range = A_TRUE;
-	  } else {
-	    if (WHETHER (q, THEN_BAR_SYMBOL)) {
-	      SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	      preliminary_symbol_table_setup (SUB (q));
-	    }
-	    if (WHETHER (q, OPEN_SYMBOL)) {
-	      SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	      preliminary_symbol_table_setup (SUB (q));
-	    }
-	  }
-	} else {
+        if (whether (q, OPEN_SYMBOL, THEN_BAR_SYMBOL, 0)) {
+          SYMBOL_TABLE (SUB (q)) = s;
+          preliminary_symbol_table_setup (SUB (q));
+          FORWARD (q);
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+          preliminary_symbol_table_setup (SUB (q));
+          if ((FORWARD (q)) == NULL) {
+            not_a_for_range = A_TRUE;
+          } else {
+            if (WHETHER (q, THEN_BAR_SYMBOL)) {
+              SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+              preliminary_symbol_table_setup (SUB (q));
+            }
+            if (WHETHER (q, OPEN_SYMBOL)) {
+              SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+              preliminary_symbol_table_setup (SUB (q));
+            }
+          }
+        } else {
 /* don't worry about STRUCT (...), UNION (...), PROC (...) yet. */
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	  preliminary_symbol_table_setup (SUB (q));
-	}
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+          preliminary_symbol_table_setup (SUB (q));
+        }
       }
 /* IF ... THEN ... ELSE ... FI are ranges. */
       else if (WHETHER (q, IF_SYMBOL)) {
-	if (whether (q, IF_SYMBOL, THEN_SYMBOL, 0)) {
-	  SYMBOL_TABLE (SUB (q)) = s;
-	  preliminary_symbol_table_setup (SUB (q));
-	  FORWARD (q);
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	  preliminary_symbol_table_setup (SUB (q));
-	  if ((FORWARD (q)) == NULL) {
-	    not_a_for_range = A_TRUE;
-	  } else {
-	    if (WHETHER (q, ELSE_SYMBOL)) {
-	      SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	      preliminary_symbol_table_setup (SUB (q));
-	    }
-	    if (WHETHER (q, IF_SYMBOL)) {
-	      SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	      preliminary_symbol_table_setup (SUB (q));
-	    }
-	  }
-	} else {
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	  preliminary_symbol_table_setup (SUB (q));
-	}
+        if (whether (q, IF_SYMBOL, THEN_SYMBOL, 0)) {
+          SYMBOL_TABLE (SUB (q)) = s;
+          preliminary_symbol_table_setup (SUB (q));
+          FORWARD (q);
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+          preliminary_symbol_table_setup (SUB (q));
+          if ((FORWARD (q)) == NULL) {
+            not_a_for_range = A_TRUE;
+          } else {
+            if (WHETHER (q, ELSE_SYMBOL)) {
+              SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+              preliminary_symbol_table_setup (SUB (q));
+            }
+            if (WHETHER (q, IF_SYMBOL)) {
+              SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+              preliminary_symbol_table_setup (SUB (q));
+            }
+          }
+        } else {
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+          preliminary_symbol_table_setup (SUB (q));
+        }
       }
 /* CASE ... IN ... OUT ... ESAC are ranges. */
       else if (WHETHER (q, CASE_SYMBOL)) {
-	if (whether (q, CASE_SYMBOL, IN_SYMBOL, 0)) {
-	  SYMBOL_TABLE (SUB (q)) = s;
-	  preliminary_symbol_table_setup (SUB (q));
-	  FORWARD (q);
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	  preliminary_symbol_table_setup (SUB (q));
-	  if ((FORWARD (q)) == NULL) {
-	    not_a_for_range = A_TRUE;
-	  } else {
-	    if (WHETHER (q, OUT_SYMBOL)) {
-	      SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	      preliminary_symbol_table_setup (SUB (q));
-	    }
-	    if (WHETHER (q, CASE_SYMBOL)) {
-	      SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	      preliminary_symbol_table_setup (SUB (q));
-	    }
-	  }
-	} else {
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	  preliminary_symbol_table_setup (SUB (q));
-	}
+        if (whether (q, CASE_SYMBOL, IN_SYMBOL, 0)) {
+          SYMBOL_TABLE (SUB (q)) = s;
+          preliminary_symbol_table_setup (SUB (q));
+          FORWARD (q);
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+          preliminary_symbol_table_setup (SUB (q));
+          if ((FORWARD (q)) == NULL) {
+            not_a_for_range = A_TRUE;
+          } else {
+            if (WHETHER (q, OUT_SYMBOL)) {
+              SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+              preliminary_symbol_table_setup (SUB (q));
+            }
+            if (WHETHER (q, CASE_SYMBOL)) {
+              SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+              preliminary_symbol_table_setup (SUB (q));
+            }
+          }
+        } else {
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+          preliminary_symbol_table_setup (SUB (q));
+        }
       }
 /* UNTIL ... OD is a range. */
       else if (WHETHER (q, UNTIL_SYMBOL) && SUB (q) != NULL) {
-	SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
-	preliminary_symbol_table_setup (SUB (q));
+        SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
+        preliminary_symbol_table_setup (SUB (q));
 /* WHILE ... DO ... OD are ranges. */
       } else if (WHETHER (q, WHILE_SYMBOL)) {
-	SYMBOL_TABLE_T *u = new_symbol_table (s);
-	SYMBOL_TABLE (SUB (q)) = u;
-	preliminary_symbol_table_setup (SUB (q));
-	if ((FORWARD (q)) == NULL) {
-	  not_a_for_range = A_TRUE;
-	} else if (WHETHER (q, ALT_DO_SYMBOL)) {
-	  SYMBOL_TABLE (SUB (q)) = new_symbol_table (u);
-	  preliminary_symbol_table_setup (SUB (q));
-	}
+        SYMBOL_TABLE_T *u = new_symbol_table (s);
+        SYMBOL_TABLE (SUB (q)) = u;
+        preliminary_symbol_table_setup (SUB (q));
+        if ((FORWARD (q)) == NULL) {
+          not_a_for_range = A_TRUE;
+        } else if (WHETHER (q, ALT_DO_SYMBOL)) {
+          SYMBOL_TABLE (SUB (q)) = new_symbol_table (u);
+          preliminary_symbol_table_setup (SUB (q));
+        }
       } else {
-	SYMBOL_TABLE (SUB (q)) = s;
-	preliminary_symbol_table_setup (SUB (q));
+        SYMBOL_TABLE (SUB (q)) = s;
+        preliminary_symbol_table_setup (SUB (q));
       }
     }
   }
@@ -1325,14 +1327,14 @@ void preliminary_symbol_table_setup (NODE_T * p)
   if (!not_a_for_range) {
     for (q = p; q != NULL; FORWARD (q)) {
       if (WHETHER (q, FOR_SYMBOL)) {
-	NODE_T *r = q;
-	SYMBOL_TABLE (NEXT (q)) = NULL;
-	for (; r != NULL && SYMBOL_TABLE (NEXT (q)) == NULL; r = NEXT (r)) {
-	  if ((WHETHER (r, WHILE_SYMBOL) || WHETHER (r, ALT_DO_SYMBOL)) && (NEXT (q) != NULL && SUB (r) != NULL)) {
-	    SYMBOL_TABLE (NEXT (q)) = SYMBOL_TABLE (SUB (r));
-	    NEXT (q)->do_od_part = SUB (r);
-	  }
-	}
+        NODE_T *r = q;
+        SYMBOL_TABLE (NEXT (q)) = NULL;
+        for (; r != NULL && SYMBOL_TABLE (NEXT (q)) == NULL; r = NEXT (r)) {
+          if ((WHETHER (r, WHILE_SYMBOL) || WHETHER (r, ALT_DO_SYMBOL)) && (NEXT (q) != NULL && SUB (r) != NULL)) {
+            SYMBOL_TABLE (NEXT (q)) = SYMBOL_TABLE (SUB (r));
+            NEXT (q)->do_od_part = SUB (r);
+          }
+        }
       }
     }
   }
@@ -1390,20 +1392,20 @@ routines in transput.
     } else if (WHETHER (p, OPERATOR)) {
       TAG_T *z;
       if (TAX (p) != NULL) {
-	TAX (p)->use = A_TRUE;
+        TAX (p)->use = A_TRUE;
       }
       if ((z = find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) != NULL) {
-	z->use = A_TRUE;
+        z->use = A_TRUE;
       }
     } else if (WHETHER (p, INDICANT)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), INDICANT, SYMBOL (p));
       if (z != NULL) {
-	TAX (p) = z;
-	z->use = A_TRUE;
+        TAX (p) = z;
+        z->use = A_TRUE;
       }
     } else if (WHETHER (p, IDENTIFIER)) {
       if (TAX (p) != NULL) {
-	TAX (p)->use = A_TRUE;
+        TAX (p)->use = A_TRUE;
       }
     }
   }
@@ -1434,10 +1436,10 @@ void warn_for_unused_tags (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     if (SUB (p) != NULL && LINE (p)->number != 0) {
       if (whether_new_lexical_level (p) && ATTRIBUTE (SYMBOL_TABLE (SUB (p))) != ENVIRON_SYMBOL) {
-	unused (SYMBOL_TABLE (SUB (p))->operators);
-	unused (PRIO (SYMBOL_TABLE (SUB (p))));
-	unused (SYMBOL_TABLE (SUB (p))->identifiers);
-	unused (SYMBOL_TABLE (SUB (p))->indicants);
+        unused (SYMBOL_TABLE (SUB (p))->operators);
+        unused (PRIO (SYMBOL_TABLE (SUB (p))));
+        unused (SYMBOL_TABLE (SUB (p))->identifiers);
+        unused (SYMBOL_TABLE (SUB (p))->indicants);
       }
     }
     warn_for_unused_tags (SUB (p));
@@ -1455,19 +1457,19 @@ void jumps_from_procs (NODE_T * p)
     if (WHETHER (p, PROCEDURING)) {
       NODE_T *u = SUB (SUB (p));
       if (WHETHER (u, GOTO_SYMBOL)) {
-	u = NEXT (u);
+        u = NEXT (u);
       }
       if (u->info->PROCEDURE_NUMBER != NODE (TAX (u))->info->PROCEDURE_NUMBER) {
-	PRIO (TAX (u)) = EXTERN_LABEL;
+        PRIO (TAX (u)) = EXTERN_LABEL;
       }
       TAX (u)->use = A_TRUE;
     } else if (WHETHER (p, JUMP)) {
       NODE_T *u = SUB (p);
       if (WHETHER (u, GOTO_SYMBOL)) {
-	u = NEXT (u);
+        u = NEXT (u);
       }
       if (u->info->PROCEDURE_NUMBER != NODE (TAX (u))->info->PROCEDURE_NUMBER) {
-	PRIO (TAX (u)) = EXTERN_LABEL;
+        PRIO (TAX (u)) = EXTERN_LABEL;
       }
       TAX (u)->use = A_TRUE;
     } else {
@@ -1537,9 +1539,9 @@ void assign_offsets_packs (MOID_LIST_T * moid_list)
       PACK_T *p = PACK (MOID (q));
       ADDR_T offset = 0;
       for (; p != NULL; FORWARD (p)) {
-	p->size = moid_size (MOID (p));
-	p->offset = offset;
-	offset += p->size;
+        p->size = moid_size (MOID (p));
+        p->offset = offset;
+        offset += p->size;
       }
     }
   }

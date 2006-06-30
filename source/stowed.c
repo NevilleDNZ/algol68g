@@ -130,7 +130,7 @@ void print_internal_index (FILE_T f, A68_TUPLE * tup, int dimensions)
   for (k = 0; k < dimensions; k++) {
     A68_TUPLE *ref = &tup[k];
     char buf[BUFFER_SIZE];
-    sprintf (buf, "%d", ref->k);
+    snprintf (buf, BUFFER_SIZE, "%d", ref->k);
     io_write_string (f, buf);
     if (k < dimensions - 1) {
       io_write_string (f, ", ");
@@ -270,10 +270,10 @@ char *a_to_c_string (NODE_T * p, char *str, A68_REF row)
       int k;
       BYTE_T *base_address = ADDRESS (&arr->array);
       for (k = tup->lower_bound; k <= tup->upper_bound; k++) {
-	int addr = INDEX_1_DIM (arr, tup, k);
-	A68_CHAR *ch = (A68_CHAR *) & (base_address[addr]);
-	TEST_INIT (p, *ch, MODE (CHAR));
-	str[n++] = ch->value;
+        int addr = INDEX_1_DIM (arr, tup, k);
+        A68_CHAR *ch = (A68_CHAR *) & (base_address[addr]);
+        TEST_INIT (p, *ch, MODE (CHAR));
+        str[n++] = ch->value;
       }
     }
     str[n] = NULL_CHAR;
@@ -375,21 +375,21 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
 /* All arrays in the stack must have the same bounds with respect to (arbitrary) first one. */
       int i;
       for (i = 1; i < elems_in_stack; i++) {
-	A68_REF run_row, ref_row;
-	A68_TUPLE *run_tup, *ref_tup;
-	int j;
-	ref_row = *(A68_REF *) STACK_ADDRESS (sp);
-	run_row = *(A68_REF *) STACK_ADDRESS (sp + i * SIZE_OF (A68_REF));
-	GET_DESCRIPTOR (dummy, ref_tup, &ref_row);
-	GET_DESCRIPTOR (dummy, run_tup, &run_row);
-	for (j = 0; j < old_dim; j++) {
-	  if ((ref_tup->upper_bound != run_tup->upper_bound) || (ref_tup->lower_bound != run_tup->lower_bound)) {
-	    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-	    exit_genie (p, A_RUNTIME_ERROR);
-	  }
-	  ref_tup++;
-	  run_tup++;
-	}
+        A68_REF run_row, ref_row;
+        A68_TUPLE *run_tup, *ref_tup;
+        int j;
+        ref_row = *(A68_REF *) STACK_ADDRESS (sp);
+        run_row = *(A68_REF *) STACK_ADDRESS (sp + i * SIZE_OF (A68_REF));
+        GET_DESCRIPTOR (dummy, ref_tup, &ref_row);
+        GET_DESCRIPTOR (dummy, run_tup, &run_row);
+        for (j = 0; j < old_dim; j++) {
+          if ((ref_tup->upper_bound != run_tup->upper_bound) || (ref_tup->lower_bound != run_tup->lower_bound)) {
+            diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+            exit_genie (p, A_RUNTIME_ERROR);
+          }
+          ref_tup++;
+          run_tup++;
+        }
       }
     }
 /* Ok, same size. Fill descriptor of new row with info from (arbitrary) first one. */
@@ -425,13 +425,13 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
       initialise_internal_index (&new_tup[1], old_dim);
       done = A_FALSE;
       while (!done) {
-	ADDR_T old_index, new_index, old_addr, new_addr;
-	old_index = calculate_internal_index (old_tup, old_dim);
-	new_index = j * new_tup->span + calculate_internal_index (&new_tup[1], old_dim);
-	old_addr = ROW_ELEMENT (old_arr, old_index);
-	new_addr = ROW_ELEMENT (new_arr, new_index);
-	MOVE (&new_elem[new_addr], &old_elem[old_addr], (unsigned) new_arr->elem_size);
-	done = increment_internal_index (old_tup, old_dim) | increment_internal_index (&new_tup[1], old_dim);
+        ADDR_T old_index, new_index, old_addr, new_addr;
+        old_index = calculate_internal_index (old_tup, old_dim);
+        new_index = j * new_tup->span + calculate_internal_index (&new_tup[1], old_dim);
+        old_addr = ROW_ELEMENT (old_arr, old_index);
+        new_addr = ROW_ELEMENT (new_arr, new_index);
+        MOVE (&new_elem[new_addr], &old_elem[old_addr], (unsigned) new_arr->elem_size);
+        done = increment_internal_index (old_tup, old_dim) | increment_internal_index (&new_tup[1], old_dim);
       }
     }
   }
@@ -482,16 +482,16 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR
     src_a = ADDRESS (&src);
     if (elem_mode->has_rows) {
       if (WHETHER (elem_mode, STRUCT_SYMBOL)) {
-	A68_REF new_one = genie_copy_stowed (src, p, elem_mode);
-	MOVE (dst_a, ADDRESS (&new_one), MOID_SIZE (elem_mode));
+        A68_REF new_one = genie_copy_stowed (src, p, elem_mode);
+        MOVE (dst_a, ADDRESS (&new_one), MOID_SIZE (elem_mode));
       } else if (WHETHER (elem_mode, FLEX_SYMBOL) || elem_mode == MODE (STRING)) {
-	*(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, DEFLEX (elem_mode));
+        *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, DEFLEX (elem_mode));
       } else if (WHETHER (elem_mode, ROW_SYMBOL)) {
-	*(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, elem_mode);
+        *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, elem_mode);
       } else if (WHETHER (elem_mode, UNION_SYMBOL)) {
-	genie_copy_union (p, dst_a, src_a, src);
+        genie_copy_union (p, dst_a, src_a, src);
       } else {
-	ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_make_row");
+        ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_make_row");
       }
     } else {
       MOVE (dst_a, src_a, (unsigned) arr->elem_size);
@@ -746,7 +746,7 @@ static void genie_copy_union (NODE_T * p, BYTE_T * dst_a, BYTE_T * src_a, A68_RE
 {
   BYTE_T *dst_u = &(dst_a[UNION_OFFSET]), *src_u = &(src_a[UNION_OFFSET]);
   A68_UNION *u = (A68_UNION *) src_a;
-  MOID_T *um = u->value;
+  MOID_T *um = (MOID_T *) u->value;
   if (um != NULL) {
     *(A68_POINTER *) dst_a = *u;
     if (WHETHER (um, STRUCT_SYMBOL)) {
@@ -778,9 +778,7 @@ static void genie_copy_union (NODE_T * p, BYTE_T * dst_a, BYTE_T * src_a, A68_RE
 
 A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
 {
-/* 
-We need this complex routine since arrays are not always contiguous (trims). 
-*/
+/* We need this complex routine since arrays are not always contiguous (trims). */
   A68_REF new_row;
   A68_ARRAY *old_arr, *new_arr;
   A68_TUPLE *old_tup, *new_tup, *old_p, *new_p;
@@ -833,26 +831,26 @@ We need this complex routine since arrays are not always contiguous (trims).
       new_addr = ROW_ELEMENT (new_arr, new_index);
       if (SUB (m)->has_rows) {
 /* Recursion. */
-	A68_REF new_old = old_arr->array, new_dst = new_arr->array;
-	BYTE_T *src_a, *dst_a;
-	new_old.offset += old_addr;
-	new_dst.offset += new_addr;
-	src_a = ADDRESS (&new_old);
-	dst_a = ADDRESS (&new_dst);
-	if (WHETHER (SUB (m), STRUCT_SYMBOL)) {
-	  A68_REF str_src = genie_copy_stowed (new_old, p, SUB (m));
-	  MOVE (dst_a, ADDRESS (&str_src), MOID_SIZE (SUB (m)));
-	} else if (WHETHER (SUB (m), FLEX_SYMBOL) || SUB (m) == MODE (STRING)) {
-	  *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, DEFLEX (SUB (m)));
-	} else if (WHETHER (SUB (m), ROW_SYMBOL)) {
-	  *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, SUB (m));
-	} else if (WHETHER (SUB (m), UNION_SYMBOL)) {
-	  genie_copy_union (p, dst_a, src_a, new_old);
-	} else {
-	  ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_row");
-	}
+        A68_REF new_old = old_arr->array, new_dst = new_arr->array;
+        BYTE_T *src_a, *dst_a;
+        new_old.offset += old_addr;
+        new_dst.offset += new_addr;
+        src_a = ADDRESS (&new_old);
+        dst_a = ADDRESS (&new_dst);
+        if (WHETHER (SUB (m), STRUCT_SYMBOL)) {
+          A68_REF str_src = genie_copy_stowed (new_old, p, SUB (m));
+          MOVE (dst_a, ADDRESS (&str_src), MOID_SIZE (SUB (m)));
+        } else if (WHETHER (SUB (m), FLEX_SYMBOL) || SUB (m) == MODE (STRING)) {
+          *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, DEFLEX (SUB (m)));
+        } else if (WHETHER (SUB (m), ROW_SYMBOL)) {
+          *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, SUB (m));
+        } else if (WHETHER (SUB (m), UNION_SYMBOL)) {
+          genie_copy_union (p, dst_a, src_a, new_old);
+        } else {
+          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_row");
+        }
       } else {
-	MOVE (&new_elem[new_addr], &old_elem[old_addr], elem_size);
+        MOVE (&new_elem[new_addr], &old_elem[old_addr], elem_size);
       }
 /* Increase pointers. */
       done = increment_internal_index (old_tup, DIMENSION (old_arr)) | increment_internal_index (new_tup, DIMENSION (new_arr));
@@ -901,8 +899,8 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
     for (k = 0; k < DIMENSION (old_arr); k++) {
       A68_TUPLE *old_p = &old_tup[k], *new_p = &new_tup[k];
       if ((new_p->upper_bound != old_p->upper_bound) || (new_p->lower_bound != old_p->lower_bound)) {
-	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-	exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+        exit_genie (p, A_RUNTIME_ERROR);
       }
     }
     span = 1;
@@ -931,37 +929,37 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
       new_addr = ROW_ELEMENT (new_arr, new_index);
       if (SUB (m)->has_rows) {
 /* Recursion. */
-	A68_REF new_old = old_arr->array, new_dst = new_arr->array;
-	BYTE_T *src_a, *dst_a;
-	new_old.offset += old_addr;
-	new_dst.offset += new_addr;
-	src_a = ADDRESS (&new_old);
-	dst_a = ADDRESS (&new_dst);
-	if (WHETHER (SUB (m), STRUCT_SYMBOL)) {
-	  genie_assign_stowed (new_old, &new_dst, p, SUB (m));
-	} else if (ATTRIBUTE (SUB (m)) == FLEX_SYMBOL || SUB (m) == MODE (STRING)) {
-	  A68_REF dst_addr = *(A68_REF *) dst_a;
+        A68_REF new_old = old_arr->array, new_dst = new_arr->array;
+        BYTE_T *src_a, *dst_a;
+        new_old.offset += old_addr;
+        new_dst.offset += new_addr;
+        src_a = ADDRESS (&new_old);
+        dst_a = ADDRESS (&new_dst);
+        if (WHETHER (SUB (m), STRUCT_SYMBOL)) {
+          genie_assign_stowed (new_old, &new_dst, p, SUB (m));
+        } else if (ATTRIBUTE (SUB (m)) == FLEX_SYMBOL || SUB (m) == MODE (STRING)) {
+          A68_REF dst_addr = *(A68_REF *) dst_a;
 /* Algol68G does not know ghost elements. NIL means an initially empty row. */
-	  if (IS_NIL (dst_addr)) {
-	    *(A68_REF *) dst_a = *(A68_REF *) src_a;
-	  } else {
-	    genie_assign_stowed (*(A68_REF *) src_a, &dst_addr, p, SUB (m));
-	  }
-	} else if (ATTRIBUTE (SUB (m)) == ROW_SYMBOL) {
-	  A68_REF dst_addr = *(A68_REF *) dst_a;
+          if (IS_NIL (dst_addr)) {
+            *(A68_REF *) dst_a = *(A68_REF *) src_a;
+          } else {
+            genie_assign_stowed (*(A68_REF *) src_a, &dst_addr, p, SUB (m));
+          }
+        } else if (ATTRIBUTE (SUB (m)) == ROW_SYMBOL) {
+          A68_REF dst_addr = *(A68_REF *) dst_a;
 /* Algol68G does not know ghost elements. NIL means an initially empty row. */
-	  if (IS_NIL (dst_addr)) {
-	    *(A68_REF *) dst_a = *(A68_REF *) src_a;
-	  } else {
-	    genie_assign_stowed (*(A68_REF *) src_a, &dst_addr, p, SUB (m));
-	  }
-	} else if (WHETHER (SUB (m), UNION_SYMBOL)) {
-	  genie_copy_union (p, dst_a, src_a, new_old);
-	} else {
-	  ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_row");
-	}
+          if (IS_NIL (dst_addr)) {
+            *(A68_REF *) dst_a = *(A68_REF *) src_a;
+          } else {
+            genie_assign_stowed (*(A68_REF *) src_a, &dst_addr, p, SUB (m));
+          }
+        } else if (WHETHER (SUB (m), UNION_SYMBOL)) {
+          genie_copy_union (p, dst_a, src_a, new_old);
+        } else {
+          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_row");
+        }
       } else {
-	MOVE (&new_elem[new_addr], &old_elem[old_addr], elem_size);
+        MOVE (&new_elem[new_addr], &old_elem[old_addr], elem_size);
       }
 /* Increase pointers. */
       done = increment_internal_index (old_tup, DIMENSION (old_arr)) | increment_internal_index (new_tup, DIMENSION (new_arr));
@@ -994,25 +992,25 @@ A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
       src_a = ADDRESS (&old_field);
       dst_a = ADDRESS (&new_field);
       if (MOID (fields)->has_rows) {
-	if (WHETHER (MOID (fields), STRUCT_SYMBOL)) {
+        if (WHETHER (MOID (fields), STRUCT_SYMBOL)) {
 /* STRUCT (STRUCT (..) ..) */
-	  genie_assign_stowed (old_field, &new_field, p, MOID (fields));
-	} else if (ATTRIBUTE (MOID (fields)) == FLEX_SYMBOL || MOID (fields) == MODE (STRING)) {
+          genie_assign_stowed (old_field, &new_field, p, MOID (fields));
+        } else if (ATTRIBUTE (MOID (fields)) == FLEX_SYMBOL || MOID (fields) == MODE (STRING)) {
 /* STRUCT (FLEX [] A ..) */
-	  *(A68_REF *) dst_a = *(A68_REF *) src_a;
-	} else if (ATTRIBUTE (MOID (fields)) == ROW_SYMBOL) {
+          *(A68_REF *) dst_a = *(A68_REF *) src_a;
+        } else if (ATTRIBUTE (MOID (fields)) == ROW_SYMBOL) {
 /* STRUCT (FLEX [] A ..) */
-	  A68_REF arr_src = *(A68_REF *) src_a;
-	  A68_REF arr_dst = *(A68_REF *) dst_a;
-	  genie_assign_row (arr_src, &arr_dst, p, MOID (fields));
-	} else if (WHETHER (MOID (fields), UNION_SYMBOL)) {
+          A68_REF arr_src = *(A68_REF *) src_a;
+          A68_REF arr_dst = *(A68_REF *) dst_a;
+          genie_assign_row (arr_src, &arr_dst, p, MOID (fields));
+        } else if (WHETHER (MOID (fields), UNION_SYMBOL)) {
 /* UNION (..) */
-	  genie_copy_union (p, dst_a, src_a, old_field);
-	} else {
-	  ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_stowed");
-	}
+          genie_copy_union (p, dst_a, src_a, old_field);
+        } else {
+          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_stowed");
+        }
       } else {
-	MOVE (dst_a, src_a, MOID_SIZE (fields));
+        MOVE (dst_a, src_a, MOID_SIZE (fields));
       }
     }
     DOWN_SWEEP_SEMA;
@@ -1058,20 +1056,20 @@ A68_REF genie_copy_stowed (A68_REF old, NODE_T * p, MOID_T * m)
       src_a = ADDRESS (&old_field);
       dst_a = ADDRESS (&new_field);
       if (MOID (fields)->has_rows) {
-	if (WHETHER (MOID (fields), STRUCT_SYMBOL)) {
-	  A68_REF str_src = genie_copy_stowed (old_field, p, MOID (fields));
-	  MOVE (dst_a, ADDRESS (&str_src), MOID_SIZE (MOID (fields)));
-	} else if (WHETHER (MOID (fields), FLEX_SYMBOL) || MOID (fields) == MODE (STRING)) {
-	  *(A68_REF *) dst_a = genie_copy_row (*(A68_REF *) src_a, p, MOID (fields));
-	} else if (WHETHER (MOID (fields), ROW_SYMBOL)) {
-	  *(A68_REF *) dst_a = genie_copy_row (*(A68_REF *) src_a, p, MOID (fields));
-	} else if (WHETHER (MOID (fields), UNION_SYMBOL)) {
-	  genie_copy_union (p, dst_a, src_a, old_field);
-	} else {
-	  ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
-	}
+        if (WHETHER (MOID (fields), STRUCT_SYMBOL)) {
+          A68_REF str_src = genie_copy_stowed (old_field, p, MOID (fields));
+          MOVE (dst_a, ADDRESS (&str_src), MOID_SIZE (MOID (fields)));
+        } else if (WHETHER (MOID (fields), FLEX_SYMBOL) || MOID (fields) == MODE (STRING)) {
+          *(A68_REF *) dst_a = genie_copy_row (*(A68_REF *) src_a, p, MOID (fields));
+        } else if (WHETHER (MOID (fields), ROW_SYMBOL)) {
+          *(A68_REF *) dst_a = genie_copy_row (*(A68_REF *) src_a, p, MOID (fields));
+        } else if (WHETHER (MOID (fields), UNION_SYMBOL)) {
+          genie_copy_union (p, dst_a, src_a, old_field);
+        } else {
+          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
+        }
       } else {
-	MOVE (dst_a, src_a, MOID_SIZE (fields));
+        MOVE (dst_a, src_a, MOID_SIZE (fields));
       }
     }
     DOWN_SWEEP_SEMA;

@@ -1,6 +1,10 @@
 ALGOL68G - ALGOL 68 GENIE
 -------------------------
 
+June 2006		Mark 9.2
+			- Improved scanner implements typographical display features
+			- Various bug fixes (generator, parallel-clause)
+
 April 2006		Mark 9.1
 			- 64-bit safe interpreter
 			- Improved monitor/debugger

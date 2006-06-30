@@ -25,6 +25,18 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
+static void sigsegv_handler (int i)
+{
+  (void) i;
+  exit (EXIT_FAILURE);
+  return;
+}
+
+/*!
+\brief signal reading from disconnected terminal
+\param i
+**/
+
 static void sigttin_handler (int i)
 {
   (void) i;
@@ -42,8 +54,8 @@ static void sigint_handler (int i)
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
   if (!(sys_request_flag || in_monitor)) {
     sys_request_flag = A_TRUE;
-/*
   } else {
+/*
     a68g_exit (EXIT_FAILURE);
 */
   }
@@ -56,7 +68,8 @@ static void sigint_handler (int i)
 void install_signal_handlers (void)
 {
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
-#ifdef HAVE_UNIX
+  ABNORMAL_END (signal (SIGSEGV, sigsegv_handler) == SIG_ERR, "cannot install SIGSEGV handler", NULL);
+#if ! defined WIN32_VERSION
   ABNORMAL_END (signal (SIGTTIN, sigttin_handler) == SIG_ERR, "cannot install SIGTTIN handler", NULL);
 #endif
 }

@@ -99,8 +99,8 @@ static int cmp (const void *key, const void *data)
 
 static BOOL_T is_coda (char *str, int len)
 {
-  char str2[8];
-  strncpy (str2, str, len);
+  char str2[BUFFER_SIZE];
+  strncpy (str2, str, BUFFER_SIZE);
   str2[len] = NULL_CHAR;
   return (bsearch (str2, codas, sizeof (codas) / sizeof (char *), sizeof (char *), cmp) != NULL);
 }
@@ -116,20 +116,20 @@ static void get_init_sylls (char *in, char *out)
   while (*in != NULL_CHAR) {
     if (isalpha (*in)) {
       while (*in != NULL_CHAR && isalpha (*in) && !is_vowel (*in))
-	*out++ = toupper (*in++);
+        *out++ = toupper (*in++);
       while (*in != NULL_CHAR && is_vowel (*in))
-	*out++ = toupper (*in++);
+        *out++ = toupper (*in++);
       coda = out;
       while (*in != NULL_CHAR && is_consonant (*in)) {
-	*out++ = toupper (*in++);
-	*out = NULL_CHAR;
-	if (!is_coda (coda, out - coda)) {
-	  out--;
-	  break;
-	}
+        *out++ = toupper (*in++);
+        *out = NULL_CHAR;
+        if (!is_coda (coda, out - coda)) {
+          out--;
+          break;
+        }
       }
       while (*in != NULL_CHAR && isalpha (*in))
-	in++;
+        in++;
       *out++ = '+';
     } else {
       in++;
@@ -153,13 +153,13 @@ static void reduce_vowels (char *str)
     }
     if (!is_vowel (*str) && is_vowel (next[1])) {
       while (str != next && !is_vowel (*str))
-	str++;
+        str++;
       if (str != next) {
-	memmove (str, next, strlen (next) + 1);
+        memmove (str, next, strlen (next) + 1);
       }
     } else {
       while (*str != NULL_CHAR && *str != '+')
-	str++;
+        str++;
     }
     if (*str == '+')
       str++;
@@ -251,8 +251,8 @@ void genie_acronym (NODE_T * p)
   char *u, *v;
   POP_REF (p, &z);
   len = a68_string_size (p, z);
-  u = malloc (len + 1);
-  v = malloc (len + 1 + 8);
+  u = (char *) malloc (len + 1);
+  v = (char *) malloc (len + 1 + 8);
   a_to_c_string (p, u, z);
   if (u != NULL && u[0] != NULL_CHAR && v != NULL) {
     make_acronym (u, v);
