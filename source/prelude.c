@@ -231,7 +231,15 @@ static void stand_moids (void)
   MODE (REF_FILE) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (REF_FILE), NULL);
   MODE (REF_REF_FILE) = stand_env->moids;
-/* [] REAL and alikes. */
+/* [] INT. */
+  add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (INT), NULL);
+  stand_env->moids->has_rows = A_TRUE;
+  MODE (ROW_INT) = stand_env->moids;
+  SLICE (MODE (ROW_INT)) = MODE (INT);
+  add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROW_INT), NULL);
+  MODE (REF_ROW_INT) = stand_env->moids;
+  NAME (MODE (REF_ROW_INT)) = MODE (REF_INT);
+/* [] REAL. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (REAL), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_REAL) = stand_env->moids;
@@ -239,6 +247,7 @@ static void stand_moids (void)
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROW_REAL), NULL);
   MODE (REF_ROW_REAL) = stand_env->moids;
   NAME (MODE (REF_ROW_REAL)) = MODE (REF_REAL);
+/* [,] REAL. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 2, NULL, MODE (REAL), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROWROW_REAL) = stand_env->moids;
@@ -246,11 +255,22 @@ static void stand_moids (void)
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROWROW_REAL), NULL);
   MODE (REF_ROWROW_REAL) = stand_env->moids;
   NAME (MODE (REF_ROWROW_REAL)) = MODE (REF_ROW_REAL);
-/* [] INT. */
-  add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (INT), NULL);
+/* [] COMPLEX. */
+  add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (COMPLEX), NULL);
   stand_env->moids->has_rows = A_TRUE;
-  MODE (ROW_INT) = stand_env->moids;
-  SLICE (MODE (ROW_INT)) = MODE (INT);
+  MODE (ROW_COMPLEX) = stand_env->moids;
+  SLICE (MODE (ROW_COMPLEX)) = MODE (COMPLEX);
+  add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROW_COMPLEX), NULL);
+  MODE (REF_ROW_COMPLEX) = stand_env->moids;
+  NAME (MODE (REF_ROW_COMPLEX)) = MODE (REF_COMPLEX);
+/* [,] COMPLEX. */
+  add_mode (&stand_env->moids, ROW_SYMBOL, 2, NULL, MODE (COMPLEX), NULL);
+  stand_env->moids->has_rows = A_TRUE;
+  MODE (ROWROW_COMPLEX) = stand_env->moids;
+  SLICE (MODE (ROWROW_COMPLEX)) = MODE (ROW_COMPLEX);
+  add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROWROW_COMPLEX), NULL);
+  MODE (REF_ROWROW_COMPLEX) = stand_env->moids;
+  NAME (MODE (REF_ROWROW_COMPLEX)) = MODE (REF_ROW_COMPLEX);
 /* [] BOOL. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (BOOL), NULL);
   stand_env->moids->has_rows = A_TRUE;
@@ -1107,6 +1127,9 @@ static void stand_prelude (void)
   a68_idf (A_FALSE, "dasinh", m, genie_arcsinh_long_mp);
   a68_idf (A_FALSE, "dacosh", m, genie_arccosh_long_mp);
   a68_idf (A_FALSE, "datanh", m, genie_arctanh_long_mp);
+  m = a68_proc (MODE (LONG_REAL), MODE (LONG_REAL), MODE (LONG_REAL), NULL);
+  a68_idf (A_TRUE, "longarctan2", m, genie_atan2_long_mp);
+  a68_idf (A_TRUE, "darctan2", m, genie_atan2_long_mp);
   m = a68_proc (MODE (INT), MODE (LONG_REAL), NULL);
   a68_op (A_TRUE, "SIGN", m, genie_sign_long_mp);
   m = a68_proc (MODE (LONG_REAL), MODE (LONG_REAL), MODE (LONG_REAL), NULL);
@@ -1294,6 +1317,9 @@ static void stand_prelude (void)
   a68_idf (A_FALSE, "qacosh", m, genie_arccosh_long_mp);
   a68_idf (A_FALSE, "qatanh", m, genie_arctanh_long_mp);
   m = a68_proc (MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), NULL);
+  a68_idf (A_TRUE, "longarctan2", m, genie_atan2_long_mp);
+  a68_idf (A_TRUE, "qarctan2", m, genie_atan2_long_mp);
+  m = a68_proc (MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), NULL);
   a68_op (A_TRUE, "+", m, genie_add_long_mp);
   a68_op (A_TRUE, "-", m, genie_sub_long_mp);
   a68_op (A_TRUE, "*", m, genie_mul_long_mp);
@@ -1388,21 +1414,6 @@ static void stand_prelude (void)
   a68_op (A_TRUE, "SHORTEN", m, genie_idle);
   m = a68_proc (MODE (BITS), MODE (BITS), NULL);
   a68_op (A_TRUE, "SHORTEN", m, genie_idle);
-/* Vector and matrix. */
-  m = a68_proc (MODE (VOID), MODE (REF_ROW_REAL), MODE (REAL), NULL);
-  a68_idf (A_FALSE, "vectorset", m, genie_vector_set);
-  m = a68_proc (MODE (VOID), MODE (REF_ROW_REAL), MODE (ROW_REAL), MODE (REAL), NULL);
-  a68_idf (A_FALSE, "vectortimesscalar", m, genie_vector_times_scalar);
-  m = a68_proc (MODE (VOID), MODE (REF_ROW_REAL), MODE (ROW_REAL), NULL);
-  a68_idf (A_FALSE, "vectormove", m, genie_vector_move);
-  m = a68_proc (MODE (VOID), MODE (REF_ROW_REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
-  a68_idf (A_FALSE, "vectorplus", m, genie_vector_add);
-  a68_idf (A_FALSE, "vectorminus", m, genie_vector_sub);
-  a68_idf (A_FALSE, "vectortimes", m, genie_vector_mul);
-  a68_idf (A_FALSE, "vectordiv", m, genie_vector_div);
-  m = a68_proc (MODE (REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
-  a68_idf (A_FALSE, "vectorinnerproduct", m, genie_vector_inner_product);
-  a68_idf (A_FALSE, "vectorinproduct", m, genie_vector_inner_product);
   m = proc_complex_complex;
   a68_idf (A_FALSE, "complexsqrt", m, genie_sqrt_complex);
   a68_idf (A_FALSE, "csqrt", m, genie_sqrt_complex);
@@ -1428,6 +1439,26 @@ static void stand_prelude (void)
   a68_idf (A_FALSE, "carccos", m, genie_arccos_complex);
   a68_idf (A_FALSE, "complexarctan", m, genie_arctan_complex);
   a68_idf (A_FALSE, "carctan", m, genie_arctan_complex);
+#if defined HAVE_GSL
+  a68_idf (A_FALSE, "complexsinh", m, genie_sinh_complex);
+  a68_idf (A_FALSE, "csinh", m, genie_sinh_complex);
+  a68_idf (A_FALSE, "complexcosh", m, genie_cosh_complex);
+  a68_idf (A_FALSE, "ccosh", m, genie_cosh_complex);
+  a68_idf (A_FALSE, "complextanh", m, genie_tanh_complex);
+  a68_idf (A_FALSE, "ctanh", m, genie_tanh_complex);
+  a68_idf (A_FALSE, "complexasinh", m, genie_arcsinh_complex);
+  a68_idf (A_FALSE, "casinh", m, genie_arcsinh_complex);
+  a68_idf (A_FALSE, "complexacosh", m, genie_arccosh_complex);
+  a68_idf (A_FALSE, "cacosh", m, genie_arccosh_complex);
+  a68_idf (A_FALSE, "complexatanh", m, genie_arctanh_complex);
+  a68_idf (A_FALSE, "catanh", m, genie_arctanh_complex);
+  a68_idf (A_FALSE, "complexarcsinh", m, genie_arcsinh_complex);
+  a68_idf (A_FALSE, "carcsinh", m, genie_arcsinh_complex);
+  a68_idf (A_FALSE, "complexarccosh", m, genie_arccosh_complex);
+  a68_idf (A_FALSE, "carccosh", m, genie_arccosh_complex);
+  a68_idf (A_FALSE, "complexarctanh", m, genie_arctanh_complex);
+  a68_idf (A_FALSE, "carctanh", m, genie_arctanh_complex);
+#endif
   m = a68_proc (MODE (LONG_COMPLEX), MODE (LONG_COMPLEX), NULL);
   a68_idf (A_FALSE, "longcomplexsqrt", m, genie_sqrt_long_complex);
   a68_idf (A_FALSE, "dcsqrt", m, genie_sqrt_long_complex);
@@ -1642,7 +1673,7 @@ static void stand_transput (void)
 
 static void stand_extensions (void)
 {
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
 /* Drawing. */
   m = a68_proc (MODE (BOOL), MODE (REF_FILE), MODE (STRING), MODE (STRING), NULL);
   a68_idf (A_FALSE, "drawdevice", m, genie_make_device);
@@ -1688,7 +1719,7 @@ static void stand_extensions (void)
   a68_idf (A_FALSE, "drawbackgroundcolorname", m, genie_draw_background_colour_name);
   a68_idf (A_FALSE, "drawbackgroundcolourname", m, genie_draw_background_colour_name);
 #endif
-#ifdef HAVE_GSL
+#if defined HAVE_GSL
   a68_idf (A_FALSE, "cgsspeedoflight", MODE (REAL), genie_cgs_speed_of_light);
   a68_idf (A_FALSE, "cgsgravitationalconstant", MODE (REAL), genie_cgs_gravitational_constant);
   a68_idf (A_FALSE, "cgsplanckconstant", MODE (REAL), genie_cgs_planck_constant_h);
@@ -1939,6 +1970,177 @@ static void stand_extensions (void)
   a68_idf (A_FALSE, "ellipticintegralrd", m, genie_elliptic_integral_rd_real);
   m = a68_proc (MODE (REAL), MODE (REAL), MODE (REAL), MODE (REAL), MODE (REAL), NULL);
   a68_idf (A_FALSE, "ellipticintegralrj", m, genie_elliptic_integral_rj_real);
+/* Vector and matrix monadic. */
+  m = a68_proc (MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "+", m, genie_idle);
+  a68_op (A_FALSE, "-", m, genie_vector_minus);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "+", m, genie_idle);
+  a68_op (A_FALSE, "-", m, genie_matrix_minus);
+  a68_op (A_FALSE, "T", m, genie_matrix_transpose);
+  a68_op (A_FALSE, "INV", m, genie_matrix_inv);
+  m = a68_proc (MODE (REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "DET", m, genie_matrix_det);
+  a68_op (A_FALSE, "TRACE", m, genie_matrix_trace);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "+", m, genie_idle);
+  a68_op (A_FALSE, "-", m, genie_vector_complex_minus);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "+", m, genie_idle);
+  a68_op (A_FALSE, "-", m, genie_matrix_complex_minus);
+  a68_op (A_FALSE, "T", m, genie_matrix_complex_transpose);
+  a68_op (A_FALSE, "INV", m, genie_matrix_complex_inv);
+  m = a68_proc (MODE (COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "DET", m, genie_matrix_complex_det);
+  a68_op (A_FALSE, "TRACE", m, genie_matrix_complex_trace);
+/* Vector and matrix dyadic. */
+  m = a68_proc (MODE (BOOL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "=", m, genie_vector_eq);
+  a68_op (A_FALSE, "/=", m, genie_vector_ne);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "+", m, genie_vector_add);
+  a68_op (A_FALSE, "-", m, genie_vector_sub);
+  m = a68_proc (MODE (REF_ROW_REAL), MODE (REF_ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "+:=", m, genie_vector_plusab);
+  a68_op (A_FALSE, "PLUSAB", m, genie_vector_plusab);
+  a68_op (A_FALSE, "-:=", m, genie_vector_minusab);
+  a68_op (A_FALSE, "MINUSAB", m, genie_vector_minusab);
+  m = a68_proc (MODE (BOOL), MODE (ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "=", m, genie_matrix_eq);
+  a68_op (A_FALSE, "/-", m, genie_matrix_ne);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "+", m, genie_matrix_add);
+  a68_op (A_FALSE, "-", m, genie_matrix_sub);
+  m = a68_proc (MODE (REF_ROWROW_REAL), MODE (REF_ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "+:=", m, genie_matrix_plusab);
+  a68_op (A_FALSE, "PLUSAB", m, genie_matrix_plusab);
+  a68_op (A_FALSE, "-:=", m, genie_matrix_minusab);
+  a68_op (A_FALSE, "MINUSAB", m, genie_matrix_minusab);
+  m = a68_proc (MODE (BOOL), MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "=", m, genie_vector_complex_eq);
+  a68_op (A_FALSE, "/=", m, genie_vector_complex_ne);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "+", m, genie_vector_complex_add);
+  a68_op (A_FALSE, "-", m, genie_vector_complex_sub);
+  m = a68_proc (MODE (REF_ROW_COMPLEX), MODE (REF_ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "+:=", m, genie_vector_complex_plusab);
+  a68_op (A_FALSE, "PLUSAB", m, genie_vector_complex_plusab);
+  a68_op (A_FALSE, "-:=", m, genie_vector_complex_minusab);
+  a68_op (A_FALSE, "MINUSAB", m, genie_vector_complex_minusab);
+  m = a68_proc (MODE (BOOL), MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "=", m, genie_matrix_complex_eq);
+  a68_op (A_FALSE, "/=", m, genie_matrix_complex_ne);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "+", m, genie_matrix_complex_add);
+  a68_op (A_FALSE, "-", m, genie_matrix_complex_sub);
+  m = a68_proc (MODE (REF_ROWROW_COMPLEX), MODE (REF_ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "+:=", m, genie_matrix_complex_plusab);
+  a68_op (A_FALSE, "PLUSAB", m, genie_matrix_complex_plusab);
+  a68_op (A_FALSE, "-:=", m, genie_matrix_complex_minusab);
+  a68_op (A_FALSE, "MINUSAB", m, genie_matrix_complex_minusab);
+/* Vector and matrix scaling. */
+  m = a68_proc (MODE (ROW_REAL), MODE (REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_real_scale_vector);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROW_REAL), MODE (REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_vector_scale_real);
+  a68_op (A_FALSE, "/", m, genie_vector_div_real);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_real_scale_matrix);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_matrix_scale_real);
+  a68_op (A_FALSE, "/", m, genie_matrix_div_real);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_complex_scale_vector_complex);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), MODE (COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_vector_complex_scale_complex);
+  a68_op (A_FALSE, "/", m, genie_vector_complex_div_complex);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_complex_scale_matrix_complex);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_matrix_complex_scale_complex);
+  a68_op (A_FALSE, "/", m, genie_matrix_complex_div_complex);
+  m = a68_proc (MODE (REF_ROW_REAL), MODE (REF_ROW_REAL), MODE (REAL), NULL);
+  a68_op (A_FALSE, "*:=", m, genie_vector_scale_real_ab);
+  a68_op (A_FALSE, "/:=", m, genie_vector_div_real_ab);
+  m = a68_proc (MODE (REF_ROWROW_REAL), MODE (REF_ROWROW_REAL), MODE (REAL), NULL);
+  a68_op (A_FALSE, "*:=", m, genie_matrix_scale_real_ab);
+  a68_op (A_FALSE, "/:=", m, genie_matrix_div_real_ab);
+  m = a68_proc (MODE (REF_ROW_COMPLEX), MODE (REF_ROW_COMPLEX), MODE (COMPLEX), NULL);
+  a68_op (A_FALSE, "*:=", m, genie_vector_complex_scale_complex_ab);
+  a68_op (A_FALSE, "/:=", m, genie_vector_complex_div_complex_ab);
+  m = a68_proc (MODE (REF_ROWROW_COMPLEX), MODE (REF_ROWROW_COMPLEX), MODE (COMPLEX), NULL);
+  a68_op (A_FALSE, "*:=", m, genie_matrix_complex_scale_complex_ab);
+  a68_op (A_FALSE, "/:=", m, genie_matrix_complex_div_complex_ab);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_vector_times_matrix);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_vector_complex_times_matrix);
+/* Matrix times vector or matrix. */
+  m = a68_proc (MODE (ROW_REAL), MODE (ROWROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_matrix_times_vector);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_matrix_times_matrix);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_matrix_complex_times_vector);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_matrix_complex_times_matrix);
+/* Vector and matrix miscellaneous. */
+  m = a68_proc (MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_idf (A_FALSE, "vectorecho", m, genie_vector_echo);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_idf (A_FALSE, "matrixecho", m, genie_matrix_echo);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_idf (A_FALSE, "complvectorecho", m, genie_vector_complex_echo);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), NULL);
+  a68_idf (A_FALSE, "complmatrixecho", m, genie_matrix_complex_echo);
+   /**/ m = a68_proc (MODE (REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "*", m, genie_vector_dot);
+  m = a68_proc (MODE (COMPLEX), MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "*", m, genie_vector_complex_dot);
+  m = a68_proc (MODE (REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "NORM", m, genie_vector_norm);
+  m = a68_proc (MODE (REAL), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "NORM", m, genie_vector_complex_norm);
+#if defined HAVE_GSL
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_op (A_FALSE, "DYAD", m, genie_vector_dyad);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_op (A_FALSE, "DYAD", m, genie_vector_complex_dyad);
+#endif
+/* LU decomposition. */
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (REF_ROW_INT), MODE (REF_INT), NULL);
+  a68_idf (A_FALSE, "ludecomp", m, genie_matrix_lu);
+  m = a68_proc (MODE (REAL), MODE (ROWROW_REAL), MODE (INT), NULL);
+  a68_idf (A_FALSE, "ludet", m, genie_matrix_lu_det);
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (ROW_INT), NULL);
+  a68_idf (A_FALSE, "luinv", m, genie_matrix_lu_inv);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (ROW_INT), MODE (ROW_REAL), NULL);
+  a68_idf (A_FALSE, "lusolve", m, genie_matrix_lu_solve);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (REF_ROW_INT), MODE (REF_INT), NULL);
+  a68_idf (A_FALSE, "complexludecomp", m, genie_matrix_complex_lu);
+  m = a68_proc (MODE (COMPLEX), MODE (ROWROW_COMPLEX), MODE (INT), NULL);
+  a68_idf (A_FALSE, "complexludet", m, genie_matrix_complex_lu_det);
+  m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (ROW_INT), NULL);
+  a68_idf (A_FALSE, "complexluinv", m, genie_matrix_complex_lu_inv);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (ROWROW_COMPLEX), MODE (ROW_INT), MODE (ROW_COMPLEX), NULL);
+  a68_idf (A_FALSE, "complexlusolve", m, genie_matrix_complex_lu_solve);
+/* SVD decomposition */
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (REF_ROWROW_REAL), MODE (REF_ROW_REAL), NULL);
+  a68_idf (A_FALSE, "svdecomp", m, genie_matrix_svd);
+  a68_idf (A_FALSE, "svddecomp", m, genie_matrix_svd);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_idf (A_FALSE, "svdsolve", m, genie_matrix_svd_solve);
+/* QR decomposition */
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (REF_ROW_REAL), NULL);
+  a68_idf (A_FALSE, "qrdecomp", m, genie_matrix_qr);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROWROW_REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
+  a68_idf (A_FALSE, "qrsolve", m, genie_matrix_qr_solve);
+  a68_idf (A_FALSE, "qrlssolve", m, genie_matrix_qr_ls_solve);
+/* Cholesky decomposition */
+  m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), NULL);
+  a68_idf (A_FALSE, "choleskydecomp", m, genie_matrix_ch);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROWROW_REAL), MODE (ROW_REAL), NULL);
+  a68_idf (A_FALSE, "choleskysolve", m, genie_matrix_ch_solve);
 #endif
   m = proc_int;
   a68_idf (A_FALSE, "argc", m, genie_argc);
@@ -1958,6 +2160,8 @@ static void stand_extensions (void)
   a68_idf (A_FALSE, "execvechild", m, genie_execve_child);
   m = a68_proc (MODE (PIPE), MODE (STRING), MODE (ROW_STRING), MODE (ROW_STRING), NULL);
   a68_idf (A_FALSE, "execvechildpipe", m, genie_execve_child_pipe);
+  m = a68_proc (MODE (INT), MODE (STRING), MODE (ROW_STRING), MODE (ROW_STRING), MODE (REF_STRING), NULL);
+  a68_idf (A_FALSE, "execveoutput", m, genie_execve_output);
   m = a68_proc (MODE (STRING), MODE (STRING), NULL);
   a68_idf (A_FALSE, "getenv", m, genie_getenv);
   m = a68_proc (MODE (VOID), MODE (INT), NULL);
@@ -1965,18 +2169,18 @@ static void stand_extensions (void)
   m = a68_proc (MODE (ROW_INT), NULL);
   a68_idf (A_FALSE, "utctime", m, genie_utctime);
   a68_idf (A_FALSE, "localtime", m, genie_localtime);
-#ifdef HAVE_HTTP
+#if defined HAVE_HTTP
   m = a68_proc (MODE (INT), MODE (REF_STRING), MODE (STRING), MODE (STRING), MODE (INT), NULL);
   a68_idf (A_FALSE, "httpcontent", m, genie_http_content);
   a68_idf (A_FALSE, "tcprequest", m, genie_tcp_request);
 #endif
-#ifdef HAVE_REGEX
+#if defined HAVE_REGEX
   m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_INT), MODE (REF_INT), NULL);
   a68_idf (A_FALSE, "grepinstring", m, genie_grep_in_string);
   m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_STRING), NULL);
   a68_idf (A_FALSE, "subinstring", m, genie_sub_in_string);
 #endif
-#ifdef HAVE_CURSES
+#if defined HAVE_CURSES
   m = proc_void;
   a68_idf (A_FALSE, "cursesstart", m, genie_curses_start);
   a68_idf (A_FALSE, "cursesend", m, genie_curses_end);
@@ -1992,7 +2196,7 @@ static void stand_extensions (void)
   a68_idf (A_FALSE, "curseslines", m, genie_curses_lines);
   a68_idf (A_FALSE, "cursescolumns", m, genie_curses_columns);
 #endif
-#ifdef HAVE_POSTGRESQL
+#if defined HAVE_POSTGRESQL
   m = a68_proc (MODE (INT), MODE (REF_FILE), MODE (STRING), MODE (REF_STRING), NULL);
   a68_idf (A_FALSE, "pqconnectdb", m, genie_pq_connectdb);
   m = a68_proc (MODE (INT), MODE (REF_FILE), NULL);

@@ -21,10 +21,10 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#ifndef A68G_TRANSPUT_H
+#if ! defined A68G_TRANSPUT_H
 #define A68G_TRANSPUT_H
 
-#define TRANSPUT_BUFFER_SIZE 	1024
+#define TRANSPUT_BUFFER_SIZE 	BUFFER_SIZE
 #define ITEM_NOT_USED		(-1)
 #define EMBEDDED_FORMAT 	A_TRUE
 #define NOT_EMBEDDED_FORMAT     A_FALSE
@@ -131,7 +131,7 @@ extern GENIE_PROCEDURE genie_write_file;
 extern GENIE_PROCEDURE genie_write_file_format;
 extern GENIE_PROCEDURE genie_write_format;
 
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
 extern GENIE_PROCEDURE genie_draw_aspect;
 extern GENIE_PROCEDURE genie_draw_atom;
 extern GENIE_PROCEDURE genie_draw_background_colour;

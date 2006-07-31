@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,9 +28,10 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
@@ -46,27 +48,28 @@ pre {font-size: 10pt; font-family: Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -74,7 +77,7 @@ pre {font-size: 10pt; font-family: Courier;}
 </td>
 </table>
 
-<h3>Algol 68 Genie Mark 9.2</h3>
+<h3>Algol 68 Genie Mark 10</h3>
 <p>
 Algol 68 Genie (Algol68G) is free software distributed under GNU GPL. This software is 
 distributed in the hope that it will be useful, but without any warranty. 
@@ -88,8 +91,8 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <p>
 The following list of commands may suffice to help you on your way (if not, follow the detailed instructions in next paragraphs):
 <pre>
-tar -xzf algol68g-mk9.2.tar.gz
-cd algol68g-mk9.2
+tar -xzf algol68g-mk10.tar.gz
+cd algol68g-mk10
 ./configure -O --threads
 make depend
 make
@@ -114,7 +117,7 @@ If available on your system, Algol68G can use next libraries to extend its funct
 <li><a href="http://www.postgresql.org/">PostgreSQL</a> for writing PostgreSQL database client applications
 </ul>
 <p>
-Algol 68 Genie Mark 9.2 was developed using next versions of optional libraries:
+Algol 68 Genie Mark 10 was developed using next versions of optional libraries:
 <ul>
 <li><a href="http://www.gnu.org/software/plotutils/">GNU plotutils</a> version 2.5
 <li><a href="http://www.gnu.org/software/gsl/">GNU scientific library</a> version 1.8
@@ -135,87 +138,49 @@ For a generic installation, follow next instructions.
 For customised installation, refer to the INSTALL file in the distribution.
 <p>
 Suppose you are user <code>algol68g</code> at your GNU/Linux machine, and your prompt indicates your present working directory in this way:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
+<pre>
 /home/algol68g> 
-</tt>
-</font>
-</td>
-</table>
+</pre>
 
 <h4>Step 1: Unpacking the distribution</h4>
 <p>
 <li>Unpack the distribution by typing:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g> tar -xzf algol68g-mk9.2.tar.gz
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g> tar -xzf algol68g-mk10.tar.gz
+</pre>
 
 <h4>Step 2: Configuring</h4>
 <p>
 <li>Make the distribution directory the present working directory by typing:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g> cd algol68g-mk9.2
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g> cd algol68g-mk10
+</pre>
+
 <p>
 <li>In the distribution directory type:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> ./configure
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> ./configure
+</pre>
+
 <p>
 This will generate a makefile. 
 <p>
 The configure script accepts various
 options. For an overview of options, type:
 <p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> ./configure --help
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> ./configure --help
+</pre>
+
 <p>
 Note that various options for optimisation, debugging and profiling
 assume you are using <code>gcc</code>, <code>gdb</code> and <code>gprof</code>.
 <p> 
 If you are interested in Algol68G's parallel clause, you need to 
 build using POSIX threads. To build with POSIX threads, type:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> ./configure --threads
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> ./configure --threads
+</pre>
 
 <h4>Step 3: Building</h4>
 <p>
@@ -228,58 +193,34 @@ see that the code is safe since these variables are declared <code>volatile</cod
 There is no risk of clobbering, and therefore such warning messages 
 can be safely ignored.
 <p>
-<li>Type :
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make depend
-</tt>
-</font>
-</td>
-</table>
+<li>Type:
+<pre>
+/home/algol68g/algol68g-mk10> make depend
+</pre>
+
 <p>
 This will register dependencies needed to build Algol68G.
 
 <p>
 <li>If you do not want to install Algol68G for all users, type:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make all
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> make all
+</pre>
+
 <p>
 or, simply:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> make
+</pre>
+
 <p>
 The executable <code>a68g</code> will be put in the present working directory.
 <p>
 If you want to install Algol68G for all users on your system, type:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make install
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> make install
+</pre>
+
 <p>
 to make available the executable and a manual page.
 Targets for those files are <code>/usr/local/bin</code> and <code>/usr/local/man</code>. 
@@ -287,75 +228,41 @@ If latter directory does not exist, <code>/usr/share/man</code> and then <code>/
 are tried.
 <p>
 <li>Installation can be undone by typing:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make uninstall
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> make uninstall
+</pre>
 
 <p>
 <li>Note that in you can supply <code>CPPFLAGS</code>, <code>CFLAGS</code> and <code>LDFLAGS</code> to <code>make</code>; 
 for instance type:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make CFLAGS="-O"
-</tt>
-</font>
-</td>
-</table>
-<p>
+<pre>
+/home/algol68g/algol68g-mk10> make CFLAGS="-O"
+</pre>
 to optimise the code.
 
 <p>
 <li>To remove binaries used for building, type: 
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make clean
-</tt>
-</font>
-</td>
-</table>
-<p>
+<pre>
+/home/algol68g/algol68g-mk10> make clean
+</pre>
 To remove all files used for building, type:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
-<tt>
-/home/algol68g/algol68g-mk9.2> make distclean
-</tt>
-</font>
-</td>
-</table>
+<pre>
+/home/algol68g/algol68g-mk10> make distclean
+</pre>
 
 <h4>Step 4: Starting Algol 68 Genie</h4>
 <p>
 When you install <code>a68g</code> in the present working directory, you may want to include the current directory in your <TT>PATH</TT> variable. Otherwise you will need to indicate the current directory by typing <code>./a68g</code> as in the following example:
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
 <pre>
-/home/algol68g/algol68g-mk9.2> ./a68g --version
-Algol 68 Genie Mark 9.2, copyright 2006 J. Marcel van der Veer.
+/home/algol68g/algol68g-mk10> ./a68g --version
+Algol 68 Genie Mark 10, copyright 2006 J. Marcel van der Veer.
 Algol 68 Genie is free software covered by the GNU General Public License.
 There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.
 See the GNU General Public License for more details.
 
-Algol 68 Genie Mark 9.2, released July 2006
-Image "a68g" compiled by a68g on Jul  1 2006 22:17:12 with gcc 3.3.5
-GNU Plotutils libplot 4.2
+Algol 68 Genie Mark 10, released August 2006
+Image "a68g" compiled by a68g on Aug 1 2006 23:59:59 with gcc 3.3.5
+GNU libplot 4.2
 GNU Scientific Library 1.8
 PostgreSQL libpq 8.1.4
 Alignment 4 bytes
@@ -364,61 +271,44 @@ Default expression stack size: 1024 kB
 Default heap size: 25600 kB
 Default handle pool size: 4096 kB
 Default stack overhead: 256 kB
-/home/algol68g/algol68g-mk9.2>
+/home/algol68g/algol68g-mk10>
 </pre>
-</font>
-</td>
-</table>
-</p>
-<p>
 If instead of above version statement you get a message like
-<p>
-<table border=0 cellpadding=12>
-<td bgcolor=#e8e8e8>
-<font color=black>
 <pre>
-/home/algol68g/algol68g-mk9.2> ./a68g --version
+/home/algol68g/algol68g-mk10> ./a68g --version
 psql: error in loading shared libraries
 libpq.so.4.1: cannot open shared object file: No such file or directory
-/home/algol68g/algol68g-mk9.2>
+/home/algol68g/algol68g-mk10>
 </pre>
-</font>
-</td>
-</table>
-</p>
-<p>
 then your shared library search path was not porperly set for PostgreSQL's <code>libpq</code> library. Find out where PostgreSQL library files are at, probably at <code>/usr/local/pgsql/lib</code>. The method to set the shared library search path varies between platforms, but the most widely used method is to set the environment variable <code>LD_LIBRARY_PATH</code>. In Bourne shells (<code>sh</code>, <code>ksh</code>, <code>bash</code>, <code>zsh</code>) you would use
-</p>
 <pre>
 LD_LIBRARY_PATH=/usr/local/pgsql/lib
 export LD_LIBRARY_PATH
 </pre>
-<p>
 while in <code>csh</code> or <code>tcsh</code> you would use
-</p>
 <pre>
 setenv LD_LIBRARY_PATH /usr/local/pgsql/lib
 </pre>
-<p>
 You should put these commands into a shell start-up file such as <code>/etc/profile</code> or <code>~/.bash_profile</code>.  
 If in doubt, refer to the manual pages of your system. 
-</p>
 
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
-<br>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
 </p>
-
+<hr color=#f0f0f0>
 </body>
 </html>
+

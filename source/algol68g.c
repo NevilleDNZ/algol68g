@@ -38,7 +38,7 @@ detailed description of Algol68G.
 #include "genie.h"
 #include "mp.h"
 
-#ifdef WIN32_VERSION
+#if defined HAVE_WIN32
 #include <sys/time.h>
 #else
 #include <sys/times.h>
@@ -47,7 +47,7 @@ detailed description of Algol68G.
 int global_argc;                /* Keep argc and argv for reference from A68. */
 char **global_argv;
 
-#ifdef HAVE_TERMINFO
+#if defined HAVE_TERMINFO
 #include <term.h>
 char term_buffer[2 * KILOBYTE];
 char *term_type;
@@ -83,7 +83,7 @@ void state_license (FILE_T f)
   snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, copyright 2006 J. Marcel van der Veer.\n", REVISION);
   io_write_string (f, output_line);
   P ("Algol 68 Genie is free software covered by the GNU General Public License.");
-  P ("There is ABSOLUTELY NO WARRANTY for Algol 68 Genie."); 
+  P ("There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.");
   P ("See the GNU General Public License for more details.");
   P ("");
 #undef P
@@ -102,10 +102,9 @@ void state_version (FILE_T f)
   state_license (f);
   snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, %s\n", REVISION, RELEASE_DATE);
   io_write_string (f, output_line);
-#if ! defined WIN32_VERSION
+#if ! defined HAVE_WIN32
   snprintf (output_line, BUFFER_SIZE, "Image \"%s\" compiled by %s on %s %s", A68G_NAME, USERID, __DATE__, __TIME__);
   io_write_string (f, output_line);
-#endif
 #if defined __GNUC__ && defined GCC_VERSION
   snprintf (output_line, BUFFER_SIZE, " with gcc %s\n", GCC_VERSION);
   io_write_string (f, output_line);
@@ -113,8 +112,9 @@ void state_version (FILE_T f)
   snprintf (output_line, BUFFER_SIZE, "\n", GCC_VERSION);
   io_write_string (f, output_line);
 #endif
+#endif
 #if defined HAVE_PLOTUTILS && defined A68_LIBPLOT_VERSION
-  snprintf (output_line, BUFFER_SIZE, "GNU Plotutils libplot %s\n", A68_LIBPLOT_VERSION);
+  snprintf (output_line, BUFFER_SIZE, "GNU libplot %s\n", A68_LIBPLOT_VERSION);
   io_write_string (f, output_line);
 #endif
 #if defined HAVE_GSL && defined A68_GSL_VERSION
@@ -178,6 +178,7 @@ void online_help (FILE_T f)
   P ("Interpreter options:");
   P ("");
   P ("   assertions, noassertions  Switch elaboration of assertions on or off");
+  P ("   backtrace, nobacktrace    Switch stack backtracing in case of a runtime error");
   P ("   precision number          Set precision for LONG LONG modes to \"number\" significant digits");
   P ("   timelimit number          Interrupt the interpreter after \"number\" seconds");
   P ("   trace, notrace            Switch tracing of a running program on or off");
@@ -226,7 +227,7 @@ int main (int argc, char *argv[])
 {
   BYTE_T stack_offset;
   int argcc;
-#ifdef HAVE_TERMINFO
+#if defined HAVE_TERMINFO
   term_type = getenv ("TERM");
   if (term_type == NULL) {
     term_width = MAX_LINE_WIDTH;
@@ -238,7 +239,7 @@ int main (int argc, char *argv[])
 #else
   term_width = MAX_LINE_WIDTH;
 #endif
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   main_thread_id = pthread_self ();
 #endif
   global_argc = argc;
@@ -303,9 +304,10 @@ int main (int argc, char *argv[])
 static void whether_extension (char *ext)
 {
   if (a68_prog.files.source.fd == -1) {
-    char *fn2 = (char *) get_heap_space (strlen (a68_prog.files.source.name) + strlen (ext) + 1);
-    bufcpy (fn2, a68_prog.files.source.name, BUFFER_SIZE);
-    bufcat (fn2, ext, BUFFER_SIZE);
+    int len = strlen (a68_prog.files.source.name) + strlen (ext) + 1;
+    char *fn2 = (char *) get_heap_space (len);
+    bufcpy (fn2, a68_prog.files.source.name, len);
+    bufcat (fn2, ext, len);
     a68_prog.files.source.fd = open (fn2, O_RDONLY | O_BINARY);
     if (a68_prog.files.source.fd != -1) {
       a68_prog.files.source.name = new_string (fn2);
@@ -337,7 +339,7 @@ static void init_before_tokeniser (void)
 
 static void compiler_interpreter (void)
 {
-  int k;
+  int k, len;
   BOOL_T path_set = A_FALSE;
   tree_listing_safe = A_FALSE;
   cross_reference_safe = A_FALSE;
@@ -372,14 +374,10 @@ Accept various silent extensions.
   a68_prog.files.path = new_string (a68_prog.files.generic_name);
   path_set = A_FALSE;
   for (k = strlen (a68_prog.files.path); k >= 0 && path_set == A_FALSE; k--) {
-#ifdef WIN32_VERSION
+#if defined HAVE_WIN32
     char delim = '\\';
 #else
-#ifdef VINTAGE_MAC_VERSION
-    char delim = ':';
-#else
     char delim = '/';
-#endif
 #endif
     if (a68_prog.files.path[k] == delim) {
       a68_prog.files.path[k + 1] = NULL_CHAR;
@@ -390,9 +388,10 @@ Accept various silent extensions.
     a68_prog.files.path[0] = NULL_CHAR;
   }
 /* Listing file. */
-  a68_prog.files.listing.name = (char *) get_heap_space (1 + strlen (a68_prog.files.source.name) + strlen (LISTING_EXTENSION));
-  bufcpy (a68_prog.files.listing.name, a68_prog.files.source.name, BUFFER_SIZE);
-  bufcat (a68_prog.files.listing.name, LISTING_EXTENSION, BUFFER_SIZE);
+  len = 1 + strlen (a68_prog.files.source.name) + strlen (LISTING_EXTENSION);
+  a68_prog.files.listing.name = (char *) get_heap_space (len);
+  bufcpy (a68_prog.files.listing.name, a68_prog.files.source.name, len);
+  bufcat (a68_prog.files.listing.name, LISTING_EXTENSION, len);
 /* Tokeniser. */
   if (!setjmp (exit_compilation)) {
     a68_prog.files.source.opened = A_TRUE;
@@ -593,7 +592,7 @@ void a68g_exit (int code)
   bufcat (name, ".x", BUFFER_SIZE);
   remove (name);
   io_close_tty_line ();
-#ifdef HAVE_CURSES
+#if defined HAVE_CURSES
 /* "curses" might still be open if it was not closed from A68, or the program
    was interrupted, or a runtime error occured. That wreaks havoc on your
    terminal. */

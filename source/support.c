@@ -25,7 +25,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
-#if ! defined WIN32_VERSION
+#if ! defined HAVE_WIN32
 #include <sys/resource.h>
 #endif
 
@@ -75,7 +75,7 @@ BYTE_T *get_temp_heap_space (size_t s)
 
 void get_stack_size (void)
 {
-#if !defined WIN32_VERSION
+#if ! defined HAVE_WIN32
   struct rlimit limits;
   RESET_ERRNO;
   ABNORMAL_END (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0), "getrlimit fails", NULL);
@@ -86,12 +86,12 @@ void get_stack_size (void)
   if (stack_size < KILOBYTE || (stack_size > 96 * MEGABYTE && stack_size > frame_stack_size)) {
     stack_size = frame_stack_size;
   }
-#elif defined WIN32_VERSION
+#elif defined HAVE_WIN32
   stack_size = MEGABYTE;
 #else
   stack_size = 0;               /* No stack check. */
 #endif
-  stack_limit = (stack_size > (128 * KILOBYTE) ? (stack_size - storage_overhead) : stack_size / 2);
+  stack_limit = (stack_size > (4 * storage_overhead) ? (stack_size - storage_overhead) : stack_size / 2);
 }
 
 /*!
@@ -425,7 +425,7 @@ SYMBOL_TABLE_T *find_level (NODE_T * n, int i)
 
 double seconds ()
 {
-#ifdef HAVE_UNIX_CLOCK
+#if defined HAVE_UNIX_CLOCK
   struct rusage rus;
   getrusage (RUSAGE_SELF, &rus);
   return ((double) (rus.ru_utime.tv_sec + rus.ru_utime.tv_usec * 1e-6));
@@ -913,6 +913,37 @@ double ten_to_the_power (int expo)
     }
   }
   return (neg_expo ? 1 / dbl_expo : dbl_expo);
+}
+
+/*!
+\brief return atan2 consistent with atan2_mp
+\return
+**/
+
+double a68g_atan2 (double x, double y)
+{
+  if (x == 0.0 && y == 0.0) {
+    errno = EDOM;
+    return (0.0);
+  } else {
+    BOOL_T flip = (y < 0.0);
+    double z;
+    y = ABS (y);
+    if (x == 0.0) {
+      z = A68G_PI / 2.0;
+    } else {
+      BOOL_T flop = (x < 0.0);
+      x = ABS (x);
+      z = atan (y / x);
+      if (flop) {
+        z = A68G_PI - z;
+      }
+    }
+    if (flip) {
+      z = -z;
+    }
+    return (z);
+  }
 }
 
 /*!

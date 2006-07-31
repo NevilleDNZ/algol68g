@@ -21,7 +21,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#ifndef A68G_GSL_H
+#if ! defined A68G_GSL_H
 #define A68G_GSL_H
 
 extern GENIE_PROCEDURE genie_exp_complex;
@@ -45,7 +45,97 @@ extern GENIE_PROCEDURE genie_sqrt_complex;
 extern GENIE_PROCEDURE genie_tan_complex;
 extern GENIE_PROCEDURE genie_tanh_complex;
 
-#ifdef HAVE_GSL
+#if defined HAVE_GSL
+extern GENIE_PROCEDURE genie_complex_scale_matrix_complex;
+extern GENIE_PROCEDURE genie_complex_scale_vector_complex;
+extern GENIE_PROCEDURE genie_matrix_add;
+extern GENIE_PROCEDURE genie_matrix_ch;
+extern GENIE_PROCEDURE genie_matrix_ch_solve;
+extern GENIE_PROCEDURE genie_matrix_complex_add;
+extern GENIE_PROCEDURE genie_matrix_complex_det;
+extern GENIE_PROCEDURE genie_matrix_complex_div_complex;
+extern GENIE_PROCEDURE genie_matrix_complex_div_complex_ab;
+extern GENIE_PROCEDURE genie_matrix_complex_echo;
+extern GENIE_PROCEDURE genie_matrix_complex_eq;
+extern GENIE_PROCEDURE genie_matrix_complex_inv;
+extern GENIE_PROCEDURE genie_matrix_complex_lu;
+extern GENIE_PROCEDURE genie_matrix_complex_lu_det;
+extern GENIE_PROCEDURE genie_matrix_complex_lu_inv;
+extern GENIE_PROCEDURE genie_matrix_complex_lu_solve;
+extern GENIE_PROCEDURE genie_matrix_complex_minus;
+extern GENIE_PROCEDURE genie_matrix_complex_minusab;
+extern GENIE_PROCEDURE genie_matrix_complex_ne;
+extern GENIE_PROCEDURE genie_matrix_complex_plusab;
+extern GENIE_PROCEDURE genie_matrix_complex_scale_complex;
+extern GENIE_PROCEDURE genie_matrix_complex_scale_complex_ab;
+extern GENIE_PROCEDURE genie_matrix_complex_sub;
+extern GENIE_PROCEDURE genie_matrix_complex_times_matrix;
+extern GENIE_PROCEDURE genie_matrix_complex_times_vector;
+extern GENIE_PROCEDURE genie_matrix_complex_trace;
+extern GENIE_PROCEDURE genie_matrix_complex_transpose;
+extern GENIE_PROCEDURE genie_matrix_det;
+extern GENIE_PROCEDURE genie_matrix_div_real;
+extern GENIE_PROCEDURE genie_matrix_div_real_ab;
+extern GENIE_PROCEDURE genie_matrix_echo;
+extern GENIE_PROCEDURE genie_matrix_eq;
+extern GENIE_PROCEDURE genie_matrix_inv;
+extern GENIE_PROCEDURE genie_matrix_lu;
+extern GENIE_PROCEDURE genie_matrix_lu_det;
+extern GENIE_PROCEDURE genie_matrix_lu_inv;
+extern GENIE_PROCEDURE genie_matrix_lu_solve;
+extern GENIE_PROCEDURE genie_matrix_minus;
+extern GENIE_PROCEDURE genie_matrix_minusab;
+extern GENIE_PROCEDURE genie_matrix_ne;
+extern GENIE_PROCEDURE genie_matrix_plusab;
+extern GENIE_PROCEDURE genie_matrix_qr;
+extern GENIE_PROCEDURE genie_matrix_qr_ls_solve;
+extern GENIE_PROCEDURE genie_matrix_qr_solve;
+extern GENIE_PROCEDURE genie_matrix_scale_real;
+extern GENIE_PROCEDURE genie_matrix_scale_real_ab;
+extern GENIE_PROCEDURE genie_matrix_sub;
+extern GENIE_PROCEDURE genie_matrix_svd;
+extern GENIE_PROCEDURE genie_matrix_svd_solve;
+extern GENIE_PROCEDURE genie_matrix_times_matrix;
+extern GENIE_PROCEDURE genie_matrix_times_vector;
+extern GENIE_PROCEDURE genie_matrix_trace;
+extern GENIE_PROCEDURE genie_matrix_transpose;
+extern GENIE_PROCEDURE genie_real_scale_matrix;
+extern GENIE_PROCEDURE genie_real_scale_vector;
+extern GENIE_PROCEDURE genie_vector_add;
+extern GENIE_PROCEDURE genie_vector_complex_add;
+extern GENIE_PROCEDURE genie_vector_complex_div_complex;
+extern GENIE_PROCEDURE genie_vector_complex_div_complex_ab;
+extern GENIE_PROCEDURE genie_vector_complex_dot;
+extern GENIE_PROCEDURE genie_vector_complex_dyad;
+extern GENIE_PROCEDURE genie_vector_complex_echo;
+extern GENIE_PROCEDURE genie_vector_complex_eq;
+extern GENIE_PROCEDURE genie_vector_complex_minus;
+extern GENIE_PROCEDURE genie_vector_complex_minusab;
+extern GENIE_PROCEDURE genie_vector_complex_ne;
+extern GENIE_PROCEDURE genie_vector_complex_norm;
+extern GENIE_PROCEDURE genie_vector_complex_plusab;
+extern GENIE_PROCEDURE genie_vector_complex_scale_complex;
+extern GENIE_PROCEDURE genie_vector_complex_scale_complex_ab;
+extern GENIE_PROCEDURE genie_vector_complex_sub;
+extern GENIE_PROCEDURE genie_vector_complex_times_matrix;
+extern GENIE_PROCEDURE genie_vector_div_real;
+extern GENIE_PROCEDURE genie_vector_div_real_ab;
+extern GENIE_PROCEDURE genie_vector_dot;
+extern GENIE_PROCEDURE genie_vector_dyad;
+extern GENIE_PROCEDURE genie_vector_echo;
+extern GENIE_PROCEDURE genie_vector_eq;
+extern GENIE_PROCEDURE genie_vector_minus;
+extern GENIE_PROCEDURE genie_vector_minusab;
+extern GENIE_PROCEDURE genie_vector_ne;
+extern GENIE_PROCEDURE genie_vector_norm;
+extern GENIE_PROCEDURE genie_vector_plusab;
+extern GENIE_PROCEDURE genie_vector_scale_real;
+extern GENIE_PROCEDURE genie_vector_scale_real_ab;
+extern GENIE_PROCEDURE genie_vector_sub;
+extern GENIE_PROCEDURE genie_vector_times_matrix;
+#endif
+
+#if defined HAVE_GSL
 extern GENIE_PROCEDURE genie_cgs_speed_of_light;
 extern GENIE_PROCEDURE genie_cgs_gravitational_constant;
 extern GENIE_PROCEDURE genie_cgs_planck_constant_h;

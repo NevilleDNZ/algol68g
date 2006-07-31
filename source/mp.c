@@ -154,7 +154,7 @@ In calculations using intermediate results we will use guard digits.
 We follow D.M. Smith in his recommendations for precisions greater than LONG.
 */
 
-#ifdef DOUBLE_PRECISION
+#if defined DOUBLE_PRECISION
 #define GUARD_DIGITS(digits) (digits)
 #else
 #define GUARD_DIGITS(digits) (((digits) == LONG_MP_DIGITS) ? 2 : (LOG_MP_BASE <= 5) ? 3 : 2)

@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,15 +28,15 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
 <h2>Context-free syntax summary</h2>
-<small>
 &nbsp;&middot;&nbsp;<a href="#basic">Notions and notation</a><br>
 &nbsp;&middot;&nbsp;<a href="#reserved">Reserved symbols</a><br>
 &nbsp;&middot;&nbsp;<a href="#coercions">Coercions</a><br>
@@ -52,7 +53,6 @@ pre {font-size: 10pt; font-family: Courier;}
 &nbsp;&middot;&nbsp;<a href="#formats">Formats</a><br>
 &nbsp;&middot;&nbsp;<a href="#pragments">Pragments</a><br>
 &nbsp;&middot;&nbsp;<a href="#refinements">Refinements</a><br>
-</small>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
 <img src="logo.gif">
@@ -67,27 +67,28 @@ pre {font-size: 10pt; font-family: Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -107,8 +108,8 @@ To accept only semantically correct programs, a two-level grammar is needed <a h
 <p>This paragraph introduces notions and notation used in this reference text.
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
-<tr><td bgcolor="#e8e8e8"><b>Notion, notation</b></td><td bgcolor="#e8e8e8"><b>Meaning</b></td></tr>
-<tr><td  bgcolor="#e8e8e8">a <i>value</i></td><td  bgcolor="#e8e8e8"> 
+<tr><td bgcolor="#f0f0f0"><b>Notion, notation</b></td><td bgcolor="#f0f0f0"><b>Meaning</b></td></tr>
+<tr><td  bgcolor="#f0f0f0">a <i>value</i></td><td  bgcolor="#f0f0f0"> 
 <li>integer number or real number
 <li>truth value (<code>TRUE</code> or <code>FALSE</code>)
 <li>character
@@ -121,19 +122,19 @@ To accept only semantically correct programs, a two-level grammar is needed <a h
 <br>
 (note that there is neither a united value nor a flexible value, id est there is no value with mode UNION or FLEX) 
 </td></tr>
-<tr><td  bgcolor="#e8e8e8">a <i>name</i></td><td  bgcolor="#e8e8e8">a <i>name</i> is a value that refers to another value, or which can be NIL (that refers to no value)</td></tr>
-<tr><td  bgcolor="#e8e8e8">( )</td><td  bgcolor="#e8e8e8">used to group notions</td></tr>
-<tr><td  bgcolor="#e8e8e8">[SOME]</td><td  bgcolor="#e8e8e8">means "optional SOME"</td></tr>
-<tr><td  bgcolor="#e8e8e8"><b>a</b>: b.</td><td  bgcolor="#e8e8e8">means "definition of a is b"</td></tr>
-<tr><td  bgcolor="#e8e8e8">a, b</td><td  bgcolor="#e8e8e8">means "a or b"</td></tr>
-<tr><td  bgcolor="#e8e8e8">`SOME'</td><td  bgcolor="#e8e8e8">means literal symbol SOME</td></tr>
-<tr><td  bgcolor="#e8e8e8">SOME-list</td><td  bgcolor="#e8e8e8">SOME [`,' SOME-list]</td></tr>
-<tr><td  bgcolor="#e8e8e8">SOME-sequence</td><td  bgcolor="#e8e8e8">SOME [SOME-sequence]</td></tr>
+<tr><td  bgcolor="#f0f0f0">a <i>name</i></td><td  bgcolor="#f0f0f0">a <i>name</i> is a value that refers to another value, or which can be NIL (that refers to no value)</td></tr>
+<tr><td  bgcolor="#f0f0f0">( )</td><td  bgcolor="#f0f0f0">used to group notions</td></tr>
+<tr><td  bgcolor="#f0f0f0">[SOME]</td><td  bgcolor="#f0f0f0">means "optional SOME"</td></tr>
+<tr><td  bgcolor="#f0f0f0"><b>a</b>: b.</td><td  bgcolor="#f0f0f0">means "definition of a is b"</td></tr>
+<tr><td  bgcolor="#f0f0f0">a, b</td><td  bgcolor="#f0f0f0">means "a or b"</td></tr>
+<tr><td  bgcolor="#f0f0f0">`SOME'</td><td  bgcolor="#f0f0f0">means literal symbol SOME</td></tr>
+<tr><td  bgcolor="#f0f0f0">SOME-list</td><td  bgcolor="#f0f0f0">SOME [`,' SOME-list]</td></tr>
+<tr><td  bgcolor="#f0f0f0">SOME-sequence</td><td  bgcolor="#f0f0f0">SOME [SOME-sequence]</td></tr>
 </table>
 
 <h3><a name="reserved"></a>Reserved symbols</h3>
 <p>
-Next symbols are reserved in Algol 68 Genie Mark 9.2:
+Next symbols are reserved in Algol 68 Genie Mark 10:
 <p>
 <code>
   ANDF,
@@ -219,28 +220,28 @@ Next symbols are reserved in Algol 68 Genie Mark 9.2:
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="#e8e8e8"><b>Context strength</b></td>
-<td bgcolor="#e8e8e8"><b>Allowed coercions</b></td>
+<td bgcolor="#f0f0f0"><b>Context strength</b></td>
+<td bgcolor="#f0f0f0"><b>Allowed coercions</b></td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">soft</td>
-<td bgcolor="#e8e8e8">deproceduring</td>
+<td bgcolor="#f0f0f0">soft</td>
+<td bgcolor="#f0f0f0">deproceduring</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">weak</td>
-<td bgcolor="#e8e8e8">dereferencing or deproceduring, yielding a name</td>
+<td bgcolor="#f0f0f0">weak</td>
+<td bgcolor="#f0f0f0">dereferencing or deproceduring, yielding a name</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">meek</td>
-<td bgcolor="#e8e8e8">dereferencing or deproceduring</td>
+<td bgcolor="#f0f0f0">meek</td>
+<td bgcolor="#f0f0f0">dereferencing or deproceduring</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">firm</td>
-<td bgcolor="#e8e8e8">meek, followed by uniting</td>
+<td bgcolor="#f0f0f0">firm</td>
+<td bgcolor="#f0f0f0">meek, followed by uniting</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">strong</td>
-<td bgcolor="#e8e8e8">firm, followed by widening, rowing or voiding</td>
+<td bgcolor="#f0f0f0">strong</td>
+<td bgcolor="#f0f0f0">firm, followed by widening, rowing or voiding</td>
 </tr>
 </table>
 
@@ -249,57 +250,57 @@ In a strong context, Algol68G implements next widenings:
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="#e8e8e8"><b>From</b></td></td><td bgcolor="#e8e8e8"><b>To</b></td>
+<td bgcolor="#f0f0f0"><b>From</b></td></td><td bgcolor="#f0f0f0"><b>To</b></td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">INT</td>
-<td bgcolor="#e8e8e8">REAL<br>LONG INT</td>
+<td bgcolor="#f0f0f0">INT</td>
+<td bgcolor="#f0f0f0">REAL<br>LONG INT</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">LONG INT</td>
-<td bgcolor="#e8e8e8">LONG LONG INT<br>LONG LONG REAL</td>
+<td bgcolor="#f0f0f0">LONG INT</td>
+<td bgcolor="#f0f0f0">LONG LONG INT<br>LONG LONG REAL</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">LONG LONG INT</td>
-<td bgcolor="#e8e8e8">LONG LONG REAL</td>
+<td bgcolor="#f0f0f0">LONG LONG INT</td>
+<td bgcolor="#f0f0f0">LONG LONG REAL</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">REAL</td>
-<td bgcolor="#e8e8e8">COMPLEX<br>LONG REAL</td>
+<td bgcolor="#f0f0f0">REAL</td>
+<td bgcolor="#f0f0f0">COMPLEX<br>LONG REAL</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">LONG REAL</td>
-<td bgcolor="#e8e8e8"> LONG LONG REAL<br>LONG COMPLEX
+<td bgcolor="#f0f0f0">LONG REAL</td>
+<td bgcolor="#f0f0f0"> LONG LONG REAL<br>LONG COMPLEX
 </td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">LONG LONG REAL</td>
-<td bgcolor="#e8e8e8">LONG LONG COMPLEX</td>
+<td bgcolor="#f0f0f0">LONG LONG REAL</td>
+<td bgcolor="#f0f0f0">LONG LONG COMPLEX</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">COMPLEX</td>
-<td bgcolor="#e8e8e8">LONG COMPLEX</td>
+<td bgcolor="#f0f0f0">COMPLEX</td>
+<td bgcolor="#f0f0f0">LONG COMPLEX</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">LONG COMPLEX</td>
-<td bgcolor="#e8e8e8">LONG LONG COMPLEX</td>
+<td bgcolor="#f0f0f0">LONG COMPLEX</td>
+<td bgcolor="#f0f0f0">LONG LONG COMPLEX</td>
 </tr>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">BITS</td>
-<td bgcolor="#e8e8e8">LONG BITS</td>
+<td bgcolor="#f0f0f0">BITS</td>
+<td bgcolor="#f0f0f0">LONG BITS</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">LONG BITS</td>
-<td bgcolor="#e8e8e8">LONG LONG BITS</td>
+<td bgcolor="#f0f0f0">LONG BITS</td>
+<td bgcolor="#f0f0f0">LONG LONG BITS</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">BITS<br>LONG BITS<br>LONG LONG BITS</td>
-<td bgcolor="#e8e8e8">[ ] BOOL</td>
+<td bgcolor="#f0f0f0">BITS<br>LONG BITS<br>LONG LONG BITS</td>
+<td bgcolor="#f0f0f0">[ ] BOOL</td>
 </tr>
 <tr>
-<td bgcolor="#e8e8e8">BYTES<br>LONG BYTES</td>
-<td bgcolor="#e8e8e8">[ ] CHAR</td>
+<td bgcolor="#f0f0f0">BYTES<br>LONG BYTES</td>
+<td bgcolor="#f0f0f0">[ ] CHAR</td>
 </tr>
 </table>
 
@@ -433,7 +434,7 @@ Short-hand notations for enclosed clauses:<br>
 
 <ul>
 <b>collateral-clause</b>: `BEGIN' [unit-list] `END'.<br>
-<small>Collateral-clauses are mainly used as <code>displays</code> which are denotations for a row or structured value.</small>
+Collateral-clauses are mainly used as <code>displays</code> which are denotations for a row or structured value.
 <ul><code>
 <li>COMPLEX z := (a * c - b * d, a * d + b * c)
 <li>[ ] REAL origin = (0, 0, 0)
@@ -444,7 +445,7 @@ Short-hand notations for enclosed clauses:<br>
 
 <ul>
 <b>parallel-clause</b>: `PAR' `BEGIN' unit-list `END'.<br>
-<small>In a parallel-clause the elaboration of units can be synchronised using semaphores.</small>
+In a parallel-clause the elaboration of units can be synchronised using semaphores.
 </ul>
 
 <ul>
@@ -475,7 +476,7 @@ Short-hand notations for enclosed clauses:<br>
                     `ESAC'.<br>
 
 <b>specified-unit</b>: `(' (formal-declarer, `VOID') [identifier] `)' `:' unit.<br>
-<small>The specified mode must be acceptable <a href="resources.html#rr">{RR 2.1.3.6}</a> to the mode yielded by the enquiry-clause.</small>
+The specified mode must be acceptable <a href="resources.html#rr">{RR 2.1.3.6}</a> to the mode yielded by the enquiry-clause.
 <ul><code>
 <li>CASE u IN (INT): print ("INT"), (REAL x): print (sin (x)) ESAC
 </code></ul>
@@ -488,7 +489,7 @@ Short-hand notations for enclosed clauses:<br>
              [(`TO', `DOWNTO') meek-integer-unit]
              [`WHILE' meek-boolean-enquiry-clause]
              `DO' (serial-clause [`UNTIL' meek-boolean-enquiry-clause]), `UNTIL' meek-boolean-enquiry-clause `OD'.<br>
-<small>`DOWNTO' and `UNTIL' are Algol68G extensions.</small>
+`DOWNTO' and `UNTIL' are Algol68G extensions.
 <ul><code>
 <li>FOR i TO 10 DO item [i] := 0 OD
 <li>FOR i FROM 10 DOWNTO WHILE item [i] ~= sought DO print (i) OD
@@ -516,13 +517,13 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 <ul>
 <b>call</b>: meek-primary `(' actual-parameter-list')'<br>
 <b>actual-parameter</b>: [strong-unit]<br>
-<small>A call invokes a procedure.</small>
+A call invokes a procedure.
 <ul><code>
 <li>sin (x)
 <li>put (stand error, (new line, x, y, z := x + y))
 <li>fun(1)(x)
 </code></ul>
-<small>(Algol68G extension) Partial parametrisation adds arguments to a procedure's locale - when the locale is complete the procedure is called otherwise currying takes place.</small>
+(Algol68G extension) Partial parametrisation adds arguments to a procedure's locale - when the locale is complete the procedure is called otherwise currying takes place.
 <ul><code>
 <li>putf (, (new line, x, y, z := x + y)) (standout)
 <li>PROC (CHAR, STRING) BOOL strchr = char in string (, HEAP INT,)
@@ -533,7 +534,7 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 <b>slice</b>: weak-primary `[' indexer-list `]'.<br>
 <b>indexer</b>: [meek-integer-unit] [`:'] [meek-integer-unit] [revised-lower-bound].<br>
 <b>revised-lower-bound</b>: (`AT', `@') meek-integer-unit.<br>
-<small>A slice selects an element or a sub-row from a rowed value.</small>
+A slice selects an element or a sub-row from a rowed value.
 <ul><code>
 <li>z [1 : 10, 3]
 <li>z [n] [3]
@@ -544,7 +545,7 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 
 <ul>
 <b>cast</b>: (formal-declarer, `VOID') strong-enclosed-clause.<br>
-<small>A cast forces a strong context in which all coercions are allowed.</small>
+A cast forces a strong context in which all coercions are allowed.
 <ul><code>
 <li>VOID (open (file, "idf", standin channel)) # Discard result of open #
 <li>REF TREE (root) :=: NIL # Force comparison of a REF TREE value #
@@ -580,7 +581,7 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 
 <ul>
 <b>bits-denotation</b>: [`LONG'-sequence, `SHORT'-sequence] digit-sequence `r' bits-digit-sequence.<br>
-<small>The left-hand side digit-sequence yields the radix for the number and can range from 2 to 16. Hexadecimal digits, when letters, must be lower case conform the Revised Report.</small>
+The left-hand side digit-sequence yields the radix for the number and can range from 2 to 16. Hexadecimal digits, when letters, must be lower case conform the Revised Report.
 <ul><code>
 <li>2r1010, 8r377, LONG 16rffffffffffff
 </code></ul>
@@ -623,7 +624,7 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 
 <ul>
 <b>selection</b>: identifier `OF' secondary.<br>
-<small>A selection selects a field from a structured value.</small>
+A selection selects a field from a structured value.
 <ul><code>
 <li>re OF z
 <li>im OF (end point OF z)
@@ -632,8 +633,8 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 
 <ul>
 <b>generator</b>: (`HEAP', `LOC') actual-declarer.<br>
-<small>A generator allocates memory for a value, and yields a name refering to allocated space.
-HEAP allocates in the heap and LOC allocates in the stack.</small>
+A generator allocates memory for a value, and yields a name refering to allocated space.
+HEAP allocates in the heap and LOC allocates in the stack.
 <ul><code>
 <li>HEAP INT
 <li>LOC [1 : 10] REAL
@@ -651,14 +652,14 @@ HEAP allocates in the heap and LOC allocates in the stack.</small>
 
 <ul>
 <b>nihil</b>: `NIL'.<br>
-<small>Nihil is a name that refers to no value.</small>
+Nihil is a name that refers to no value.
 </ul>
 
 <ul>
 <b>formula</b>: monadic-operator-sequence firm-secondary,
          firm-factor dyadic-operator firm-factor.<br>
 <b>factor</b>: [monadic-operator-sequence] secondary, formula.<br>
-<small>Formulas apply operators to operands.</small>
+Formulas apply operators to operands.
 <ul><code>
 <li>- 1
 <li>- SIGN z * ARG z # means (- (SIGN z)) * (ARG z)
@@ -690,7 +691,7 @@ HEAP allocates in the heap and LOC allocates in the stack.</small>
 
 <ul>
 <b>identity-relation</b>: soft-tertiary (`IS', `:=:'), (`ISNT', `:/=:') soft-tertiary.<br>
-<small>An identity-relation tests equality of two names.</small>
+An identity-relation tests equality of two names.
 <ul><code>
 <li>REF TREE (root) IS NIL, REF TREE (root) :=: NIL
 <li>name 1 :/=: name 2
@@ -707,13 +708,13 @@ HEAP allocates in the heap and LOC allocates in the stack.</small>
 
 <ul>
 <b>skip</b>: `SKIP'.<br>
-<small>Skip has no action but yield an undefined value of the required mode.</small>
+Skip has no action but yield an undefined value of the required mode.
 </ul>
 
 <a name="assertions"></a>
 <ul>
 <b>assertion</b>: `ASSERT' meek-boolean-enclosed-clause.<br>
-<small>(Algol68G extension) Assertions can be used as invariants or debugging statements.</small>
+(Algol68G extension) Assertions can be used as invariants or debugging statements.
 <ul><code>
 <li>ASSERT (n /= 0 AND m > n)
 </code></ul>
@@ -721,7 +722,7 @@ HEAP allocates in the heap and LOC allocates in the stack.</small>
 
 <ul>
 <b>conditional-function</b>: meek-boolean-tertiary (`ANDF', `ANDTH', `ORF', `OREL') meek-boolean-tertiary.<br>
-<small>(Algol68G extension) A conditional function does not evaluate its second operand if the result can be deduced after evaluating the first.</small>
+(Algol68G extension) A conditional function does not evaluate its second operand if the result can be deduced after evaluating the first.
 <ul><code>
 <li>(z ISNT NIL) ANDF freq OF z > 0 # avoid dereferencing NIL #  
 </code></ul>
@@ -729,7 +730,7 @@ HEAP allocates in the heap and LOC allocates in the stack.</small>
 
 <ul>
 <b>routine-text</b>: [`(' (formal-declarer identifier)-list `)'] formal-declarer `:' strong-unit.<br>
-<small>A routine-text is a procedure body. It can be considered as a "procedure-denotation" or an "anonymous procedure".</small>
+A routine-text is a procedure body. It can be considered as a "procedure-denotation" or an "anonymous procedure".
 <ul><code>
 <li>REF STRING: HEAP STRING := "xyzzy"
 <li>(REAL x) REAL: sin (2 * z)
@@ -753,8 +754,8 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 
 <ul>
 <b>mode-declaration</b>: `MODE' (declarer-identifier `=' actual-declarer)-list.<br>
-<small>A mode-declaration introduces a new mode. Modes must not be declared in a cyclic way and must give objects that (1) are of finite size, and (2) require a finite number of coercions.
-</small>
+A mode-declaration introduces a new mode. Modes must not be declared in a cyclic way and must give objects that (1) are of finite size, and (2) require a finite number of coercions.
+
 <ul><code>
 <li>MODE TREE = STRUCT (INFO info, NODE smaller, larger), INFO = STRING, NODE = REF TREE
 </code></ul>
@@ -762,7 +763,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 
 <ul>
 <b>identity-declaration</b>: formal-declarer (identifier `=' strong-unit)-list.<br>
-<small>An identity-relation binds values to identifiers. The identifier becomes a synonym for the value, further assignation is not possible.</small>
+An identity-relation binds values to identifiers. The identifier becomes a synonym for the value, further assignation is not possible.
 <ul><code>
 <li>INT number = 1000, [ ] INT first primes = (1, 3, 5, 7, 11)
 </code></ul>
@@ -770,7 +771,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 
 <ul>
 <b>variable-declaration</b>: [`HEAP', `LOC'] actual-declarer (identifier `:=' strong-unit)-list.<br>
-<small>A variable-declaration binds an identifier to space allocated for a value. The initial value can be assigned in the declaration. HEAP variables go to the heap, LOC variables go into the stack.</small>
+A variable-declaration binds an identifier to space allocated for a value. The initial value can be assigned in the declaration. HEAP variables go to the heap, LOC variables go into the stack.
 <ul><code>
 <li>REAL sum := 0, max := - max real
 <li>HEAP INT k := read int, LOC BOOL z := k = 1
@@ -779,7 +780,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 
 <ul>
 <b>procedure-declaration</b>: `PROC' (identifier `=' routine-text)-list.<br>
-<small>A procedure-declaration binds a routine-text to an identifier. Further assignation of another routine-text is not possible.</small>
+A procedure-declaration binds a routine-text to an identifier. Further assignation of another routine-text is not possible.
 <ul><code>
 <li>PROC inc = (INT n) INT: n + 1
 </code></ul>
@@ -787,7 +788,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 
 <ul>
 <b>procedure-variable-declaration</b>: [`HEAP', `LOC'] `PROC' (identifier `:='  routine-text)-list.<br>
-<small>A procedure-variable-declaration binds an identifier to space allocated for a routine-text. The initial routine-text must be assigned in the declaration. HEAP variables go to the heap, LOC variables go into the stack.</small>
+A procedure-variable-declaration binds an identifier to space allocated for a routine-text. The initial routine-text must be assigned in the declaration. HEAP variables go to the heap, LOC variables go into the stack.
 <ul><code>
 <li>LOC PROC inc := (INT n) INT: n + 1
 </code></ul>
@@ -796,7 +797,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 <ul>
 <b>operator-declaration</b>: 
 `OP' (operator `=' routine-text)-list, `OP' [`(' formal-declarer-list `)' (formal-declarer, `VOID')] (operator `=' strong-unit)-list.<br>
-<small>An operator-declaration introduces new operators.</small>
+An operator-declaration introduces new operators.
 <ul><code>
 <li>OP F = (INT i) INT: (i > 0 | i * F (i - 1) | 1) 
 <li>OP (REAL) REAL SQRT = sqrt, LN = ln, TAN = tan
@@ -805,7 +806,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
 
 <ul>
 <b>priority-declaration</b>: `PRIO' (operator `=' digit)-list.<br>
-<small>A priority-declaration introduces a priority for operators.</small>
+A priority-declaration introduces a priority for operators.
 <ul><code>
 <li>PRIO + = 6, * = 7, / = 7
 </code></ul>
@@ -850,13 +851,13 @@ Algol 68 employs structural equivalence for modes. Note that field identifiers i
 
 <ul>
 <b>primitive-declarer</b>: `INT', `REAL', `COMPL', `COMPLEX', `BOOL', `CHAR', `STRING', `BITS', `BYTES', `FORMAT', `FILE', `PIPE', `CHANNEL', `SEMA'.<br>
-<small>Primitive-declarers are the standard provided modes.</small>
+Primitive-declarers are the standard provided modes.
 </ul>
  
 <ul>
 <b>actual-bounds</b>:  [meek-integer-unit `:'] meek-integer-unit. # default lower bound is 1 #<br>
 <b>formal-bounds</b>, <b>virtual-bounds</b>:  [`:'].<br>
-<small>Bounds provide the size per dimension of a row, where needed.</small>
+Bounds provide the size per dimension of a row, where needed.
 <br>
 </ul>
 
@@ -955,7 +956,7 @@ procedures yielding formats etcetera. A format-text can be considered as a (dyna
 
 <ul>
 <b>bits-pattern</b>: replicator `r' integer-mould.<br>
-<small>The replicator yields the radix for the number and can range from 2 to 16.</small>
+The replicator yields the radix for the number and can range from 2 to 16.
 <ul><code>
 <li>2r7zd # binary 8-bit byte with trailing zero-bit suppression #
 <li>16r8d # hexadecimal 32 bit without trailing zero-digit suppression #
@@ -1030,20 +1031,23 @@ The <a href="extensions.html#refine">refinement preprocessor</a> is a low-level 
 </code></ul>
 </ul>
 
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
 </p>
-
+<hr color=#f0f0f0>
 </body>
 </html>
+

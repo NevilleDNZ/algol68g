@@ -33,7 +33,7 @@ registers and stack for each concurrent unit.
 #include "genie.h"
 #include "mp.h"
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 typedef struct STACK STACK;
 
@@ -55,7 +55,7 @@ Don't copy POSIX_THREAD_THREADS_MAX since it may be ULONG_MAX.
 
 #define THREAD_LIMIT   256
 
-#ifndef _POSIX_THREAD_THREADS_MAX
+#if ! defined _POSIX_THREAD_THREADS_MAX
 #define _POSIX_THREAD_THREADS_MAX	(THREAD_LIMIT)
 #endif
 
@@ -96,7 +96,7 @@ static NODE_T *jump_label;
 
 void count_parallel_clauses (NODE_T * p)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, PARALLEL_CLAUSE)) {
       parallel_clauses++;
@@ -116,7 +116,7 @@ void count_parallel_clauses (NODE_T * p)
 
 BOOL_T is_main_thread (void)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   return (main_thread_id == pthread_self ());
 #else
   ABNORMAL_END (A_TRUE, ERROR_REQUIRE_THREADS, NULL);
@@ -130,7 +130,7 @@ BOOL_T is_main_thread (void)
 
 void genie_abend_thread (void)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   save_stacks (pthread_self ());
   pthread_mutex_unlock (&mutex);
   pthread_exit (NULL);
@@ -177,7 +177,7 @@ void set_par_level (NODE_T * p, int n)
   }
 }
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief save this thread and try to start another
@@ -197,7 +197,7 @@ static void try_change_thread (NODE_T * p)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief thread id to context index
@@ -218,7 +218,7 @@ static int get_index (pthread_t id)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief save a stack, only allocate if a block is too small
@@ -254,7 +254,7 @@ static void save (STACK * s, BYTE_T * start, int size)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief restore a stack
@@ -269,7 +269,7 @@ static void restore (STACK * s)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief store the stacks of threads
@@ -298,7 +298,7 @@ static void save_stacks (pthread_t t)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief restore stacks of thread
@@ -323,7 +323,7 @@ static void restore_stacks (pthread_t t)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief does system stack grow up or down?
@@ -344,7 +344,7 @@ static int stack_direction (BYTE_T * lwb)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief execute one unit from a PAR clause
@@ -368,7 +368,7 @@ static void *start_unit (void *arg)
 }
 #endif
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 
 /*!
 \brief execute parallel units
@@ -431,7 +431,7 @@ static void genie_parallel_units (NODE_T * p)
 
 PROPAGATOR_T genie_parallel (NODE_T * p)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   PROPAGATOR_T self;
   int j;
   ADDR_T stack_s = 0, frame_s = 0;
@@ -517,7 +517,7 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
 
 void genie_level_sema_int (NODE_T * p)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   A68_INT k;
   A68_REF s;
   POP_INT (p, &k);
@@ -538,7 +538,7 @@ void genie_level_sema_int (NODE_T * p)
 
 void genie_level_int_sema (NODE_T * p)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   A68_REF s;
   POP_REF (p, &s);
   CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
@@ -556,7 +556,7 @@ void genie_level_int_sema (NODE_T * p)
 
 void genie_up_sema (NODE_T * p)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   A68_REF s;
   POP_REF (p, &s);
   CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
@@ -574,7 +574,7 @@ void genie_up_sema (NODE_T * p)
 
 void genie_down_sema (NODE_T * p)
 {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   A68_REF s;
   A68_INT *k;
   BOOL_T cont = A_TRUE;
