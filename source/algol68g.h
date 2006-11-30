@@ -96,7 +96,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define SMALL_BUFFER_SIZE 128
 #define MAX_ERRORS 8
 #define MAX_PRIORITY 9				/* Algol 68 requirement. */
-#define MIN_MEM_SIZE (MEGABYTE)			/* Stack, heap blocks not smaller than this in kB. */
+#define MIN_MEM_SIZE (32 * KILOBYTE)		/* Stack, heap blocks not smaller than this in kB. */
 #define MAX_LINE_WIDTH (BUFFER_SIZE / 2)	/* Must be smaller than BUFFER_SIZE */
 #define MOID_WIDTH 80
 
@@ -138,6 +138,35 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define PRIMAL_SCOPE 0
 
+#define NULL_MASK 		0x00000000
+#define IN_HEAP_MASK		0x00000001
+#define IN_FRAME_MASK		0x00000002
+#define IN_STACK_MASK		0x00000004
+#define IN_HANDLE_MASK		0x00000008
+#define INITIALISED_MASK 	0x00000010
+#define CONSTANT_MASK 		0x00000020
+#define NO_SWEEP_MASK 		0x00000040
+#define ROW_COLOUR_MASK 	0x00000080
+#define COOKIE_MASK 		0x00000100
+#define ASSIGNED_MASK 		0x00000200
+#define ALLOCATED_MASK 		0x00000400
+#define STANDENV_PROC_MASK 	0x00000800
+#define COLOUR_MASK 		0x00001000
+#define PROCEDURE_MASK 		0x00002000
+#define OPTIMAL_MASK 		0x00004000
+#define SERIAL_MASK 		0x00008000
+#define CROSS_REFERENCE_MASK 	0x00010000
+#define TREE_MASK 		0x00020000
+#define CODE_MASK 		0x00040000
+#define SYNTAX_TREE_MASK 	0x00080000
+#define SOURCE_MASK 		0x00100000
+#define TRACE_MASK 		0x00200000
+#define ASSERT_MASK 		0x00400000
+#define BREAKPOINT_MASK 	0x00800000
+#define SKIP_PROCEDURE_MASK  	0x01000000
+#define PARTIAL_CALL_MASK	0x02000000
+#define NIL_MASK		0x04000000
+
 /*
 Some (necessary) macros to overcome the ambiguity in having signed or unsigned
 char on various systems. PDP-11s and IBM 370s are still haunting us with this.
@@ -173,11 +202,12 @@ typedef struct A68_FORMAT A68_FORMAT;
 typedef struct A68_HANDLE A68_HANDLE;
 typedef struct A68_INT A68_INT;
 typedef struct A68_LONG_BYTES A68_LONG_BYTES;
-typedef struct A68_POINTER A68_POINTER;
+typedef struct A68_UNION A68_UNION;
 typedef struct A68_PROCEDURE A68_PROCEDURE;
 typedef struct A68_REAL A68_REAL;
 typedef struct A68_REF A68_REF, A68_ROW;
 typedef struct A68_TUPLE A68_TUPLE;
+
 typedef struct POSTULATE_T POSTULATE_T;
 typedef struct FILES_T FILES_T;
 typedef struct GENIE_INFO_T GENIE_INFO_T;
@@ -231,7 +261,7 @@ struct A68_REAL
 
 struct A68_CHAR
 {
-  STATUS_MASK status;
+  BYTE_T status;
   signed char value;
 };
 
@@ -247,12 +277,23 @@ struct A68_LONG_BYTES
   char value[LONG_BYTES_WIDTH + 1];
 };
 
+#define IS_IN_HEAP(z) ((z)->status & IN_HEAP_MASK)
+#define IS_IN_FRAME(z) ((z)->status & IN_FRAME_MASK)
+#define IS_IN_STACK(z) ((z)->status & IN_STACK_MASK)
+#define IS_IN_HANDLE(z) ((z)->status & IN_HANDLE_MASK)
+#define IS_NIL(p) ((p).status & NIL_MASK)
+#define GET_REF_SCOPE(z) (IS_IN_HEAP (z) ? PRIMAL_SCOPE : REF_SCOPE (z))
+#define SET_REF_SCOPE(z, s) { if (!IS_IN_HEAP (z)) { REF_SCOPE (z) = (s);}}
+
+#define REF_SCOPE(z) (((z)->u).scope)
+#define REF_HANDLE(z) (((z)->u).handle)
+#define REF_OFFSET(z) ((z)->offset)
+
 struct A68_REF
 {
   STATUS_MASK status;
-  BYTE_T *segment;
-  ADDR_T offset, scope;
-  A68_HANDLE *handle;
+  ADDR_T offset;
+  union {A68_HANDLE *handle; ADDR_T scope;} u;
 };
 
 struct A68_FORMAT
@@ -262,7 +303,7 @@ struct A68_FORMAT
   ADDR_T environ;
 };
 
-struct A68_POINTER
+struct A68_UNION
 {
   STATUS_MASK status;
   void *value;
@@ -272,7 +313,7 @@ struct A68_PROCEDURE
 {
   STATUS_MASK status;
   void *body;
-  A68_REF locale;
+  A68_HANDLE *locale;
   MOID_T *proc_mode;
   ADDR_T environ;
 };
@@ -323,8 +364,8 @@ struct A68_FILE
   }
   device;
 #if defined HAVE_POSTGRESQL
-PGconn *connection;
-PGresult *result;
+  PGconn *connection;
+  PGresult *result;
 #endif
 };
 
@@ -468,7 +509,7 @@ struct NODE_T
   SYMBOL_TABLE_T *symbol_table;
   TAG_T *tag, *protect_sweep;
   int attribute, annotation, par_level;
-  BOOL_T dns, error;
+  BOOL_T need_dns, error;
 };
 
 struct POSTULATE_T
@@ -565,33 +606,6 @@ struct MODULE_T
 enum
 {
   UPPER_STROPPING = 1, QUOTE_STROPPING
-};
-
-enum
-{
-  NULL_MASK 			= 0x00000000L,
-  INITIALISED_MASK 		= 0x00000001L,
-  NO_SWEEP_MASK 		= 0x00000002L,
-  COOKIE_MASK 			= 0x00000004L,
-  ROW_COLOUR_MASK 		= 0x00000008L,
-  CONSTANT_MASK 		= 0x00000010L,
-  ASSIGNED_MASK 		= 0x00000020L,
-  ALLOCATED_MASK 		= 0x00000040L,
-  STANDENV_PROCEDURE_MASK 	= 0x00000080L,
-  COLOUR_MASK 			= 0x00000100L,
-  PROCEDURE_MASK 		= 0x00000200L,
-  OPTIMAL_MASK 			= 0x00000400L,
-  SERIAL_MASK 			= 0x00000800L,
-  CROSS_REFERENCE_MASK 		= 0x00001000L,
-  TREE_MASK 			= 0x00002000L,
-  CODE_MASK 			= 0x00004000L,
-  SYNTAX_TREE_MASK 		= 0x00008000L,
-  SOURCE_MASK 			= 0x00010000L,
-  TRACE_MASK 			= 0x00020000L,
-  ASSERT_MASK 			= 0x00040000L,
-  BREAKPOINT_MASK 		= 0x00080000L,
-  SKIP_PROCEDURE_MASK  		= 0x00100000L,
-  PARTIAL_CALL_MASK		= 0x00200000L
 };
 
 enum MODE_ATTRIBUTES
@@ -987,7 +1001,7 @@ enum
 
 #define RESET_ERRNO {errno = 0;}
 
-#define A68_UNION A68_POINTER
+#define A68_UNION A68_UNION
 #define UNION_OFFSET (SIZE_OF (A68_UNION))
 
 /* Miscellaneous misery. */
@@ -997,7 +1011,6 @@ enum
 #define DEFLEX(p) (DEFLEXED (p) != NULL ? DEFLEXED(p) : (p))
 #define DEFLEXED(p) ((p)->deflexed_mode)
 #define DIMENSION(p) ((p)->dimensions)
-#define DNS(p) ((p)->dns)
 #define ENVIRON(p) ((p)->environ)
 #define EQUIVALENT(p) ((p)->equivalent_mode)
 #define EXIT_COMPILATION longjmp(exit_compilation, 1)
@@ -1239,7 +1252,10 @@ extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
 extern void where (FILE_T, NODE_T *);
 extern void widen_denoter (NODE_T *);
+extern void write_listing_header (MODULE_T *);
 extern void write_listing (MODULE_T *);
 extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, BOOL_T);
+extern void dump_stowed (NODE_T *, FILE_T, void *, MOID_T *, int);
+extern void print_item (NODE_T *, FILE_T, BYTE_T *, MOID_T *);
 
 #endif

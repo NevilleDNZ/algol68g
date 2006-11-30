@@ -372,8 +372,7 @@ static void tax_generators (NODE_T * p)
     tax_generators (SUB (p));
     if (WHETHER (p, GENERATOR)) {
       if (WHETHER (SUB (p), LOC_SYMBOL)) {
-        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))),
-            GENERATOR);
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))), GENERATOR);
         HEAP (z) = LOC_SYMBOL;
         z->use = A_TRUE;
         TAX (p) = z;

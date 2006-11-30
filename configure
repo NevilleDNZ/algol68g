@@ -21,24 +21,23 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="10"
+VERSION_NUMBER="10.1"
 REVISION="Mark $VERSION_NUMBER"
-TIME_STAMP="August 2006"
+TIME_STAMP="December 2006"
 RELEASE_DATE="released $TIME_STAMP"
 PACKAGE="algol68g-mk$VERSION_NUMBER"
+warnings=
 # Where does the system store things
 SYS_INC=/usr/include
 SYS_LIB=/usr/lib
 SYS_BIN=/usr/bin
-#USR_LOC=/usr/local
-USR_LOC=/usr/lib
+USR_LOC=/usr/local
 LOC_INC=$USR_LOC/include
 USR_CHK="./regression-mk$VERSION_NUMBER"
 USR_DOC="./doc"
 USR_DOC_TEMPLATES="$USR_DOC/templates"
 USR_SRC="./source"
-#SQL_DIR=$USR_LOC/pgsql # ncd/6s7
-SQL_DIR=$SYS_LIB/pgsql
+SQL_DIR=$USR_LOC/pgsql
 BUILD_FILE="$USR_SRC/$MAKEFILE"
 VERSION_FILE="$USR_SRC/version.h"
 TEST_FILE="$USR_CHK/regression"
@@ -142,26 +141,23 @@ do
 	-help | --help | -? | ?)
 		echo "usage: $0 [options]"
 		cat << \_HELP
---incdir[=]DIR  	set include-directory for compilation to DIR
---libdir[=]DIR  	set library-directory for compilation to DIR
 --bindir[=]DIR  	set target directory for executable to DIR
---mandir[=]DIR  	set target directory for manual page to DIR
-
---threads       	use POSIX threads enabling the parallel clause
-
---cc[=]CC       	set C compiler to CC
--debug  		set debugging mode
--profile                set profiling mode
--O0     		set optimisation level for compilation to -O0
--O      		set optimisation level for compilation to -O
--O2     		set optimisation level for compilation to -O2
--O3     		set optimisation level for compilation to -O3
-
 --build 		build target after configuring
+--cc[=]CC       	set C compiler to CC
+--debug  		set debugging mode
 --docs			build documentation (development release only)
 --help  		print help and exit
+--incdir[=]DIR  	set include-directory for compilation to DIR
+--libdir[=]DIR  	set library-directory for compilation to DIR
+--mandir[=]DIR  	set target directory for manual page to DIR
+--profile                set profiling mode
+--threads       	use POSIX threads enabling the parallel clause
 --version       	print version and exit
 --warn			give warning messages during compilation
+-O      		set optimisation level for compilation to -O
+-O0     		set optimisation level for compilation to -O0
+-O2     		set optimisation level for compilation to -O2
+-O3     		set optimisation level for compilation to -O3
 _HELP
 		exit 1 ;;
 	*)
@@ -313,6 +309,11 @@ fi
 if ! [  -w $USR_BIN     ]
 then
 	echo "$USERID cannot write to $USR_BIN, set to `pwd`"
+	if [	-f $USR_BIN/a68g ]
+	then
+		echo "warning: $USR_BIN/a68g already exists which may cause confusion"
+		warnings=yes
+	fi
 	USR_BIN=`pwd`
 fi
 # Find default man_dir if none was given
@@ -617,11 +618,13 @@ else
 	A68='a68g'
 fi
 #
+echo "a68g regression test"
+date
 uname -mrs
+which a68g
+$A68 -version
 pwd
 echo "number of test programs: `find . -name "*.a68" -print | wc -l`"
-date
-$A68 -version
 case $?
 in
 	0) ;;
@@ -727,5 +730,10 @@ then
 			exit 1 ;;
 	esac
 fi
-echo "$0 done"
+if [	-z $warnings ]
+then
+	echo "$0 done"
+else
+	echo "$0 done, with warnings"
+fi
 exit

@@ -1637,6 +1637,42 @@ static void make_multiple_modes (NODE_T * p, int *modifications)
   }
 }
 
+static void make_multiple_modes_standenv (int *modifications)
+{
+  MOID_T **top = &stand_env->moids;
+  BOOL_T z = A_TRUE;
+  while (z) {
+    MOID_T *q = stand_env->moids;
+    z = A_FALSE;
+    for (; q != NULL; FORWARD (q)) {
+      if (MULTIPLE (q) != NULL) {
+        ;
+      } else if (WHETHER (q, REF_SYMBOL)) {
+        if (MULTIPLE (SUB (q)) != NULL) {
+          (*modifications)++;
+          MULTIPLE (q) = make_name_struct (MULTIPLE (SUB (q)), top);
+        }
+      } else if (WHETHER (q, ROW_SYMBOL)) {
+        if (WHETHER (SUB (q), STRUCT_SYMBOL)) {
+          z = A_TRUE;
+          (*modifications)++;
+          MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIMENSION (q));
+        }
+      } else if (WHETHER (q, FLEX_SYMBOL)) {
+        if (SUB (SUB (q)) == NULL) {
+          (*modifications)++;   /* as yet unresolved FLEX INDICANT. */
+        } else {
+          if (WHETHER (SUB (SUB (q)), STRUCT_SYMBOL)) {
+            z = A_TRUE;
+            (*modifications)++;
+            MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIMENSION (SUB (q)));
+          }
+        }
+      }
+    }
+  }
+}
+
 /*
 Deflexing removes all FLEX from a mode,
 for instance REF STRING -> REF [] CHAR.
@@ -1963,6 +1999,7 @@ static int expand_contract_moids (NODE_T * top_node, int cycle_no)
   reset_postulates ();
   if (cycle_no >= 0) {          /* Just experimental, might remove. */
 /* Calculate derived modes. */
+    make_multiple_modes_standenv (&modifications);
     absorb_unions (top_node, &modifications);
     contract_unions (top_node, &modifications);
     make_multiple_modes (top_node, &modifications);
@@ -2166,7 +2203,7 @@ static int moid_size_2 (MOID_T * p)
     if (SIZE_OF (A68_REF) > k) {
       k = SIZE_OF (A68_REF);
     }
-    return (SIZE_OF (A68_POINTER) + k);
+    return (SIZE_OF (A68_UNION) + k);
   } else if (p == MODE (SIMPLIN)) {
     int k = 0;
     if (SIZE_OF (A68_REF) > k) {
@@ -2178,9 +2215,9 @@ static int moid_size_2 (MOID_T * p)
     if (SIZE_OF (A68_PROCEDURE) > k) {
       k = SIZE_OF (A68_PROCEDURE);
     }
-    return (SIZE_OF (A68_POINTER) + k);
+    return (SIZE_OF (A68_UNION) + k);
   } else if (p == MODE (SIMPLOUT)) {
-    return (SIZE_OF (A68_POINTER) + max_simplout_size);
+    return (SIZE_OF (A68_UNION) + max_simplout_size);
   } else if (WHETHER (p, REF_SYMBOL)) {
     return (SIZE_OF (A68_REF));
   } else if (WHETHER (p, PROC_SYMBOL)) {
@@ -2188,7 +2225,7 @@ static int moid_size_2 (MOID_T * p)
   } else if (WHETHER (p, ROW_SYMBOL) && p != MODE (ROWS)) {
     return (SIZE_OF (A68_REF));
   } else if (p == MODE (ROWS)) {
-    return (SIZE_OF (A68_POINTER) + SIZE_OF (A68_REF));
+    return (SIZE_OF (A68_UNION) + SIZE_OF (A68_REF));
   } else if (WHETHER (p, FLEX_SYMBOL)) {
     return moid_size (SUB (p));
   } else if (WHETHER (p, STRUCT_SYMBOL)) {
@@ -2206,7 +2243,7 @@ static int moid_size_2 (MOID_T * p)
         size = moid_size (MOID (z));
       }
     }
-    return (SIZE_OF (A68_POINTER) + size);
+    return (SIZE_OF (A68_UNION) + size);
   } else if (PACK (p) != NULL) {
     PACK_T *z = PACK (p);
     int size = 0;

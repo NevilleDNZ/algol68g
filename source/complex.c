@@ -77,10 +77,10 @@ void genie_icomplex (NODE_T * p)
 void genie_iint_complex (NODE_T * p)
 {
   A68_INT re, im;
-  POP_INT (p, &im);
-  POP_INT (p, &re);
-  PUSH_REAL (p, (double) re.value);
-  PUSH_REAL (p, (double) im.value);
+  POP_PRIMITIVE (p, &im, A68_INT);
+  POP_PRIMITIVE (p, &re, A68_INT);
+  PUSH_PRIMITIVE (p, (double) re.value, A68_REAL);
+  PUSH_PRIMITIVE (p, (double) im.value, A68_REAL);
 }
 
 /*!
@@ -101,7 +101,7 @@ void genie_re_complex (NODE_T * p)
 void genie_im_complex (NODE_T * p)
 {
   A68_REAL im;
-  POP_REAL (p, &im);
+  POP_PRIMITIVE (p, &im, A68_REAL);
   *(A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL))) = im;
 }
 
@@ -129,7 +129,7 @@ void genie_abs_complex (NODE_T * p)
 {
   A68_REAL re_x, im_x;
   POP_COMPLEX (p, &re_x, &im_x);
-  PUSH_REAL (p, a68g_hypot (re_x.value, im_x.value));
+  PUSH_PRIMITIVE (p, a68g_hypot (re_x.value, im_x.value), A68_REAL);
 }
 
 /*!
@@ -142,7 +142,7 @@ void genie_arg_complex (NODE_T * p)
   A68_REAL re_x, im_x;
   POP_COMPLEX (p, &re_x, &im_x);
   if (re_x.value != 0.0 || im_x.value != 0.0) {
-    PUSH_REAL (p, atan2 (im_x.value, re_x.value));
+    PUSH_PRIMITIVE (p, atan2 (im_x.value, re_x.value), A68_REAL);
   } else {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (COMPLEX), NULL);
     exit_genie (p, A_RUNTIME_ERROR);
@@ -252,7 +252,7 @@ void genie_pow_complex_int (NODE_T * p)
   A68_INT j;
   int expo;
   BOOL_T negative;
-  POP_INT (p, &j);
+  POP_PRIMITIVE (p, &j, A68_INT);
   POP_COMPLEX (p, &re_x, &im_x);
   re_z = 1.0;
   im_z = 0.0;
@@ -276,14 +276,14 @@ void genie_pow_complex_int (NODE_T * p)
   }
   TEST_COMPLEX_REPRESENTATION (p, re_z, im_z);
   if (negative) {
-    PUSH_REAL (p, 1.0);
-    PUSH_REAL (p, 0.0);
-    PUSH_REAL (p, re_z);
-    PUSH_REAL (p, im_z);
+    PUSH_PRIMITIVE (p, 1.0, A68_REAL);
+    PUSH_PRIMITIVE (p, 0.0, A68_REAL);
+    PUSH_PRIMITIVE (p, re_z, A68_REAL);
+    PUSH_PRIMITIVE (p, im_z, A68_REAL);
     genie_div_complex (p);
   } else {
-    PUSH_REAL (p, re_z);
-    PUSH_REAL (p, im_z);
+    PUSH_PRIMITIVE (p, re_z, A68_REAL);
+    PUSH_PRIMITIVE (p, im_z, A68_REAL);
   }
 }
 
@@ -297,7 +297,7 @@ void genie_eq_complex (NODE_T * p)
   A68_REAL re_x, im_x, re_y, im_y;
   POP_COMPLEX (p, &re_y, &im_y);
   POP_COMPLEX (p, &re_x, &im_x);
-  PUSH_BOOL (p, (re_x.value == re_y.value) && (im_x.value == im_y.value));
+  PUSH_PRIMITIVE (p, (re_x.value == re_y.value) && (im_x.value == im_y.value), A68_BOOL);
 }
 
 /*!
@@ -311,7 +311,7 @@ void genie_ne_complex (NODE_T * p)
   A68_REAL re_x, im_x, re_y, im_y;
   POP_COMPLEX (p, &re_y, &im_y);
   POP_COMPLEX (p, &re_x, &im_x);
-  PUSH_BOOL (p, !((re_x.value == re_y.value) && (im_x.value == im_y.value)));
+  PUSH_PRIMITIVE (p, !((re_x.value == re_y.value) && (im_x.value == im_y.value)), A68_BOOL);
 }
 
 /*!
@@ -364,8 +364,8 @@ void genie_lengthen_complex_to_long_complex (NODE_T * p)
   int digits = get_mp_digits (MODE (LONG_REAL));
   MP_DIGIT_T *z;
   A68_REAL a, b;
-  POP_REAL (p, &b);
-  POP_REAL (p, &a);
+  POP_PRIMITIVE (p, &b, A68_REAL);
+  POP_PRIMITIVE (p, &a, A68_REAL);
   STACK_MP (z, p, digits);
   real_to_mp (p, z, a.value, digits);
   MP_STATUS (z) = INITIALISED_MASK;
@@ -385,8 +385,8 @@ void genie_shorten_long_complex_to_complex (NODE_T * p)
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-size);
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   DECREMENT_STACK_POINTER (p, 2 * size);
-  PUSH_REAL (p, mp_to_real (p, a, digits));
-  PUSH_REAL (p, mp_to_real (p, b, digits));
+  PUSH_PRIMITIVE (p, mp_to_real (p, a, digits), A68_REAL);
+  PUSH_PRIMITIVE (p, mp_to_real (p, b, digits), A68_REAL);
 }
 
 /*!
@@ -639,7 +639,7 @@ void genie_pow_long_complex_int (NODE_T * p)
   A68_INT j;
   int expo;
   BOOL_T negative;
-  POP_INT (p, &j);
+  POP_PRIMITIVE (p, &j, A68_INT);
   pop_sp = stack_pointer;
   im_x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   re_x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
@@ -703,7 +703,7 @@ void genie_eq_long_complex (NODE_T * p)
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-4 * size);
   genie_sub_long_complex (p);
   DECREMENT_STACK_POINTER (p, 2 * size);
-  PUSH_BOOL (p, MP_DIGIT (a, 1) == 0 && MP_DIGIT (b, 1) == 0);
+  PUSH_PRIMITIVE (p, MP_DIGIT (a, 1) == 0 && MP_DIGIT (b, 1) == 0, A68_BOOL);
 }
 
 /*!
@@ -718,7 +718,7 @@ void genie_ne_long_complex (NODE_T * p)
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-4 * size);
   genie_sub_long_complex (p);
   DECREMENT_STACK_POINTER (p, 2 * size);
-  PUSH_BOOL (p, MP_DIGIT (a, 1) != 0 || MP_DIGIT (b, 1) != 0);
+  PUSH_PRIMITIVE (p, MP_DIGIT (a, 1) != 0 || MP_DIGIT (b, 1) != 0, A68_BOOL);
 }
 
 /*!
@@ -871,10 +871,10 @@ void genie_ln_complex (NODE_T * p)
   RESET_ERRNO;
   PUSH_COMPLEX (p, re->value, im->value);
   genie_abs_complex (p);
-  POP_REAL (p, &r);
+  POP_PRIMITIVE (p, &r, A68_REAL);
   PUSH_COMPLEX (p, re->value, im->value);
   genie_arg_complex (p);
-  POP_REAL (p, &th);
+  POP_PRIMITIVE (p, &th, A68_REAL);
   re->value = log (r.value);
   im->value = th.value;
   math_rte (p, errno != 0, MODE (COMPLEX), NULL);
@@ -995,13 +995,13 @@ void genie_tan_complex (NODE_T * p)
   RESET_ERRNO;
   r = re->value;
   i = im->value;
-  PUSH_REAL (p, r);
-  PUSH_REAL (p, i);
+  PUSH_PRIMITIVE (p, r, A68_REAL);
+  PUSH_PRIMITIVE (p, i, A68_REAL);
   genie_sin_complex (p);
-  POP_REAL (p, &v);
-  POP_REAL (p, &u);
-  PUSH_REAL (p, r);
-  PUSH_REAL (p, i);
+  POP_PRIMITIVE (p, &v, A68_REAL);
+  POP_PRIMITIVE (p, &u, A68_REAL);
+  PUSH_PRIMITIVE (p, r, A68_REAL);
+  PUSH_PRIMITIVE (p, i, A68_REAL);
   genie_cos_complex (p);
   re->value = u.value;
   im->value = v.value;

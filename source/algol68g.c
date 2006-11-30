@@ -567,11 +567,7 @@ Accept various silent extensions.
   }
 /* Write listing. */
   if (a68_prog.files.listing.opened) {
-    state_version (a68_prog.files.listing.fd);
-    io_write_string (a68_prog.files.listing.fd, "\n++++ File \"");
-    io_write_string (a68_prog.files.listing.fd, a68_prog.files.source.name);
-    io_write_string (a68_prog.files.listing.fd, "\"");
-    io_write_string (a68_prog.files.listing.fd, "\n++++ Source listing");
+    write_listing_header (&a68_prog);
     source_listing (&a68_prog);
     write_listing (&a68_prog);
     close (a68_prog.files.listing.fd);

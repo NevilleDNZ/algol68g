@@ -58,15 +58,15 @@ void genie_http_content (NODE_T * p)
   char buffer[CONTENT_BUFFER_SIZE];
   RESET_ERRNO;
 /* Pop arguments. */
-  POP_INT (p, &port_number);
-  TEST_INIT (p, port_number, MODE (INT));
+  POP_PRIMITIVE (p, &port_number, A68_INT);
+  CHECK_INIT (p, INITIALISED (&port_number), MODE (INT));
   POP_REF (p, &path_string);
-  TEST_INIT (p, path_string, MODE (STRING));
+  CHECK_INIT (p, INITIALISED (&path_string), MODE (STRING));
   POP_REF (p, &domain_string);
-  TEST_INIT (p, domain_string, MODE (STRING));
+  CHECK_INIT (p, INITIALISED (&domain_string), MODE (STRING));
   POP_REF (p, &content_string);
-  TEST_INIT (p, content_string, MODE (REF_STRING));
-  TEST_NIL (p, content_string, MODE (REF_STRING));
+  CHECK_INIT (p, INITIALISED (&content_string), MODE (REF_STRING));
+  CHECK_NIL (p, content_string, MODE (REF_STRING));
   *(A68_REF *) ADDRESS (&content_string) = empty_string (p);
 /* Reset buffers. */
   reset_transput_buffer (DOMAIN_BUFFER);
@@ -84,7 +84,7 @@ void genie_http_content (NODE_T * p)
   socket_address.sin_family = AF_INET;
   service_address = getservbyname (SERVICE, PROTOCOL);
   if (service_address == NULL) {
-    PUSH_INT (p, 1);
+    PUSH_PRIMITIVE (p, 1, A68_INT);
     return;
   };
   if (port_number.value == 0) {
@@ -92,36 +92,36 @@ void genie_http_content (NODE_T * p)
   } else {
     socket_address.sin_port = htons ((u_short) port_number.value);
     if (socket_address.sin_port == 0) {
-      PUSH_INT (p, (errno == 0 ? 1 : errno));
+      PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
       return;
     };
   }
   host_address = gethostbyname (get_transput_buffer (DOMAIN_BUFFER));
   if (host_address == NULL) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
   COPY (&socket_address.sin_addr, host_address->h_addr, host_address->h_length);
   protocol = getprotobyname (PROTOCOL);
   if (protocol == NULL) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
   socket_id = socket (PF_INET, SOCK_STREAM, protocol->p_proto);
   if (socket_id < 0) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
   conn = connect (socket_id, (const struct sockaddr *) &socket_address, SIZE_OF (socket_address));
   if (conn < 0) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
     return;
   };
 /* Read from host. */
   io_write_string (socket_id, get_transput_buffer (REQUEST_BUFFER));
   if (errno != 0) {
-    PUSH_INT (p, errno);
+    PUSH_PRIMITIVE (p, errno, A68_INT);
     close (socket_id);
     return;
   };
@@ -136,13 +136,13 @@ void genie_http_content (NODE_T * p)
   case 0:
     {
       errno = ETIMEDOUT;
-      PUSH_INT (p, errno);
+      PUSH_PRIMITIVE (p, errno, A68_INT);
       close (socket_id);
       return;
     }
   case -1:
     {
-      PUSH_INT (p, errno);
+      PUSH_PRIMITIVE (p, errno, A68_INT);
       close (socket_id);
       return;
     }
@@ -160,14 +160,14 @@ void genie_http_content (NODE_T * p)
     add_string_transput_buffer (p, CONTENT_BUFFER, buffer);
   }
   if (k < 0 || errno != 0) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
     return;
   };
 /* Convert string. */
   *(A68_REF *) ADDRESS (&content_string) = c_to_a_string (p, get_transput_buffer (CONTENT_BUFFER));
   close (socket_id);
-  PUSH_INT (p, errno);
+  PUSH_PRIMITIVE (p, errno, A68_INT);
 }
 
 /*!
@@ -189,15 +189,15 @@ void genie_tcp_request (NODE_T * p)
   char buffer[CONTENT_BUFFER_SIZE];
   RESET_ERRNO;
 /* Pop arguments. */
-  POP_INT (p, &port_number);
-  TEST_INIT (p, port_number, MODE (INT));
+  POP_PRIMITIVE (p, &port_number, A68_INT);
+  CHECK_INIT (p, INITIALISED (&port_number), MODE (INT));
   POP_REF (p, &path_string);
-  TEST_INIT (p, path_string, MODE (STRING));
+  CHECK_INIT (p, INITIALISED (&path_string), MODE (STRING));
   POP_REF (p, &domain_string);
-  TEST_INIT (p, domain_string, MODE (STRING));
+  CHECK_INIT (p, INITIALISED (&domain_string), MODE (STRING));
   POP_REF (p, &content_string);
-  TEST_INIT (p, content_string, MODE (REF_STRING));
-  TEST_NIL (p, content_string, MODE (REF_STRING));
+  CHECK_INIT (p, INITIALISED (&content_string), MODE (REF_STRING));
+  CHECK_NIL (p, content_string, MODE (REF_STRING));
   *(A68_REF *) ADDRESS (&content_string) = empty_string (p);
 /* Reset buffers. */
   reset_transput_buffer (DOMAIN_BUFFER);
@@ -213,7 +213,7 @@ void genie_tcp_request (NODE_T * p)
   socket_address.sin_family = AF_INET;
   service_address = getservbyname (SERVICE, PROTOCOL);
   if (service_address == NULL) {
-    PUSH_INT (p, 1);
+    PUSH_PRIMITIVE (p, 1, A68_INT);
     return;
   };
   if (port_number.value == 0) {
@@ -221,36 +221,36 @@ void genie_tcp_request (NODE_T * p)
   } else {
     socket_address.sin_port = htons ((u_short) port_number.value);
     if (socket_address.sin_port == 0) {
-      PUSH_INT (p, (errno == 0 ? 1 : errno));
+      PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
       return;
     };
   }
   host_address = gethostbyname (get_transput_buffer (DOMAIN_BUFFER));
   if (host_address == NULL) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
   COPY (&socket_address.sin_addr, host_address->h_addr, host_address->h_length);
   protocol = getprotobyname (PROTOCOL);
   if (protocol == NULL) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
   socket_id = socket (PF_INET, SOCK_STREAM, protocol->p_proto);
   if (socket_id < 0) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
   conn = connect (socket_id, (const struct sockaddr *) &socket_address, SIZE_OF (socket_address));
   if (conn < 0) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
     return;
   };
 /* Read from host. */
   io_write_string (socket_id, get_transput_buffer (REQUEST_BUFFER));
   if (errno != 0) {
-    PUSH_INT (p, errno);
+    PUSH_PRIMITIVE (p, errno, A68_INT);
     close (socket_id);
     return;
   };
@@ -265,13 +265,13 @@ void genie_tcp_request (NODE_T * p)
   case 0:
     {
       errno = ETIMEDOUT;
-      PUSH_INT (p, errno);
+      PUSH_PRIMITIVE (p, errno, A68_INT);
       close (socket_id);
       return;
     }
   case -1:
     {
-      PUSH_INT (p, errno);
+      PUSH_PRIMITIVE (p, errno, A68_INT);
       close (socket_id);
       return;
     }
@@ -289,14 +289,14 @@ void genie_tcp_request (NODE_T * p)
     add_string_transput_buffer (p, CONTENT_BUFFER, buffer);
   }
   if (k < 0 || errno != 0) {
-    PUSH_INT (p, (errno == 0 ? 1 : errno));
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
     return;
   };
 /* Convert string. */
   *(A68_REF *) ADDRESS (&content_string) = c_to_a_string (p, get_transput_buffer (CONTENT_BUFFER));
   close (socket_id);
-  PUSH_INT (p, errno);
+  PUSH_PRIMITIVE (p, errno, A68_INT);
 }
 
 #endif

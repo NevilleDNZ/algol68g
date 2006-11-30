@@ -40,7 +40,7 @@ void genie_char_in_string (NODE_T * p)
   int k, len;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pos);
-  POP_CHAR (p, &c);
+  POP_PRIMITIVE (p, &c, A68_CHAR);
   reset_transput_buffer (PATTERN_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_str);
   len = get_transput_buffer_index (PATTERN_BUFFER);
@@ -51,11 +51,11 @@ void genie_char_in_string (NODE_T * p)
       STATUS (&pos) = INITIALISED_MASK;
       VALUE (&pos) = k + 1;
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
-      PUSH_BOOL (p, A_TRUE);
+      PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
       return;
     }
   }
-  PUSH_BOOL (p, A_FALSE);
+  PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
 }
 
 /*!
@@ -72,7 +72,7 @@ void genie_last_char_in_string (NODE_T * p)
   int k, len;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pos);
-  POP_CHAR (p, &c);
+  POP_PRIMITIVE (p, &c, A68_CHAR);
   reset_transput_buffer (PATTERN_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_str);
   len = get_transput_buffer_index (PATTERN_BUFFER);
@@ -83,11 +83,11 @@ void genie_last_char_in_string (NODE_T * p)
       STATUS (&pos) = INITIALISED_MASK;
       VALUE (&pos) = k + 1;
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
-      PUSH_BOOL (p, A_TRUE);
+      PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
       return;
     }
   }
-  PUSH_BOOL (p, A_FALSE);
+  PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
 }
 
 /*!
@@ -115,9 +115,9 @@ void genie_string_in_string (NODE_T * p)
       VALUE (&pos) = 1 + (int) get_transput_buffer_index (STRING_BUFFER) - (int) strlen (q);
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
     }
-    PUSH_BOOL (p, A_TRUE);
+    PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
   } else {
-    PUSH_BOOL (p, A_FALSE);
+    PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
   }
 }
 
@@ -136,22 +136,22 @@ void push_grep_rc (NODE_T * p, int rc)
   switch (rc) {
   case 0:
     {
-      PUSH_INT (p, 0);
+      PUSH_PRIMITIVE (p, 0, A68_INT);
       return;
     }
   case REG_NOMATCH:
     {
-      PUSH_INT (p, 1);
+      PUSH_PRIMITIVE (p, 1, A68_INT);
       return;
     }
   case REG_ESPACE:
     {
-      PUSH_INT (p, 3);
+      PUSH_PRIMITIVE (p, 3, A68_INT);
       return;
     }
   default:
     {
-      PUSH_INT (p, 2);
+      PUSH_PRIMITIVE (p, 2, A68_INT);
       return;
     }
   }
@@ -189,7 +189,7 @@ void genie_grep_in_string (NODE_T * p)
   }
   matches = malloc (nmatch * SIZE_OF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
-    PUSH_INT (p, rc);
+    PUSH_PRIMITIVE (p, rc, A68_INT);
     regfree (&compiled);
     return;
   }
@@ -240,7 +240,7 @@ void genie_sub_in_string (NODE_T * p)
   POP_REF (p, &ref_rep);
   POP_REF (p, &ref_pat);
   if (IS_NIL (ref_str)) {
-    PUSH_INT (p, 3);
+    PUSH_PRIMITIVE (p, 3, A68_INT);
     return;
   }
   reset_transput_buffer (STRING_BUFFER);
@@ -260,7 +260,7 @@ void genie_sub_in_string (NODE_T * p)
   }
   matches = malloc (nmatch * SIZE_OF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
-    PUSH_INT (p, rc);
+    PUSH_PRIMITIVE (p, rc, A68_INT);
     regfree (&compiled);
     return;
   }

@@ -28,9 +28,11 @@ This distribution contains following files and directories:
 * COPYING                     License information (GNU GPL).
 * INSTALL                     How to build and install Algol68G.
 * LIMITATIONS                 Known limitations.
+* READ_ME                     This file.
 * THANKS                      Credits.
 * configure                   Shell script to generate a makefile.
 * demo                        Sample Algol 68 programs.
 * doc                         Directory with documentation.
 * foreign	              Directory with third party source code.
 * source                      Directory with source files.
+* win32                       Directory with Win32 executable.

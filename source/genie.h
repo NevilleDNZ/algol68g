@@ -26,6 +26,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 /* Macros. */
 
+#define INITIALISED(z) ((z)->status & INITIALISED_MASK)
+
 #define BITS_WIDTH ((int) (1 + ceil (log (MAX_INT) / log(2))))
 #define INT_WIDTH ((int) (1 + floor (log (MAX_INT) / log (10))))
 
@@ -34,45 +36,26 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define EXP_WIDTH ((int) (1 + log10 ((double) DBL_MAX_10_EXP)))
 
 #define HEAP_ADDRESS(n) ((BYTE_T *) & (heap_segment[n]))
-#define IS_NIL(p) ((p).offset == 0 && (p).handle == NULL)
 
 #define LHS_MODE(p) (MOID (PACK (MOID (p))))
 #define RHS_MODE(p) (MOID (NEXT (PACK (MOID (p)))))
 
 /* ADDRESS calculates the effective address of fat pointer z. */
 
-/*
 #define ADDRESS(z)\
- ((BYTE_T *) (\
-   &((z)->segment[(z)->offset + ((z)->segment == heap_segment ? (z)->handle->offset : 0)])\
-  ))
-*/
-
-#define ADDRESS(z)\
-  (((z)->segment == heap_segment) ?\
-    (BYTE_T *) (&((z)->segment[(z)->offset + (z)->handle->offset]))\
-  :\
-    (BYTE_T *) (&((z)->segment[(z)->offset]))\
-  )
+  (IS_IN_HEAP (z) ? &(heap_segment[REF_OFFSET (z) + REF_OFFSET (REF_HANDLE(z))])\
+                  : &((IS_IN_FRAME (z) ? frame_segment : stack_segment)[REF_OFFSET (z)]))
 
 #define DEREF(mode, expr) ((mode *) ADDRESS (expr))
 
 /* Check on a NIL name. */
 
-#define TEST_NIL(p, z, m)\
+#define CHECK_NIL(p, z, m)\
   if (IS_NIL (z)) {\
     genie_check_initialisation (p, (BYTE_T *) &z, m);\
     diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_ACCESSING_NIL, (m));\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }
-
-/* Initialisation check. */
-
-#define TEST_INIT(p, z, m) {\
-  if (! (z).status & INITIALISED_MASK) {\
-    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE, (m));\
-    exit_genie ((p), A_RUNTIME_ERROR);\
-  }}
 
 /* Activation records in the frame stack. */
 
@@ -81,7 +64,6 @@ typedef struct ACTIVATION_RECORD ACTIVATION_RECORD;
 struct ACTIVATION_RECORD
 {
   ADDR_T static_link, dynamic_link, dynamic_scope;
-  ADDR_T global_pointer;
   NODE_T *node;
   jmp_buf *jump_stat;
   BOOL_T proc_frame;
@@ -90,7 +72,6 @@ struct ACTIVATION_RECORD
 #define FRAME_DYNAMIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_link)
 #define FRAME_DYNAMIC_SCOPE(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_scope)
 #define FRAME_PROC_FRAME(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->proc_frame)
-#define FRAME_GLOBAL_POINTER(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->global_pointer)
 #define FRAME_INCREMENT(n) (SYMBOL_TABLE (FRAME_TREE(n))->ap_increment)
 #define FRAME_JUMP_STAT(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->jump_stat)
 #define FRAME_LEXICAL_LEVEL(n) (SYMBOL_TABLE (FRAME_TREE(n))->level)
@@ -104,64 +85,42 @@ struct ACTIVATION_RECORD
 #define FRAME_CLEAR(m) FILL ((BYTE_T *) FRAME_OFFSET (FRAME_INFO_SIZE), 0, (m))
 #define FRAME_SIZE(fp) (FRAME_INFO_SIZE + FRAME_INCREMENT (fp))
 
-/* 
-STATIC_LINK_FOR_FRAME: determine static link for stack frame.
-new_lex_lvl: lexical level of new stack frame.
-returns: static link for stack frame at 'new_lex_lvl'. 
-*/
-
-#define STATIC_LINK_FOR_FRAME(dest, new_lex_lvl) {\
-  int m_cur_lex_lvl = FRAME_LEXICAL_LEVEL (frame_pointer);\
-  if (m_cur_lex_lvl == (new_lex_lvl)) {\
-    (dest) = FRAME_STATIC_LINK (frame_pointer);\
-  } else if (m_cur_lex_lvl > (new_lex_lvl)) {\
-    ADDR_T m_static_link = frame_pointer;\
-    while (FRAME_LEXICAL_LEVEL (m_static_link) >= (new_lex_lvl)) {\
-      m_static_link = FRAME_STATIC_LINK (m_static_link);\
-    }\
-    (dest) = m_static_link;\
+#define FOLLOW_STATIC_LINK(dest, l) {\
+  if ((l) == global_level) {\
+    (dest) = global_pointer;\
   } else {\
-    (dest) = frame_pointer;\
+    ADDR_T m_sl = frame_pointer;\
+    while ((l) != FRAME_LEXICAL_LEVEL (m_sl)) {\
+      m_sl = FRAME_STATIC_LINK (m_sl);\
+    }\
+    (dest) = m_sl;\
   }}
-
-/* DESCENT: descent static link to appropriate lexical level. */
-
-#define DESCENT(dest, l) {\
-  ADDR_T m_sl = frame_pointer;\
-  while (l != FRAME_LEXICAL_LEVEL (m_sl)) {\
-    m_sl = FRAME_STATIC_LINK (m_sl);\
-  }\
-  (dest) = m_sl;\
-  }
-
-#define FRAME_GET_GLOBAL(dest, cast, p) {\
-  ADDR_T m_z = FRAME_GLOBAL_POINTER (frame_pointer);\
-  (dest) = (cast *) & ((p)->genie.offset[m_z]);\
-  }
 
 #define FRAME_GET(dest, cast, p) {\
   ADDR_T m_z;\
-  DESCENT (m_z, (p)->genie.level);\
+  FOLLOW_STATIC_LINK (m_z, (p)->genie.level);\
   (dest) = (cast *) & ((p)->genie.offset[m_z]);\
   }
 
 /* Macros for row-handling. */
 
 #define GET_DESCRIPTOR(a, t, p)\
-  /* ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL); */\
   a = (A68_ARRAY *) ADDRESS (p);\
   t = (A68_TUPLE *) & (((BYTE_T *) (a)) [SIZE_OF (A68_ARRAY)]);
 
-#define PUT_DESCRIPTOR(a, t1, p)\
-  ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL);\
-  *(A68_ARRAY *) ADDRESS (p) = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (ADDRESS(p))) [SIZE_OF (A68_ARRAY)]) = (t1);
+#define PUT_DESCRIPTOR(a, t1, p) {\
+  BYTE_T *a_p = ADDRESS (p);\
+  *(A68_ARRAY *) a_p = (a);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_OF (A68_ARRAY)]) = (t1);\
+  }
 
-#define PUT_DESCRIPTOR2(a, t1, t2, p)\
-  ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL);\
-  *(A68_ARRAY *) ADDRESS (p) = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (ADDRESS(p))) [SIZE_OF (A68_ARRAY)]) = (t1);\
-  *(A68_TUPLE *) &(((BYTE_T *) (ADDRESS(p))) [SIZE_OF (A68_ARRAY) + SIZE_OF (A68_TUPLE)]) = (t2);
+#define PUT_DESCRIPTOR2(a, t1, t2, p) {\
+  /* ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL); */\
+  BYTE_T *a_p = ADDRESS (p);\
+  *(A68_ARRAY *) a_p = (a);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_OF (A68_ARRAY)]) = (t1);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_OF (A68_ARRAY) + SIZE_OF (A68_TUPLE)]) = (t2);\
+  }
 
 #define ROW_SIZE(t) (((t)->upper_bound >= (t)->lower_bound) ? ((t)->upper_bound - (t)->lower_bound + 1) : 0)
 
@@ -187,11 +146,20 @@ extern unsigned check_time_limit_count;
     where (STDOUT_FILENO, (NODE_T *) p);\
   }}
 
-#define EXECUTE_UNIT(p) (last_unit = p, (p)->genie.propagator.unit ((p)->genie.propagator.source))
+#define EXECUTE_UNIT_2(p, dest) {\
+  PROPAGATOR_T *prop = &((p)->genie.propagator);\
+  last_unit = p;\
+  dest = prop->unit (prop->source);\
+  }
 
-/* #define EXECUTE_UNIT_TRACE(p) genie_unit_trace (p); */
+#define EXECUTE_UNIT(p) {\
+  PROPAGATOR_T *prop = &((p)->genie.propagator);\
+  last_unit = p;\
+  prop->unit (prop->source);\
+  }
 
 #define EXECUTE_UNIT_TRACE(p) {\
+  PROPAGATOR_T *prop = &((p)->genie.propagator);\
   if (sys_request_flag) {\
     single_step ((p), A_TRUE, A_FALSE);\
   } else if (MASK (p) & BREAKPOINT_MASK) {\
@@ -205,176 +173,20 @@ extern unsigned check_time_limit_count;
   } else if (MASK (p) & TRACE_MASK) {\
     where (STDOUT_FILENO, (p));\
   }\
-  EXECUTE_UNIT (p);\
+  last_unit = p;\
+  prop->unit (prop->source);\
   }
-
-/* Stack manipulation. */
-
-#define STACK_ADDRESS(n) ((BYTE_T *) &(stack_segment[(n)]))
-#define STACK_OFFSET(n) (STACK_ADDRESS (stack_pointer + (n)))
-#define STACK_TOP (STACK_ADDRESS (stack_pointer))
-
-#define INCREMENT_STACK_POINTER(err, i) {stack_pointer += ALIGN (i); (void) (err);}
-
-#define DECREMENT_STACK_POINTER(err, i) {\
-  stack_pointer -= ALIGN (i);\
-  (void) (err);\
-}
-
-#define PUSH(p, addr, size) {\
-  BYTE_T *sp = STACK_TOP;\
-  INCREMENT_STACK_POINTER ((p), (size));\
-  COPY (sp, (BYTE_T *) (addr), (unsigned) (size));\
-}
-
-#define POP(p, addr, size) {\
-  DECREMENT_STACK_POINTER((p), (size));\
-  COPY ((BYTE_T *) (addr), STACK_TOP, (unsigned) (size));\
-}
-
-#define POP_ADDRESS(p, addr, type) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (type));\
-  (addr) = (type *) STACK_TOP;\
-}
-
-#define PUSH_INT(p, k) {\
-  A68_INT *_z_ = (A68_INT *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  _z_->value = (k);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_INT));\
-}
-
-#define POP_INT(p, k) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_INT));\
-  (*(k)) = *((A68_INT *) STACK_TOP);\
-}
-
-#define PUSH_REAL(p, x) {\
-  A68_REAL *_z_ = (A68_REAL *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  _z_->value = (x);\
-  INCREMENT_STACK_POINTER((p), MOID_SIZE (MODE (REAL)));\
-}
-
-#define POP_REAL(p, x) {\
-  DECREMENT_STACK_POINTER((p), MOID_SIZE (MODE (REAL)));\
-  (*(x)) = *((A68_REAL *) STACK_TOP);\
-}
-
-#define PUSH_BOOL(p, k) {\
-  A68_BOOL *_z_ = (A68_BOOL *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  _z_->value = (k);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_BOOL));\
-}
-
-#define POP_BOOL(p, k) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_BOOL));\
-  (*(k)) = *((A68_BOOL *) STACK_TOP);\
-}
-
-#define PUSH_CHAR(p, k) {\
-  A68_CHAR *_z_ = (A68_CHAR *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  _z_->value = (k);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_CHAR));\
-}
-
-#define POP_CHAR(p, k) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_CHAR));\
-  (*(k)) = *((A68_CHAR *) STACK_TOP);\
-}
-
-#define PUSH_BITS(p, k) {\
-  A68_BITS *_z_ = (A68_BITS *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  _z_->value = (k);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_BITS));\
-}
-
-#define POP_BITS(p, k) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_BITS));\
-  (*(k)) = *((A68_BITS *) STACK_TOP);\
-}
-
-#define PUSH_BYTES(p, k) {\
-  A68_BYTES *_z_ = (A68_BYTES *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  strncpy (_z_->value, k, BYTES_WIDTH);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_BYTES));\
-}
-
-#define POP_BYTES(p, k) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_BYTES));\
-  (*(k)) = *((A68_BYTES *) STACK_TOP);\
-}
-
-#define PUSH_LONG_BYTES(p, k) {\
-  A68_LONG_BYTES *_z_ = (A68_LONG_BYTES *) STACK_TOP;\
-  _z_->status = INITIALISED_MASK;\
-  strncpy (_z_->value, k, LONG_BYTES_WIDTH);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_LONG_BYTES));\
-}
-
-#define POP_LONG_BYTES(p, k) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_LONG_BYTES));\
-  (*(k)) = *((A68_LONG_BYTES *) STACK_TOP);\
-}
-
-#define PUSH_COMPLEX(p, re, im) {\
-  PUSH_REAL (p, re);\
-  PUSH_REAL (p, im);\
-}
-
-#define POP_COMPLEX(p, re, im) {\
-  POP_REAL (p, im);\
-  POP_REAL (p, re);\
-}
-
-#define PUSH_REF(p, z) {\
-  * (A68_REF *) STACK_TOP = (z);\
-  INCREMENT_STACK_POINTER (p, SIZE_OF (A68_REF));\
-}
-
-#define PUSH_ROW PUSH_REF
-
-#define PUSH_REF_FILE(p, z) PUSH_REF (p, z)
-
-#define PUSH_CHANNEL(p, z) {\
-  * (A68_CHANNEL *) STACK_TOP = (z);\
-  INCREMENT_STACK_POINTER (p, SIZE_OF (A68_CHANNEL));\
-}
-
-#define PUSH_POINTER(p, z) {\
-  A68_POINTER *_w_ = (A68_POINTER *) STACK_TOP;\
-  _w_->status = INITIALISED_MASK;\
-  _w_->value = z;\
-  INCREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));\
-}
-
-#define POP_REF(p, z) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_REF));\
-  (*(z)) = *((A68_REF *) STACK_TOP);\
-}
-
-#define POP_ROW POP_REF
-
-#define POP_OPERAND_ADDRESS(p, i, type) {\
-  (void) (p);\
-  (i) = (type *) (STACK_OFFSET (-SIZE_OF (type)));\
-}
-
-#define POP_OPERAND_ADDRESSES(p, i, j, type) {\
-  DECREMENT_STACK_POINTER ((p), SIZE_OF (type));\
-  (j) = (type *) STACK_TOP;\
-  (i) = (type *) (STACK_OFFSET (-SIZE_OF (type)));\
-}
 
 /* Macro's for the garbage collector. */
 
 /* Store intermediate REF to save it from the GC. */
 
-#define PROTECT_FROM_SWEEP(p)\
+#define PROTECT_FROM_SWEEP(p, z)\
+  if ((p)->protect_sweep != NULL) {\
+    *(A68_REF *) FRAME_LOCAL (frame_pointer, (p)->protect_sweep->offset) = *(A68_REF *) (z);\
+  }
+
+#define PROTECT_FROM_SWEEP_STACK(p)\
   if ((p)->protect_sweep != NULL) {\
     *(A68_REF *) FRAME_LOCAL (frame_pointer, (p)->protect_sweep->offset) =\
     *(A68_REF *) (STACK_OFFSET (- SIZE_OF (A68_REF)));\
@@ -383,7 +195,7 @@ extern unsigned check_time_limit_count;
 #define PREEMPTIVE_SWEEP {\
   double f = (double) heap_pointer / (double) heap_size;\
   double h = (double) free_handle_count / (double) max_handle_count;\
-  if (f > 0.5 || h < 0.1) {\
+  if (f > 0.8 || h < 0.2) {\
     sweep_heap ((NODE_T *) p, frame_pointer);\
   }}
 
@@ -392,22 +204,44 @@ extern int block_heap_compacter;
 #define UP_SWEEP_SEMA {block_heap_compacter++;}
 #define DOWN_SWEEP_SEMA {block_heap_compacter--;}
 
-#define PROTECT_SWEEP_HANDLE(z) {((z)->handle)->status |= NO_SWEEP_MASK;}
-#define UNPROTECT_SWEEP_HANDLE(z) {((z)->handle)->status &= ~NO_SWEEP_MASK;}
+#define PROTECT_SWEEP_HANDLE(z) { if (IS_IN_HEAP (z)) {(REF_HANDLE(z))->status |= NO_SWEEP_MASK;} }
+#define UNPROTECT_SWEEP_HANDLE(z) { if (IS_IN_HEAP (z)) {(REF_HANDLE (z))->status &= ~NO_SWEEP_MASK;} }
 
-/* Macros for checking representation of values. */
+/* Tests for objects of mode INT. */
 
+#if defined HAVE_IEEE_754
+#if INT_MAX == 2147483647
+#define TEST_INT_ADDITION(p, i, j) {\
+  double _sum_ = (double) (i) + (double) (j);\
+  if (ABS (_sum_) > INT_MAX) {\
+    errno = ERANGE;\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
+    exit_genie (p, A_RUNTIME_ERROR);\
+  }}
+#else
 #define TEST_INT_ADDITION(p, i, j)\
   if (((i ^ j) & MIN_INT) == 0 && ABS (i) > INT_MAX - ABS (j)) {\
     errno = ERANGE;\
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
     exit_genie (p, A_RUNTIME_ERROR);\
     }
+#endif
+#define TEST_INT_MULTIPLICATION(p, i, j) {\
+  double _prod_ = (double ) (i) * (double) (j);\
+  if (ABS (_prod_) > MAX_INT) {\
+    errno = ERANGE;\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
+    exit_genie (p, A_RUNTIME_ERROR);\
+  }}
+#else
+#define TEST_INT_ADDITION(p, i, j) {;}
+#define TEST_TIMES_OVERFLOW_INT(p, i, j) {;}
+#endif
+
+/* Tests for objects of mode REAL. */
 
 #if defined HAVE_IEEE_754
-
-#define NOT_A_REAL(x) (!finite (x) || isnan(x))
-
+#define NOT_A_REAL(x) (!finite (x))
 #define TEST_REAL_REPRESENTATION(p, u)\
   if (NOT_A_REAL (u)) {\
     errno = ERANGE;\
@@ -428,15 +262,6 @@ extern int block_heap_compacter;
 #else
 #define TEST_COMPLEX_REPRESENTATION(p, u, v) {;}
 #endif
-
-/* Now we assume that double can exactly represent MAX_INT: */
-
-#define TEST_TIMES_OVERFLOW_INT(p, u, v)\
-  if ((double) ABS (u) * (double) ABS (v) > (double) MAX_INT) {\
-    errno = ERANGE;\
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
-    exit_genie (p, A_RUNTIME_ERROR);\
-    }\
 
 #if defined HAVE_IEEE_754
 #define TEST_TIMES_OVERFLOW_REAL(p, u, v) {;}
@@ -494,10 +319,30 @@ still is sufficient overhead to make it to the next check.
 
 /* Opening of stack frames is in-line. */
 
+/* 
+STATIC_LINK_FOR_FRAME: determine static link for stack frame.
+new_lex_lvl: lexical level of new stack frame.
+returns: static link for stack frame at 'new_lex_lvl'. 
+*/
+
+#define STATIC_LINK_FOR_FRAME(dest, new_lex_lvl) {\
+  int m_cur_lex_lvl = FRAME_LEXICAL_LEVEL (frame_pointer);\
+  if (m_cur_lex_lvl == (new_lex_lvl)) {\
+    (dest) = FRAME_STATIC_LINK (frame_pointer);\
+  } else if (m_cur_lex_lvl > (new_lex_lvl)) {\
+    ADDR_T m_static_link = frame_pointer;\
+    while (FRAME_LEXICAL_LEVEL (m_static_link) >= (new_lex_lvl)) {\
+      m_static_link = FRAME_STATIC_LINK (m_static_link);\
+    }\
+    (dest) = m_static_link;\
+  } else {\
+    (dest) = frame_pointer;\
+  }}
+
 #define OPEN_STATIC_FRAME(p) {\
   ADDR_T dynamic_link = frame_pointer, static_link;\
   ACTIVATION_RECORD *act;\
-  LOW_STACK_ALERT (p);\
+  /* LOW_STACK_ALERT (p); */\
   STATIC_LINK_FOR_FRAME (static_link, LEX_LEVEL (p));\
   frame_pointer += FRAME_SIZE (dynamic_link);\
   act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
@@ -507,10 +352,6 @@ still is sufficient overhead to make it to the next check.
   act->node = p;\
   act->jump_stat = NULL;\
   act->proc_frame = A_FALSE;\
-  if (global_pointer == 0 && LEX_LEVEL (p) == global_level) {\
-    global_pointer = frame_pointer;\
-  }\
-  act->global_pointer = global_pointer;\
   FRAME_CLEAR (SYMBOL_TABLE (p)->ap_increment);\
   if (SYMBOL_TABLE (p)->initialise_frame) {\
     initialise_frame (p);\
@@ -533,10 +374,6 @@ still is sufficient overhead to make it to the next check.
   act->node = p;\
   act->jump_stat = NULL;\
   act->proc_frame = A_TRUE;\
-  if (global_pointer == 0 && LEX_LEVEL (p) == global_level) {\
-    global_pointer = frame_pointer;\
-  }\
-  act->global_pointer = global_pointer;\
   FRAME_CLEAR (SYMBOL_TABLE (p)->ap_increment);\
   if (SYMBOL_TABLE (p)->initialise_frame) {\
     initialise_frame (p);\
@@ -554,68 +391,175 @@ still is sufficient overhead to make it to the next check.
     exit_genie ((p), A_RUNTIME_ERROR);\
   }
 
-#define GENIE_CHECK_INITIALISATION(p, w, q) {\
+#define CHECK_INIT_GENERIC(p, w, q) {\
   switch ((q)->short_id) {\
   case MODE_INT: {\
-      A68_INT *_z_ = (A68_INT *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_INT *) (w)), (q));\
       break;\
     }\
   case MODE_REAL: {\
-      A68_REAL *_z_ = (A68_REAL *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_REAL *) (w)), (q));\
       break;\
     }\
   case MODE_BOOL: {\
-      A68_BOOL *_z_ = (A68_BOOL *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_BOOL *) (w)), (q));\
       break;\
     }\
   case MODE_CHAR: {\
-      A68_CHAR *_z_ = (A68_CHAR *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_CHAR *) (w)), (q));\
       break;\
     }\
   case MODE_BITS: {\
-      A68_BITS *_z_ = (A68_BITS *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_BITS *) (w)), (q));\
       break;\
     }\
   case MODE_COMPLEX: {\
       A68_REAL *_r_ = (A68_REAL *) (w);\
-      A68_REAL *_i_ = (A68_REAL *) ((w) + SIZE_OF (A68_REAL));\
-      CHECK_INIT ((p), _r_->status & INITIALISED_MASK, (q));\
-      CHECK_INIT ((p), _i_->status & INITIALISED_MASK, (q));\
+      A68_REAL *_i_ = &(_r_[1]);\
+      CHECK_INIT ((p), INITIALISED (_r_), (q));\
+      CHECK_INIT ((p), INITIALISED (_i_), (q));\
       break;\
     }\
+  case ROW_SYMBOL:\
   case REF_SYMBOL: {\
-      A68_REF *_z_ = (A68_REF *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_REF *) (w)), (q));\
       break;\
     }\
   case PROC_SYMBOL: {\
-      A68_PROCEDURE *_z_ = (A68_PROCEDURE *) (w);\
-      CHECK_INIT ((p), _z_->status & INITIALISED_MASK, (q));\
+      CHECK_INIT ((p), INITIALISED ((A68_PROCEDURE *) (w)), (q));\
       break;\
     }\
   default: {\
-      genie_check_initialisation ((p), (w), (q));\
+      genie_check_initialisation ((p), (BYTE_T *) (w), (q));\
       break;\
     }\
   }\
 }
 
+/* Stack manipulation. */
+
+#define STACK_ADDRESS(n) ((BYTE_T *) &(stack_segment[(n)]))
+#define STACK_OFFSET(n) (STACK_ADDRESS (stack_pointer + (n)))
+#define STACK_TOP (STACK_ADDRESS (stack_pointer))
+
+#define INCREMENT_STACK_POINTER(err, i) {stack_pointer += ALIGN (i); (void) (err);}
+
+#define DECREMENT_STACK_POINTER(err, i) {\
+  stack_pointer -= ALIGN (i);\
+  (void) (err);\
+  }
+
+#define PUSH(p, addr, size) {\
+  BYTE_T *sp = STACK_TOP;\
+  INCREMENT_STACK_POINTER ((p), (size));\
+  COPY (sp, (BYTE_T *) (addr), (unsigned) (size));\
+  }
+
+#define POP(p, addr, size) {\
+  DECREMENT_STACK_POINTER((p), (size));\
+  COPY ((BYTE_T *) (addr), STACK_TOP, (unsigned) (size));\
+  }
+
+#define POP_ADDRESS(p, addr, type) {\
+  DECREMENT_STACK_POINTER((p), SIZE_OF (type));\
+  (addr) = (type *) STACK_TOP;\
+  }
+
+#define PUSH_PRIMITIVE(p, z, mode) {\
+  mode *_x_ = (mode *) STACK_TOP;\
+  _x_->status = INITIALISED_MASK;\
+  _x_->value = (z);\
+  INCREMENT_STACK_POINTER((p), SIZE_OF (mode));\
+  }
+
+#define POP_PRIMITIVE(p, z, mode) {\
+  DECREMENT_STACK_POINTER((p), SIZE_OF (mode));\
+  (*(z)) = *((mode *) STACK_TOP);\
+  }
+
+#define PUSH_COMPLEX(p, re, im) {\
+  PUSH_PRIMITIVE (p, re, A68_REAL);\
+  PUSH_PRIMITIVE (p, im, A68_REAL);\
+  }
+
+#define POP_COMPLEX(p, re, im) {\
+  POP_PRIMITIVE (p, im, A68_REAL);\
+  POP_PRIMITIVE (p, re, A68_REAL);\
+  }
+
+#define PUSH_BYTES(p, k) {\
+  A68_BYTES *_z_ = (A68_BYTES *) STACK_TOP;\
+  _z_->status = INITIALISED_MASK;\
+  strncpy (_z_->value, k, BYTES_WIDTH);\
+  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_BYTES));\
+  }
+
+#define POP_BYTES(p, k) {\
+  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_BYTES));\
+  (*(k)) = *((A68_BYTES *) STACK_TOP);\
+  }
+
+#define PUSH_LONG_BYTES(p, k) {\
+  A68_LONG_BYTES *_z_ = (A68_LONG_BYTES *) STACK_TOP;\
+  _z_->status = INITIALISED_MASK;\
+  strncpy (_z_->value, k, LONG_BYTES_WIDTH);\
+  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_LONG_BYTES));\
+  }
+
+#define POP_LONG_BYTES(p, k) {\
+  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_LONG_BYTES));\
+  (*(k)) = *((A68_LONG_BYTES *) STACK_TOP);\
+  }
+
+#define PUSH_REF(p, z) {\
+  * (A68_REF *) STACK_TOP = (z);\
+  INCREMENT_STACK_POINTER (p, SIZE_OF (A68_REF));\
+  }
+
+#define PUSH_ROW PUSH_REF
+
+#define PUSH_REF_FILE PUSH_REF
+
+#define POP_REF(p, z) {\
+  DECREMENT_STACK_POINTER((p), SIZE_OF (A68_REF));\
+  (*(z)) = *((A68_REF *) STACK_TOP);\
+  }
+
+#define POP_ROW POP_REF
+
+#define PUSH_CHANNEL(p, z) {\
+  * (A68_CHANNEL *) STACK_TOP = (z);\
+  INCREMENT_STACK_POINTER (p, SIZE_OF (A68_CHANNEL));\
+  }
+
+#define PUSH_UNION(p, z) {\
+  A68_UNION *_w_ = (A68_UNION *) STACK_TOP;\
+  _w_->status = INITIALISED_MASK;\
+  _w_->value = z;\
+  INCREMENT_STACK_POINTER (p, SIZE_OF (A68_UNION));\
+  }
+
+#define POP_OPERAND_ADDRESS(p, i, type) {\
+  (void) (p);\
+  (i) = (type *) (STACK_OFFSET (-SIZE_OF (type)));\
+  }
+
+#define POP_OPERAND_ADDRESSES(p, i, j, type) {\
+  DECREMENT_STACK_POINTER ((p), SIZE_OF (type));\
+  (j) = (type *) STACK_TOP;\
+  (i) = (type *) (STACK_OFFSET (-SIZE_OF (type)));\
+  }
+
 /* Macro's for standard environ. */
 
-#define A68_ENV_INT(n, k) void n (NODE_T *p) {PUSH_INT (p, (k));}
-#define A68_ENV_REAL(n, z) void n (NODE_T *p) {PUSH_REAL (p, (z));}
+#define A68_ENV_INT(n, k) void n (NODE_T *p) {PUSH_PRIMITIVE (p, (k), A68_INT);}
+#define A68_ENV_REAL(n, z) void n (NODE_T *p) {PUSH_PRIMITIVE (p, (z), A68_REAL);}
 
 /* External symbols. */
 
 extern ADDR_T frame_pointer, stack_pointer, heap_pointer, handle_pointer, global_pointer;
 extern A68_FORMAT nil_format;
 extern A68_HANDLE nil_handle, *free_handles, *busy_handles;
-extern A68_POINTER nil_pointer;
 extern A68_REF nil_ref;
 extern A68_REF stand_in, stand_out;
 extern BOOL_T in_monitor;
