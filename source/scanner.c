@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -60,7 +60,7 @@ static void append_source_line (MODULE_T *, char *, SOURCE_LINE_T **, int *, cha
 
 static char *scan_buf;
 static int max_scan_buf_length, source_file_size;
-static BOOL_T stop_scanner = A_FALSE, read_error = A_FALSE, no_preprocessing = A_FALSE;
+static BOOL_T stop_scanner = A68_FALSE, read_error = A68_FALSE, no_preprocessing = A68_FALSE;
 
 /*!
 \brief save scanner state, for character look-ahead
@@ -149,7 +149,7 @@ static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
     if (u[0] == '\'') {
       return (strncmp (++u, v, len) == 0 && u[len] == '\'');
     } else {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   } else {
     return (strncmp (u, v, len) == 0 && !IS_UPPER (u[len]));
@@ -172,7 +172,7 @@ static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
       if (v[0] == QUOTE_CHAR && v[1] != QUOTE_CHAR) {
         *top = u;
         *ch = &v[1];
-        return (A_TRUE);
+        return (A68_TRUE);
       } else if (v[0] == QUOTE_CHAR && v[1] == QUOTE_CHAR) {
         v += 2;
       } else {
@@ -186,7 +186,7 @@ static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
       v = NULL;
     }
   }
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 /*!
@@ -206,15 +206,15 @@ static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
       if (whether_bold (u, v, "COMMENT") && delim == BOLD_COMMENT_SYMBOL) {
         *top = u;
         *ch = &v[1];
-        return (A_TRUE);
+        return (A68_TRUE);
       } else if (whether_bold (u, v, "CO") && delim == STYLE_I_COMMENT_SYMBOL) {
         *top = u;
         *ch = &v[1];
-        return (A_TRUE);
+        return (A68_TRUE);
       } else if (v[0] == '#' && delim == STYLE_II_COMMENT_SYMBOL) {
         *top = u;
         *ch = &v[1];
-        return (A_TRUE);
+        return (A68_TRUE);
       } else {
         v++;
       }
@@ -226,7 +226,7 @@ static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
       v = NULL;
     }
   }
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 /*!
@@ -246,11 +246,11 @@ static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T w
       if (whether_bold (u, v, "PRAGMAT") && delim == BOLD_PRAGMAT_SYMBOL) {
         *top = u;
         *ch = &v[1];
-        return (A_TRUE);
+        return (A68_TRUE);
       } else if (whether_bold (u, v, "PR") && delim == STYLE_I_PRAGMAT_SYMBOL) {
         *top = u;
         *ch = &v[1];
-        return (A_TRUE);
+        return (A68_TRUE);
       } else {
         if (whitespace && !IS_SPACE (v[0]) && v[0] != NEWLINE_CHAR) {
           scan_error (u, v, ERROR_PRAGMENT);
@@ -271,7 +271,7 @@ static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T w
       v = NULL;
     }
   }
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 /*!
@@ -366,17 +366,17 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
         SCAN_ERROR (item == NULL, start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 /* Item "preprocessor" restarts preprocessing if it is off. */
         if (no_preprocessing && streq (item, "PREPROCESSOR") == 0) {
-          no_preprocessing = A_FALSE;
-          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
+          no_preprocessing = A68_FALSE;
+          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A68_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
         }
 /* If preprocessing is switched off, we idle to closing bracket. */
         else if (no_preprocessing) {
-          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_FALSE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
+          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A68_FALSE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
         }
 /* Item "nopreprocessor" stops preprocessing if it is on. */
         if (streq (item, "NOPREPROCESSOR") == 0) {
-          no_preprocessing = A_TRUE;
-          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
+          no_preprocessing = A68_TRUE;
+          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A68_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
         }
 /* Item "INCLUDE" includes a file. */
         else if (streq (item, "INCLUDE") == 0) {
@@ -392,7 +392,7 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
         }
 /* Unrecognised item - probably options handled later by the tokeniser. */
         else {
-          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_FALSE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
+          SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A68_FALSE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
         }
       } else if (IS_UPPER (v[0])) {
 /* Skip a bold word as you may trigger on REPR, for instance ... */
@@ -433,11 +433,11 @@ The file gets inserted before the line containing the pragmat. In this way
 correct line numbers are preserved which helps diagnostics. A file that has
 been included will not be included a second time - it will be ignored. 
 */
-  BOOL_T make_pass = A_TRUE;
+  BOOL_T make_pass = A68_TRUE;
   while (make_pass) {
     SOURCE_LINE_T *s, *t, *u = top;
     char *v = &(u->string[0]);
-    make_pass = A_FALSE;
+    make_pass = A68_FALSE;
     RESET_ERRNO;
     while (u != NULL) {
       int pr_lim;
@@ -479,13 +479,13 @@ been included will not be included a second time - it will be ignored.
             fnb[n++] = *(v++);
             fnb[n] = NULL_CHAR;
           } else {
-            SCAN_ERROR (A_TRUE, start_l, start_c, ERROR_INCORRECT_FILENAME);
+            SCAN_ERROR (A68_TRUE, start_l, start_c, ERROR_INCORRECT_FILENAME);
           }
         }
         while (v[0] != delim);
 /* Insist that the pragmat is closed properly. */
         v = &v[1];
-        SCAN_ERROR (!skip_pragmat (&u, &v, pr_lim, A_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
+        SCAN_ERROR (!skip_pragmat (&u, &v, pr_lim, A68_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 /* Filename valid? */
         SCAN_ERROR (n == 0, start_l, start_c, ERROR_INCORRECT_FILENAME);
         fnwid = strlen (u->module->files.path) + strlen (fnb) + 1;
@@ -543,7 +543,7 @@ been included will not be included a second time - it will be ignored.
         PREVIOUS (s) = t;
         concatenate_lines (top);
         close (fd);
-        make_pass = A_TRUE;
+        make_pass = A68_TRUE;
       }
     search_next_pragmat:       /* skip. */ ;
     }
@@ -574,7 +574,7 @@ static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** r
   z->filename = filename;
   z->number = (*line_num)++;
   z->print_status = NOT_PRINTED;
-  z->list = A_TRUE;
+  z->list = A68_TRUE;
   z->diagnostics = NULL;
   z->top_node = NULL;
   z->module = module;
@@ -685,7 +685,7 @@ static BOOL_T read_source_file (MODULE_T * module)
   concatenate_lines (module->top_line);
 /* Include files. */
   include_files (module->top_line);
-  return (A_TRUE);
+  return (A68_TRUE);
 }
 
 /*!
@@ -701,14 +701,14 @@ static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s, 
 {
   char ch;
 #if defined NO_TYPO
-  allow_typo = A_FALSE;
+  allow_typo = A68_FALSE;
 #endif
   LOW_STACK_ALERT (NULL);
 /* Source empty? */
   if (*ref_l == NULL) {
     return (STOP_CHAR);
   } else {
-    (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A_TRUE : A_FALSE);
+    (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A68_TRUE : A68_FALSE);
 /* Take new line? */
     if ((*ref_s)[0] == NEWLINE_CHAR || (*ref_s)[0] == NULL_CHAR) {
       *ref_l = NEXT (*ref_l);
@@ -740,9 +740,9 @@ static void get_good_char (MODULE_T * module, char *ref_c, SOURCE_LINE_T ** ref_
 {
   while (*ref_c != STOP_CHAR && (IS_SPACE (*ref_c) || (*ref_c == NULL_CHAR))) {
     if (*ref_l != NULL) {
-      (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A_TRUE : A_FALSE);
+      (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A68_TRUE : A68_FALSE);
     }
-    *ref_c = next_char (module, ref_l, ref_s, A_FALSE);
+    *ref_c = next_char (module, ref_l, ref_s, A68_FALSE);
   }
 }
 
@@ -793,30 +793,30 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
 /* Scan for terminator, and process pragmat items. */
   INIT_BUFFER;
   get_good_char (module, &c, ref_l, ref_c);
-  stop = A_FALSE;
-  while (stop == A_FALSE) {
+  stop = A68_FALSE;
+  while (stop == A68_FALSE) {
     SCAN_ERROR (c == STOP_CHAR, start_l, start_c, ERROR_UNTERMINATED_PRAGMENT);
 /* A ".." or '..' delimited string in a PRAGMAT. */
     if ((c == QUOTE_CHAR || (c == '\'' && module->options.stropping == UPPER_STROPPING)) && (type == STYLE_I_PRAGMAT_SYMBOL || type == BOLD_PRAGMAT_SYMBOL)) {
       char delim = c;
-      BOOL_T eos = A_FALSE;
+      BOOL_T eos = A68_FALSE;
       ADD_ONE_CHAR (c);
-      c = next_char (module, ref_l, ref_c, A_FALSE);
+      c = next_char (module, ref_l, ref_c, A68_FALSE);
       while (!eos) {
         SCAN_ERROR (EOL (c), start_l, start_c, ERROR_LONG_STRING);
         if (c == delim) {
           ADD_ONE_CHAR (delim);
-          c = next_char (module, ref_l, ref_c, A_FALSE);
+          c = next_char (module, ref_l, ref_c, A68_FALSE);
           save_state (module, *ref_l, *ref_c, c);
           if (c == delim) {
-            c = next_char (module, ref_l, ref_c, A_FALSE);
+            c = next_char (module, ref_l, ref_c, A68_FALSE);
           } else {
             restore_state (module, ref_l, ref_c, &c);
-            eos = A_TRUE;
+            eos = A68_TRUE;
           }
         } else if (IS_PRINT (c)) {
           ADD_ONE_CHAR (c);
-          c = next_char (module, ref_l, ref_c, A_FALSE);
+          c = next_char (module, ref_l, ref_c, A68_FALSE);
         } else {
           unworthy (start_l, start_c, c);
         }
@@ -835,10 +835,10 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
 /* Check whether we encountered the terminator. */
       stop = (strcmp (term_s, &(scan_buf[chars_in_buf - term_s_length])) == 0);
     }
-    c = next_char (module, ref_l, ref_c, A_FALSE);
+    c = next_char (module, ref_l, ref_c, A68_FALSE);
   }
   scan_buf[chars_in_buf - term_s_length] = NULL_CHAR;
-  return (A_TRUE);
+  return (A68_TRUE);
 #undef ADD_ONE_CHAR
 #undef INIT_BUFFER
 }
@@ -985,15 +985,15 @@ static int get_format_item (char ch)
 #define SCAN_DIGITS(c)\
   while (IS_DIGIT (c)) {\
     (sym++)[0] = (c);\
-    (c) = next_char (module, ref_l, ref_s, A_TRUE);\
+    (c) = next_char (module, ref_l, ref_s, A68_TRUE);\
   }
 
 #define SCAN_EXPONENT_PART(c)\
   (sym++)[0] = EXPONENT_CHAR;\
-  (c) = next_char (module, ref_l, ref_s, A_TRUE);\
+  (c) = next_char (module, ref_l, ref_s, A68_TRUE);\
   if ((c) == '+' || (c) == '-') {\
     (sym++)[0] = (c);\
-    (c) = next_char (module, ref_l, ref_s, A_TRUE);\
+    (c) = next_char (module, ref_l, ref_s, A68_TRUE);\
   }\
   SCAN_ERROR (!IS_DIGIT (c), *start_l, *start_c, ERROR_EXPONENT_DIGIT);\
   SCAN_DIGITS (c)
@@ -1005,7 +1005,7 @@ static int get_format_item (char ch)
 
 static BOOL_T whether_exp_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref_s, char *ch)
 {
-  BOOL_T res = A_FALSE;
+  BOOL_T res = A68_FALSE;
   char exp_syms[3];
   if (m->options.stropping == UPPER_STROPPING) {
     exp_syms[0] = EXPONENT_CHAR;
@@ -1018,7 +1018,7 @@ static BOOL_T whether_exp_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref
   }
   save_state (m, *ref_l, *ref_s, *ch);
   if (strchr (exp_syms, *ch) != NULL) {
-    *ch = next_char (m, ref_l, ref_s, A_TRUE);
+    *ch = next_char (m, ref_l, ref_s, A68_TRUE);
     res = (strchr ("+-0123456789", *ch) != NULL);
   }
   restore_state (m, ref_l, ref_s, ch);
@@ -1032,16 +1032,16 @@ static BOOL_T whether_exp_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref
 
 static BOOL_T whether_radix_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref_s, char *ch)
 {
-  BOOL_T res = A_FALSE;
+  BOOL_T res = A68_FALSE;
   save_state (m, *ref_l, *ref_s, *ch);
   if (m->options.stropping == QUOTE_STROPPING) {
     if (*ch == TO_UPPER (RADIX_CHAR)) {
-      *ch = next_char (m, ref_l, ref_s, A_TRUE);
+      *ch = next_char (m, ref_l, ref_s, A68_TRUE);
       res = (strchr ("0123456789ABCDEF", *ch) != NULL);
     }
   } else {
     if (*ch == RADIX_CHAR) {
-      *ch = next_char (m, ref_l, ref_s, A_TRUE);
+      *ch = next_char (m, ref_l, ref_s, A68_TRUE);
       res = (strchr ("0123456789abcdef", *ch) != NULL);
     }
   }
@@ -1056,7 +1056,7 @@ static BOOL_T whether_radix_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **r
 
 static BOOL_T whether_decimal_point (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref_s, char *ch)
 {
-  BOOL_T res = A_FALSE;
+  BOOL_T res = A68_FALSE;
   save_state (m, *ref_l, *ref_s, *ch);
   if (*ch == POINT_CHAR) {
     char exp_syms[3];
@@ -1069,9 +1069,9 @@ static BOOL_T whether_decimal_point (MODULE_T * m, SOURCE_LINE_T ** ref_l, char 
       exp_syms[1] = ESCAPE_CHAR;
       exp_syms[2] = NULL_CHAR;
     }
-    *ch = next_char (m, ref_l, ref_s, A_TRUE);
+    *ch = next_char (m, ref_l, ref_s, A68_TRUE);
     if (strchr (exp_syms, *ch) != NULL) {
-      *ch = next_char (m, ref_l, ref_s, A_TRUE);
+      *ch = next_char (m, ref_l, ref_s, A68_TRUE);
       res = (strchr ("+-0123456789", *ch) != NULL);
     } else {
       res = (strchr ("0123456789", *ch) != NULL);
@@ -1120,7 +1120,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       (sym++)[0] = c;
       sym[0] = NULL_CHAR;
       *att = get_format_item (c);
-      next_char (module, ref_l, ref_s, A_FALSE);
+      next_char (module, ref_l, ref_s, A68_FALSE);
       return;
     }
     if (IS_DIGIT (c)) {
@@ -1139,14 +1139,14 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 /* Upper case word - bold tag. */
       while (IS_UPPER (c) || c == '_') {
         (sym++)[0] = c;
-        c = next_char (module, ref_l, ref_s, A_FALSE);
+        c = next_char (module, ref_l, ref_s, A68_FALSE);
       }
       sym[0] = NULL_CHAR;
       *att = BOLD_TAG;
     } else if (module->options.stropping == QUOTE_STROPPING) {
       while (IS_UPPER (c) || IS_DIGIT (c) || c == '_') {
         (sym++)[0] = c;
-        c = next_char (module, ref_l, ref_s, A_TRUE);
+        c = next_char (module, ref_l, ref_s, A68_TRUE);
       }
       sym[0] = NULL_CHAR;
       *att = IDENTIFIER;
@@ -1154,23 +1154,23 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
   } else if (c == '\'') {
 /* Quote, uppercase word, quote - bold tag. */
     int k = 0;
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
     while (IS_UPPER (c) || IS_DIGIT (c) || c == '_') {
       (sym++)[0] = c;
       k++;
-      c = next_char (module, ref_l, ref_s, A_TRUE);
+      c = next_char (module, ref_l, ref_s, A68_TRUE);
     }
     SCAN_ERROR (k == 0, *start_l, *start_c, ERROR_QUOTED_BOLD_TAG);
     sym[0] = NULL_CHAR;
     *att = BOLD_TAG;
 /* Skip terminating quote, or complain if it is not there. */
     SCAN_ERROR (c != '\'', *start_l, *start_c, ERROR_QUOTED_BOLD_TAG);
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
   } else if (IS_LOWER (c)) {
 /* Lower case word - identifier. */
     while (IS_LOWER (c) || IS_DIGIT (c) || c == '_') {
       (sym++)[0] = c;
-      c = next_char (module, ref_l, ref_s, A_TRUE);
+      c = next_char (module, ref_l, ref_s, A68_TRUE);
     }
     sym[0] = NULL_CHAR;
     *att = IDENTIFIER;
@@ -1179,7 +1179,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     if (whether_decimal_point (module, ref_l, ref_s, &c)) {
       (sym++)[0] = '0';
       (sym++)[0] = POINT_CHAR;
-      c = next_char (module, ref_l, ref_s, A_TRUE);
+      c = next_char (module, ref_l, ref_s, A68_TRUE);
       SCAN_DIGITS (c);
       if (whether_exp_char (module, ref_l, ref_s, &c)) {
         SCAN_EXPONENT_PART (c);
@@ -1187,13 +1187,13 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       sym[0] = NULL_CHAR;
       *att = REAL_DENOTER;
     } else {
-      c = next_char (module, ref_l, ref_s, A_TRUE);
+      c = next_char (module, ref_l, ref_s, A68_TRUE);
       if (c == POINT_CHAR) {
         (sym++)[0] = POINT_CHAR;
         (sym++)[0] = POINT_CHAR;
         sym[0] = NULL_CHAR;
         *att = DOTDOT_SYMBOL;
-        c = next_char (module, ref_l, ref_s, A_FALSE);
+        c = next_char (module, ref_l, ref_s, A68_FALSE);
       } else {
         (sym++)[0] = POINT_CHAR;
         sym[0] = NULL_CHAR;
@@ -1204,7 +1204,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 /* Something that begins with a digit - L INT denoter, L REAL denoter. */
     SCAN_DIGITS (c);
     if (whether_decimal_point (module, ref_l, ref_s, &c)) {
-      c = next_char (module, ref_l, ref_s, A_TRUE);
+      c = next_char (module, ref_l, ref_s, A68_TRUE);
       if (whether_exp_char (module, ref_l, ref_s, &c)) {
         (sym++)[0] = POINT_CHAR;
         (sym++)[0] = '0';
@@ -1223,16 +1223,16 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       *att = REAL_DENOTER;
     } else if (whether_radix_char (module, ref_l, ref_s, &c)) {
       (sym++)[0] = c;
-      c = next_char (module, ref_l, ref_s, A_TRUE);
+      c = next_char (module, ref_l, ref_s, A68_TRUE);
       if (module->options.stropping == UPPER_STROPPING) {
         while (IS_DIGIT (c) || strchr ("abcdef", c) != NULL) {
           (sym++)[0] = c;
-          c = next_char (module, ref_l, ref_s, A_TRUE);
+          c = next_char (module, ref_l, ref_s, A68_TRUE);
         }
       } else {
         while (IS_DIGIT (c) || strchr ("ABCDEF", c) != NULL) {
           (sym++)[0] = c;
-          c = next_char (module, ref_l, ref_s, A_TRUE);
+          c = next_char (module, ref_l, ref_s, A68_TRUE);
         }
       }
       *att = BITS_DENOTER;
@@ -1242,20 +1242,20 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     sym[0] = NULL_CHAR;
   } else if (c == QUOTE_CHAR) {
 /* STRING denoter. */
-    BOOL_T stop = A_FALSE;
+    BOOL_T stop = A68_FALSE;
     while (!stop) {
-      c = next_char (module, ref_l, ref_s, A_FALSE);
+      c = next_char (module, ref_l, ref_s, A68_FALSE);
       while (c != QUOTE_CHAR && c != STOP_CHAR) {
         SCAN_ERROR (EOL (c), *start_l, *start_c, ERROR_LONG_STRING);
         (sym++)[0] = c;
-        c = next_char (module, ref_l, ref_s, A_FALSE);
+        c = next_char (module, ref_l, ref_s, A68_FALSE);
       }
       SCAN_ERROR (*ref_l == NULL, *start_l, *start_c, ERROR_UNTERMINATED_STRING);
-      c = next_char (module, ref_l, ref_s, A_FALSE);
+      c = next_char (module, ref_l, ref_s, A68_FALSE);
       if (c == QUOTE_CHAR) {
         (sym++)[0] = QUOTE_CHAR;
       } else {
-        stop = A_TRUE;
+        stop = A68_TRUE;
       }
     }
     sym[0] = NULL_CHAR;
@@ -1263,16 +1263,16 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
   } else if (a68g_strchr ("#$()[]{},;@", c) != NULL) {
 /* Single character symbols. */
     (sym++)[0] = c;
-    next_char (module, ref_l, ref_s, A_FALSE);
+    next_char (module, ref_l, ref_s, A68_FALSE);
     sym[0] = NULL_CHAR;
     *att = 0;
   } else if (c == '|') {
 /* Bar. */
     (sym++)[0] = c;
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (c == ':') {
       (sym++)[0] = c;
-      next_char (module, ref_l, ref_s, A_FALSE);
+      next_char (module, ref_l, ref_s, A68_FALSE);
     }
     sym[0] = NULL_CHAR;
     *att = 0;
@@ -1280,30 +1280,30 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 /* Bar, will be replaced with modern variant.
    For this reason ! is not a MONAD with quote-stropping. */
     (sym++)[0] = '|';
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (c == ':') {
       (sym++)[0] = c;
-      next_char (module, ref_l, ref_s, A_FALSE);
+      next_char (module, ref_l, ref_s, A68_FALSE);
     }
     sym[0] = NULL_CHAR;
     *att = 0;
   } else if (c == ':') {
 /* Colon, semicolon, IS, ISNT. */
     (sym++)[0] = c;
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (c == '=') {
       (sym++)[0] = c;
-      if ((c = next_char (module, ref_l, ref_s, A_FALSE)) == ':') {
+      if ((c = next_char (module, ref_l, ref_s, A68_FALSE)) == ':') {
         (sym++)[0] = c;
-        c = next_char (module, ref_l, ref_s, A_FALSE);
+        c = next_char (module, ref_l, ref_s, A68_FALSE);
       }
     } else if (c == '/') {
       (sym++)[0] = c;
-      if ((c = next_char (module, ref_l, ref_s, A_FALSE)) == '=') {
+      if ((c = next_char (module, ref_l, ref_s, A68_FALSE)) == '=') {
         (sym++)[0] = c;
-        if ((c = next_char (module, ref_l, ref_s, A_FALSE)) == ':') {
+        if ((c = next_char (module, ref_l, ref_s, A68_FALSE)) == ':') {
           (sym++)[0] = c;
-          c = next_char (module, ref_l, ref_s, A_FALSE);
+          c = next_char (module, ref_l, ref_s, A68_FALSE);
         }
       }
     }
@@ -1313,27 +1313,27 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 /* Operator starting with "=". */
     char *scanned = sym;
     (sym++)[0] = c;
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (a68g_strchr (NOMADS, c) != NULL) {
       (sym++)[0] = c;
-      c = next_char (module, ref_l, ref_s, A_FALSE);
+      c = next_char (module, ref_l, ref_s, A68_FALSE);
     }
     if (c == '=') {
       (sym++)[0] = c;
-      if (next_char (module, ref_l, ref_s, A_FALSE) == ':') {
+      if (next_char (module, ref_l, ref_s, A68_FALSE) == ':') {
         (sym++)[0] = ':';
-        c = next_char (module, ref_l, ref_s, A_FALSE);
+        c = next_char (module, ref_l, ref_s, A68_FALSE);
         if (strlen (sym) < 4 && c == '=') {
           (sym++)[0] = '=';
-          next_char (module, ref_l, ref_s, A_FALSE);
+          next_char (module, ref_l, ref_s, A68_FALSE);
         }
       }
     } else if (c == ':') {
       (sym++)[0] = c;
       sym[0] = NULL_CHAR;
-      if (next_char (module, ref_l, ref_s, A_FALSE) == '=') {
+      if (next_char (module, ref_l, ref_s, A68_FALSE) == '=') {
         (sym++)[0] = '=';
-        next_char (module, ref_l, ref_s, A_FALSE);
+        next_char (module, ref_l, ref_s, A68_FALSE);
       } else {
         SCAN_ERROR (!(strcmp (scanned, "=:") == 0 || strcmp (scanned, "==:") == 0), *start_l, *start_c, ERROR_INVALID_OPERATOR_TAG);
       }
@@ -1348,28 +1348,28 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 /* Operator. */
     char *scanned = sym;
     (sym++)[0] = c;
-    c = next_char (module, ref_l, ref_s, A_FALSE);
+    c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (a68g_strchr (NOMADS, c) != NULL) {
       (sym++)[0] = c;
-      c = next_char (module, ref_l, ref_s, A_FALSE);
+      c = next_char (module, ref_l, ref_s, A68_FALSE);
     }
     if (c == '=') {
       (sym++)[0] = c;
-      if (next_char (module, ref_l, ref_s, A_FALSE) == ':') {
+      if (next_char (module, ref_l, ref_s, A68_FALSE) == ':') {
         (sym++)[0] = ':';
-        c = next_char (module, ref_l, ref_s, A_FALSE);
+        c = next_char (module, ref_l, ref_s, A68_FALSE);
         if (strlen (scanned) < 4 && c == '=') {
           (sym++)[0] = '=';
-          next_char (module, ref_l, ref_s, A_FALSE);
+          next_char (module, ref_l, ref_s, A68_FALSE);
         }
       }
     } else if (c == ':') {
       (sym++)[0] = c;
       sym[0] = NULL_CHAR;
-      if (next_char (module, ref_l, ref_s, A_FALSE) == '=') {
+      if (next_char (module, ref_l, ref_s, A68_FALSE) == '=') {
         (sym++)[0] = '=';
         sym[0] = NULL_CHAR;
-        next_char (module, ref_l, ref_s, A_FALSE);
+        next_char (module, ref_l, ref_s, A68_FALSE);
       } else {
         SCAN_ERROR (strcmp (&(scanned[1]), "=:") != 0, *start_l, *start_c, ERROR_INVALID_OPERATOR_TAG);
       }
@@ -1406,11 +1406,11 @@ static BOOL_T open_embedded_clause (int att)
   case SUB_SYMBOL:
   case ACCO_SYMBOL:
     {
-      return (A_TRUE);
+      return (A68_TRUE);
     }
   default:
     {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   }
 }
@@ -1432,11 +1432,11 @@ static BOOL_T close_embedded_clause (int att)
   case BUS_SYMBOL:
   case OCCA_SYMBOL:
     {
-      return (A_TRUE);
+      return (A68_TRUE);
     }
   default:
     {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   }
 }
@@ -1473,11 +1473,11 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
     int att = 0;
     get_next_token (module, in_format, l, s, start_l, start_c, &att);
     if (scan_buf[0] == STOP_CHAR) {
-      stop_scanner = A_TRUE;
+      stop_scanner = A68_TRUE;
     } else if (strlen (scan_buf) > 0 || att == ROW_CHAR_DENOTER || att == LITERAL) {
       KEYWORD_T *kw = find_keyword (top_keyword, scan_buf);
       char *c = NULL;
-      BOOL_T make_node = A_TRUE;
+      BOOL_T make_node = A68_TRUE;
       if (!(kw != NULL && att != ROW_CHAR_DENOTER)) {
         if (att == IDENTIFIER) {
           make_lower_case (scan_buf);
@@ -1489,7 +1489,7 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
           if (*root != NULL && WHETHER (*root, GO_SYMBOL)) {
             ATTRIBUTE (*root) = GOTO_SYMBOL;
             SYMBOL (*root) = find_keyword (top_keyword, "GOTO")->text;
-            make_node = A_FALSE;
+            make_node = A68_FALSE;
           } else {
             att = ATTRIBUTE (kw);
             c = kw->text;
@@ -1502,13 +1502,13 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
 /* Handle pragments. */
           if (att == STYLE_II_COMMENT_SYMBOL || att == STYLE_I_COMMENT_SYMBOL || att == BOLD_COMMENT_SYMBOL) {
             stop_scanner = !pragment (module, ATTRIBUTE (kw), l, s);
-            make_node = A_FALSE;
+            make_node = A68_FALSE;
           } else if (att == STYLE_I_PRAGMAT_SYMBOL || att == BOLD_PRAGMAT_SYMBOL) {
             stop_scanner = !pragment (module, ATTRIBUTE (kw), l, s);
             if (!stop_scanner) {
               isolate_options (module, scan_buf, *start_l);
-              set_options (module, module->options.list, A_FALSE);
-              make_node = A_FALSE;
+              set_options (module, module->options.list, A68_FALSE);
+              make_node = A68_FALSE;
             }
           }
         }
@@ -1546,11 +1546,11 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
       if (in_format && att == FORMAT_DELIMITER_SYMBOL) {
         return;
       } else if (!in_format && att == FORMAT_DELIMITER_SYMBOL) {
-        tokenise_source (module, root, level + 1, A_TRUE, l, s, start_l, start_c);
+        tokenise_source (module, root, level + 1, A68_TRUE, l, s, start_l, start_c);
       } else if (in_format && open_embedded_clause (att)) {
         NODE_T *z = PREVIOUS (*root);
-        if (z != NULL && (WHETHER (z, FORMAT_ITEM_N) || WHETHER (z, FORMAT_ITEM_G) || WHETHER (z, FORMAT_ITEM_F))) {
-          tokenise_source (module, root, level, A_FALSE, l, s, start_l, start_c);
+        if (z != NULL && (WHETHER (z, FORMAT_ITEM_N) || WHETHER (z, FORMAT_ITEM_G) || WHETHER (z, FORMAT_ITEM_H) || WHETHER (z, FORMAT_ITEM_F))) {
+          tokenise_source (module, root, level, A68_FALSE, l, s, start_l, start_c);
         } else if (att == OPEN_SYMBOL) {
           ATTRIBUTE (*root) = FORMAT_ITEM_OPEN;
         } else if (module->options.brackets && att == SUB_SYMBOL) {
@@ -1559,7 +1559,7 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
           ATTRIBUTE (*root) = FORMAT_ITEM_OPEN;
         }
       } else if (!in_format && level > 0 && open_embedded_clause (att)) {
-        tokenise_source (module, root, level + 1, A_FALSE, l, s, start_l, start_c);
+        tokenise_source (module, root, level + 1, A68_FALSE, l, s, start_l, start_c);
       } else if (!in_format && level > 0 && close_embedded_clause (att)) {
         return;
       } else if (in_format && att == CLOSE_SYMBOL) {
@@ -1588,7 +1588,7 @@ BOOL_T lexical_analyzer (MODULE_T * module)
   max_scan_buf_length = source_file_size = get_source_size (module);
 /* Errors in file? */
   if (max_scan_buf_length == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   max_scan_buf_length += strlen (bold_prelude_start) + strlen (bold_postlude);
   max_scan_buf_length += strlen (quote_prelude_start) + strlen (quote_postlude);
@@ -1596,16 +1596,16 @@ BOOL_T lexical_analyzer (MODULE_T * module)
   scan_buf = (char *) get_temp_heap_space ((unsigned) (8 + max_scan_buf_length));
 /* Errors in file? */
   if (!read_source_file (module)) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 /* Start tokenising. */
-  read_error = A_FALSE;
-  stop_scanner = A_FALSE;
+  read_error = A68_FALSE;
+  stop_scanner = A68_FALSE;
   if ((l = module->top_line) != NULL) {
     s = l->string;
   }
-  tokenise_source (module, &root, 0, A_FALSE, &l, &s, &start_l, &start_c);
-  return (A_TRUE);
+  tokenise_source (module, &root, 0, A68_FALSE, &l, &s, &start_l, &start_c);
+  return (A68_TRUE);
 }
 
 /* This is a small refinement preprocessor for Algol68G. */
@@ -1620,12 +1620,12 @@ static BOOL_T whether_refinement_terminator (NODE_T * p)
 {
   if (WHETHER (p, POINT_SYMBOL)) {
     if (IN_PRELUDE (NEXT (p))) {
-      return (A_TRUE);
+      return (A68_TRUE);
     } else {
       return (whether (p, POINT_SYMBOL, IDENTIFIER, COLON_SYMBOL, 0));
     }
   } else {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 }
 
@@ -1668,7 +1668,7 @@ void get_refinements (MODULE_T * z)
     new_one->end = NULL;
     p = NEXT (NEXT (p));
     if (p == NULL) {
-      diagnostic_node (A_SYNTAX_ERROR, NULL, ERROR_REFINEMENT_EMPTY, NULL);
+      diagnostic_node (A68_SYNTAX_ERROR, NULL, ERROR_REFINEMENT_EMPTY, NULL);
       return;
     } else {
       new_one->begin = p;
@@ -1678,18 +1678,18 @@ void get_refinements (MODULE_T * z)
       FORWARD (p);
     }
     if (p == NULL) {
-      diagnostic_node (A_SYNTAX_ERROR, NULL, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
+      diagnostic_node (A68_SYNTAX_ERROR, NULL, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
       return;
     } else {
       FORWARD (p);
     }
 /* Do we already have one by this name. */
     x = z->top_refinement;
-    exists = A_FALSE;
+    exists = A68_FALSE;
     while (x != NULL && !exists) {
       if (x->name == new_one->name) {
-        diagnostic_node (A_SYNTAX_ERROR, new_one->tree, ERROR_REFINEMENT_DEFINED, NULL);
-        exists = A_TRUE;
+        diagnostic_node (A68_SYNTAX_ERROR, new_one->tree, ERROR_REFINEMENT_DEFINED, NULL);
+        exists = A68_TRUE;
       }
       FORWARD (x);
     }
@@ -1700,7 +1700,7 @@ void get_refinements (MODULE_T * z)
     }
   }
   if (p != NULL && !IN_PRELUDE (p)) {
-    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_REFINEMENT_INVALID, NULL);
+    diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_REFINEMENT_INVALID, NULL);
   }
 }
 
@@ -1751,7 +1751,7 @@ void put_refinements (MODULE_T * z)
 /* We found its definition. */
         y->applications++;
         if (y->applications > 1) {
-          diagnostic_node (A_SYNTAX_ERROR, y->line_defined->top_node, ERROR_REFINEMENT_APPLIED, NULL);
+          diagnostic_node (A68_SYNTAX_ERROR, y->line_defined->top_node, ERROR_REFINEMENT_APPLIED, NULL);
           FORWARD (p);
         } else {
 /* Tie the definition in the tree. */
@@ -1786,14 +1786,14 @@ void put_refinements (MODULE_T * z)
       PREVIOUS (point) = PREVIOUS (p);
     }
   } else {
-    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
+    diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
   }
 /* Has the programmer done it well? */
   if (error_count == 0) {
     x = z->top_refinement;
     while (x != NULL) {
       if (x->applications == 0) {
-        diagnostic_node (A_SYNTAX_ERROR, x->line_defined->top_node, ERROR_REFINEMENT_NOT_APPLIED, NULL);
+        diagnostic_node (A68_SYNTAX_ERROR, x->line_defined->top_node, ERROR_REFINEMENT_NOT_APPLIED, NULL);
       }
       FORWARD (x);
     }

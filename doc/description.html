@@ -28,7 +28,9 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-Documentation for Algol 68 Genie Mark 10.1
+<small>
+Documentation for Algol 68 Genie Mark 10.2
+</small>
 </td>
 </table>
 
@@ -53,7 +55,7 @@ Documentation for Algol 68 Genie Mark 10.1
 &nbsp;&middot;&nbsp;<a href="#limitations">Limitations and bugs</a><br>
 </td>
 <td width="30%" valign=top align=center>
-<img src="logo.gif">
+<img src="algol68.gif">
 </td>
 <td width="5%" valign=top bgcolor="white">
 </td>
@@ -62,28 +64,26 @@ Documentation for Algol 68 Genie Mark 10.1
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.1</b>
-<br>
-&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
-&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
-&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
-<br>
-<b>Extensions</b>
-<br>
-&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
-<br>
-&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
+<b>Algol68G Mark 10.2</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
+<p>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
 </td>
 </tr>
 </table>
@@ -179,7 +179,7 @@ OP ELEMS = (INT d, "ROWS" z) INT # number of elements in dimension "d" of "z" #
 </pre>
 For example
 <pre>
-[1 : 10, -5 : 5] INT r;<br>
+[1 : 10, -5 : 5] INT r;
 print ((1 ELEMS r, 2 ELEMS r, ELEMS r)) # prints +10 +11 +110 #
 </pre>
 
@@ -189,17 +189,23 @@ The monadic operator returns the total number of elements while the dyadic opera
 <code>(..)</code>, <code>[..]</code> and <code>{..}</code> 
 are equivalent to the parser and any pair can be used where Algol 68 requires open-symbols and close-symbols. This allows for clearer coding when parenthesis are nested. For example:
 <pre>
-poly := a0 + x * (a1 + x * {a2 + x * [a3 + x * a4]});<br>
-COMPL z := {cos (phi), -sin (phi)};<br>
-ln [x + sqrt {x^2 + 1}]
+poly := a0 + x * (a1 + x * {a2 + x * [a3 + x * a4]}); # poly := a0 + x * (a1 + x * (a2 + x * (a3 + x * a4))); #
+COMPL z := {cos (phi), -sin (phi)};                   # COMPL z := (cos (phi), -sin (phi));                   #
+ln [x + sqrt {x^2 + 1}]                               # ln (x + sqrt (x^2 + 1))                               #
 </pre>
 
 <p>
 If <code>brackets</code> is not specified, <code>(..)</code> is an alternative for <code>[..]</code> in bounds and indexers, which is traditional Algol 68 syntax. 
+<li>Implementation of operators <code>SET</code> and  <code>CLEAR</code>, defined as
+<pre>
+OP SET = (INT n, BITS b) BITS:   # yield b with bit n set     #
+OP CLEAR = (INT n, BITS b) BITS: # yield b with bit n cleared #
+</pre>
+Analoguous definitions exits for <code>LONG BITS</code> and <code>LONG LONG BITS</code> values. 
 <li>The parser allows for colons, used in bounds and indexers, to be replaced by '<code>..</code>' which is the Pascal style. For instance
 <pre>
-[1 .. n] INT z;<br>
-z [1 .. n OVER 2]
+[1 .. n] INT z;   # equivalent to [1 : n] INT z; #
+z [1 .. n OVER 2] # equivalent to z [1 : n OVER 2] #
 </pre>
 </ul>
 
@@ -222,8 +228,8 @@ A mode flexible-row-of-...-row-of-... is treated as if it were flexible througho
 <br>
 <li>Algol68G does not recognise nonlocal environs <a href="resources.html#rr">{RR 5.2.3.2}</a>. All environs are local. Hence constructs as
 <pre>
-REF INT i = (... | LOC INT | SKIP);<br>
-...<br>
+REF INT i = (... | LOC INT | SKIP);
+...
 [n] REF INT a; FOR k TO n DO a[k] := LOC INT OD
 </pre>
 
@@ -232,8 +238,8 @@ result in a scope violation error with Algol68G.
 <br>
 <li>It is not possible to declare in a <code>[WHILE ...] DO ... [UNTIL ...] OD</code> part an identifier with equal spelling as the loop counter identifier. For instance
 <pre>
-FOR i TO n DO INT i := 2 * n; ... OD;<br>
-...<br>
+FOR i TO n DO INT i := 2 * n; ... OD;
+...
 FOR i TO n WHILE INT i := n OVER 2; ... DO ... OD
 </pre>
 
@@ -246,8 +252,7 @@ are not accepted by Algol68G.
 <br>
 <h3><a name="params"></a>Partial parametrisation and currying</h3>
 <p>
-Algol68G implements C.H. Lindsey's 
-<a href="resources.html#rr">proposal for partial parametrisation</a>.
+Algol68G implements C.H. Lindsey's proposal for partial parametrisation.
 In Algol68G, a
 <a href="syntax.html#primaries">
 call
@@ -334,6 +339,7 @@ OD;
 end: close (read OF p); close (write OF p)
 </pre>
 <p>
+<li>Implementation of a procedure <a href="environ.html#real"><code>real</code></a> that extends the functionality of <code>float</code>.
 <li>Algol68G implements Algol68C routines as <code>read int</code> and <code>print int</code>, but not routines as <code>get int</code> and <code>put int</code>.
 <pre>
 INT k = read int; COMPL z := read compl;
@@ -454,6 +460,7 @@ The Algol68G implementation deviates from the Revised Report specification, as d
 <ul>
 <li>Insertions can be any combination of alignments and literals.
 <li>The argument for a general-pattern is an enclosed-clause yielding <code>[] INT</code> (which is a superset of the RR specification). 
+<li>Extended general-pattern for <a href="syntax.html#general_pattern">transputting real values</a>.
 <li>The radix for a bits-pattern can be 2 .. 16. The radix can be dynamic, by specifying 
 <pre>
 n integral-enclosed-clause r
@@ -570,7 +577,7 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 <tr><td bgcolor=#f0f0f0>VAX 11/785</td><td bgcolor="#f0f0f0">1</td><td bgcolor="#f0f0f0">FORTRAN</td>
 <tr><td bgcolor=#f0f0f0>CYBER 205<br>Cray-1A<br></td><td bgcolor="#f0f0f0">12 (Scalar)</td><td bgcolor="#f0f0f0">FORTRAN</td></tr>
 <tr><td bgcolor=#f0f0f0>PowerPC G4 (1.3 GHz)</td><td bgcolor="#f0f0f0">11</td><td bgcolor="#f0f0f0">Algol68G/MacOS X/gcc</td></tr>
-<tr><td bgcolor=#f0f0f0>Pentium 4 (3 GHz)</td><td bgcolor="#f0f0f0">29</td><td bgcolor="#f0f0f0">Algol68G/OpenBSD/gcc</td></tr>
+<tr><td bgcolor=#f0f0f0>Pentium 4 (3 GHz)</td><td bgcolor="#f0f0f0">31</td><td bgcolor="#f0f0f0">Algol68G/OpenBSD/gcc</td></tr>
 <tr><td bgcolor=#f0f0f0>Pentium 4 (3 GHz)</td><td bgcolor="#f0f0f0">820</td><td bgcolor="#f0f0f0">C/OpenBSD/gcc</td></tr>
 </table>
 <p>From above data one could conclude that Algol68G on a 3 GHz Pentium runs the Whetstone test roughly as fast as C on a 100 MHz Pentium. However Algol68G offers many runtime checks while the compiled C code offered none, therefore this speed comparison overrates the speed of compiled C code by a factor of probably 2-3. 
@@ -600,8 +607,8 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 <hr color=#f0f0f0>
 <p>
 <small>
-Copyright &copy; 2001-2006 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.1 (December 2006)
+Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 10.2 (April 2007)
 </small>
 </p>
 <hr color=#f0f0f0>

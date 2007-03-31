@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -94,7 +94,7 @@ enum
 
 #define TEST_MP_INIT(p, z, m) {\
   if (! ((int) z[0] & INITIALISED_MASK)) {\
-    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE, (m));\
+    diagnostic_node (A68_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE, (m));\
     exit_genie ((p), 1);\
   }}
 
@@ -102,7 +102,7 @@ enum
   MP_DIGIT_T expo = fabs (MP_EXPONENT (z));\
   if (expo > MAX_MP_EXPONENT || (expo == MAX_MP_EXPONENT && ABS (MP_DIGIT (z, 1)) > 1.0)) {\
       errno = ERANGE;\
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MP_OUT_OF_BOUNDS, NULL);\
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_MP_OUT_OF_BOUNDS, NULL);\
       exit_genie (p, 1);\
   }}
 
@@ -117,8 +117,8 @@ enum
 #define STACK_MP(dest, p, digits) {\
   ADDR_T stack_mp_sp = stack_pointer;\
   if ((stack_pointer += SIZE_MP (digits)) > expr_stack_limit) {\
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);\
-    exit_genie (p, A_RUNTIME_ERROR);\
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);\
+    exit_genie (p, A68_RUNTIME_ERROR);\
   }\
   dest = (MP_DIGIT_T *) STACK_ADDRESS (stack_mp_sp);\
 }

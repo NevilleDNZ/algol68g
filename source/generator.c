@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -145,11 +145,11 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
   int k, max;
   (void) p;
   if (heap_segment == NULL) {
-    diagnostic_node (A_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
+    diagnostic_node (A68_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
     exit_genie (module->top_node, 1);
   }
   if (handle_segment == NULL) {
-    diagnostic_node (A_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
+    diagnostic_node (A68_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
     exit_genie (module->top_node, 1);
   }
   block_heap_compacter = 0;
@@ -183,18 +183,18 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
 static BOOL_T moid_needs_colouring (MOID_T * m)
 {
   if (WHETHER (m, REF_SYMBOL)) {
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (WHETHER (m, FLEX_SYMBOL) || WHETHER (m, ROW_SYMBOL)) {
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (WHETHER (m, STRUCT_SYMBOL) || WHETHER (m, UNION_SYMBOL)) {
     PACK_T *p = PACK (m);
-    BOOL_T k = A_FALSE;
+    BOOL_T k = A68_FALSE;
     for (; p != NULL && !k; FORWARD (p)) {
       k |= moid_needs_colouring (MOID (p));
     }
     return (k);
   } else {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 }
 
@@ -213,7 +213,7 @@ static void colour_row_elements (A68_REF * z, MOID_T * m)
   if (get_row_size (tup, arr->dimensions) > 0) {
 /* The multi-dimensional sweeper. */
     BYTE_T *elem = ADDRESS (&arr->array);
-    BOOL_T done = A_FALSE;
+    BOOL_T done = A68_FALSE;
     initialise_internal_index (tup, arr->dimensions);
     while (!done) {
       ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -296,7 +296,7 @@ void colour_object (BYTE_T * item, MOID_T * m)
       PACK_T *s = PACK (z->proc_mode);
       z->locale->status |= COOKIE_MASK;
       for (; s != NULL; FORWARD (s)) {
-        if (((A68_BOOL *) & u[0])->value == A_TRUE) {
+        if (((A68_BOOL *) & u[0])->value == A68_TRUE) {
           colour_object (&u[SIZE_OF (A68_BOOL)], MOID (s));
         }
         u = &(u[SIZE_OF (A68_BOOL) + MOID_SIZE (MOID (s))]);
@@ -384,7 +384,7 @@ static void defragment_heap ()
     z->status &= ~COLOUR_MASK;
     z->offset = heap_pointer;
     heap_pointer += (z->size);
-    ABNORMAL_END (heap_pointer % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+    ABNORMAL_END (heap_pointer % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   }
 }
 
@@ -459,8 +459,8 @@ static A68_HANDLE *give_handle (NODE_T * p, MOID_T * a68m)
     if (free_handles != NULL) {
       return (give_handle (p, a68m));
     } else {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
   return (NULL);
@@ -478,7 +478,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
 {
 /* Align. */
   ABNORMAL_END (size < 0, ERROR_INVALID_SIZE, NULL);
-  size = ALIGN (size);
+  size = A68_ALIGN (size);
 /* Now give it. */
   if (heap_available () >= size) {
     A68_HANDLE *x;
@@ -494,7 +494,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
     z.offset = 0;
     SET_REF_SCOPE (&z, PRIMAL_SCOPE);
     REF_HANDLE (&z) = x;
-    ABNORMAL_END (((long) ADDRESS (&z)) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+    ABNORMAL_END (((long) ADDRESS (&z)) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
     return (z);
   } else {
 /* No heap space. First sweep the heap. */
@@ -503,8 +503,8 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
       return (heap_generator (p, mode, size));
     } else {
 /* Still no heap space. We must abend. */
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+      exit_genie (p, A68_RUNTIME_ERROR);
       return (nil_ref);
     }
   }
@@ -544,18 +544,18 @@ Bound-count is advanced when completing a STRUCTURED_FIELD.
 static BOOL_T needs_allocation (MOID_T * m)
 {
   if (WHETHER (m, REF_SYMBOL)) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   if (WHETHER (m, PROC_SYMBOL)) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   if (WHETHER (m, UNION_SYMBOL)) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   if (m == MODE (VOID)) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
-  return (A_TRUE);
+  return (A68_TRUE);
 }
 
 /*!
@@ -600,7 +600,7 @@ void genie_generator_bounds (NODE_T * p)
          */
         genie_generator_bounds (DEF (p));
       }
-    } else if (WHETHER (p, DECLARER) && needs_allocation (MOID (p)) == A_FALSE) {
+    } else if (WHETHER (p, DECLARER) && needs_allocation (MOID (p)) == A68_FALSE) {
       return;
     } else {
       genie_generator_bounds (SUB (p));
@@ -690,34 +690,35 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
   }
   if (WHETHER (p, BOUNDS)) {
     ADDR_T bla = *max_sp;
-    A68_REF desc, elems;
+    A68_REF desc;
     MOID_T *slice_mode = MOID (NEXT (p));
     A68_ARRAY *arr;
     A68_TUPLE *tup;
-    A68_INT *bounds = (A68_INT *) STACK_ADDRESS (*sp);
+    BYTE_T *bounds = STACK_ADDRESS (*sp);
     int k, dimensions = DIMENSION (DEFLEX (MOID (p)));
     int elem_size = MOID_SIZE (slice_mode), row_size = 1;
     UP_SWEEP_SEMA;
     desc = heap_generator (p, MOID (p), dimensions * SIZE_OF (A68_TUPLE) + SIZE_OF (A68_ARRAY));
     GET_DESCRIPTOR (arr, tup, &desc);
     for (k = 0; k < dimensions; k++) {
-      tup[k].lower_bound = VALUE (&(bounds[2 * k]));
-      tup[k].upper_bound = VALUE (&(bounds[2 * k + 1]));
+      tup[k].lower_bound = VALUE ((A68_INT *) bounds);
+      bounds += SIZE_OF (A68_INT);
+      tup[k].upper_bound = VALUE ((A68_INT *) bounds);
+      bounds += SIZE_OF (A68_INT);
       tup[k].span = row_size;
       tup[k].shift = tup[k].lower_bound;
       row_size *= ROW_SIZE (&tup[k]);
     }
-    elems = heap_generator (p, MOID (p), row_size * elem_size);
     arr->dimensions = dimensions;
     arr->type = slice_mode;
     arr->elem_size = elem_size;
     arr->slice_offset = 0;
     arr->field_offset = 0;
-    arr->array = elems;
+    arr->array = heap_generator (p, MOID (p), row_size * elem_size);
     (*sp) += (dimensions * 2 * SIZE_OF (A68_INT));
     MAX (bla, *sp);
     if (slice_mode->has_rows && needs_allocation (slice_mode)) {
-      BYTE_T *elem = ADDRESS (&elems);
+      BYTE_T *elem = ADDRESS (&(arr->array));
       for (k = 0; k < row_size; k++) {
         ADDR_T pop_sp = *sp;
         bla = *max_sp;
@@ -776,6 +777,7 @@ PROPAGATOR_T genie_generator (NODE_T * p)
   PROPAGATOR_T self;
   ADDR_T pop_sp = stack_pointer;
   A68_REF z;
+  A68_TRACE ("enter genie_generator", p);
   self.unit = genie_generator;
   self.source = p;
   genie_generator_bounds (NEXT (SUB (p)));
@@ -784,5 +786,6 @@ PROPAGATOR_T genie_generator (NODE_T * p)
   stack_pointer = pop_sp;
   PUSH_REF (p, z);
   PROTECT_FROM_SWEEP_STACK (p);
+  A68_TRACE ("exit genie_generator", p);
   return (self);
 }

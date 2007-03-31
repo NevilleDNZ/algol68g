@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -47,9 +47,9 @@ TOKEN_T *top_token;
 BYTE_T *get_fixed_heap_space (size_t s)
 {
   BYTE_T *z = HEAP_ADDRESS (fixed_heap_pointer);
-  fixed_heap_pointer += ALIGN (s);
+  fixed_heap_pointer += A68_ALIGN (s);
   ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
-  ABNORMAL_END (((long) z) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+  ABNORMAL_END (((long) z) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   return (z);
 }
 
@@ -62,10 +62,10 @@ BYTE_T *get_fixed_heap_space (size_t s)
 BYTE_T *get_temp_heap_space (size_t s)
 {
   BYTE_T *z;
-  temp_heap_pointer -= ALIGN (s);
+  temp_heap_pointer -= A68_ALIGN (s);
   ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
   z = HEAP_ADDRESS (temp_heap_pointer);
-  ABNORMAL_END (((long) z) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+  ABNORMAL_END (((long) z) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   return (z);
 }
 
@@ -142,14 +142,14 @@ NODE_T *new_node (void)
   z->info = new_node_info ();
   z->attribute = 0;
   z->annotation = 0;
-  z->error = A_FALSE;
-  z->need_dns = A_FALSE;
+  z->error = A68_FALSE;
+  z->need_dns = A68_FALSE;
   z->genie.propagator.unit = NULL;
   z->genie.propagator.source = NULL;
-  z->genie.whether_coercion = A_FALSE;
-  z->genie.whether_new_lexical_level = A_FALSE;
+  z->genie.whether_coercion = A68_FALSE;
+  z->genie.whether_new_lexical_level = A68_FALSE;
   z->genie.seq = NULL;
-  z->genie.seq_set = A_FALSE;
+  z->genie.seq_set = A68_FALSE;
   z->genie.parent = NULL;
   z->genie.constant = NULL;
   z->genie.argsize = 0;
@@ -182,10 +182,10 @@ SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
   z->attribute = 0;
   z->environ = NULL;
   z->ap_increment = 0;
-  z->empty_table = A_FALSE;
-  z->initialise_frame = A_TRUE;
-  z->proc_ops = A_TRUE;
-  z->initialise_anon = A_TRUE;
+  z->empty_table = A68_FALSE;
+  z->initialise_frame = A68_TRUE;
+  z->proc_ops = A68_TRUE;
+  z->initialise_anon = A68_TRUE;
   PREVIOUS (z) = p;
   z->identifiers = NULL;
   z->operators = NULL;
@@ -210,14 +210,14 @@ MOID_T *new_moid ()
   z->attribute = 0;
   z->number = 0;
   z->dimensions = 0;
-  z->well_formed = A_FALSE;
-  z->use = A_FALSE;
-  z->has_ref = A_FALSE;
-  z->has_flex = A_FALSE;
-  z->has_rows = A_FALSE;
-  z->in_standard_environ = A_FALSE;
+  z->well_formed = A68_FALSE;
+  z->use = A68_FALSE;
+  z->has_ref = A68_FALSE;
+  z->has_flex = A68_FALSE;
+  z->has_rows = A68_FALSE;
+  z->in_standard_environ = A68_FALSE;
   z->size = 0;
-  z->portable = A_TRUE;
+  z->portable = A68_TRUE;
   NODE (z) = NULL;
   PACK (z) = NULL;
   SUB (z) = NULL;
@@ -265,18 +265,18 @@ TAG_T *new_tag ()
   z->stand_env_proc = 0;
   z->procedure = NULL;
   z->scope = PRIMAL_SCOPE;
-  z->scope_assigned = A_FALSE;
+  z->scope_assigned = A68_FALSE;
   PRIO (z) = 0;
-  z->use = A_FALSE;
-  z->in_proc = A_FALSE;
-  HEAP (z) = A_FALSE;
+  z->use = A68_FALSE;
+  z->in_proc = A68_FALSE;
+  HEAP (z) = A68_FALSE;
   z->size = 0;
   z->offset = 0;
   z->youngest_environ = PRIMAL_SCOPE;
-  z->loc_assigned = A_FALSE;
+  z->loc_assigned = A68_FALSE;
   NEXT (z) = NULL;
   z->body = NULL;
-  z->portable = A_TRUE;
+  z->portable = A68_TRUE;
   return (z);
 }
 
@@ -293,7 +293,7 @@ SOURCE_LINE_T *new_source_line ()
   z->diagnostics = NULL;
   z->number = 0;
   z->print_status = 0;
-  z->list = A_TRUE;
+  z->list = A68_TRUE;
   z->top_node = NULL;
   z->module = NULL;
   NEXT (z) = NULL;
@@ -330,7 +330,7 @@ void make_special_mode (MOID_T ** n, int m)
 
 BOOL_T match_string (char *x, char *c, char alt)
 {
-  BOOL_T match = A_TRUE;
+  BOOL_T match = A68_TRUE;
   while ((IS_UPPER (c[0]) || IS_DIGIT (c[0]) || c[0] == '-') && match) {
     match &= (TO_LOWER (x[0]) == TO_LOWER ((c++)[0]));
     if (x[0] != NULL_CHAR) {
@@ -340,7 +340,7 @@ BOOL_T match_string (char *x, char *c, char alt)
   while (x[0] != NULL_CHAR && x[0] != alt && c[0] != NULL_CHAR && match) {
     match &= (TO_LOWER ((x++)[0]) == TO_LOWER ((c++)[0]));
   }
-  return (match ? (x[0] == NULL_CHAR || x[0] == alt) : A_FALSE);
+  return (match ? (x[0] == NULL_CHAR || x[0] == alt) : A68_FALSE);
 }
 
 /*!
@@ -359,11 +359,11 @@ BOOL_T whether (NODE_T * p, ...)
       p = NEXT (p);
     } else {
       va_end (vl);
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   }
   va_end (vl);
-  return (A_TRUE);
+  return (A68_TRUE);
 }
 
 /*!
@@ -472,11 +472,11 @@ BOOL_T whether_new_lexical_level (NODE_T * p)
   case UNITED_OUSE_PART:
   case WHILE_PART:
     {
-      return (A_TRUE);
+      return (A68_TRUE);
     }
   default:
     {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   }
 }
@@ -595,22 +595,18 @@ void discard_heap (void)
 
 void init_heap (void)
 {
-  int heap_a_size = ALIGN (heap_size);
-  int handle_a_size = ALIGN (handle_pool_size);
-  int frame_a_size = ALIGN (frame_stack_size);
-  int expr_a_size = ALIGN (expr_stack_size);
-  int total_size = ALIGN (heap_a_size + handle_a_size + frame_a_size + expr_a_size);
-  BYTE_T *core = (BYTE_T *) (ALIGN_T *) malloc ((size_t) total_size);
+  int heap_a_size = A68_ALIGN (heap_size);
+  int handle_a_size = A68_ALIGN (handle_pool_size);
+  int frame_a_size = A68_ALIGN (frame_stack_size);
+  int expr_a_size = A68_ALIGN (expr_stack_size);
+  int total_size = A68_ALIGN (heap_a_size + handle_a_size + frame_a_size + expr_a_size);
+  BYTE_T *core = (BYTE_T *) (A68_ALIGN_T *) malloc ((size_t) total_size);
   ABNORMAL_END (core == NULL, ERROR_OUT_OF_CORE, NULL);
   heap_segment = &core[0];
   handle_segment = &heap_segment[heap_a_size];
   frame_segment = &handle_segment[handle_a_size];
   stack_segment = &frame_segment[frame_a_size];
-  ABNORMAL_END (((long) heap_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
-  ABNORMAL_END (((long) handle_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
-  ABNORMAL_END (((long) frame_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
-  ABNORMAL_END (((long) stack_segment) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
-  fixed_heap_pointer = ALIGNMENT;
+  fixed_heap_pointer = A68_ALIGNMENT;
   temp_heap_pointer = total_size;
 }
 
@@ -631,7 +627,7 @@ void free_heap (void)
 
 void *get_heap_space (size_t s)
 {
-  char *z = (char *) (ALIGN_T *) malloc (ALIGN (s));
+  char *z = (char *) (A68_ALIGN_T *) malloc (A68_ALIGN (s));
   ABNORMAL_END (z == NULL, ERROR_OUT_OF_CORE, NULL);
   return ((void *) z);
 }
@@ -906,7 +902,7 @@ double ten_to_the_power (int expo)
   double dbl_expo, *dep;
   BOOL_T neg_expo;
   dbl_expo = 1;
-  if ((neg_expo = expo < 0) == A_TRUE) {
+  if ((neg_expo = expo < 0) == A68_TRUE) {
     expo = -expo;
   }
   ABNORMAL_END (expo > MAX_DOUBLE_EXPO, "exponent too large", "in multiprecision library");

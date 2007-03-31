@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -209,7 +209,7 @@ static char *diag_pos (SOURCE_LINE_T * p, DIAGNOSTIC_T * d)
 \param diag
 **/
 
-void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag)
+void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
 {
   char *c, *c0;
   int continuations = 0;
@@ -242,13 +242,13 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
 /* Pretty print line */
   c = c0 = p->string;
   col = 1;
-  line_ended = A_FALSE;
+  line_ended = A68_FALSE;
   while (!line_ended) {
     int len = 0;
     char *new_pos = NULL;
     if (c[0] == NULL_CHAR) {
       bufcpy (output_line, "", BUFFER_SIZE);
-      line_ended = A_TRUE;
+      line_ended = A68_TRUE;
     } else {
       if (IS_GRAPH (c[0])) {
         char *c1;
@@ -290,13 +290,13 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
       c = new_pos;
     } else {
 /* First see if there are diagnostics to be printed */
-      BOOL_T y = A_FALSE, z = A_FALSE;
+      BOOL_T y = A68_FALSE, z = A68_FALSE;
       DIAGNOSTIC_T *d = p->diagnostics;
       if (d != NULL || where != NULL) {
         char *c1;
         for (c1 = c0; c1 != c; c1++) {
-          y |= (where != NULL && p == LINE (where) ? c1 == where_pos (p, where) : A_FALSE);
-          if (diag) {
+          y |= (where != NULL && p == LINE (where) ? c1 == where_pos (p, where) : A68_FALSE);
+          if (diag != A68_NO_DIAGNOSTICS) {
             for (d = p->diagnostics; d != NULL; FORWARD (d)) {
               z |= (c1 == diag_pos (p, d));
             }
@@ -317,10 +317,10 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
               k = d->number;
             }
           }
-          if (y == A_TRUE && c1 == where_pos (p, where)) {
+          if (y == A68_TRUE && c1 == where_pos (p, where)) {
             bufcpy (output_line, "^", BUFFER_SIZE);
           } else if (diags_at_this_pos != 0) {
-            if (diag == A_FALSE) {
+            if (diag == A68_NO_DIAGNOSTICS) {
               bufcpy (output_line, " ", BUFFER_SIZE);
             } else if (diags_at_this_pos == 1) {
               snprintf (output_line, BUFFER_SIZE, "%c", digit_to_char (k));
@@ -357,7 +357,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
         io_write_string (f, output_line);
         if (continuations >= 9) {
           io_write_string (f, "...");
-          line_ended = A_TRUE;
+          line_ended = A68_TRUE;
         } else {
           c0 = c;
           pos = 5;
@@ -371,8 +371,15 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
     if (p->diagnostics != NULL) {
       DIAGNOSTIC_T *d;
       for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-        io_write_string (f, NEWLINE_STRING);
-        pretty_diag (f, d->text);
+        if (diag == A68_RUNTIME_ERROR) {
+          if (WHETHER (d, A68_RUNTIME_ERROR)) {
+            io_write_string (f, NEWLINE_STRING);
+            pretty_diag (f, d->text);
+          }
+        } else {
+          io_write_string (f, NEWLINE_STRING);
+          pretty_diag (f, d->text);
+        }
       }
     }
   }
@@ -388,17 +395,17 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
 {
   for (; p != NULL; FORWARD (p)) {
     if (p->diagnostics != NULL) {
-      BOOL_T z = A_FALSE;
+      BOOL_T z = A68_FALSE;
       DIAGNOSTIC_T *d = p->diagnostics;
       for (; d != NULL; FORWARD (d)) {
-        if (what == A_ALL_DIAGNOSTICS) {
-          z |= (WHETHER (d, A_WARNING) || WHETHER (d, A_ERROR) || WHETHER (d, A_SYNTAX_ERROR));
-        } else if (what == A_RUNTIME_ERROR) {
-          z |= (WHETHER (d, A_RUNTIME_ERROR));
+        if (what == A68_ALL_DIAGNOSTICS) {
+          z |= (WHETHER (d, A68_WARNING) || WHETHER (d, A68_ERROR) || WHETHER (d, A68_SYNTAX_ERROR));
+        } else if (what == A68_RUNTIME_ERROR) {
+          z |= (WHETHER (d, A68_RUNTIME_ERROR));
         }
       }
       if (z) {
-        write_source_line (STDOUT_FILENO, p, NULL, A_TRUE);
+        write_source_line (STDOUT_FILENO, p, NULL, what);
       }
     }
   }
@@ -413,9 +420,9 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
 void scan_error (SOURCE_LINE_T * u, char *v, char *txt)
 {
   if (errno != 0) {
-    diagnostic_line (A_ERROR, u, v, txt, ERROR_SPECIFICATION, NULL);
+    diagnostic_line (A68_ERROR, u, v, txt, ERROR_SPECIFICATION, NULL);
   } else {
-    diagnostic_line (A_ERROR, u, v, txt, ERROR_UNSPECIFIED, NULL);
+    diagnostic_line (A68_ERROR, u, v, txt, ERROR_UNSPECIFIED, NULL);
   }
   longjmp (exit_compilation, 1);
 }
@@ -428,22 +435,22 @@ void scan_error (SOURCE_LINE_T * u, char *v, char *txt)
 static char *get_severity (int sev)
 {
   switch (sev) {
-  case A_ERROR:
+  case A68_ERROR:
     {
       error_count++;
       return ("error");
     }
-  case A_SYNTAX_ERROR:
+  case A68_SYNTAX_ERROR:
     {
       error_count++;
       return ("syntax error");
     }
-  case A_RUNTIME_ERROR:
+  case A68_RUNTIME_ERROR:
     {
       error_count++;
       return ("runtime error");
     }
-  case A_WARNING:
+  case A68_WARNING:
     {
       warning_count++;
       return ("warning");
@@ -590,7 +597,7 @@ Z quoted string literal.
 #define COMPOSE_DIAGNOSTIC\
   while (t[0] != NULL_CHAR) {\
     if (t[0] == '#') {\
-      extra_syntax = A_FALSE;\
+      extra_syntax = A68_FALSE;\
     } else if (t[0] == '@') {\
       char *nt = non_terminal_string (edit_line, ATTRIBUTE (p));\
       if (t != NULL) {\
@@ -740,30 +747,30 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
   va_list args;
   MOID_T *moid = NULL;
   char *t = str, b[BUFFER_SIZE];
-  BOOL_T force, extra_syntax = A_TRUE, shortcut = A_FALSE;
+  BOOL_T force, extra_syntax = A68_TRUE, shortcut = A68_FALSE;
   int err = errno;
   va_start (args, str);
   b[0] = NULL_CHAR;
-  force = (sev & FORCE_DIAGNOSTIC) != 0;
-  sev &= ~FORCE_DIAGNOSTIC;
+  force = (sev & A68_FORCE_DIAGNOSTICS) != 0;
+  sev &= ~A68_FORCE_DIAGNOSTICS;
 /* No warnings? */
-  if (!force && sev == A_WARNING && no_warnings) {
+  if (!force && sev == A68_WARNING && no_warnings) {
     return;
   }
 /* Suppressed? */
-  if (sev == A_ERROR || sev == A_SYNTAX_ERROR) {
+  if (sev == A68_ERROR || sev == A68_SYNTAX_ERROR) {
     if (error_count == MAX_ERRORS) {
       bufcpy (b, "further error diagnostics suppressed", BUFFER_SIZE);
-      sev = A_ERROR;
-      shortcut = A_TRUE;
+      sev = A68_ERROR;
+      shortcut = A68_TRUE;
     } else if (error_count > MAX_ERRORS) {
       error_count++;
       return;
     }
-  } else if (sev == A_WARNING) {
+  } else if (sev == A68_WARNING) {
     if (warning_count == MAX_ERRORS) {
       bufcpy (b, "further warning diagnostics suppressed", BUFFER_SIZE);
-      shortcut = A_TRUE;
+      shortcut = A68_TRUE;
     } else if (warning_count > MAX_ERRORS) {
       warning_count++;
       return;
@@ -808,31 +815,31 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
   va_list args;
   MOID_T *moid = NULL;
   char *t = str, b[BUFFER_SIZE];
-  BOOL_T force, extra_syntax = A_TRUE, shortcut = A_FALSE;
+  BOOL_T force, extra_syntax = A68_TRUE, shortcut = A68_FALSE;
   int err = errno;
   NODE_T *p = NULL;
   va_start (args, str);
   b[0] = NULL_CHAR;
-  force = (sev & FORCE_DIAGNOSTIC) != 0;
-  sev &= ~FORCE_DIAGNOSTIC;
+  force = (sev & A68_FORCE_DIAGNOSTICS) != 0;
+  sev &= ~A68_FORCE_DIAGNOSTICS;
 /* No warnings? */
-  if (!force && sev == A_WARNING && no_warnings) {
+  if (!force && sev == A68_WARNING && no_warnings) {
     return;
   }
 /* Suppressed? */
-  if (sev == A_ERROR || sev == A_SYNTAX_ERROR) {
+  if (sev == A68_ERROR || sev == A68_SYNTAX_ERROR) {
     if (error_count == MAX_ERRORS) {
       bufcpy (b, "further error diagnostics suppressed", BUFFER_SIZE);
-      sev = A_ERROR;
-      shortcut = A_TRUE;
+      sev = A68_ERROR;
+      shortcut = A68_TRUE;
     } else if (error_count > MAX_ERRORS) {
       error_count++;
       return;
     }
-  } else if (sev == A_WARNING) {
+  } else if (sev == A68_WARNING) {
     if (warning_count == MAX_ERRORS) {
       bufcpy (b, "further warning diagnostics suppressed", BUFFER_SIZE);
-      shortcut = A_TRUE;
+      shortcut = A68_TRUE;
     } else if (warning_count > MAX_ERRORS) {
       warning_count++;
       return;

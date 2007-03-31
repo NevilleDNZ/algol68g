@@ -28,7 +28,9 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-Documentation for Algol 68 Genie Mark 10.1
+<small>
+Documentation for Algol 68 Genie Mark 10.2
+</small>
 </td>
 </table>
 
@@ -41,10 +43,9 @@ Documentation for Algol 68 Genie Mark 10.1
 &nbsp;&middot;&nbsp;<a href="#documentation">Readily available information on Algol 68</a><br>
 &nbsp;&middot;&nbsp;<a href="#implementations">Algol 68 implementations</a><br>
 &nbsp;&middot;&nbsp;<a href="#ref">References</a><br>
-</ul>
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
-<img src="logo.gif" valign=top align=center>
+<img src="algol68.gif" valign=top align=center>
 <p>
 <div align=right>
 {&nbsp;<i>... 'Languages take such a time, and so do&nbsp;<br>
@@ -59,28 +60,26 @@ all the things one wants to know about.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.1</b>
-<br>
-&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
-&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
-&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
-<br>
-<b>Extensions</b>
-<br>
-&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
-<br>
-&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
+<b>Algol68G Mark 10.2</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
+<p>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
 </td>
 </tr>
 </table>
@@ -109,7 +108,7 @@ A revised report was issued in 1976.
 Algol 68 was the first major language for which a full formal definition was made before it was implemented.
 <p>
 Probably because of the formal character of the defining document, which requires some study to comprehend, the misconception got hold that Algol 68 is a complex language, while in fact it is rather lean. The reason that its definition (a "two-level grammar" or "W-grammar") looks complex is that the W-grammar describes only semantically correct programs. 
-For example, Algol 68's W-grammar cannot describe programs that use identifiers or operators that are not declared, or that define modes resulting in objects that are infinitely large or require infinite coercion, etcetera. A context-free syntax (C, C++, Pascal, ...) describes both semantically correct and - incorrect programs, and many rules are needed besides the syntax to reject the incorrect ones. This is less elegant, but the resulting defining document looks much simpler than the Algol 68 report. You can judge this for yourself by having a look at Algol 68's <a href="syntax.html">context-free syntax</a> and <a href="resources.html#rr">W-grammar</a>.
+For example, Algol 68's W-grammar cannot describe programs that use identifiers or operators that are not declared, or that define modes resulting in objects that are infinitely large or require infinite coercion, etcetera. A context-free syntax (C, C++, Pascal, ...) describes both semantically correct and - incorrect programs, and many rules are needed besides the syntax to reject the incorrect ones. This is less elegant, but the resulting defining document looks much simpler than the Algol 68 report. You can judge this for yourself by having a look at Algol 68's <a href="syntax.html">context-free syntax</a> and W-grammar as described in the Revised Report.
 <p>
 Another factor that hindered Algol 68 from spreading rapidly is that the language was designed for programmers, not for compiler writers, in a time when the field of compiler construction was not as advanced as it is today. 
 Implementation efforts based on formal methods generally failed; Algol 68's context-dependent grammar requires some invention to parse (consider for instance <code>x(y, z)</code> that can be either a call or a slice depending on the mode of <code>x</code>, while <code>x</code> does not need to be declared <i>before</i> being applied).
@@ -129,9 +128,7 @@ This page provides <i>Programming Algol 68 Made Easy</i>, a good informal textbo
 T<sub>E</sub>X source files are in the <code>a68toc</code> distribution.<br>
 <li><a name="rr"></a>
 Wilhelm Kloke has made available an on-line version of the formal
-<a href="http://members.dokom.net/w.kloke/">Revised Report</a>,
-<a href="http://members.dokom.net/w.kloke/syntax.txt">Algol 68's W-grammar</a> extracted from same report, and
-<a href="http://members.dokom.net/w.kloke/RR/rrE.html#E">
+<a href="http://vestein.arb-phys.uni-dortmund.de/~wb/">Revised Report</a>.
 C.H. Lindsey's partial parametrisation proposal</a>.
 <li>HOPL - History of programming languages. 
     On-line encyclopedia of programming languages has an 
@@ -225,8 +222,8 @@ Subset implementation for IBM mainframes, DECsystems 10 and 20, VAX/UNIX, CYBER 
 <hr color=#f0f0f0>
 <p>
 <small>
-Copyright &copy; 2001-2006 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.1 (December 2006)
+Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 10.2 (April 2007)
 </small>
 </p>
 <hr color=#f0f0f0>

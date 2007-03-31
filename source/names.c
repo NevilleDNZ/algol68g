@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -378,4 +378,114 @@ char *standard_environ_proc_name (GENIE_PROCEDURE f)
     }
   }
   return (NULL);
+}
+
+char *propagator_name (PROPAGATOR_PROCEDURE * p)
+{
+  if (p == genie_and_function) {
+    return ("genie_and_function");
+  } else if (p == genie_assertion) {
+    return ("genie_assertion");
+  } else if (p == genie_assignation) {
+    return ("genie_assignation");
+  } else if (p == genie_call) {
+    return ("genie_call");
+  } else if (p == genie_cast) {
+    return ("genie_cast");
+  } else if (p == (PROPAGATOR_PROCEDURE *) genie_closed) {
+    return ("genie_closed");
+  } else if (p == genie_coercion) {
+    return ("genie_coercion");
+  } else if (p == genie_collateral) {
+    return ("genie_collateral");
+  } else if (p == (PROPAGATOR_PROCEDURE *) genie_conditional) {
+    return ("genie_conditional");
+  } else if (p == genie_constant) {
+    return ("genie_constant");
+  } else if (p == genie_denoter) {
+    return ("genie_denoter");
+  } else if (p == genie_deproceduring) {
+    return ("genie_deproceduring");
+  } else if (p == genie_dereference_loc_identifier) {
+    return ("genie_dereference_loc_identifier");
+  } else if (p == genie_dereference_slice_name_quick) {
+    return ("genie_dereference_slice_name_quick");
+  } else if (p == genie_dereferencing) {
+    return ("genie_dereferencing");
+  } else if (p == genie_dereferencing_quick) {
+    return ("genie_dereferencing_quick");
+  } else if (p == genie_dyadic) {
+    return ("genie_dyadic");
+  } else if (p == genie_dyadic_quick) {
+    return ("genie_dyadic_quick");
+  } else if (p == (PROPAGATOR_PROCEDURE *) genie_enclosed) {
+    return ("genie_enclosed");
+  } else if (p == genie_format_text) {
+    return ("genie_format_text");
+  } else if (p == genie_formula) {
+    return ("genie_formula");
+  } else if (p == genie_generator) {
+    return ("genie_generator");
+  } else if (p == genie_identifier) {
+    return ("genie_identifier");
+  } else if (p == genie_identifier_standenv) {
+    return ("genie_identifier_standenv");
+  } else if (p == genie_identifier_standenv_proc) {
+    return ("genie_identifier_standenv_proc");
+  } else if (p == genie_identity_relation) {
+    return ("genie_identity_relation");
+  } else if (p == (PROPAGATOR_PROCEDURE *) genie_int_case) {
+    return ("genie_int_case");
+  } else if (p == genie_loc_identifier) {
+    return ("genie_loc_identifier");
+  } else if (p == (PROPAGATOR_PROCEDURE *) genie_loop) {
+    return ("genie_loop");
+  } else if (p == genie_monadic) {
+    return ("genie_monadic");
+  } else if (p == genie_nihil) {
+    return ("genie_nihil");
+  } else if (p == genie_or_function) {
+    return ("genie_or_function");
+  } else if (p == genie_parallel) {
+    return ("genie_parallel");
+  } else if (p == genie_routine_text) {
+    return ("genie_routine_text");
+  } else if (p == genie_rowing) {
+    return ("genie_rowing");
+  } else if (p == genie_rowing_ref_row_of_row) {
+    return ("genie_rowing_ref_row_of_row");
+  } else if (p == genie_rowing_ref_row_row) {
+    return ("genie_rowing_ref_row_row");
+  } else if (p == genie_rowing_row_of_row) {
+    return ("genie_rowing_row_of_row");
+  } else if (p == genie_rowing_row_row) {
+    return ("genie_rowing_row_row");
+  } else if (p == genie_selection) {
+    return ("genie_selection");
+  } else if (p == genie_selection_name) {
+    return ("genie_selection_name");
+  } else if (p == genie_selection_value) {
+    return ("genie_selection_value");
+  } else if (p == genie_skip) {
+    return ("genie_skip");
+  } else if (p == genie_slice) {
+    return ("genie_slice");
+  } else if (p == genie_slice_name_quick) {
+    return ("genie_slice_name_quick");
+  } else if (p == genie_unit) {
+    return ("");
+  } else if (p == (PROPAGATOR_PROCEDURE *) genie_united_case) {
+    return ("genie_united_case");
+  } else if (p == genie_uniting) {
+    return ("genie_uniting");
+  } else if (p == genie_voiding) {
+    return ("genie_voiding");
+  } else if (p == genie_voiding_assignation) {
+    return ("genie_voiding_assignation");
+  } else if (p == genie_widening) {
+    return ("genie_widening");
+  } else if (p == genie_widening_int_to_real) {
+    return ("genie_widening_int_to_real");
+  } else
+    return ("");
 }

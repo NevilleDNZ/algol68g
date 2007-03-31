@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -82,15 +82,15 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define GIGABYTE (KILOBYTE * MEGABYTE)
 
 #define LISTING_EXTENSION ".l"
-#define A_TRUE 1
-#define A_FALSE 0
+#define A68_TRUE 1
+#define A68_FALSE 0
 #define TIME_FORMAT "%A %d-%b-%Y %H:%M:%S"
 
-#define ALIGN_T void *
-#define ALIGNMENT ((int) (sizeof (ALIGN_T)))
-#define ALIGN(s) ((int) ((s) % ALIGNMENT) == 0 ? (s) : ((s) + ALIGNMENT - (s) % ALIGNMENT))
-#define SIZE_OF(p) ((int) ALIGN (sizeof (p)))
-#define MOID_SIZE(p) ALIGN ((p)->size)
+#define A68_ALIGN_T void *
+#define A68_ALIGNMENT ((int) (sizeof (A68_ALIGN_T)))
+#define A68_ALIGN(s) ((int) ((s) % A68_ALIGNMENT) == 0 ? (s) : ((s) + A68_ALIGNMENT - (s) % A68_ALIGNMENT))
+#define SIZE_OF(p) ((int) A68_ALIGN (sizeof (p)))
+#define MOID_SIZE(p) A68_ALIGN ((p)->size)
 
 #define BUFFER_SIZE KILOBYTE			/* BUFFER_SIZE exceeds actual requirements. */
 #define SMALL_BUFFER_SIZE 128
@@ -103,14 +103,14 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define BYTES_WIDTH 32		/* More useful than the usual 4. */
 #define LONG_BYTES_WIDTH 64	/* More useful than the usual 8. */
 
-#define A_READ_ACCESS (O_RDONLY)
-#define A_WRITE_ACCESS (O_WRONLY | O_CREAT | O_TRUNC)
+#define A68_READ_ACCESS (O_RDONLY)
+#define A68_WRITE_ACCESS (O_WRONLY | O_CREAT | O_TRUNC)
 #define A68_PROTECTION (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)	/* -rw-r--r-- */
 
-#define MAX_INT 	(INT_MAX)
-#define MIN_INT 	(INT_MIN)
-#define MAX_UNT 	(UINT_MAX)
-#define MAX_BITS	(UINT_MAX)
+#define A68_MAX_INT 	(INT_MAX)
+#define A68_MIN_INT 	(INT_MIN)
+#define A68_MAX_UNT 	(UINT_MAX)
+#define A68_MAX_BITS	(UINT_MAX)
 
 #define TO_UCHAR(c) ((c) >= 0 ? (int) (c) : (int) (UCHAR_MAX + (int) (c) + 1))
 
@@ -320,8 +320,7 @@ struct A68_PROCEDURE
 
 struct A68_TUPLE
 {
-  int upper_bound, lower_bound, shift;
-  int span, k;
+  int upper_bound, lower_bound, shift, span, k;
 };
 
 struct A68_ARRAY
@@ -956,7 +955,9 @@ enum
 { NOT_PRINTED, TO_PRINT, PRINTED };
 
 enum
-{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_STORAGE_ERROR, A_ALL_DIAGNOSTICS, FORCE_DIAGNOSTIC = 128, A_FORCE_QUIT = 256 };
+{ A68_NO_DIAGNOSTICS = 0, A68_ERROR = 1, A68_SYNTAX_ERROR, A68_WARNING, 
+  A68_RUNTIME_ERROR, A68_STORAGE_ERROR, A68_ALL_DIAGNOSTICS, 
+  A68_FORCE_DIAGNOSTICS = 128, A68_FORCE_QUIT = 256 };
 
 enum
 { NO_DEFLEXING = 1, SAFE_DEFLEXING, ALIAS_DEFLEXING, FORCE_DEFLEXING, SKIP_DEFLEXING };
@@ -1137,6 +1138,7 @@ extern char *moid_to_string (MOID_T *, int);
 extern char *new_fixed_string (char *);
 extern char *new_string (char *);
 extern char *non_terminal_string (char *, int);
+extern char *propagator_name (PROPAGATOR_PROCEDURE *p);
 extern char *read_string_from_tty (char *);
 extern char *standard_environ_proc_name (GENIE_PROCEDURE);
 extern char digit_to_char (int);
@@ -1186,6 +1188,7 @@ extern void diagnostic_node (int, NODE_T *, char *, ...);
 extern void diagnostics_to_terminal (SOURCE_LINE_T *, int);
 extern void discard_heap (void);
 extern void dump_heap ();
+extern void dump_stowed (NODE_T *, FILE_T, void *, MOID_T *, int);
 extern void finalise_symbol_table_setup (NODE_T *, int);
 extern void free_heap (void);
 extern void free_postulates (void);
@@ -1221,6 +1224,7 @@ extern void online_help (FILE_T);
 extern void portcheck (NODE_T *);
 extern void preliminary_symbol_table_setup (NODE_T *);
 extern void print_internal_index (FILE_T, A68_TUPLE *, int);
+extern void print_item (NODE_T *, FILE_T, BYTE_T *, MOID_T *);
 extern void protect_from_sweep (NODE_T *);
 extern void prune_echoes (MODULE_T *, OPTION_LIST_T *);
 extern void put_refinements (MODULE_T *);
@@ -1252,10 +1256,8 @@ extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
 extern void where (FILE_T, NODE_T *);
 extern void widen_denoter (NODE_T *);
-extern void write_listing_header (MODULE_T *);
 extern void write_listing (MODULE_T *);
-extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, BOOL_T);
-extern void dump_stowed (NODE_T *, FILE_T, void *, MOID_T *, int);
-extern void print_item (NODE_T *, FILE_T, BYTE_T *, MOID_T *);
+extern void write_listing_header (MODULE_T *);
+extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, int);
 
 #endif

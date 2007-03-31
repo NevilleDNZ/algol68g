@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -37,8 +37,8 @@ char output_line[BUFFER_SIZE], edit_line[BUFFER_SIZE], input_line[BUFFER_SIZE];
 void init_tty (void)
 {
   chars_in_tty_line = 0;
-  halt_typing = A_FALSE;
-  sys_request_flag = A_FALSE;
+  halt_typing = A68_FALSE;
+  sys_request_flag = A68_FALSE;
 }
 
 /*!

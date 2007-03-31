@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -118,7 +118,7 @@ void genie_argv (NODE_T * p)
 {
   A68_INT index;
   RESET_ERRNO;
-  POP_PRIMITIVE (p, &index, A68_INT);
+  POP_OBJECT (p, &index, A68_INT);
   if (index.value >= 1 && index.value <= global_argc) {
     PUSH_REF (p, c_to_a_string (p, global_argv[index.value - 1]));
   } else {
@@ -140,7 +140,7 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
   int k = 0;
   if (get_row_size (tup, arr->dimensions) != 0) {
     BYTE_T *base_addr = ADDRESS (&arr->array);
-    BOOL_T done = A_FALSE;
+    BOOL_T done = A68_FALSE;
     initialise_internal_index (tup, arr->dimensions);
     while (!done) {
       ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -151,8 +151,8 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
       vec[k] = (char *) get_heap_space (1 + size);
       a_to_c_string (p, vec[k], *(A68_REF *) elem);
       if (k == VECTOR_SIZE - 1) {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_TOO_MANY_ARGUMENTS);
-        exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_TOO_MANY_ARGUMENTS);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       if (strlen (vec[k]) > 0) {
         k++;
@@ -205,7 +205,7 @@ void genie_errno (NODE_T * p)
 void genie_strerror (NODE_T * p)
 {
   A68_INT i;
-  POP_PRIMITIVE (p, &i, A68_INT);
+  POP_OBJECT (p, &i, A68_INT);
   PUSH_REF (p, c_to_a_string (p, strerror (i.value)));
 }
 
@@ -231,12 +231,12 @@ static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL
   f->channel = chan;
   f->fd = fd;
   f->device.stream = NULL;
-  f->opened = A_TRUE;
-  f->open_exclusive = A_FALSE;
+  f->opened = A68_TRUE;
+  f->open_exclusive = A68_FALSE;
   f->read_mood = r_mood;
   f->write_mood = w_mood;
-  f->char_mood = A_TRUE;
-  f->draw_mood = A_FALSE;
+  f->char_mood = A68_TRUE;
+  f->draw_mood = A68_FALSE;
   f->format = nil_format;
   f->transput_buffer = get_unblocked_transput_buffer (p);
   reset_transput_buffer (f->transput_buffer);
@@ -256,11 +256,11 @@ static void genie_mkpipe (NODE_T * p, int fd_r, int fd_w, int pid)
   A68_REF r, w;
   RESET_ERRNO;
 /* Set up pipe. */
-  set_up_file (p, &r, fd_r, stand_in_channel, A_TRUE, A_FALSE, pid);
-  set_up_file (p, &w, fd_w, stand_out_channel, A_FALSE, A_TRUE, pid);
+  set_up_file (p, &r, fd_r, stand_in_channel, A68_TRUE, A68_FALSE, pid);
+  set_up_file (p, &w, fd_w, stand_out_channel, A68_FALSE, A68_TRUE, pid);
 /* push pipe. */
-  PUSH_REF_FILE (p, r);
-  PUSH_REF_FILE (p, w);
+  PUSH_REF (p, r);
+  PUSH_REF (p, w);
   PUSH_PRIMITIVE (p, pid, A68_INT);
 }
 
@@ -274,7 +274,7 @@ void genie_getenv (NODE_T * p)
   A68_REF a_env;
   char *val, *z, *z_env;
   RESET_ERRNO;
-  POP (p, &a_env, SIZE_OF (A68_REF));
+  POP_REF (p, &a_env);
   CHECK_INIT (p, INITIALISED (&a_env), MODE (STRING));
   z_env = (char *) get_heap_space (1 + a68_string_size (p, a_env));
   z = a_to_c_string (p, z_env, a_env);
@@ -284,7 +284,7 @@ void genie_getenv (NODE_T * p)
   } else {
     a_env = tmp_to_a68_string (p, val);
   }
-  PUSH (p, &a_env, SIZE_OF (A68_REF));
+  PUSH_REF (p, a_env);
 }
 
 /*!
@@ -315,17 +315,17 @@ void genie_execve (NODE_T * p)
   char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
   RESET_ERRNO;
 /* Pop parameters. */
-  POP (p, &a_env, SIZE_OF (A68_REF));
-  POP (p, &a_args, SIZE_OF (A68_REF));
-  POP (p, &a_prog, SIZE_OF (A68_REF));
+  POP_REF (p, &a_env);
+  POP_REF (p, &a_args);
+  POP_REF (p, &a_prog);
 /* Convert strings and hasta el infinito. */
   prog = (char *) get_heap_space (1 + a68_string_size (p, a_prog));
   a_to_c_string (p, prog, a_prog);
   convert_string_vector (p, argv, a_args);
   convert_string_vector (p, envp, a_env);
   if (argv[0] == NULL) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   ret = execve (prog, argv, envp);
 /* execve only returns if it fails. */
@@ -346,9 +346,9 @@ void genie_execve_child (NODE_T * p)
   A68_REF a_prog, a_args, a_env;
   RESET_ERRNO;
 /* Pop parameters. */
-  POP (p, &a_env, SIZE_OF (A68_REF));
-  POP (p, &a_args, SIZE_OF (A68_REF));
-  POP (p, &a_prog, SIZE_OF (A68_REF));
+  POP_REF (p, &a_env);
+  POP_REF (p, &a_args);
+  POP_REF (p, &a_prog);
 /* Now create the pipes and fork. */
 #if defined HAVE_WIN32
   pid = -1;
@@ -366,8 +366,8 @@ void genie_execve_child (NODE_T * p)
     convert_string_vector (p, argv, a_args);
     convert_string_vector (p, envp, a_env);
     if (argv[0] == NULL) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     (void) execve (prog, argv, envp);
 /* execve only returns if it fails - end child process. */
@@ -400,9 +400,9 @@ Return a PIPE that contains the descriptors for the parent.
   A68_REF a_prog, a_args, a_env;
   RESET_ERRNO;
 /* Pop parameters. */
-  POP (p, &a_env, SIZE_OF (A68_REF));
-  POP (p, &a_args, SIZE_OF (A68_REF));
-  POP (p, &a_prog, SIZE_OF (A68_REF));
+  POP_REF (p, &a_env);
+  POP_REF (p, &a_args);
+  POP_REF (p, &a_prog);
 /* Now create the pipes and fork. */
 #if defined HAVE_WIN32
   pid = -1;
@@ -434,8 +434,8 @@ Return a PIPE that contains the descriptors for the parent.
     dup2 (ptoc_fd[FD_READ], STDIN_FILENO);
     dup2 (ctop_fd[FD_WRITE], STDOUT_FILENO);
     if (argv[0] == NULL) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     (void) execve (prog, argv, envp);
 /* execve only returns if it fails - end child process. */
@@ -505,8 +505,8 @@ Child redirects STDIN and STDOUT.
     dup2 (ptoc_fd[FD_READ], STDIN_FILENO);
     dup2 (ctop_fd[FD_WRITE], STDOUT_FILENO);
     if (argv[0] == NULL) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     (void) execve (prog, argv, envp);
 /* execve only returns if it fails - end child process. */
@@ -563,7 +563,7 @@ void genie_waitpid (NODE_T * p)
 {
   A68_INT k;
   RESET_ERRNO;
-  POP_PRIMITIVE (p, &k, A68_INT);
+  POP_OBJECT (p, &k, A68_INT);
 #if ! defined HAVE_WIN32
   waitpid (k.value, NULL, 0);
 #endif
@@ -586,7 +586,7 @@ Be sure to know what you are doing when you use this, but on the other hand,
 #include <winsock.h>
 #endif
 
-BOOL_T curses_active = A_FALSE;
+BOOL_T curses_active = A68_FALSE;
 
 /*!
 \brief clean_curses
@@ -594,10 +594,10 @@ BOOL_T curses_active = A_FALSE;
 
 void clean_curses ()
 {
-  if (curses_active == A_TRUE) {
+  if (curses_active == A68_TRUE) {
     attrset (A_NORMAL);
     endwin ();
-    curses_active = A_FALSE;
+    curses_active = A68_FALSE;
   }
 }
 
@@ -612,7 +612,7 @@ void init_curses ()
   noecho ();
   nonl ();
   curs_set (0);
-  curses_active = A_TRUE;
+  curses_active = A68_TRUE;
 }
 
 /*!
@@ -674,7 +674,7 @@ void genie_curses_end (NODE_T * p)
 void genie_curses_clear (NODE_T * p)
 {
   (void) p;
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
   clear ();
@@ -688,7 +688,7 @@ void genie_curses_clear (NODE_T * p)
 void genie_curses_refresh (NODE_T * p)
 {
   (void) p;
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
   refresh ();
@@ -701,7 +701,7 @@ void genie_curses_refresh (NODE_T * p)
 
 void genie_curses_lines (NODE_T * p)
 {
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
   PUSH_PRIMITIVE (p, LINES, A68_INT);
@@ -714,7 +714,7 @@ void genie_curses_lines (NODE_T * p)
 
 void genie_curses_columns (NODE_T * p)
 {
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
   PUSH_PRIMITIVE (p, COLS, A68_INT);
@@ -727,7 +727,7 @@ void genie_curses_columns (NODE_T * p)
 
 void genie_curses_getchar (NODE_T * p)
 {
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
   PUSH_PRIMITIVE (p, rgetchar (), A68_CHAR);
@@ -741,10 +741,10 @@ void genie_curses_getchar (NODE_T * p)
 void genie_curses_putchar (NODE_T * p)
 {
   A68_CHAR ch;
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
-  POP_PRIMITIVE (p, &ch, A68_CHAR);
+  POP_OBJECT (p, &ch, A68_CHAR);
   addch (ch.value);
 }
 
@@ -756,11 +756,11 @@ void genie_curses_putchar (NODE_T * p)
 void genie_curses_move (NODE_T * p)
 {
   A68_INT i, j;
-  if (curses_active == A_FALSE) {
+  if (curses_active == A68_FALSE) {
     init_curses ();
   }
-  POP_PRIMITIVE (p, &j, A68_INT);
-  POP_PRIMITIVE (p, &i, A68_INT);
+  POP_OBJECT (p, &j, A68_INT);
+  POP_OBJECT (p, &i, A68_INT);
   move (i.value, j.value);
 }
 
@@ -799,29 +799,29 @@ void genie_pq_connectdb (NODE_T * p)
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   if (IS_IN_HEAP (&ref_file) && !IS_IN_HEAP (&ref_string)) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+    exit_genie (p, A68_RUNTIME_ERROR);
   } else if (IS_IN_FRAME (&ref_file) && IS_IN_FRAME (&ref_string)) {
     if (GET_REF_SCOPE (&ref_string) > GET_REF_SCOPE (&ref_file)) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
 /* Initialise the file. */
   file = FILE_DEREF (&ref_file);
   if (file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_ALREADY_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ALREADY_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   file->status = INITIALISED_MASK;
   file->channel = associate_channel;
-  file->opened = A_TRUE;
-  file->open_exclusive = A_FALSE;
-  file->read_mood = A_FALSE;
-  file->write_mood = A_FALSE;
-  file->char_mood = A_FALSE;
-  file->draw_mood = A_FALSE;
-  file->tmp_file = A_FALSE;
+  file->opened = A68_TRUE;
+  file->open_exclusive = A68_FALSE;
+  file->read_mood = A68_FALSE;
+  file->write_mood = A68_FALSE;
+  file->char_mood = A68_FALSE;
+  file->draw_mood = A68_FALSE;
+  file->tmp_file = A68_FALSE;
   if (INITIALISED (&(file->identification)) && !IS_NIL (file->identification)) {
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
   }
@@ -912,7 +912,7 @@ void genie_pq_exec (NODE_T * p)
   A68_REF ref_z, query;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &query, SIZE_OF (A68_REF));
+  POP_REF (p, &query);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -943,7 +943,7 @@ void genie_pq_parameterstatus (NODE_T * p)
   A68_REF ref_z, parameter;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &parameter, SIZE_OF (A68_REF));
+  POP_REF (p, &parameter);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1080,7 +1080,7 @@ void genie_pq_fname (NODE_T * p)
   int upb;
   A68_REF ref_file;
   A68_FILE *file;
-  POP_PRIMITIVE (p, &index, A68_INT);
+  POP_OBJECT (p, &index, A68_INT);
   CHECK_INIT (p, INITIALISED (&index), MODE (INT));
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
@@ -1096,8 +1096,8 @@ void genie_pq_fname (NODE_T * p)
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
   if (index.value < 1 || index.value > upb) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!IS_NIL (file->string)) {
     *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQfname (file->result, index.value - 1));
@@ -1117,7 +1117,7 @@ void genie_pq_fnumber (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   int k;
-  POP (p, &name, SIZE_OF (A68_REF));
+  POP_REF (p, &name);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1150,7 +1150,7 @@ void genie_pq_fformat (NODE_T * p)
   int upb;
   A68_REF ref_file;
   A68_FILE *file;
-  POP_PRIMITIVE (p, &index, A68_INT);
+  POP_OBJECT (p, &index, A68_INT);
   CHECK_INIT (p, INITIALISED (&index), MODE (INT));
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
@@ -1166,8 +1166,8 @@ void genie_pq_fformat (NODE_T * p)
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
   if (index.value < 1 || index.value > upb) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   PUSH_PRIMITIVE (p, PQfformat (file->result, index.value - 1), A68_INT);
 }
@@ -1184,9 +1184,9 @@ void genie_pq_getvalue (NODE_T * p)
   int upb;
   A68_REF ref_file;
   A68_FILE *file;
-  POP_PRIMITIVE (p, &column, A68_INT);
+  POP_OBJECT (p, &column, A68_INT);
   CHECK_INIT (p, INITIALISED (&column), MODE (INT));
-  POP_PRIMITIVE (p, &row, A68_INT);
+  POP_OBJECT (p, &row, A68_INT);
   CHECK_INIT (p, INITIALISED (&row), MODE (INT));
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
@@ -1202,18 +1202,18 @@ void genie_pq_getvalue (NODE_T * p)
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
   if (column.value < 1 || column.value > upb) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQntuples (file->result) : 0);
   if (row.value < 1 || row.value > upb) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   str = PQgetvalue (file->result, row.value - 1, column.value - 1);
   if (str == NULL) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_NO_QUERY_RESULT);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_NO_QUERY_RESULT);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!IS_NIL (file->string)) {
     *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, str);
@@ -1235,9 +1235,9 @@ void genie_pq_getisnull (NODE_T * p)
   int upb;
   A68_REF ref_file;
   A68_FILE *file;
-  POP_PRIMITIVE (p, &column, A68_INT);
+  POP_OBJECT (p, &column, A68_INT);
   CHECK_INIT (p, INITIALISED (&column), MODE (INT));
-  POP_PRIMITIVE (p, &row, A68_INT);
+  POP_OBJECT (p, &row, A68_INT);
   CHECK_INIT (p, INITIALISED (&row), MODE (INT));
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
@@ -1253,13 +1253,13 @@ void genie_pq_getisnull (NODE_T * p)
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
   if (column.value < 1 || column.value > upb) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQntuples (file->result) : 0);
   if (row.value < 1 || row.value > upb) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   PUSH_PRIMITIVE (p, PQgetisnull (file->result, row.value - 1, column.value - 1), A68_INT);
 }
@@ -1277,7 +1277,7 @@ static char *pq_edit (char *str)
     static char edt[BUFFER_SIZE];
     char *q;
     int newlines = 0, len = strlen (str);
-    BOOL_T suppress_blank = A_FALSE;
+    BOOL_T suppress_blank = A68_FALSE;
     q = edt;
     while (len > 0 && str[len - 1] == NEWLINE_CHAR) {
       str[len - 1] = NULL_CHAR;
@@ -1294,7 +1294,7 @@ static char *pq_edit (char *str)
         } else {
           *(q++) = BLANK_CHAR;
         }
-        suppress_blank = A_TRUE;
+        suppress_blank = A68_TRUE;
         str++;
       } else if (IS_SPACE (str[0])) {
         if (suppress_blank) {
@@ -1304,11 +1304,11 @@ static char *pq_edit (char *str)
             *(q++) = BLANK_CHAR;
           }
           str++;
-          suppress_blank = A_TRUE;
+          suppress_blank = A68_TRUE;
         }
       } else {
         *(q++) = *(str++);
-        suppress_blank = A_FALSE;
+        suppress_blank = A68_FALSE;
       }
     }
     if (newlines > 0) {

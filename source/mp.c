@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -302,7 +302,7 @@ BOOL_T check_mp_int (MP_DIGIT_T * z, MOID_T * m)
   } else if (m == MODE (LONGLONG_INT) || m == MODE (LONGLONG_BITS)) {
     return (check_longlong_int (z));
   }
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 /*!
@@ -363,12 +363,12 @@ static BOOL_T same_mp (NODE_T * p, MP_DIGIT_T * x, MP_DIGIT_T * y, int digits)
   if (MP_EXPONENT (x) == MP_EXPONENT (y)) {
     for (k = digits; k >= 1; k--) {
       if (MP_DIGIT (x, k) != MP_DIGIT (y, k)) {
-        return (A_FALSE);
+        return (A68_FALSE);
       }
     }
-    return (A_TRUE);
+    return (A68_TRUE);
   } else {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 }
 
@@ -436,7 +436,7 @@ MP_DIGIT_T *string_to_mp (NODE_T * p, MP_DIGIT_T * z, char *s, int digits)
 {
   int i, j, sign, weight, sum, comma, power;
   int expo;
-  BOOL_T ok = A_TRUE;
+  BOOL_T ok = A68_TRUE;
   RESET_ERRNO;
   SET_MP_ZERO (z, digits);
   while (IS_SPACE (s[0])) {
@@ -573,8 +573,8 @@ could be wider than 2 ** 52.
   int sum = 0, weight = 1;
   BOOL_T negative;
   if (expo >= digits) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MOID (p));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MOID (p));
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   negative = MP_DIGIT (z, 1) < 0;
   if (negative) {
@@ -582,14 +582,14 @@ could be wider than 2 ** 52.
   }
   for (j = 1 + expo; j >= 1; j--) {
     int term;
-    if ((int) MP_DIGIT (z, j) > MAX_INT / weight) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if ((int) MP_DIGIT (z, j) > A68_MAX_INT / weight) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     term = (int) MP_DIGIT (z, j) * weight;
-    if (sum > MAX_INT - term) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (sum > A68_MAX_INT - term) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     sum += term;
     weight *= MP_RADIX;
@@ -614,19 +614,19 @@ could be wider than 2 ** 52.
   int j, expo = (int) MP_EXPONENT (z);
   unsigned sum = 0, weight = 1;
   if (expo >= digits) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MOID (p));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MOID (p));
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   for (j = 1 + expo; j >= 1; j--) {
     unsigned term;
-    if ((unsigned) MP_DIGIT (z, j) > MAX_UNT / weight) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BITS));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if ((unsigned) MP_DIGIT (z, j) > A68_MAX_UNT / weight) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BITS));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     term = (unsigned) MP_DIGIT (z, j) * weight;
-    if (sum > MAX_UNT - term) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BITS));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (sum > A68_MAX_UNT - term) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BITS));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     sum += term;
     weight *= MP_RADIX;
@@ -746,8 +746,8 @@ unsigned *stack_mp_bits (NODE_T * p, MP_DIGIT_T * z, MOID_T * m)
 /* Argument check. */
   if (MP_DIGIT (u, 1) < 0.0) {
     errno = EDOM;
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, (m == MODE (LONG_BITS) ? MODE (LONG_INT) : MODE (LONGLONG_INT)));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, (m == MODE (LONG_BITS) ? MODE (LONG_INT) : MODE (LONGLONG_INT)));
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Convert radix MP_BITS_RADIX number. */
   for (k = words - 1; k >= 0; k--) {
@@ -766,8 +766,8 @@ unsigned *stack_mp_bits (NODE_T * p, MP_DIGIT_T * z, MOID_T * m)
   }
   if ((row[0] & ~mask) != 0x0 || MP_DIGIT (u, 1) != 0.0) {
     errno = ERANGE;
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, m);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, m);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Exit. */
   return (row);
@@ -830,6 +830,7 @@ MP_DIGIT_T *pack_mp_bits (NODE_T * p, MP_DIGIT_T * u, unsigned *row, MOID_T * m)
       mul_mp_digit (p, v, v, MP_BITS_RADIX, digits);
     }
   }
+  MP_STATUS (u) = INITIALISED_MASK;
   stack_pointer = pop_sp;
   return (u);
 }
@@ -926,8 +927,8 @@ void trunc_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
     SET_MP_ZERO (z, digits);
   } else if (MP_EXPONENT (x) >= digits) {
     errno = EDOM;
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, (WHETHER (MOID (p), PROC_SYMBOL) ? SUB (MOID (p)) : MOID (p)));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, (WHETHER (MOID (p), PROC_SYMBOL) ? SUB (MOID (p)) : MOID (p)));
+    exit_genie (p, A68_RUNTIME_ERROR);
   } else {
     int k;
     MOVE_MP (z, x, digits);
@@ -1091,7 +1092,7 @@ MP_DIGIT_T *sub_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y, 
   ADDR_T pop_sp = stack_pointer;
   int fnz, k;
   MP_DIGIT_T *w, z1, x1 = MP_DIGIT (x, 1), y1 = MP_DIGIT (y, 1);
-  BOOL_T negative = A_FALSE;
+  BOOL_T negative = A68_FALSE;
 /* Trivial cases. */
   if (MP_DIGIT (x, 1) == 0) {
     MOVE_MP (z, y, digits);
@@ -1203,7 +1204,7 @@ MP_DIGIT_T *sub_pos_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T *
   MP_DIGIT_T z1, x1 = MP_DIGIT (x, 1), y1 = MP_DIGIT (y, 1);
   int fnz, j, k, digits_h = 2 + digits;
   MP_DIGIT_T *w = (MP_DIGIT_T *) get_temp_heap_space (SIZE_MP (digits_h));
-  BOOL_T negative = A_FALSE;
+  BOOL_T negative = A68_FALSE;
 /* Trivial cases. */
   if (MP_DIGIT (x, 1) == 0) {
     MOVE_MP (z, y, digits);
@@ -1766,11 +1767,11 @@ MP_DIGIT_T *pow_mp_int (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int n, int d
 static BOOL_T eps_mp (MP_DIGIT_T * z, int digits)
 {
   if (MP_DIGIT (z, 1) == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (MP_EXPONENT (z) > -1) {
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (MP_EXPONENT (z) < -1) {
-    return (A_FALSE);
+    return (A68_FALSE);
   } else {
 #if (MP_RADIX == DEFAULT_MP_RADIX)
 /* More or less optimised for LONG and default LONG LONG precisions. */
@@ -1795,8 +1796,8 @@ static BOOL_T eps_mp (MP_DIGIT_T * z, int digits)
       }
     default:
       {
-        ABNORMAL_END (A_TRUE, "unexpected mp base", "");
-        return (A_FALSE);
+        ABNORMAL_END (A68_TRUE, "unexpected mp base", "");
+        return (A68_FALSE);
       }
     }
 #endif
@@ -1816,7 +1817,7 @@ MP_DIGIT_T *sqrt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 {
   int pop_sp = stack_pointer, digits_g = FUN_DIGITS (digits), digits_h;
   MP_DIGIT_T *tmp, *x_g, *z_g;
-  BOOL_T reciprocal = A_FALSE;
+  BOOL_T reciprocal = A68_FALSE;
   if (MP_DIGIT (x, 1) == 0) {
     stack_pointer = pop_sp;
     SET_MP_ZERO (z, digits);
@@ -1832,7 +1833,7 @@ MP_DIGIT_T *sqrt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
   STACK_MP (tmp, p, digits_g);
   lengthen_mp (p, x_g, digits_g, x, digits);
 /* Scaling for small x; sqrt (x) = 1 / sqrt (1 / x) */
-  if ((reciprocal = MP_EXPONENT (x_g) < 0) == A_TRUE) {
+  if ((reciprocal = MP_EXPONENT (x_g) < 0) == A68_TRUE) {
     rec_mp (p, x_g, x_g, digits_g);
   }
   if (ABS (MP_EXPONENT (x_g)) >= 2) {
@@ -1879,14 +1880,14 @@ MP_DIGIT_T *curt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 {
   int pop_sp = stack_pointer, digits_g = FUN_DIGITS (digits), digits_h;
   MP_DIGIT_T *tmp, *x_g, *z_g;
-  BOOL_T reciprocal = A_FALSE, change_sign = A_FALSE;
+  BOOL_T reciprocal = A68_FALSE, change_sign = A68_FALSE;
   if (MP_DIGIT (x, 1) == 0) {
     stack_pointer = pop_sp;
     SET_MP_ZERO (z, digits);
     return (z);
   }
   if (MP_DIGIT (x, 1) < 0) {
-    change_sign = A_TRUE;
+    change_sign = A68_TRUE;
     MP_DIGIT (x, 1) = -MP_DIGIT (x, 1);
   }
   STACK_MP (z_g, p, digits_g);
@@ -1894,7 +1895,7 @@ MP_DIGIT_T *curt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
   STACK_MP (tmp, p, digits_g);
   lengthen_mp (p, x_g, digits_g, x, digits);
 /* Scaling for small x; curt (x) = 1 / curt (1 / x) */
-  if ((reciprocal = MP_EXPONENT (x_g) < 0) == A_TRUE) {
+  if ((reciprocal = MP_EXPONENT (x_g) < 0) == A68_TRUE) {
     rec_mp (p, x_g, x_g, digits_g);
   }
   if (ABS (MP_EXPONENT (x_g)) >= 3) {
@@ -2049,7 +2050,7 @@ MP_DIGIT_T *exp_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
   while (iterate) {
     div_mp (p, tmp, pow, fac, digits_g);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (sum) - digits_g)) {
-      iterate = A_FALSE;
+      iterate = A68_FALSE;
     } else {
       add_mp (p, sum, sum, tmp, digits_g);
       mul_mp (p, pow, pow, x_g, digits_g);
@@ -2130,7 +2131,7 @@ MP_DIGIT_T *expm1_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
   while (iterate) {
     div_mp (p, tmp, pow, fac, digits_g);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (sum) - digits_g)) {
-      iterate = A_FALSE;
+      iterate = A68_FALSE;
     } else {
       add_mp (p, sum, sum, tmp, digits_g);
       mul_mp (p, pow, pow, x_g, digits_g);
@@ -2254,7 +2255,7 @@ MP_DIGIT_T *ln_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
     while (iterate) {
       div_mp_digit (p, tmp, pow, (MP_DIGIT_T) n, digits_g);
       if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - digits_g)) {
-        iterate = A_FALSE;
+        iterate = A68_FALSE;
       } else {
         MP_DIGIT (tmp, 1) = (n % 2 == 0 ? -MP_DIGIT (tmp, 1) : MP_DIGIT (tmp, 1));
         add_mp (p, z_g, z_g, tmp, digits_g);
@@ -2576,7 +2577,7 @@ MP_DIGIT_T *mp_pi (NODE_T * p, MP_DIGIT_T * api, int mult, int digits)
     sqrt_mp (p, x_g, x_g, digits_g);
     add_mp (p, pi_g, x_g, two, digits_g);
     sqrt_mp (p, y_g, x_g, digits_g);
-    iterate = A_TRUE;
+    iterate = A68_TRUE;
     while (iterate) {
 /* New x. */
       sqrt_mp (p, u_g, x_g, digits_g);
@@ -2590,7 +2591,7 @@ MP_DIGIT_T *mp_pi (NODE_T * p, MP_DIGIT_T * api, int mult, int digits)
       mul_mp (p, v_g, pi_g, u_g, digits_g);
 /* Done yet? */
       if (same_mp (p, v_g, pi_g, digits_g)) {
-        iterate = A_FALSE;
+        iterate = A68_FALSE;
       } else {
         MOVE_MP (pi_g, v_g, digits_g);
 /* New y. */
@@ -2698,24 +2699,24 @@ MP_DIGIT_T *sin_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
   mul_mp (p, pow, pow, sqr, digits_g);
   set_mp_short (fac, (MP_DIGIT_T) 362880, 0, digits_g);
   n = 9;
-  even = A_TRUE;
+  even = A68_TRUE;
 #else
   set_mp_short (fac, (MP_DIGIT_T) 6, 0, digits_g);
   n = 3;
-  even = A_FALSE;
+  even = A68_FALSE;
 #endif
   iterate = MP_DIGIT (pow, 1) != 0;
   while (iterate) {
     div_mp (p, tmp, pow, fac, digits_g);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - digits_g)) {
-      iterate = A_FALSE;
+      iterate = A68_FALSE;
     } else {
       if (even) {
         add_mp (p, z_g, z_g, tmp, digits_g);
-        even = A_FALSE;
+        even = A68_FALSE;
       } else {
         sub_mp (p, z_g, z_g, tmp, digits_g);
-        even = A_TRUE;
+        even = A68_TRUE;
       }
       mul_mp (p, pow, pow, sqr, digits_g);
       mul_mp_digit (p, fac, fac, (MP_DIGIT_T) (++n), digits_g);
@@ -2960,19 +2961,19 @@ MP_DIGIT_T *atan_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
     mul_mp (p, sqr, x_g, x_g, digits_g);
     mul_mp (p, pow, sqr, x_g, digits_g);
     MOVE_MP (z_g, x_g, digits_g);
-    even = A_FALSE;
+    even = A68_FALSE;
     iterate = MP_DIGIT (pow, 1) != 0;
     while (iterate) {
       div_mp_digit (p, tmp, pow, (MP_DIGIT_T) n, digits_g);
       if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - digits_g)) {
-        iterate = A_FALSE;
+        iterate = A68_FALSE;
       } else {
         if (even) {
           add_mp (p, z_g, z_g, tmp, digits_g);
-          even = A_FALSE;
+          even = A68_FALSE;
         } else {
           sub_mp (p, z_g, z_g, tmp, digits_g);
-          even = A_TRUE;
+          even = A68_TRUE;
         }
         mul_mp (p, pow, pow, sqr, digits_g);
         n += 2;
