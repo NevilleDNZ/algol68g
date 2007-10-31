@@ -32,14 +32,14 @@ this file will give a runtime error when called. You can also choose to not
 define them in "prelude.c". 
 */
 
-#if defined HAVE_PLOTUTILS
+#if defined ENABLE_GRAPHICS
 
 /*
-To use titles in an X-window you must enable HAVE_MODIFIABLE_X_TITLE and edit
+To use titles in an X-window you must enable ENABLE_X_TITLE and edit
 GNU libplot. See the INSTALL file. 
 */
 
-#if defined HAVE_MODIFIABLE_X_TITLE
+#if defined ENABLE_X_TITLE
 extern char *XPLOT_APP_NAME;
 #endif
 
@@ -50,7 +50,8 @@ This part contains names for 24-bit colours recognised by libplot.
 The table below is based on the "rgb.txt" file distributed with X11R6. 
 */
 
-struct COLOUR_INFO {
+struct COLOUR_INFO
+{
   char *name;
   int r, g, b;
 };
@@ -954,8 +955,8 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-#if defined HAVE_MODIFIABLE_X_TITLE
-/* To use this you must enable HAVE_MODIFIABLE_X_TITLE and edit GNU libplot.
+#if defined ENABLE_X_TITLE
+/* To use this you must enable ENABLE_X_TITLE and edit GNU libplot.
    See the INSTALL file. */
     CHECK_INIT (p, INITIALISED (&ref_filename), MODE (ROWS));
     CHECK_NIL (p, ref_filename, MODE (ROWS));

@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+Documentation for Algol 68 Genie Mark 10.3
 </small>
 </td>
 </table>
@@ -38,7 +38,7 @@ Documentation for Algol 68 Genie Mark 11
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Example: dining persons problem</h2>
+<h2>Example: Printing characters alternatingly</h2>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="algol68.gif">
@@ -50,7 +50,7 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
+<b>Algol68G Mark 10.3</b>
 <p>
 &nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
@@ -72,77 +72,44 @@ Documentation for Algol 68 Genie Mark 11
 </table>
 
 <pre>
-# 
-Dining persons problem, analogous to the "dining philosophers problem".
-
-`N' persons sit at a round table with a bowl of spaghetti. 
-There are `N' forks, one between each pair of persons.
-To eat spaghetti, a person needs two forks, so not everybody can eat at
-the same time. This program synchronises their actions.
-#
-
-MODE PERSON = INT;
-
-INT persons = 10, idle = 0, try = 1, eat = 2, meal tickets = 2;
-
-[persons] INT action, [persons] SEMA person;
-
-FOR i TO persons
-DO action[i] := idle;
-   person[i] := LEVEL 0
-OD;
-
-SEMA mutex = LEVEL 1; # to synchronise access to `action' #
-
-PROC put at table = (PERSON i) VOID:
-     IF i > 0
-     THEN PAR BEGIN put at table (i - 1),
-                    (PROC do eat  = (PERSON i) VOID: print ((i, " eats")),
-                          do idle = (PERSON i) VOID: print ((i, " is not eating"));
-                     TO meal tickets
-                     DO OP LEFT  = (PERSON i) PERSON: 1 + (i - 1) %* persons,
-                           RIGHT = (PERSON i) PERSON: 1 + (i + 1) %* persons;
-
-                        PROC try eat = (PERSON i) VOID:
-                             IF action[i] = try ANDF 
-                                (action[LEFT i] ~= eat ANDF action[RIGHT i] ~= eat)
-                             THEN action[i] := eat;
-                                  UP person[i]
-                             FI;
-
-                        do idle (i);
-                        # Try to eat #
-                        DOWN mutex;
-                        action[i] := try;
-                        try eat (i);
-                        UP mutex;
-                        # Eat when we can #
-                        DOWN person [i];
-                        do eat (i);
-                        # Stop eating #
-                        DOWN mutex;
-                        action[i] := idle;
-                        try eat (LEFT i);
-                        try eat (RIGHT i);
-                        UP mutex
-                     OD;
-                     do idle (i)
-                    )
-              END
-     FI;
-
-put at table (persons)
+#smio07#
+BEGIN
+# 10/08/73, R van Vliet; 30/09/75, revised.
+Test the print and putroutines.#
+    print((new line,
+      "Print 100 stars and 100 dots alternatingly", new line));
+    ( SEMA star allowed =LEVEL 1, dot allowed =LEVEL 0;
+      PROC stardot = (REF FILE f) VOID:
+      BEGIN
+        PROC prstar =(REF FILE f, INT n) VOID:
+          IF n NE 1
+          THEN prstar(f, n -1); prstar(f, 1)
+          ELSE DOWN star allowed; put(f, "*"); UP dot allowed
+          FI,
+        PROC prdot =(REF FILE f, INT n) VOID:
+          IF n NE 1
+          THEN prdot(f, n-1); prdot(f, 1)
+          ELSE DOWN dot allowed; put(f, "."); UP star allowed
+          FI;
+        PAR(prstar(f, 100), prdot(f, 100))
+          #This parallel call on the recursive procedures 'prstar'
+          and 'prdot' should cause the printing of stars and dots,
+          looking at the semas before they are actually printed.#
+      END;
+      print((stardot, newline))
+    )
+END
 </pre>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
+<hr color=#f0f0f0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Algol 68 Genie Mark 10.3 (April 2007)
 </small>
 </p>
-<hr color=#e0e0e0>
+<hr color=#f0f0f0>
 
 </body>
 </html>

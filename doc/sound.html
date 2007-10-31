@@ -1,0 +1,198 @@
+<!-- Header -->
+<html>
+<head>
+<title>Algol 68 Genie</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
+<style type="text/css">
+a:link    {color: blue; text-decoration: underline;}
+a:visited {color: blue; text-decoration: underline;}
+a:active  {color: blue; text-decoration: underline;}
+p {font-size: 10pt; font-family: Arial,Helvetica;}
+u {font-size: 10pt; font-family: Arial,Helvetica;}
+dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
+h2 {font-size: 14pt; font-family: Arial,Helvetica;}
+h3 {font-size: 12pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
+ul {font-size: 10pt; font-family: Arial,Helvetica;}
+body {font-size: 10pt; font-family: Arial,Helvetica;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
+</style>
+</head>
+
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="100%" background="lines.gif">
+<img src="lines.gif" align=right>
+<small>
+Documentation for Algol 68 Genie Mark 11
+</small>
+</td>
+</table>
+
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<br>
+<h2>Sound procedures</h2>
+&nbsp;&middot;&nbsp;<a href="#struct">Data structure and access methods</a><br>
+&nbsp;&middot;&nbsp;<a href="#transput">Transput of SOUND values</a><br>
+&nbsp;&middot;&nbsp;<a href="#play">Playing SOUND values</a><br>
+</td>
+<td width="30%" bgcolor="white" valign=top align=center>
+<img src="algol68.gif">
+</td>
+<td width="5%" valign=top bgcolor="white">
+</td>
+<td width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td background="lines.gif">
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<p>
+&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<p>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
+</td>
+</table>
+
+<p>
+Algol 68 Genie has basic support for manipulating sounds. 
+In Algol68G, <code>SOUND</code> values can be generated, read and written and the sampled sound data can be accessed and altered. 
+The programmer can for example write an application to concatenate sound files, or to <a href="sound_fft.a68.html#fft">filter a sound using Fourier transforms</a>.
+Currently Algol 68 Genie supports linearly encoded PCM (for example used for CD audio).
+Should you wish to manipulate sound data in another format, then one option is to convert formats using a tool as for instance <a href="http://sox.sourceforge.net/">SoX</a>.
+</p>
+
+<br>
+
+<h3><a name="struct"></a>Data structure and access methods</h3>
+
+<p>
+Algol68G allows the declaration of values of mode <code>SOUND</code> that will contain a sound.
+The standard prelude contains a declaration
+<pre>
+MODE SOUND = STRUCT ( ... );
+</pre>
+with structured fields that cannot be directly accessed by the programmer. The actual sample data is stored in the heap. 
+Algol68G takes care of proper copying of sample data in case of assignation of <code>SOUND</code> values, or manipulation of stowed objects containing <code>SOUND</code> values, etcetera.
+
+<p>
+A new <code>SOUND</code> value can be generated using the procedure <code>new sound</code>
+<br>
+<dl>
+<dt><code>PROC new sound = (INT resolution, rate, channels, samples) SOUND</code>
+<dd>Returns a sound value where <var>resolution</var> is the number of bits per sample (8, 16, ...), 
+<var>rate</var> is the sample rate, 
+<var>channels</var> is the number of channels (1 for mono, 2 for stereo) and 
+<var>samples</var> is the number of samples per channel.
+</dl>
+
+<p>
+A value of mode <code>SOUND</code> can be accessed with the following procedures: 
+<dl>
+<dt><code>OP RESOLUTION = (SOUND s) INT </code>
+<dd>Returns the number of bits in a sample of <var>s</var>.
+<br>
+<br>
+<dt><code>OP CHANNELS = (SOUND s) INT </code>
+<dd>Returns the number of channels of <var>s</var>.
+<br>
+<br>
+<dt><code>OP RATE = (SOUND s) INT </code>
+<dd>Returns the sample rate (as samples per second per channel) of <var>s</var>. 
+Common values are 8000, 11025, 22050 or 44100.
+<br>
+<br>
+<dt><code>OP SAMPLES = (SOUND s) INT </code>
+<dd>Returns the number of samples per channel of <var>s</var>.
+<br>
+<br>
+<dt><code>PROC get sound = (SOUND s, INT channel, sample) INT</code>
+<dd>Returns the sample indexed by <var>channel</var> and <var>sample</var> of <var>s</var>.
+Note that under RIFF, samples with size upto 8 bits are normally unsigned while samples of larger size are signed.
+<br>
+<br>
+<dt><code>PROC set sound = (SOUND s, INT channel, sample, value) INT</code>
+<dd>Sets the sample indexed by <var>channel</var> and <var>sample</var> of <var>s</var> to <var>value</var>.
+Note that under RIFF, samples with size upto 8 bits are normally unsigned while samples of larger size are signed.
+</dl>
+
+<h3><a name="transput"></a>Transput of SOUND values</h3>
+<p>
+<code>SOUND</code> values can be read and written using standard prelude transput routines. 
+Formatted transput of <code>SOUND</code> values is undefined.
+Currently, Algol 68 Genie supports transput of files according to the RIFF PCM/WAVE format specification.
+Note that chunks other than <code>WAVE</code>, <code>fmt</code> or <code>data</code> are stripped upon reading, and do not appear upon writing.
+</table>
+<p>
+An example of transput of a <code>SOUND</code> value is:
+<pre>
+SOUND s;
+FILE in, out;
+open (in, "source.wav", standback channel);
+open (out, "destination.wav", standback channel);
+get bin (in, s);
+put bin (out, s);
+close (in);
+close (out);
+</pre>
+
+<h3><a name="play"></a>Playing SOUND values</h3>
+<p>
+Playing a sound depends on actual hardware details of a platform. 
+Therefore, Algol 68 Genie does not have a standard procedure to play <code>SOUND</code> values.
+It is however possible to write a procedure to play a sound in Algol 68 Genie, making use of its extensions to print to pipes and to fork, as is demonstrated in next example that makes a <code>SOUND</code> value to be played by the <code>play</code> program that comes with <a href="http://sox.sourceforge.net/">SoX</a>:
+
+<pre>
+PR heap=256M PR # ... to play BIG audio tracks #
+
+PROC play sound = (SOUND s) VOID:
+     IF PIPE p = execve child pipe ("/usr/bin/play", ("play", "-t", "wav", "-q", "-"), "");
+        pid OF p &lt; 0
+     THEN put (stand error, ("pipe not valid: ", strerror (errno)));
+     ELSE put (write OF p, s); # put must wait for play to empty the pipe #
+          close (read OF p);
+          close (write OF p)
+     FI;
+
+print ("File: ");
+STRING name = read string;
+open (standin, name + ".wav", standin channel);
+SOUND s;
+read (s);
+close (standin);
+play sound (s)
+</pre>
+
+<!-- Footer -->
+<hr color=#e0e0e0>
+<p>
+<small>
+Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11 (November 2007)
+</small>
+</p>
+<hr color=#e0e0e0>
+
+</body>
+</html>
+

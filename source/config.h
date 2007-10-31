@@ -25,15 +25,15 @@ this program; if not, write to the Free Software Foundation, Inc.,
 This file defines system dependencies that cannot be detected (reliably) in an
 automatic way. These dependencies are
 
-   HAVE_SYSTEM_STACK_CHECK
-   HAVE_MODIFIABLE_X_TITLE
-   HAVE_UNIX_CLOCK
-   HAVE_WIN32
+   ENABLE_SYS_STACK_CHECK
+   ENABLE_X_TITLE
+   ENABLE_UNIX_CLOCK
+   ENABLE_WIN32
 
 Define or undefine the directives below depending on your system.
 You can also set them when using `make' by using the CFLAGS parameter:
 
-   make CFLAGS=-DHAVE_SYSTEM_STACK_CHECK
+   make CFLAGS=-DENABLE_SYS_STACK_CHECK
 
 Refer to the file INSTALL.
 */
@@ -43,57 +43,57 @@ Refer to the file INSTALL.
 
 /*
 If you want the interpreter to check the system stack then define
-HAVE_SYSTEM_STACK_CHECK. This check assumes that the stack grows linearly (either
+ENABLE_SYS_STACK_CHECK. This check assumes that the stack grows linearly (either
 upwards or downwards) and that the difference between (1) the address of a local
 variable in the current stack frame and (2) the address of a local variable in
 a stack frame at the start of execution of the Algol 68 program, is a measure
 of system stack size.
 */
 
-#if ! defined HAVE_SYSTEM_STACK_CHECK
-#define HAVE_SYSTEM_STACK_CHECK
+#if ! defined ENABLE_SYS_STACK_CHECK
+#define ENABLE_SYS_STACK_CHECK
 #endif
 
 /*
 Did you edit GNU libplot so you can modify X Window titles? If yes then define
-HAVE_MODIFIABLE_X_TITLE else undefine it.
+ENABLE_X_TITLE else undefine it.
 */
 
-#if ! defined HAVE_MODIFIABLE_X_TITLE
-#undef HAVE_MODIFIABLE_X_TITLE
+#if ! defined ENABLE_X_TITLE
+#undef ENABLE_X_TITLE
 #endif
 
 /*
-HAVE_UNIX_CLOCK attempts getting usec resolution to the clock on UNIX systems.
+ENABLE_UNIX_CLOCK attempts getting usec resolution to the clock on UNIX systems.
 This calls get_rusage, which does not work on some systems.
 Undefining it means that clock () will be called, which is portable.
 */
 
-#undef HAVE_UNIX_CLOCK
+#undef ENABLE_UNIX_CLOCK
 
 /*
-When defining HAVE_WIN32 you may want to change directives following the 
+When defining ENABLE_WIN32 you may want to change directives following the 
 definition below to reflect your particular system.
-HAVE_IEEE_754 is ok for Pentiums.
+ENABLE_IEEE_754 is ok for Pentiums.
 */
 
-#if ! defined HAVE_WIN32
-#undef HAVE_WIN32
+#if ! defined ENABLE_WIN32
+#undef ENABLE_WIN32
 #endif
 
-#if defined HAVE_WIN32
-#define HAVE_PLOTUTILS 1
-#define HAVE_GSL 1
-#define HAVE_CURSES 1
-#undef HAVE_POSTGRESQL
-#undef HAVE_MODIFIABLE_X_TITLE
-#undef HAVE_UNIX_CLOCK
-#undef HAVE_POSIX_THREADS
-#undef HAVE_HTTP
-#undef HAVE_REGEX
-#undef HAVE_POSTGRESQL
-#define HAVE_IEEE_754 1
-#if defined HAVE_PLOTUTILS
+#if defined ENABLE_WIN32
+#define ENABLE_GRAPHICS 1
+#define ENABLE_NUMERICAL 1
+#define ENABLE_CURSES 1
+#undef ENABLE_POSTGRESQL
+#undef ENABLE_X_TITLE
+#undef ENABLE_UNIX_CLOCK
+#undef ENABLE_PAR_CLAUSE
+#undef ENABLE_HTTP
+#undef ENABLE_REGEX
+#undef ENABLE_POSTGRESQL
+#define ENABLE_IEEE_754 1
+#if defined ENABLE_GRAPHICS
 #define X_DISPLAY_MISSING 1
 #endif
 #endif

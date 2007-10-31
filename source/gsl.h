@@ -45,7 +45,7 @@ extern GENIE_PROCEDURE genie_sqrt_complex;
 extern GENIE_PROCEDURE genie_tan_complex;
 extern GENIE_PROCEDURE genie_tanh_complex;
 
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
 extern GENIE_PROCEDURE genie_complex_scale_matrix_complex;
 extern GENIE_PROCEDURE genie_complex_scale_vector_complex;
 extern GENIE_PROCEDURE genie_matrix_add;
@@ -135,7 +135,17 @@ extern GENIE_PROCEDURE genie_vector_sub;
 extern GENIE_PROCEDURE genie_vector_times_matrix;
 #endif
 
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
+extern GENIE_PROCEDURE genie_prime_factors;
+extern GENIE_PROCEDURE genie_fft_complex_forward;
+extern GENIE_PROCEDURE genie_fft_complex_backward;
+extern GENIE_PROCEDURE genie_fft_complex_inverse;
+extern GENIE_PROCEDURE genie_fft_forward;
+extern GENIE_PROCEDURE genie_fft_backward;
+extern GENIE_PROCEDURE genie_fft_inverse;
+#endif
+
+#if defined ENABLE_NUMERICAL
 extern GENIE_PROCEDURE genie_cgs_speed_of_light;
 extern GENIE_PROCEDURE genie_cgs_gravitational_constant;
 extern GENIE_PROCEDURE genie_cgs_planck_constant_h;

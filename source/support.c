@@ -25,11 +25,9 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
-#if ! defined HAVE_WIN32
+#if ! defined ENABLE_WIN32
 #include <sys/resource.h>
 #endif
-
-#include <sys/time.h>
 
 ADDR_T fixed_heap_pointer, temp_heap_pointer;
 
@@ -75,7 +73,7 @@ BYTE_T *get_temp_heap_space (size_t s)
 
 void get_stack_size (void)
 {
-#if ! defined HAVE_WIN32
+#if ! defined ENABLE_WIN32
   struct rlimit limits;
   RESET_ERRNO;
 /* Some systems do not implement RLIMIT_STACK so if getrlimit fails, we do not abend. */
@@ -89,7 +87,7 @@ void get_stack_size (void)
   if (stack_size < KILOBYTE || (stack_size > 96 * MEGABYTE && stack_size > frame_stack_size)) {
     stack_size = frame_stack_size;
   }
-#elif defined HAVE_WIN32
+#elif defined ENABLE_WIN32
   stack_size = MEGABYTE;
 #else
   stack_size = 0;               /* No stack check. */
@@ -114,13 +112,29 @@ char digit_to_char (int i)
 }
 
 /*!
+\brief renumber nodes
+\param p
+\param n
+\return
+**/
+
+void renumber_nodes (NODE_T * p, int *n)
+{
+  for (; p != NULL; FORWARD (p)) {
+    NUMBER (p) = (*n);
+    (*n)++;
+    renumber_nodes (SUB (p), n);
+  }
+}
+
+/*!
 \brief new_node_info
 \return
 **/
 
 NODE_INFO_T *new_node_info (void)
 {
-  NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space (SIZE_OF (NODE_INFO_T));
+  NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space (ALIGNED_SIZEOF (NODE_INFO_T));
   z->module = NULL;
   z->PROCEDURE_LEVEL = 0;
   z->PROCEDURE_NUMBER = 0;
@@ -137,7 +151,7 @@ NODE_INFO_T *new_node_info (void)
 
 NODE_T *new_node (void)
 {
-  NODE_T *z = (NODE_T *) get_fixed_heap_space (SIZE_OF (NODE_T));
+  NODE_T *z = (NODE_T *) get_fixed_heap_space (ALIGNED_SIZEOF (NODE_T));
   z->mask = 0;
   z->info = new_node_info ();
   z->attribute = 0;
@@ -176,11 +190,10 @@ NODE_T *new_node (void)
 
 SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
 {
-  SYMBOL_TABLE_T *z = (SYMBOL_TABLE_T *) get_fixed_heap_space (SIZE_OF (SYMBOL_TABLE_T));
+  SYMBOL_TABLE_T *z = (SYMBOL_TABLE_T *) get_fixed_heap_space (ALIGNED_SIZEOF (SYMBOL_TABLE_T));
   z->level = symbol_table_count++;
   z->nest = symbol_table_count;
   z->attribute = 0;
-  z->environ = NULL;
   z->ap_increment = 0;
   z->empty_table = A68_FALSE;
   z->initialise_frame = A68_TRUE;
@@ -206,7 +219,7 @@ SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
 
 MOID_T *new_moid ()
 {
-  MOID_T *z = (MOID_T *) get_fixed_heap_space (SIZE_OF (MOID_T));
+  MOID_T *z = (MOID_T *) get_fixed_heap_space (ALIGNED_SIZEOF (MOID_T));
   z->attribute = 0;
   z->number = 0;
   z->dimensions = 0;
@@ -238,7 +251,7 @@ MOID_T *new_moid ()
 
 PACK_T *new_pack ()
 {
-  PACK_T *z = (PACK_T *) get_fixed_heap_space (SIZE_OF (PACK_T));
+  PACK_T *z = (PACK_T *) get_fixed_heap_space (ALIGNED_SIZEOF (PACK_T));
   MOID (z) = NULL;
   z->text = NULL;
   NODE (z) = NULL;
@@ -254,9 +267,11 @@ PACK_T *new_pack ()
 \return
 **/
 
+static int tag_number = 0;
+
 TAG_T *new_tag ()
 {
-  TAG_T *z = (TAG_T *) get_fixed_heap_space (SIZE_OF (TAG_T));
+  TAG_T *z = (TAG_T *) get_fixed_heap_space (ALIGNED_SIZEOF (TAG_T));
   SYMBOL_TABLE (z) = NULL;
   MOID (z) = NULL;
   NODE (z) = NULL;
@@ -277,6 +292,7 @@ TAG_T *new_tag ()
   NEXT (z) = NULL;
   z->body = NULL;
   z->portable = A68_TRUE;
+  NUMBER (z) = ++tag_number;
   return (z);
 }
 
@@ -287,7 +303,7 @@ TAG_T *new_tag ()
 
 SOURCE_LINE_T *new_source_line ()
 {
-  SOURCE_LINE_T *z = (SOURCE_LINE_T *) get_fixed_heap_space (SIZE_OF (SOURCE_LINE_T));
+  SOURCE_LINE_T *z = (SOURCE_LINE_T *) get_fixed_heap_space (ALIGNED_SIZEOF (SOURCE_LINE_T));
   z->string = NULL;
   z->filename = NULL;
   z->diagnostics = NULL;
@@ -311,13 +327,15 @@ SOURCE_LINE_T *new_source_line ()
 void make_special_mode (MOID_T ** n, int m)
 {
   (*n) = new_moid ();
-  (*n)->attribute = 0;
-  (*n)->number = m;
+  ATTRIBUTE (*n) = 0;
+  NUMBER (*n) = m;
   PACK (*n) = NULL;
   SUB (*n) = NULL;
-  (*n)->deflexed_mode = NULL;
-  (*n)->name = NULL;
-  (*n)->slice = NULL;
+  EQUIVALENT (*n) = NULL;
+  DEFLEXED (*n) = NULL;
+  NAME (*n) = NULL;
+  SLICE (*n) = NULL;
+  ROWED (*n) = 0;
 }
 
 /*!
@@ -354,7 +372,8 @@ BOOL_T whether (NODE_T * p, ...)
   va_list vl;
   int a;
   va_start (vl, p);
-  while ((a = va_arg (vl, int)) != 0) {
+  while ((a = va_arg (vl, int)) != 0)
+  {
     if (p != NULL && (a == WILDCARD || (a >= 0 ? a == ATTRIBUTE (p) : -a != ATTRIBUTE (p)))) {
       p = NEXT (p);
     } else {
@@ -378,7 +397,7 @@ void make_sub (NODE_T * p, NODE_T * q, int t)
 {
   NODE_T *z = new_node ();
   ABNORMAL_END (p == NULL || q == NULL, ERROR_INTERNAL_CONSISTENCY, "make_sub");
-  MOVE (z, p, SIZE_OF (NODE_T));
+  MOVE (z, p, ALIGNED_SIZEOF (NODE_T));
   PREVIOUS (z) = NULL;
   if (p == q) {
     NEXT (z) = NULL;
@@ -428,7 +447,7 @@ SYMBOL_TABLE_T *find_level (NODE_T * n, int i)
 
 double seconds ()
 {
-#if defined HAVE_UNIX_CLOCK
+#if defined ENABLE_UNIX_CLOCK
   struct rusage rus;
   getrusage (RUSAGE_SELF, &rus);
   return ((double) (rus.ru_utime.tv_sec + rus.ru_utime.tv_usec * 1e-6));
@@ -528,7 +547,7 @@ void make_postulate (POSTULATE_T ** p, MOID_T * a, MOID_T * b)
     new_one = old_postulate;
     old_postulate = NEXT (old_postulate);
   } else {
-    new_one = (POSTULATE_T *) get_temp_heap_space (SIZE_OF (POSTULATE_T));
+    new_one = (POSTULATE_T *) get_temp_heap_space (ALIGNED_SIZEOF (POSTULATE_T));
   }
   new_one->a = a;
   new_one->b = b;
@@ -680,7 +699,7 @@ TOKEN_T *add_token (TOKEN_T ** p, char *t)
       return (*p);
     }
   }
-  *p = (TOKEN_T *) get_fixed_heap_space (SIZE_OF (TOKEN_T));
+  *p = (TOKEN_T *) get_fixed_heap_space (ALIGNED_SIZEOF (TOKEN_T));
   (*p)->text = z;
   (*p)->less = (*p)->more = NULL;
   return (*p);
@@ -725,7 +744,7 @@ static void add_keyword (KEYWORD_T ** p, int a, char *t)
       p = &(*p)->more;
     }
   }
-  *p = (KEYWORD_T *) get_fixed_heap_space (SIZE_OF (KEYWORD_T));
+  *p = (KEYWORD_T *) get_fixed_heap_space (ALIGNED_SIZEOF (KEYWORD_T));
   (*p)->attribute = a;
   (*p)->text = t;
   (*p)->less = (*p)->more = NULL;
@@ -786,8 +805,14 @@ KEYWORD_T *find_keyword_from_attribute (KEYWORD_T * p, int a)
 void set_up_tables ()
 {
 /* Entries are randomised to balance the tree. */
-  add_keyword (&top_keyword, THEF_SYMBOL, "THEF");
-  add_keyword (&top_keyword, ELSF_SYMBOL, "ELSF");
+  add_keyword (&top_keyword, DIAGONAL_SYMBOL, "DIAG");
+  add_keyword (&top_keyword, TRANSPOSE_SYMBOL, "TRNSP");
+  add_keyword (&top_keyword, ROW_SYMBOL, "ROW");
+  add_keyword (&top_keyword, COLUMN_SYMBOL, "COL");
+  add_keyword (&top_keyword, ROW_ASSIGN_SYMBOL, "::=");
+  add_keyword (&top_keyword, SOUND_SYMBOL, "SOUND");
+  add_keyword (&top_keyword, ANDF_SYMBOL, "THEF");
+  add_keyword (&top_keyword, ELIF_SYMBOL, "ELSF");
   add_keyword (&top_keyword, POINT_SYMBOL, ".");
   add_keyword (&top_keyword, ACCO_SYMBOL, "{");
   add_keyword (&top_keyword, OCCA_SYMBOL, "}");

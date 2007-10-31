@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 10.2
+Documentation for Algol 68 Genie Mark 11
 </small>
 </td>
 </table>
@@ -46,7 +46,7 @@ Documentation for Algol 68 Genie Mark 10.2
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionlist">Listing options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionint">Interpreter options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionmisc">Miscellaneous options</a><br>
-&middot;&nbsp;<a href="synopsis.html#monitor">The monitor</a><br>
+&middot;&nbsp;<a href="synopsis.html#monitor">The monitor (debugger)</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#monexp">Monitor expressions</a>
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
@@ -59,7 +59,9 @@ Documentation for Algol 68 Genie Mark 10.2
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.2</b>
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
 &nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -67,15 +69,7 @@ Documentation for Algol 68 Genie Mark 10.2
 &nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
-<p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
@@ -257,10 +251,10 @@ Options are not case sensitive. In the list below, underlined letters denote let
 </dl>
 
 <br>
-<h3><a name="monitor"></a>The monitor</h3>
+<h3><a name="monitor"></a>The monitor (debugger)</h3>
 
 <p>
-Algol68G has a monitor for basic debugging of a running program. The monitor is invoked when Algol68G receives signal SIGINT (which usually comes from typing CTRL-C), when standard procedures <code>debug</code> or <code>break</code> are called, or when a runtime error occurs when option <code>monitor</code> is in effect. Breakpoints can be indicated a&nbsp;priori through pragmats as well.
+Algol68G has a monitor for basic debugging of a running program. The monitor is invoked when Algol68G receives signal SIGINT (which usually comes from typing CTRL-C), when standard procedures <code>debug</code> or <code>break</code> are called, or when a runtime error occurs when option <code>monitor</code> or <code>debug</code> is in effect. Breakpoints can be indicated a&nbsp;priori through pragmats as well.
 
 <p>
 Currently, the monitor recognises next commands:
@@ -295,8 +289,10 @@ Units in other positions cannot trigger a breakpoint, unless they contain a call
 <dt><u>exi</u>t, <u>hx</u>, <u>q</u>uit
 <dd>Terminates the program.
 
-<dt><u>f</u>rame
-<dd>Print contents of the current stack frame. This is equivalent to <code>stack 1</code>.
+<dt><u>f</u>rame <i>n</i>
+<dd>Select stack frame <i>n</i> as the current stack frame. 
+If <i>n</i> is not specified, print the current stack frame.
+If <i>0</i> is specified, the current stack frame will be the top of the frame stack.
 
 <dt><u>hea</u>p <i>n</i>
 <dd>Print contents of the heap with address not greater than <i>n</i>.
@@ -305,7 +301,10 @@ Units in other positions cannot trigger a breakpoint, unless they contain a call
 <dd>Print brief help text.
 
 <dt><u>ht</u>
-<dd>Suppress program output to standard output.
+<dd>Halts typing to standard output.
+
+<dt><u>rt</u>
+<dd>Resumes typing to standard output.
 
 <dt><u>l</u>ist <i>n</i> <i>m</i>
 <dd>If <i>m</i> is omitted, show <i>n</i> lines around the interrupted line 
@@ -315,12 +314,42 @@ If <i>n</i> and <i>m</i> are supplied, show lines <i>n</i> upto <i>m</i>.
 <dt><u>n</u>ext, <u>ste</u>p
 <dd>Resume execution until the next unit in the program that can be a breakpoint (coarse single-stepping). 
 
+<dt><u>pro</u>mpt <i>s</i>
+<dd>Set prompt to <i>s</i>.
+
+<dt><u>s</u>izes
+<dd>Show sizes of various memory segments.
+
 <dt><u>sta</u>ck <i>n</i>
 <dd>Print <i>n</i> frames in the stack
 (default <i>n</i>=3).
 
 <dt><u>w</u>here
 <dd>Show the line where interruption took place.
+
+<dt><u>xr</u>ef <i>n</i>
+<dd>Give detailed information on source line <i>n</i>.
+<pre>
+===> xr
+2    INT z := 0;
+++++ Syntax tree
+     0d 04 (57, 523) VOID serial-clause, "INT z := 0 ...", seq=59+72+73
+     0e 04  (58) initialiser-series, "INT z := 0"
+     0f 04  |(59) declaration-list, "INT z := 0", seq=72+73
+     10 04  | (60) variable-declaration, "INT z := 0"
+     11 04  |  (61, 493) REF INT declarer, "INT"
+     12 04  |  |(62, 520) INT indicant, "INT"
+     13 04  |  | (63) int-symbol, "INT"
+     11 04  |  (64, 493) REF INT defining-identifier, "z" #05ae
+     11 04  |  (65) assign-symbol, ":="
+     11 04  |  (66, 520) INT unit, "0"
+     12 04  |   (67, 520) INT tertiary, "0"
+     13 04  |    (68, 520) INT secondary, "0"
+     14 04  |     (69, 520) INT primary, "0"
+     15 04  |      (70, 520) INT denoter, "0"
+     16 04  |       (71, 520) INT int-denoter, "0"
+     0e 04  (72) semi-symbol, ";", seq=73
+</pre>
 
 </dl>
 
@@ -362,14 +391,14 @@ Important points are:
 </ul>
 
 <!-- Footer -->
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.2 (April 2007)
+Algol 68 Genie Mark 11 (November 2007)
 </small>
 </p>
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 
 </body>
 </html>

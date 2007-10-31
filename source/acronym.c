@@ -24,7 +24,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "algol68g.h"
 #include "genie.h"
-#include <ctype.h>
 
 static BOOL_T is_vowel (char);
 static BOOL_T is_consonant (char);

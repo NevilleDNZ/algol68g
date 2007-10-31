@@ -30,7 +30,7 @@ Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>.
 #include "genie.h"
 #include "transput.h"
 
-#if ! defined HAVE_WIN32
+#if ! defined ENABLE_WIN32
 #include <sys/wait.h>
 #endif
 
@@ -136,7 +136,7 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
 {
   BYTE_T *z = ADDRESS (&row);
   A68_ARRAY *arr = (A68_ARRAY *) & z[0];
-  A68_TUPLE *tup = (A68_TUPLE *) & z[SIZE_OF (A68_ARRAY)];
+  A68_TUPLE *tup = (A68_TUPLE *) & z[ALIGNED_SIZEOF (A68_ARRAY)];
   int k = 0;
   if (get_row_size (tup, arr->dimensions) != 0) {
     BYTE_T *base_addr = ADDRESS (&arr->array);
@@ -223,7 +223,7 @@ void genie_strerror (NODE_T * p)
 static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL_T r_mood, BOOL_T w_mood, int pid)
 {
   A68_FILE *f;
-  *z = heap_generator (p, MODE (REF_FILE), SIZE_OF (A68_FILE));
+  *z = heap_generator (p, MODE (REF_FILE), ALIGNED_SIZEOF (A68_FILE));
   f = (A68_FILE *) ADDRESS (z);
   f->status = (pid < 0) ? 0 : INITIALISED_MASK;
   f->identification = nil_ref;
@@ -295,7 +295,7 @@ void genie_getenv (NODE_T * p)
 void genie_fork (NODE_T * p)
 {
   RESET_ERRNO;
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
   PUSH_PRIMITIVE (p, -1, A68_INT);
 #else
   PUSH_PRIMITIVE (p, fork (), A68_INT);
@@ -350,7 +350,7 @@ void genie_execve_child (NODE_T * p)
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 /* Now create the pipes and fork. */
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
   pid = -1;
 #else
   pid = fork ();
@@ -404,7 +404,7 @@ Return a PIPE that contains the descriptors for the parent.
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 /* Now create the pipes and fork. */
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
   pid = -1;
 #else
   if ((pipe (ptoc_fd) == -1) || (pipe (ctop_fd) == -1)) {
@@ -474,7 +474,7 @@ Child redirects STDIN and STDOUT.
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 /* Now create the pipes and fork. */
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
   pid = -1;
 #else
   if ((pipe (ptoc_fd) == -1) || (pipe (ctop_fd) == -1)) {
@@ -488,7 +488,7 @@ Child redirects STDIN and STDOUT.
     PUSH_PRIMITIVE (p, -1, A68_INT);
     return;
   }
-#if !defined HAVE_WIN32
+#if !defined ENABLE_WIN32
   if (pid == 0) {
 /* Child process. */
     char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
@@ -524,12 +524,10 @@ Child redirects STDIN and STDOUT.
       if (read > 0) {
         add_char_transput_buffer (p, INPUT_BUFFER, ch);
       }
-    }
-    while (read > 0);
+    } while (read > 0);
     do {
       ret = waitpid (pid, &status, 0);
-    }
-    while (ret == -1 && errno == EINTR);
+    } while (ret == -1 && errno == EINTR);
     if (ret != pid) {
       status = -1;
     }
@@ -564,7 +562,7 @@ void genie_waitpid (NODE_T * p)
   A68_INT k;
   RESET_ERRNO;
   POP_OBJECT (p, &k, A68_INT);
-#if ! defined HAVE_WIN32
+#if ! defined ENABLE_WIN32
   waitpid (k.value, NULL, 0);
 #endif
 }
@@ -575,12 +573,11 @@ Be sure to know what you are doing when you use this, but on the other hand,
 "reset" will always restore your terminal. 
 */
 
-#if defined HAVE_CURSES
+#if defined ENABLE_CURSES
 
-#include <sys/time.h>
 #include <curses.h>
 
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
 #undef FD_READ
 #undef FD_WRITE
 #include <winsock.h>
@@ -622,7 +619,7 @@ void init_curses ()
 
 int rgetchar (void)
 {
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
   return (getch ());
 #else
   int retval;
@@ -764,9 +761,9 @@ void genie_curses_move (NODE_T * p)
   move (i.value, j.value);
 }
 
-#endif                          /* HAVE_CURSES */
+#endif /* ENABLE_CURSES */
 
-#if defined HAVE_POSTGRESQL
+#if defined ENABLE_POSTGRESQL
 
 /*
 PostgreSQL libpq interface based on initial work by Jaap Boender. 
@@ -1675,4 +1672,4 @@ void genie_pq_backendpid (NODE_T * p)
   }
 }
 
-#endif                          /* HAVE_POSTGRESQL */
+#endif /* ENABLE_POSTGRESQL */

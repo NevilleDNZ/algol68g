@@ -133,7 +133,7 @@ extern GENIE_PROCEDURE genie_write_file;
 extern GENIE_PROCEDURE genie_write_file_format;
 extern GENIE_PROCEDURE genie_write_format;
 
-#if defined HAVE_PLOTUTILS
+#if defined ENABLE_GRAPHICS
 extern GENIE_PROCEDURE genie_draw_aspect;
 extern GENIE_PROCEDURE genie_draw_atom;
 extern GENIE_PROCEDURE genie_draw_background_colour;
@@ -173,7 +173,7 @@ extern char get_flip_char (void);
 extern char get_flop_char (void);
 extern int char_scanner (A68_FILE *);
 extern int end_of_format (NODE_T *, A68_REF);
-extern int get_replicator_value (NODE_T *);
+extern int get_replicator_value (NODE_T *, BOOL_T);
 extern int get_transput_buffer_index (int);
 extern int get_transput_buffer_length (int);
 extern int get_transput_buffer_size (int);
@@ -206,5 +206,7 @@ extern void unchar_scanner (NODE_T *, A68_FILE *, char);
 extern void value_error (NODE_T *, MOID_T *, A68_REF);
 extern void write_insertion (NODE_T *, A68_REF, unsigned);
 extern void write_purge_buffer (NODE_T *, A68_REF, int);
+extern void read_sound (NODE_T *, A68_REF, A68_SOUND *);
+extern void write_sound (NODE_T *, A68_REF, A68_SOUND *);
 
 #endif

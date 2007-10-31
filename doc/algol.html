@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 10.2
+Documentation for Algol 68 Genie Mark 11
 </small>
 </td>
 </table>
@@ -38,7 +38,7 @@ Documentation for Algol 68 Genie Mark 10.2
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 10.2</h2>
+<h2>Algol 68 Genie Mark 11</h2>
 <h3>An Algol 68 interpreter</h3>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
 &middot;&nbsp;<a href="#obtaining">Obtaining Algol 68 Genie</a><br>
@@ -63,7 +63,9 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.2</b>
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
 &nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -71,15 +73,7 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 &nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
-<p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
@@ -97,7 +91,7 @@ Algol 68 is an orthogonal general-purpose programming language, that is a beauti
 <i>Algol 68 Genie</i> (Algol68G) is an <a href="description.html">Algol 68 interpreter</a>.
 It can be used for executing Algol 68 programs or scripts.
 <p>
-The current version of Algol 68 Genie is Mark 10.2, released in April 2007.
+The current version of Algol 68 Genie is Mark 11, released in November 2007.
 You can download it from this page.
 </p>
 
@@ -112,26 +106,29 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <ul>
 <li>
 Download 
-<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk10.2.tar.gz">Algol68G Mark 10.2</a>, a gzipped tar archive containing C source code and documentation. 
+<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk11.tar.gz">Algol68G Mark 11</a>, a gzipped tar archive containing C source code and documentation. 
 
 <p>
 <a href="install.html">Here</a> are instructions for installation of Algol68G on UNIX, Linux or MacOS X.
 
 <p>
-The archive includes a WIN32 executable of Algol 68 Genie Mark 10.2, which has been built and tested on Microsoft Windows XP and can for instance be run from <code>cmd.exe</code>. This executable has been linked to the GNU Plotting Utilities and the GNU Scientific Library.
+The archive includes a WIN32 executable of Algol 68 Genie Mark 11, which has been built and tested on Microsoft Windows XP and can for instance be run from <code>cmd.exe</code>. This executable has been linked to the GNU Plotting Utilities and the GNU Scientific Library.
 
 <p>
-Algol 68 Genie Mark 10.2 was developed tested on OpenBSD 4.0 (gcc 3.3.5),
+Algol 68 Genie Mark 11 was developed and tested on 
+Fedora 7 (gcc 4.1.2, linux kernel 2.6.21),
 and was tested on
-Windows XP (gcc 3.4.2) and 
-Slackware Linux 8.0 (gcc 2.95.3).
-The Algol 68 Genie test set comprises more than 1150 programs and includes the MC test set.
+Windows XP (gcc 3.4.2),
+OpenBSD 3.9 (gcc 3.3.5) and 
+Slackware 8.0 (gcc 2.95.3, linux kernel 2.2.19).
+The Algol 68 Genie test set comprises more than 1200 programs and includes the MC test set.
 
 <li>For Apple's MacOS X Darwin environment, Norman Hardy has posted a 
 <a href="http://www.cap-lore.com/Languages/A68/Build.html">binary package</a>.
 <li>
 The <a href="resources.html">resources page</a> contains links to on-line Algol 68 resources (Revised Report, informal textbook, historic documents, <i>Algol Bulletin</i> archive, other implementations, and more).
 The <a href="examples.html">example programs page</a> has examples of Algol68G programs. 
+<li>Neville Dempsey posts a <a href="http://www.vim.org/scripts/script.php?script_id=1927">syntax script</a> for vim.
 </ul>
 
 <br>
@@ -163,6 +160,7 @@ Bruce Axtens,
 Lennart Benschop,
 Jaap Boenders,
 Bart Botma,
+Paul Cockshott,
 Huw Davies, 
 Neville Dempsey,
 Koos Dering, 
@@ -190,11 +188,12 @@ Nacho Vidal García,
 Merijn Vogel,
 Theo Vosse, 
 Andy Walker,
-Jim Watt
+Jim Watt,
+Glyn Webster
 </i>
 and
 <i>
-Glyn Webster.
+Tom Zahm.
 </i>
 <p>
 Algol68G would not be what it is without their help.
@@ -207,7 +206,7 @@ Details on implemented features are on <a href="description.html">this page</a>.
 
 <p>
 <table border="0" cellspacing="0" cellpadding=6>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 <b>Mark</b>
 </td>
@@ -218,9 +217,28 @@ Details on implemented features are on <a href="description.html">this page</a>.
 <b>Changes</b>
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
-Mark 10.2
+Mark 11
+</td>
+<td valign=top>
+November 2007
+</td>
+<td valign=top>
+Adds support for <a href="sound.html">sound</a><br>
+Adds support for <a href="torrix.html#fft">Fourier transforms</a><br>
+Adds pseudo-operator <code>DIAG</code><br>
+Adds pseudo-operator <code>TRNSP</code><br>
+Adds pseudo-operator <code>COL</code><br>
+Adds pseudo-operator <code>ROW</code><br>
+Improves diagnostics in formatted transput<br>
+Improves monitor<br>
+Fixes bugs
+</td>
+</tr>
+<tr bgcolor="#e0e0e0">
+<td valign=top>
+10.2
 </td>
 <td valign=top>
 April 2007
@@ -234,9 +252,9 @@ Fixes alignment bug on 64-bit systems<br>
 Fixes minor bugs
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
-Mark 10.1
+10.1
 </td>
 <td valign=top>
 December 2006
@@ -246,9 +264,9 @@ Improves interpreter efficiency<br>
 Fixes minor bugs
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
-Mark 10
+10
 </td>
 <td valign=top>
 August 2006
@@ -262,7 +280,7 @@ Adds option [NO]BACKTRACE<br>
 Fixes minor bugs
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 9.2
 </td>
@@ -275,7 +293,7 @@ Fixes two serious bugs (generator, parallel-clause)<br>
 Fixes <code>configure</code> bugs that occur on some platforms
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 9.1
 </td>
@@ -290,7 +308,7 @@ Adds procedure <code>monitor</code> (or <code>debug</code>)<br>
 Fixes <code>configure</code> bugs that occur on some platforms<br>
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 9
 </td>
@@ -304,7 +322,7 @@ Adds procedure <code>local time</code> (UNIX)<br>
 Improves diagnostic messages
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 8.1
 </td>
@@ -318,7 +336,7 @@ Adds option <code>PEDANTIC</code><br>
 Fixes bug in partial parametrisation
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 8
 </td>
@@ -337,7 +355,7 @@ Adds keyword <code>ANDTH</code> as alternative for <code>ANDF</code> and keyword
 Makes ~ a <code>SKIP</code> when used as a unit (cf. RR)
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 7
 </td>
@@ -349,7 +367,7 @@ Adds <a href="description.html#params">partial parametrisation</a> following C. 
 Adds elementary and trigonometric functions for complex numbers, independent of GSL
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 6
 </td>
@@ -360,7 +378,7 @@ March 2005
 Adds parallel clause on platforms that support POSIX threads
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 5
 </td>
@@ -375,7 +393,7 @@ Adds basic preprocessor<br>
 Adds curses support
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 4
 </td>
@@ -392,7 +410,7 @@ Makes mode checker accept <code>UNION</code> with components relates through def
 Changes to thread-safe plotutils interface<br>
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 3.2
 </td>
@@ -403,7 +421,7 @@ March 2004
 Adds overflow checks for primitive modes
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 3.1
 </td>
@@ -415,7 +433,7 @@ Adds optional system stack overflow handling to interpreter<br>
 Improves multiprecision library
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 3
 </td>
@@ -427,7 +445,7 @@ Adds formatted transput<br>
 Improves speed of multiprecision library
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 2
 </td>
@@ -442,7 +460,7 @@ Adds mode <code>PIPE</code> and <code>UNIX</code> support<br>
 Changes to UNIX system level IO
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 1
 </td>
@@ -453,7 +471,7 @@ November 2002
 &nbsp;
 </td>
 </tr>
-<tr bgcolor="#f0f0f0">
+<tr bgcolor="#e0e0e0">
 <td valign=top>
 Beta releases
 </td>
@@ -467,14 +485,14 @@ From November 2001 onward
 </table>
 
 <!-- Footer -->
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.2 (April 2007)
+Algol 68 Genie Mark 11 (November 2007)
 </small>
 </p>
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 
 </body>
 </html>

@@ -36,13 +36,14 @@ clauses) and has basic means for inspecting call-frame stack and heap.
 #include "mp.h"
 #include "transput.h"
 
-#if defined HAVE_TERMINFO
+#if defined ENABLE_TERMINFO
 #include <term.h>
-char term_buffer[2 * KILOBYTE];
+extern char term_buffer[];
 char *term_type;
 #endif
 
 static int mon_errors = 0;
+static int current_frame = 0;
 
 #define QUIT_ON_ERROR\
   if (mon_errors > 0) {\
@@ -81,14 +82,16 @@ static BOOL_T check_initialisation (NODE_T *, BYTE_T *, MOID_T *, BOOL_T *);
 static void parse (FILE_T, NODE_T *, int);
 
 /*!
-\brief
+\brief ask whether we really want to quit
+\return 
 */
 
 static BOOL_T confirm_exit (void)
 {
   char *cmd;
   int k;
-  WRITELN (STDOUT_FILENO, "++++ Terminate program (y or n)? ");
+  snprintf (output_line, BUFFER_SIZE, "++++ Terminate %s (yes|no): ", A68G_NAME);
+  WRITELN (STDOUT_FILENO, output_line);
   cmd = read_string_from_tty (NULL);
   if (TO_UCHAR (cmd[0]) == TO_UCHAR (EOF_CHAR)) {
     return (confirm_exit ());
@@ -112,7 +115,7 @@ static BOOL_T confirm_exit (void)
 }
 
 /*!
-\brief
+\brief give a monitor error message
 */
 
 void monitor_error (char *msg, char *info)
@@ -121,13 +124,15 @@ void monitor_error (char *msg, char *info)
   QUIT_ON_ERROR;
   mon_errors++;
   bufcpy (edit, msg, BUFFER_SIZE);
-  WRITELN (STDOUT_FILENO, "++++ Monitor: ");
+  WRITELN (STDOUT_FILENO, "++++ Monitor error. ");
+  edit[0] = TO_UPPER (edit[0]);
   WRITE (STDOUT_FILENO, edit);
   if (info != NULL) {
     WRITE (STDOUT_FILENO, " (");
     WRITE (STDOUT_FILENO, info);
     WRITE (STDOUT_FILENO, ")");
   }
+  WRITE (STDOUT_FILENO, ".");
 }
 
 static char expr[BUFFER_SIZE];
@@ -137,7 +142,9 @@ static MOID_T *m_stack[STACK_SIZE];
 static int m_sp;
 
 /*!
-\brief
+\brief scan symbol from input
+\param f 
+\param p
 */
 
 static void scan_sym (FILE_T f, NODE_T * p)
@@ -323,7 +330,8 @@ static void scan_sym (FILE_T f, NODE_T * p)
 }
 
 /*!
-\brief
+\brief return priority for symbol at input
+\return 
 */
 
 static int prio (FILE_T f, NODE_T * p)
@@ -339,7 +347,9 @@ static int prio (FILE_T f, NODE_T * p)
 }
 
 /*!
-\brief
+\brief push a mode on the stack
+\param f
+\param m
 */
 
 static void push_mode (FILE_T f, MOID_T * m)
@@ -353,7 +363,10 @@ static void push_mode (FILE_T f, MOID_T * m)
 }
 
 /*!
-\brief
+\brief dereference, WEAK or otherwise
+\param k
+\param context
+\return whether value can be dereferenced further
 */
 
 static BOOL_T deref_condition (int k, int context)
@@ -369,7 +382,7 @@ static BOOL_T deref_condition (int k, int context)
 }
 
 /*!
-\brief
+\brief weak dereferencing
 */
 
 static void deref (NODE_T * p, int k, int context)
@@ -385,7 +398,11 @@ static void deref (NODE_T * p, int k, int context)
 }
 
 /*!
-\brief
+\brief search mode that matches indicant
+\param refs
+\param leng
+\param indy
+\return moid
 **/
 
 static MOID_T *search_mode (int refs, int leng, char *indy)
@@ -426,7 +443,11 @@ static MOID_T *search_mode (int refs, int leng, char *indy)
 }
 
 /*!
-\brief
+\brief search operator X SYM Y
+\param sym
+\param x
+\param y
+\return
 */
 
 static TAG_T *search_operator (char *sym, MOID_T * x, MOID_T * y)
@@ -456,33 +477,35 @@ static TAG_T *search_operator (char *sym, MOID_T * x, MOID_T * y)
   }
 /* Not found. Grrrr. Give a message. */
   if (y == NULL) {
-    snprintf (edit_line, BUFFER_SIZE, "OP %s (%s) ...", sym, moid_to_string (x, MOID_WIDTH));
+    snprintf (edit_line, BUFFER_SIZE, "%s %s", sym, moid_to_string (x, MOID_WIDTH));
   } else {
-    snprintf (edit_line, BUFFER_SIZE, "OP %s (%s, %s) ...", sym, moid_to_string (x, MOID_WIDTH), moid_to_string (y, MOID_WIDTH));
+    snprintf (edit_line, BUFFER_SIZE, "%s %s %s", moid_to_string (x, MOID_WIDTH), sym, moid_to_string (y, MOID_WIDTH));
   }
   monitor_error ("cannot find operator in standard environ", edit_line);
   return (NULL);
 }
 
 /*!
-\brief
+\brief search identifier in frame stack and push value
 */
 
 static void search_identifier (FILE_T f, NODE_T * p, ADDR_T link, char *sym)
 {
   if (link > 0) {
     int dynamic_link = FRAME_DYNAMIC_LINK (link);
-    NODE_T *u = FRAME_TREE (link);
-    if (u != NULL) {
-      SYMBOL_TABLE_T *q = SYMBOL_TABLE (u);
-      TAG_T *i = q->identifiers;
-      for (; i != NULL; FORWARD (i)) {
-        if (sym == SYMBOL (NODE (i))) {
-          ADDR_T pos = link + FRAME_INFO_SIZE + i->offset;
-          MOID_T *m = MOID (i);
-          PUSH (p, FRAME_ADDRESS (pos), MOID_SIZE (m));
-          push_mode (f, m);
-          return;
+    if (current_frame == 0 || (current_frame == FRAME_NUMBER (link))) {
+      NODE_T *u = FRAME_TREE (link);
+      if (u != NULL) {
+        SYMBOL_TABLE_T *q = SYMBOL_TABLE (u);
+        TAG_T *i = q->identifiers;
+        for (; i != NULL; FORWARD (i)) {
+          if (sym == SYMBOL (NODE (i))) {
+            ADDR_T pos = link + FRAME_INFO_SIZE + i->offset;
+            MOID_T *m = MOID (i);
+            PUSH (p, FRAME_ADDRESS (pos), MOID_SIZE (m));
+            push_mode (f, m);
+            return;
+          }
         }
       }
     }
@@ -512,7 +535,7 @@ static void search_identifier (FILE_T f, NODE_T * p, ADDR_T link, char *sym)
 }
 
 /*!
-\brief
+\brief coerce arguments in a call
 */
 
 static void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int top, int top_sp)
@@ -532,13 +555,15 @@ static void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int 
     } else if (WHETHER (m_stack[k], REF_SYMBOL)) {
       A68_REF *v = (A68_REF *) STACK_ADDRESS (sp_2);
       PUSH_REF (p, *v);
-      sp_2 += SIZE_OF (A68_REF);
+      sp_2 += ALIGNED_SIZEOF (A68_REF);
       deref (p, k, STRONG);
       if (m_stack[k] != MOID (u)) {
-        monitor_error ("argument mode error", moid_to_string (m_stack[k], MOID_WIDTH));
+        snprintf (edit_line, BUFFER_SIZE, "%s to %s", moid_to_string (m_stack[k], MOID_WIDTH), moid_to_string (MOID (u), MOID_WIDTH));
+        monitor_error ("argument mode error", edit_line);
       }
     } else {
-      monitor_error ("argument mode error", moid_to_string (m_stack[k], MOID_WIDTH));
+      snprintf (edit_line, BUFFER_SIZE, "%s to %s", moid_to_string (m_stack[k], MOID_WIDTH), moid_to_string (MOID (u), MOID_WIDTH));
+      monitor_error ("cannot coerce argument", edit_line);
     }
     QUIT_ON_ERROR;
   }
@@ -547,7 +572,7 @@ static void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int 
 }
 
 /*!
-\brief
+\brief perform a selection
 */
 
 static void selection (FILE_T f, NODE_T * p, char *field)
@@ -580,7 +605,7 @@ static void selection (FILE_T f, NODE_T * p, char *field)
   for (; u != NULL; FORWARD (u), FORWARD (v)) {
     if (field == u->text) {
       if (name) {
-        A68_REF *z = (A68_REF *) (STACK_OFFSET (-SIZE_OF (A68_REF)));
+        A68_REF *z = (A68_REF *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REF)));
         CHECK_NIL (p, *z, moid);
         z->offset += v->offset;
       } else {
@@ -596,7 +621,7 @@ static void selection (FILE_T f, NODE_T * p, char *field)
 }
 
 /*!
-\brief
+\brief perform a call
 */
 
 static void call (FILE_T f, NODE_T * p, int depth)
@@ -642,7 +667,7 @@ static void call (FILE_T f, NODE_T * p, int depth)
 }
 
 /*!
-\brief
+\brief perform a slice
 */
 
 static void slice (FILE_T f, NODE_T * p, int depth)
@@ -680,7 +705,7 @@ static void slice (FILE_T f, NODE_T * p, int depth)
     dim = DIMENSION (moid);
   }
 /* Get indexer. */
-  ref_heap = REF_HANDLE (&z)->offset + SIZE_OF (A68_ARRAY) + (dim - 1) * SIZE_OF (A68_TUPLE);
+  ref_heap = REF_HANDLE (&z)->offset + ALIGNED_SIZEOF (A68_ARRAY) + (dim - 1) * ALIGNED_SIZEOF (A68_TUPLE);
   args = m_sp;
   if (attr == SUB_SYMBOL) {
     do {
@@ -710,7 +735,7 @@ static void slice (FILE_T f, NODE_T * p, int depth)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
     QUIT_ON_ERROR;
-    index += t->span * (i.value - t->shift);
+    index += t->span * i.value - t->shift;
   }
   address = ROW_ELEMENT (x, index);
   if (name) {
@@ -725,7 +750,7 @@ static void slice (FILE_T f, NODE_T * p, int depth)
 }
 
 /*!
-\brief
+\brief perform a call or a slice
 */
 
 static void call_or_slice (FILE_T f, NODE_T * p, int depth)
@@ -741,7 +766,7 @@ static void call_or_slice (FILE_T f, NODE_T * p, int depth)
 }
 
 /*!
-\brief
+\brief parse expression on input
 */
 
 static void parse (FILE_T f, NODE_T * p, int depth)
@@ -1016,7 +1041,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
 }
 
 /*!
-\brief
+\brief perform assignment
 */
 
 static void assign (FILE_T f, NODE_T * p)
@@ -1053,7 +1078,7 @@ static void assign (FILE_T f, NODE_T * p)
 }
 
 /*!
-\brief
+\brief evaluate expression on input
 */
 
 static void evaluate (FILE_T f, NODE_T * p, char *str)
@@ -1065,6 +1090,9 @@ static void evaluate (FILE_T f, NODE_T * p, char *str)
   SCAN_CHECK (f, p);
   QUIT_ON_ERROR;
   assign (f, p);
+  if (attr != 0) {
+    monitor_error ("trailing character in expression", symbol);
+  }
 }
 
 /*!
@@ -1157,7 +1185,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
   case MODE_COMPLEX:
     {
       A68_REAL *r = (A68_REAL *) w;
-      A68_REAL *i = (A68_REAL *) (w + SIZE_OF (A68_REAL));
+      A68_REAL *i = (A68_REAL *) (w + ALIGNED_SIZEOF (A68_REAL));
       initialised = (INITIALISED (r) && INITIALISED (i));
       recognised = A68_TRUE;
       break;
@@ -1248,11 +1276,17 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
   case MODE_PIPE:
     {
       A68_REF *read = (A68_REF *) w;
-      A68_REF *write = (A68_REF *) (w + SIZE_OF (A68_REF));
-      A68_INT *pid = (A68_INT *) (w + 2 * SIZE_OF (A68_REF));
+      A68_REF *write = (A68_REF *) (w + ALIGNED_SIZEOF (A68_REF));
+      A68_INT *pid = (A68_INT *) (w + 2 * ALIGNED_SIZEOF (A68_REF));
       initialised = (INITIALISED (read) && INITIALISED (write) && INITIALISED (pid));
       recognised = A68_TRUE;
       break;
+    }
+  case MODE_SOUND:
+    {
+      A68_SOUND *z = (A68_SOUND *) w;
+      initialised = INITIALISED (z);
+      recognised = A68_TRUE;
     }
   }
   if (result == NULL) {
@@ -1318,7 +1352,7 @@ static void indent_crlf (FILE_T f)
 \param mode
 **/
 
-static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
+static void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
 {
   if (WHETHER (mode, REF_SYMBOL)) {
     A68_REF *z = (A68_REF *) item;
@@ -1329,20 +1363,24 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
         WRITE (STDOUT_FILENO, NO_VALUE);
       }
     } else {
-      ADDR_T addr = z->offset;
-      WRITE (STDOUT_FILENO, " refers to");
-      if (IS_IN_HEAP (z)) {
-        addr += REF_HANDLE (z)->offset;
-        WRITE (STDOUT_FILENO, " heap");
-      } else if (IS_IN_FRAME (z)) {
-        WRITE (STDOUT_FILENO, " frame");
-      } else if (IS_IN_STACK (z)) {
-        WRITE (STDOUT_FILENO, " stack");
-      } else if (IS_IN_HANDLE (z)) {
-        WRITE (STDOUT_FILENO, " handle");
+      if (INITIALISED (z)) {
+        ADDR_T addr = z->offset;
+        WRITE (STDOUT_FILENO, " refers to");
+        if (IS_IN_HEAP (z)) {
+          addr += REF_HANDLE (z)->offset;
+          WRITE (STDOUT_FILENO, " heap");
+        } else if (IS_IN_FRAME (z)) {
+          WRITE (STDOUT_FILENO, " frame");
+        } else if (IS_IN_STACK (z)) {
+          WRITE (STDOUT_FILENO, " stack");
+        } else if (IS_IN_HANDLE (z)) {
+          WRITE (STDOUT_FILENO, " handle");
+        }
+        snprintf (output_line, BUFFER_SIZE, "(%d)", addr);
+        WRITE (STDOUT_FILENO, output_line);
+      } else {
+        WRITE (STDOUT_FILENO, NO_VALUE);
       }
-      snprintf (output_line, BUFFER_SIZE, "(%d)", addr);
-      WRITE (STDOUT_FILENO, output_line);
     }
   } else if (mode == MODE (STRING)) {
     if (!INITIALISED ((A68_REF *) item)) {
@@ -1352,25 +1390,24 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     }
   } else if ((WHETHER (mode, ROW_SYMBOL) || WHETHER (mode, FLEX_SYMBOL)) && mode != MODE (STRING)) {
     MOID_T *deflexed = DEFLEX (mode);
-    A68_ARRAY *arr;
-    A68_TUPLE *tup;
-    tabs++;
+    int old_tabs = tabs;
+    tabs += 2;
     if (!INITIALISED ((A68_REF *) item)) {
       WRITE (STDOUT_FILENO, NO_VALUE);
     } else {
-      int count = 0;
+      A68_ARRAY *arr;
+      A68_TUPLE *tup;
+      int count = 0, act_count = 0, elems;
       GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
-      snprintf (output_line, BUFFER_SIZE, " (elements: %d)", get_row_size (tup, arr->dimensions));
+      elems = get_row_size (tup, arr->dimensions);
+      snprintf (output_line, BUFFER_SIZE, ", %d element(s)", elems);
       WRITE (f, output_line);
       if (get_row_size (tup, arr->dimensions) != 0) {
         BYTE_T *base_addr = ADDRESS (&arr->array);
         BOOL_T done = A68_FALSE;
         initialise_internal_index (tup, arr->dimensions);
         while (!done && ++count <= (max_row_elems + 1)) {
-          if (count > max_row_elems) {
-            indent_crlf (f);
-            WRITE (f, "...");
-          } else {
+          if (count <= max_row_elems) {
             ADDR_T index = calculate_internal_index (tup, arr->dimensions);
             ADDR_T elem_addr = ROW_ELEMENT (arr, index);
             BYTE_T *elem = &base_addr[elem_addr];
@@ -1378,13 +1415,17 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
             WRITE (f, "[");
             print_internal_index (f, tup, arr->dimensions);
             WRITE (f, "]");
-            show_item (p, f, elem, SUB (deflexed));
+            show_item (f, p, elem, SUB (deflexed));
+            act_count++;
             done = increment_internal_index (tup, arr->dimensions);
           }
         }
+        indent_crlf (f);
+        snprintf (output_line, BUFFER_SIZE, " %d element(s) written (%d%%)", act_count, (int) ((100.0 * act_count) / elems));
+        WRITE (f, output_line);
       }
     }
-    tabs--;
+    tabs = old_tabs;
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     tabs++;
@@ -1393,17 +1434,22 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
       indent_crlf (f);
       snprintf (output_line, BUFFER_SIZE, "     %s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH), TEXT (q));
       WRITE (STDOUT_FILENO, output_line);
-      show_item (p, f, elem, MOID (q));
+      show_item (f, p, elem, MOID (q));
     }
     tabs--;
   } else if (WHETHER (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
-    tabs++;
-    indent_crlf (f);
-    snprintf (output_line, BUFFER_SIZE, "%s", moid_to_string ((MOID_T *) (z->value), MOID_WIDTH));
+    snprintf (output_line, BUFFER_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (z->value), MOID_WIDTH));
     WRITE (STDOUT_FILENO, output_line);
-    show_item (p, f, &item[SIZE_OF (A68_UNION)], (MOID_T *) (z->value));
-    tabs--;
+    show_item (f, p, &item[ALIGNED_SIZEOF (A68_UNION)], (MOID_T *) (z->value));
+  } else if (mode == MODE (SIMPLIN)) {
+    A68_UNION *z = (A68_UNION *) item;
+    snprintf (output_line, BUFFER_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (z->value), MOID_WIDTH));
+    WRITE (STDOUT_FILENO, output_line);
+  } else if (mode == MODE (SIMPLOUT)) {
+    A68_UNION *z = (A68_UNION *) item;
+    snprintf (output_line, BUFFER_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (z->value), MOID_WIDTH));
+    WRITE (STDOUT_FILENO, output_line);
   } else {
     BOOL_T init;
     if (check_initialisation (p, item, mode, &init)) {
@@ -1434,6 +1480,15 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
           } else {
             WRITE (STDOUT_FILENO, CANNOT_SHOW);
           }
+        } else if (mode == MODE (SOUND)) {
+          A68_SOUND *z = (A68_SOUND *) item;
+          if (z != NULL) {
+            snprintf (output_line, BUFFER_SIZE, "% d channels, %d bits, %d rate, %d samples", z->num_channels, z->bits_per_sample, z->sample_rate, z->num_samples);
+            WRITE (STDOUT_FILENO, output_line);
+
+          } else {
+            WRITE (STDOUT_FILENO, CANNOT_SHOW);
+          }
         } else {
           print_item (p, f, item, mode);
         }
@@ -1441,8 +1496,47 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
         WRITE (STDOUT_FILENO, NO_VALUE);
       }
     } else {
-      WRITE (STDOUT_FILENO, CANNOT_SHOW);
+      snprintf (output_line, BUFFER_SIZE, " mode %s, %s", moid_to_string (mode, MOID_WIDTH), CANNOT_SHOW);
+      WRITE (STDOUT_FILENO, output_line);
     }
+  }
+}
+
+/*!
+\brief overview of frame item
+\param f
+\param p
+\param link
+\param q
+\param modif
+**/
+
+static void show_frame_item (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, int modif)
+{
+  ADDR_T addr = link + FRAME_INFO_SIZE + q->offset;
+  ADDR_T loc = FRAME_INFO_SIZE + q->offset;
+  (void) p;
+  indent_crlf (STDOUT_FILENO);
+  if (modif != ANONYMOUS) {
+    snprintf (output_line, BUFFER_SIZE, "     frame(%d=%d+%d) %s \"%s\"", addr, link, loc, moid_to_string (MOID (q), MOID_WIDTH), SYMBOL (NODE (q)));
+    WRITE (STDOUT_FILENO, output_line);
+    show_item (f, p, FRAME_ADDRESS (addr), MOID (q));
+  } else {
+    switch (PRIO (q)) {
+    case GENERATOR:
+      {
+        snprintf (output_line, BUFFER_SIZE, "     frame(%d=%d+%d) LOC %s", addr, link, loc, moid_to_string (MOID (q), MOID_WIDTH));
+        WRITE (STDOUT_FILENO, output_line);
+        break;
+      }
+    default:
+      {
+        snprintf (output_line, BUFFER_SIZE, "     frame(%d=%d+%d) internal %s", addr, link, loc, moid_to_string (MOID (q), MOID_WIDTH));
+        WRITE (STDOUT_FILENO, output_line);
+        break;
+      }
+    }
+    show_item (f, p, FRAME_ADDRESS (addr), MOID (q));
   }
 }
 
@@ -1459,29 +1553,28 @@ static void show_frame_items (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, int 
 {
   (void) p;
   for (; q != NULL; q = NEXT (q)) {
-    ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + q->offset;
-    indent_crlf (STDOUT_FILENO);
-    if (modif != ANONYMOUS) {
-      snprintf (output_line, BUFFER_SIZE, "     frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH), SYMBOL (NODE (q)));
-      WRITE (STDOUT_FILENO, output_line);
-    } else {
-      switch (PRIO (q)) {
-      case GENERATOR:
-        {
-          snprintf (output_line, BUFFER_SIZE, "     frame(%d) LOC %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
-          WRITE (STDOUT_FILENO, output_line);
-          break;
-        }
-      default:
-        {
-          snprintf (output_line, BUFFER_SIZE, "     frame(%d) internal %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
-          WRITE (STDOUT_FILENO, output_line);
-          break;
-        }
-      }
-    }
-    show_item (p, f, FRAME_ADDRESS (pos_in_frame_stack), MOID (q));
+    show_frame_item (f, p, link, q, modif);
   }
+}
+
+/*!
+\brief introduce stack frame
+\param f
+\param p
+\param link
+\param printed
+**/
+
+static void intro_frame (FILE_T f, NODE_T * p, ADDR_T link, int *printed)
+{
+  SYMBOL_TABLE_T *q = SYMBOL_TABLE (p);
+  if (*printed > 0) {
+    WRITELN (f, "++++");
+  }
+  (*printed)++;
+  where (f, p);
+  snprintf (output_line, BUFFER_SIZE, "++++ Stack frame %d at frame(%d), level=%d, size=%d bytes", FRAME_NUMBER (link), link, q->level, FRAME_INCREMENT (link) + FRAME_INFO_SIZE);
+  WRITELN (f, output_line);
 }
 
 /*!
@@ -1489,16 +1582,23 @@ static void show_frame_items (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, int 
 \param f
 \param p
 \param link
+\param printed
 **/
 
-void show_stack_frame (FILE_T f, NODE_T * p, ADDR_T link)
+void show_stack_frame (FILE_T f, NODE_T * p, ADDR_T link, int *printed)
 {
 /* show the frame starting at frame pointer 'link', using symbol table from p as a map. */
   if (p != NULL) {
     SYMBOL_TABLE_T *q = SYMBOL_TABLE (p);
-    where (STDOUT_FILENO, p);
-    snprintf (output_line, BUFFER_SIZE, "++++ Stack frame level %d", q->level);
+    intro_frame (f, p, link, printed);
+    snprintf (output_line, BUFFER_SIZE, "++++ Dynamic link=frame(%d), static link=frame(%d)", FRAME_DYNAMIC_LINK (link), FRAME_STATIC_LINK (link));
     WRITELN (STDOUT_FILENO, output_line);
+    snprintf (output_line, BUFFER_SIZE, "++++ Procedure frame=%s", (FRAME_PROC_FRAME (link) ? "yes" : "no"));
+    WRITELN (STDOUT_FILENO, output_line);
+#if defined ENABLE_PAR_CLAUSE
+    snprintf (output_line, BUFFER_SIZE, "++++ Thread id=%d", (unsigned) FRAME_THREAD_ID (link));
+    WRITELN (STDOUT_FILENO, output_line);
+#endif
     show_frame_items (f, p, link, q->identifiers, IDENTIFIER);
     show_frame_items (f, p, link, q->operators, OPERATOR);
     show_frame_items (f, p, link, q->anonymous, ANONYMOUS);
@@ -1571,20 +1671,42 @@ void show_heap (FILE_T f, NODE_T * p, A68_HANDLE * z, int top, int n)
 }
 
 /*!
+\brief search current frame and print it
+\param f
+\param link
+**/
+
+void stack_dump_current (FILE_T f, ADDR_T link)
+{
+  if (link > 0) {
+    int dynamic_link = FRAME_DYNAMIC_LINK (link);
+    NODE_T *p = FRAME_TREE (link);
+    if (p != NULL && SYMBOL_TABLE (p)->level > 3) {
+      if (FRAME_NUMBER (link) == current_frame) {
+        int printed = 0;
+        show_stack_frame (f, p, link, &printed);
+      } else {
+        stack_dump_current (f, dynamic_link);
+      }
+    }
+  }
+}
+
+/*!
 \brief overview of the stack
 \param f
 \param link
 \param depth
 **/
 
-void stack_dump (FILE_T f, ADDR_T link, int depth)
+void stack_dump (FILE_T f, ADDR_T link, int depth, int *printed)
 {
   if (depth > 0 && link > 0) {
     int dynamic_link = FRAME_DYNAMIC_LINK (link);
     NODE_T *p = FRAME_TREE (link);
     if (p != NULL && SYMBOL_TABLE (p)->level > 3) {
-      show_stack_frame (f, p, link);
-      stack_dump (f, dynamic_link, depth - 1);
+      show_stack_frame (f, p, link, printed);
+      stack_dump (f, dynamic_link, depth - 1, printed);
     }
   }
 }
@@ -1596,22 +1718,22 @@ void stack_dump (FILE_T f, ADDR_T link, int depth)
 \param depth
 **/
 
-void stack_trace (FILE_T f, ADDR_T link, int depth)
+void stack_trace (FILE_T f, ADDR_T link, int depth, int *printed)
 {
   if (depth > 0 && link > 0) {
     int dynamic_link = FRAME_DYNAMIC_LINK (link);
     if (FRAME_PROC_FRAME (link)) {
       NODE_T *p = FRAME_TREE (link);
-      show_stack_frame (f, p, link);
-      stack_trace (f, dynamic_link, depth - 1);
+      show_stack_frame (f, p, link, printed);
+      stack_trace (f, dynamic_link, depth - 1, printed);
     } else {
-      stack_trace (f, dynamic_link, depth);
+      stack_trace (f, dynamic_link, depth, printed);
     }
   }
 }
 
 /*!
-\brief examine_tags
+\brief examine tags
 \param f
 \param p
 \param link
@@ -1619,15 +1741,12 @@ void stack_trace (FILE_T f, ADDR_T link, int depth)
 \param sym
 **/
 
-void examine_tags (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * i, char *sym)
+void examine_tags (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, char *sym, int *printed)
 {
-  for (; i != NULL; i = NEXT (i)) {
-    ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + i->offset;
-    if (NODE (i) != NULL && SYMBOL (NODE (i)) == sym) {
-      where (f, NODE (i));
-      snprintf (output_line, BUFFER_SIZE, "     frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (i), MOID_WIDTH), SYMBOL (NODE (i)));
-      WRITELN (STDOUT_FILENO, output_line);
-      show_item (p, f, FRAME_ADDRESS (pos_in_frame_stack), MOID (i));
+  for (; q != NULL; q = NEXT (q)) {
+    if (NODE (q) != NULL && SYMBOL (NODE (q)) == sym) {
+      intro_frame (f, p, link, printed);
+      show_frame_item (f, p, link, q, PRIO (q));
     }
   }
 }
@@ -1639,17 +1758,17 @@ void examine_tags (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * i, char *sym)
 \param sym
 **/
 
-void examine_stack (FILE_T f, ADDR_T link, char *sym)
+void examine_stack (FILE_T f, ADDR_T link, char *sym, int *printed)
 {
   if (link > 0) {
     int dynamic_link = FRAME_DYNAMIC_LINK (link);
     NODE_T *p = FRAME_TREE (link);
     if (p != NULL) {
       SYMBOL_TABLE_T *q = SYMBOL_TABLE (p);
-      examine_tags (f, p, link, q->identifiers, sym);
-      examine_tags (f, p, link, q->operators, sym);
+      examine_tags (f, p, link, q->identifiers, sym, printed);
+      examine_tags (f, p, link, q->operators, sym, printed);
     }
-    examine_stack (f, dynamic_link, sym);
+    examine_stack (f, dynamic_link, sym, printed);
   }
 }
 
@@ -1683,49 +1802,60 @@ static void breakpoints (NODE_T * p, BOOL_T set, int num, char *expr)
 
 static void genie_help (FILE_T f)
 {
-  WRITELN (f, "(Supply sufficient characters for unique recognition)");
-  WRITELN (f, "breakpoint n [expression]");
-  WRITELN (f, "  Set breakpoint on units in line \"n\"");
-  WRITELN (f, "  For a break to occur, expression must evaluate to TRUE");
-  WRITELN (f, "breakpoint");
-  WRITELN (f, "  Clear all breakpoints");
-  WRITELN (f, "calls [n]");
-  WRITELN (f, "  Print \"n\" frames in the call stack (default n=3)");
-  WRITELN (f, "continue, resume");
-  WRITELN (f, "  Continue execution");
-  WRITELN (f, "do command, exec command");
-  WRITELN (f, "  Pass \"command\" to the shell and print return code");
-  WRITELN (f, "elems n");
-  WRITELN (f, "  Print first \"n\" elements of rows (default n=24)");
-  WRITELN (f, "evaluate expression, x expression");
-  WRITELN (f, "  Print result of \"expression\"");
-  WRITELN (f, "examine n");
-  WRITELN (f, "  Print value of symbols named \"n\" in the call stack");
-  WRITELN (f, "exit, hx, quit");
-  WRITELN (f, "  Terminates the program");
-  WRITELN (f, "frame");
-  WRITELN (f, "  Print contents of the current stack frame");
-  WRITELN (f, "heap [n]");
-  WRITELN (f, "  Print contents of the heap with address not greater than \"n\"");
-  WRITELN (f, "help");
-  WRITELN (f, "  Print brief help text");
-  WRITELN (f, "ht");
-  WRITELN (f, "  Suppress program output to standard output");
-  WRITELN (f, "list [n]");
-  WRITELN (f, "  Show \"n\" lines around the interrupted line (default n=10)");
-  WRITELN (f, "stack [n]");
-  WRITELN (f, "  Print \"n\" frames in the stack (default n=3)");
-  WRITELN (f, "next, step");
-  WRITELN (f, "  Resume execution to next interruptable point");
-  WRITELN (f, "where");
-  WRITELN (f, "  Print the interrupted line");
+  WRITELN (f, "Commands can be abbreviated");
+  WRITELN (f, "");
+  WRITELN (f, "BREAKPOINT n [expression]");
+  WRITELN (f, "   Set breakpoint on units in line \"n\"");
+  WRITELN (f, "   For a break to occur, expression must evaluate to TRUE");
+  WRITELN (f, "BREAKPOINT");
+  WRITELN (f, "   Clear all breakpoints");
+  WRITELN (f, "CALLS [n]");
+  WRITELN (f, "   Print \"n\" frames in the call stack (default n=3)");
+  WRITELN (f, "CONTINUE, RESUME");
+  WRITELN (f, "   Continue execution");
+  WRITELN (f, "DO command, EXEC command");
+  WRITELN (f, "   Pass \"command\" to the shell and print return code");
+  WRITELN (f, "ELEMS n");
+  WRITELN (f, "   Print first \"n\" elements of rows (default n=24)");
+  WRITELN (f, "EVALUATE expression, X expression");
+  WRITELN (f, "   Print result of \"expression\"");
+  WRITELN (f, "EXAMINE n");
+  WRITELN (f, "   Print value of symbols named \"n\" in the call stack");
+  WRITELN (f, "EXIT, HX, QUIT");
+  WRITELN (f, "   Terminates the program");
+  WRITELN (f, "FRAME [n]");
+  WRITELN (f, "   Print contents of the current stack frame if n is not specified");
+  WRITELN (f, "   Set current stack frame to \"n\" if \"n\" is specified");
+  WRITELN (f, "   Set current stack frame to top of frame stack if \"0\" is specified");
+  WRITELN (f, "HEAP [n]");
+  WRITELN (f, "   Print contents of the heap with address not greater than \"n\"");
+  WRITELN (f, "HELP");
+  WRITELN (f, "   Print brief help text");
+  WRITELN (f, "HT");
+  WRITELN (f, "   Halts typing to standard output");
+  WRITELN (f, "LIST [n]");
+  WRITELN (f, "   Show \"n\" lines around the interrupted line (default n=10)");
+  WRITELN (f, "PROMPT s");
+  WRITELN (f, "   Set prompt to \"s\"");
+  WRITELN (f, "RT");
+  WRITELN (f, "   Resumes typing to standard output");
+  WRITELN (f, "SIZES");
+  WRITELN (f, "   Print size of memory segments");
+  WRITELN (f, "STACK [n]");
+  WRITELN (f, "   Print \"n\" frames in the stack (default n=3)");
+  WRITELN (f, "NEXT, STEP");
+  WRITELN (f, "   Resume execution to next interruptable point");
+  WRITELN (f, "WHERE");
+  WRITELN (f, "   Print the interrupted line");
+  WRITELN (f, "XREF n");
+  WRITELN (f, "   Give detailed information on source line \"n\"");
 }
 
 /*!
 \brief execute monitor command
 \param p
 \param cmd
-\return 
+\return TRUE if execution can be continued, FALSE otherwise
 **/
 
 static BOOL_T single_stepper (NODE_T * p, char *cmd)
@@ -1740,10 +1870,11 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
   }
   if (match_string (cmd, "CAlls", BLANK_CHAR)) {
     int k = argval (cmd, NULL);
+    int printed = 0;
     if (k > 0) {
-      stack_trace (STDOUT_FILENO, frame_pointer, k);
+      stack_trace (STDOUT_FILENO, frame_pointer, k, &printed);
     } else if (k == 0) {
-      stack_trace (STDOUT_FILENO, frame_pointer, 3);
+      stack_trace (STDOUT_FILENO, frame_pointer, 3, &printed);
     }
     return (A68_FALSE);
   } else if (match_string (cmd, "Continue", NULL_CHAR)) {
@@ -1786,7 +1917,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
           WRITELN (STDOUT_FILENO, "(");
           WRITE (STDOUT_FILENO, moid_to_string (res, MOID_WIDTH));
           WRITE (STDOUT_FILENO, ")");
-          show_item (p, STDOUT_FILENO, STACK_ADDRESS (old_sp), res);
+          show_item (STDOUT_FILENO, p, STACK_ADDRESS (old_sp), res);
           cont = (WHETHER (res, REF_SYMBOL) && !IS_NIL (*(A68_REF *) STACK_ADDRESS (old_sp)));
           if (cont) {
             A68_REF z;
@@ -1808,8 +1939,14 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     while (IS_SPACE (sym[0]) && sym[0] != NULL_CHAR) {
       sym++;
     }
-    if (sym[0] != NULL_CHAR) {
-      examine_stack (STDOUT_FILENO, frame_pointer, add_token (&top_token, sym)->text);
+    if (sym[0] != NULL_CHAR && (IS_LOWER (sym[0]) || IS_UPPER (sym[0]))) {
+      int printed = 0;
+      examine_stack (STDOUT_FILENO, frame_pointer, add_token (&top_token, sym)->text, &printed);
+      if (printed == 0) {
+        monitor_error ("tag not found", sym);
+      }
+    } else {
+      monitor_error ("tag expected", NULL);
     }
     return (A68_FALSE);
   } else if (match_string (cmd, "EXIt", NULL_CHAR) || match_string (cmd, "HX", NULL_CHAR) || match_string (cmd, "Quit", NULL_CHAR) || strcmp (cmd, LOGOUT_STRING) == 0) {
@@ -1818,14 +1955,24 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     }
     return (A68_FALSE);
   } else if (match_string (cmd, "Frame", NULL_CHAR)) {
-    stack_dump (STDOUT_FILENO, frame_pointer, 1);
+    if (current_frame == 0) {
+      int printed = 0;
+      stack_dump (STDOUT_FILENO, frame_pointer, 1, &printed);
+    } else {
+      stack_dump_current (STDOUT_FILENO, frame_pointer);
+    }
+    return (A68_FALSE);
+  } else if (match_string (cmd, "Frame", BLANK_CHAR)) {
+    int n = argval (cmd, NULL);
+    current_frame = (n > 0 ? n : 0);
+    stack_dump_current (STDOUT_FILENO, frame_pointer);
     return (A68_FALSE);
   } else if (match_string (cmd, "HEAp", BLANK_CHAR)) {
     int top = argval (cmd, NULL);
     if (top <= 0) {
       top = heap_size;
     }
-#if defined HAVE_TERMINFO
+#if defined ENABLE_TERMINFO
     {
       char *term_type = getenv ("TERM");
       int term_lines;
@@ -1847,6 +1994,9 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     return (A68_FALSE);
   } else if (match_string (cmd, "HT", NULL_CHAR)) {
     halt_typing = A68_TRUE;
+    return (A68_TRUE);
+  } else if (match_string (cmd, "RT", NULL_CHAR)) {
+    halt_typing = A68_FALSE;
     return (A68_TRUE);
   } else if (match_string (cmd, "Breakpoint", BLANK_CHAR)) {
     char *expr = NULL;
@@ -1896,10 +2046,11 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     return (A68_TRUE);
   } else if (match_string (cmd, "STAck", BLANK_CHAR)) {
     int k = argval (cmd, NULL);
+    int printed = 0;
     if (k > 0) {
-      stack_dump (STDOUT_FILENO, frame_pointer, k);
+      stack_dump (STDOUT_FILENO, frame_pointer, k, &printed);
     } else if (k == 0) {
-      stack_dump (STDOUT_FILENO, frame_pointer, 3);
+      stack_dump (STDOUT_FILENO, frame_pointer, 3, &printed);
     }
     return (A68_FALSE);
   } else if (match_string (cmd, "STEp", NULL_CHAR)) {
@@ -1914,7 +2065,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
   } else if (strcmp (cmd, "?") == 0) {
     genie_help (STDOUT_FILENO);
     return (A68_FALSE);
-  } else if (match_string (cmd, "Sizes", BLANK_CHAR)) {
+  } else if (match_string (cmd, "Sizes", NULL_CHAR)) {
     snprintf (output_line, BUFFER_SIZE, "Frame stack pointer=%d available=%d", frame_pointer, frame_stack_size - frame_pointer);
     WRITELN (STDOUT_FILENO, output_line);
     snprintf (output_line, BUFFER_SIZE, "Expression stack pointer=%d available=%d", stack_pointer, expr_stack_size - stack_pointer);
@@ -1924,6 +2075,24 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     snprintf (output_line, BUFFER_SIZE, "Garbage collections=%d", garbage_collects);
     WRITELN (STDOUT_FILENO, output_line);
     return (A68_FALSE);
+  } else if (match_string (cmd, "XRef", NULL_CHAR)) {
+    int k = NUMBER (LINE (p));
+    SOURCE_LINE_T *line = a68_prog.top_line;
+    for (; line != NULL; FORWARD (line)) {
+      if (line->number > 0 && line->number == k) {
+        list_source_line (STDOUT_FILENO, &a68_prog, line, A68_TRUE);
+      }
+    }
+    return (A68_FALSE);
+  } else if (match_string (cmd, "XRef", BLANK_CHAR)) {
+    int k = argval (cmd, NULL);
+    SOURCE_LINE_T *line = a68_prog.top_line;
+    for (; line != NULL; FORWARD (line)) {
+      if (line->number > 0 && line->number == k) {
+        list_source_line (STDOUT_FILENO, &a68_prog, line, A68_TRUE);
+      }
+    }
+    return (A68_FALSE);
   } else if (strlen (cmd) == 0) {
     return (A68_FALSE);
   } else {
@@ -1932,9 +2101,14 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
   }
 }
 
+/*!
+\brief evaluate conditional breakpoint expression
+\param p
+\return whether expression evaluates to TRUE
+**/
+
 BOOL_T breakpoint_expression (NODE_T * p)
 {
-/* Check whether this is a conditional breakpoint. */
   ADDR_T top_sp = stack_pointer;
   volatile BOOL_T res = A68_FALSE;
   mon_errors = 0;
@@ -1964,7 +2138,7 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
 {
   volatile BOOL_T do_cmd = A68_TRUE;
   ADDR_T top_sp = stack_pointer;
-#if defined HAVE_CURSES
+#if defined ENABLE_CURSES
   genie_curses_end (NULL);
 #endif
   in_monitor = A68_TRUE;
