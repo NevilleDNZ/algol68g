@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -144,11 +144,11 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
   (void) p;
   if (heap_segment == NULL) {
     diagnostic_node (A68_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
-    exit_genie (module->top_node, 1);
+    exit_genie (module->top_node, A68_RUNTIME_ERROR);
   }
   if (handle_segment == NULL) {
     diagnostic_node (A68_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
-    exit_genie (module->top_node, 1);
+    exit_genie (module->top_node, A68_RUNTIME_ERROR);
   }
   block_heap_compacter = 0;
   garbage_seconds = 0;

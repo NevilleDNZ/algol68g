@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -38,11 +39,11 @@ Documentation for Algol 68 Genie Mark 11
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 11</h2>
+<h2>Algol 68 Genie Mark 11.1</h2>
 <p>
 <address>J. Marcel van der Veer
 <br>
-November 2007
+March 2008
 </address>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
@@ -55,20 +56,14 @@ November 2007
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -93,8 +88,7 @@ November 2007
 <ul>
 <li><a href="description.html#high">About this Algol 68 implementation</a>
 <li><a href="description.html#diff">Algol68G compared to the Revised Report description</a>
-<li><a href="description.html#params">Partial parametrisation and currying</a>
-<li><a href="description.html#io">Transput implementation</a>
+<li><a href="description.html#params">Partial parametrisation</a><li><a href="description.html#io">Transput implementation</a>
 <ul>
 <li><a href="description.html#genio">Transput in general</a>
 <li><a href="description.html#fmtio">Formatted transput</a>
@@ -243,25 +237,32 @@ November 2007
 
 <h3><a href="license.html">15. GNU Free Documentation License</a></h3>
 
-<p style="font-size: 8pt;">
-<font color=black>
-Permission is granted to copy, distribute and/or modify this document under the terms of the 
-GNU Free Documentation License, Version 1.2 or any later version published by the 
-Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no 
-Back-Cover Texts. A copy of the license is included in the section entitled 
-<i>GNU Free Documentation License</i>.
-</p>
-
-<!-- Footer -->
-<hr color=#e0e0e0>
 <p>
-<small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
-</small>
-</p>
-<hr color=#e0e0e0>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
+<h3>
+Copyright notice
+</h3>
 
+<p style="font-size: 8pt; font-color: black;">
+The <i>Documentation for Algol 68 Genie Mark 11.1</i> is covered by the GNU Free Documentation License:
+<p style="font-size: 8pt; font-color: black;">
+<i>
+Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included in the section entitled GNU Free Documentation License.
+</i>
+<p style="font-size: 8pt; font-color: black;">
+The copy of the <i>Revised Report on the Algorithmic Language Algol 68</i> that is in the distribution of Algol 68 Genie Mark 11.1 is <b>not</b> covered by the GNU Free Documentation License: <i>The Algol 68 Revised Report has been accepted by Working Group 2.1, reviewed by Technical Committee 2 on Programming and approved for publication by the General Assembly of The International Federation for Information Processing. Reproduction of the Report, for any purpose, but only of the whole text, is explicitly permitted without formality.</i>
+</i>
+<p style="font-size: 8pt; font-color: black;">
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
+
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

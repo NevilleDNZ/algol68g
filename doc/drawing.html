@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -55,20 +56,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -76,14 +71,17 @@ Documentation for Algol 68 Genie Mark 11
 </td>
 </table>
 
-<p>On systems that have installed the <a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> (version 2.5 or compatible), Algol68G can be linked with that library to extend the standard prelude. This section contains a list of procedures supported by the current revision of Algol68G.
+<p>
+On systems that have installed the <a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> (version 2.5 or compatible), Algol68G can be linked with that library to extend the standard prelude. This section contains a list of procedures supported by the current revision of Algol68G.
 </p>
-<p><a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> offer a number of routines for drawing 2-D graphics. This allows for drawing in <code>X windows, postscript format</code>, <code>pseudo graphical interface format (pseudo-gif)</code> and <code>portable any-map format (pnm)</code> from Algol 68. Note that Algol68G is not a full Algol 68 binding for libplot.
+<p>
+<a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> offer a number of routines for drawing 2-D graphics. This allows for drawing in <code>X windows, postscript format</code>, <code>pseudo graphical interface format (pseudo-gif)</code> and <code>portable any-map format (pnm)</code> from Algol 68. Note that Algol68G is not a full Algol 68 binding for libplot.
 </p>
 <p>
 A plotter (window, postscript file, etcetera) can be considered as a stream to which plotting commands are written. Therefore Algol68G considers plotters to be objects of mode <code>REF FILE</code>. This seems consistent with the design of Algol 68 transput since a file is associated with a channel that describes the device, and therefore can be considered as a description of a device driver.
 </p>
-<p>A plotter must be opened and closed, just like any file. To specify the file to be a drawing device, <code>stand draw channel</code> is declared in the standard environment, that yields <code>TRUE</code> when inspected by <code>draw possible</code>. To specify details on the plotter type and page size, the procedure <code>draw device</code> has to be called. A sample program is given below.
+<p>
+A plotter must be opened and closed, just like any file. To specify the file to be a drawing device, <code>stand draw channel</code> is declared in the standard environment, that yields <code>TRUE</code> when inspected by <code>draw possible</code>. To specify details on the plotter type and page size, the procedure <code>draw device</code> has to be called. A sample program is given below.
 </p>
 <p>
 <pre>
@@ -111,7 +109,6 @@ close (window);
 <p>Implemented drawing routines are part of the standard environment.
 </p>
 
-<br>
 <h3><a name="drawsetup"></a>Setting up a graphics device</h3>
 <p>
 <dl>
@@ -193,7 +190,6 @@ In the preceding patterns, each hyphen stands for one line thickness. This is th
 <dd>Sets the foreground colour for plotter <code>file</code>'s graphics display. Argument <code>name</code> is a case insensitive string. Accepted names are essentially those supported by recent revisions of the <code>X</code> Window System.
 </dl>
 
-<br>
 <h3><a name="drawdraw"></a>Drawing objects</h3>
 <dl>
 <dt><code>PROC draw point = (REF FILE file, REAL x, y) VOID</code>
@@ -213,7 +209,6 @@ the page size in respectively the <code>x</code> and <code>y</code> directions.
 <dd>The three arguments specifying the centre (<code>x, y</code>) and radius <code>r</code> of a circle, and the circle is drawn. The graphics cursor is moved to (<code>x, y</code>). The values of <code>x</code> and <code>y</code> are fractions 0 .. 1 of the page size in respectively the <code>x</code> and <code>y</code> directions. The value of <code>r</code> is a fraction 0 .. 1 of the page size in the <code>y</code> direction.
 </dl>
 
-<br>
 <h3><a name="drawtext"></a>Drawing text</h3>
 <dl>
 <dt><code>PROC draw text = (REF FILE file, CHAR horiz_justify,
@@ -239,15 +234,19 @@ vert_justify, [] CHAR s) VOID</code>
 This example program can be found <a href="mandelbrot.a68.html">here</a>.
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -34,7 +34,6 @@ it ends up in at the root where traversing for that terminal started.
 Such piece of information is called a PROPAGATOR.
 */
 
-void genie_unit_trace (NODE_T *);
 void genie_serial_units_no_label (NODE_T *, int, NODE_T **);
 
 PROPAGATOR_T genie_voiding_assignation (NODE_T * p);
@@ -61,6 +60,28 @@ This saves a push/pop pair.
     z = &u;\
   }}
 
+#define EXECUTE_UNIT_INLINE_OPERAND(p) {\
+  PROPAGATOR_T *prop = &((p)->genie.propagator);\
+  NODE_T *src = prop->source;\
+  last_unit = (p);\
+  if (prop->unit == genie_dereference_loc_identifier) {\
+    A68_REF *z;\
+    MOID_T *deref = SUB (MOID (src));\
+    unsigned size = MOID_SIZE (deref);\
+    FRAME_GET (z, A68_REF, src);\
+    CHECK_NIL ((p), *z, MOID (src));\
+    PUSH_ALIGNED (p, ADDRESS (z), size);\
+    CHECK_INIT_GENERIC ((p), STACK_OFFSET (-size), deref);\
+  } else if (prop->unit == genie_loc_identifier) {\
+    BYTE_T *x;\
+    FRAME_GET (x, BYTE_T, src);\
+    PUSH_ALIGNED ((p), x, MOID_SIZE (MOID (src)));\
+  } else if (prop->unit == genie_constant) {\
+    PUSH_ALIGNED ((p), src->genie.constant, src->genie.size);\
+  } else {\
+    EXECUTE_UNIT (p);\
+  }}
+
 #define EXECUTE_UNIT_INLINE(p) {\
   PROPAGATOR_T *prop = &((p)->genie.propagator);\
   NODE_T *src = prop->source;\
@@ -79,6 +100,13 @@ This saves a push/pop pair.
     PUSH_ALIGNED ((p), x, MOID_SIZE (MOID (src)));\
   } else if (prop->unit == genie_constant) {\
     PUSH_ALIGNED ((p), src->genie.constant, src->genie.size);\
+  } else if (prop->unit == genie_dyadic_quick) {\
+    NODE_T *u = SUB (src);\
+    NODE_T *op = NEXT (u);\
+    NODE_T *v = NEXT (op);\
+    EXECUTE_UNIT_INLINE_OPERAND (u);\
+    EXECUTE_UNIT_INLINE_OPERAND (v);\
+    (void) (TAX (op)->procedure) (op);\
   } else {\
     EXECUTE_UNIT (p);\
   }}
@@ -281,7 +309,7 @@ qualifier to a pointer. This is safe here.
 */
 
 #define GENIE_DNS_STACK(p, m, limit, info)\
-  if (p != NULL && p->need_dns) {\
+  if (p != NULL && p->need_dns && limit != PRIMAL_SCOPE) {\
     genie_dns_addr ((void *)(p), (m), (STACK_OFFSET (-MOID_SIZE (m))), (limit), (info));\
   }
 
@@ -1325,7 +1353,7 @@ PROPAGATOR_T genie_slice_name_quick (NODE_T * p)
   A68_REF *z;
   A68_ROW *r;
   A68_ARRAY *a;
-  ADDR_T pop_sp /*, scope */ ;
+  ADDR_T pop_sp, scope;
   A68_TUPLE *t;
   int index, *k;
 /* Get row and save row from sweeper. */
@@ -1349,10 +1377,10 @@ PROPAGATOR_T genie_slice_name_quick (NODE_T * p)
   }
   DOWN_SWEEP_SEMA;
 /* Leave reference to element on the stack, preserving scope. */
-/*  scope = GET_REF_SCOPE (z); */
+  scope = GET_REF_SCOPE (z);
   *z = a->array;
   z->offset += ROW_ELEMENT (a, index);
-/*  SET_REF_SCOPE (z, scope); */
+  SET_REF_SCOPE (z, scope);
   return (p->genie.propagator);
 }
 
@@ -1365,7 +1393,7 @@ PROPAGATOR_T genie_slice_name_quick (NODE_T * p)
 PROPAGATOR_T genie_slice (NODE_T * p)
 {
   PROPAGATOR_T self, primary;
-/*  ADDR_T scope = PRIMAL_SCOPE; */
+  ADDR_T scope = PRIMAL_SCOPE;
   BOOL_T slice_of_name = WHETHER (MOID (SUB (p)), REF_SYMBOL);
   MOID_T *result_moid = slice_of_name ? SUB (MOID (p)) : MOID (p);
   NODE_T *indexer = NEXT_SUB (p);
@@ -1381,7 +1409,7 @@ PROPAGATOR_T genie_slice (NODE_T * p)
     POP_REF (p, &z);
     A68_PRINT_REF ("implicit deference", &z);
     CHECK_NIL (p, z, MOID (SUB (p)));
-/*    scope = GET_REF_SCOPE (&z); */
+    scope = GET_REF_SCOPE (&z);
     PUSH_REF (p, *(A68_REF *) ADDRESS (&z));
   }
 /* SLICING subscripts one element from an array. */
@@ -1425,7 +1453,7 @@ PROPAGATOR_T genie_slice (NODE_T * p)
     if (slice_of_name) {
       A68_REF name = x->array;
       name.offset += address;
-/*      SET_REF_SCOPE (&name, scope); */
+      SET_REF_SCOPE (&name, scope);
       PUSH_REF (p, name);
       if (SEQUENCE_SET (p) == A68_TRUE) {
         self.unit = genie_slice_name_quick;
@@ -1466,7 +1494,7 @@ PROPAGATOR_T genie_slice (NODE_T * p)
     if (slice_of_name) {
       A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZEOF (A68_REF));
       *(A68_REF *) ADDRESS (&ref_new) = ref_desc_copy;
-/*      SET_REF_SCOPE (&ref_new, scope); */
+      SET_REF_SCOPE (&ref_new, scope);
       PUSH_REF (p, ref_new);
     } else {
       PUSH_REF (p, ref_desc_copy);
@@ -2545,29 +2573,6 @@ PROPAGATOR_T genie_unit (NODE_T * p)
 }
 
 /*!
-\brief execute a unit, possibly in trace mood
-\param p position in the syntax tree, should not be NULL
-**/
-
-void genie_unit_trace (NODE_T * p)
-{
-  if (sys_request_flag) {
-    single_step (p, A68_TRUE, A68_FALSE);
-  } else if (MASK (p) & BREAKPOINT_MASK) {
-    if (INFO (p)->expr == NULL) {
-      sys_request_flag = A68_FALSE;
-      single_step (p, A68_FALSE, A68_TRUE);
-    } else if (breakpoint_expression (p)) {
-      sys_request_flag = A68_FALSE;
-      single_step (p, A68_FALSE, A68_TRUE);
-    }
-  } else if (MASK (p) & TRACE_MASK) {
-    where (STDOUT_FILENO, p);
-  }
-  EXECUTE_UNIT (p);
-}
-
-/*!
 \brief execution of serial clause without labels
 \param p position in the syntax tree, should not be NULL
 \param p position in the syntax tree, should not be NULLop_sp
@@ -3032,7 +3037,11 @@ static void genie_proc_variable_dec (NODE_T * p)
         if (NEXT (p) != NULL && WHETHER (NEXT (p), ASSIGN_SYMBOL)) {
           MOID_T *source_moid = SUB (MOID (p));
           int size = MOID_SIZE (source_moid);
+          ADDR_T pop_dns = FRAME_DYNAMIC_SCOPE (frame_pointer);
+          FRAME_DYNAMIC_SCOPE (frame_pointer) = frame_pointer;
           EXECUTE_UNIT (NEXT (NEXT (p)));
+          GENIE_DNS_STACK (p, SUB (ref_mode), frame_pointer, "procedure-variable-declaration");
+          FRAME_DYNAMIC_SCOPE (frame_pointer) = pop_dns;
           DECREMENT_STACK_POINTER (p, size);
           MOVE (ADDRESS (z), STACK_TOP, (unsigned) size);
         }

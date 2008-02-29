@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -52,6 +52,8 @@ These are the phases:
 #include "algol68g.h"
 
 static jmp_buf bottom_up_crash_exit, top_down_crash_exit;
+
+static int reductions = 0;
 
 static BOOL_T reduce_phrase (NODE_T *, int);
 static BOOL_T victal_check_declarer (NODE_T *, int);
@@ -299,7 +301,6 @@ static BOOL_T dont_mark_here (NODE_T * p)
   case ALT_DO_SYMBOL:
   case ALT_EQUALS_SYMBOL:
   case ANDF_SYMBOL:
-  case ANDTH_SYMBOL:
   case ASSERT_SYMBOL:
   case ASSIGN_SYMBOL:
   case ASSIGN_TO_SYMBOL:
@@ -362,7 +363,6 @@ static BOOL_T dont_mark_here (NODE_T * p)
   case OF_SYMBOL:
   case OPEN_SYMBOL:
   case OP_SYMBOL:
-  case OREL_SYMBOL:
   case ORF_SYMBOL:
   case OUSE_SYMBOL:
   case OUT_SYMBOL:
@@ -431,10 +431,12 @@ static char *phrase_to_text (NODE_T * p, NODE_T ** w)
 Where to put the error message?  Bob Uzgalis noted that actual content of a 
 diagnostic is not as important as accurately indicating *were* the problem is! 
 */
-      if (count == 0 || (*w) == NULL) {
-        *w = p;
-      } else if (dont_mark_here (*w)) {
-        *w = p;
+      if (w != NULL) {
+        if (count == 0 || (*w) == NULL) {
+          *w = p;
+        } else if (dont_mark_here (*w)) {
+          *w = p;
+        }
       }
 /* Add initiation. */
       if (count == 0) {
@@ -1548,15 +1550,35 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
       return;
     }
   }
-  if (head != NULL && head->info->module->options.reductions) {
-    where (STDOUT_FILENO, head);
-    bufcpy (output_line, "", BUFFER_SIZE);
-    bufcat (output_line, non_terminal_string (edit_line, result), BUFFER_SIZE);
-    bufcat (output_line, "<-", BUFFER_SIZE);
-    bufcat (output_line, phrase_to_text (head, NULL), BUFFER_SIZE);
+/* Print parser reductions. */
+  if (head != NULL && head->info->module->options.reductions && LINE_NUMBER (head) > 0) {
+    NODE_T *q;
+    int count = 0;
+    reductions++;
+    if (!((reductions == head->reduction + 1) && NEXT (head) == NULL)) {
+      where (STDOUT_FILENO, head);
+    }
+    head->reduction = reductions;
+    snprintf (output_line, BUFFER_SIZE, "\n++++ Reduction %d: %s<-", reductions, non_terminal_string (edit_line, result));
     io_write_string (STDOUT_FILENO, output_line);
+    for (q = head; q != NULL && tail != NULL && q != NEXT (tail); FORWARD (q), count++) {
+      int gatt = ATTRIBUTE (q);
+      char *z = non_terminal_string (input_line, gatt);
+      if (count > 0) {
+        io_write_string (STDOUT_FILENO, ", ");
+      }
+      if (z != NULL) {
+        io_write_string (STDOUT_FILENO, z);
+        if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTER || gatt == INDICANT) {
+          snprintf (output_line, BUFFER_SIZE, " \"%s\"", SYMBOL (q));
+          io_write_string (STDOUT_FILENO, output_line);
+        }
+      } else {
+        io_write_string (STDOUT_FILENO, SYMBOL (q));
+      }
+    }
   }
-/* Execute procedure in case reduction succeeds. */
+/* Make reduction. */
   if (a != NULL) {
     a (head);
   }
@@ -2899,9 +2921,7 @@ static void reduce_tertiaries (NODE_T * p)
   }
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, a68_extension, NULL, AND_FUNCTION, TERTIARY, ANDF_SYMBOL, TERTIARY, 0);
-    f (q, a68_extension, NULL, AND_FUNCTION, TERTIARY, ANDTH_SYMBOL, TERTIARY, 0);
     f (q, a68_extension, NULL, OR_FUNCTION, TERTIARY, ORF_SYMBOL, TERTIARY, 0);
-    f (q, a68_extension, NULL, OR_FUNCTION, TERTIARY, OREL_SYMBOL, TERTIARY, 0);
   }
 }
 

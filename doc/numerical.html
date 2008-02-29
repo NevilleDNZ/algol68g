@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -58,20 +59,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -138,7 +133,6 @@ Items that do not require GSL are marked as <b>[Native]</b>.
 [Native] Evaluates the angle whose tangent is <code>y / x</code>.
 The angle will be in range [- &pi;, &pi;].
 </dl>
-<br>
 
 <h3><a name="gslcomplex"></a>COMPLEX functions</h3>
 <dl>
@@ -219,7 +213,6 @@ The angle will be in range [- &pi;, &pi;].
 <dt><code>PROC complex arc tanh = (COMPLEX z) COMPLEX</code>
 <dd>[GSL] Evaluates the complex inverse hyperbolic tangent of argument <code>z</code>. 
 </dl>
-<br>
 
 <h3><a name="gslairy"></a>REAL Airy functions</h3>
 <dl>
@@ -238,7 +231,6 @@ The angle will be in range [- &pi;, &pi;].
 <dt><code>PROC airy bi derivative = (REAL x) REAL</code>
 <dd>[GSL] Evaluates the airy function <code>Bi' (x)</code>.
 </dl>
-<br>
 
 <h3><a name="gslbessel"></a>REAL Bessel functions</h3>
 <dl>
@@ -321,7 +313,6 @@ Argument <code>l</code> must be integral.
 <dd>[GSL] Evaluates the scaled fractional irregular modified Bessel function <code>exp 
 (-|x|) K_nu (x)</code>.
 </dl>
-<br>
 
 <h3><a name="gslelliptic"></a>REAL Elliptic integrals</h3>
 <dl>
@@ -401,12 +392,11 @@ defined as <code>gamma (a) * gamma (b) / gamma (a + b)</code>.
 <code>b</code> and <code>x</code>.
 </dl>
 
-<br>
 <h3><a name="constants"></a>Physical Constants</h3>
 <p>
 This paragraph describes physical constants such as the speed of light or the gravitational constant.  The constants are available in the MKSA system (meter-kilograms-seconds-ampere) and the CGS system (centimeter-grams-seconds). 
 
-<h4><a name="contants_1"></a>Fundamental constants</h4>
+<h3><a name="contants_1"></a>Fundamental constants</h3>
 
 <dl compact>
 <dt><code>REAL mksa speed of light, cgs speed of light</code>
@@ -469,7 +459,7 @@ This paragraph describes physical constants such as the speed of light or the gr
 <dd>[GSL] The speed of 1 kilometer per hour.
 </dl>
 
-<h4><a name="constants_2"></a>Astronomy and astrophysics</h4>
+<h3><a name="constants_2"></a>Astronomy and astrophysics</h3>
 <dl compact>
 <dt><code>REAL mksa astronomical unit, cgs astronomical unit</code>
 <dd>[GSL] The length of 1 astronomical unit (mean Earth-Sun distance), au.
@@ -495,7 +485,7 @@ This paragraph describes physical constants such as the speed of light or the gr
 <dd>[GSL] The mass of the Sun.
 </dl>
 
-<h4><a name="constants_3"></a>Atomic and nuclear physics</h4>
+<h3><a name="constants_3"></a>Atomic and nuclear physics</h3>
 
 <dl compact>
 <dt><code>REAL mksa electron charge, cgs electron charge</code>
@@ -564,7 +554,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The magnetic moment of a proton, &mu; p.
 </dl>
 
-<h4><a name="constants_4"></a>Time</h4>
+<h3><a name="constants_4"></a>Time</h3>
 
 <dl compact>
 <dt><code>REAL mksa minute, cgs minute</code>
@@ -583,7 +573,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The number of seconds in 1 week.
 </dl>
 
-<h4><a name="constants_5"></a>Imperial units</h4>
+<h3><a name="constants_5"></a>Imperial units</h3>
 
 <dl compact>
 <dt><code>REAL mksa inch, cgs inch</code>
@@ -606,7 +596,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The length of 1 mil (1/1000th of an inch).
 </dl>
 
-<h4><constants_6></a>Nautical units</h4>
+<h3><constants_6></a>Nautical units</h3>
 
 <dl compact>
 <dt><code>REAL mksa nautical mile, cgs nautical mile</code>
@@ -621,7 +611,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The speed of 1 knot.
 </dl>
 
-<h4><a name="constants_8"></a>Volume</h4>
+<h3><a name="constants_8"></a>Volume</h3>
 
 <dl compact>
 <dt><code>REAL mksa acre, cgs acre</code>
@@ -652,7 +642,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The volume of 1 pint.
 </dl>
 
-<h4><a name="constants_9"></a>Mass and weight</h4>
+<h3><a name="constants_9"></a>Mass and weight</h3>
 
 <dl compact>
 <dt><code>REAL mksa pound mass, cgs pound mass</code>
@@ -699,7 +689,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The force of 1 poundal.
 </dl>
 
-<h4><a name="constants_10"></a>Thermal energy and power</h4>
+<h3><a name="constants_10"></a>Thermal energy and power</h3>
 
 <dl compact>
 <dt><code>REAL mksa calorie, cgs calorie</code>
@@ -718,7 +708,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The power of 1 horsepower.
 </dl>
 
-<h4><a name="constants_11"></a>Pressure</h4>
+<h3><a name="constants_11"></a>Pressure</h3>
 
 <dl compact>
 <dt><code>REAL mksa bar, cgs bar</code>
@@ -749,7 +739,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The pressure of 1 pound per square inch.
 </dl>
 
-<h4><a name="constants_12"></a>Viscosity</h4>
+<h3><a name="constants_12"></a>Viscosity</h3>
 
 <dl compact>
 <dt><code>REAL mksa poise, cgs poise</code>
@@ -760,7 +750,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The kinematic viscosity of 1 Stokes.
 </dl>
 
-<h4><a name="constants_13"></a>Light and illumination</h4>
+<h3><a name="constants_13"></a>Light and illumination</h3>
 
 <dl compact>
 <dt><code>REAL mksa stilb, cgs stilb</code>
@@ -791,7 +781,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The luminance of 1 footlambert.
 </dl>
 
-<h4><a name="constants_14"></a>Radioactivity</h4>
+<h3><a name="constants_14"></a>Radioactivity</h3>
 
 <dl compact>
 <dt><code>REAL mksa curie, cgs curie</code>
@@ -806,7 +796,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The absorbed dose of 1 Rad.
 </dl>
 
-<h4><a name="constants_15"></a>Force and energy</h4>
+<h3><a name="constants_15"></a>Force and energy</h3>
 
 <dl compact>
 <dt><code>REAL mksa newton, cgs newton</code>
@@ -825,7 +815,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The energy of 1 Erg.
 </dl>
 
-<h4><a name="constants_16></a>Prefixes</h4>
+<h3><a name="constants_16></a>Prefixes</h3>
 
 <dl compact>
 <dt><code>REAL num yotta</code>
@@ -892,7 +882,7 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] 10^-24
 </dl>
 
-<h4><a name="constants_7"></a>Printer units</h4>
+<h3><a name="constants_7"></a>Printer units</h3>
 
 <dl compact>
 <dt><code>REAL mksa point, cgs point</code>
@@ -904,15 +894,19 @@ the physical magnetic moment of an electron is negative.
 </dl>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

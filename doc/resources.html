@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -46,12 +47,6 @@ Documentation for Algol 68 Genie Mark 11
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
 <img src="algol68.gif" valign=top align=center>
-<p>
-<div align=right>
-{&nbsp;<i>... 'Languages take such a time, and so do&nbsp;<br>
-all the things one wants to know about.'</i>&nbsp;<br>
-<small>J. R. R. Tolkien, The Lost Road.</small> }&nbsp;
-</div>
 </td>
 <td width="5%" valign=top bgcolor="white">
 </td>
@@ -60,26 +55,27 @@ all the things one wants to know about.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
 <!-- End navigation bar -->
 </td>
 </table>
+
+<p>
+<div align=right>
+{... "Languages take such a time, and so do<br>
+all the things one wants to know about."<br>
+The Lost Road. John Tolkien.}
+</div>
 
 <h3><a name="history"></a>A brief history of Algol 68</h3>
 
@@ -89,54 +85,57 @@ ALGOrithmic Language Algol 68 was designed by
 (Algorithmic Languages and Calculi) as a general-purpose programming language. 
 This working group has continuing responsibility for Algol 60 and Algol 68.
 Algol 68 is a rather lean orthogonal general-purpose language that is a beautiful means for denoting algorithms.
+
 <p>
 In the early 1960's Working Group 2.1 started discussing the development of Algol X, a successor to Algol 60. At its 1965 meeting in Princeton, WG 2.1 invited written descriptions of the language based on the previous discussions. At the meeting in St. Pierre de Chartreuse, also in 1965, three reports describing more or less complete languages, by Wirth, Seegm&uuml;ller, and Van Wijngaarden, were amongst the contributions. 
 Other significant contributions were papers by Hoare and Naur. 
-Van Wijngaarden's paper "Orthogonal design and description of a formal language" 
+Van Wijngaarden's paper <i>Orthogonal design and description of a formal language</i> 
 (available from <a href="#documentation">Karl Kleine's collection</a>) featured a new technique for language design and definition. 
 This paper formed the basis for what would develop into Algol 68. Wirth left the project to work on Algol W which influenced his later language Pascal.
+
 <p>
 Algol 68 was defined in a formal document, first published in January 1969,
 and later published in <a href="#ref">Acta Informatica</a> and also printed in <a href="#ref">Sigplan Notices</a>.
 A revised report was issued in 1976. 
+The distribution of Algol 68 Genie Mark 11.1 contains a HTML translation of the <a href="report_contents.html">Revised Report</a>.
 Algol 68 was the first major language for which a full formal definition was made before it was implemented.
-<p>
-Probably because of the formal character of the defining document, which requires some study to comprehend, the misconception got hold that Algol 68 is a complex language, while in fact it is rather lean. The reason that its definition (a "two-level grammar" or "W-grammar") looks complex is that the W-grammar describes only semantically correct programs. 
-For example, Algol 68's W-grammar cannot describe programs that use identifiers or operators that are not declared, or that define modes resulting in objects that are infinitely large or require infinite coercion, etcetera. A context-free syntax (C, C++, Pascal, ...) describes both semantically correct and - incorrect programs, and many rules are needed besides the syntax to reject the incorrect ones. This is less elegant, but the resulting defining document looks much simpler than the Algol 68 report. You can judge this for yourself by having a look at Algol 68's <a href="syntax.html">context-free syntax</a> and W-grammar as described in the Revised Report.
-<p>
-Another factor that hindered Algol 68 from spreading rapidly is that the language was designed for programmers, not for compiler writers, in a time when the field of compiler construction was not as advanced as it is today. 
-Implementation efforts based on formal methods generally failed; Algol 68's context-dependent grammar requires some invention to parse (consider for instance <code>x(y, z)</code> that can be either a call or a slice depending on the mode of <code>x</code>, while <code>x</code> does not need to be declared <i>before</i> being applied).
-Pragmatically, Algol 68 can be parsed in multiple stages, following Mailloux's scheme <a href="#ref">[Lindsey 1993]</a>. Algol 68 Genie follows this scheme: it first identifies lexical levels, then constructs symbol tables and completes the syntax tree using bottom-up parsing and mode-checking.
-<p>
-At the time of Algol 68's presentation compilers usually were made available on mainframes by computing centers, which explains why Algol 68 was popular in locations rather than areas, for instance Amsterdam, Berlin or Cambridge. An important clue to understanding why Algol 68 did not become a widely used language lies in the fact that industry did not pick it up and that initiatives to commericialise Algol 68 compilers were relatively unsuccessful. The market for universal programming languages evidently did not develop as hoped for during the decade in which the language was developed and implemented.
-</p>
 
-<br>
+<p>
+Probably because of the formal character of the Revised Report, which requires study to comprehend, the misconception got hold that Algol 68 is a complex language, while in fact it is rather lean. Algol 68's grammar is a two-level W-grammar ('W' for Van <u>W</u>ijngaarden) that can define a potentially infinite grammar in a finite number of rules. It can rigorously define some syntactic restrictions that otherwise 
+have to be formulated in natural language, despite their essentially syntactical content; for example, demanding that applied identifiers or - operators be declared, or demanding that modes result in finite objects that require finite coercion, etcetera. In that respect, a context-free syntax needs extra rules formulated in natural language to reject incorrect programs. This is less elegant, but defining documents for programming languages with a context-free grammar indeed look less complex than the Algol 
+68 (Revised) Report - see for instance the <a href="syntax.html">context-free grammar</a> of Algol 68 Genie.
+
+<p>
+Another factor that hindered Algol 68 from spreading rapidly is that the language was designed for programmers, not for compiler writers, in a time when the field of compiler construction was not as advanced as it is today. Implementation efforts based on formal methods generally failed; Algol 68's context-dependent grammar required some invention to parse (consider for instance <code>x(y, z)</code> that can be either a call or a slice depending on the mode of <code>x</code>, while <code>x</code> does not need to be declared <i>before</i> being applied). Algol 68 Genie employs a multipass scheme to parse Algol 68 <a href="resources.html#ref">[Lindsey 1993]</a>.
+
+<p>
+At the time of Algol 68's presentation compilers usually were made available on mainframes by computing centers, which may explain why Algol 68 was popular in locations rather than areas, for instance Amsterdam, Berlin or Cambridge. It appears that Algol 68 was relatively popular in the UK, where the ALGOL68RS and ALGOL68C compilers were developed. An important clue to understanding why Algol 68 did not become a widely used language lies in the fact that industry did not pick it up and that initiatives to commercialise Algol 68 compilers were relatively unsuccessful, for instance the FLACC compiler sold just twenty-two copies. The market for universal programming languages evidently did not develop as hoped for during the decade in which the language was developed and implemented.
+
+<p>
+The language is nowadays still referred to in teaching material, discussions and publications. 
+Because of the rigour and precision of its definition, one could argue that a student reading computer science should, at an appropriate moment, study Algol 68, irrespective of whether the language did or did not spread widely at the time it was presented.
+For programmers, the world has of course moved on, but the reactions on Algol 68 Genie 
+suggest that many people who have seriously programmed in Algol 68 in the past, only moved to other programming languages because the Algol 68 implementations they were using were phased out.
+
 <h3><a name="documentation"></a>Readily available information on Algol 68</h3>
 
 <p>
 <ul>
+<li><a name="rr"></a>
+The distribution of Algol 68 Genie Mark 11.1 contains a copy of the <a href="report_contents.html">Revised Report in HTML</a> that is based on the 
+<a href="http://vestein.arb-phys.uni-dortmund.de/~wb/">version prepared by W.B. Kloke</a>
 <li><a name="nunan"></a>Greg Nunan maintains a page on
 <a href="http://www.algol68.org/">Algol 68 web resources</a>. 
 This page provides <i>Programming Algol 68 Made Easy</i>, a good informal textbook on Algol 68 written by Sian Leitch.
 T<sub>E</sub>X source files are in the <code>a68toc</code> distribution.<br>
-<li><a name="rr"></a>
-Wilhelm Kloke has made available an on-line version of the formal
-<a href="http://vestein.arb-phys.uni-dortmund.de/~wb/">Revised Report</a>.
-C.H. Lindsey's partial parametrisation proposal</a>.
 <li>HOPL - History of programming languages. 
-    On-line encyclopedia of programming languages has an 
+    On-line encyclopaedia of programming languages has an 
 <a href="http://hopl.murdoch.edu.au/showlanguage2.prx?exp=311">entry for Algol 68</a>.
 <li><a name="kk"></a>Karl Kleine collects and posts
     <a href="http://www.fh-jena.de/~kleine/history/history.html">Algol 68 historic documents</a>.
 <li>Brian Wichmann maintains 
     <a href="http://archive.computerhistory.org/resources/text/algol/algol_bulletin/">
     The Algol Bulletin</a> on-line archive.
-<li>The Wikipedia Project has entries for 
-<a href="http://en.wikipedia.org/wiki/ALGOL_68">Algol 68</a>,
-<a href="http://en.wikipedia.org/wiki/ALGOL_68G">Algol 68 Genie</a>,
-<a href="http://en.wikipedia.org/wiki/Adriaan_van_Wijngaarden">Adriaan van Wijngaarden</a>, and
-<a href="http://en.wikipedia.org/wiki/Van_Wijngaarden_grammar">two-level grammars</a>.
 <li>The <a href="http://dmoz.org/Computers/Programming/Languages/Algol_68/">Algol 68 directory</a> from the Open Directory Project.
 <li>Dick Grune has posted an 
     <a href="http://www.cs.vu.nl/pub/dick/Algol68/">Algol 68 program collection</a>.
@@ -145,9 +144,27 @@ C.H. Lindsey's partial parametrisation proposal</a>.
     and an elaborated example of <a href="http://www.cap-lore.com/MathPhys/Tumble/Rigid.html">
     Algol 68 applied in tensor calculations</a>.
 </ul>
+<table width=100% cellspacing=0 cellpadding=0>
+<tr>
+<td valign=top>
+<ul>
+<li>
+The Wikipedia Project has entries for 
+<a href="http://en.wikipedia.org/wiki/ALGOL_68">Algol 68</a>,
+<a href="http://en.wikipedia.org/wiki/ALGOL_68G">Algol 68 Genie</a>,
+<a href="http://en.wikipedia.org/wiki/Adriaan_van_Wijngaarden">Adriaan van Wijngaarden</a>, and
+<a href="http://en.wikipedia.org/wiki/Van_Wijngaarden_grammar">two-level grammars</a>.
+</ul>
+</td>
+<td width=5%>
+</td>
+<td valign=top>
+<a href=http://en.wikipedia.org><img src="wiki.png" align=right border=0></a>
+</td>
+</tr>
+</table>
 </p>
 
-<br>
 <h3><a name="implementations"></a>Algol 68 implementations</h3>
 <h4>Current other implementations</h4>
 <ul>
@@ -167,12 +184,12 @@ or the
 <a href="http://dmoz.org/Computers/Programming/Languages/Algol_68/">Algol 68 directory</a> from the Open Directory Project.
 </ul>
 
-<h4>Former implementations</h4>
+<h3>Former implementations</h3>
 <p>
 See for instance <a href="#ref">[AB51.3.1]</a> or <a href="#ref">[Koster 1994]</a>:
 <ul>
 <li>ALGOL68R. Currie et al., RSRE (Royal Signals and Radar Establishment, Malvern) 1970.
-Single-pass comiler, used extensively in military and scientific circles in the UK on ICL machines.
+Single-pass compiler, used extensively in military and scientific circles in the UK on ICL machines.
 <li>CONTROL DATA ALGOL 68. Zoethout et al., CDC Netherlands 1974.
 Full implementation (apparently it only lacked the format-pattern),
 used mainly in teaching in Germany and the Netherlands on CDC mainframes.
@@ -209,21 +226,25 @@ Subset implementation for IBM mainframes, DECsystems 10 and 20, VAX/UNIX, CYBER 
 <li>
 [McGettrick 1978] A. D. McGettrick. <i>Algol 68: a first and second course.</i> Cambridge University Press [1978].
 <li>
-[Revised Report 1976] A. van Wijngaarden et al., editors, <i>Revised Report on the Algorithmic Language Algol 68</i>. Acta Informatica <b>5</b> 1-236 [1976]; SIGPLAN Notices <b>12</b>(5) 1-70 [1977].
+[Revised Report 1976] A. van Wijngaarden et al., editors, <i>Revised Report on the Algorithmic Language Algol 68</i>. Acta Informatica <b>5</b> 1-236 [1976]; Springer-Verlag [1976] ISBN 3-540-07592-5, ISBN 0-387-07592-5; SIGPLAN Notices <b>12</b>(5) 1-70 [1977].
 <li>
 [Torrix 1977] S.G. van der Meulen, M. Veldhorst. <i>TORRIX - A programming language for operations on vectors and matrices over arbitrary fields and of variable size.</i> Rijksuniversiteit Utrecht [1977]. 
 </ul>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

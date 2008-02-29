@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -690,6 +690,42 @@ void genie_inverf_real (NODE_T * p)
 void genie_inverfc_real (NODE_T * p)
 {
   C_FUNCTION (p, inverfc);
+}
+
+/*!
+\brief PROC lj e 12 6 = (REAL, REAL, REAL) REAL
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_lj_e_12_6 (NODE_T * p)
+{
+  A68_REAL *e, *s, *r;
+  double u, u2, u6;
+  POP_3_OPERAND_ADDRESSES (p, e, s, r, A68_REAL);
+  RESET_ERRNO;
+  u = (s->value / r->value);
+  u2 = u * u;
+  u6 = u2 * u2 * u2;
+  e->value = 4.0 * e->value * u6 * (u6 - 1.0);
+  math_rte (p, errno != 0, MODE (REAL), NULL);
+}
+
+/*!
+\brief PROC lj f 12 6 = (REAL, REAL, REAL) REAL
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_lj_f_12_6 (NODE_T * p)
+{
+  A68_REAL *e, *s, *r;
+  double u, u2, u6;
+  POP_3_OPERAND_ADDRESSES (p, e, s, r, A68_REAL);
+  RESET_ERRNO;
+  u = (s->value / r->value);
+  u2 = u * u;
+  u6 = u2 * u2 * u2;
+  e->value = 24.0 * e->value * u2 * u6 * (1.0 - 2.0 * u6);
+  math_rte (p, errno != 0, MODE (REAL), NULL);
 }
 
 #if defined ENABLE_NUMERICAL

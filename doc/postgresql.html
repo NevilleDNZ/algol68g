@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -57,20 +58,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -85,7 +80,7 @@ PostgreSQL uses a client/server model. A PostgreSQL session consists of the foll
 <p>
 &nbsp;&middot;&nbsp;A server process, which manages the database files, accepts connections to the database from client applications, and performs actions on the database on behalf of the clients. The database server program is called postmaster. 
 <p>
-&nbsp;&middot;&nbsp;The user's client (frontend) application that wants to perform database operations. Client applications can be very diverse in nature: a client could be a text-oriented tool, a graphical application, a web server that accesses the database to display web pages, or a specialised database maintenance tool. 
+&nbsp;&middot;&nbsp;The user's client (front-end) application that wants to perform database operations. Client applications can be very diverse in nature: a client could be a text-oriented tool, a graphical application, a web server that accesses the database to display web pages, or a specialised database maintenance tool. 
 <p>
 As is typical of client/server applications, the client and the server can be on different hosts. In that case they communicate over a TCP/IP network connection. You should keep this in mind, because the files that can be accessed on a client machine might not be accessible (or might only be accessible using a different file name) on the database server machine. 
 <p>
@@ -98,16 +93,18 @@ Algol 68 Genie uses <code><code>libpq</code></code>, the C application programme
 Connection to a database server is established through a <code>REF FILE</code> variable. String results are communicated through a <code>REF STRING</code> buffer that is associated with the <code>REF FILE</code> variable upon establishing a connection with a PostgreSQL server. This allows for easy mode conversion of text-formatted data from tables using <code>get</code>. Currently, Algol 68 Genie does not support retrieving data in binary format.
 </p>
 
-<br>
-<a name="pgconnect"></a>
-<h3>Connecting to a server</h3>
+<h3>
+<a name="pgconnect"></a>Connecting to a server
+</h3>
+
 <p>
 Return values are 0 or positive on success, -1 when no connection was established, -2 when no result was available, or -3 on other errors.
 <dl>
 <dt><code>PROC pq connect db = (REF FILE f, STRING conninfo, REF STRING buffer) INT</code>
 <dd>Connect to a PostgreSQL backend server and open a new database connection in a way specified by <code>conninfo</code>, associate the connection with file <code>f</code> and associate <code>buffer</code> with file <code>f</code>. 
 <p>
-The passed string can be empty to use all default parameters, or it can contain one or more parameter settings separated by whitespace. Each parameter setting is in the form keyword = value. Spaces around the equal sign are optional. To write an empty value or a value containing spaces, surround it with single quotes, e.g., keyword = 'a value'. Single quotes and backslashes within the value must be escaped with a backslash, i.e., \' and \\. 
+The passed string can be empty to use all default parameters, or it can contain one or more parameter settings separated by 
+white space. Each parameter setting is in the form keyword = value. Spaces around the equal sign are optional. To write an empty value or a value containing spaces, surround it with single quotes, e.g., keyword = 'a value'. Single quotes and backslashes within the value must be escaped with a backslash, i.e., \' and \\. 
 <p>
 The currently recognised parameter keywords are: 
 <dl>
@@ -145,7 +142,7 @@ Without either a host name or host address, <code><code>libpq</code></code> will
 If PostgreSQL is compiled without SSL support, using option require will cause an error, while options allow and prefer will be accepted but <code>libpq</code> will not in fact attempt an SSL connection. 
 
 <dt><code>requiressl</code>
-<dd>This option is deprecated in favor of the sslmode setting. 
+<dd>This option is deprecated in favour of the sslmode setting. 
 
 If set to 1, an SSL connection to the server is required (this is equivalent to sslmode require). <code>libpq</code> will then refuse to connect if the server does not accept an SSL connection. If set to 0 (default), <code>libpq</code> will negotiate the connection type with the server (equivalent to sslmode prefer). This option is only available if PostgreSQL is compiled with SSL support. 
 
@@ -187,8 +184,8 @@ attempt to connect to localhost.
 <dt><code>PGPORT</code>
 <dd><code>PGPORT</code> sets the TCP port number or Unix-domain socket file extension for communicating with the PostgreSQL server.
 <br><br>
-<dt><code>PGDATABASE</code>
-<dd><code>PGDATABASE</code> sets the PostgreSQL database name.
+<dt><code>PGDA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ASE</code>
+<dd><code>PGDA&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ASE</code> sets the PostgreSQL database name.
 <br><br>
 <dt><code>PGUSER</code>
 <dd><code>PGUSER</code> sets the user name used to connect to the database.
@@ -214,7 +211,8 @@ used if Kerberos authentication is selected by the server.
 <dd><code>PGSSLMODE</code> determines whether and with what priority an SSL connection will be negotiated with the server. There are four modes: disable will attempt only an unencrypted SSL connection; allow will negotiate, trying first a non-SSL connection, then if that fails, trying an SSL connection; prefer (the default) will negotiate, trying first an SSL connection, then if that fails, trying a regular non-SSL connection; require will try only an SSL connection. If PostgreSQL is compiled without SSL support, using option require will cause an error, while options allow and prefer will be accepted but <code>libpq</code> will not in fact attempt an SSL connection.
 <br><br>
 <dt><code>PGREQUIRESSL</code>
-<dd><code>PGREQUIRESSL</code> sets whether or not the connection must be made over SSL. If set to <quote>1</quote>, <code>libpq</code> will refuse to connect if the server does not accept an SSL connection (equivalent to sslmode prefer). This option is deprecated in favor of the sslmode setting, and is only available if PostgreSQL is compiled with SSL support.
+<dd><code>PGREQUIRESSL</code> sets whether or not the connection must be made over SSL. If set to <quote>1</quote>, <code>libpq</code> will refuse to connect if the server does not accept an SSL connection (equivalent to sslmode prefer). This option is deprecated in 
+favour of the sslmode setting, and is only available if PostgreSQL is compiled with SSL support.
 <br><br>
 <dt><code>PGKRBSRVNAME</code>
 <dd><code>PGKRBSRVNAME</code> sets the Kerberos service name to use when authenticating with Kerberos 5.
@@ -233,7 +231,8 @@ used if Kerberos authentication is selected by the server.
 <br>
 <dt><code>PROC pq reset = (REF FILE f) INT</code>
 <dd>Resets the communication channel to the server.
-This function will close the connection to the server and attempt to reestablish a new connection to the same server, using all the same parameters previously used. This may be useful for error recovery if a working connection is lost. 
+This function will close the connection to the server and attempt to 
+re-establish a new connection to the same server, using all the same parameters previously used. This may be useful for error recovery if a working connection is lost. 
 
 <br>
 <br>
@@ -241,7 +240,7 @@ This function will close the connection to the server and attempt to reestablish
 <dd>Assigns current parameter value to the string associated with <code>f</code>. 
 <p>
 Certain parameter values are reported by the server automatically at
-connection startup or whenever their values change.
+connection start-up or whenever their values change.
 <code>pq parameter status</code> can be used to interrogate these settings.
 It returns the current value of a parameter if known, or an empty string
 if the parameter is not known.
@@ -264,14 +263,14 @@ Note that
 <code>server_version</code>,
 <code>server_encoding</code> and
 <code>integer_datetimes</code>
-cannot change after startup.
+cannot change after start-up.
 <p>
 Pre-3.0-protocol servers do not report parameter settings, but
 <code>libpq</code> includes logic to obtain values for
 <code>server_version</code> and <code>client_encoding</code> anyway.
 Note
 that on a pre-3.0 connection, changing <code>client_encoding</code> via
-<code>SET</code> after connection startup will not be reflected by
+<code>SET</code> after connection start-up will not be reflected by
 <code>pq parameter status</code>. 
 <p>
 If no value for <code>standard_conforming_strings</code> is reported,
@@ -282,9 +281,9 @@ parameter may be taken as an indication that the escape string syntax
 </dl>
 </p>
 
-<br>
-<a name="pgquery"></a>
-<h3>Sending queries and retrieving results</h3>
+<h3>
+<a name="pgquery"></a>Sending queries and retrieving results
+</h3>
 <p>
 Return values are 0 or positive on success, -1 when no connection was established, -2 when no result was available, or -3 on other errors.
 <dl>
@@ -309,7 +308,8 @@ Column numbers start at 1 (which deviates from the <code>libpq</code> convention
 <br>
 <br>
 <dt><code>PROC pq fnumber = (REF FILE f, INT index) INT</code>
-<dd>Returns the column number associated with the given column name.  Column numbers start at 1 (which deviates from the <code>libpq</code> convention, where 0 subscripts the first element).  The given name is treated like an identifier in an SQL command, that is, it is downcased unless quoted.
+<dd>Returns the column number associated with the given column name.  Column numbers start at 1 (which deviates from the <code>libpq</code> convention, where 0 subscripts the first element).  The given name is treated like an identifier in an SQL command, that is, it is 
+down-cased unless quoted.
 <br>
 <br>
 <dt><code>PROC pq fformat = (REF FILE f, INT index) INT</code>
@@ -382,8 +382,9 @@ Immediately following a <code>pq exec call</code>, <code>pq error message</code>
 <br>
 <br>
 <dt><code>PROC pq protocol version = (REF FILE f) INT</code>
-<dd>Returns the frontend/backend protocol being used.
-Applications may wish to use this to determine whether certain features are supported. Currently, the possible values are 2 (2.0 protocol), 3 (3.0 protocol), or zero (connection bad). This will not change after connection startup is complete, but it could theoretically change during a connection reset. The 3.0 protocol will normally be used when communicating with PostgreSQL 7.4 or later servers; pre-7.4 servers support only protocol 2.0. (Protocol 1.0 is obsolete and not supported by libpq.)
+<dd>Returns the front-end/back-end protocol being used.
+Applications may wish to use this to determine whether certain features are supported. Currently, the possible values are 2 (2.0 protocol), 3 (3.0 protocol), or zero (connection bad). This will not change after connection 
+start-up is complete, but it could theoretically change during a connection reset. The 3.0 protocol will normally be used when communicating with PostgreSQL 7.4 or later servers; pre-7.4 servers support only protocol 2.0. (Protocol 1.0 is obsolete and not supported by libpq.)
 <br>
 <br>
 <dt><code>PROC pq server version = (REF FILE f) INT</code>
@@ -400,9 +401,10 @@ Applications may use this to determine the version of the database server they a
 </dl>
 </p>
 
-<br>
-<a name="pgthread"></a>
-<h3>Behaviour in threaded programs</h3>
+
+<h3>
+<a name="pgthread"></a>Behaviour in threaded programs
+</h3>
 <p>
 <code>libpq</code> is re-entrant and thread-safe if the configure command-line option <code>--enable-thread-safety</code> was used when the PostgreSQL distribution was built.
 <p>
@@ -413,9 +415,9 @@ In Algol 68 Genie, this means that in a parallel clause, two concurrent units sh
 For more information please refer to the PostgreSQL documentation.
 </p>
 
-<br>
-<a name="pgexample"></a>
-<h3>Example code</h3>
+<h3>
+<a name="pgexample"></a>Example code
+</h3>
 <p>
 <pre>
 #
@@ -490,9 +492,12 @@ pq finish (z)
 </pre>
 </p>
 
-<br>
-<a name="pgcopyright"></a>
-<h3>Copyright and license notice</h3>
+
+<h3>
+<a name="pgcopyright"></a>Copyright and license notice
+</h3>
+
+<p>
 Information on this page is in part based on PostgreSQL documentation that is released under the BSD license:
 
 <p>
@@ -509,7 +514,7 @@ Permission to use, copy, modify, and distribute this software and its documentat
 <p>
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <p>
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATIONS TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHAN&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATIONS TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 </p>
 </td>
 <td width="15%">
@@ -518,15 +523,19 @@ THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, B
 </table>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

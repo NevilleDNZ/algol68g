@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -38,23 +39,17 @@ Documentation for Algol 68 Genie Mark 11
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 11</h2>
+<h2>Algol 68 Genie Mark 11.1</h2>
 <h3>An Algol 68 interpreter</h3>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
 &middot;&nbsp;<a href="#obtaining">Obtaining Algol 68 Genie</a><br>
 &middot;&nbsp;<a href="#linkto">What libraries can Algol 68 Genie link to?</a><br>
 &middot;&nbsp;<a href="#contact">Author and contact information</a><br>
-&middot;&nbsp;<a href="#ack">Acknowlegements</a><br>
+&middot;&nbsp;<a href="#ack">Acknowledgements</a><br>
 &middot;&nbsp;<a href="#history">Release history</a><br>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="algol68.gif">
-<p>
-<div align=right>
-{&nbsp;<i>... 'Lisp and Algol, are built around a kernel that&nbsp;<br>
-seems as natural as a branch of mathematics.'</i>&nbsp;<br>
-<small>D. R. Hofstadter, Metamagical Themas.</small> }&nbsp;
-</div>
 </td>
 <td width="5%" valign=top bgcolor="white">
 </td>
@@ -63,20 +58,14 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -84,54 +73,69 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 </td>
 </table>
 
+<p>
+<table width=100% cellspacing=0 cellpadding=0>
+<tr>
+<td valign=top>
+<p>
+<div align=right>
+{&nbsp;... 'Lisp and Algol, are built around a kernel that&nbsp;<br>
+seems as natural as a branch of mathematics.'&nbsp;<br>
+Metamagical Themas. Douglas Hofstadter. }&nbsp;
+</div>
+
 <h3><a name="whatis"></a>What is Algol 68 Genie?</h3>
+
 <p>
-Algol 68 is an orthogonal general-purpose programming language, that is a beautiful means for denoting algorithms.
+<i>Algol 68 Genie</i> (Algol68G) is an <a href="description.html">Algol 68 interpreter</a>. It can be used for executing Algol 68 programs or scripts. Algol 68 is a rather lean orthogonal general-purpose language that is a beautiful means for denoting algorithms. Algol 68 was designed as a general-purpose programming language by <a href="http://web.comlab.ox.ac.uk/oucl/work/jeremy.gibbons/wg21/">IFIP Working Group 2.1</a> (Algorithmic Languages and Calculi) that has continuing responsibility for Algol 60 and Algol 68. 
+
 <p>
-<i>Algol 68 Genie</i> (Algol68G) is an <a href="description.html">Algol 68 interpreter</a>.
-It can be used for executing Algol 68 programs or scripts.
+Since Algol 68 Genie became available on the Internet, it has become clear that there still are many people who are interested in an Algol 68 implementation, the majority of them being mathematicians or computer scientists. The language is nowadays still referred to in teaching material, discussions and publications. Because of the exceptional rigour and precision of its definition, one could argue that a student reading computer science should, at an appropriate moment, study Algol 68, irrespective of whether the language did or did not spread widely at the time it was presented. 
 <p>
-The current version of Algol 68 Genie is Mark 11, released in November 2007.
-You can download it from this page.
+For programmers, the world has of course moved on, but the reactions on Algol 68 Genie suggest that many people who have seriously programmed in Algol 68 in the past, only moved to other programming languages because the Algol 68 implementations they were using were phased out. 
+
+<p>
+The observations mentioned here are believed to be sufficient ground to preserve Algol 68, both by making available its defining document as well as an implementation as to enable those interested in the language to both study it, and use it.
+
+<p>
+The current version of Algol 68 Genie is Mark 11.1, released in March 2008. You can download it from this page. Algol 68 Genie (Algol68G) is free software, distributed under GNU General Public License. Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for details. The distribution of Algol 68 Genie Mark 11.1 contains revision 1.0 of the HTML translation of the Algol 68 Revised Report.
 </p>
+</td>
+<td width=10%>
+</td>
+<td valign=centre>
+<img src=pooh_a68g.gif align=right>
+</td>
+</tr>
+</table>
 
-<br>
 <h3><a name="obtaining"></a>Obtaining Algol 68 Genie</h3>
+<table border=0 cellspacing=6 cellpadding=6>
+<tr>
+<td width=25% valign=top style="border: 1px solid red">
+<center>
+<img valign=top src="download.png">
 <p>
-Algol 68 Genie (Algol68G) is free software, distributed under GNU General Public License. 
-This software is distributed in the hope that it will be useful,
-but <i>without any warranty</i>; without even the implied warranty of
-<i>merchantability</i> or <i>fitness for a particular purpose</i>. 
-Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for details.
-<ul>
-<li>
-Download 
-<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk11.tar.gz">Algol68G Mark 11</a>, a gzipped tar archive containing C source code and documentation. 
-
+Download <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk11.1.tar.gz">Algol68G Mark 11.1</a>, a gzipped tar archive containing C source code, a Win32 executable, documentation and revision 1.0 of the HTML translation of the Algol 68 Revised Report.
+</center>
+</td>
+<td width=25% valign=top style="border: 1px solid red">
+<center>
+<img valign=top src="documents.png">
 <p>
-<a href="install.html">Here</a> are instructions for installation of Algol68G on UNIX, Linux or MacOS X.
-
+Read the <a href="contents.html">documentation for Algol68G Mark 11.1</a>.
+</center>
+</td>
+<td width=25% valign=top style="border: 1px solid red">
+<center>
+<img valign=top src="documents.png">
 <p>
-The archive includes a WIN32 executable of Algol 68 Genie Mark 11, which has been built and tested on Microsoft Windows XP and can for instance be run from <code>cmd.exe</code>. This executable has been linked to the GNU Plotting Utilities and the GNU Scientific Library.
+Read the <a href="report_contents.html">Algol 68 Revised Report</a>.
+</center>
+</td>
+</tr>
+</table>
 
-<p>
-Algol 68 Genie Mark 11 was developed and tested on 
-Fedora 7 (gcc 4.1.2, linux kernel 2.6.21),
-and was tested on
-Windows XP (gcc 3.4.2),
-OpenBSD 3.9 (gcc 3.3.5) and 
-Slackware 8.0 (gcc 2.95.3, linux kernel 2.2.19).
-The Algol 68 Genie test set comprises more than 1200 programs and includes the MC test set.
-
-<li>For Apple's MacOS X Darwin environment, Norman Hardy has posted a 
-<a href="http://www.cap-lore.com/Languages/A68/Build.html">binary package</a>.
-<li>
-The <a href="resources.html">resources page</a> contains links to on-line Algol 68 resources (Revised Report, informal textbook, historic documents, <i>Algol Bulletin</i> archive, other implementations, and more).
-The <a href="examples.html">example programs page</a> has examples of Algol68G programs. 
-<li>Neville Dempsey posts a <a href="http://www.vim.org/scripts/script.php?script_id=1927">syntax script</a> for vim.
-</ul>
-
-<br>
 <h3><a name="linkto"></a>What libraries can Algol 68 Genie link to?</h3>
 <p>
 <ul>
@@ -140,7 +144,6 @@ The <a href="examples.html">example programs page</a> has examples of Algol68G p
 <li><a href="http://www.postgresql.org/">PostgreSQL</a> for writing PostgreSQL database client applications.
 </ul>
 
-<br>
 <h3><a name="contact"></a>Author and contact information</h3>
 <p>
 Author of Algol68G is <a href="http://www.xs4all.nl/~jmvdveer/">Marcel van der Veer</a>.
@@ -148,7 +151,6 @@ If you have a question or remark, or have found a bug, please send a note to
 <a href="mailto:algol68g@xs4all.nl">algol68g@xs4all.nl</a>.
 </p>
 
-<br>
 <h3><a name="ack"></a>Acknowledgements</h3>
 <p>
 Thanks go to the following people, who were kind enough to report bugs and obscurities, to propose improvements, provide documentation, or to make a contribution in another way.
@@ -168,6 +170,7 @@ Scott Gallaher,
 Jeremy Gibbons,
 Dick Grune, 
 Norman Hardy,
+Chap Harrison,
 Jim Heifetz, 
 Patrik Jansson,
 Trevor Jenkins, 
@@ -182,6 +185,7 @@ Lawrence D'Oliveiro,
 France Pahlplatz, 
 Steven Pemberton,
 Richard Pinch,
+Henk Robbers,
 Rubin Simons,
 Robert Uzgalis,
 Nacho Vidal García,
@@ -199,7 +203,6 @@ Tom Zahm.
 Algol68G would not be what it is without their help.
 </p>
 
-<br>
 <h3><a name="history"></a>Release history</h3>
 <p>
 Details on implemented features are on <a href="description.html">this page</a>.
@@ -219,7 +222,19 @@ Details on implemented features are on <a href="description.html">this page</a>.
 </tr>
 <tr bgcolor="#e0e0e0">
 <td valign=top>
-Mark 11
+11.1
+</td>
+<td valign=top>
+March 2008
+</td>
+<td valign=top>
+Adds Revised Report (HTML translation 1.0) to the documentation<br>
+Adds options RERUN, RESET and RESTART to monitor
+</td>
+</tr>
+<tr bgcolor="#e0e0e0">
+<td valign=top>
+11
 </td>
 <td valign=top>
 November 2007
@@ -232,8 +247,7 @@ Adds pseudo-operator <code>TRNSP</code><br>
 Adds pseudo-operator <code>COL</code><br>
 Adds pseudo-operator <code>ROW</code><br>
 Improves diagnostics in formatted transput<br>
-Improves monitor<br>
-Fixes bugs
+Improves monitor
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -248,8 +262,7 @@ Adds procedure <code>real</code><br>
 Adds format pattern <code>h</code><br>
 Adds operator <code>OP SET = (INT, L BITS) L BITS</code><br>
 Adds operator <code>OP CLEAR = (INT, L BITS) L BITS</code><br>
-Fixes alignment bug on 64-bit systems<br>
-Fixes minor bugs
+Fixes alignment bug on 64-bit systems
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -260,8 +273,7 @@ Fixes minor bugs
 December 2006
 </td>
 <td valign=top>
-Improves interpreter efficiency<br>
-Fixes minor bugs
+Improves interpreter efficiency
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -276,8 +288,7 @@ Adds basic <a href="torrix.html">linear algebra support</a><br>
 Adds procedures <code>arctan2</code>, <code>long arctan2</code> and <code>long long arctan2</code><br>
 Adds procedure <code>execve output</code><br>
 Improves diagnostics<br>
-Adds option [NO]BACKTRACE<br>
-Fixes minor bugs
+Adds option [NO]BACKTRACE
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -289,8 +300,7 @@ July 2006
 </td>
 <td valign=top>
 Adds typographical display features<br>
-Fixes two serious bugs (generator, parallel-clause)<br>
-Fixes <code>configure</code> bugs that occur on some platforms
+Fixes two bugs (generator, parallel-clause)
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -304,8 +314,7 @@ May 2006
 64-bit safe interpreter<br>
 Improves monitor/debugger<br>
 Adds option MONITOR (or DEBUG)<br>
-Adds procedure <code>monitor</code> (or <code>debug</code>)<br>
-Fixes <code>configure</code> bugs that occur on some platforms<br>
+Adds procedure <code>monitor</code> (or <code>debug</code>)
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -347,9 +356,9 @@ July 2005
 Adds procedure <code>http content</code> for fetching web page contents (UNIX)<br>
 Adds procedure <code>tcp request</code> for sending requests via TCP (UNIX)<br>
 Adds procedure <code>grep in string</code> for matching regular expressions in a string (UNIX)<br>
-Adds procedure <code>last char in string</code> to find last occurence of a character in a string<br>
-Adds procedure <code>string in string</code> to find first occurence of a string in a string<br>
-Adds keyword <code>UNTIL</code> to implement post-checkes loop<br>
+Adds procedure <code>last char in string</code> to find last occurrence of a character in a string<br>
+Adds procedure <code>string in string</code> to find first occurrence of a string in a string<br>
+Adds keyword <code>UNTIL</code> to implement post-checked loop<br>
 Adds keyword <code>DOWNTO</code> to complement <code>TO</code><br>
 Adds keyword <code>ANDTH</code> as alternative for <code>ANDF</code> and keyword <code>OREL</code> as alternative for <code>ORF</code><br>
 Makes ~ a <code>SKIP</code> when used as a unit (cf. RR)
@@ -363,7 +372,7 @@ Makes ~ a <code>SKIP</code> when used as a unit (cf. RR)
 May 2005
 </td>
 <td valign=top>
-Adds <a href="description.html#params">partial parametrisation</a> following C. H. Lindsey</code>s proposal<br>
+Adds <a href="description.html#params">partial parametrisation</a> following C. H. Lindsey's proposal<br>
 Adds elementary and trigonometric functions for complex numbers, independent of GSL
 </td>
 </tr>
@@ -404,7 +413,7 @@ June 2004
 Adds more GSL support<br>
 Adds modes <code>LONG BITS</code> and <code>LONG LONG BITS</code><br>
 Makes parser accept <code>( .. )</code> as alternative for <code>[ .. ]</code><br>
-Makes parser optionally treat <code>{ .. }</code>, <code>[ ..]</code>  and <code>( ..)</code> as equivalent<br>
+Makes parser optionally treat <code>{ .. }</code>, <code>[ .. ]</code> and <code>( .. )</code> as equivalent<br>
 Makes parser accept loop clause as encloses clause<br>
 Makes mode checker accept <code>UNION</code> with components relates through deflexing<br>
 Changes to thread-safe plotutils interface<br>
@@ -485,15 +494,19 @@ From November 2001 onward
 </table>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -35,6 +35,7 @@ void genie_preprocess (NODE_T *, int *);
 A68_HANDLE nil_handle = { INITIALISED_MASK, 0, 0, NULL, NULL, NULL };
 A68_REF nil_ref = { INITIALISED_MASK | NIL_MASK, 0, {NULL} };
 ADDR_T frame_pointer = 0, stack_pointer = 0, heap_pointer = 0, handle_pointer = 0, global_pointer = 0;
+BOOL_T do_confirm_exit = A68_TRUE;
 BYTE_T *frame_segment = NULL, *stack_segment = NULL, *heap_segment = NULL, *handle_segment = NULL;
 NODE_T *last_unit = NULL;
 int global_level = 0, ret_code, ret_line_number, ret_char_number;
@@ -84,15 +85,13 @@ void genie_system (NODE_T * p)
 void exit_genie (NODE_T * p, int ret)
 {
   if (ret == A68_RUNTIME_ERROR && in_monitor) {
-/*
-    sys_request_flag = A68_FALSE;
-    single_step (p, A68_FALSE, A68_FALSE);
-*/
+/*  sys_request_flag = A68_FALSE;
+    single_step (p, A68_FALSE); */
     return;
   } else if (ret == A68_RUNTIME_ERROR && MODULE (p)->options.debug) {
     diagnostics_to_terminal (MODULE (p)->top_line, A68_RUNTIME_ERROR);
     sys_request_flag = A68_FALSE;
-    single_step (p, A68_FALSE, A68_FALSE);
+    single_step (p, A68_FALSE);
     return;
   } else {
     if (ret > A68_FORCE_QUIT) {
@@ -449,6 +448,7 @@ void genie (MODULE_T * module)
     io_write_string (STDOUT_FILENO, output_line);
   }
   install_signal_handlers ();
+  do_confirm_exit = A68_TRUE;
 /* Dive into the program. */
   if (setjmp (genie_exit_label) == 0) {
     NODE_T *p = SUB (module->top_node);
@@ -471,8 +471,10 @@ void genie (MODULE_T * module)
     cputime_0 = seconds ();
     (void) genie_enclosed (module->top_node);
   } else {
-/* Abnormal end of program. */
-    if (ret_code == A68_RUNTIME_ERROR) {
+    if (ret_code == A68_RERUN) {
+      diagnostics_to_terminal (module->top_line, A68_RUNTIME_ERROR);
+      genie (module);
+    } else if (ret_code == A68_RUNTIME_ERROR) {
       if (module->options.backtrace) {
         int printed = 0;
         snprintf (output_line, BUFFER_SIZE, "\n++++ Stack backtrace");
