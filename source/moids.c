@@ -40,14 +40,14 @@ static POSTULATE_T *postulates;
 \brief add mode "sub" to chain "z"
 \param z
 \param att
-\param dimensions
+\param dim
 \param node
 \param sub
 \param pack
 \return
 **/
 
-MOID_T *add_mode (MOID_T ** z, int att, int dimensions, NODE_T * node, MOID_T * sub, PACK_T * pack)
+MOID_T *add_mode (MOID_T ** z, int att, int dim, NODE_T * node, MOID_T * sub, PACK_T * pack)
 {
   MOID_T *new_mode = new_moid ();
   new_mode->in_standard_environ = (z == &(stand_env->moids));
@@ -55,7 +55,7 @@ MOID_T *add_mode (MOID_T ** z, int att, int dimensions, NODE_T * node, MOID_T * 
   new_mode->size = 0;
   NUMBER (new_mode) = mode_count++;
   ATTRIBUTE (new_mode) = att;
-  DIMENSION (new_mode) = dimensions;
+  DIM (new_mode) = dim;
   NODE (new_mode) = node;
   new_mode->well_formed = A68_TRUE;
   new_mode->has_rows = (att == ROW_SYMBOL);
@@ -154,7 +154,7 @@ void add_moid_list (MOID_LIST_T ** p, SYMBOL_TABLE_T * c)
 
 /*!
 \brief add moid moid list
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -236,7 +236,7 @@ void add_mode_to_pack_end (PACK_T ** p, MOID_T * m, char *text, NODE_T * node)
 
 /*!
 \brief count formal bounds in declarer in tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -255,7 +255,7 @@ static int count_formal_bounds (NODE_T * p)
 
 /*!
 \brief count bounds in declarer in tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -274,7 +274,7 @@ static int count_bounds (NODE_T * p)
 
 /*!
 \brief count number of SHORTs or LONGs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -322,7 +322,7 @@ static MOID_T *get_mode_from_standard_moid (int sizety, NODE_T * indicant, BOOL_
 {
   MOID_T *p = stand_env->moids, *q = NULL;
   for (; p != NULL && q == NULL; FORWARD (p)) {
-    if (WHETHER (p, STANDARD) && DIMENSION (p) == sizety && SYMBOL (NODE (p)) == SYMBOL (indicant)) {
+    if (WHETHER (p, STANDARD) && DIM (p) == sizety && SYMBOL (NODE (p)) == SYMBOL (indicant)) {
       q = p;
     }
   }
@@ -347,7 +347,7 @@ static MOID_T *get_mode_from_standard_moid (int sizety, NODE_T * indicant, BOOL_
 
 /*!
 \brief collect mode from STRUCT field
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \param m
 **/
@@ -385,7 +385,7 @@ static void get_mode_from_struct_field (NODE_T * p, PACK_T ** u, MOID_T ** m)
 
 /*!
 \brief collect MODE from formal pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \param m
 **/
@@ -414,7 +414,7 @@ static void get_mode_from_formal_pack (NODE_T * p, PACK_T ** u, MOID_T ** m)
 
 /*!
 \brief collect MODE or VOID from formal UNION pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \param m
 **/
@@ -444,7 +444,7 @@ static void get_mode_from_union_pack (NODE_T * p, PACK_T ** u, MOID_T ** m)
 
 /*!
 \brief collect mode from PROC, OP pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \param m
 **/
@@ -481,7 +481,7 @@ static void get_mode_from_routine_pack (NODE_T * p, PACK_T ** u, MOID_T ** m)
 
 /*!
 \brief collect MODE from DECLARER
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param put_where
 \return
 **/
@@ -579,7 +579,7 @@ static MOID_T *get_mode_from_declarer (NODE_T * p, int put_where)
 
 /*!
 \brief collect MODEs from a routine-text header
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -599,7 +599,7 @@ static MOID_T *get_mode_from_routine_text (NODE_T * p)
 
 /*!
 \brief collect modes from operator-plan
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -708,7 +708,7 @@ static void get_mode_from_denoter (NODE_T * p, int sizety)
 
 /*!
 \brief collect modes from the syntax tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param attribute
 **/
 
@@ -754,7 +754,7 @@ static void get_mode_from_modes (NODE_T * p, int attribute)
 
 /*!
 \brief collect modes from proc variables
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void get_mode_from_proc_variables (NODE_T * p)
@@ -763,7 +763,8 @@ static void get_mode_from_proc_variables (NODE_T * p)
     if (WHETHER (p, PROCEDURE_VARIABLE_DECLARATION)) {
       get_mode_from_proc_variables (SUB (p));
       get_mode_from_proc_variables (NEXT (p));
-    } else if (WHETHER (p, QUALIFIER) || WHETHER (p, PROC_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+    } else if (WHETHER (p, QUALIFIER) || WHETHER (p, PROC_SYMBOL)
+               || WHETHER (p, COMMA_SYMBOL)) {
       get_mode_from_proc_variables (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       MOID_T **m = &(SYMBOL_TABLE (p)->moids), *new_one = MOID (NEXT (NEXT (p)));
@@ -774,7 +775,7 @@ static void get_mode_from_proc_variables (NODE_T * p)
 
 /*!
 \brief collect modes from proc variable declarations
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -792,13 +793,14 @@ static void get_mode_from_proc_variable_declarations (NODE_T * p)
 
 /*!
 \brief test whether FLEX is followed by [] AMODE
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void check_flex_modes (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, FLEX_SYMBOL) && ATTRIBUTE (MOID (NEXT (p))) != ROW_SYMBOL) {
+    if (WHETHER (p, FLEX_SYMBOL)
+        && ATTRIBUTE (MOID (NEXT (p))) != ROW_SYMBOL) {
       diagnostic_node (A68_ERROR, p, ERROR_FLEX_ROW, NULL);
     }
     check_flex_modes (SUB (p));
@@ -858,7 +860,7 @@ static BOOL_T whether_mode_has_void (MOID_T * m)
 
 /*!
 \brief check for modes that are related to VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void check_relation_to_void (NODE_T * p)
@@ -903,7 +905,7 @@ PACK_T *absorb_union_pack (PACK_T * t, int *modifications)
 
 /*!
 \brief absorb UNION members
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param modifications
 \return
 **/
@@ -953,7 +955,7 @@ void contract_union (MOID_T * u, int *modifications)
 
 /*!
 \brief contract UNIONs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param modifications
 \return
 **/
@@ -1007,7 +1009,7 @@ static BOOL_T cyclic_declaration (TAG_T * table, MOID_T * p)
 
 /*!
 \brief check for cyclic mode chains in the program
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void check_cyclic_modes (NODE_T * p)
@@ -1101,7 +1103,7 @@ BOOL_T check_yin_yang (NODE_T * def, MOID_T * dec, BOOL_T yin, BOOL_T yang)
 
 /*!
 \brief check well-formedness of modes in the program
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void check_well_formedness (NODE_T * p)
@@ -1190,7 +1192,8 @@ BOOL_T modes_equivalent (MOID_T * a, MOID_T * b)
     return (a == b);
   } else if (EQUIVALENT (a) == b || EQUIVALENT (b) == a) {
     return (A68_TRUE);
-  } else if (whether_postulated_pair (top_postulate, a, b) || whether_postulated_pair (top_postulate, b, a)) {
+  } else if (whether_postulated_pair (top_postulate, a, b)
+             || whether_postulated_pair (top_postulate, b, a)) {
     return (A68_TRUE);
   } else if (WHETHER (a, INDICANT)) {
     return (modes_equivalent (EQUIVALENT (a), EQUIVALENT (b)));
@@ -1199,17 +1202,24 @@ BOOL_T modes_equivalent (MOID_T * a, MOID_T * b)
     if (WHETHER (a, REF_SYMBOL) || WHETHER (a, FLEX_SYMBOL)) {
       return modes_equivalent (SUB (a), SUB (b));
     } else if (WHETHER (a, ROW_SYMBOL)) {
-      return (DIMENSION (a) == DIMENSION (b) && modes_equivalent (SUB (a), SUB (b)));
+      return (DIM (a) == DIM (b)
+              && modes_equivalent (SUB (a), SUB (b)));
     } else if (WHETHER (a, STRUCT_SYMBOL)) {
-      return (DIMENSION (a) == DIMENSION (b) && packs_equivalent (PACK (a), PACK (b)));
+      return (DIM (a) == DIM (b)
+              && packs_equivalent (PACK (a), PACK (b)));
     } else if (WHETHER (a, UNION_SYMBOL)) {
-      return (united_moids_equivalent (PACK (a), PACK (b)) && united_moids_equivalent (PACK (b), PACK (a)));
+      return (united_moids_equivalent (PACK (a), PACK (b))
+              && united_moids_equivalent (PACK (b), PACK (a)));
     } else if (WHETHER (a, PROC_SYMBOL)) {
-      return (DIMENSION (a) == DIMENSION (b) && modes_equivalent (SUB (a), SUB (b)) && packs_equivalent (PACK (a), PACK (b)));
+      return (DIM (a) == DIM (b)
+              && modes_equivalent (SUB (a), SUB (b))
+              && packs_equivalent (PACK (a), PACK (b)));
     } else if (WHETHER (a, SERIES_MODE)) {
-      return (DIMENSION (a) == DIMENSION (b) && packs_equivalent (PACK (a), PACK (b)));
+      return (DIM (a) == DIM (b)
+              && packs_equivalent (PACK (a), PACK (b)));
     } else if (WHETHER (a, STOWED_MODE)) {
-      return (DIMENSION (a) == DIMENSION (b) && packs_equivalent (PACK (a), PACK (b)));
+      return (DIM (a) == DIM (b)
+              && packs_equivalent (PACK (a), PACK (b)));
     } else {
       return (A68_FALSE);
     }
@@ -1231,7 +1241,8 @@ static BOOL_T check_equivalent_moids (MOID_T * p, MOID_T * q)
 /* Optimise a bit since most will be comparing PROCs in standenv. */
   if (ATTRIBUTE (p) == ATTRIBUTE (q)) {
     if (WHETHER (p, PROC_SYMBOL)) {
-      z = (ATTRIBUTE (SUB (p)) == ATTRIBUTE (SUB (q)) && DIMENSION (p) == DIMENSION (q)) ? modes_equivalent (p, q) : A68_FALSE;
+      z = (ATTRIBUTE (SUB (p)) == ATTRIBUTE (SUB (q))
+           && DIM (p) == DIM (q)) ? modes_equivalent (p, q) : A68_FALSE;
     } else {
       z = modes_equivalent (p, q);
     }
@@ -1275,7 +1286,7 @@ static void find_equivalent_moids (MOID_LIST_T * start, MOID_LIST_T * stop)
 
 /*!
 \brief bind indicants in symbol tables to tags in syntax tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void bind_indicants_to_tags (NODE_T * p)
@@ -1297,7 +1308,7 @@ static void bind_indicants_to_tags (NODE_T * p)
 
 /*!
 \brief bind indicants in symbol tables to tags in syntax tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void bind_indicants_to_modes (NODE_T * p)
@@ -1382,7 +1393,7 @@ static void track_equivalent_tags (TAG_T * z)
 
 /*!
 \brief track equivalent tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void track_equivalent_tree (NODE_T * p)
@@ -1533,7 +1544,7 @@ static MOID_T *make_name_struct (MOID_T * m, MOID_T ** p)
 {
   MOID_T *save;
   PACK_T *u = NULL;
-  add_mode (p, STRUCT_SYMBOL, DIMENSION (m), NULL, NULL, NULL);
+  add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
   save = *p;
   make_name_pack (PACK (m), &u, p);
   PACK (save) = u;
@@ -1558,7 +1569,7 @@ static MOID_T *make_name_row (MOID_T * m, MOID_T ** p)
 
 /*!
 \brief make structured names
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param modifications
 **/
 
@@ -1601,14 +1612,14 @@ static void make_stowed_names (NODE_T * p, int *modifications)
 \param src
 \param dst
 \param p
-\param dimensions
+\param dim
 **/
 
-static void make_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p, int dimensions)
+static void make_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p, int dim)
 {
   if (src != NULL) {
-    make_multiple_row_pack (NEXT (src), dst, p, dimensions);
-    add_mode_to_pack (dst, add_row (p, dimensions, MOID (src), NULL), TEXT (src), NODE (src));
+    make_multiple_row_pack (NEXT (src), dst, p, dim);
+    add_mode_to_pack (dst, add_row (p, dim, MOID (src), NULL), TEXT (src), NODE (src));
   }
 }
 
@@ -1616,17 +1627,17 @@ static void make_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p, in
 \brief make multiple struct
 \param m
 \param p
-\param dimensions
+\param dim
 \return
 **/
 
-static MOID_T *make_multiple_struct (MOID_T * m, MOID_T ** p, int dimensions)
+static MOID_T *make_multiple_struct (MOID_T * m, MOID_T ** p, int dim)
 {
   MOID_T *save;
   PACK_T *u = NULL;
-  add_mode (p, STRUCT_SYMBOL, DIMENSION (m), NULL, NULL, NULL);
+  add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
   save = *p;
-  make_multiple_row_pack (PACK (m), &u, p, dimensions);
+  make_multiple_row_pack (PACK (m), &u, p, dim);
   PACK (save) = u;
   return (save);
 }
@@ -1636,15 +1647,15 @@ static MOID_T *make_multiple_struct (MOID_T * m, MOID_T ** p, int dimensions)
 \param src
 \param dst
 \param p
-\param dimensions
+\param dim
 **/
 
-static void make_flex_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p, int dimensions)
+static void make_flex_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p, int dim)
 {
   if (src != NULL) {
     MOID_T *z;
-    make_flex_multiple_row_pack (NEXT (src), dst, p, dimensions);
-    z = add_row (p, dimensions, MOID (src), NULL);
+    make_flex_multiple_row_pack (NEXT (src), dst, p, dim);
+    z = add_row (p, dim, MOID (src), NULL);
     z = add_mode (p, FLEX_SYMBOL, 0, NULL, z, NULL);
     add_mode_to_pack (dst, z, TEXT (src), NODE (src));
   }
@@ -1654,24 +1665,24 @@ static void make_flex_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** 
 \brief make flex multiple struct
 \param m
 \param p
-\param dimensions
+\param dim
 \return
 **/
 
-static MOID_T *make_flex_multiple_struct (MOID_T * m, MOID_T ** p, int dimensions)
+static MOID_T *make_flex_multiple_struct (MOID_T * m, MOID_T ** p, int dim)
 {
   MOID_T *x;
   PACK_T *u = NULL;
-  add_mode (p, STRUCT_SYMBOL, DIMENSION (m), NULL, NULL, NULL);
+  add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
   x = *p;
-  make_flex_multiple_row_pack (PACK (m), &u, p, dimensions);
+  make_flex_multiple_row_pack (PACK (m), &u, p, dim);
   PACK (x) = u;
   return (x);
 }
 
 /*!
 \brief make multiple modes
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param modifications
 **/
 
@@ -1697,7 +1708,7 @@ static void make_multiple_modes (NODE_T * p, int *modifications)
             if (WHETHER (SUB (q), STRUCT_SYMBOL)) {
               z = A68_TRUE;
               (*modifications)++;
-              MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIMENSION (q));
+              MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIM (q));
             }
           } else if (WHETHER (q, FLEX_SYMBOL)) {
             if (SUB (SUB (q)) == NULL) {
@@ -1706,7 +1717,7 @@ static void make_multiple_modes (NODE_T * p, int *modifications)
               if (WHETHER (SUB (SUB (q)), STRUCT_SYMBOL)) {
                 z = A68_TRUE;
                 (*modifications)++;
-                MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIMENSION (SUB (q)));
+                MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIM (SUB (q)));
               }
             }
           }
@@ -1736,7 +1747,7 @@ static void make_multiple_modes_standenv (int *modifications)
         if (WHETHER (SUB (q), STRUCT_SYMBOL)) {
           z = A68_TRUE;
           (*modifications)++;
-          MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIMENSION (q));
+          MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIM (q));
         }
       } else if (WHETHER (q, FLEX_SYMBOL)) {
         if (SUB (SUB (q)) == NULL) {
@@ -1745,7 +1756,7 @@ static void make_multiple_modes_standenv (int *modifications)
           if (WHETHER (SUB (SUB (q)), STRUCT_SYMBOL)) {
             z = A68_TRUE;
             (*modifications)++;
-            MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIMENSION (SUB (q)));
+            MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIM (SUB (q)));
           }
         }
       }
@@ -1834,12 +1845,12 @@ static MOID_T *make_deflexed (MOID_T * m, MOID_T ** p)
   }
   if (WHETHER (m, REF_SYMBOL)) {
     MOID_T *new_one = make_deflexed (SUB (m), p);
-    add_mode (p, REF_SYMBOL, DIMENSION (m), NULL, new_one, NULL);
+    add_mode (p, REF_SYMBOL, DIM (m), NULL, new_one, NULL);
     SUB (*p) = new_one;
     return (DEFLEXED (m) = *p);
   } else if (WHETHER (m, PROC_SYMBOL)) {
     MOID_T *save, *new_one;
-    add_mode (p, PROC_SYMBOL, DIMENSION (m), NULL, NULL, PACK (m));
+    add_mode (p, PROC_SYMBOL, DIM (m), NULL, NULL, PACK (m));
     save = *p;
 /* Mark to prevent eventual cyclic references. */
     DEFLEXED (m) = save;
@@ -1852,21 +1863,21 @@ static MOID_T *make_deflexed (MOID_T * m, MOID_T ** p)
     return (DEFLEXED (m));
   } else if (WHETHER (m, ROW_SYMBOL)) {
     MOID_T *new_sub, *new_slice;
-    if (DIMENSION (m) > 1) {
+    if (DIM (m) > 1) {
       new_slice = make_deflexed (SLICE (m), p);
-      add_mode (p, ROW_SYMBOL, DIMENSION (m) - 1, NULL, new_slice, NULL);
+      add_mode (p, ROW_SYMBOL, DIM (m) - 1, NULL, new_slice, NULL);
       new_sub = make_deflexed (SUB (m), p);
     } else {
       new_sub = make_deflexed (SUB (m), p);
       new_slice = new_sub;
     }
-    add_mode (p, ROW_SYMBOL, DIMENSION (m), NULL, new_sub, NULL);
+    add_mode (p, ROW_SYMBOL, DIM (m), NULL, new_sub, NULL);
     SLICE (*p) = new_slice;
     return (DEFLEXED (m) = *p);
   } else if (WHETHER (m, STRUCT_SYMBOL)) {
     MOID_T *save;
     PACK_T *u = NULL;
-    add_mode (p, STRUCT_SYMBOL, DIMENSION (m), NULL, NULL, NULL);
+    add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
     save = *p;
 /* Mark to prevent eventual cyclic references. */
     DEFLEXED (m) = save;
@@ -1887,7 +1898,7 @@ static MOID_T *make_deflexed (MOID_T * m, MOID_T ** p)
 
 /*!
 \brief make deflexed modes
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param modifications
 **/
 
@@ -1912,9 +1923,10 @@ static void make_deflexed_modes (NODE_T * p, int *modifications)
         if (TRIM (m) == NULL && WHETHER (m, FLEX_SYMBOL)) {
           (*modifications)++;
           TRIM (m) = SUB (m);
-        } else if (TRIM (m) == NULL && WHETHER (m, REF_SYMBOL) && WHETHER (SUB (m), FLEX_SYMBOL)) {
+        } else if (TRIM (m) == NULL && WHETHER (m, REF_SYMBOL)
+                   && WHETHER (SUB (m), FLEX_SYMBOL)) {
           (*modifications)++;
-          add_mode (top, REF_SYMBOL, DIMENSION (m), NULL, SUB (SUB (m)), NULL);
+          add_mode (top, REF_SYMBOL, DIM (m), NULL, SUB (SUB (m)), NULL);
           TRIM (m) = *top;
         }
       }
@@ -1932,11 +1944,11 @@ static void make_extra_rows_local (SYMBOL_TABLE_T * s)
 {
   MOID_T *m, **top = &(s->moids);
   for (m = s->moids; m != NULL; FORWARD (m)) {
-    if (ATTRIBUTE (m) == ROW_SYMBOL && DIMENSION (m) > 0 && SUB (m) != NULL) {
-      (void) add_row (top, DIMENSION (m) + 1, SUB (m), NODE (m));
+    if (ATTRIBUTE (m) == ROW_SYMBOL && DIM (m) > 0 && SUB (m) != NULL) {
+      (void) add_row (top, DIM (m) + 1, SUB (m), NODE (m));
     } else if (ATTRIBUTE (m) == REF_SYMBOL && ATTRIBUTE (SUB (m)) == ROW_SYMBOL) {
       MOID_T *y, *z;
-      z = add_row (top, DIMENSION (SUB (m)) + 1, SUB (SUB (m)), NODE (SUB (m)));
+      z = add_row (top, DIM (SUB (m)) + 1, SUB (SUB (m)), NODE (SUB (m)));
       y = add_mode (top, REF_SYMBOL, 0, NODE (m), z, NULL);
       NAME (y) = m;
     }
@@ -2006,7 +2018,7 @@ static BOOL_T whether_mode_has_ref (MOID_T * m)
 
 /*!
 \brief reset moid
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reset_moid (NODE_T * p)
@@ -2028,7 +2040,7 @@ static int renumber_moids (MOID_LIST_T * p)
   if (p == NULL) {
     return (1);
   } else {
-    return (1 + (MOID (p)->number = renumber_moids (NEXT (p))));
+    return (1 + (NUMBER (MOID (p)) = renumber_moids (NEXT (p))));
   }
 }
 
@@ -2049,13 +2061,14 @@ static int whether_mode_has_row (MOID_T * m)
     }
     return (k);
   } else {
-    return (m->has_rows || WHETHER (m, ROW_SYMBOL) || WHETHER (m, FLEX_SYMBOL));
+    return (m->has_rows || WHETHER (m, ROW_SYMBOL)
+            || WHETHER (m, FLEX_SYMBOL));
   }
 }
 
 /*!
 \brief mark row modes
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mark_row_modes (NODE_T * p)
@@ -2093,7 +2106,8 @@ static void set_moid_attributes (MOID_LIST_T * q)
     }
     if (WHETHER (z, REF_SYMBOL)) {
       MOID_T *y = SUB (z);
-      if (SLICE (y) != NULL && WHETHER (SLICE (y), ROW_SYMBOL) && NAME (z) != NULL) {
+      if (SLICE (y) != NULL && WHETHER (SLICE (y), ROW_SYMBOL)
+          && NAME (z) != NULL) {
         ROWED (NAME (z)) = z;
         track_equivalent_modes (&(ROWED (NAME (z))));
       }
@@ -2156,7 +2170,7 @@ static int expand_contract_moids (NODE_T * top_node, int cycle_no)
 
 /*!
 \brief maintain mode table
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void maintain_mode_table (NODE_T * p)
@@ -2217,7 +2231,7 @@ void reset_max_simplout_size (void)
 
 /*!
 \brief max unitings to simplout
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param max
 **/
 
@@ -2239,7 +2253,7 @@ static void max_unitings_to_simplout (NODE_T * p, int *max)
 
 /*!
 \brief get max simplout size
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void get_max_simplout_size (NODE_T * p)
@@ -2516,10 +2530,11 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w)
     moid_to_string_3 (b, "\"ROWS\"", w);
   } else if (n == MODE (VACUUM)) {
     moid_to_string_3 (b, "\"VACUUM\"", w);
-  } else if (WHETHER (n, VOID_SYMBOL) || WHETHER (n, STANDARD) || WHETHER (n, INDICANT)) {
+  } else if (WHETHER (n, VOID_SYMBOL) || WHETHER (n, STANDARD)
+             || WHETHER (n, INDICANT)) {
     int i = 1;
-    for (; i <= abs (n->dimensions) && w > 0; i++) {
-      if (n->dimensions < 0) {
+    for (; i <= abs (DIM (n)) && w > 0; i++) {
+      if (DIM (n) < 0) {
         if (w >= (int) strlen ("SHORT ..")) {
           bufcat (b, "SHORT ", BUFFER_SIZE);
           w -= (int) strlen ("SHORT ");
@@ -2551,11 +2566,11 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w)
       bufcat (b, "..", BUFFER_SIZE);
     }
   } else if (WHETHER (n, ROW_SYMBOL)) {
-    int j = (int) strlen ("[] ..") + 2 * (n->dimensions - 1);
+    int j = (int) strlen ("[] ..") + 2 * (DIM (n) - 1);
     if (w >= j) {
       int i;
       bufcat (b, "[", BUFFER_SIZE);
-      for (i = 1; i < n->dimensions; i++) {
+      for (i = 1; i < DIM (n); i++) {
         bufcat (b, ", ", BUFFER_SIZE);
       }
       bufcat (b, "] ", BUFFER_SIZE);

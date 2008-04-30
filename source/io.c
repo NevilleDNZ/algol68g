@@ -27,7 +27,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MAX_RESTART 256
 
-BOOL_T halt_typing, sys_request_flag;
+BOOL_T halt_typing;
 static int chars_in_tty_line;
 
 char output_line[BUFFER_SIZE], edit_line[BUFFER_SIZE], input_line[BUFFER_SIZE];
@@ -40,7 +40,7 @@ void init_tty (void)
 {
   chars_in_tty_line = 0;
   halt_typing = A68_FALSE;
-  sys_request_flag = A68_FALSE;
+  change_masks (a68_prog.top_node, BREAKPOINT_INTERRUPT_MASK, A68_FALSE);
 }
 
 /*!

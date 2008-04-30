@@ -1,7 +1,7 @@
 <!-- RRHeader -->
 <html>
 <head>
-<title>Algol 68 Genie</title>
+<title>Algol 68 Genie - Revised Report on the Algorithmic Language Algol 68</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -577,7 +577,7 @@ c) l &bull; ? }
 </h3>
  
 <p>
-<a name=94a></a>a) The reference language provides representations for various <b>symbols</b>, including an arbitrarily large number of <b>TAX-symbols</b> {where <b>TAX :: TAG  ; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ; TAD ; TAM.</b>} . The representations of some of them are specified below {<a href="report_4.html#941">9.4.1</a> }, and to these may be added suitable representations for <b>style-TALLY-letter-ABC-symbols</b> and <b>style-TALLY-monad-symbols</b> and any terminal productions of <b>'STYLE other PRAGMENT item'</b> {<a href="report_4.html#921d">9.2.1.d</a>} and of <b>'other string item'</b> {<a href="report_4.html#8141d">8.1.4.1.d</a>}. Representations are not provided for any of these {but they enable individual implementations to make available their full character sets for use as characters, to provide additional or extended alphabets for the construction of <b>TAG-</b> and <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-symbols</b>, and to provide additional <b>symbols</b> for use as <b>operators</b>} . There is not, however, {and there must not be, }  except in representations of the <b>standard-</b>, and other, <b>preludes</b>  {<a href="report_5.html#A13s6">10.1.3.Step 6</a> }, any representation of the <b>letter-aleph-symbol</b> or the <b>primal-symbol</b>. {For the remaining <b>TAX-symbols</b>, see <a href="report_4.html#942">9.4.2</a> . There are, however, some <b>symbols</b> produced by the syntax, e.g., the <b>brief-pragmat-symbol</b>, for which no representation is provided at all. This does not preclude the representation of such <b>symbols</b> in other representation languages.}  
+<a name=94a></a>a) The reference language provides representations for various <b>symbols</b>, including an arbitrarily large number of <b>TAX-symbols</b> {where <b>TAX :: TAG  ; TAB ; TAD ; TAM.</b>} . The representations of some of them are specified below {<a href="report_4.html#941">9.4.1</a> }, and to these may be added suitable representations for <b>style-TALLY-letter-ABC-symbols</b> and <b>style-TALLY-monad-symbols</b> and any terminal productions of <b>'STYLE other PRAGMENT item'</b> {<a href="report_4.html#921d">9.2.1.d</a>} and of <b>'other string item'</b> {<a href="report_4.html#8141d">8.1.4.1.d</a>}. Representations are not provided for any of these {but they enable individual implementations to make available their full character sets for use as characters, to provide additional or extended alphabets for the construction of <b>TAG-</b> and <b>TAB-symbols</b>, and to provide additional <b>symbols</b> for use as <b>operators</b>} . There is not, however, {and there must not be, }  except in representations of the <b>standard-</b>, and other, <b>preludes</b>  {<a href="report_5.html#A13s6">10.1.3.Step 6</a> }, any representation of the <b>letter-aleph-symbol</b> or the <b>primal-symbol</b>. {For the remaining <b>TAX-symbols</b>, see <a href="report_4.html#942">9.4.2</a> . There are, however, some <b>symbols</b> produced by the syntax, e.g., the <b>brief-pragmat-symbol</b>, for which no representation is provided at all. This does not preclude the representation of such <b>symbols</b> in other representation languages.}  
 
 <p>
 <a name=94b></a>b) Where more than one representation of a <b>symbol</b> is given, any of them may be chosen. Moreover, it is sufficient for an implementation of the reference language to provide only one. Also, it is not necessary to provide a representation of any particular <b>MONAD-symbol</b> or <b>NOMAD-symbol</b> so long as those that are provided are sufficient to represent at least one version {<a href="report_5.html#A13s3">10.1.3.Step 3</a> } of each <b>operator</b> declared in the <b>standard-prelude</b>.  
@@ -816,7 +816,7 @@ Also, some of the given representations appear to be composite; e.g., the repres
 <br>
 <a name=9421C></a>C) <b>DIGIT {A} :: digit zero</b> {<a href="report_4.html#941b">94b</a> }  <b>; digit one</b> {<a href="report_4.html#941b">94b</a> }  <b>; digit two</b> {<a href="report_4.html#941b">94b</a>} <b>;  digit three</b> {<a href="report_4.html#941b">94b</a> }  <b>; digit four</b> {<a href="report_4.html#941b">94b</a>} <b>;  digit five</b> {<a href="report_4.html#941b">94b</a> }  <b>; digit six</b> {<a href="report_4.html#941b">94b</a>} <b>;  digit seven</b> {<a href="report_4.html#941b">94b</a> }  <b>; digit eight</b> {<a href="report_4.html#941b">94b</a>} <b>;  digit nine</b> {<a href="report_4.html#941b">94b</a> }  <b>.</b> 
 <br>
-<a name=9421D></a>D) <b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b> {<a href="report_2.html#481a">48a, b</a> }  <b>:: bold TAG</b> {A, -}<b>; SIZETY STANDARD</b> {E}<b>.</b> 
+<a name=9421D></a>D) <b>TAB</b> {<a href="report_2.html#481a">48a, b</a> }  <b>:: bold TAG</b> {A, -}<b>; SIZETY STANDARD</b> {E}<b>.</b> 
 <br>
 <a name=9421E></a>E) <b>STANDARD</b> {D}<b> :: integral</b> {<a href="report_4.html#941e">94e</a> }  <b>; real</b> {<a href="report_4.html#941e">94e</a> }  <b>; boolean</b> {<a href="report_4.html#941e">94e</a>} <b>;  character</b> {<a href="report_4.html#941e">94e</a> }  <b>; format</b> {<a href="report_4.html#941e">94e</a>} <b>;  void</b> {<a href="report_4.html#941e">94e</a> }  <b>; complex</b> {<a href="report_4.html#941e">94e</a>} <b>;  bits</b> {<a href="report_4.html#941e">94e</a> }  <b>; bytes</b> {<a href="report_4.html#941e">94e</a>} <b>;  string</b> {<a href="report_4.html#941e">94e</a> }  <b>; sema</b> {<a href="report_4.html#941e">94e</a>} <b>;  file</b> {<a href="report_4.html#941e">94e</a> }  <b>; channel</b> {<a href="report_4.html#941e">94e</a>}  <b>.</b> 
 <br>
@@ -877,7 +877,7 @@ not a part of the Algol 68 Revised Report, and is distributed with
 Algol 68 Genie with kind permission of C.H. Lindsey.
 <p style="font-size: 8pt; font-color: black;">
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11.1 (March 2008)
+Algol 68 Genie Mark 12 (May 2008)
 </td>
 </tr>
 </table>

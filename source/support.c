@@ -30,11 +30,10 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 ADDR_T fixed_heap_pointer, temp_heap_pointer;
-
 POSTULATE_T *top_postulate, *old_postulate;
-
 KEYWORD_T *top_keyword;
 TOKEN_T *top_token;
+BOOL_T get_fixed_heap_allowed;
 
 /*!
 \brief get_fixed_heap_space
@@ -45,6 +44,7 @@ TOKEN_T *top_token;
 BYTE_T *get_fixed_heap_space (size_t s)
 {
   BYTE_T *z = HEAP_ADDRESS (fixed_heap_pointer);
+  ABNORMAL_END (get_fixed_heap_allowed == A68_FALSE, ERROR_INTERNAL_CONSISTENCY, NULL);
   fixed_heap_pointer += A68_ALIGN (s);
   ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
   ABNORMAL_END (((long) z) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
@@ -135,9 +135,8 @@ void renumber_nodes (NODE_T * p, int *n)
 NODE_INFO_T *new_node_info (void)
 {
   NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space (ALIGNED_SIZEOF (NODE_INFO_T));
-  z->module = NULL;
+  MODULE (z) = NULL;
   z->PROCEDURE_LEVEL = 0;
-  z->PROCEDURE_NUMBER = 0;
   z->char_in_line = NULL;
   z->symbol = NULL;
   z->line = NULL;
@@ -159,8 +158,8 @@ NODE_T *new_node (void)
   z->annotation = 0;
   z->error = A68_FALSE;
   z->need_dns = A68_FALSE;
-  z->genie.propagator.unit = NULL;
-  z->genie.propagator.source = NULL;
+  PROPAGATOR (z).unit = NULL;
+  PROPAGATOR (z).source = NULL;
   z->genie.whether_coercion = A68_FALSE;
   z->genie.whether_new_lexical_level = A68_FALSE;
   z->genie.seq = NULL;
@@ -201,6 +200,7 @@ SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
   z->proc_ops = A68_TRUE;
   z->initialise_anon = A68_TRUE;
   PREVIOUS (z) = p;
+  OUTER (z) = NULL;
   z->identifiers = NULL;
   z->operators = NULL;
   PRIO (z) = NULL;
@@ -222,8 +222,8 @@ MOID_T *new_moid ()
 {
   MOID_T *z = (MOID_T *) get_fixed_heap_space (ALIGNED_SIZEOF (MOID_T));
   z->attribute = 0;
-  z->number = 0;
-  z->dimensions = 0;
+  NUMBER (z) = 0;
+  DIM (z) = 0;
   z->well_formed = A68_FALSE;
   z->use = A68_FALSE;
   z->has_ref = A68_FALSE;
@@ -277,7 +277,7 @@ TAG_T *new_tag ()
   MOID (z) = NULL;
   NODE (z) = NULL;
   z->unit = NULL;
-  z->value = NULL;
+  VALUE (z) = NULL;
   z->stand_env_proc = 0;
   z->procedure = NULL;
   z->scope = PRIMAL_SCOPE;
@@ -291,7 +291,7 @@ TAG_T *new_tag ()
   z->youngest_environ = PRIMAL_SCOPE;
   z->loc_assigned = A68_FALSE;
   NEXT (z) = NULL;
-  z->body = NULL;
+  BODY (z) = NULL;
   z->portable = A68_TRUE;
   NUMBER (z) = ++tag_number;
   return (z);
@@ -308,11 +308,11 @@ SOURCE_LINE_T *new_source_line ()
   z->string = NULL;
   z->filename = NULL;
   z->diagnostics = NULL;
-  z->number = 0;
+  NUMBER (z) = 0;
   z->print_status = 0;
   z->list = A68_TRUE;
   z->top_node = NULL;
-  z->module = NULL;
+  MODULE (z) = NULL;
   NEXT (z) = NULL;
   PREVIOUS (z) = NULL;
   return (z);
@@ -352,7 +352,7 @@ BOOL_T match_string (char *x, char *c, char alt)
   BOOL_T match = A68_TRUE;
   while ((IS_UPPER (c[0]) || IS_DIGIT (c[0]) || c[0] == '-') && match) {
     match &= (TO_LOWER (x[0]) == TO_LOWER ((c++)[0]));
-    if (x[0] != NULL_CHAR) {
+    if (!(x[0] == NULL_CHAR || x[0] == alt)) {
       x++;
     }
   }
@@ -375,7 +375,11 @@ BOOL_T whether (NODE_T * p, ...)
   va_start (vl, p);
   while ((a = va_arg (vl, int)) != 0)
   {
-    if (p != NULL && (a == WILDCARD || (a >= 0 ? a == ATTRIBUTE (p) : -a != ATTRIBUTE (p)))) {
+    if (p != NULL && a == WILDCARD) {
+      p = NEXT (p);
+    } else if (p != NULL && (a == KEYWORD) && (find_keyword_from_attribute (top_keyword, ATTRIBUTE (p)) != NULL)) {
+      p = NEXT (p);
+    } else if (p != NULL && (a >= 0 ? a == ATTRIBUTE (p) : -a != ATTRIBUTE (p))) {
       p = NEXT (p);
     } else {
       va_end (vl);
@@ -624,10 +628,12 @@ void init_heap (void)
   ABNORMAL_END (core == NULL, ERROR_OUT_OF_CORE, NULL);
   heap_segment = &core[0];
   handle_segment = &heap_segment[heap_a_size];
-  frame_segment = &handle_segment[handle_a_size];
-  stack_segment = &frame_segment[frame_a_size];
+  stack_segment = &handle_segment[handle_a_size];
   fixed_heap_pointer = A68_ALIGNMENT;
   temp_heap_pointer = total_size;
+  frame_start = 0;              /* actually, heap_a_size + handle_a_size */
+  frame_end = stack_start = frame_start + frame_a_size;
+  stack_end = stack_start + expr_a_size;
 }
 
 /*!
@@ -797,6 +803,7 @@ KEYWORD_T *find_keyword_from_attribute (KEYWORD_T * p, int a)
     }
   }
 }
+
 
 /*!
 \brief make tables of keywords and non-terminals

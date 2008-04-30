@@ -114,7 +114,7 @@ static void reduce_units (NODE_T *);
 
 /*!
 \brief insert node
-\param p node after which to insert, should not be NULL
+\param p node after which to insert
 \param att attribute for new node
 **/
 
@@ -132,7 +132,7 @@ static void insert_node (NODE_T * p, int att)
 
 /*!
 \brief substitute brackets
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void substitute_brackets (NODE_T * p)
@@ -166,7 +166,7 @@ void substitute_brackets (NODE_T * p)
 
 /*!
 \brief whether token terminates a unit
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return TRUE or FALSE whether token terminates a unit
 **/
 
@@ -203,7 +203,7 @@ static int whether_unit_terminator (NODE_T * p)
 
 /*!
 \brief whether token is a unit-terminator in a loop clause
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return whether token is a unit-terminator in a loop clause
 **/
 
@@ -229,7 +229,7 @@ static BOOL_T whether_loop_keyword (NODE_T * p)
 
 /*!
 \brief whether token cannot follow semicolon or EXIT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return whether token cannot follow semicolon or EXIT
 **/
 
@@ -267,7 +267,7 @@ static int whether_semicolon_less (NODE_T * p)
 
 /*!
 \brief get good attribute
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -290,7 +290,7 @@ static int get_good_attribute (NODE_T * p)
 
 /*!
 \brief preferably don't put intelligible diagnostic here
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -413,7 +413,7 @@ static BOOL_T dont_mark_here (NODE_T * p)
 
 /*!
 \brief intelligible diagnostic from syntax tree branch
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 \return
 **/
@@ -518,13 +518,13 @@ static void bracket_check_error (char *txt, int n, char *bra, char *ket)
 
 /*!
 \brief diagnose brackets in local branch of the tree
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
 static char *bracket_check_diagnose (NODE_T * p)
 {
-  int begins = 0, opens = 0, format_opens = 0, subs = 0, ifs = 0, cases = 0, dos = 0, accos = 0;
+  int begins = 0, opens = 0, format_delims = 0, format_opens = 0, subs = 0, ifs = 0, cases = 0, dos = 0, accos = 0;
   for (; p != NULL; FORWARD (p)) {
     switch (ATTRIBUTE (p)) {
     case BEGIN_SYMBOL:
@@ -557,12 +557,21 @@ static char *bracket_check_diagnose (NODE_T * p)
         accos--;
         break;
       }
-    case FORMAT_ITEM_OPEN:
+    case FORMAT_DELIMITER_SYMBOL:
+      {
+        if (format_delims == 0) {
+          format_delims = 1;
+        } else {
+          format_delims = 0;
+        }
+        break;
+      }
+    case FORMAT_OPEN_SYMBOL:
       {
         format_opens++;
         break;
       }
-    case FORMAT_ITEM_CLOSE:
+    case FORMAT_CLOSE_SYMBOL:
       {
         format_opens--;
         break;
@@ -613,6 +622,7 @@ static char *bracket_check_diagnose (NODE_T * p)
   bracket_check_error (bracket_check_error_text, begins, "BEGIN", "END");
   bracket_check_error (bracket_check_error_text, opens, "(", ")");
   bracket_check_error (bracket_check_error_text, format_opens, "(", ")");
+  bracket_check_error (bracket_check_error_text, format_delims, "$", "$");
   bracket_check_error (bracket_check_error_text, accos, "{", "}");
   bracket_check_error (bracket_check_error_text, subs, "[", "]");
   bracket_check_error (bracket_check_error_text, ifs, "IF", "FI");
@@ -652,10 +662,10 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
         ket = OCCA_SYMBOL;
         break;
       }
-    case FORMAT_ITEM_OPEN:
+    case FORMAT_OPEN_SYMBOL:
       {
         q = bracket_check_parse (top, NEXT (p));
-        ket = FORMAT_ITEM_CLOSE;
+        ket = FORMAT_CLOSE_SYMBOL;
         break;
       }
     case SUB_SYMBOL:
@@ -685,7 +695,7 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
     case END_SYMBOL:
     case OCCA_SYMBOL:
     case CLOSE_SYMBOL:
-    case FORMAT_ITEM_CLOSE:
+    case FORMAT_CLOSE_SYMBOL:
     case BUS_SYMBOL:
     case FI_SYMBOL:
     case ESAC_SYMBOL:
@@ -704,7 +714,7 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
       longjmp (top_down_crash_exit, 1);
     } else if (WHETHER_NOT (q, ket)) {
       char *diag = bracket_check_diagnose (top);
-      diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_PARENTHESIS_2, SYMBOL (q), LINE (q), ket, strlen (diag) > 0 ? diag : INFO_MISSING_KEYWORDS);
+      diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_PARENTHESIS_2, ATTRIBUTE (q), LINE (q), ket, strlen (diag) > 0 ? diag : INFO_MISSING_KEYWORDS);
       longjmp (top_down_crash_exit, 1);
     }
     p = q;
@@ -755,7 +765,7 @@ static void top_down_diagnose (NODE_T * start, NODE_T * where, int clause, int e
 
 /*!
 \brief check for premature exhaustion of tokens
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -771,7 +781,7 @@ static void tokens_exhausted (NODE_T * p, NODE_T * q)
 
 /*!
 \brief whether in cast or formula with loop clause
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return number of symbols to skip
 **/
 
@@ -801,7 +811,7 @@ static int whether_loop_cast_formula (NODE_T * p)
 
 /*!
 \brief skip a unit in a loop clause (FROM u BY u TO u)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
@@ -836,7 +846,8 @@ static NODE_T *top_down_skip_loop_unit (NODE_T * p)
       if (p != NULL && whether_loop_keyword (p)) {
         p = top_down_loop (p);
       }
-    } else if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, COMMA_SYMBOL) || WHETHER (p, EXIT_SYMBOL)) {
+    } else if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, COMMA_SYMBOL)
+               || WHETHER (p, EXIT_SYMBOL)) {
 /* Statement separators. */
       return (p);
     } else {
@@ -848,7 +859,7 @@ static NODE_T *top_down_skip_loop_unit (NODE_T * p)
 
 /*!
 \brief skip a loop clause
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
@@ -857,7 +868,8 @@ static NODE_T *top_down_skip_loop_series (NODE_T * p)
   BOOL_T z;
   do {
     p = top_down_skip_loop_unit (p);
-    z = (p != NULL && (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL) || WHETHER (p, COMMA_SYMBOL) || WHETHER (p, COLON_SYMBOL)));
+    z = (p != NULL && (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL)
+                       || WHETHER (p, COMMA_SYMBOL) || WHETHER (p, COLON_SYMBOL)));
     if (z) {
       FORWARD (p);
     }
@@ -867,7 +879,7 @@ static NODE_T *top_down_skip_loop_series (NODE_T * p)
 
 /*!
 \brief branch out loop parts
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
@@ -883,7 +895,9 @@ NODE_T *top_down_loop (NODE_T * p)
       longjmp (top_down_crash_exit, 1);
     }
     tokens_exhausted (FORWARD (q), start);
-    if (WHETHER (q, FROM_SYMBOL) || WHETHER (q, BY_SYMBOL) || WHETHER (q, TO_SYMBOL) || WHETHER (q, DOWNTO_SYMBOL) || WHETHER (q, WHILE_SYMBOL)) {
+    if (WHETHER (q, FROM_SYMBOL) || WHETHER (q, BY_SYMBOL)
+        || WHETHER (q, TO_SYMBOL) || WHETHER (q, DOWNTO_SYMBOL)
+        || WHETHER (q, WHILE_SYMBOL)) {
       ;
     } else if (WHETHER (q, DO_SYMBOL)) {
       ATTRIBUTE (q) = ALT_DO_SYMBOL;
@@ -896,7 +910,8 @@ NODE_T *top_down_loop (NODE_T * p)
     start = q;
     q = top_down_skip_loop_unit (NEXT (q));
     tokens_exhausted (q, start);
-    if (WHETHER (q, BY_SYMBOL) || WHETHER (q, TO_SYMBOL) || WHETHER (q, DOWNTO_SYMBOL) || WHETHER (q, WHILE_SYMBOL)) {
+    if (WHETHER (q, BY_SYMBOL) || WHETHER (q, TO_SYMBOL)
+        || WHETHER (q, DOWNTO_SYMBOL) || WHETHER (q, WHILE_SYMBOL)) {
       ;
     } else if (WHETHER (q, DO_SYMBOL)) {
       ATTRIBUTE (q) = ALT_DO_SYMBOL;
@@ -910,7 +925,8 @@ NODE_T *top_down_loop (NODE_T * p)
     start = q;
     q = top_down_skip_loop_series (NEXT (q));
     tokens_exhausted (q, start);
-    if (WHETHER (q, TO_SYMBOL) || WHETHER (q, DOWNTO_SYMBOL) || WHETHER (q, WHILE_SYMBOL)) {
+    if (WHETHER (q, TO_SYMBOL) || WHETHER (q, DOWNTO_SYMBOL)
+        || WHETHER (q, WHILE_SYMBOL)) {
       ;
     } else if (WHETHER (q, DO_SYMBOL)) {
       ATTRIBUTE (q) = ALT_DO_SYMBOL;
@@ -964,7 +980,7 @@ NODE_T *top_down_loop (NODE_T * p)
 
 /*!
 \brief driver for branching out loop parts
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void top_down_loops (NODE_T * p)
@@ -987,7 +1003,7 @@ static void top_down_loops (NODE_T * p)
 
 /*!
 \brief driver for branching out until parts
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void top_down_untils (NODE_T * p)
@@ -1017,7 +1033,7 @@ static void top_down_untils (NODE_T * p)
 
 /*!
 \brief skip serial/enquiry clause (unit series)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
@@ -1028,7 +1044,8 @@ static NODE_T *top_down_series (NODE_T * p)
     z = A68_FALSE;
     p = top_down_skip_unit (p);
     if (p != NULL) {
-      if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+      if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL)
+          || WHETHER (p, COMMA_SYMBOL)) {
         z = A68_TRUE;
         FORWARD (p);
       }
@@ -1250,7 +1267,7 @@ static NODE_T *top_down_case (NODE_T * case_p)
 
 /*!
 \brief skip a unit
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
@@ -1289,11 +1306,11 @@ static NODE_T *top_down_skip_format (NODE_T *);
 static NODE_T *top_down_format_open (NODE_T * open_p)
 {
   NODE_T *close_p = top_down_skip_format (NEXT (open_p));
-  if (close_p != NULL && WHETHER (close_p, FORMAT_ITEM_CLOSE)) {
-    make_sub (open_p, close_p, FORMAT_ITEM_OPEN);
+  if (close_p != NULL && WHETHER (close_p, FORMAT_CLOSE_SYMBOL)) {
+    make_sub (open_p, close_p, FORMAT_OPEN_SYMBOL);
     return (NEXT (open_p));
   } else {
-    top_down_diagnose (open_p, close_p, 0, FORMAT_ITEM_CLOSE);
+    top_down_diagnose (open_p, close_p, 0, FORMAT_CLOSE_SYMBOL);
     longjmp (top_down_crash_exit, 1);
     return (NULL);
   }
@@ -1301,16 +1318,17 @@ static NODE_T *top_down_format_open (NODE_T * open_p)
 
 /*!
 \brief skip a format text
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
 static NODE_T *top_down_skip_format (NODE_T * p)
 {
   while (p != NULL) {
-    if (WHETHER (p, FORMAT_ITEM_OPEN)) {
+    if (WHETHER (p, FORMAT_OPEN_SYMBOL)) {
       p = top_down_format_open (p);
-    } else if (WHETHER (p, FORMAT_ITEM_CLOSE) || WHETHER (p, FORMAT_DELIMITER_SYMBOL)) {
+    } else if (WHETHER (p, FORMAT_CLOSE_SYMBOL)
+               || WHETHER (p, FORMAT_DELIMITER_SYMBOL)) {
       return (p);
     } else {
       FORWARD (p);
@@ -1321,7 +1339,7 @@ static NODE_T *top_down_skip_format (NODE_T * p)
 
 /*!
 \brief branch out $ .. $
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return token from where to proceed
 **/
 
@@ -1337,7 +1355,7 @@ static void top_down_formats (NODE_T * p)
     if (WHETHER (q, FORMAT_DELIMITER_SYMBOL)) {
       NODE_T *f = NEXT (q);
       while (f != NULL && WHETHER_NOT (f, FORMAT_DELIMITER_SYMBOL)) {
-        if (WHETHER (f, FORMAT_ITEM_OPEN)) {
+        if (WHETHER (f, FORMAT_OPEN_SYMBOL)) {
           f = top_down_format_open (f);
         } else {
           f = NEXT (f);
@@ -1355,13 +1373,12 @@ static void top_down_formats (NODE_T * p)
 
 /*!
 \brief branch out phrases for the bottom-up parser
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void top_down_parser (NODE_T * p)
 {
   if (p != NULL) {
-    current_module = NULL;
     if (!setjmp (top_down_crash_exit)) {
       top_down_series (p);
       top_down_loops (p);
@@ -1394,8 +1411,20 @@ finally the level 1 phrase.
 */
 
 /*!
+\brief detect redefined keyword
+\param p position in tree
+*/
+
+static void detect_redefined_keyword (NODE_T * p, int construct)
+{
+  if (p != NULL && whether (p, KEYWORD, EQUALS_SYMBOL, 0)) {
+    diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_REDEFINED_KEYWORD, SYMBOL (p), construct, NULL);
+  }
+}
+
+/*!
 \brief whether a series is serial or collateral
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return whether a series is serial or collateral
 **/
 
@@ -1426,7 +1455,7 @@ static int serial_or_collateral (NODE_T * p)
 
 /*!
 \brief insert a node with attribute "a" after "p"
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param a
 **/
 
@@ -1450,7 +1479,7 @@ Filling in gives one format for such construct; this helps later passes.
 
 /*!
 \brief diagnose extensions
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void a68_extension (NODE_T * p)
@@ -1460,7 +1489,7 @@ static void a68_extension (NODE_T * p)
 
 /*!
 \brief diagnose for not-supported features
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void not_supported (NODE_T * p)
@@ -1470,7 +1499,7 @@ static void not_supported (NODE_T * p)
 
 /*!
 \brief diagnose for clauses not yielding a value
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void empty_clause (NODE_T * p)
@@ -1482,19 +1511,19 @@ static void empty_clause (NODE_T * p)
 
 /*!
 \brief diagnose for parallel clause
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void par_clause (NODE_T * p)
 {
-  diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_EXECUTED_AS, PARALLEL_CLAUSE, COLLATERAL_CLAUSE);
+  diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_NO_PARALLEL_CLAUSE);
 }
 
 #endif
 
 /*!
 \brief diagnose for missing symbol
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void missing_symbol (NODE_T * p)
@@ -1505,7 +1534,7 @@ static void missing_symbol (NODE_T * p)
 
 /*!
 \brief diagnose for missing separator
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void missing_separator (NODE_T * p)
@@ -1516,7 +1545,7 @@ static void missing_separator (NODE_T * p)
 
 /*!
 \brief diagnose for wrong separator
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void wrong_separator (NODE_T * p)
@@ -1527,7 +1556,7 @@ static void wrong_separator (NODE_T * p)
 
 /*!
 \brief whether match and reduce a sentence
-\param p token where to start matching, should not be NULL
+\param p token where to start matching
 \param a if not NULL, procedure to execute upon match
 \param z if not NULL, to be set to TRUE upon match
 **/
@@ -1551,7 +1580,7 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     }
   }
 /* Print parser reductions. */
-  if (head != NULL && head->info->module->options.reductions && LINE_NUMBER (head) > 0) {
+  if (head != NULL && MODULE (INFO (head))->options.reductions && LINE_NUMBER (head) > 0) {
     NODE_T *q;
     int count = 0;
     reductions++;
@@ -1560,21 +1589,21 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     }
     head->reduction = reductions;
     snprintf (output_line, BUFFER_SIZE, "\n++++ Reduction %d: %s<-", reductions, non_terminal_string (edit_line, result));
-    io_write_string (STDOUT_FILENO, output_line);
+    WRITE (STDOUT_FILENO, output_line);
     for (q = head; q != NULL && tail != NULL && q != NEXT (tail); FORWARD (q), count++) {
       int gatt = ATTRIBUTE (q);
       char *z = non_terminal_string (input_line, gatt);
       if (count > 0) {
-        io_write_string (STDOUT_FILENO, ", ");
+        WRITE (STDOUT_FILENO, ", ");
       }
       if (z != NULL) {
-        io_write_string (STDOUT_FILENO, z);
+        WRITE (STDOUT_FILENO, z);
         if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTER || gatt == INDICANT) {
           snprintf (output_line, BUFFER_SIZE, " \"%s\"", SYMBOL (q));
-          io_write_string (STDOUT_FILENO, output_line);
+          WRITE (STDOUT_FILENO, output_line);
         }
       } else {
-        io_write_string (STDOUT_FILENO, SYMBOL (q));
+        WRITE (STDOUT_FILENO, SYMBOL (q));
       }
     }
   }
@@ -1591,13 +1620,12 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
 
 /*!
 \brief driver for the bottom-up parser
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void bottom_up_parser (NODE_T * p)
 {
   if (p != NULL) {
-    current_module = p->info->module;
     if (!setjmp (bottom_up_crash_exit)) {
       ignore_superfluous_semicolons (p);
       reduce_particular_program (p);
@@ -1607,7 +1635,7 @@ void bottom_up_parser (NODE_T * p)
 
 /*!
 \brief top-level reduction
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_particular_program (NODE_T * p)
@@ -1655,7 +1683,7 @@ static void reduce_particular_program (NODE_T * p)
 
 /*!
 \brief reduce the sub-phrase that starts one level down
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 \return
 **/
@@ -1679,7 +1707,7 @@ as the parser can repair some faults. This gives less spurious diagnostics.
 
 /*!
 \brief driver for reducing a phrase
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 \return
 **/
@@ -1726,7 +1754,7 @@ BOOL_T reduce_phrase (NODE_T * p, int expect)
 
 /*!
 \brief driver for reducing declarers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -1750,7 +1778,8 @@ static void reduce_declarers (NODE_T * p, int expect)
   } else {
     NODE_T *q;
     for (q = p; q != NULL; FORWARD (q)) {
-      if (whether (q, OPEN_SYMBOL, COLON_SYMBOL, 0) && !(expect == GENERIC_ARGUMENT || expect == BOUNDS)) {
+      if (whether (q, OPEN_SYMBOL, COLON_SYMBOL, 0)
+          && !(expect == GENERIC_ARGUMENT || expect == BOUNDS)) {
         reduce_subordinate (q, SPECIFIER);
       }
       if (whether (q, OPEN_SYMBOL, DECLARER, COLON_SYMBOL, 0)) {
@@ -1765,7 +1794,7 @@ static void reduce_declarers (NODE_T * p, int expect)
 
 /*!
 \brief driver for reducing control structure elements
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_deeper_clauses_driver (NODE_T * p)
@@ -1779,7 +1808,7 @@ static void reduce_deeper_clauses_driver (NODE_T * p)
 
 /*!
 \brief reduces PRIMARY, SECONDARY, TERITARY and FORMAT TEXT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -1800,7 +1829,7 @@ static void reduce_statements (NODE_T * p, int expect)
 
 /*!
 \brief handle cases that need reducing from right-to-left
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_right_to_left_constructs (NODE_T * p)
@@ -1873,7 +1902,7 @@ history. Meanwhile we use this routine.
 
 /*!
 \brief  graciously ignore extra semicolons
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 \return
 **/
@@ -1886,7 +1915,8 @@ for instance "FI; OD". These provoke only a warning.
 */
   for (; p != NULL; FORWARD (p)) {
     ignore_superfluous_semicolons (SUB (p));
-    if (NEXT (p) != NULL && WHETHER (NEXT (p), SEMI_SYMBOL) && NEXT (NEXT (p)) == NULL) {
+    if (NEXT (p) != NULL && WHETHER (NEXT (p), SEMI_SYMBOL)
+        && NEXT (NEXT (p)) == NULL) {
       diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, NEXT (p), WARNING_SKIPPED_SUPERFLUOUS, ATTRIBUTE (NEXT (p)));
       NEXT (p) = NULL;
     } else if (WHETHER (p, SEMI_SYMBOL) && whether_semicolon_less (NEXT (p))) {
@@ -1901,7 +1931,7 @@ for instance "FI; OD". These provoke only a warning.
 
 /*!
 \brief reduce constructs in proper order
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -1938,7 +1968,7 @@ static void reduce_constructs (NODE_T * p, int expect)
 
 /*!
 \brief reduce control structure
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -1950,7 +1980,7 @@ static void reduce_control_structure (NODE_T * p, int expect)
 
 /*!
 \brief reduce lengths in declarers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_lengtheties (NODE_T * p)
@@ -1970,7 +2000,7 @@ static void reduce_lengtheties (NODE_T * p)
 
 /*!
 \brief reduce indicants
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_indicants (NODE_T * p)
@@ -1997,7 +2027,7 @@ static void reduce_indicants (NODE_T * p)
 
 /*!
 \brief reduce basic declarations, like LONG BITS, STRING, ..
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_small_declarers (NODE_T * p)
@@ -2041,7 +2071,7 @@ static void reduce_small_declarers (NODE_T * p)
 
 /*!
 \brief whether formal bounds
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return whether formal bounds
 **/
 
@@ -2071,7 +2101,7 @@ static BOOL_T whether_formal_bounds (NODE_T * p)
 
 /*!
 \brief reduce declarer lists for packs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_declarer_lists (NODE_T * p)
@@ -2104,7 +2134,7 @@ static void reduce_declarer_lists (NODE_T * p)
 
 /*!
 \brief reduce ROW, PROC and OP declarers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_row_proc_op_declarers (NODE_T * p)
@@ -2176,7 +2206,7 @@ static void reduce_row_proc_op_declarers (NODE_T * p)
 
 /*!
 \brief reduce structure packs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_struct_pack (NODE_T * p)
@@ -2206,7 +2236,7 @@ static void reduce_struct_pack (NODE_T * p)
 
 /*!
 \brief reduce parameter packs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_parameter_pack (NODE_T * p)
@@ -2234,7 +2264,7 @@ static void reduce_parameter_pack (NODE_T * p)
 
 /*!
 \brief reduce formal declarer packs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_formal_declarer_pack (NODE_T * p)
@@ -2255,7 +2285,7 @@ static void reduce_formal_declarer_pack (NODE_T * p)
 
 /*!
 \brief reduce union packs (formal declarers and VOID)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_union_pack (NODE_T * p)
@@ -2279,7 +2309,7 @@ static void reduce_union_pack (NODE_T * p)
 
 /*!
 \brief reduce specifiers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_specifiers (NODE_T * p)
@@ -2292,14 +2322,14 @@ static void reduce_specifiers (NODE_T * p)
 
 /*!
 \brief reduce control structure elements
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_deeper_clauses (NODE_T * p)
 {
   if (WHETHER (p, FORMAT_DELIMITER_SYMBOL)) {
     reduce_subordinate (p, FORMAT_TEXT);
-  } else if (WHETHER (p, FORMAT_ITEM_OPEN)) {
+  } else if (WHETHER (p, FORMAT_OPEN_SYMBOL)) {
     reduce_subordinate (p, FORMAT_TEXT);
   } else if (WHETHER (p, OPEN_SYMBOL)) {
     if (NEXT (p) != NULL && WHETHER (NEXT (p), THEN_BAR_SYMBOL)) {
@@ -2307,11 +2337,16 @@ static void reduce_deeper_clauses (NODE_T * p)
     } else if (PREVIOUS (p) != NULL && WHETHER (PREVIOUS (p), PAR_SYMBOL)) {
       reduce_subordinate (p, COLLATERAL_CLAUSE);
     }
-  } else if (WHETHER (p, IF_SYMBOL) || WHETHER (p, ELIF_SYMBOL) || WHETHER (p, CASE_SYMBOL) || WHETHER (p, OUSE_SYMBOL) || WHETHER (p, WHILE_SYMBOL) || WHETHER (p, UNTIL_SYMBOL) || WHETHER (p, ELSE_BAR_SYMBOL) || WHETHER (p, ACCO_SYMBOL)) {
+  } else if (WHETHER (p, IF_SYMBOL) || WHETHER (p, ELIF_SYMBOL)
+             || WHETHER (p, CASE_SYMBOL) || WHETHER (p, OUSE_SYMBOL)
+             || WHETHER (p, WHILE_SYMBOL) || WHETHER (p, UNTIL_SYMBOL)
+             || WHETHER (p, ELSE_BAR_SYMBOL) || WHETHER (p, ACCO_SYMBOL)) {
     reduce_subordinate (p, ENQUIRY_CLAUSE);
   } else if (WHETHER (p, BEGIN_SYMBOL)) {
     reduce_subordinate (p, SOME_CLAUSE);
-  } else if (WHETHER (p, THEN_SYMBOL) || WHETHER (p, ELSE_SYMBOL) || WHETHER (p, OUT_SYMBOL) || WHETHER (p, DO_SYMBOL) || WHETHER (p, ALT_DO_SYMBOL) || WHETHER (p, CODE_SYMBOL)) {
+  } else if (WHETHER (p, THEN_SYMBOL) || WHETHER (p, ELSE_SYMBOL)
+             || WHETHER (p, OUT_SYMBOL) || WHETHER (p, DO_SYMBOL)
+             || WHETHER (p, ALT_DO_SYMBOL) || WHETHER (p, CODE_SYMBOL)) {
     reduce_subordinate (p, SERIAL_CLAUSE);
   } else if (WHETHER (p, IN_SYMBOL)) {
     reduce_subordinate (p, COLLATERAL_CLAUSE);
@@ -2319,14 +2354,16 @@ static void reduce_deeper_clauses (NODE_T * p)
     reduce_subordinate (p, SOME_CLAUSE);
   } else if (WHETHER (p, LOOP_CLAUSE)) {
     reduce_subordinate (p, ENCLOSED_CLAUSE);
-  } else if (WHETHER (p, FOR_SYMBOL) || WHETHER (p, FROM_SYMBOL) || WHETHER (p, BY_SYMBOL) || WHETHER (p, TO_SYMBOL) || WHETHER (p, DOWNTO_SYMBOL)) {
+  } else if (WHETHER (p, FOR_SYMBOL) || WHETHER (p, FROM_SYMBOL)
+             || WHETHER (p, BY_SYMBOL) || WHETHER (p, TO_SYMBOL)
+             || WHETHER (p, DOWNTO_SYMBOL)) {
     reduce_subordinate (p, UNIT);
   }
 }
 
 /*!
 \brief reduce primary elements
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -2384,7 +2421,7 @@ static void reduce_primary_bits (NODE_T * p, int expect)
 
 /*!
 \brief reduce primaries completely
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -2455,7 +2492,7 @@ static void reduce_primaries (NODE_T * p, int expect)
 
 /*!
 \brief enforce that ambiguous patterns are separated by commas
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -2496,7 +2533,7 @@ routines for implementing formatted transput. This is a pragmatic system.
 
 /*!
 \brief reduce format texts completely
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_format_texts (NODE_T * p)
@@ -2745,7 +2782,7 @@ static void reduce_format_texts (NODE_T * p)
 
 /*!
 \brief reduce secondaries completely
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_secondaries (NODE_T * p)
@@ -2785,7 +2822,7 @@ static int operator_with_priority (NODE_T * q, int k)
 
 /*!
 \brief reduce formulae
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_formulae (NODE_T * p)
@@ -2841,7 +2878,7 @@ static void reduce_formulae (NODE_T * p)
 
 /*!
 \brief reduce dyadic expressions
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \return
 **/
@@ -2883,7 +2920,7 @@ static NODE_T *reduce_dyadic (NODE_T * p, int u)
 
 /*!
 \brief reduce tertiaries completely
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_tertiaries (NODE_T * p)
@@ -2927,7 +2964,7 @@ static void reduce_tertiaries (NODE_T * p)
 
 /*!
 \brief reduce declarations
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_basic_declarations (NODE_T * p)
@@ -2964,7 +3001,7 @@ static void reduce_basic_declarations (NODE_T * p)
 
 /*!
 \brief reduce units
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_units (NODE_T * p)
@@ -2992,7 +3029,7 @@ static void reduce_units (NODE_T * p)
 
 /*!
 \brief reduce_generic arguments
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_generic_arguments (NODE_T * p)
@@ -3055,7 +3092,7 @@ static void reduce_generic_arguments (NODE_T * p)
 
 /*!
 \brief reduce bounds
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_bounds (NODE_T * p)
@@ -3085,7 +3122,7 @@ static void reduce_bounds (NODE_T * p)
 
 /*!
 \brief reduce argument packs
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_arguments (NODE_T * p)
@@ -3104,7 +3141,7 @@ static void reduce_arguments (NODE_T * p)
 
 /*!
 \brief reduce declaration lists
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_declaration_lists (NODE_T * p)
@@ -3160,7 +3197,7 @@ static void reduce_declaration_lists (NODE_T * p)
 
 /*!
 \brief reduce labels and specifiers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_labels (NODE_T * p)
@@ -3174,7 +3211,7 @@ static void reduce_labels (NODE_T * p)
 
 /*!
 \brief signal badly used exits
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 \return
 **/
@@ -3205,7 +3242,7 @@ static void precheck_serial_clause (NODE_T * q)
 
 /*!
 \brief reduce serial clauses
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_serial_clauses (NODE_T * p)
@@ -3253,7 +3290,7 @@ static void reduce_serial_clauses (NODE_T * p)
 
 /*!
 \brief reduce enquiry clauses
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_enquiry_clauses (NODE_T * p)
@@ -3282,7 +3319,7 @@ static void reduce_enquiry_clauses (NODE_T * p)
 
 /*!
 \brief reduce collateral clauses
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_collateral_clauses (NODE_T * p)
@@ -3311,7 +3348,7 @@ static void reduce_collateral_clauses (NODE_T * p)
 
 /*!
 \brief reduces clause parts, before reducing the clause itself
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -3367,8 +3404,8 @@ static void reduce_enclosed_clause_bits (NODE_T * p, int expect)
   } else if (WHETHER (p, FORMAT_DELIMITER_SYMBOL)) {
     f (p, NULL, NULL, FORMAT_TEXT, FORMAT_DELIMITER_SYMBOL, PICTURE_LIST, FORMAT_DELIMITER_SYMBOL, 0);
     f (p, NULL, NULL, FORMAT_TEXT, FORMAT_DELIMITER_SYMBOL, FORMAT_DELIMITER_SYMBOL, 0);
-  } else if (WHETHER (p, FORMAT_ITEM_OPEN)) {
-    f (p, NULL, NULL, COLLECTION, FORMAT_ITEM_OPEN, PICTURE_LIST, FORMAT_ITEM_CLOSE, 0);
+  } else if (WHETHER (p, FORMAT_OPEN_SYMBOL)) {
+    f (p, NULL, NULL, COLLECTION, FORMAT_OPEN_SYMBOL, PICTURE_LIST, FORMAT_CLOSE_SYMBOL, 0);
   } else if (WHETHER (p, CODE_SYMBOL)) {
     f (p, NULL, NULL, CODE_CLAUSE, CODE_SYMBOL, SERIAL_CLAUSE, EDOC_SYMBOL, 0);
   } else if (WHETHER (p, IF_SYMBOL)) {
@@ -3429,7 +3466,7 @@ static void reduce_enclosed_clause_bits (NODE_T * p, int expect)
 
 /*!
 \brief reduce enclosed clauses
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_enclosed_clauses (NODE_T * p)
@@ -3522,7 +3559,7 @@ static void reduce_enclosed_clauses (NODE_T * p)
 
 /*!
 \brief substitute reduction when a phrase could not be parsed
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 \param suppress suppresses a diagnostic_node message (nested c.q. related diagnostics)
 \return
@@ -3593,7 +3630,8 @@ static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
     make_sub (p, q, FROM_PART);
   } else if (WHETHER (p, BY_SYMBOL) || WHETHER (p, BY_PART)) {
     make_sub (p, q, BY_PART);
-  } else if (WHETHER (p, TO_SYMBOL) || WHETHER (p, DOWNTO_SYMBOL) || WHETHER (p, TO_PART)) {
+  } else if (WHETHER (p, TO_SYMBOL) || WHETHER (p, DOWNTO_SYMBOL)
+             || WHETHER (p, TO_PART)) {
     make_sub (p, q, TO_PART);
   } else if (WHETHER (p, WHILE_SYMBOL) || WHETHER (p, WHILE_PART)) {
     make_sub (p, q, WHILE_PART);
@@ -3610,7 +3648,7 @@ static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
 
 /*!
 \brief heuristic aid in pinpointing errors
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void reduce_erroneous_units (NODE_T * p)
@@ -3626,10 +3664,14 @@ unsuspecting user. */
       f (q, NULL, NULL, UNIT, SELECTOR, WILDCARD, 0);
     }
 /* Attention for identity relations that require tertiaries. */
-    if (whether (q, -TERTIARY, IS_SYMBOL, TERTIARY, 0) || whether (q, TERTIARY, IS_SYMBOL, -TERTIARY, 0) || whether (q, -TERTIARY, IS_SYMBOL, -TERTIARY, 0)) {
+    if (whether (q, -TERTIARY, IS_SYMBOL, TERTIARY, 0)
+        || whether (q, TERTIARY, IS_SYMBOL, -TERTIARY, 0)
+        || whether (q, -TERTIARY, IS_SYMBOL, -TERTIARY, 0)) {
       diagnostic_node (A68_SYNTAX_ERROR, NEXT (q), ERROR_SYNTAX_EXPECTED, TERTIARY);
       f (q, NULL, NULL, UNIT, WILDCARD, IS_SYMBOL, WILDCARD, 0);
-    } else if (whether (q, -TERTIARY, ISNT_SYMBOL, TERTIARY, 0) || whether (q, TERTIARY, ISNT_SYMBOL, -TERTIARY, 0) || whether (q, -TERTIARY, ISNT_SYMBOL, -TERTIARY, 0)) {
+    } else if (whether (q, -TERTIARY, ISNT_SYMBOL, TERTIARY, 0)
+               || whether (q, TERTIARY, ISNT_SYMBOL, -TERTIARY, 0)
+               || whether (q, -TERTIARY, ISNT_SYMBOL, -TERTIARY, 0)) {
       diagnostic_node (A68_SYNTAX_ERROR, NEXT (q), ERROR_SYNTAX_EXPECTED, TERTIARY);
       f (q, NULL, NULL, UNIT, WILDCARD, ISNT_SYMBOL, WILDCARD, 0);
     }
@@ -3702,7 +3744,7 @@ static int find_tag_definition (SYMBOL_TABLE_T * table, char *name)
 
 /*!
 \brief fill in whether bold tag is operator or indicant
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void elaborate_bold_tags (NODE_T * p)
@@ -3733,14 +3775,16 @@ static void elaborate_bold_tags (NODE_T * p)
 
 /*!
 \brief skip declarer, or argument pack and declarer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return node before token that is not part of pack or declarer 
 **/
 
 static NODE_T *skip_pack_declarer (NODE_T * p)
 {
 /* Skip () REF [] REF FLEX [] [] ... */
-  while (p != NULL && (WHETHER (p, SUB_SYMBOL) || WHETHER (p, OPEN_SYMBOL) || WHETHER (p, REF_SYMBOL) || WHETHER (p, FLEX_SYMBOL) || WHETHER (p, SHORT_SYMBOL) || WHETHER (p, LONG_SYMBOL))) {
+  while (p != NULL && (WHETHER (p, SUB_SYMBOL) || WHETHER (p, OPEN_SYMBOL)
+                       || WHETHER (p, REF_SYMBOL) || WHETHER (p, FLEX_SYMBOL)
+                       || WHETHER (p, SHORT_SYMBOL) || WHETHER (p, LONG_SYMBOL))) {
     FORWARD (p);
   }
 /* Skip STRUCT (), UNION () or PROC [()]. */
@@ -3755,7 +3799,7 @@ static NODE_T *skip_pack_declarer (NODE_T * p)
 
 /*!
 \brief search MODE A = .., B = .. and store indicants
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_indicants (NODE_T * p)
@@ -3766,6 +3810,7 @@ static void extract_indicants (NODE_T * p)
       BOOL_T z = A68_TRUE;
       do {
         FORWARD (q);
+        detect_redefined_keyword (q, MODE_DECLARATION);
         if (whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)) {
           add_tag (SYMBOL_TABLE (p), INDICANT, q, NULL, 0);
           ATTRIBUTE (q) = DEFINING_INDICANT;
@@ -3796,7 +3841,7 @@ static void extract_indicants (NODE_T * p)
 
 /*!
 \brief search PRIO X = .., Y = .. and store priorities
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_priorities (NODE_T * p)
@@ -3807,6 +3852,7 @@ static void extract_priorities (NODE_T * p)
       BOOL_T z = A68_TRUE;
       do {
         FORWARD (q);
+        detect_redefined_keyword (q, PRIORITY_DECLARATION);
 /* An operator tag like ++ or && gives strange errors so we catch it here. */
         if (whether (q, OPERATOR, OPERATOR, 0)) {
           int k;
@@ -3823,7 +3869,9 @@ static void extract_priorities (NODE_T * p)
           ATTRIBUTE (q) = PRIORITY;
           add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
           FORWARD (q);
-        } else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTER, 0) || whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTER, 0) || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTER, 0)) {
+        } else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTER, 0)
+                   || whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTER, 0)
+                   || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTER, 0)) {
           int k;
           NODE_T *y = q;
           ATTRIBUTE (q) = DEFINING_OPERATOR;
@@ -3834,7 +3882,9 @@ static void extract_priorities (NODE_T * p)
           ATTRIBUTE (q) = PRIORITY;
           add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
           FORWARD (q);
-        } else if (whether (q, BOLD_TAG, INT_DENOTER, 0) || whether (q, OPERATOR, INT_DENOTER, 0) || whether (q, EQUALS_SYMBOL, INT_DENOTER, 0)) {
+        } else if (whether (q, BOLD_TAG, INT_DENOTER, 0)
+                   || whether (q, OPERATOR, INT_DENOTER, 0)
+                   || whether (q, EQUALS_SYMBOL, INT_DENOTER, 0)) {
 /* The scanner cannot separate operator and "=" sign so we do this here. */
           int len = (int) strlen (SYMBOL (q));
           if (len > 1 && SYMBOL (q)[len - 1] == '=') {
@@ -3866,7 +3916,7 @@ static void extract_priorities (NODE_T * p)
 
 /*!
 \brief search OP [( .. ) ..] X = .., Y = .. and store operators
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_operators (NODE_T * p)
@@ -3885,6 +3935,7 @@ static void extract_operators (NODE_T * p)
       if (q != NULL) {
         do {
           FORWARD (q);
+          detect_redefined_keyword (q, OPERATOR_DECLARATION);
 /* An unacceptable operator tag like ++ or && gives strange errors so we catch it here. */
           if (whether (q, OPERATOR, OPERATOR, 0)) {
             diagnostic_node (A68_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
@@ -3895,13 +3946,16 @@ static void extract_operators (NODE_T * p)
             FORWARD (q);
             q->attribute = ALT_EQUALS_SYMBOL;
             q = skip_unit (q);
-          } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0) || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0) || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
+          } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0)
+                     || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)
+                     || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
             ATTRIBUTE (q) = DEFINING_OPERATOR;
             add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
             FORWARD (q);
             q->attribute = ALT_EQUALS_SYMBOL;
             q = skip_unit (q);
-          } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG) || WHETHER (q, EQUALS_SYMBOL))) {
+          } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG)
+                                   || WHETHER (q, EQUALS_SYMBOL))) {
 /* The scanner cannot separate operator and "=" sign so we do this here. */
             int len = (int) strlen (SYMBOL (q));
             if (len > 1 && SYMBOL (q)[len - 1] == '=') {
@@ -3928,7 +3982,7 @@ static void extract_operators (NODE_T * p)
 
 /*!
 \brief search and store labels
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param expect information the parser may have on what is expected
 **/
 
@@ -3949,7 +4003,7 @@ static void extract_labels (NODE_T * p, int expect)
 
 /*!
 \brief search MOID x = .., y = .. and store identifiers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_identities (NODE_T * p)
@@ -3984,7 +4038,7 @@ static void extract_identities (NODE_T * p)
 
 /*!
 \brief search MOID x [:= ..], y [:= ..] and store identifiers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_variables (NODE_T * p)
@@ -4016,7 +4070,7 @@ static void extract_variables (NODE_T * p)
 
 /*!
 \brief search PROC x = .., y = .. and stores identifiers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_proc_identities (NODE_T * p)
@@ -4028,7 +4082,8 @@ static void extract_proc_identities (NODE_T * p)
       do {
         FORWARD (q);
         if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
-          TAG_T *t = add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          TAG_T *t = add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL,
+                              NORMAL_IDENTIFIER);
           t->in_proc = A68_TRUE;
           ATTRIBUTE (q) = DEFINING_IDENTIFIER;
           (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
@@ -4052,7 +4107,7 @@ static void extract_proc_identities (NODE_T * p)
 
 /*!
 \brief search PROC x [:= ..], y [:= ..]; store identifiers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_proc_variables (NODE_T * p)
@@ -4086,7 +4141,7 @@ static void extract_proc_variables (NODE_T * p)
 
 /*!
 \brief schedule gathering of definitions in a phrase
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void extract_declarations (NODE_T * p)
@@ -4142,7 +4197,7 @@ static void extract_declarations (NODE_T * p)
 
 /*!
 \brief count pictures
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param k
 **/
 
@@ -4158,7 +4213,7 @@ static void count_pictures (NODE_T * p, int *k)
 
 /*!
 \brief driver for a posteriori error checking
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void bottom_up_error_check (NODE_T * p)
@@ -4180,7 +4235,7 @@ void bottom_up_error_check (NODE_T * p)
 
 /*!
 \brief transfer IDENTIFIER to JUMP where appropriate
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void rearrange_goto_less_jumps (NODE_T * p)
@@ -4234,8 +4289,7 @@ void rearrange_goto_less_jumps (NODE_T * p)
     } else if (WHETHER (p, PRIMARY)) {
       NODE_T *q = SUB (p);
       if (q != NULL && WHETHER (q, IDENTIFIER)) {
-        if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q))
-            == LABEL) {
+        if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
           make_sub (q, q, JUMP);
         }
       }
@@ -4248,7 +4302,7 @@ void rearrange_goto_less_jumps (NODE_T * p)
 
 /*!
 \brief check generator
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_generator (NODE_T * p)
@@ -4260,7 +4314,7 @@ static void victal_check_generator (NODE_T * p)
 
 /*!
 \brief check formal pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param z
 **/
@@ -4284,7 +4338,7 @@ static void victal_check_formal_pack (NODE_T * p, int x, BOOL_T * z)
 
 /*!
 \brief check operator declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_operator_dec (NODE_T * p)
@@ -4304,7 +4358,7 @@ static void victal_check_operator_dec (NODE_T * p)
 
 /*!
 \brief check mode declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_mode_dec (NODE_T * p)
@@ -4326,7 +4380,7 @@ static void victal_check_mode_dec (NODE_T * p)
 
 /*!
 \brief check variable declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_variable_dec (NODE_T * p)
@@ -4351,7 +4405,7 @@ static void victal_check_variable_dec (NODE_T * p)
 
 /*!
 \brief check identity declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_identity_dec (NODE_T * p)
@@ -4376,7 +4430,7 @@ static void victal_check_identity_dec (NODE_T * p)
 
 /*!
 \brief check routine pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param z
 \return
@@ -4400,7 +4454,7 @@ static void victal_check_routine_pack (NODE_T * p, int x, BOOL_T * z)
 
 /*!
 \brief check routine text
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_routine_text (NODE_T * p)
@@ -4421,7 +4475,7 @@ static void victal_check_routine_text (NODE_T * p)
 
 /*!
 \brief check structure pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param z
 **/
@@ -4445,7 +4499,7 @@ static void victal_check_structure_pack (NODE_T * p, int x, BOOL_T * z)
 
 /*!
 \brief check union pack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param z
 **/
@@ -4470,7 +4524,7 @@ static void victal_check_union_pack (NODE_T * p, int x, BOOL_T * z)
 
 /*!
 \brief check declarer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 **/
 
@@ -4542,7 +4596,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
 
 /*!
 \brief check cast
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void victal_check_cast (NODE_T * p)
@@ -4555,7 +4609,7 @@ static void victal_check_cast (NODE_T * p)
 
 /*!
 \brief driver for checking VICTALITY of declarers
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void victal_checker (NODE_T * p)
@@ -4582,31 +4636,49 @@ void victal_checker (NODE_T * p)
 }
 
 /*
+\brief set level for procedures
+\param p position in tree
+\param n proc level number
+*/
+
+void set_proc_level (NODE_T * p, int n)
+{
+  for (; p != NULL; FORWARD (p)) {
+    INFO (p)->PROCEDURE_LEVEL = n;
+    if (WHETHER (p, ROUTINE_TEXT)) {
+      set_proc_level (SUB (p), n + 1);
+    } else {
+      set_proc_level (SUB (p), n);
+    }
+  }
+}
+
+/*
 \brief set nests for diagnostics
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param s start of enclosing nest
 */
 
-void set_nests (NODE_T * p, NODE_T * s)
+void set_nest (NODE_T * p, NODE_T * s)
 {
   for (; p != NULL; FORWARD (p)) {
     NEST (p) = s;
     if (WHETHER (p, PARTICULAR_PROGRAM)) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else if (WHETHER (p, CLOSED_CLAUSE) && NUMBER (LINE (p)) != 0) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else if (WHETHER (p, COLLATERAL_CLAUSE) && NUMBER (LINE (p)) != 0) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else if (WHETHER (p, CONDITIONAL_CLAUSE) && NUMBER (LINE (p)) != 0) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else if (WHETHER (p, INTEGER_CASE_CLAUSE) && NUMBER (LINE (p)) != 0) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else if (WHETHER (p, UNITED_CASE_CLAUSE) && NUMBER (LINE (p)) != 0) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else if (WHETHER (p, LOOP_CLAUSE) && NUMBER (LINE (p)) != 0) {
-      set_nests (SUB (p), p);
+      set_nest (SUB (p), p);
     } else {
-      set_nests (SUB (p), s);
+      set_nest (SUB (p), s);
     }
   }
 }

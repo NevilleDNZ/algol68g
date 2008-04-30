@@ -48,10 +48,11 @@ that has not been implemented here. */
 #include "algol68g.h"
 #include "environ.h"
 #include "genie.h"
+#include "inline.h"
 
 #define STOP_CHAR 127
 
-#define IN_PRELUDE(p) (LINE(p)->number <= 0)
+#define IN_PRELUDE(p) (LINE_NUMBER (p) <= 0)
 #define EOL(c) ((c) == NEWLINE_CHAR || (c) == NULL_CHAR)
 
 void file_format_error (MODULE_T *, int);
@@ -144,7 +145,7 @@ static void concatenate_lines (SOURCE_LINE_T * top)
 static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
 {
   int len = strlen (v);
-  if (z->module->options.stropping == QUOTE_STROPPING) {
+  if (MODULE (z)->options.stropping == QUOTE_STROPPING) {
     if (u[0] == '\'') {
       return (strncmp (++u, v, len) == 0 && u[len] == '\'');
     } else {
@@ -208,7 +209,8 @@ static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
         *top = u;
         *ch = &v[1];
         return (A68_TRUE);
-      } else if (whether_bold (u, v, "CO") && delim == STYLE_I_COMMENT_SYMBOL) {
+      } else if (whether_bold (u, v, "CO")
+                 && delim == STYLE_I_COMMENT_SYMBOL) {
         *top = u;
         *ch = &v[1];
         return (A68_TRUE);
@@ -249,7 +251,8 @@ static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T w
         *top = u;
         *ch = &v[1];
         return (A68_TRUE);
-      } else if (whether_bold (u, v, "PR") && delim == STYLE_I_PRAGMAT_SYMBOL) {
+      } else if (whether_bold (u, v, "PR")
+                 && delim == STYLE_I_PRAGMAT_SYMBOL) {
         *top = u;
         *ch = &v[1];
         return (A68_TRUE);
@@ -354,7 +357,8 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
         SCAN_ERROR (!skip_comment (&u, &v, STYLE_I_COMMENT_SYMBOL), start_l, start_c, ERROR_UNTERMINATED_COMMENT);
       } else if (v[0] == '#') {
         SCAN_ERROR (!skip_comment (&u, &v, STYLE_II_COMMENT_SYMBOL), start_l, start_c, ERROR_UNTERMINATED_COMMENT);
-      } else if (whether_bold (u, v, "PRAGMAT") || whether_bold (u, v, "PR")) {
+      } else if (whether_bold (u, v, "PRAGMAT")
+                 || whether_bold (u, v, "PR")) {
 /* We caught a PRAGMAT. */
         char *item;
         if (whether_bold (u, v, "PRAGMAT")) {
@@ -489,9 +493,9 @@ been included will not be included a second time - it will be ignored.
         SCAN_ERROR (!skip_pragmat (&u, &v, pr_lim, A68_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 /* Filename valid? */
         SCAN_ERROR (n == 0, start_l, start_c, ERROR_INCORRECT_FILENAME);
-        fnwid = strlen (u->module->files.path) + strlen (fnb) + 1;
+        fnwid = strlen (MODULE (u)->files.path) + strlen (fnb) + 1;
         fn = (char *) get_fixed_heap_space (fnwid);
-        bufcpy (fn, u->module->files.path, fnwid);
+        bufcpy (fn, MODULE (u)->files.path, fnwid);
         bufcat (fn, fnb, fnwid);
 /* Recursive include? Then *ignore* the file. */
         for (t = top; t != NULL; t = NEXT (t)) {
@@ -517,7 +521,9 @@ been included will not be included a second time - it will be ignored.
 /* Buffer still usable? */
         if (fsize > max_scan_buf_length) {
           max_scan_buf_length = fsize;
-          scan_buf = (char *) get_temp_heap_space ((unsigned) (8 + max_scan_buf_length));
+          scan_buf = (char *)
+            get_temp_heap_space ((unsigned)
+                                 (8 + max_scan_buf_length));
         }
 /* Link all lines into the list. */
         linum = 1;
@@ -528,7 +534,8 @@ been included will not be included a second time - it will be ignored.
           n = 0;
           scan_buf[0] = NULL_CHAR;
           while (k < fsize && fbuf[k] != NEWLINE_CHAR) {
-            SCAN_ERROR ((IS_CNTRL (fbuf[k]) && !IS_SPACE (fbuf[k])) || fbuf[k] == STOP_CHAR, start_l, start_c, ERROR_FILE_INCLUDE_CTRL);
+            SCAN_ERROR ((IS_CNTRL (fbuf[k]) && !IS_SPACE (fbuf[k]))
+                        || fbuf[k] == STOP_CHAR, start_l, start_c, ERROR_FILE_INCLUDE_CTRL);
             scan_buf[n++] = fbuf[k++];
             scan_buf[n] = NULL_CHAR;
           }
@@ -537,7 +544,7 @@ been included will not be included a second time - it will be ignored.
           if (k < fsize) {
             k++;
           }
-          append_source_line (u->module, scan_buf, &t, &linum, fn);
+          append_source_line (MODULE (u), scan_buf, &t, &linum, fn);
         }
 /* Conclude and go find another include directive, if any. */
         NEXT (t) = s;
@@ -573,12 +580,12 @@ static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** r
 /* Link line into the chain. */
   z->string = new_fixed_string (str);
   z->filename = filename;
-  z->number = (*line_num)++;
+  NUMBER (z) = (*line_num)++;
   z->print_status = NOT_PRINTED;
   z->list = A68_TRUE;
   z->diagnostics = NULL;
   z->top_node = NULL;
-  z->module = module;
+  MODULE (z) = module;
   NEXT (z) = NULL;
   PREVIOUS (z) = *ref_l;
   if (module != NULL && module->top_line == NULL) {
@@ -619,10 +626,11 @@ static void append_environ (MODULE_T * module, char *str, SOURCE_LINE_T ** ref_l
     char *car = text;
     char *cdr = a68g_strchr (text, '!');
     int zero_line_num = 0;
-    cdr[0] = NEWLINE_CHAR;
+    cdr[0] = NULL_CHAR;
     text = &cdr[1];
     (*line_num)++;
-    append_source_line (module, car, ref_l, &zero_line_num, name);
+    snprintf (edit_line, BUFFER_SIZE, "%s\n", car);
+    append_source_line (module, edit_line, ref_l, &zero_line_num, name);
   }
 }
 
@@ -798,7 +806,8 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
   while (stop == A68_FALSE) {
     SCAN_ERROR (c == STOP_CHAR, start_l, start_c, ERROR_UNTERMINATED_PRAGMENT);
 /* A ".." or '..' delimited string in a PRAGMAT. */
-    if ((c == QUOTE_CHAR || (c == '\'' && module->options.stropping == UPPER_STROPPING)) && (type == STYLE_I_PRAGMAT_SYMBOL || type == BOLD_PRAGMAT_SYMBOL)) {
+    if ((c == QUOTE_CHAR || (c == '\'' && module->options.stropping == UPPER_STROPPING))
+        && (type == STYLE_I_PRAGMAT_SYMBOL || type == BOLD_PRAGMAT_SYMBOL)) {
       char delim = c;
       BOOL_T eos = A68_FALSE;
       ADD_ONE_CHAR (c);
@@ -1528,15 +1537,14 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
           (*start_l)->top_node = q;
         }
         q->info->char_in_line = *start_c;
-        PRIO (q->info) = 0;
-        q->info->PROCEDURE_LEVEL = 0;
-        q->info->PROCEDURE_NUMBER = 0;
+        PRIO (INFO (q)) = 0;
+        INFO (q)->PROCEDURE_LEVEL = 0;
         ATTRIBUTE (q) = att;
         SYMBOL (q) = c;
         PREVIOUS (q) = *root;
         SUB (q) = NEXT (q) = NULL;
         SYMBOL_TABLE (q) = NULL;
-        q->info->module = module;
+        MODULE (INFO (q)) = module;
         MOID (q) = NULL;
         TAX (q) = NULL;
         if (*root != NULL) {
@@ -1555,25 +1563,27 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
         tokenise_source (module, root, level + 1, A68_TRUE, l, s, start_l, start_c);
       } else if (in_format && open_embedded_clause (att)) {
         NODE_T *z = PREVIOUS (*root);
-        if (z != NULL && (WHETHER (z, FORMAT_ITEM_N) || WHETHER (z, FORMAT_ITEM_G) || WHETHER (z, FORMAT_ITEM_H) || WHETHER (z, FORMAT_ITEM_F))) {
+        if (z != NULL && (WHETHER (z, FORMAT_ITEM_N) || WHETHER (z, FORMAT_ITEM_G)
+                          || WHETHER (z, FORMAT_ITEM_H)
+                          || WHETHER (z, FORMAT_ITEM_F))) {
           tokenise_source (module, root, level, A68_FALSE, l, s, start_l, start_c);
         } else if (att == OPEN_SYMBOL) {
-          ATTRIBUTE (*root) = FORMAT_ITEM_OPEN;
+          ATTRIBUTE (*root) = FORMAT_OPEN_SYMBOL;
         } else if (module->options.brackets && att == SUB_SYMBOL) {
-          ATTRIBUTE (*root) = FORMAT_ITEM_OPEN;
+          ATTRIBUTE (*root) = FORMAT_OPEN_SYMBOL;
         } else if (module->options.brackets && att == ACCO_SYMBOL) {
-          ATTRIBUTE (*root) = FORMAT_ITEM_OPEN;
+          ATTRIBUTE (*root) = FORMAT_OPEN_SYMBOL;
         }
       } else if (!in_format && level > 0 && open_embedded_clause (att)) {
         tokenise_source (module, root, level + 1, A68_FALSE, l, s, start_l, start_c);
       } else if (!in_format && level > 0 && close_embedded_clause (att)) {
         return;
       } else if (in_format && att == CLOSE_SYMBOL) {
-        ATTRIBUTE (*root) = FORMAT_ITEM_CLOSE;
+        ATTRIBUTE (*root) = FORMAT_CLOSE_SYMBOL;
       } else if (module->options.brackets && in_format && att == BUS_SYMBOL) {
-        ATTRIBUTE (*root) = FORMAT_ITEM_CLOSE;
+        ATTRIBUTE (*root) = FORMAT_CLOSE_SYMBOL;
       } else if (module->options.brackets && in_format && att == OCCA_SYMBOL) {
-        ATTRIBUTE (*root) = FORMAT_ITEM_CLOSE;
+        ATTRIBUTE (*root) = FORMAT_CLOSE_SYMBOL;
       }
     }
   }
@@ -1661,7 +1671,8 @@ void get_refinements (MODULE_T * z)
 /* Ok, we accept a program with no refinements as well. */
     return;
   }
-  while (p != NULL && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, 0)) {
+  while (p != NULL && !IN_PRELUDE (p)
+         && whether (p, IDENTIFIER, COLON_SYMBOL, 0)) {
     REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space (ALIGNED_SIZEOF (REFINEMENT_T)), *x;
     BOOL_T exists;
     NEXT (new_one) = NULL;

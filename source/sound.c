@@ -23,6 +23,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "algol68g.h"
 #include "genie.h"
+#include "inline.h"
 #include "mp.h"
 #include "transput.h"
 
@@ -143,151 +144,200 @@ static char *code_unsigned (NODE_T * p, unsigned n)
 static char *format_category (unsigned n)
 {
   switch (n) {
-  case WAVE_FORMAT_UNKNOWN:{
+  case WAVE_FORMAT_UNKNOWN:
+    {
       return ("WAVE_FORMAT_UNKNOWN");
     }
-  case WAVE_FORMAT_PCM:{
+  case WAVE_FORMAT_PCM:
+    {
       return ("WAVE_FORMAT_PCM	");
     }
-  case WAVE_FORMAT_ADPCM:{
+  case WAVE_FORMAT_ADPCM:
+    {
       return ("WAVE_FORMAT_ADPCM");
     }
-  case WAVE_FORMAT_IEEE_FLOAT:{
+  case WAVE_FORMAT_IEEE_FLOAT:
+    {
       return ("WAVE_FORMAT_IEEE_FLOAT");
     }
-  case WAVE_FORMAT_IBM_FORMAT_CVSD:{
+  case WAVE_FORMAT_IBM_FORMAT_CVSD:
+    {
       return ("WAVE_FORMAT_IBM_FORMAT_CVSD");
     }
-  case WAVE_FORMAT_ALAW:{
+  case WAVE_FORMAT_ALAW:
+    {
       return ("WAVE_FORMAT_ALAW");
     }
-  case WAVE_FORMAT_MULAW:{
+  case WAVE_FORMAT_MULAW:
+    {
       return ("WAVE_FORMAT_MULAW");
     }
-  case WAVE_FORMAT_OKI_ADPCM:{
+  case WAVE_FORMAT_OKI_ADPCM:
+    {
       return ("WAVE_FORMAT_OKI_ADPCM");
     }
-  case WAVE_FORMAT_DVI_ADPCM:{
+  case WAVE_FORMAT_DVI_ADPCM:
+    {
       return ("WAVE_FORMAT_DVI_ADPCM");
     }
-  case WAVE_FORMAT_MEDIASPACE_ADPCM:{
+  case WAVE_FORMAT_MEDIASPACE_ADPCM:
+    {
       return ("WAVE_FORMAT_MEDIASPACE_ADPCM");
     }
-  case WAVE_FORMAT_SIERRA_ADPCM:{
+  case WAVE_FORMAT_SIERRA_ADPCM:
+    {
       return ("WAVE_FORMAT_SIERRA_ADPCM");
     }
-  case WAVE_FORMAT_G723_ADPCM:{
+  case WAVE_FORMAT_G723_ADPCM:
+    {
       return ("WAVE_FORMAT_G723_ADPCM");
     }
-  case WAVE_FORMAT_DIGISTD:{
+  case WAVE_FORMAT_DIGISTD:
+    {
       return ("WAVE_FORMAT_DIGISTD");
     }
-  case WAVE_FORMAT_DIGIFIX:{
+  case WAVE_FORMAT_DIGIFIX:
+    {
       return ("WAVE_FORMAT_DIGIFIX");
     }
-  case WAVE_FORMAT_YAMAHA_ADPCM:{
+  case WAVE_FORMAT_YAMAHA_ADPCM:
+    {
       return ("WAVE_FORMAT_YAMAHA_ADPCM");
     }
-  case WAVE_FORMAT_SONARC:{
+  case WAVE_FORMAT_SONARC:
+    {
       return ("WAVE_FORMAT_SONARC");
     }
-  case WAVE_FORMAT_DSPGROUP_TRUESPEECH:{
+  case WAVE_FORMAT_DSPGROUP_TRUESPEECH:
+    {
       return ("WAVE_FORMAT_DSPGROUP_TRUESPEECH");
     }
-  case WAVE_FORMAT_ECHOSCI1:{
+  case WAVE_FORMAT_ECHOSCI1:
+    {
       return ("WAVE_FORMAT_ECHOSCI1");
     }
-  case WAVE_FORMAT_AUDIOFILE_AF36:{
+  case WAVE_FORMAT_AUDIOFILE_AF36:
+    {
       return ("WAVE_FORMAT_AUDIOFILE_AF36");
     }
-  case WAVE_FORMAT_APTX:{
+  case WAVE_FORMAT_APTX:
+    {
       return ("WAVE_FORMAT_APTX");
     }
-  case WAVE_FORMAT_AUDIOFILE_AF10:{
+  case WAVE_FORMAT_AUDIOFILE_AF10:
+    {
       return ("WAVE_FORMAT_AUDIOFILE_AF10");
     }
-  case WAVE_FORMAT_DOLBY_AC2:{
+  case WAVE_FORMAT_DOLBY_AC2:
+    {
       return ("WAVE_FORMAT_DOLBY_AC2");
     }
-  case WAVE_FORMAT_GSM610:{
+  case WAVE_FORMAT_GSM610:
+    {
       return ("WAVE_FORMAT_GSM610 ");
     }
-  case WAVE_FORMAT_ANTEX_ADPCME:{
+  case WAVE_FORMAT_ANTEX_ADPCME:
+    {
       return ("WAVE_FORMAT_ANTEX_ADPCME");
     }
-  case WAVE_FORMAT_CONTROL_RES_VQLPC:{
+  case WAVE_FORMAT_CONTROL_RES_VQLPC:
+    {
       return ("WAVE_FORMAT_CONTROL_RES_VQLPC");
     }
-  case WAVE_FORMAT_DIGIREAL:{
+  case WAVE_FORMAT_DIGIREAL:
+    {
       return ("WAVE_FORMAT_DIGIREAL");
     }
-  case WAVE_FORMAT_DIGIADPCM:{
+  case WAVE_FORMAT_DIGIADPCM:
+    {
       return ("WAVE_FORMAT_DIGIADPCM");
     }
-  case WAVE_FORMAT_CONTROL_RES_CR10:{
+  case WAVE_FORMAT_CONTROL_RES_CR10:
+    {
       return ("WAVE_FORMAT_CONTROL_RES_CR10");
     }
-  case WAVE_FORMAT_NMS_VBXADPCM:{
+  case WAVE_FORMAT_NMS_VBXADPCM:
+    {
       return ("WAVE_FORMAT_NMS_VBXADPCM");
     }
-  case WAVE_FORMAT_ROCKWELL_ADPCM:{
+  case WAVE_FORMAT_ROCKWELL_ADPCM:
+    {
       return ("WAVE_FORMAT_ROCKWELL_ADPCM");
     }
-  case WAVE_FORMAT_ROCKWELL_DIGITALK:{
+  case WAVE_FORMAT_ROCKWELL_DIGITALK:
+    {
       return ("WAVE_FORMAT_ROCKWELL_DIGITALK");
     }
-  case WAVE_FORMAT_G721_ADPCM:{
+  case WAVE_FORMAT_G721_ADPCM:
+    {
       return ("WAVE_FORMAT_G721_ADPCM");
     }
-  case WAVE_FORMAT_G728_CELP:{
+  case WAVE_FORMAT_G728_CELP:
+    {
       return ("WAVE_FORMAT_G728_CELP");
     }
-  case WAVE_FORMAT_MPEG:{
+  case WAVE_FORMAT_MPEG:
+    {
       return ("WAVE_FORMAT_MPEG");
     }
-  case WAVE_FORMAT_MPEGLAYER3:{
+  case WAVE_FORMAT_MPEGLAYER3:
+    {
       return ("WAVE_FORMAT_MPEGLAYER3");
     }
-  case WAVE_FORMAT_G726_ADPCM:{
+  case WAVE_FORMAT_G726_ADPCM:
+    {
       return ("WAVE_FORMAT_G726_ADPCM");
     }
-  case WAVE_FORMAT_G722_ADPCM:{
+  case WAVE_FORMAT_G722_ADPCM:
+    {
       return ("WAVE_FORMAT_G722_ADPCM");
     }
-  case WAVE_FORMAT_IBM_FORMAT_MULAW:{
+  case WAVE_FORMAT_IBM_FORMAT_MULAW:
+    {
       return ("WAVE_FORMAT_IBM_FORMAT_MULAW");
     }
-  case WAVE_FORMAT_IBM_FORMAT_ALAW:{
+  case WAVE_FORMAT_IBM_FORMAT_ALAW:
+    {
       return ("WAVE_FORMAT_IBM_FORMAT_ALAW");
     }
-  case WAVE_FORMAT_IBM_FORMAT_ADPCM:{
+  case WAVE_FORMAT_IBM_FORMAT_ADPCM:
+    {
       return ("WAVE_FORMAT_IBM_FORMAT_ADPCM");
     }
-  case WAVE_FORMAT_CREATIVE_ADPCM:{
+  case WAVE_FORMAT_CREATIVE_ADPCM:
+    {
       return ("WAVE_FORMAT_CREATIVE_ADPCM");
     }
-  case WAVE_FORMAT_FM_TOWNS_SND:{
+  case WAVE_FORMAT_FM_TOWNS_SND:
+    {
       return ("WAVE_FORMAT_FM_TOWNS_SND");
     }
-  case WAVE_FORMAT_OLIGSM:{
+  case WAVE_FORMAT_OLIGSM:
+    {
       return ("WAVE_FORMAT_OLIGSM");
     }
-  case WAVE_FORMAT_OLIADPCM:{
+  case WAVE_FORMAT_OLIADPCM:
+    {
       return ("WAVE_FORMAT_OLIADPCM");
     }
-  case WAVE_FORMAT_OLICELP:{
+  case WAVE_FORMAT_OLICELP:
+    {
       return ("WAVE_FORMAT_OLICELP");
     }
-  case WAVE_FORMAT_OLISBC:{
+  case WAVE_FORMAT_OLISBC:
+    {
       return ("WAVE_FORMAT_OLISBC");
     }
-  case WAVE_FORMAT_OLIOPR:{
+  case WAVE_FORMAT_OLIOPR:
+    {
       return ("WAVE_FORMAT_OLIOPR");
     }
-  case WAVE_FORMAT_EXTENSIBLE:{
+  case WAVE_FORMAT_EXTENSIBLE:
+    {
       return ("WAVE_FORMAT_EXTENSIBLE");
     }
-  default:{
+  default:
+    {
       return ("other");
     }
   }
@@ -411,7 +461,7 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
-  w->status = INITIALISED_MASK;
+  STATUS (w) = INITIALISED_MASK;
 }
 
 /*!
@@ -493,13 +543,13 @@ void genie_new_sound (NODE_T * p)
   POP_OBJECT (p, &num_channels, A68_INT);
   POP_OBJECT (p, &sample_rate, A68_INT);
   POP_OBJECT (p, &bits_per_sample, A68_INT);
-  w.num_samples = num_samples.value;
-  w.num_channels = num_channels.value;
-  w.sample_rate = sample_rate.value;
-  w.bits_per_sample = bits_per_sample.value;
+  w.num_samples = VALUE (&num_samples);
+  w.num_channels = VALUE (&num_channels);
+  w.sample_rate = VALUE (&sample_rate);
+  w.bits_per_sample = VALUE (&bits_per_sample);
   test_bits_per_sample (p, w.bits_per_sample);
   w.data = heap_generator (p, MODE (SOUND_DATA), A68_SOUND_DATA_SIZE (&w));
-  w.status = INITIALISED_MASK;
+  STATUS (&w) = INITIALISED_MASK;
   PUSH_OBJECT (p, w, A68_SOUND);
 }
 
@@ -516,11 +566,11 @@ void genie_get_sound (NODE_T * p)
   POP_OBJECT (p, &sample, A68_INT);
   POP_OBJECT (p, &channel, A68_INT);
   POP_OBJECT (p, &w, A68_SOUND);
-  if (!(channel.value >= 1 && channel.value <= (int) w.num_channels)) {
+  if (!(VALUE (&channel) >= 1 && VALUE (&channel) <= (int) w.num_channels)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "channel index out of range");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  if (!(sample.value >= 1 && sample.value <= (int) w.num_samples)) {
+  if (!(VALUE (&sample) >= 1 && VALUE (&sample) <= (int) w.num_samples)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "sample index out of range");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
@@ -529,7 +579,8 @@ void genie_get_sound (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   n = A68_SOUND_BYTES (&w);
-  d = &(ADDRESS (&(w.data))[((sample.value - 1) * w.num_channels + (channel.value - 1)) * n]);
+  d = &(ADDRESS (&(w.data))
+        [((VALUE (&sample) - 1) * w.num_channels + (VALUE (&channel) - 1)) * n]);
 
 /* Convert from little-endian, irrespective from the platform we work on. */
   for (k = 0, z = 0, m = 0; k < n; k++) {
@@ -553,11 +604,11 @@ void genie_set_sound (NODE_T * p)
   POP_OBJECT (p, &sample, A68_INT);
   POP_OBJECT (p, &channel, A68_INT);
   POP_OBJECT (p, &w, A68_SOUND);
-  if (!(channel.value >= 1 && channel.value <= (int) w.num_channels)) {
+  if (!(VALUE (&channel) >= 1 && VALUE (&channel) <= (int) w.num_channels)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "channel index out of range");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  if (!(sample.value >= 1 && sample.value <= (int) w.num_samples)) {
+  if (!(VALUE (&sample) >= 1 && VALUE (&sample) <= (int) w.num_samples)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "sample index out of range");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
@@ -566,10 +617,11 @@ void genie_set_sound (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   n = A68_SOUND_BYTES (&w);
-  d = &(ADDRESS (&(w.data))[((sample.value - 1) * w.num_channels + (channel.value - 1)) * n]);
+  d = &(ADDRESS (&(w.data))
+        [((VALUE (&sample) - 1) * w.num_channels + (VALUE (&channel) - 1)) * n]);
 
 /* Convert to little-endian. */
-  for (k = 0, z = value.value; k < n; k++) {
+  for (k = 0, z = VALUE (&value); k < n; k++) {
     d[k] = (BYTE_T) (z & 0xff);
     z >>= 8;
   }

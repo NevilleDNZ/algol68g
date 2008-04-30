@@ -1,6 +1,6 @@
 /*!
-\file torrix.c
-\brief vector and matrix support through GSL
+\file math.c
+\brief vector, matrix and FFT support through GSL
 */
 
 /*
@@ -23,6 +23,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "algol68g.h"
 #include "genie.h"
+#include "inline.h"
 #include "gsl.h"
 
 #if defined ENABLE_NUMERICAL
@@ -32,6 +33,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_const.h>
 #include <gsl/gsl_errno.h>
+#include <gsl/gsl_fft_complex.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_matrix.h>
@@ -39,13 +41,26 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_vector.h>
 
-#define VECTOR_OFFSET(a, t)\
-  (((t)->lower_bound * (t)->span - (t)->shift + (a)->slice_offset) * (a)->elem_size + (a)->field_offset)
-
-#define MATRIX_OFFSET(a, t1, t2)\
-  (((t1)->lower_bound * (t1)->span - (t1)->shift + (t2)->lower_bound * (t2)->span - (t2)->shift + (a)->slice_offset ) * (a)->elem_size + (a)->field_offset)
+/*
+#include <gsl/gsl_blas.h>
+#include <gsl/gsl_complex.h>
+#include <gsl/gsl_complex_math.h>
+#include <gsl/gsl_const.h>
+#include <gsl/gsl_linalg.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_matrix.h>
+#include <gsl/gsl_permutation.h>
+#include <gsl/gsl_sf.h>
+#include <gsl/gsl_vector.h>
+*/
 
 static NODE_T *error_node = NULL;
+
+#define VECTOR_OFFSET(a, t)\
+  ((LWB (t) * (t)->span - (t)->shift + (a)->slice_offset) * (a)->elem_size + (a)->field_offset)
+
+#define MATRIX_OFFSET(a, t1, t2)\
+  ((LWB (t1) * (t1)->span - (t1)->shift + LWB (t2) * (t2)->span - (t2)->shift + (a)->slice_offset ) * (a)->elem_size + (a)->field_offset)
 
 /*!
 \brief set permutation vector element - function fails in gsl
@@ -92,7 +107,7 @@ static void torrix_test_error (int rc)
 
 /*!
 \brief pop [] INT on the stack as gsl_permutation
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param get whether to get elements from row in the stack
 \return gsl_permutation_complex
 **/
@@ -107,19 +122,18 @@ static gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
   gsl_permutation *v;
 /* Pop arguments. */
   POP_REF (p, &desc);
-  CHECK_INIT (p, INITIALISED (&desc), MODE (ROW_INT));
-  CHECK_NIL (p, desc, MODE (ROW_INT));
+  CHECK_REF (p, desc, MODE (ROW_INT));
   GET_DESCRIPTOR (arr, tup, &desc);
   len = ROW_SIZE (tup);
   v = gsl_permutation_alloc (len);
   if (get) {
-    base = DEREF (BYTE_T, &(arr->array));
+    base = DEREF (BYTE_T, &(ARRAY (arr)));
     index = VECTOR_OFFSET (arr, tup);
     inc = tup->span * arr->elem_size;
     for (k = 0; k < len; k++, index += inc) {
       A68_INT *x = (A68_INT *) (base + index);
       CHECK_INIT (p, INITIALISED (x), MODE (INT));
-      gsl_permutation_set (v, k, x->value);
+      gsl_permutation_set (v, k, VALUE (x));
     }
   }
   return (v);
@@ -127,7 +141,7 @@ static gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
 
 /*!
 \brief push gsl_permutation on the stack as [] INT
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void push_permutation (NODE_T * p, gsl_permutation * v)
@@ -142,24 +156,24 @@ static void push_permutation (NODE_T * p, gsl_permutation * v)
   PROTECT_SWEEP_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZEOF (A68_INT));
   PROTECT_SWEEP_HANDLE (&row);
-  arr.dimensions = 1;
-  arr.type = MODE (INT);
+  DIM (&arr) = 1;
+  MOID (&arr) = MODE (INT);
   arr.elem_size = ALIGNED_SIZEOF (A68_INT);
   arr.slice_offset = arr.field_offset = 0;
-  arr.array = row;
-  tup.lower_bound = 1;
-  tup.upper_bound = len;
+  ARRAY (&arr) = row;
+  LWB (&tup) = 1;
+  UPB (&tup) = len;
   tup.span = 1;
-  tup.shift = tup.lower_bound;
+  tup.shift = LWB (&tup);
   tup.k = 0;
   PUT_DESCRIPTOR (arr, tup, &desc);
-  base = DEREF (BYTE_T, &(arr.array));
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
   index = VECTOR_OFFSET (&arr, &tup);
   inc = tup.span * arr.elem_size;
   for (k = 0; k < len; k++, index += inc) {
     A68_INT *x = (A68_INT *) (base + index);
-    x->status = INITIALISED_MASK;
-    x->value = gsl_permutation_get (v, k);
+    STATUS (x) = INITIALISED_MASK;
+    VALUE (x) = gsl_permutation_get (v, k);
   }
   UNPROTECT_SWEEP_HANDLE (&desc);
   UNPROTECT_SWEEP_HANDLE (&row);
@@ -168,7 +182,7 @@ static void push_permutation (NODE_T * p, gsl_permutation * v)
 
 /*!
 \brief pop [] REAL on the stack as gsl_vector
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param get whether to get elements from row in the stack
 \return gsl_vector_complex
 **/
@@ -183,19 +197,18 @@ static gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
   gsl_vector *v;
 /* Pop arguments. */
   POP_REF (p, &desc);
-  CHECK_INIT (p, INITIALISED (&desc), MODE (ROW_REAL));
-  CHECK_NIL (p, desc, MODE (ROW_REAL));
+  CHECK_REF (p, desc, MODE (ROW_REAL));
   GET_DESCRIPTOR (arr, tup, &desc);
   len = ROW_SIZE (tup);
   v = gsl_vector_alloc (len);
   if (get) {
-    base = DEREF (BYTE_T, &(arr->array));
+    base = DEREF (BYTE_T, &(ARRAY (arr)));
     index = VECTOR_OFFSET (arr, tup);
     inc = tup->span * arr->elem_size;
     for (k = 0; k < len; k++, index += inc) {
       A68_REAL *x = (A68_REAL *) (base + index);
       CHECK_INIT (p, INITIALISED (x), MODE (REAL));
-      gsl_vector_set (v, k, x->value);
+      gsl_vector_set (v, k, VALUE (x));
     }
   }
   return (v);
@@ -203,7 +216,7 @@ static gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
 
 /*!
 \brief push gsl_vector on the stack as [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void push_vector (NODE_T * p, gsl_vector * v)
@@ -218,25 +231,25 @@ static void push_vector (NODE_T * p, gsl_vector * v)
   PROTECT_SWEEP_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZEOF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
-  arr.dimensions = 1;
-  arr.type = MODE (REAL);
+  DIM (&arr) = 1;
+  MOID (&arr) = MODE (REAL);
   arr.elem_size = ALIGNED_SIZEOF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
-  arr.array = row;
-  tup.lower_bound = 1;
-  tup.upper_bound = len;
+  ARRAY (&arr) = row;
+  LWB (&tup) = 1;
+  UPB (&tup) = len;
   tup.span = 1;
-  tup.shift = tup.lower_bound;
+  tup.shift = LWB (&tup);
   tup.k = 0;
   PUT_DESCRIPTOR (arr, tup, &desc);
-  base = DEREF (BYTE_T, &(arr.array));
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
   index = VECTOR_OFFSET (&arr, &tup);
   inc = tup.span * arr.elem_size;
   for (k = 0; k < len; k++, index += inc) {
     A68_REAL *x = (A68_REAL *) (base + index);
-    x->status = INITIALISED_MASK;
-    x->value = gsl_vector_get (v, k);
-    TEST_REAL_REPRESENTATION (p, x->value);
+    STATUS (x) = INITIALISED_MASK;
+    VALUE (x) = gsl_vector_get (v, k);
+    TEST_REAL_REPRESENTATION (p, VALUE (x));
   }
   UNPROTECT_SWEEP_HANDLE (&desc);
   UNPROTECT_SWEEP_HANDLE (&row);
@@ -245,7 +258,7 @@ static void push_vector (NODE_T * p, gsl_vector * v)
 
 /*!
 \brief pop [,] REAL on the stack as gsl_matrix
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param get whether to get elements from row in the stack
 \return gsl_matrix
 **/
@@ -260,15 +273,14 @@ static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
   gsl_matrix *a;
 /* Pop arguments. */
   POP_REF (p, &desc);
-  CHECK_INIT (p, INITIALISED (&desc), MODE (ROWROW_REAL));
-  CHECK_NIL (p, desc, MODE (ROWROW_REAL));
+  CHECK_REF (p, desc, MODE (ROWROW_REAL));
   GET_DESCRIPTOR (arr, tup1, &desc);
   tup2 = &(tup1[1]);
   len1 = ROW_SIZE (tup1);
   len2 = ROW_SIZE (tup2);
   a = gsl_matrix_alloc (len1, len2);
   if (get) {
-    base = DEREF (BYTE_T, &(arr->array));
+    base = DEREF (BYTE_T, &(ARRAY (arr)));
     index1 = MATRIX_OFFSET (arr, tup1, tup2);
     inc1 = tup1->span * arr->elem_size;
     inc2 = tup2->span * arr->elem_size;
@@ -276,7 +288,7 @@ static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
       for (k2 = 0, index2 = index1; k2 < len2; k2++, index2 += inc2) {
         A68_REAL *x = (A68_REAL *) (base + index2);
         CHECK_INIT (p, INITIALISED (x), MODE (REAL));
-        gsl_matrix_set (a, k1, k2, x->value);
+        gsl_matrix_set (a, k1, k2, VALUE (x));
       }
     }
   }
@@ -285,7 +297,7 @@ static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
 
 /*!
 \brief push gsl_matrix on the stack as [,] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void push_matrix (NODE_T * p, gsl_matrix * a)
@@ -301,32 +313,32 @@ static void push_matrix (NODE_T * p, gsl_matrix * a)
   PROTECT_SWEEP_HANDLE (&desc);
   row = heap_generator (p, MODE (ROWROW_REAL), len1 * len2 * ALIGNED_SIZEOF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
-  arr.dimensions = 2;
-  arr.type = MODE (REAL);
+  DIM (&arr) = 2;
+  MOID (&arr) = MODE (REAL);
   arr.elem_size = ALIGNED_SIZEOF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
-  arr.array = row;
-  tup1.lower_bound = 1;
-  tup1.upper_bound = len1;
+  ARRAY (&arr) = row;
+  LWB (&tup1) = 1;
+  UPB (&tup1) = len1;
   tup1.span = 1;
-  tup1.shift = tup1.lower_bound;
+  tup1.shift = LWB (&tup1);
   tup1.k = 0;
-  tup2.lower_bound = 1;
-  tup2.upper_bound = len2;
+  LWB (&tup2) = 1;
+  UPB (&tup2) = len2;
   tup2.span = ROW_SIZE (&tup1);
-  tup2.shift = tup2.lower_bound * tup2.span;
+  tup2.shift = LWB (&tup2) * tup2.span;
   tup2.k = 0;
   PUT_DESCRIPTOR2 (arr, tup1, tup2, &desc);
-  base = DEREF (BYTE_T, &(arr.array));
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
   index1 = MATRIX_OFFSET (&arr, &tup1, &tup2);
   inc1 = tup1.span * arr.elem_size;
   inc2 = tup2.span * arr.elem_size;
   for (k1 = 0; k1 < len1; k1++, index1 += inc1) {
     for (k2 = 0, index2 = index1; k2 < len2; k2++, index2 += inc2) {
       A68_REAL *x = (A68_REAL *) (base + index2);
-      x->status = INITIALISED_MASK;
-      x->value = gsl_matrix_get (a, k1, k2);
-      TEST_REAL_REPRESENTATION (p, x->value);
+      STATUS (x) = INITIALISED_MASK;
+      VALUE (x) = gsl_matrix_get (a, k1, k2);
+      TEST_REAL_REPRESENTATION (p, VALUE (x));
     }
   }
   UNPROTECT_SWEEP_HANDLE (&desc);
@@ -336,7 +348,7 @@ static void push_matrix (NODE_T * p, gsl_matrix * a)
 
 /*!
 \brief pop [] COMPLEX on the stack as gsl_vector_complex
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param get whether to get elements from row in the stack
 \return gsl_vector_complex
 **/
@@ -351,13 +363,12 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
   gsl_vector_complex *v;
 /* Pop arguments. */
   POP_REF (p, &desc);
-  CHECK_INIT (p, INITIALISED (&desc), MODE (ROW_COMPLEX));
-  CHECK_NIL (p, desc, MODE (ROW_COMPLEX));
+  CHECK_REF (p, desc, MODE (ROW_COMPLEX));
   GET_DESCRIPTOR (arr, tup, &desc);
   len = ROW_SIZE (tup);
   v = gsl_vector_complex_alloc (len);
   if (get) {
-    base = DEREF (BYTE_T, &(arr->array));
+    base = DEREF (BYTE_T, &(ARRAY (arr)));
     index = VECTOR_OFFSET (arr, tup);
     inc = tup->span * arr->elem_size;
     for (k = 0; k < len; k++, index += inc) {
@@ -366,7 +377,7 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
       gsl_complex z;
       CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
       CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
-      GSL_SET_COMPLEX (&z, re->value, im->value);
+      GSL_SET_COMPLEX (&z, VALUE (re), VALUE (im));
       gsl_vector_complex_set (v, k, z);
     }
   }
@@ -375,7 +386,7 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
 
 /*!
 \brief push gsl_vector_complex on the stack as [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
@@ -390,29 +401,29 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
   PROTECT_SWEEP_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZEOF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
-  arr.dimensions = 1;
-  arr.type = MODE (COMPLEX);
+  DIM (&arr) = 1;
+  MOID (&arr) = MODE (COMPLEX);
   arr.elem_size = 2 * ALIGNED_SIZEOF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
-  arr.array = row;
-  tup.lower_bound = 1;
-  tup.upper_bound = len;
+  ARRAY (&arr) = row;
+  LWB (&tup) = 1;
+  UPB (&tup) = len;
   tup.span = 1;
-  tup.shift = tup.lower_bound;
+  tup.shift = LWB (&tup);
   tup.k = 0;
   PUT_DESCRIPTOR (arr, tup, &desc);
-  base = DEREF (BYTE_T, &(arr.array));
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
   index = VECTOR_OFFSET (&arr, &tup);
   inc = tup.span * arr.elem_size;
   for (k = 0; k < len; k++, index += inc) {
     A68_REAL *re = (A68_REAL *) (base + index);
     A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
     gsl_complex z = gsl_vector_complex_get (v, k);
-    re->status = INITIALISED_MASK;
-    re->value = GSL_REAL (z);
-    im->status = INITIALISED_MASK;
-    im->value = GSL_IMAG (z);
-    TEST_COMPLEX_REPRESENTATION (p, re->value, im->value);
+    STATUS (re) = INITIALISED_MASK;
+    VALUE (re) = GSL_REAL (z);
+    STATUS (im) = INITIALISED_MASK;
+    VALUE (im) = GSL_IMAG (z);
+    TEST_COMPLEX_REPRESENTATION (p, VALUE (re), VALUE (im));
   }
   UNPROTECT_SWEEP_HANDLE (&desc);
   UNPROTECT_SWEEP_HANDLE (&row);
@@ -421,7 +432,7 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
 
 /*!
 \brief pop [,] COMPLEX on the stack as gsl_matrix_complex
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param get whether to get elements from row in the stack
 \return gsl_matrix_complex
 **/
@@ -435,15 +446,14 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
   gsl_matrix_complex *a;
 /* Pop arguments. */
   POP_REF (p, &desc);
-  CHECK_INIT (p, INITIALISED (&desc), MODE (ROWROW_COMPLEX));
-  CHECK_NIL (p, desc, MODE (ROWROW_COMPLEX));
+  CHECK_REF (p, desc, MODE (ROWROW_COMPLEX));
   GET_DESCRIPTOR (arr, tup1, &desc);
   tup2 = &(tup1[1]);
   len1 = ROW_SIZE (tup1);
   len2 = ROW_SIZE (tup2);
   a = gsl_matrix_complex_alloc (len1, len2);
   if (get) {
-    BYTE_T *base = DEREF (BYTE_T, &(arr->array));
+    BYTE_T *base = DEREF (BYTE_T, &(ARRAY (arr)));
     int index1 = MATRIX_OFFSET (arr, tup1, tup2);
     int inc1 = tup1->span * arr->elem_size, inc2 = tup2->span * arr->elem_size, k1;
     for (k1 = 0; k1 < len1; k1++, index1 += inc1) {
@@ -454,7 +464,7 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
         gsl_complex z;
         CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
         CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
-        GSL_SET_COMPLEX (&z, re->value, im->value);
+        GSL_SET_COMPLEX (&z, VALUE (re), VALUE (im));
         gsl_matrix_complex_set (a, k1, k2, z);
       }
     }
@@ -464,7 +474,7 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
 
 /*!
 \brief push gsl_matrix_complex on the stack as [,] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
@@ -480,23 +490,23 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
   PROTECT_SWEEP_HANDLE (&desc);
   row = heap_generator (p, MODE (ROWROW_COMPLEX), len1 * len2 * 2 * ALIGNED_SIZEOF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
-  arr.dimensions = 2;
-  arr.type = MODE (COMPLEX);
+  DIM (&arr) = 2;
+  MOID (&arr) = MODE (COMPLEX);
   arr.elem_size = 2 * ALIGNED_SIZEOF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
-  arr.array = row;
-  tup1.lower_bound = 1;
-  tup1.upper_bound = len1;
+  ARRAY (&arr) = row;
+  LWB (&tup1) = 1;
+  UPB (&tup1) = len1;
   tup1.span = 1;
-  tup1.shift = tup1.lower_bound;
+  tup1.shift = LWB (&tup1);
   tup1.k = 0;
-  tup2.lower_bound = 1;
-  tup2.upper_bound = len2;
+  LWB (&tup2) = 1;
+  UPB (&tup2) = len2;
   tup2.span = ROW_SIZE (&tup1);
-  tup2.shift = tup2.lower_bound * tup2.span;
+  tup2.shift = LWB (&tup2) * tup2.span;
   tup2.k = 0;
   PUT_DESCRIPTOR2 (arr, tup1, tup2, &desc);
-  base = DEREF (BYTE_T, &(arr.array));
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
   index1 = MATRIX_OFFSET (&arr, &tup1, &tup2);
   inc1 = tup1.span * arr.elem_size;
   inc2 = tup2.span * arr.elem_size;
@@ -505,11 +515,11 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
       A68_REAL *re = (A68_REAL *) (base + index2);
       A68_REAL *im = (A68_REAL *) (base + index2 + ALIGNED_SIZEOF (A68_REAL));
       gsl_complex z = gsl_matrix_complex_get (a, k1, k2);
-      re->status = INITIALISED_MASK;
-      re->value = GSL_REAL (z);
-      im->status = INITIALISED_MASK;
-      im->value = GSL_IMAG (z);
-      TEST_COMPLEX_REPRESENTATION (p, re->value, im->value);
+      STATUS (re) = INITIALISED_MASK;
+      VALUE (re) = GSL_REAL (z);
+      STATUS (im) = INITIALISED_MASK;
+      VALUE (im) = GSL_IMAG (z);
+      TEST_COMPLEX_REPRESENTATION (p, VALUE (re), VALUE (im));
     }
   }
   UNPROTECT_SWEEP_HANDLE (&desc);
@@ -519,7 +529,7 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
 
 /*!
 \brief pop REF [...] M and derefence to [...] M
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param m mode of REF [...] M
 \param par_size size of parameters in the stack
 \return the undereferenced REF
@@ -530,14 +540,14 @@ static A68_REF dereference_ref_row (NODE_T * p, MOID_T * m, ADDR_T par_size)
   A68_REF *u, v;
   u = (A68_REF *) STACK_OFFSET (-par_size);
   v = *u;
-  CHECK_NIL (p, v, m);
+  CHECK_REF (p, v, m);
   *u = *DEREF (A68_ROW, &v);
   return (v);
 }
 
 /*!
 \brief generically perform operation and assign result (+:=, -:=, ...) 
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \param m mode of REF [...] M
 \param n mode of right operand M
 \param op operation to be performed
@@ -557,7 +567,7 @@ static void op_ab (NODE_T * p, MOID_T * m, MOID_T * n, GENIE_PROCEDURE * op)
 
 /*!
 \brief PROC vector echo = ([] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_echo (NODE_T * p)
@@ -573,7 +583,7 @@ void genie_vector_echo (NODE_T * p)
 
 /*!
 \brief PROC matrix echo = ([,] REAL) [,] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_echo (NODE_T * p)
@@ -589,7 +599,7 @@ void genie_matrix_echo (NODE_T * p)
 
 /*!
 \brief PROC complex vector echo = ([] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_echo (NODE_T * p)
@@ -605,7 +615,7 @@ void genie_vector_complex_echo (NODE_T * p)
 
 /*!
 \brief PROC complex matrix echo = ([,] COMPLEX) [,] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_echo (NODE_T * p)
@@ -621,7 +631,7 @@ void genie_matrix_complex_echo (NODE_T * p)
 
 /*!
 \brief OP - = ([] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_minus (NODE_T * p)
@@ -640,7 +650,7 @@ void genie_vector_minus (NODE_T * p)
 
 /*!
 \brief OP - = ([,] REAL) [,] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_minus (NODE_T * p)
@@ -659,7 +669,7 @@ void genie_matrix_minus (NODE_T * p)
 
 /*!
 \brief OP T = ([,] REAL) [,] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_transpose (NODE_T * p)
@@ -678,7 +688,7 @@ void genie_matrix_transpose (NODE_T * p)
 
 /*!
 \brief OP T = ([,] COMPLEX) [,] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_transpose (NODE_T * p)
@@ -697,7 +707,7 @@ void genie_matrix_complex_transpose (NODE_T * p)
 
 /*!
 \brief OP INV = ([,] REAL) [,] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_inv (NODE_T * p)
@@ -723,7 +733,7 @@ void genie_matrix_inv (NODE_T * p)
 
 /*!
 \brief OP INV = ([,] COMPLEX) [,] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_inv (NODE_T * p)
@@ -749,7 +759,7 @@ void genie_matrix_complex_inv (NODE_T * p)
 
 /*!
 \brief OP DET = ([,] REAL) REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_det (NODE_T * p)
@@ -771,7 +781,7 @@ void genie_matrix_det (NODE_T * p)
 
 /*!
 \brief OP DET = ([,] COMPLEX) COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_det (NODE_T * p)
@@ -796,7 +806,7 @@ void genie_matrix_complex_det (NODE_T * p)
 
 /*!
 \brief OP TRACE = ([,] REAL) REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_trace (NODE_T * p)
@@ -823,7 +833,7 @@ void genie_matrix_trace (NODE_T * p)
 
 /*!
 \brief OP TRACE = ([,] COMPLEX) COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_trace (NODE_T * p)
@@ -851,7 +861,7 @@ void genie_matrix_complex_trace (NODE_T * p)
 
 /*!
 \brief OP - = ([] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_minus (NODE_T * p)
@@ -868,7 +878,7 @@ void genie_vector_complex_minus (NODE_T * p)
 
 /*!
 \brief OP - = ([,] COMPLEX) [,] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_minus (NODE_T * p)
@@ -889,7 +899,7 @@ void genie_matrix_complex_minus (NODE_T * p)
 
 /*!
 \brief OP + = ([] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_add (NODE_T * p)
@@ -910,7 +920,7 @@ void genie_vector_add (NODE_T * p)
 
 /*!
 \brief OP - = ([] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_sub (NODE_T * p)
@@ -931,7 +941,7 @@ void genie_vector_sub (NODE_T * p)
 
 /*!
 \brief OP = = ([] REAL, [] REAL) BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_eq (NODE_T * p)
@@ -952,7 +962,7 @@ void genie_vector_eq (NODE_T * p)
 
 /*!
 \brief OP /= = ([] REAL, [] REAL) BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_ne (NODE_T * p)
@@ -963,7 +973,7 @@ void genie_vector_ne (NODE_T * p)
 
 /*!
 \brief OP +:= = (REF [] REAL, [] REAL) REF [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_plusab (NODE_T * p)
@@ -973,7 +983,7 @@ void genie_vector_plusab (NODE_T * p)
 
 /*!
 \brief OP -:= = (REF [] REAL, [] REAL) REF [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_minusab (NODE_T * p)
@@ -983,7 +993,7 @@ void genie_vector_minusab (NODE_T * p)
 
 /*!
 \brief OP + = ([, ] REAL, [, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_add (NODE_T * p)
@@ -1004,7 +1014,7 @@ void genie_matrix_add (NODE_T * p)
 
 /*!
 \brief OP - = ([, ] REAL, [, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_sub (NODE_T * p)
@@ -1025,7 +1035,7 @@ void genie_matrix_sub (NODE_T * p)
 
 /*!
 \brief OP = = ([, ] REAL, [, ] REAL) [, ] BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_eq (NODE_T * p)
@@ -1046,7 +1056,7 @@ void genie_matrix_eq (NODE_T * p)
 
 /*!
 \brief OP /= = ([, ] REAL, [, ] REAL) [, ] BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_ne (NODE_T * p)
@@ -1057,7 +1067,7 @@ void genie_matrix_ne (NODE_T * p)
 
 /*!
 \brief OP +:= = (REF [, ] REAL, [, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_plusab (NODE_T * p)
@@ -1067,7 +1077,7 @@ void genie_matrix_plusab (NODE_T * p)
 
 /*!
 \brief OP -:= = (REF [, ] REAL, [, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_minusab (NODE_T * p)
@@ -1077,7 +1087,7 @@ void genie_matrix_minusab (NODE_T * p)
 
 /*!
 \brief OP + = ([] COMPLEX, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_add (NODE_T * p)
@@ -1100,7 +1110,7 @@ void genie_vector_complex_add (NODE_T * p)
 
 /*!
 \brief OP - = ([] COMPLEX, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_sub (NODE_T * p)
@@ -1123,7 +1133,7 @@ void genie_vector_complex_sub (NODE_T * p)
 
 /*!
 \brief OP = = ([] COMPLEX, [] COMPLEX) BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_eq (NODE_T * p)
@@ -1146,7 +1156,7 @@ void genie_vector_complex_eq (NODE_T * p)
 
 /*!
 \brief OP /= = ([] COMPLEX, [] COMPLEX) BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_ne (NODE_T * p)
@@ -1157,7 +1167,7 @@ void genie_vector_complex_ne (NODE_T * p)
 
 /*!
 \brief OP +:= = (REF [] COMPLEX, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_plusab (NODE_T * p)
@@ -1167,7 +1177,7 @@ void genie_vector_complex_plusab (NODE_T * p)
 
 /*!
 \brief OP -:= = (REF [] COMPLEX, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_minusab (NODE_T * p)
@@ -1177,7 +1187,7 @@ void genie_vector_complex_minusab (NODE_T * p)
 
 /*!
 \brief OP + = ([, ] COMPLEX, [, ] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_add (NODE_T * p)
@@ -1198,7 +1208,7 @@ void genie_matrix_complex_add (NODE_T * p)
 
 /*!
 \brief OP - = ([, ] COMPLEX, [, ] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_sub (NODE_T * p)
@@ -1219,7 +1229,7 @@ void genie_matrix_complex_sub (NODE_T * p)
 
 /*!
 \brief OP = = ([, ] COMPLEX, [, ] COMPLEX) BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_eq (NODE_T * p)
@@ -1240,7 +1250,7 @@ void genie_matrix_complex_eq (NODE_T * p)
 
 /*!
 \brief OP /= = ([, ] COMPLEX, [, ] COMPLEX) BOOL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_ne (NODE_T * p)
@@ -1251,7 +1261,7 @@ void genie_matrix_complex_ne (NODE_T * p)
 
 /*!
 \brief OP +:= = (REF [, ] COMPLEX, [, ] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_plusab (NODE_T * p)
@@ -1261,7 +1271,7 @@ void genie_matrix_complex_plusab (NODE_T * p)
 
 /*!
 \brief OP -:= = (REF [, ] COMPLEX, [, ] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_minusab (NODE_T * p)
@@ -1271,7 +1281,7 @@ void genie_matrix_complex_minusab (NODE_T * p)
 
 /*!
 \brief OP * = ([] REAL, REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_scale_real (NODE_T * p)
@@ -1292,7 +1302,7 @@ void genie_vector_scale_real (NODE_T * p)
 
 /*!
 \brief OP * = (REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_real_scale_vector (NODE_T * p)
@@ -1313,7 +1323,7 @@ void genie_real_scale_vector (NODE_T * p)
 
 /*!
 \brief OP * = ([, ] REAL, REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_scale_real (NODE_T * p)
@@ -1334,7 +1344,7 @@ void genie_matrix_scale_real (NODE_T * p)
 
 /*!
 \brief OP * = (REAL, [, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_real_scale_matrix (NODE_T * p)
@@ -1355,7 +1365,7 @@ void genie_real_scale_matrix (NODE_T * p)
 
 /*!
 \brief OP * = ([] COMPLEX, COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_scale_complex (NODE_T * p)
@@ -1377,7 +1387,7 @@ void genie_vector_complex_scale_complex (NODE_T * p)
 
 /*!
 \brief OP * = (COMPLEX, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_complex_scale_vector_complex (NODE_T * p)
@@ -1399,7 +1409,7 @@ void genie_complex_scale_vector_complex (NODE_T * p)
 
 /*!
 \brief OP * = ([, ] COMPLEX, COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_scale_complex (NODE_T * p)
@@ -1423,7 +1433,7 @@ void genie_matrix_complex_scale_complex (NODE_T * p)
 
 /*!
 \brief OP * = (COMPLEX, [, ] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_complex_scale_matrix_complex (NODE_T * p)
@@ -1447,7 +1457,7 @@ void genie_complex_scale_matrix_complex (NODE_T * p)
 
 /*!
 \brief OP *:= (REF [] REAL, REAL) REF [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_scale_real_ab (NODE_T * p)
@@ -1457,7 +1467,7 @@ void genie_vector_scale_real_ab (NODE_T * p)
 
 /*!
 \brief OP *:= (REF [, ] REAL, REAL) REF [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_scale_real_ab (NODE_T * p)
@@ -1467,7 +1477,7 @@ void genie_matrix_scale_real_ab (NODE_T * p)
 
 /*!
 \brief OP *:= (REF [] COMPLEX, COMPLEX) REF [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_scale_complex_ab (NODE_T * p)
@@ -1477,7 +1487,7 @@ void genie_vector_complex_scale_complex_ab (NODE_T * p)
 
 /*!
 \brief OP *:= (REF [, ] COMPLEX, COMPLEX) REF [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_scale_complex_ab (NODE_T * p)
@@ -1487,7 +1497,7 @@ void genie_matrix_complex_scale_complex_ab (NODE_T * p)
 
 /*!
 \brief OP / = ([] REAL, REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_div_real (NODE_T * p)
@@ -1512,7 +1522,7 @@ void genie_vector_div_real (NODE_T * p)
 
 /*!
 \brief OP / = ([, ] REAL, REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_div_real (NODE_T * p)
@@ -1537,7 +1547,7 @@ void genie_matrix_div_real (NODE_T * p)
 
 /*!
 \brief OP / = ([] COMPLEX, COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_div_complex (NODE_T * p)
@@ -1564,7 +1574,7 @@ void genie_vector_complex_div_complex (NODE_T * p)
 
 /*!
 \brief OP / = ([, ] COMPLEX, COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_div_complex (NODE_T * p)
@@ -1593,7 +1603,7 @@ void genie_matrix_complex_div_complex (NODE_T * p)
 
 /*!
 \brief OP /:= (REF [] REAL, REAL) REF [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_div_real_ab (NODE_T * p)
@@ -1603,7 +1613,7 @@ void genie_vector_div_real_ab (NODE_T * p)
 
 /*!
 \brief OP /:= (REF [, ] REAL, REAL) REF [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_div_real_ab (NODE_T * p)
@@ -1613,7 +1623,7 @@ void genie_matrix_div_real_ab (NODE_T * p)
 
 /*!
 \brief OP /:= (REF [] COMPLEX, COMPLEX) REF [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_div_complex_ab (NODE_T * p)
@@ -1623,7 +1633,7 @@ void genie_vector_complex_div_complex_ab (NODE_T * p)
 
 /*!
 \brief OP /:= (REF [, ] COMPLEX, COMPLEX) REF [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_div_complex_ab (NODE_T * p)
@@ -1633,7 +1643,7 @@ void genie_matrix_complex_div_complex_ab (NODE_T * p)
 
 /*!
 \brief OP * = ([] REAL, [] REAL) REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_dot (NODE_T * p)
@@ -1655,7 +1665,7 @@ void genie_vector_dot (NODE_T * p)
 
 /*!
 \brief OP * = ([] COMPLEX, [] COMPLEX) COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_dot (NODE_T * p)
@@ -1678,7 +1688,7 @@ void genie_vector_complex_dot (NODE_T * p)
 
 /*!
 \brief OP NORM = ([] REAL) REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_norm (NODE_T * p)
@@ -1694,7 +1704,7 @@ void genie_vector_norm (NODE_T * p)
 
 /*!
 \brief OP NORM = ([] COMPLEX) COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_norm (NODE_T * p)
@@ -1710,7 +1720,7 @@ void genie_vector_complex_norm (NODE_T * p)
 
 /*!
 \brief OP DYAD = ([] REAL, [] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_dyad (NODE_T * p)
@@ -1741,7 +1751,7 @@ void genie_vector_dyad (NODE_T * p)
 
 /*!
 \brief OP DYAD = ([] COMPLEX, [] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_dyad (NODE_T * p)
@@ -1772,7 +1782,7 @@ void genie_vector_complex_dyad (NODE_T * p)
 
 /*!
 \brief OP * = ([, ] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_times_vector (NODE_T * p)
@@ -1799,7 +1809,7 @@ void genie_matrix_times_vector (NODE_T * p)
 
 /*!
 \brief OP * = ([] REAL, [, ] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_times_matrix (NODE_T * p)
@@ -1828,7 +1838,7 @@ void genie_vector_times_matrix (NODE_T * p)
 
 /*!
 \brief OP * = ([, ] REAL, [, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_times_matrix (NODE_T * p)
@@ -1855,7 +1865,7 @@ void genie_matrix_times_matrix (NODE_T * p)
 
 /*!
 \brief OP * = ([, ] COMPLEX, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_times_vector (NODE_T * p)
@@ -1884,7 +1894,7 @@ void genie_matrix_complex_times_vector (NODE_T * p)
 
 /*!
 \brief OP * = ([] COMPLEX, [, ] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_vector_complex_times_matrix (NODE_T * p)
@@ -1915,7 +1925,7 @@ void genie_vector_complex_times_matrix (NODE_T * p)
 
 /*!
 \brief OP * = ([, ] COMPLEX, [, ] COMPLEX) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_times_matrix (NODE_T * p)
@@ -1944,7 +1954,7 @@ void genie_matrix_complex_times_matrix (NODE_T * p)
 
 /*!
 \brief PROC lu decomp = ([, ] REAL, REF [] INT, REF INT) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_lu (NODE_T * p)
@@ -1957,15 +1967,15 @@ void genie_matrix_lu (NODE_T * p)
   A68_INT signum;
   error_node = p;
   POP_REF (p, &ref_signum);
-  CHECK_NIL (p, ref_signum, MODE (REF_INT));
+  CHECK_REF (p, ref_signum, MODE (REF_INT));
   POP_REF (p, &ref_q);
-  CHECK_NIL (p, ref_q, MODE (REF_ROW_INT));
+  CHECK_REF (p, ref_q, MODE (REF_ROW_INT));
   PUSH_REF (p, *DEREF (A68_ROW, &ref_q));
   q = pop_permutation (p, A68_FALSE);
   u = pop_matrix (p, A68_TRUE);
-  rc = gsl_linalg_LU_decomp (u, q, &(signum.value));
+  rc = gsl_linalg_LU_decomp (u, q, &(VALUE (&signum)));
   torrix_test_error (rc);
-  signum.status = INITIALISED_MASK;
+  STATUS (&signum) = INITIALISED_MASK;
   *DEREF (A68_INT, &ref_signum) = signum;
   push_permutation (p, q);
   POP_REF (p, DEREF (A68_ROW, &ref_q));
@@ -1977,7 +1987,7 @@ void genie_matrix_lu (NODE_T * p)
 
 /*!
 \brief PROC lu det = ([, ] REAL, INT) REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_lu_det (NODE_T * p)
@@ -1988,14 +1998,14 @@ void genie_matrix_lu_det (NODE_T * p)
   error_node = p;
   POP_OBJECT (p, &signum, A68_INT);
   lu = pop_matrix (p, A68_TRUE);
-  PUSH_PRIMITIVE (p, gsl_linalg_LU_det (lu, signum.value), A68_REAL);
+  PUSH_PRIMITIVE (p, gsl_linalg_LU_det (lu, VALUE (&signum)), A68_REAL);
   gsl_matrix_free (lu);
   (void) gsl_set_error_handler (save_handler);
 }
 
 /*!
 \brief PROC lu inv = ([, ] REAL, [] INT) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_lu_inv (NODE_T * p)
@@ -2019,7 +2029,7 @@ void genie_matrix_lu_inv (NODE_T * p)
 
 /*!
 \brief PROC lu solve ([, ] REAL, [, ] REAL, [] INT, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_lu_solve (NODE_T * p)
@@ -2052,7 +2062,7 @@ void genie_matrix_lu_solve (NODE_T * p)
 
 /*!
 \brief PROC complex lu decomp = ([, ] COMPLEX, REF [] INT, REF INT) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_lu (NODE_T * p)
@@ -2065,15 +2075,15 @@ void genie_matrix_complex_lu (NODE_T * p)
   A68_INT signum;
   error_node = p;
   POP_REF (p, &ref_signum);
-  CHECK_NIL (p, ref_signum, MODE (REF_INT));
+  CHECK_REF (p, ref_signum, MODE (REF_INT));
   POP_REF (p, &ref_q);
-  CHECK_NIL (p, ref_q, MODE (REF_ROW_INT));
+  CHECK_REF (p, ref_q, MODE (REF_ROW_INT));
   PUSH_REF (p, *DEREF (A68_ROW, &ref_q));
   q = pop_permutation (p, A68_FALSE);
   u = pop_matrix_complex (p, A68_TRUE);
-  rc = gsl_linalg_complex_LU_decomp (u, q, &(signum.value));
+  rc = gsl_linalg_complex_LU_decomp (u, q, &(VALUE (&signum)));
   torrix_test_error (rc);
-  signum.status = INITIALISED_MASK;
+  STATUS (&signum) = INITIALISED_MASK;
   *DEREF (A68_INT, &ref_signum) = signum;
   push_permutation (p, q);
   POP_REF (p, DEREF (A68_ROW, &ref_q));
@@ -2085,7 +2095,7 @@ void genie_matrix_complex_lu (NODE_T * p)
 
 /*!
 \brief PROC complex lu det = ([, ] COMPLEX, INT) COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_lu_det (NODE_T * p)
@@ -2097,7 +2107,7 @@ void genie_matrix_complex_lu_det (NODE_T * p)
   error_node = p;
   POP_OBJECT (p, &signum, A68_INT);
   lu = pop_matrix_complex (p, A68_TRUE);
-  det = gsl_linalg_complex_LU_det (lu, signum.value);
+  det = gsl_linalg_complex_LU_det (lu, VALUE (&signum));
   PUSH_PRIMITIVE (p, GSL_REAL (det), A68_REAL);
   PUSH_PRIMITIVE (p, GSL_IMAG (det), A68_REAL);
   gsl_matrix_complex_free (lu);
@@ -2106,7 +2116,7 @@ void genie_matrix_complex_lu_det (NODE_T * p)
 
 /*!
 \brief PROC complex lu inv = ([, ] COMPLEX, [] INT) [, ] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_lu_inv (NODE_T * p)
@@ -2130,7 +2140,7 @@ void genie_matrix_complex_lu_inv (NODE_T * p)
 
 /*!
 \brief PROC complex lu solve ([, ] COMPLEX, [, ] COMPLEX, [] INT, [] COMPLEX) [] COMPLEX
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_complex_lu_solve (NODE_T * p)
@@ -2163,7 +2173,7 @@ void genie_matrix_complex_lu_solve (NODE_T * p)
 
 /*!
 \brief PROC svd decomp = ([, ] REAL, REF [, ] REAL, REF [] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_svd (NODE_T * p)
@@ -2175,11 +2185,11 @@ void genie_matrix_svd (NODE_T * p)
   int rc;
   error_node = p;
   POP_REF (p, &ref_s);
-  CHECK_NIL (p, ref_s, MODE (REF_ROW_REAL));
+  CHECK_REF (p, ref_s, MODE (REF_ROW_REAL));
   PUSH_REF (p, *DEREF (A68_ROW, &ref_s));
   s = pop_vector (p, A68_FALSE);
   POP_REF (p, &ref_v);
-  CHECK_NIL (p, ref_v, MODE (REF_ROWROW_REAL));
+  CHECK_REF (p, ref_v, MODE (REF_ROWROW_REAL));
   PUSH_REF (p, *DEREF (A68_ROW, &ref_v));
   v = pop_matrix (p, A68_FALSE);
   a = pop_matrix (p, A68_TRUE);
@@ -2200,7 +2210,7 @@ void genie_matrix_svd (NODE_T * p)
 
 /*!
 \brief PROC svd solve = ([, ] REAL, [, ] REAL, [] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_svd_solve (NODE_T * p)
@@ -2227,7 +2237,7 @@ void genie_matrix_svd_solve (NODE_T * p)
 
 /*!
 \brief PROC qr decomp = ([, ] REAL, [] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_qr (NODE_T * p)
@@ -2239,7 +2249,7 @@ void genie_matrix_qr (NODE_T * p)
   int rc;
   error_node = p;
   POP_REF (p, &ref_t);
-  CHECK_NIL (p, ref_t, MODE (REF_ROW_REAL));
+  CHECK_REF (p, ref_t, MODE (REF_ROW_REAL));
   PUSH_REF (p, *DEREF (A68_ROW, &ref_t));
   t = pop_vector (p, A68_FALSE);
   a = pop_matrix (p, A68_TRUE);
@@ -2255,7 +2265,7 @@ void genie_matrix_qr (NODE_T * p)
 
 /*!
 \brief PROC qr solve = ([, ] REAL, [] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_qr_solve (NODE_T * p)
@@ -2280,7 +2290,7 @@ void genie_matrix_qr_solve (NODE_T * p)
 
 /*!
 \brief PROC qr ls solve = ([, ] REAL, [] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_qr_ls_solve (NODE_T * p)
@@ -2307,7 +2317,7 @@ void genie_matrix_qr_ls_solve (NODE_T * p)
 
 /*!
 \brief PROC cholesky decomp = ([, ] REAL) [, ] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_ch (NODE_T * p)
@@ -2326,7 +2336,7 @@ void genie_matrix_ch (NODE_T * p)
 
 /*!
 \brief PROC cholesky solve = ([, ] REAL, [] REAL) [] REAL
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_matrix_ch_solve (NODE_T * p)
@@ -2347,4 +2357,418 @@ void genie_matrix_ch_solve (NODE_T * p)
   (void) gsl_set_error_handler (save_handler);
 }
 
-#endif
+/*!
+\brief map GSL error handler onto a68g error handler
+\param reason error text
+\param file gsl file where error occured
+\param line line in above file
+\param int gsl error number
+**/
+
+void fft_error_handler (const char *reason, const char *file, int line, int gsl_errno)
+{
+  if (line != 0) {
+    snprintf (edit_line, BUFFER_SIZE, "%s in line %d of file %s", reason, line, file);
+  } else {
+    snprintf (edit_line, BUFFER_SIZE, "%s", reason);
+  }
+  diagnostic_node (A68_RUNTIME_ERROR, error_node, ERROR_FFT, edit_line, gsl_strerror (gsl_errno), NULL);
+  exit_genie (error_node, A68_RUNTIME_ERROR);
+}
+
+/*!
+\brief detect math errors
+\param rc return code from function
+**/
+
+static void fft_test_error (int rc)
+{
+  if (rc != 0) {
+    fft_error_handler ("math error", "", 0, rc);
+  }
+}
+
+/*!
+\brief pop [] REAL on the stack as complex double []
+\param p position in tree
+\param get whether to get elements from row in the stack
+\return double []
+**/
+
+static double *pop_array_real (NODE_T * p, int *len)
+{
+  A68_REF desc;
+  A68_ARRAY *arr;
+  A68_TUPLE *tup;
+  int inc, index, k;
+  BYTE_T *base;
+  double *v;
+  error_node = p;
+/* Pop arguments. */
+  POP_REF (p, &desc);
+  CHECK_REF (p, desc, MODE (ROW_REAL));
+  GET_DESCRIPTOR (arr, tup, &desc);
+  *len = ROW_SIZE (tup);
+  if ((*len) == 0) {
+    return (NULL);
+  }
+  v = malloc (2 * (*len) * sizeof (double));
+  fft_test_error (v == NULL ? GSL_ENOMEM : GSL_SUCCESS);
+  base = DEREF (BYTE_T, &(ARRAY (arr)));
+  index = VECTOR_OFFSET (arr, tup);
+  inc = tup->span * arr->elem_size;
+  for (k = 0; k < (*len); k++, index += inc) {
+    A68_REAL *x = (A68_REAL *) (base + index);
+    CHECK_INIT (p, INITIALISED (x), MODE (REAL));
+    v[2 * k] = VALUE (x);
+    v[2 * k + 1] = 0.0;
+  }
+  return (v);
+}
+
+/*!
+\brief push double [] on the stack as [] REAL
+\param p position in tree
+**/
+
+static void push_array_real (NODE_T * p, double *v, int len)
+{
+  A68_REF desc, row;
+  A68_ARRAY arr;
+  A68_TUPLE tup;
+  int inc, index, k;
+  BYTE_T *base;
+  error_node = p;
+  desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  PROTECT_SWEEP_HANDLE (&desc);
+  row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZEOF (A68_REAL));
+  PROTECT_SWEEP_HANDLE (&row);
+  DIM (&arr) = 1;
+  MOID (&arr) = MODE (REAL);
+  arr.elem_size = ALIGNED_SIZEOF (A68_REAL);
+  arr.slice_offset = arr.field_offset = 0;
+  ARRAY (&arr) = row;
+  LWB (&tup) = 1;
+  UPB (&tup) = len;
+  tup.shift = LWB (&tup);
+  tup.span = 1;
+  tup.k = 0;
+  PUT_DESCRIPTOR (arr, tup, &desc);
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
+  index = VECTOR_OFFSET (&arr, &tup);
+  inc = tup.span * arr.elem_size;
+  for (k = 0; k < len; k++, index += inc) {
+    A68_REAL *x = (A68_REAL *) (base + index);
+    STATUS (x) = INITIALISED_MASK;
+    VALUE (x) = v[2 * k];
+    TEST_REAL_REPRESENTATION (p, VALUE (x));
+  }
+  UNPROTECT_SWEEP_HANDLE (&desc);
+  UNPROTECT_SWEEP_HANDLE (&row);
+  PUSH_REF (p, desc);
+}
+
+/*!
+\brief pop [] COMPLEX on the stack as double []
+\param p position in tree
+\param get whether to get elements from row in the stack
+\return double []
+**/
+
+static double *pop_array_complex (NODE_T * p, int *len)
+{
+  A68_REF desc;
+  A68_ARRAY *arr;
+  A68_TUPLE *tup;
+  int inc, index, k;
+  BYTE_T *base;
+  double *v;
+  error_node = p;
+/* Pop arguments. */
+  POP_REF (p, &desc);
+  CHECK_REF (p, desc, MODE (ROW_COMPLEX));
+  GET_DESCRIPTOR (arr, tup, &desc);
+  *len = ROW_SIZE (tup);
+  if ((*len) == 0) {
+    return (NULL);
+  }
+  v = malloc (2 * (*len) * sizeof (double));
+  fft_test_error (v == NULL ? GSL_ENOMEM : GSL_SUCCESS);
+  base = DEREF (BYTE_T, &(ARRAY (arr)));
+  index = VECTOR_OFFSET (arr, tup);
+  inc = tup->span * arr->elem_size;
+  for (k = 0; k < (*len); k++, index += inc) {
+    A68_REAL *re = (A68_REAL *) (base + index);
+    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
+    CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
+    CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
+    v[2 * k] = VALUE (re);
+    v[2 * k + 1] = VALUE (im);
+  }
+  return (v);
+}
+
+/*!
+\brief push double [] on the stack as [] COMPLEX
+\param p position in tree
+**/
+
+static void push_array_complex (NODE_T * p, double *v, int len)
+{
+  A68_REF desc, row;
+  A68_ARRAY arr;
+  A68_TUPLE tup;
+  int inc, index, k;
+  BYTE_T *base;
+  error_node = p;
+  desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  PROTECT_SWEEP_HANDLE (&desc);
+  row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZEOF (A68_REAL));
+  PROTECT_SWEEP_HANDLE (&row);
+  DIM (&arr) = 1;
+  MOID (&arr) = MODE (COMPLEX);
+  arr.elem_size = 2 * ALIGNED_SIZEOF (A68_REAL);
+  arr.slice_offset = arr.field_offset = 0;
+  ARRAY (&arr) = row;
+  LWB (&tup) = 1;
+  UPB (&tup) = len;
+  tup.shift = LWB (&tup);
+  tup.span = 1;
+  tup.k = 0;
+  PUT_DESCRIPTOR (arr, tup, &desc);
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
+  index = VECTOR_OFFSET (&arr, &tup);
+  inc = tup.span * arr.elem_size;
+  for (k = 0; k < len; k++, index += inc) {
+    A68_REAL *re = (A68_REAL *) (base + index);
+    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
+    STATUS (re) = INITIALISED_MASK;
+    VALUE (re) = v[2 * k];
+    STATUS (im) = INITIALISED_MASK;
+    VALUE (im) = v[2 * k + 1];
+    TEST_COMPLEX_REPRESENTATION (p, VALUE (re), VALUE (im));
+  }
+  UNPROTECT_SWEEP_HANDLE (&desc);
+  UNPROTECT_SWEEP_HANDLE (&row);
+  PUSH_REF (p, desc);
+}
+
+/*!
+\brief push prime factorisation on the stack as [] INT
+\param p position in tree
+**/
+
+void genie_prime_factors (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  A68_INT n;
+  A68_REF desc, row;
+  A68_ARRAY arr;
+  A68_TUPLE tup;
+  int len, inc, index, k;
+  BYTE_T *base;
+  gsl_fft_complex_wavetable *wt;
+  error_node = p;
+  POP_OBJECT (p, &n, A68_INT);
+  CHECK_INIT (p, INITIALISED (&n), MODE (INT));
+  wt = gsl_fft_complex_wavetable_alloc (VALUE (&n));
+  len = wt->nf;
+  desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  PROTECT_SWEEP_HANDLE (&desc);
+  row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZEOF (A68_INT));
+  PROTECT_SWEEP_HANDLE (&row);
+  DIM (&arr) = 1;
+  MOID (&arr) = MODE (INT);
+  arr.elem_size = ALIGNED_SIZEOF (A68_INT);
+  arr.slice_offset = arr.field_offset = 0;
+  ARRAY (&arr) = row;
+  LWB (&tup) = 1;
+  UPB (&tup) = len;
+  tup.shift = LWB (&tup);
+  tup.span = 1;
+  tup.k = 0;
+  PUT_DESCRIPTOR (arr, tup, &desc);
+  base = DEREF (BYTE_T, &(ARRAY (&arr)));
+  index = VECTOR_OFFSET (&arr, &tup);
+  inc = tup.span * arr.elem_size;
+  for (k = 0; k < len; k++, index += inc) {
+    A68_INT *x = (A68_INT *) (base + index);
+    STATUS (x) = INITIALISED_MASK;
+    VALUE (x) = (wt->factor)[k];
+  }
+  gsl_fft_complex_wavetable_free (wt);
+  UNPROTECT_SWEEP_HANDLE (&desc);
+  UNPROTECT_SWEEP_HANDLE (&row);
+  PUSH_REF (p, desc);
+  (void) gsl_set_error_handler (save_handler);
+}
+
+/*!
+\brief PROC ([] COMPLEX) [] COMPLEX fft complex forward
+\param p position in tree
+**/
+
+void genie_fft_complex_forward (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  int len, rc;
+  double *data;
+  gsl_fft_complex_wavetable *wt;
+  gsl_fft_complex_workspace *ws;
+  error_node = p;
+  data = pop_array_complex (p, &len);
+  fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
+  wt = gsl_fft_complex_wavetable_alloc (len);
+  ws = gsl_fft_complex_workspace_alloc (len);
+  rc = gsl_fft_complex_forward (data, 1, len, wt, ws);
+  fft_test_error (rc);
+  push_array_complex (p, data, len);
+  gsl_fft_complex_wavetable_free (wt);
+  gsl_fft_complex_workspace_free (ws);
+  if (data != NULL) {
+    free (data);
+  }
+  (void) gsl_set_error_handler (save_handler);
+}
+
+/*!
+\brief PROC ([] COMPLEX) [] COMPLEX fft complex backward
+\param p position in tree
+**/
+
+void genie_fft_complex_backward (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  int len, rc;
+  double *data;
+  gsl_fft_complex_wavetable *wt;
+  gsl_fft_complex_workspace *ws;
+  error_node = p;
+  data = pop_array_complex (p, &len);
+  fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
+  wt = gsl_fft_complex_wavetable_alloc (len);
+  ws = gsl_fft_complex_workspace_alloc (len);
+  rc = gsl_fft_complex_backward (data, 1, len, wt, ws);
+  fft_test_error (rc);
+  push_array_complex (p, data, len);
+  gsl_fft_complex_wavetable_free (wt);
+  gsl_fft_complex_workspace_free (ws);
+  if (data != NULL) {
+    free (data);
+  }
+  (void) gsl_set_error_handler (save_handler);
+}
+
+/*!
+\brief PROC ([] COMPLEX) [] COMPLEX fft complex inverse
+\param p position in tree
+**/
+
+void genie_fft_complex_inverse (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  int len, rc;
+  double *data;
+  gsl_fft_complex_wavetable *wt;
+  gsl_fft_complex_workspace *ws;
+  error_node = p;
+  data = pop_array_complex (p, &len);
+  fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
+  wt = gsl_fft_complex_wavetable_alloc (len);
+  ws = gsl_fft_complex_workspace_alloc (len);
+  rc = gsl_fft_complex_inverse (data, 1, len, wt, ws);
+  fft_test_error (rc);
+  push_array_complex (p, data, len);
+  gsl_fft_complex_wavetable_free (wt);
+  gsl_fft_complex_workspace_free (ws);
+  if (data != NULL) {
+    free (data);
+  }
+  (void) gsl_set_error_handler (save_handler);
+}
+
+/*!
+\brief PROC ([] REAL) [] COMPLEX fft forward
+\param p position in tree
+**/
+
+void genie_fft_forward (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  int len, rc;
+  double *data;
+  gsl_fft_complex_wavetable *wt;
+  gsl_fft_complex_workspace *ws;
+  error_node = p;
+  data = pop_array_real (p, &len);
+  fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
+  wt = gsl_fft_complex_wavetable_alloc (len);
+  ws = gsl_fft_complex_workspace_alloc (len);
+  rc = gsl_fft_complex_forward (data, 1, len, wt, ws);
+  fft_test_error (rc);
+  push_array_complex (p, data, len);
+  gsl_fft_complex_wavetable_free (wt);
+  gsl_fft_complex_workspace_free (ws);
+  if (data != NULL) {
+    free (data);
+  }
+  (void) gsl_set_error_handler (save_handler);
+}
+
+/*!
+\brief PROC ([] COMPLEX) [] REAL fft backward
+\param p position in tree
+**/
+
+void genie_fft_backward (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  int len, rc;
+  double *data;
+  gsl_fft_complex_wavetable *wt;
+  gsl_fft_complex_workspace *ws;
+  error_node = p;
+  data = pop_array_complex (p, &len);
+  fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
+  wt = gsl_fft_complex_wavetable_alloc (len);
+  ws = gsl_fft_complex_workspace_alloc (len);
+  rc = gsl_fft_complex_backward (data, 1, len, wt, ws);
+  fft_test_error (rc);
+  push_array_real (p, data, len);
+  gsl_fft_complex_wavetable_free (wt);
+  gsl_fft_complex_workspace_free (ws);
+  if (data != NULL) {
+    free (data);
+  }
+  (void) gsl_set_error_handler (save_handler);
+}
+
+/*!
+\brief PROC ([] COMPLEX) [] REAL fft inverse
+\param p position in tree
+**/
+
+void genie_fft_inverse (NODE_T * p)
+{
+  gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
+  int len, rc;
+  double *data;
+  gsl_fft_complex_wavetable *wt;
+  gsl_fft_complex_workspace *ws;
+  error_node = p;
+  data = pop_array_complex (p, &len);
+  fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
+  wt = gsl_fft_complex_wavetable_alloc (len);
+  ws = gsl_fft_complex_workspace_alloc (len);
+  rc = gsl_fft_complex_inverse (data, 1, len, wt, ws);
+  fft_test_error (rc);
+  push_array_real (p, data, len);
+  gsl_fft_complex_wavetable_free (wt);
+  gsl_fft_complex_workspace_free (ws);
+  if (data != NULL) {
+    free (data);
+  }
+  (void) gsl_set_error_handler (save_handler);
+}
+
+#endif /* ENABLE_NUMERICAL */

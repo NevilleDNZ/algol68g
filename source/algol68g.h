@@ -94,7 +94,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ALIGNED_SIZEOF(p) ((int) A68_ALIGN (sizeof (p)))
 #define MOID_SIZE(p) A68_ALIGN ((p)->size)
 
-#define BUFFER_SIZE KILOBYTE			/* BUFFER_SIZE exceeds actual requirements. */
+#define BUFFER_SIZE (KILOBYTE)		/* BUFFER_SIZE exceeds actual requirements. */
 #define SMALL_BUFFER_SIZE 128
 #define MAX_ERRORS 8
 #define MAX_PRIORITY 9				/* Algol 68 requirement. */
@@ -140,34 +140,40 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define PRIMAL_SCOPE 0
 
-#define NULL_MASK 		0x00000000
-#define IN_HEAP_MASK		0x00000001
-#define IN_FRAME_MASK		0x00000002
-#define IN_STACK_MASK		0x00000004
-#define IN_HANDLE_MASK		0x00000008
-#define INITIALISED_MASK 	0x00000010
-#define CONSTANT_MASK 		0x00000020
-#define NO_SWEEP_MASK 		0x00000040
-#define ROW_COLOUR_MASK 	0x00000080
-#define COOKIE_MASK 		0x00000100
-#define ASSIGNED_MASK 		0x00000200
-#define ALLOCATED_MASK 		0x00000400
-#define STANDENV_PROC_MASK 	0x00000800
-#define COLOUR_MASK 		0x00001000
-#define PROCEDURE_MASK 		0x00002000
-#define OPTIMAL_MASK 		0x00004000
-#define SERIAL_MASK 		0x00008000
-#define CROSS_REFERENCE_MASK 	0x00010000
-#define TREE_MASK 		0x00020000
-#define CODE_MASK 		0x00040000
-#define SYNTAX_TREE_MASK 	0x00080000
-#define SOURCE_MASK 		0x00100000
-#define TRACE_MASK 		0x00200000
-#define ASSERT_MASK 		0x00400000
-#define BREAKPOINT_MASK 	0x00800000
-#define SKIP_PROCEDURE_MASK  	0x01000000
-#define PARTIAL_CALL_MASK	0x02000000
-#define NIL_MASK		0x04000000
+/* Status Masks */
+
+#define NULL_MASK 			0x00000000
+#define IN_HEAP_MASK			0x00000001
+#define IN_FRAME_MASK			0x00000002
+#define IN_STACK_MASK			0x00000004
+#define IN_HANDLE_MASK			0x00000008
+#define INITIALISED_MASK 		0x00000010
+#define CONSTANT_MASK 			0x00000020
+#define NO_SWEEP_MASK 			0x00000040
+#define ROW_COLOUR_MASK 		0x00000080
+#define COOKIE_MASK 			0x00000100
+#define ASSIGNED_MASK 			0x00000200
+#define ALLOCATED_MASK 			0x00000400
+#define STANDENV_PROC_MASK 		0x00000800
+#define COLOUR_MASK 			0x00001000
+#define PROCEDURE_MASK 			0x00002000
+#define OPTIMAL_MASK	 		0x00004000
+#define SERIAL_MASK 			0x00008000
+#define CROSS_REFERENCE_MASK 		0x00010000
+#define TREE_MASK 			0x00020000
+#define CODE_MASK 			0x00040000
+#define SYNTAX_TREE_MASK 		0x00080000
+#define SOURCE_MASK	 		0x00100000
+#define ASSERT_MASK 			0x00200000
+#define NIL_MASK			0x00400000
+#define SKIP_PROCEDURE_MASK	  	0x00800000
+#define INTERRUPTIBLE_MASK		0x01000000
+#define BREAKPOINT_MASK 		0x02000000
+#define BREAKPOINT_TEMPORARY_MASK 	0x04000000
+#define BREAKPOINT_INTERRUPT_MASK	0x08000000
+#define BREAKPOINT_WATCH_MASK		0x10000000
+#define BREAKPOINT_TRACE_MASK		0x20000000
+#define BREAKPOINT_ERROR_MASK		0xffffffff
 
 /*
 Some (necessary) macros to overcome the ambiguity in having signed or unsigned
@@ -238,7 +244,7 @@ typedef struct TOKEN_T TOKEN_T;
 struct A68_HANDLE
 {
   STATUS_MASK status;
-  ADDR_T offset;
+  BYTE_T *pointer;
   int size;
   MOID_T *type;
   A68_HANDLE *next, *previous;
@@ -280,17 +286,18 @@ struct A68_LONG_BYTES
   char value[LONG_BYTES_WIDTH + 1];
 };
 
-#define IS_IN_HEAP(z) ((z)->status & IN_HEAP_MASK)
-#define IS_IN_FRAME(z) ((z)->status & IN_FRAME_MASK)
-#define IS_IN_STACK(z) ((z)->status & IN_STACK_MASK)
-#define IS_IN_HANDLE(z) ((z)->status & IN_HANDLE_MASK)
-#define IS_NIL(p) ((p).status & NIL_MASK)
-#define GET_REF_SCOPE(z) (IS_IN_HEAP (z) ? PRIMAL_SCOPE : REF_SCOPE (z))
-#define SET_REF_SCOPE(z, s) { if (!IS_IN_HEAP (z)) { REF_SCOPE (z) = (s);}}
-
 #define REF_SCOPE(z) (((z)->u).scope)
 #define REF_HANDLE(z) (((z)->u).handle)
+#define REF_POINTER(z) (REF_HANDLE (z)->pointer)
 #define REF_OFFSET(z) ((z)->offset)
+
+#define IS_IN_HEAP(z) (STATUS (z) & IN_HEAP_MASK)
+#define IS_IN_FRAME(z) (STATUS (z) & IN_FRAME_MASK)
+#define IS_IN_STACK(z) (STATUS (z) & IN_STACK_MASK)
+#define IS_IN_HANDLE(z) (STATUS (z) & IN_HANDLE_MASK)
+#define IS_NIL(p) ((STATUS (&(p)) & NIL_MASK) != 0)
+#define GET_REF_SCOPE(z) (IS_IN_HEAP (z) ? PRIMAL_SCOPE : REF_SCOPE (z))
+#define SET_REF_SCOPE(z, s) { if (!IS_IN_HEAP (z)) { REF_SCOPE (z) = (s);}}
 
 struct A68_REF
 {
@@ -317,7 +324,7 @@ struct A68_PROCEDURE
   STATUS_MASK status;
   void *body;
   A68_HANDLE *locale;
-  MOID_T *proc_mode;
+  MOID_T *type;
   ADDR_T environ;
 };
 
@@ -329,7 +336,7 @@ struct A68_TUPLE
 struct A68_ARRAY
 {
   MOID_T *type;
-  int dimensions, elem_size;
+  int dim, elem_size;
   ADDR_T slice_offset, field_offset;
   A68_REF array;
 };
@@ -455,7 +462,7 @@ struct SYMBOL_TABLE_T
   int level, nest, attribute /* MAIN, PRELUDE_T*/ ;
   BOOL_T empty_table, initialise_frame, initialise_anon, proc_ops;
   ADDR_T ap_increment;
-  SYMBOL_TABLE_T *previous;
+  SYMBOL_TABLE_T *previous, *outer;
   TAG_T *identifiers, *operators, *priority, *indicants, *labels, *anonymous;
   MOID_T *moids;
   NODE_T *jump_to, *inits;
@@ -473,7 +480,7 @@ struct PACK_T
 
 struct MOID_T
 {
-  int attribute, number, dimensions, short_id, size;
+  int attribute, number, dim, short_id, size;
   BOOL_T has_ref, has_flex, has_rows, in_standard_environ, well_formed, use, portable;
   NODE_T *node;
   PACK_T *pack;
@@ -490,7 +497,7 @@ struct MOID_LIST_T
 struct NODE_INFO_T
 {
   MODULE_T *module;
-  int PROCEDURE_LEVEL, PROCEDURE_NUMBER, priority;
+  int PROCEDURE_LEVEL, priority;
   char *char_in_line, *symbol, *expr;
   SOURCE_LINE_T *line;
 };
@@ -827,7 +834,7 @@ enum ATTRIBUTES
   FORMAT_ITEM_A,
   FORMAT_ITEM_B,
   FORMAT_ITEM_C,
-  FORMAT_ITEM_CLOSE,
+  FORMAT_CLOSE_SYMBOL,
   FORMAT_ITEM_D,
   FORMAT_ITEM_E,
   FORMAT_ITEM_ESCAPE,
@@ -842,7 +849,7 @@ enum ATTRIBUTES
   FORMAT_ITEM_MINUS,
   FORMAT_ITEM_N,
   FORMAT_ITEM_O,
-  FORMAT_ITEM_OPEN,
+  FORMAT_OPEN_SYMBOL,
   FORMAT_ITEM_P,
   FORMAT_ITEM_PLUS,
   FORMAT_ITEM_POINT,
@@ -895,6 +902,7 @@ enum ATTRIBUTES
   ISNT_SYMBOL,
   IS_SYMBOL,
   JUMP,
+  KEYWORD,
   LABEL,
   LABELED_UNIT,
   LABEL_IDENTIFIER,
@@ -1036,8 +1044,7 @@ enum
 enum
 {
   NORMAL_IDENTIFIER, ERROR_IDENTIFIER, LOOP_IDENTIFIER, FORMAT_IDENTIFIER,
-  PARAMETER_IDENTIFIER, SPECIFIER_IDENTIFIER, LOCAL_LABEL, EXTERN_LABEL,
-  ANONYMOUS, PROTECT_FROM_SWEEP
+  PARAMETER_IDENTIFIER, SPECIFIER_IDENTIFIER, LOCAL_LABEL, ANONYMOUS, PROTECT_FROM_SWEEP
 };
 
 enum
@@ -1096,79 +1103,82 @@ enum
 
 /* Miscellaneous macros. */
 
-#define A68_SOUND_DATA_SIZE(s) ((s)->num_samples * (s)->num_channels * A68_SOUND_BYTES (s))
 #define A68_SOUND_BYTES(s) ((s)->bits_per_sample / 8 + ((s)->bits_per_sample % 8 == 0 ? 0 : 1))
+#define A68_SOUND_DATA_SIZE(s) ((s)->num_samples * (s)->num_channels * A68_SOUND_BYTES (s))
+#define ARRAY(p) ((p)->array)
 #define ANNOTATION(p) ((p)->annotation)
 #define ATTRIBUTE(p) ((p)->attribute)
-#define DEFLEX(p) (DEFLEXED (p) != NULL ? DEFLEXED(p) : (p))
+#define BODY(p) ((p)->body)
 #define DEFLEXED(p) ((p)->deflexed_mode)
-#define DIMENSION(p) ((p)->dimensions)
+#define DEFLEX(p) (DEFLEXED (p) != NULL ? DEFLEXED(p) : (p))
+#define DIM(p) ((p)->dim)
 #define ENVIRON(p) ((p)->environ)
 #define EQUIVALENT(p) ((p)->equivalent_mode)
 #define EXIT_COMPILATION longjmp(exit_compilation, 1)
 #define FILE_DEREF(p) ((A68_FILE *) ADDRESS (p))
 #define FORWARD(p) ((p) = NEXT (p))
+#define FORMAT(p) ((p)->format)
 #define GENIE_INFO(p) ((p)->genie_info)
 #define HEAP(p) ((p)->heap)
 #define INFO(p) ((p)->info)
 #define LEX_LEVEL(p) (SYMBOL_TABLE (p)->level)
+#define LINE_NUMBER(p) (NUMBER (LINE (p)))
 #define LINE(p) ((p)->info->line)
-#define LINE_NUMBER(p) (NUMBER ((p)->info->line))
+#define LOCALE(p) ((p)->locale)
+#define LWB(p) ((p)->lower_bound)
 #define MASK(p) ((p)->mask)
 #define MODE(p) (a68_modes.p)
-#define MODULE(p) (INFO (p)->module)
+#define MODULE(p) ((p)->module)
 #define MOID(p) ((p)->type)
 #define MULTIPLE(p) ((p)->multiple_mode)
 #define NAME(p) ((p)->name)
 #define NEST(p) ((p)->nest)
-#define NEXT(p) ((p)->next)
 #define NEXT_NEXT(p) (NEXT (NEXT (p)))
+#define NEXT(p) ((p)->next)
 #define NEXT_SUB(p) (NEXT (SUB (p)))
 #define NODE(p) ((p)->node)
 #define NUMBER(p) ((p)->number)
+#define OFFSET(p) ((p)->offset)
+#define OUTER(p) ((p)->outer)
 #define PACK(p) ((p)->pack)
 #define PARENT(p) ((p)->genie.parent)
 #define PAR_LEVEL(p) ((p)->par_level)
+#define POINTER(p) ((p)->pointer)
 #define PREVIOUS(p) ((p)->previous)
 #define PRIO(p) ((p)->priority)
+#define PROPAGATOR(p) (((p)->genie).propagator)
 #define ROWED(p) ((p)->rowed)
 #define SEQUENCE(p) ((p)->genie.seq)
 #define SEQUENCE_SET(p) ((p)->genie.seq_set)
+#define SIZE(p) ((p)->size)
 #define SLICE(p) ((p)->slice)
 #define SORT(p) ((p)->sort)
 #define STATUS(p) ((p)->status)
-#define SUB(p) ((p)->sub)
 #define SUB_NEXT(p) (SUB (NEXT (p)))
+#define SUB(p) ((p)->sub)
 #define SYMBOL(p) ((p)->info->symbol)
 #define SYMBOL_TABLE(p) ((p)->symbol_table)
 #define TAX(p) ((p)->tag)
 #define TEXT(p) ((p)->text)
 #define TRIM(p) ((p)->trim)
+#define UPB(p) ((p)->upper_bound)
 #define VALUE(p) ((p)->value)
-#define WHETHER(p, s) (ATTRIBUTE (p) == (s))
 #define WHETHER_LITERALLY(p, s) (strcmp (SYMBOL (p), s) == 0)
 #define WHETHER_NOT(p, s) (ATTRIBUTE (p) != (s))
+#define WHETHER(p, s) (ATTRIBUTE (p) == (s))
 
 #define SCAN_ERROR(c, u, v, txt) if (c) {scan_error (u, v, txt);}
 #define WRITE(f, s) io_write_string ((f), (s));
-#define WRITELN(f, s) {io_close_tty_line (); WRITE (f, s);}
+#define WRITELN(f, s) {io_close_tty_line (); WRITE ((f), (s));}
 
 /* External definitions. */
 
 extern ADDR_T fixed_heap_pointer, temp_heap_pointer;
 extern BOOL_T a68c_diags, gnu_diags, no_warnings;
-extern BOOL_T halt_typing, sys_request_flag, time_limit_flag, listing_is_safe;
+extern BOOL_T halt_typing, time_limit_flag, listing_is_safe;
 extern BOOL_T tree_listing_safe, cross_reference_safe, moid_listing_safe;
+extern BOOL_T get_fixed_heap_allowed;
 extern BYTE_T *system_stack_offset;
-extern KEYWORD_T *top_keyword;
-extern MODES_T a68_modes;
-extern MODULE_T *current_module;
-extern MODULE_T a68_prog;
-extern MOID_LIST_T *top_moid_list, *old_moid_list;
-extern POSTULATE_T *top_postulate, *old_postulate;
-extern SYMBOL_TABLE_T *stand_env;
-extern TAG_T *error_tag;
-extern TOKEN_T *top_token;
 extern char output_line[], edit_line[], input_line[];
 extern double a68g_acosh (double);
 extern double a68g_asinh (double);
@@ -1185,6 +1195,14 @@ extern int stack_size;
 extern int symbol_table_count, mode_count;
 extern int term_width;
 extern jmp_buf exit_compilation;
+extern KEYWORD_T *top_keyword;
+extern MODES_T a68_modes;
+extern MODULE_T a68_prog;
+extern MOID_LIST_T *top_moid_list, *old_moid_list;
+extern POSTULATE_T *top_postulate, *old_postulate;
+extern SYMBOL_TABLE_T *stand_env;
+extern TAG_T *error_tag;
+extern TOKEN_T *top_token;
 
 extern int global_argc;
 extern char **global_argv;
@@ -1196,17 +1214,35 @@ extern BOOL_T lexical_analyzer (MODULE_T *);
 extern BOOL_T match_string (char *, char *, char);
 extern BOOL_T modes_equivalent (MOID_T *, MOID_T *);
 extern BOOL_T set_options (MODULE_T *, OPTION_LIST_T *, BOOL_T);
-extern BOOL_T whether (NODE_T * p, ...);
 extern BOOL_T whether_coercion (NODE_T *);
 extern BOOL_T whether_firm (MOID_T *, MOID_T *);
 extern BOOL_T whether_modes_equal (MOID_T *, MOID_T *, int);
 extern BOOL_T whether_new_lexical_level (NODE_T *);
+extern BOOL_T whether (NODE_T * p, ...);
 extern BOOL_T whether_subset (MOID_T *, MOID_T *, int);
 extern BOOL_T whether_unitable (MOID_T *, MOID_T *, int);
 extern BYTE_T *get_fixed_heap_space (size_t);
 extern BYTE_T *get_temp_heap_space (size_t);
-extern KEYWORD_T *find_keyword (KEYWORD_T *, char *);
+extern char *a68g_strchr (char *, int);
+extern char *a68g_strrchr (char *, int);
+extern char *ctrl_char (int);
+extern char digit_to_char (int);
+extern char *moid_to_string (MOID_T *, int);
+extern char *new_fixed_string (char *);
+extern char *new_string (char *);
+extern char *non_terminal_string (char *, int);
+extern char *propagator_name (PROPAGATOR_PROCEDURE *p);
+extern char *read_string_from_tty (char *);
+extern char *standard_environ_proc_name (GENIE_PROCEDURE);
+extern double seconds (void);
+extern double ten_to_the_power (int);
+extern int count_pack_members (PACK_T *);
+extern int get_row_size (A68_TUPLE *, int);
+extern int heap_available ();
+extern int moid_size (MOID_T *);
+extern int whether_identifier_or_label_global (SYMBOL_TABLE_T *, char *);
 extern KEYWORD_T *find_keyword_from_attribute (KEYWORD_T *, int);
+extern KEYWORD_T *find_keyword (KEYWORD_T *, char *);
 extern MOID_T *add_mode (MOID_T **, int, int, NODE_T *, MOID_T *, PACK_T *);
 extern MOID_T *depref_completely (MOID_T *);
 extern MOID_T *new_moid (void);
@@ -1215,9 +1251,14 @@ extern NODE_T *new_node (void);
 extern NODE_T *some_node (char *);
 extern PACK_T *absorb_union_pack (PACK_T *, int *);
 extern PACK_T *new_pack (void);
-extern POSTULATE_T *whether_postulated (POSTULATE_T *, MOID_T *);
 extern POSTULATE_T *whether_postulated_pair (POSTULATE_T *, MOID_T *, MOID_T *);
+extern POSTULATE_T *whether_postulated (POSTULATE_T *, MOID_T *);
+extern size_t io_read_string (FILE_T, char *, size_t);
 extern SOURCE_LINE_T *new_source_line (void);
+extern ssize_t io_read_conv (FILE_T, void *, size_t);
+extern ssize_t io_read (FILE_T, void *, size_t);
+extern ssize_t io_write_conv (FILE_T, const void *, size_t);
+extern ssize_t io_write (FILE_T, const void *, size_t);
 extern SYMBOL_TABLE_T *find_level (NODE_T *, int);
 extern SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T *);
 extern TAG_T *add_tag (SYMBOL_TABLE_T *, int, NODE_T *, MOID_T *, int);
@@ -1226,38 +1267,12 @@ extern TAG_T *find_tag_local (SYMBOL_TABLE_T *, int, char *);
 extern TAG_T *new_tag (void);
 extern TOKEN_T *add_token (TOKEN_T **, char *);
 extern TOKEN_T *find_token (TOKEN_T **, char *);
-extern char *a68g_strchr (char *, int);
-extern char *a68g_strrchr (char *, int);
-extern char *ctrl_char (int);
-extern char *moid_to_string (MOID_T *, int);
-extern char *new_fixed_string (char *);
-extern char *new_string (char *);
-extern char *non_terminal_string (char *, int);
-extern char *propagator_name (PROPAGATOR_PROCEDURE *p);
-extern char *read_string_from_tty (char *);
-extern char *standard_environ_proc_name (GENIE_PROCEDURE);
-extern char digit_to_char (int);
-extern double seconds (void);
-extern double ten_to_the_power (int);
-extern int count_pack_members (PACK_T *);
-extern int get_row_size (A68_TUPLE *, int);
-extern int heap_available ();
-extern int moid_size (MOID_T *);
-extern int whether_identifier_or_label_global (SYMBOL_TABLE_T *, char *);
-extern size_t io_read_string (FILE_T, char *, size_t);
-extern ssize_t io_read (FILE_T, void *, size_t);
-extern ssize_t io_read_conv (FILE_T, void *, size_t);
-extern ssize_t io_write (FILE_T, const void *, size_t);
-extern ssize_t io_write_conv (FILE_T, const void *, size_t);
 extern unsigned long a68g_strtoul (char *, char **, int);
-extern void *get_heap_space (size_t);
-extern void PROTECT_SWEEP_HANDLE (A68_REF *);
-extern void UNPROTECT_SWEEP_HANDLE (A68_REF *);
 extern void a68g_exit (int);
 extern void abend (char *, char *, char *, int);
 extern void acronym (char *, char *);
-extern void add_mode_to_pack (PACK_T **, MOID_T *, char *, NODE_T *);
 extern void add_mode_to_pack_end (PACK_T **, MOID_T *, char *, NODE_T *);
+extern void add_mode_to_pack (PACK_T **, MOID_T *, char *, NODE_T *);
 extern void add_moid_list (MOID_LIST_T **, SYMBOL_TABLE_T *);
 extern void add_moid_moid_list (NODE_T *, MOID_LIST_T **);
 extern void add_option_list (OPTION_LIST_T **, char *, SOURCE_LINE_T *);
@@ -1284,21 +1299,23 @@ extern void diagnostics_to_terminal (SOURCE_LINE_T *, int);
 extern void discard_heap (void);
 extern void dump_heap ();
 extern void dump_stowed (NODE_T *, FILE_T, void *, MOID_T *, int);
+extern void fill_symbol_table_outer (NODE_T *, SYMBOL_TABLE_T *);
 extern void finalise_symbol_table_setup (NODE_T *, int);
 extern void free_heap (void);
 extern void free_postulates (void);
 extern void genie_init_heap (NODE_T *, MODULE_T *);
+extern void *get_heap_space (size_t);
 extern void get_max_simplout_size (NODE_T *);
 extern void get_moid_list (MOID_LIST_T **, NODE_T *);
 extern void get_refinements (MODULE_T *);
 extern void get_stack_size (void);
 extern void init_curses (void);
 extern void init_heap (void);
+extern void initialise_internal_index (A68_TUPLE *, int);
 extern void init_moid_list ();
 extern void init_options (MODULE_T *);
 extern void init_postulates (void);
 extern void init_tty (void);
-extern void initialise_internal_index (A68_TUPLE *, int);
 extern void io_close_tty_line (void);
 extern void io_write_string (FILE_T, const char *);
 extern void isolate_options (MODULE_T *, char *, SOURCE_LINE_T *);
@@ -1323,6 +1340,7 @@ extern void preliminary_symbol_table_setup (NODE_T *);
 extern void print_internal_index (FILE_T, A68_TUPLE *, int);
 extern void print_item (NODE_T *, FILE_T, BYTE_T *, MOID_T *);
 extern void protect_from_sweep (NODE_T *);
+extern void PROTECT_SWEEP_HANDLE (A68_REF *);
 extern void prune_echoes (MODULE_T *, OPTION_LIST_T *);
 extern void put_refinements (MODULE_T *);
 extern void read_env_options (MODULE_T *);
@@ -1338,8 +1356,9 @@ extern void reset_symbol_table_nest_count (NODE_T *);
 extern void scan_error (SOURCE_LINE_T *, char *, char *);
 extern void scope_checker (NODE_T *);
 extern void set_moid_sizes (MOID_LIST_T *);
-extern void set_nests (NODE_T *, NODE_T *);
+extern void set_nest (NODE_T *, NODE_T *);
 extern void set_par_level (NODE_T *, int);
+extern void set_proc_level (NODE_T *, int);
 extern void set_up_mode_table (NODE_T *);
 extern void set_up_tables ();
 extern void source_listing (MODULE_T *);
@@ -1349,12 +1368,14 @@ extern void substitute_brackets (NODE_T *);
 extern void tie_label_to_serial (NODE_T *);
 extern void tie_label_to_unit (NODE_T *);
 extern void top_down_parser (NODE_T *);
+extern void UNPROTECT_SWEEP_HANDLE (A68_REF *);
 extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
+extern void warn_tags_threads (NODE_T *);
 extern void where (FILE_T, NODE_T *);
 extern void widen_denoter (NODE_T *);
-extern void write_listing (MODULE_T *);
 extern void write_listing_header (MODULE_T *);
+extern void write_listing (MODULE_T *);
 extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, int);
 
 #endif

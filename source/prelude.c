@@ -47,13 +47,12 @@ static PACK_T *z;
 static void add_stand_env (BOOL_T portable, int a, NODE_T * n, char *c, MOID_T * m, int p, GENIE_PROCEDURE * q)
 {
   TAG_T *new_one = new_tag ();
-  n->info->PROCEDURE_LEVEL = 0;
-  n->info->PROCEDURE_NUMBER = 0;
+  INFO (n)->PROCEDURE_LEVEL = 0;
   new_one->use = A68_FALSE;
   HEAP (new_one) = HEAP_SYMBOL;
   SYMBOL_TABLE (new_one) = stand_env;
   NODE (new_one) = n;
-  new_one->value = c != NULL ? add_token (&top_token, c)->text : NULL;
+  VALUE (new_one) = (c != NULL ? add_token (&top_token, c)->text : NULL);
   PRIO (new_one) = p;
   new_one->procedure = q;
   new_one->stand_env_proc = q != NULL;
@@ -939,6 +938,7 @@ static void stand_prelude (void)
   m = a68_proc (MODE (STRING), MODE (INT), MODE (ROW_CHAR), NULL);
   a68_op (A68_TRUE, "*", m, genie_times_int_string);
 /* SEMA ops. */
+#if defined ENABLE_PAR_CLAUSE
   m = a68_proc (MODE (SEMA), MODE (INT), NULL);
   a68_op (A68_TRUE, "LEVEL", m, genie_level_sema_int);
   m = a68_proc (MODE (INT), MODE (SEMA), NULL);
@@ -946,6 +946,15 @@ static void stand_prelude (void)
   m = a68_proc (MODE (VOID), MODE (SEMA), NULL);
   a68_op (A68_TRUE, "UP", m, genie_up_sema);
   a68_op (A68_TRUE, "DOWN", m, genie_down_sema);
+#else
+  m = a68_proc (MODE (SEMA), MODE (INT), NULL);
+  a68_op (A68_TRUE, "LEVEL", m, genie_unimplemented);
+  m = a68_proc (MODE (INT), MODE (SEMA), NULL);
+  a68_op (A68_TRUE, "LEVEL", m, genie_unimplemented);
+  m = a68_proc (MODE (VOID), MODE (SEMA), NULL);
+  a68_op (A68_TRUE, "UP", m, genie_unimplemented);
+  a68_op (A68_TRUE, "DOWN", m, genie_unimplemented);
+#endif
 /* ROWS ops. */
   m = a68_proc (MODE (INT), MODE (ROWS), NULL);
   a68_op (A68_FALSE, "ELEMS", m, genie_monad_elems);
