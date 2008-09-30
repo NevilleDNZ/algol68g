@@ -9,21 +9,21 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
 #include "algol68g.h"
 #include "genie.h"
+#include "transput.h"
 
 #define MAX_RESTART 256
 
@@ -56,23 +56,23 @@ void io_close_tty_line (void)
 
 /*!
 \brief get a char from STDIN
-\return
+\return same
 **/
 
 char get_stdin_char (void)
 {
   ssize_t j;
-  char ch;
+  char ch[4];
   RESET_ERRNO;
-  j = io_read_conv (STDIN_FILENO, &ch, 1);
+  j = io_read_conv (STDIN_FILENO, &(ch[0]), 1);
   ABNORMAL_END (j < 0, "cannot read char from stdin", NULL);
-  return (j == 1 ? ch : EOF_CHAR);
+  return (j == 1 ? ch[0] : EOF_CHAR);
 }
 
 /*!
 \brief read string from STDIN, until NEWLINE_STRING
 \param prompt prompt string
-\return
+\return input line buffer
 **/
 
 char *read_string_from_tty (char *prompt)
@@ -101,35 +101,9 @@ char *read_string_from_tty (char *prompt)
 }
 
 /*!
-\brief read string from file including NEWLINE_STRING
-\param f
-\param z
-\param max
-\return
-**/
-
-size_t io_read_string (FILE_T f, char *z, size_t max)
-{
-  int j = 1, k = 0;
-  char ch = NULL_CHAR;
-  char nl = NEWLINE_CHAR;
-  ABNORMAL_END (max < 2, "no buffer", NULL);
-  while ((j == 1) && (ch != nl) && (k < (int) (max - 1))) {
-    RESET_ERRNO;
-    j = io_read_conv (f, &ch, 1);
-    ABNORMAL_END (j < 0, "cannot read string", NULL);
-    if (j == 1) {
-      z[k++] = ch;
-    }
-  }
-  z[k] = NULL_CHAR;
-  return (k);
-}
-
-/*!
 \brief write string to file
-\param f
-\param z
+\param f file number
+\param z string to write
 **/
 
 void io_write_string (FILE_T f, const char *z)
@@ -284,7 +258,7 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
     to_do -= bytes_read;
     z += bytes_read;
   }
-  return (n - to_do);           /* return >= 0 */
+  return (n - to_do);
 }
 
 /*!

@@ -1,5 +1,6 @@
 /*!
 \file acronym.c
+\brief VMS style acronyms
 */
 
 /*
@@ -8,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.                      
 */
 
 /* This code was contributed by Theo Vosse.  */
@@ -28,7 +28,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 static BOOL_T is_vowel (char);
 static BOOL_T is_consonant (char);
-static int cmp (const void *, const void *);
+static int qsort_strcmp (const void *, const void *);
 static BOOL_T is_coda (char *, int);
 static void get_init_sylls (char *, char *);
 static void reduce_vowels (char *);
@@ -37,9 +37,9 @@ static BOOL_T remove_extra_coda (char *);
 static void make_acronym (char *, char *);
 
 /*!
-\brief
-\param
-\return
+\brief whether ch is a vowel
+\param ch character under test
+\return same
 **/
 
 static BOOL_T is_vowel (char ch)
@@ -48,9 +48,9 @@ static BOOL_T is_vowel (char ch)
 }
 
 /*!
-\brief
-\param
-\return
+\brief whether ch is consonant
+\param ch character under test
+\return same
 **/
 
 static BOOL_T is_consonant (char ch)
@@ -83,20 +83,22 @@ static char *codas[] = {
 };
 
 /*!
-\brief
-\param
-\return
+\brief compare function to pass to bsearch
+\param key key to search
+\param data data to search in
+\return difference between key and data
 **/
 
-static int cmp (const void *key, const void *data)
+static int qsort_strcmp (const void *key, const void *data)
 {
   return (strcmp ((char *) key, *(char **) data));
 }
 
 /*!
-\brief
-\param
-\return
+\brief whether first characters of string are a coda
+\param str string under test
+\param len number of characters
+\return same
 **/
 
 static BOOL_T is_coda (char *str, int len)
@@ -104,12 +106,13 @@ static BOOL_T is_coda (char *str, int len)
   char str2[BUFFER_SIZE];
   strncpy (str2, str, BUFFER_SIZE);
   str2[len] = NULL_CHAR;
-  return (bsearch (str2, codas, sizeof (codas) / sizeof (char *), sizeof (char *), cmp) != NULL);
+  return (bsearch (str2, codas, sizeof (codas) / sizeof (char *), sizeof (char *), qsort_strcmp) != NULL);
 }
 
 /*!
-\brief
-\param
+\brief get_init_sylls
+\param in input string
+\param out output string
 **/
 
 static void get_init_sylls (char *in, char *out)
@@ -117,10 +120,12 @@ static void get_init_sylls (char *in, char *out)
   char *coda;
   while (*in != NULL_CHAR) {
     if (isalpha (*in)) {
-      while (*in != NULL_CHAR && isalpha (*in) && !is_vowel (*in))
+      while (*in != NULL_CHAR && isalpha (*in) && !is_vowel (*in)) {
         *out++ = toupper (*in++);
-      while (*in != NULL_CHAR && is_vowel (*in))
+      }
+      while (*in != NULL_CHAR && is_vowel (*in)) {
         *out++ = toupper (*in++);
+      }
       coda = out;
       while (*in != NULL_CHAR && is_consonant (*in)) {
         *out++ = toupper (*in++);
@@ -130,8 +135,9 @@ static void get_init_sylls (char *in, char *out)
           break;
         }
       }
-      while (*in != NULL_CHAR && isalpha (*in))
+      while (*in != NULL_CHAR && isalpha (*in)) {
         in++;
+      }
       *out++ = '+';
     } else {
       in++;
@@ -141,8 +147,8 @@ static void get_init_sylls (char *in, char *out)
 }
 
 /*!
-\brief
-\param
+\brief reduce vowels in string
+\param str string
 **/
 
 static void reduce_vowels (char *str)
@@ -154,8 +160,9 @@ static void reduce_vowels (char *str)
       break;
     }
     if (!is_vowel (*str) && is_vowel (next[1])) {
-      while (str != next && !is_vowel (*str))
+      while (str != next && !is_vowel (*str)) {
         str++;
+      }
       if (str != next) {
         memmove (str, next, strlen (next) + 1);
       }
@@ -163,21 +170,23 @@ static void reduce_vowels (char *str)
       while (*str != NULL_CHAR && *str != '+')
         str++;
     }
-    if (*str == '+')
+    if (*str == '+') {
       str++;
+    }
   }
 }
 
 /*!
-\brief
-\param
+\brief remove boundaries in string
+\param str string
+\param max_len maximym length
 **/
 
-static void remove_boundaries (char *str, int maxLen)
+static void remove_boundaries (char *str, int max_len)
 {
   int len = 0;
   while (*str != NULL_CHAR) {
-    if (len >= maxLen) {
+    if (len >= max_len) {
       *str = NULL_CHAR;
       return;
     }
@@ -191,34 +200,34 @@ static void remove_boundaries (char *str, int maxLen)
 }
 
 /*!
-\brief
-\param
-\return
+\brief error_length
+\param str string
+\return same
 **/
 
 static int error_length (char *str)
 {
   int len = 0;
   while (*str != NULL_CHAR) {
-    if (*str != '+')
+    if (*str != '+') {
       len++;
+    }
     str++;
   }
   return (len);
 }
 
 /*!
-\brief
-\param
-\return
+\brief remove extra coda
+\param str string
+\return whether operation succeeded
 **/
 
 static BOOL_T remove_extra_coda (char *str)
 {
   int len;
   while (*str != NULL_CHAR) {
-    if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1])
-        && str[2] != '+' && str[2] != NULL_CHAR) {
+    if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1]) && str[2] != '+' && str[2] != NULL_CHAR) {
       for (len = 2; str[len] != NULL_CHAR && str[len] != '+'; len++);
       memmove (str + 1, str + len, strlen (str + len) + 1);
       return (A68_TRUE);
@@ -229,9 +238,9 @@ static BOOL_T remove_extra_coda (char *str)
 }
 
 /*!
-\brief
-\param
-\param
+\brief make acronym
+\param in input string
+\param out output string
 **/
 
 static void make_acronym (char *in, char *out)
@@ -243,8 +252,8 @@ static void make_acronym (char *in, char *out)
 }
 
 /*!
-\brief
-\param
+\brief push acronym of string in stack
+\param p position in tree
 **/
 
 void genie_acronym (NODE_T * p)

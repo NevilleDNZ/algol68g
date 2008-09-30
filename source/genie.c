@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "algol68g.h"
@@ -35,6 +34,7 @@ void genie_preprocess (NODE_T *, int *);
 
 A68_HANDLE nil_handle = { INITIALISED_MASK, 0, 0, NULL, NULL, NULL };
 A68_REF nil_ref = { INITIALISED_MASK | NIL_MASK, 0, {NULL} };
+
 ADDR_T frame_pointer = 0, stack_pointer = 0, heap_pointer = 0, handle_pointer = 0, global_pointer = 0, frame_start, frame_end, stack_start, stack_end;
 BOOL_T do_confirm_exit = A68_TRUE;
 BYTE_T *stack_segment = NULL, *heap_segment = NULL, *handle_segment = NULL;
@@ -72,7 +72,6 @@ void genie_unimplemented (NODE_T * p)
 /*!
 \brief PROC system = (STRING) INT
 \param p position in tree
-\return
 **/
 
 void genie_system (NODE_T * p)
@@ -110,7 +109,7 @@ void change_masks (NODE_T * p, unsigned mask, BOOL_T set)
 /*!
 \brief leave interpretation
 \param p position in tree
-\param ret
+\param ret exit code
 **/
 
 void exit_genie (NODE_T * p, int ret)
@@ -191,7 +190,7 @@ void tie_label_to_serial (NODE_T * p)
 /*!
 \brief tie label to the clause it is defined in
 \param p position in tree
-\param unit
+\param unit associated unit
 **/
 
 static void tie_label (NODE_T * p, NODE_T * unit)
@@ -231,12 +230,15 @@ Insert annotations in the tree that prevent premature sweeping of temporary
 names and rows. For instance, let x, y be PROC STRING, then x + y can crash by
 the heap sweeper. Annotations are local hence when the block is exited they
 become prone to the heap sweeper.
-*/ for (; p != NULL; FORWARD (p)) {
+*/
+  for (; p != NULL; FORWARD (p)) {
     protect_from_sweep (SUB (p));
     p->protect_sweep = NULL;
-/* Catch all constructs that give vulnarable intermediate results on the stack.
-   Units do not apply, casts work through their enclosed-clauses, denoters are
-   protected and identifiers protect themselves. */
+/*
+Catch all constructs that give vulnerable intermediate results on the stack.
+Units do not apply, casts work through their enclosed-clauses, denotations are
+protected and identifiers protect themselves. 
+*/
     switch (ATTRIBUTE (p)) {
     case FORMULA:
     case MONADIC_FORMULA:
@@ -255,15 +257,14 @@ become prone to the heap sweeper.
     case SELECTION:
     case DEPROCEDURING:
     case ROWING:
+    case WIDENING:
       {
         MOID_T *m = MOID (p);
-        if (m != NULL && (WHETHER (m, REF_SYMBOL)
-                          || WHETHER (DEFLEX (m), ROW_SYMBOL))) {
-          TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m,
-                              PROTECT_FROM_SWEEP);
+        if (m != NULL && (WHETHER (m, REF_SYMBOL) || WHETHER (DEFLEX (m), ROW_SYMBOL))) {
+          TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m, PROTECT_FROM_SWEEP);
           p->protect_sweep = z;
           HEAP (z) = HEAP_SYMBOL;
-          z->use = A68_TRUE;
+          USE (z) = A68_TRUE;
         }
         break;
       }
@@ -331,7 +332,7 @@ static int mode_attribute (MOID_T * p)
 
 /*!
 \brief whether a symbol table contains no user definition
-\param t
+\param t symbol table
 \return TRUE or FALSE
 **/
 
@@ -342,19 +343,19 @@ BOOL_T genie_no_user_symbols (SYMBOL_TABLE_T * t)
 
 /*!
 \brief whether a symbol table contains no (anonymous) definition
-\param t
+\param t symbol table
 \return TRUE or FALSE
 **/
 
 static BOOL_T genie_empty_table (SYMBOL_TABLE_T * t)
 {
-  return (t->identifiers == NULL && t->operators == NULL && PRIO (t) == NULL && t->indicants == NULL && t->labels == NULL && t->anonymous == NULL);
+  return (t->identifiers == NULL && t->operators == NULL && PRIO (t) == NULL && t->indicants == NULL && t->labels == NULL);
 }
 
 /*!
 \brief perform tasks before interpretation
 \param p position in tree
-\param max_lev
+\param max_lev maximum level found
 **/
 
 void genie_preprocess (NODE_T * p, int *max_lev)
@@ -438,7 +439,6 @@ void get_global_level (NODE_T * p)
 /*!
 \brief free heap allocated by genie
 \param p position in tree
-\return
 **/
 
 void free_genie_heap (NODE_T * p)
@@ -454,7 +454,7 @@ void free_genie_heap (NODE_T * p)
 
 /*!
 \brief driver for the interpreter
-\param module
+\param module current module
 **/
 
 void genie (MODULE_T * module)
@@ -492,7 +492,7 @@ void genie (MODULE_T * module)
 /* If we are to stop in the monitor, set a breakpoint on the first unit. */
     if (module->options.debug) {
       change_masks (module->top_node, BREAKPOINT_TEMPORARY_MASK, A68_TRUE);
-      WRITE (STDOUT_FILENO, "++++ Execution begins ...");
+      WRITE (STDOUT_FILENO, "Execution begins ...");
     }
     RESET_ERRNO;
     ret_code = 0;
@@ -518,7 +518,7 @@ void genie (MODULE_T * module)
   } else {
 /* Here we have jumped out of the interpreter. What happened? */
     if (module->options.debug) {
-      WRITE (STDOUT_FILENO, "++++ Execution discontinued");
+      WRITE (STDOUT_FILENO, "Execution discontinued");
     }
     if (ret_code == A68_RERUN) {
       diagnostics_to_terminal (module->top_line, A68_RUNTIME_ERROR);
@@ -526,14 +526,14 @@ void genie (MODULE_T * module)
     } else if (ret_code == A68_RUNTIME_ERROR) {
       if (module->options.backtrace) {
         int printed = 0;
-        snprintf (output_line, BUFFER_SIZE, "\n++++ Stack backtrace");
+        snprintf (output_line, BUFFER_SIZE, "\nStack backtrace");
         WRITE (STDOUT_FILENO, output_line);
         stack_dump (STDOUT_FILENO, frame_pointer, 16, &printed);
         WRITE (STDOUT_FILENO, "\n");
       }
       if (module->files.listing.opened) {
         int printed = 0;
-        snprintf (output_line, BUFFER_SIZE, "\n++++ Stack backtrace");
+        snprintf (output_line, BUFFER_SIZE, "\nStack backtrace");
         WRITE (module->files.listing.fd, output_line);
         stack_dump (module->files.listing.fd, frame_pointer, 32, &printed);
       }

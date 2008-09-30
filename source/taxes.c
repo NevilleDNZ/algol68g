@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /* This file contains routines that work with TAXes and symbol tables. */
@@ -30,7 +29,10 @@ static void tax_specifier_list (NODE_T *);
 static void tax_parameter_list (NODE_T *);
 static void tax_format_texts (NODE_T *);
 
-#define PORTCHECK_TAX(p, q) if (q == A68_FALSE) {diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_TAG_NOT_PORTABLE, NULL);}
+#define PORTCHECK_TAX(p, q) {\
+  if (q == A68_FALSE) {\
+    diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_TAG_NOT_PORTABLE, NULL);\
+  }}
 
 /*!
 \brief check portability of sub tree
@@ -58,16 +60,17 @@ void portcheck (NODE_T * p)
 
 /*!
 \brief whether routine can be "lengthety-mapped"
-\param z
-\return torf
+\param z name of routine
+\return same
 **/
-
-#define ACCEPT(u, v) if (strlen (u) >= strlen (v)) \
-                     {if (strcmp (&u[strlen (u) - strlen (v)], v) == 0) \
-                     {return (A68_TRUE);} }
 
 static BOOL_T whether_mappable_routine (char *z)
 {
+#define ACCEPT(u, v) {\
+  if (strlen (u) >= strlen (v)) {\
+    if (strcmp (&u[strlen (u) - strlen (v)], v) == 0) {\
+      return (A68_TRUE);\
+  }}}
 /* Math routines. */
   ACCEPT (z, "arccos");
   ACCEPT (z, "arcsin");
@@ -98,20 +101,19 @@ static BOOL_T whether_mappable_routine (char *z)
   ACCEPT (z, "byteswidth");
   ACCEPT (z, "smallreal");
   return (A68_FALSE);
+#undef ACCEPT
 }
 
-#undef ACCEPT
-
-#define CAR(u, v) (strncmp (u, v, strlen(v)) == 0)
 
 /*!
 \brief map "short sqrt" onto "sqrt" etcetera
-\param u
-\return
+\param u name of routine
+\return tag to map onto
 **/
 
 static TAG_T *bind_lengthety_identifier (char *u)
 {
+#define CAR(u, v) (strncmp (u, v, strlen(v)) == 0)
 /*
 We can only map routines blessed by "whether_mappable_routine", so there is no
 "short print" or "long char in string".
@@ -140,9 +142,8 @@ We can only map routines blessed by "whether_mappable_routine", so there is no
     } while (CAR (u, "long"));
   }
   return (NULL);
-}
-
 #undef CAR
+}
 
 /*!
 \brief bind identifier tags to the symbol table
@@ -153,15 +154,12 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     bind_identifier_tag_to_symbol_table (SUB (p));
-    if (WHETHER (p, IDENTIFIER) || WHETHER (p, DEFINING_IDENTIFIER)) {
+    if (whether_one_of (p, IDENTIFIER, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       if (z != NULL) {
         MOID (p) = MOID (z);
-      } else if ((z = find_tag_global (SYMBOL_TABLE (p), LABEL, SYMBOL (p)))
-                 != NULL) {
-        /*
-         * skip. 
-         */ ;
+      } else if ((z = find_tag_global (SYMBOL_TABLE (p), LABEL, SYMBOL (p))) != NULL) {
+        ;
       } else if ((z = bind_lengthety_identifier (SYMBOL (p))) != NULL) {
         MOID (p) = MOID (z);
       } else {
@@ -180,14 +178,13 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
 /*!
 \brief bind indicant tags to the symbol table
 \param p position in tree
-\return
 **/
 
 static void bind_indicant_tag_to_symbol_table (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     bind_indicant_tag_to_symbol_table (SUB (p));
-    if (WHETHER (p, INDICANT) || WHETHER (p, DEFINING_INDICANT)) {
+    if (whether_one_of (p, INDICANT, DEFINING_INDICANT, NULL_ATTRIBUTE)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), INDICANT, SYMBOL (p));
       if (z != NULL) {
         MOID (p) = MOID (z);
@@ -225,11 +222,10 @@ static void tax_specifier_list (NODE_T * p)
   if (p != NULL) {
     if (WHETHER (p, OPEN_SYMBOL)) {
       tax_specifier_list (NEXT (p));
-    } else if (WHETHER (p, CLOSE_SYMBOL) || WHETHER (p, VOID_SYMBOL)) {
-/* skip. */ ;
+    } else if (whether_one_of (p, CLOSE_SYMBOL, VOID_SYMBOL, NULL_ATTRIBUTE)) {
+      ;
     } else if (WHETHER (p, IDENTIFIER)) {
-      TAG_T *z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, NULL,
-                          SPECIFIER_IDENTIFIER);
+      TAG_T *z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, NULL, SPECIFIER_IDENTIFIER);
       HEAP (z) = LOC_SYMBOL;
     } else if (WHETHER (p, DECLARER)) {
       tax_specifiers (SUB (p));
@@ -266,10 +262,11 @@ static void tax_parameters (NODE_T * p)
 static void tax_parameter_list (NODE_T * p)
 {
   if (p != NULL) {
-    if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+    if (whether_one_of (p, OPEN_SYMBOL, COMMA_SYMBOL, NULL_ATTRIBUTE)) {
       tax_parameter_list (NEXT (p));
-    } else if (WHETHER (p, CLOSE_SYMBOL)) {;
-    } else if (WHETHER (p, PARAMETER_LIST) || WHETHER (p, PARAMETER)) {
+    } else if (WHETHER (p, CLOSE_SYMBOL)) {
+      ;
+    } else if (whether_one_of (p, PARAMETER_LIST, PARAMETER, NULL_ATTRIBUTE)) {
       tax_parameter_list (NEXT (p));
       tax_parameter_list (SUB (p));
     } else if (WHETHER (p, IDENTIFIER)) {
@@ -317,7 +314,7 @@ static void tax_routine_texts (NODE_T * p)
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MOID (p), ROUTINE_TEXT);
       TAX (p) = z;
       HEAP (z) = LOC_SYMBOL;
-      z->use = A68_TRUE;
+      USE (z) = A68_TRUE;
     }
   }
 }
@@ -332,15 +329,13 @@ static void tax_format_texts (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     tax_format_texts (SUB (p));
     if (WHETHER (p, FORMAT_TEXT)) {
-      TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
-                          FORMAT_TEXT);
+      TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT), FORMAT_TEXT);
       TAX (p) = z;
-      z->use = A68_TRUE;
+      USE (z) = A68_TRUE;
     } else if (WHETHER (p, FORMAT_DELIMITER_SYMBOL) && NEXT (p) != NULL) {
-      TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
-                          FORMAT_IDENTIFIER);
+      TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT), FORMAT_IDENTIFIER);
       TAX (p) = z;
-      z->use = A68_TRUE;
+      USE (z) = A68_TRUE;
     }
   }
 }
@@ -371,10 +366,9 @@ static void tax_generators (NODE_T * p)
     tax_generators (SUB (p));
     if (WHETHER (p, GENERATOR)) {
       if (WHETHER (SUB (p), LOC_SYMBOL)) {
-        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))),
-                            GENERATOR);
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))), GENERATOR);
         HEAP (z) = LOC_SYMBOL;
-        z->use = A68_TRUE;
+        USE (z) = A68_TRUE;
         TAX (p) = z;
       }
     }
@@ -384,7 +378,6 @@ static void tax_generators (NODE_T * p)
 /*!
 \brief consistency check on fields in structured modes
 \param p position in tree
-\return
 **/
 
 static void structure_fields_test (NODE_T * p)
@@ -393,7 +386,7 @@ static void structure_fields_test (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       MOID_T *m = SYMBOL_TABLE (SUB (p))->moids;
-      for (; m != NULL; m = NEXT (m)) {
+      for (; m != NULL; FORWARD (m)) {
         if (WHETHER (m, STRUCT_SYMBOL) && m->equivalent_mode == NULL) {
 /* check on identically named fields. */
           PACK_T *s = PACK (m);
@@ -421,7 +414,6 @@ static void structure_fields_test (NODE_T * p)
 /*!
 \brief incestuous union test
 \param p position in tree
-\return
 **/
 
 static void incestuous_union_test (NODE_T * p)
@@ -430,7 +422,7 @@ static void incestuous_union_test (NODE_T * p)
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       SYMBOL_TABLE_T *symbol_table = SYMBOL_TABLE (SUB (p));
       MOID_T *m = symbol_table->moids;
-      for (; m != NULL; m = NEXT (m)) {
+      for (; m != NULL; FORWARD (m)) {
         if (WHETHER (m, UNION_SYMBOL) && m->equivalent_mode == NULL) {
           PACK_T *s = PACK (m);
           BOOL_T x = A68_TRUE;
@@ -471,12 +463,12 @@ static void incestuous_union_test (NODE_T * p)
 
 /*!
 \brief find a firmly related operator for operands
-\param c
-\param n
-\param l
-\param r
-\param self
-\return
+\param c symbol table
+\param n name of operator
+\param l left operand mode
+\param r right operand mode
+\param self own tag of "n", as to not relate to itself
+\return pointer to entry in table
 **/
 
 static TAG_T *find_firmly_related_op (SYMBOL_TABLE_T * c, char *n, MOID_T * l, MOID_T * r, TAG_T * self)
@@ -508,7 +500,7 @@ static TAG_T *find_firmly_related_op (SYMBOL_TABLE_T * c, char *n, MOID_T * l, M
 /*!
 \brief check for firmly related operators in this range
 \param p position in tree
-\param s
+\param s operator tag to start from
 **/
 
 static void test_firmly_related_ops_local (NODE_T * p, TAG_T * s)
@@ -575,8 +567,8 @@ void collect_taxes (NODE_T * p)
 
 /*!
 \brief whether tag has already been declared in this range
-\param n
-\param a
+\param n name of tag
+\param a attribute of tag
 **/
 
 static void already_declared (NODE_T * n, int a)
@@ -586,20 +578,19 @@ static void already_declared (NODE_T * n, int a)
   }
 }
 
-#define INSERT_TAG(l, n) {NEXT (n) = *(l); *(l) = (n);}
-
 /*!
 \brief add tag to local symbol table
-\param s
-\param a
-\param n
-\param m
+\param s table where to insert
+\param a attribute
+\param n name of tag
+\param m mode of tag
 \param p position in tree
-\return
+\return entry in symbol table
 **/
 
 TAG_T *add_tag (SYMBOL_TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
 {
+#define INSERT_TAG(l, n) {NEXT (n) = *(l); *(l) = (n);}
   if (s != NULL) {
     TAG_T *z = new_tag ();
     SYMBOL_TABLE (z) = s;
@@ -607,63 +598,89 @@ TAG_T *add_tag (SYMBOL_TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
     MOID (z) = m;
     NODE (z) = n;
 /*    TAX(n) = z; */
-    if (a == IDENTIFIER) {
-      already_declared (n, IDENTIFIER);
-      already_declared (n, LABEL);
-      INSERT_TAG (&s->identifiers, z);
-    } else if (a == OP_SYMBOL) {
-      already_declared (n, INDICANT);
-      INSERT_TAG (&s->operators, z);
-    } else if (a == PRIO_SYMBOL) {
-      already_declared (n, PRIO_SYMBOL);
-      already_declared (n, INDICANT);
-      INSERT_TAG (&PRIO (s), z);
-    } else if (a == INDICANT) {
-      already_declared (n, INDICANT);
-      already_declared (n, OP_SYMBOL);
-      already_declared (n, PRIO_SYMBOL);
-      INSERT_TAG (&s->indicants, z);
-    } else if (a == LABEL) {
-      already_declared (n, LABEL);
-      already_declared (n, IDENTIFIER);
-      INSERT_TAG (&s->labels, z);
-    } else if (a == ANONYMOUS) {
-      INSERT_TAG (&s->anonymous, z);
-    } else {
-      ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "add tag");
+    switch (a) {
+    case IDENTIFIER:{
+        already_declared (n, IDENTIFIER);
+        already_declared (n, LABEL);
+        INSERT_TAG (&s->identifiers, z);
+        break;
+      }
+    case INDICANT:{
+        already_declared (n, INDICANT);
+        already_declared (n, OP_SYMBOL);
+        already_declared (n, PRIO_SYMBOL);
+        INSERT_TAG (&s->indicants, z);
+        break;
+      }
+    case LABEL:{
+        already_declared (n, LABEL);
+        already_declared (n, IDENTIFIER);
+        INSERT_TAG (&s->labels, z);
+        break;
+      }
+    case OP_SYMBOL:{
+        already_declared (n, INDICANT);
+        INSERT_TAG (&s->operators, z);
+        break;
+      }
+    case PRIO_SYMBOL:{
+        already_declared (n, PRIO_SYMBOL);
+        already_declared (n, INDICANT);
+        INSERT_TAG (&PRIO (s), z);
+        break;
+      }
+    case ANONYMOUS:{
+        INSERT_TAG (&s->anonymous, z);
+        break;
+      }
+    default:{
+        ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "add tag");
+      }
     }
     return (z);
   } else {
     return (NULL);
   }
-}
-
 #undef INSERT_TAG
+}
 
 /*!
 \brief find a tag, searching symbol tables towards the root
-\param table
-\param a
-\param name
-\return
+\param table symbol table to search
+\param a attribute of tag
+\param name name of tag
+\return entry in symbol table
 **/
 
 TAG_T *find_tag_global (SYMBOL_TABLE_T * table, int a, char *name)
 {
   if (table != NULL) {
     TAG_T *s = NULL;
-    if (a == OP_SYMBOL) {
-      s = table->operators;
-    } else if (a == PRIO_SYMBOL) {
-      s = PRIO (table);
-    } else if (a == IDENTIFIER) {
-      s = table->identifiers;
-    } else if (a == INDICANT) {
-      s = table->indicants;
-    } else if (a == LABEL) {
-      s = table->labels;
-    } else {
-      ABNORMAL_END (A68_TRUE, "impossible state in find_tag_global", NULL);
+    switch (a) {
+    case IDENTIFIER:{
+        s = table->identifiers;
+        break;
+      }
+    case INDICANT:{
+        s = table->indicants;
+        break;
+      }
+    case LABEL:{
+        s = table->labels;
+        break;
+      }
+    case OP_SYMBOL:{
+        s = table->operators;
+        break;
+      }
+    case PRIO_SYMBOL:{
+        s = PRIO (table);
+        break;
+      }
+    default:{
+        ABNORMAL_END (A68_TRUE, "impossible state in find_tag_global", NULL);
+        break;
+      }
     }
     for (; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
@@ -678,9 +695,9 @@ TAG_T *find_tag_global (SYMBOL_TABLE_T * table, int a, char *name)
 
 /*!
 \brief whether identifier or label global
-\param table
-\param name
-\return
+\param table symbol table to search
+\param name name of tag
+\return attribute of tag
 **/
 
 int whether_identifier_or_label_global (SYMBOL_TABLE_T * table, char *name)
@@ -705,10 +722,10 @@ int whether_identifier_or_label_global (SYMBOL_TABLE_T * table, char *name)
 
 /*!
 \brief find a tag, searching only local symbol table
-\param table
-\param a
-\param name
-\return
+\param table symbol table to search
+\param a attribute of tag
+\param name name of tag
+\return entry in symbol table
 **/
 
 TAG_T *find_tag_local (SYMBOL_TABLE_T * table, int a, char *name)
@@ -740,17 +757,16 @@ TAG_T *find_tag_local (SYMBOL_TABLE_T * table, int a, char *name)
 /*!
 \brief whether context specifies HEAP or LOC for an identifier
 \param p position in tree
-\return
+\return attribute of generator
 **/
 
 static int tab_qualifier (NODE_T * p)
 {
   if (p != NULL) {
-    int k = ATTRIBUTE (p);
-    if (k == UNIT || k == ASSIGNATION || k == TERTIARY || k == SECONDARY || k == GENERATOR) {
+    if (whether_one_of (p, UNIT, ASSIGNATION, TERTIARY, SECONDARY, GENERATOR, NULL_ATTRIBUTE)) {
       return (tab_qualifier (SUB (p)));
-    } else if (k == LOC_SYMBOL || k == HEAP_SYMBOL) {
-      return (k);
+    } else if (whether_one_of (p, LOC_SYMBOL, HEAP_SYMBOL, NULL_ATTRIBUTE)) {
+      return (ATTRIBUTE (p));
     } else {
       return (LOC_SYMBOL);
     }
@@ -762,8 +778,7 @@ static int tab_qualifier (NODE_T * p)
 /*!
 \brief enter identity declarations in the symbol table
 \param p position in tree
-\param m
-\param access
+\param m mode of identifiers to enter (picked from the left-most one in fi. INT i = 1, j = 2)
 **/
 
 static void tax_identity_dec (NODE_T * p, MOID_T ** m)
@@ -785,9 +800,9 @@ static void tax_identity_dec (NODE_T * p, MOID_T ** m)
       TAX (p) = entry;
       MOID (entry) = *m;
       if ((*m)->attribute == REF_SYMBOL) {
-        HEAP (entry) = tab_qualifier (NEXT (NEXT (p)));
+        HEAP (entry) = tab_qualifier (NEXT_NEXT (p));
       }
-      tax_identity_dec (NEXT (NEXT (p)), m);
+      tax_identity_dec (NEXT_NEXT (p), m);
     } else {
       tax_tags (p);
     }
@@ -797,9 +812,8 @@ static void tax_identity_dec (NODE_T * p, MOID_T ** m)
 /*!
 \brief enter variable declarations in the symbol table
 \param p position in tree
-\param q
-\param m
-\param access
+\param q qualifier of generator (HEAP, LOC) picked from left-most identifier
+\param m mode of identifiers to enter (picked from the left-most one in fi. INT i, j, k)
 **/
 
 static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
@@ -825,7 +839,7 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
       if (*q == LOC_SYMBOL) {
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (*m), GENERATOR);
         HEAP (z) = LOC_SYMBOL;
-        z->use = A68_TRUE;
+        USE (z) = A68_TRUE;
         BODY (entry) = z;
       } else {
         BODY (entry) = NULL;
@@ -839,10 +853,9 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
 }
 
 /*!
-\brief enter proc variable declarations in the symbol table
+\brief enter procedure variable declarations in the symbol table
 \param p position in tree
-\param q
-\param access
+\param q qualifier of generator (HEAP, LOC) picked from left-most identifier
 **/
 
 static void tax_proc_variable_dec (NODE_T * p, int *q)
@@ -854,7 +867,7 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
     } else if (WHETHER (p, QUALIFIER)) {
       *q = ATTRIBUTE (SUB (p));
       tax_proc_variable_dec (NEXT (p), q);
-    } else if (WHETHER (p, PROC_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+    } else if (whether_one_of (p, PROC_SYMBOL, COMMA_SYMBOL, NULL_ATTRIBUTE)) {
       tax_proc_variable_dec (NEXT (p), q);
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *entry = find_tag_local (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
@@ -865,7 +878,7 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (p)),
                             GENERATOR);
         HEAP (z) = LOC_SYMBOL;
-        z->use = A68_TRUE;
+        USE (z) = A68_TRUE;
         BODY (entry) = z;
       } else {
         BODY (entry) = NULL;
@@ -878,9 +891,8 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
 }
 
 /*!
-\brief enter proc declarations in the symbol table
+\brief enter procedure declarations in the symbol table
 \param p position in tree
-\param access
 **/
 
 static void tax_proc_dec (NODE_T * p)
@@ -889,11 +901,11 @@ static void tax_proc_dec (NODE_T * p)
     if (WHETHER (p, PROCEDURE_DECLARATION)) {
       tax_proc_dec (SUB (p));
       tax_proc_dec (NEXT (p));
-    } else if (WHETHER (p, PROC_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+    } else if (whether_one_of (p, PROC_SYMBOL, COMMA_SYMBOL, NULL_ATTRIBUTE)) {
       tax_proc_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *entry = find_tag_local (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
-      MOID_T *m = MOID (NEXT (NEXT (p)));
+      MOID_T *m = MOID (NEXT_NEXT (p));
       MOID (p) = m;
       TAX (p) = entry;
       HEAP (entry) = LOC_SYMBOL;
@@ -908,7 +920,7 @@ static void tax_proc_dec (NODE_T * p)
 /*!
 \brief count number of operands in operator parameter list
 \param p position in tree
-\return
+\return same
 **/
 
 static int count_operands (NODE_T * p)
@@ -927,23 +939,23 @@ static int count_operands (NODE_T * p)
 }
 
 /*!
-\brief check operator dec
+\brief check validity of operator declaration
 \param p position in tree
 **/
 
 static void check_operator_dec (NODE_T * p)
 {
   int k = 0;
-  NODE_T *pack = SUB (SUB (NEXT (NEXT (p))));   /* That's where the parameter pack is. */
-  if (ATTRIBUTE (NEXT (NEXT (p))) != ROUTINE_TEXT) {
+  NODE_T *pack = SUB (SUB (NEXT_NEXT (p)));     /* That's where the parameter pack is. */
+  if (ATTRIBUTE (NEXT_NEXT (p)) != ROUTINE_TEXT) {
     pack = SUB (pack);
   }
   k = 1 + count_operands (pack);
-  if (!(k == 1 || k == 2)) {
+  if (k < 1 && k > 2) {
     diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_OPERAND_NUMBER);
     k = 0;
   }
-  if (k == 1 && a68g_strchr (NOMADS, *(SYMBOL (p))) != NULL) {
+  if (k == 1 && a68g_strchr (NOMADS, SYMBOL (p)[0]) != NULL) {
     diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_OPERATOR_INVALID, NOMADS);
   } else if (k == 2 && !find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) {
     diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_DYADIC_PRIORITY);
@@ -953,8 +965,7 @@ static void check_operator_dec (NODE_T * p)
 /*!
 \brief enter operator declarations in the symbol table
 \param p position in tree
-\param m
-\param access
+\param m mode of operators to enter (picked from the left-most one)
 **/
 
 static void tax_op_dec (NODE_T * p, MOID_T ** m)
@@ -991,7 +1002,6 @@ static void tax_op_dec (NODE_T * p, MOID_T ** m)
 /*!
 \brief enter brief operator declarations in the symbol table
 \param p position in tree
-\param access
 **/
 
 static void tax_brief_op_dec (NODE_T * p)
@@ -1000,11 +1010,11 @@ static void tax_brief_op_dec (NODE_T * p)
     if (WHETHER (p, BRIEF_OPERATOR_DECLARATION)) {
       tax_brief_op_dec (SUB (p));
       tax_brief_op_dec (NEXT (p));
-    } else if (WHETHER (p, OP_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+    } else if (whether_one_of (p, OP_SYMBOL, COMMA_SYMBOL, NULL_ATTRIBUTE)) {
       tax_brief_op_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_OPERATOR)) {
       TAG_T *entry = SYMBOL_TABLE (p)->operators;
-      MOID_T *m = MOID (NEXT (NEXT (p)));
+      MOID_T *m = MOID (NEXT_NEXT (p));
       check_operator_dec (p);
       while (entry != NULL && NODE (entry) != p) {
         FORWARD (entry);
@@ -1023,7 +1033,6 @@ static void tax_brief_op_dec (NODE_T * p)
 /*!
 \brief enter priority declarations in the symbol table
 \param p position in tree
-\param access
 **/
 
 static void tax_prio_dec (NODE_T * p)
@@ -1032,7 +1041,7 @@ static void tax_prio_dec (NODE_T * p)
     if (WHETHER (p, PRIORITY_DECLARATION)) {
       tax_prio_dec (SUB (p));
       tax_prio_dec (NEXT (p));
-    } else if (WHETHER (p, PRIO_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+    } else if (whether_one_of (p, PRIO_SYMBOL, COMMA_SYMBOL, NULL_ATTRIBUTE)) {
       tax_prio_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_OPERATOR)) {
       TAG_T *entry = PRIO (SYMBOL_TABLE (p));
@@ -1082,7 +1091,6 @@ static void tax_tags (NODE_T * p)
 /*!
 \brief reset symbol table nest count
 \param p position in tree
-\return
 **/
 
 void reset_symbol_table_nest_count (NODE_T * p)
@@ -1098,7 +1106,6 @@ void reset_symbol_table_nest_count (NODE_T * p)
 /*!
 \brief bind routines in symbol table to the tree
 \param p position in tree
-\return
 **/
 
 void bind_routine_tags_to_tree (NODE_T * p)
@@ -1133,7 +1140,7 @@ void bind_format_tags_to_tree (NODE_T * p)
 /*!
 \brief fill outer level of symbol table
 \param p position in tree
-\param s
+\param s parent symbol table
 **/
 
 void fill_symbol_table_outer (NODE_T * p, SYMBOL_TABLE_T * s)
@@ -1155,7 +1162,7 @@ void fill_symbol_table_outer (NODE_T * p, SYMBOL_TABLE_T * s)
 /*!
 \brief flood branch in tree with local symbol table "s"
 \param p position in tree
-\param s
+\param s parent symbol table
 **/
 
 static void flood_with_symbol_table_restricted (NODE_T * p, SYMBOL_TABLE_T * s)
@@ -1175,7 +1182,7 @@ static void flood_with_symbol_table_restricted (NODE_T * p, SYMBOL_TABLE_T * s)
 /*!
 \brief final structure of symbol table after parsing
 \param p position in tree
-\param l
+\param l current lexical level
 **/
 
 void finalise_symbol_table_setup (NODE_T * p, int l)
@@ -1223,7 +1230,6 @@ void finalise_symbol_table_setup (NODE_T * p, int l)
       SYMBOL_TABLE (NEXT (q)) = SYMBOL_TABLE (NEXT (q)->do_od_part);
     }
   }
-
 }
 
 /*!
@@ -1244,10 +1250,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
   for (q = p; q != NULL && !not_a_for_range; FORWARD (q)) {
     if (SUB (q) != NULL) {
 /* BEGIN ... END, CODE ... EDOC, DEF ... FED, DO ... OD, $ ... $, { ... } are ranges. */
-      if (WHETHER (q, BEGIN_SYMBOL) || WHETHER (q, DO_SYMBOL)
-          || WHETHER (q, ALT_DO_SYMBOL)
-          || WHETHER (q, FORMAT_DELIMITER_SYMBOL)
-          || WHETHER (q, ACCO_SYMBOL)) {
+      if (whether_one_of (q, BEGIN_SYMBOL, DO_SYMBOL, ALT_DO_SYMBOL, FORMAT_DELIMITER_SYMBOL, ACCO_SYMBOL, NULL_ATTRIBUTE)) {
         SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
         preliminary_symbol_table_setup (SUB (q));
       }
@@ -1354,9 +1357,8 @@ void preliminary_symbol_table_setup (NODE_T * p)
       if (WHETHER (q, FOR_SYMBOL)) {
         NODE_T *r = q;
         SYMBOL_TABLE (NEXT (q)) = NULL;
-        for (; r != NULL && SYMBOL_TABLE (NEXT (q)) == NULL; r = NEXT (r)) {
-          if ((WHETHER (r, WHILE_SYMBOL)
-               || WHETHER (r, ALT_DO_SYMBOL)) && (NEXT (q) != NULL && SUB (r) != NULL)) {
+        for (; r != NULL && SYMBOL_TABLE (NEXT (q)) == NULL; FORWARD (r)) {
+          if ((whether_one_of (r, WHILE_SYMBOL, ALT_DO_SYMBOL, NULL_ATTRIBUTE)) && (NEXT (q) != NULL && SUB (r) != NULL)) {
             SYMBOL_TABLE (NEXT (q)) = SYMBOL_TABLE (SUB (r));
             NEXT (q)->do_od_part = SUB (r);
           }
@@ -1368,18 +1370,18 @@ void preliminary_symbol_table_setup (NODE_T * p)
 
 /*!
 \brief mark a mode as in use
-\param m
+\param m mode to mark
 **/
 
 static void mark_mode (MOID_T * m)
 {
-  if (m != NULL && m->use == A68_FALSE) {
+  if (m != NULL && USE (m) == A68_FALSE) {
     PACK_T *p = PACK (m);
-    m->use = A68_TRUE;
+    USE (m) = A68_TRUE;
     for (; p != NULL; FORWARD (p)) {
       mark_mode (MOID (p));
       mark_mode (SUB (m));
-      mark_mode (m->slice);
+      mark_mode (SLICE (m));
     }
   }
 }
@@ -1402,7 +1404,6 @@ void mark_moids (NODE_T * p)
 /*!
 \brief mark various tags as used
 \param p position in tree
-\return
 **/
 
 void mark_auxilliary (NODE_T * p)
@@ -1418,20 +1419,20 @@ routines in transput.
     } else if (WHETHER (p, OPERATOR)) {
       TAG_T *z;
       if (TAX (p) != NULL) {
-        TAX (p)->use = A68_TRUE;
+        USE (TAX (p)) = A68_TRUE;
       }
       if ((z = find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) != NULL) {
-        z->use = A68_TRUE;
+        USE (z) = A68_TRUE;
       }
     } else if (WHETHER (p, INDICANT)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), INDICANT, SYMBOL (p));
       if (z != NULL) {
         TAX (p) = z;
-        z->use = A68_TRUE;
+        USE (z) = A68_TRUE;
       }
     } else if (WHETHER (p, IDENTIFIER)) {
       if (TAX (p) != NULL) {
-        TAX (p)->use = A68_TRUE;
+        USE (TAX (p)) = A68_TRUE;
       }
     }
   }
@@ -1439,14 +1440,13 @@ routines in transput.
 
 /*!
 \brief check a single tag
-\param s
-\return
+\param s tag to check
 **/
 
 static void unused (TAG_T * s)
 {
   for (; s != NULL; FORWARD (s)) {
-    if (!s->use) {
+    if (!USE (s)) {
       diagnostic_node (A68_WARNING, NODE (s), WARNING_TAG_UNUSED, NODE (s));
     }
   }
@@ -1461,8 +1461,7 @@ void warn_for_unused_tags (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     if (SUB (p) != NULL && LINE_NUMBER (p) != 0) {
-      if (whether_new_lexical_level (p)
-          && ATTRIBUTE (SYMBOL_TABLE (SUB (p))) != ENVIRON_SYMBOL) {
+      if (whether_new_lexical_level (p) && ATTRIBUTE (SYMBOL_TABLE (SUB (p))) != ENVIRON_SYMBOL) {
         unused (SYMBOL_TABLE (SUB (p))->operators);
         unused (PRIO (SYMBOL_TABLE (SUB (p))));
         unused (SYMBOL_TABLE (SUB (p))->identifiers);
@@ -1482,18 +1481,19 @@ void warn_tags_threads (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     warn_tags_threads (SUB (p));
-    if (WHETHER (p, IDENTIFIER) || WHETHER (p, OPERATOR)) {
-      int plev_def = PAR_LEVEL (NODE (TAX (p)));
-      int plev_app = PAR_LEVEL (p);
-      if (plev_def != 0 && plev_def != plev_app) {
-        diagnostic_node (A68_WARNING, p, WARNING_DEFINED_IN_OTHER_THREAD);
+    if (whether_one_of (p, IDENTIFIER, OPERATOR, NULL_ATTRIBUTE)) {
+      if (TAX (p) != NULL) {
+        int plev_def = PAR_LEVEL (NODE (TAX (p))), plev_app = PAR_LEVEL (p);
+        if (plev_def != 0 && plev_def != plev_app) {
+          diagnostic_node (A68_WARNING, p, WARNING_DEFINED_IN_OTHER_THREAD);
+        }
       }
     }
   }
 }
 
 /*!
-\brief jumps from procs
+\brief mark jumps and procedured jumps
 \param p position in tree
 **/
 
@@ -1503,15 +1503,15 @@ void jumps_from_procs (NODE_T * p)
     if (WHETHER (p, PROCEDURING)) {
       NODE_T *u = SUB (SUB (p));
       if (WHETHER (u, GOTO_SYMBOL)) {
-        u = NEXT (u);
+        FORWARD (u);
       }
-      TAX (u)->use = A68_TRUE;
+      USE (TAX (u)) = A68_TRUE;
     } else if (WHETHER (p, JUMP)) {
       NODE_T *u = SUB (p);
       if (WHETHER (u, GOTO_SYMBOL)) {
-        u = NEXT (u);
+        FORWARD (u);
       }
-      TAX (u)->use = A68_TRUE;
+      USE (TAX (u)) = A68_TRUE;
     } else {
       jumps_from_procs (SUB (p));
     }
@@ -1520,19 +1520,19 @@ void jumps_from_procs (NODE_T * p)
 
 /*!
 \brief assign offset tags
-\param t
-\param base
-\return
+\param t tag to start from
+\param base first (base) address
+\return end address
 **/
 
 static ADDR_T assign_offset_tags (TAG_T * t, ADDR_T base)
 {
   ADDR_T sum = base;
   for (; t != NULL; FORWARD (t)) {
-    t->size = moid_size (MOID (t));
+    SIZE (t) = moid_size (MOID (t));
     if (VALUE (t) == NULL) {
-      t->offset = sum;
-      sum += t->size;
+      OFFSET (t) = sum;
+      sum += SIZE (t);
     }
   }
   return (sum);
@@ -1540,7 +1540,7 @@ static ADDR_T assign_offset_tags (TAG_T * t, ADDR_T base)
 
 /*!
 \brief assign offsets table
-\param c
+\param c symbol table 
 **/
 
 void assign_offsets_table (SYMBOL_TABLE_T * c)
@@ -1567,8 +1567,8 @@ void assign_offsets (NODE_T * p)
 }
 
 /*!
-\brief assign offsets packs
-\param moid_list
+\brief assign offsets packs in moid list
+\param moid_list moid list entry to start from
 **/
 
 void assign_offsets_packs (MOID_LIST_T * moid_list)
@@ -1579,9 +1579,9 @@ void assign_offsets_packs (MOID_LIST_T * moid_list)
       PACK_T *p = PACK (MOID (q));
       ADDR_T offset = 0;
       for (; p != NULL; FORWARD (p)) {
-        p->size = moid_size (MOID (p));
-        p->offset = offset;
-        offset += p->size;
+        SIZE (p) = moid_size (MOID (p));
+        OFFSET (p) = offset;
+        offset += SIZE (p);
       }
     }
   }

@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
@@ -31,7 +30,7 @@ Algol68G tokenises all symbols before the parser is invoked. This means that
 scanning does not use information from the parser.
 
 The scanner does of course do some rudimentary parsing. Format texts can have
-enclosed clauses in them, so we record information in the stack as to know
+enclosed clauses in them, so we record information in a stack as to know
 what is being scanned. Also, the refinement preprocessor implements a
 (trivial) grammar.
 
@@ -94,8 +93,8 @@ static void restore_state (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref
 
 /*!
 \brief whether ch is unworthy
-\param u
-\param v
+\param u source line with error
+\param v character in line
 \param ch
 **/
 
@@ -107,7 +106,7 @@ static void unworthy (SOURCE_LINE_T * u, char *v, char ch)
 
 /*!
 \brief concatenate lines that terminate in '\' with next line
-\param top
+\param top top source line
 **/
 
 static void concatenate_lines (SOURCE_LINE_T * top)
@@ -115,9 +114,7 @@ static void concatenate_lines (SOURCE_LINE_T * top)
   SOURCE_LINE_T *q;
 /* Work from bottom backwards. */
   for (q = top; q != NULL && NEXT (q) != NULL; q = NEXT (q)) {
-    /*
-     * skip. 
-     */ ;
+    ;
   }
   for (; q != NULL; q = PREVIOUS (q)) {
     char *z = q->string;
@@ -136,10 +133,10 @@ static void concatenate_lines (SOURCE_LINE_T * top)
 
 /*!
 \brief whether u is bold tag v, independent of stropping regime
-\param z
-\param u
-\param v
-\return
+\param z source line
+\param u symbol under test
+\param v bold symbol 
+\return whether u is v
 **/
 
 static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
@@ -158,9 +155,9 @@ static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
 
 /*!
 \brief skip string
-\param top
-\param ch
-\return
+\param top current source line
+\param ch current character in source line
+\return whether string is properly terminated
 **/
 
 static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
@@ -192,10 +189,10 @@ static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
 
 /*!
 \brief skip comment
-\param top
-\param ch
-\param delim
-\return
+\param top current source line
+\param ch current character in source line
+\param delim expected terminating delimiter
+\return whether comment is properly terminated
 **/
 
 static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
@@ -209,8 +206,7 @@ static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
         *top = u;
         *ch = &v[1];
         return (A68_TRUE);
-      } else if (whether_bold (u, v, "CO")
-                 && delim == STYLE_I_COMMENT_SYMBOL) {
+      } else if (whether_bold (u, v, "CO") && delim == STYLE_I_COMMENT_SYMBOL) {
         *top = u;
         *ch = &v[1];
         return (A68_TRUE);
@@ -234,11 +230,11 @@ static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
 
 /*!
 \brief skip rest of pragmat
-\param top
-\param ch
-\param delim
+\param top current source line
+\param ch current character in source line
+\param delim expected terminating delimiter
 \param whitespace whether other pragmat items are allowed
-\return
+\return whether pragmat is properly terminated
 **/
 
 static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T whitespace)
@@ -281,9 +277,9 @@ static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T w
 
 /*!
 \brief return pointer to next token within pragmat
-\param top
-\param ch
-\return
+\param top current source line
+\param ch current character in source line
+\return pointer to next item, NULL if none remains
 **/
 
 static char *get_pragmat_item (SOURCE_LINE_T ** top, char **ch)
@@ -312,29 +308,26 @@ static char *get_pragmat_item (SOURCE_LINE_T ** top, char **ch)
 
 /*!
 \brief case insensitive strncmp for at most the number of chars in 'v'
-\param u
-\param v
-\return
+\param u string 1, must not be NULL
+\param v string 2, must not be NULL
+\return alphabetic difference between 1 and 2
 **/
 
 static int streq (char *u, char *v)
 {
-  int sum = 0;
-  while (sum == 0 && u[0] != NULL_CHAR && v[0] != NULL_CHAR) {
-    char x = TO_LOWER (u[0]), y = TO_LOWER (v[0]);
-    sum = (int) x - (int) y;
-    u++;
-    v++;
+  int diff;
+  for (diff = 0; diff == 0 && u[0] != NULL_CHAR && v[0] != NULL_CHAR; u++, v++) {
+    diff = ((int) TO_LOWER (u[0])) - ((int) TO_LOWER (v[0]));
   }
-  return (sum);
+  return (diff);
 }
 
 /*!
 \brief scan for next pragmat and yield first pragmat item
-\param top
-\param ch
-\param delim
-\return
+\param top current source line
+\param ch current character in source line
+\param delim expected terminating delimiter
+\return pointer to next item or NULL if none remain
 **/
 
 static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim)
@@ -424,7 +417,7 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
 
 /*!
 \brief include files
-\param top
+\param top top source line
 **/
 
 static void include_files (SOURCE_LINE_T * top)
@@ -560,11 +553,11 @@ been included will not be included a second time - it will be ignored.
 
 /*!
 \brief append a source line to the internal source file
-\param module
+\param module module that reads source
 \param str text line to be appended
 \param ref_l previous source line
 \param line_num previous source line number
-\param filename
+\param filename name of file being read
 **/
 
 static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** ref_l, int *line_num, char *filename)
@@ -577,6 +570,11 @@ static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** r
       return;
     }
   }
+  if (module->options.reductions) {
+    WRITELN (STDOUT_FILENO, "\"");
+    WRITE (STDOUT_FILENO, str);
+    WRITE (STDOUT_FILENO, "\"");
+  }
 /* Link line into the chain. */
   z->string = new_fixed_string (str);
   z->filename = filename;
@@ -584,7 +582,6 @@ static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** r
   z->print_status = NOT_PRINTED;
   z->list = A68_TRUE;
   z->diagnostics = NULL;
-  z->top_node = NULL;
   MODULE (z) = module;
   NEXT (z) = NULL;
   PREVIOUS (z) = *ref_l;
@@ -599,8 +596,8 @@ static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** r
 
 /*!
 \brief size of source file
-\param module
-\return
+\param module module that reads source
+\return size of file
 **/
 
 static int get_source_size (MODULE_T * module)
@@ -612,11 +609,11 @@ static int get_source_size (MODULE_T * module)
 
 /*!
 \brief append environment source lines
-\param module
+\param module module that reads source
 \param str line to append
 \param ref_l source line after which to append
 \param line_num number of source line 'ref_l'
-\param name
+\param name either "prelude" or "postlude"
 **/
 
 static void append_environ (MODULE_T * module, char *str, SOURCE_LINE_T ** ref_l, int *line_num, char *name)
@@ -636,8 +633,8 @@ static void append_environ (MODULE_T * module, char *str, SOURCE_LINE_T ** ref_l
 
 /*!
 \brief read source file and make internal copy
-\param module
-\return
+\param module module that reads source
+\return whether reading is satisfactory 
 **/
 
 static BOOL_T read_source_file (MODULE_T * module)
@@ -699,9 +696,9 @@ static BOOL_T read_source_file (MODULE_T * module)
 
 /*!
 \brief next_char get next character from internal copy of source file
-\param module
-\param ref_l source line we're at
-\param ref_s char (in source line) we're at
+\param module module that reads source
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
 \param allow_typo whether typographical display features are allowed
 \return next char on input
 **/
@@ -739,10 +736,9 @@ static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s, 
 
 /*!
 \brief find first character that can start a valid symbol
-\param module
-\param ref_c char (in source line) we're at
-\param ref_l source line we're at
-\param ref_s
+\param module module that reads source
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
 **/
 
 static void get_good_char (MODULE_T * module, char *ref_c, SOURCE_LINE_T ** ref_l, char **ref_s)
@@ -757,14 +753,13 @@ static void get_good_char (MODULE_T * module, char *ref_c, SOURCE_LINE_T ** ref_
 
 /*!
 \brief handle a pragment (pragmat or comment)
-\param module
+\param module module that reads source
 \param type type of pragment (#, CO, COMMENT, PR, PRAGMAT)
-\param ref_l source line we're at
-\param ref_c char (in source line) we're at
-\return
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
 **/
 
-static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, char **ref_c)
+static void pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, char **ref_c)
 {
 #define INIT_BUFFER {chars_in_buf = 0; scan_buf[chars_in_buf] = NULL_CHAR;}
 #define ADD_ONE_CHAR(ch) {scan_buf[chars_in_buf ++] = ch; scan_buf[chars_in_buf] = NULL_CHAR;}
@@ -848,15 +843,14 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
     c = next_char (module, ref_l, ref_c, A68_FALSE);
   }
   scan_buf[chars_in_buf - term_s_length] = NULL_CHAR;
-  return (A68_TRUE);
 #undef ADD_ONE_CHAR
 #undef INIT_BUFFER
 }
 
 /*!
 \brief attribute for format item
-\param ch
-\return
+\param ch format item in character form
+\return same
 **/
 
 static int get_format_item (char ch)
@@ -1010,6 +1004,10 @@ static int get_format_item (char ch)
 
 /*!
 \brief whether input shows exponent character
+\param m module that reads source
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
+\param ch last scanned char
 \return same
 **/
 
@@ -1037,6 +1035,9 @@ static BOOL_T whether_exp_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref
 
 /*!
 \brief whether input shows radix character
+\param m module that reads source
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
 \return same
 **/
 
@@ -1061,6 +1062,9 @@ static BOOL_T whether_radix_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **r
 
 /*!
 \brief whether input shows decimal point
+\param m module that reads source
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
 \return same
 **/
 
@@ -1093,10 +1097,10 @@ static BOOL_T whether_decimal_point (MODULE_T * m, SOURCE_LINE_T ** ref_l, char 
 
 /*!
 \brief get next token from internal copy of source file.
-\param module
+\param module module that reads source
 \param in_format are we scanning a format text
-\param ref_l source line we're at
-\param ref_s char (in source line) we're at
+\param ref_l source line we're scanning
+\param ref_s character (in source line) we're scanning
 \param start_l line where token starts
 \param start_c character where token starts
 \param att attribute designated to token
@@ -1134,7 +1138,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       return;
     }
     if (IS_DIGIT (c)) {
-/* INT denoter for static replicator. */
+/* INT denotation for static replicator. */
       SCAN_DIGITS (c);
       sym[0] = NULL_CHAR;
       *att = STATIC_REPLICATOR;
@@ -1185,7 +1189,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     sym[0] = NULL_CHAR;
     *att = IDENTIFIER;
   } else if (c == POINT_CHAR) {
-/* Begins with a point symbol - point, dotdot, L REAL denoter. */
+/* Begins with a point symbol - point, dotdot, L REAL denotation. */
     if (whether_decimal_point (module, ref_l, ref_s, &c)) {
       (sym++)[0] = '0';
       (sym++)[0] = POINT_CHAR;
@@ -1195,7 +1199,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
         SCAN_EXPONENT_PART (c);
       }
       sym[0] = NULL_CHAR;
-      *att = REAL_DENOTER;
+      *att = REAL_DENOTATION;
     } else {
       c = next_char (module, ref_l, ref_s, A68_TRUE);
       if (c == POINT_CHAR) {
@@ -1211,7 +1215,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       }
     }
   } else if (IS_DIGIT (c)) {
-/* Something that begins with a digit - L INT denoter, L REAL denoter. */
+/* Something that begins with a digit - L INT denotation, L REAL denotation. */
     SCAN_DIGITS (c);
     if (whether_decimal_point (module, ref_l, ref_s, &c)) {
       c = next_char (module, ref_l, ref_s, A68_TRUE);
@@ -1219,18 +1223,18 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
         (sym++)[0] = POINT_CHAR;
         (sym++)[0] = '0';
         SCAN_EXPONENT_PART (c);
-        *att = REAL_DENOTER;
+        *att = REAL_DENOTATION;
       } else {
         (sym++)[0] = POINT_CHAR;
         SCAN_DIGITS (c);
         if (whether_exp_char (module, ref_l, ref_s, &c)) {
           SCAN_EXPONENT_PART (c);
         }
-        *att = REAL_DENOTER;
+        *att = REAL_DENOTATION;
       }
     } else if (whether_exp_char (module, ref_l, ref_s, &c)) {
       SCAN_EXPONENT_PART (c);
-      *att = REAL_DENOTER;
+      *att = REAL_DENOTATION;
     } else if (whether_radix_char (module, ref_l, ref_s, &c)) {
       (sym++)[0] = c;
       c = next_char (module, ref_l, ref_s, A68_TRUE);
@@ -1245,13 +1249,13 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
           c = next_char (module, ref_l, ref_s, A68_TRUE);
         }
       }
-      *att = BITS_DENOTER;
+      *att = BITS_DENOTATION;
     } else {
-      *att = INT_DENOTER;
+      *att = INT_DENOTATION;
     }
     sym[0] = NULL_CHAR;
   } else if (c == QUOTE_CHAR) {
-/* STRING denoter. */
+/* STRING denotation. */
     BOOL_T stop = A68_FALSE;
     while (!stop) {
       c = next_char (module, ref_l, ref_s, A68_FALSE);
@@ -1269,7 +1273,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       }
     }
     sym[0] = NULL_CHAR;
-    *att = in_format ? LITERAL : ROW_CHAR_DENOTER;
+    *att = in_format ? LITERAL : ROW_CHAR_DENOTATION;
   } else if (a68g_strchr ("#$()[]{},;@", c) != NULL) {
 /* Single character symbols. */
     (sym++)[0] = c;
@@ -1399,8 +1403,8 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 
 /*!
 \brief whether att opens an embedded clause
-\param att
-\return
+\param att attribute under test
+\return whether att opens an embedded clause
 **/
 
 static BOOL_T open_embedded_clause (int att)
@@ -1432,8 +1436,8 @@ static BOOL_T open_embedded_clause (int att)
 
 /*!
 \brief whether att closes an embedded clause
-\param att
-\return
+\param att attribute under test
+\return whether att closes an embedded clause
 **/
 
 static BOOL_T close_embedded_clause (int att)
@@ -1458,28 +1462,26 @@ static BOOL_T close_embedded_clause (int att)
 
 /*!
 \brief cast a string to lower case
-\param p
-\return
+\param p string to cast
 **/
 
 static void make_lower_case (char *p)
 {
-  while (p[0] != NULL_CHAR) {
+  for (; p != NULL && p[0] != NULL_CHAR; p++) {
     p[0] = TO_LOWER (p[0]);
-    p++;
   }
 }
 
 /*!
 \brief construct a linear list of tokens
-\param module
-\param root
-\param level
-\param in_format
-\param l
-\param s
-\param start_l
-\param start_c
+\param module module that reads source
+\param root node where to insert new symbol
+\param level current recursive descent depth
+\param in_format whether we scan a format
+\param l current source line
+\param s current character in source line
+\param start_l source line where symbol starts
+\param start_c character where symbol starts
 **/
 
 static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_T in_format, SOURCE_LINE_T ** l, char **s, SOURCE_LINE_T ** start_l, char **start_c)
@@ -1489,11 +1491,11 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
     get_next_token (module, in_format, l, s, start_l, start_c, &att);
     if (scan_buf[0] == STOP_CHAR) {
       stop_scanner = A68_TRUE;
-    } else if (strlen (scan_buf) > 0 || att == ROW_CHAR_DENOTER || att == LITERAL) {
+    } else if (strlen (scan_buf) > 0 || att == ROW_CHAR_DENOTATION || att == LITERAL) {
       KEYWORD_T *kw = find_keyword (top_keyword, scan_buf);
       char *c = NULL;
       BOOL_T make_node = A68_TRUE;
-      if (!(kw != NULL && att != ROW_CHAR_DENOTER)) {
+      if (!(kw != NULL && att != ROW_CHAR_DENOTATION)) {
         if (att == IDENTIFIER) {
           make_lower_case (scan_buf);
         }
@@ -1516,10 +1518,10 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
           c = kw->text;
 /* Handle pragments. */
           if (att == STYLE_II_COMMENT_SYMBOL || att == STYLE_I_COMMENT_SYMBOL || att == BOLD_COMMENT_SYMBOL) {
-            stop_scanner = !pragment (module, ATTRIBUTE (kw), l, s);
+            pragment (module, ATTRIBUTE (kw), l, s);
             make_node = A68_FALSE;
           } else if (att == STYLE_I_PRAGMAT_SYMBOL || att == BOLD_PRAGMAT_SYMBOL) {
-            stop_scanner = !pragment (module, ATTRIBUTE (kw), l, s);
+            pragment (module, ATTRIBUTE (kw), l, s);
             if (!stop_scanner) {
               isolate_options (module, scan_buf, *start_l);
               set_options (module, module->options.list, A68_FALSE);
@@ -1533,14 +1535,16 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
         NODE_T *q = new_node ();
         MASK (q) = module->options.nodemask;
         LINE (q) = *start_l;
-        if ((*start_l)->top_node == NULL) {
-          (*start_l)->top_node = q;
-        }
-        q->info->char_in_line = *start_c;
+        INFO (q)->char_in_line = *start_c;
         PRIO (INFO (q)) = 0;
         INFO (q)->PROCEDURE_LEVEL = 0;
         ATTRIBUTE (q) = att;
         SYMBOL (q) = c;
+        if (module->options.reductions) {
+          WRITELN (STDOUT_FILENO, "\"");
+          WRITE (STDOUT_FILENO, c);
+          WRITE (STDOUT_FILENO, "\"");
+        }
         PREVIOUS (q) = *root;
         SUB (q) = NEXT (q) = NULL;
         SYMBOL_TABLE (q) = NULL;
@@ -1555,8 +1559,10 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
         }
         *root = q;
       }
-/* Redirection in tokenising formats. The scanner is a recursive-descent type as
-   to know when it scans a format text and when not. */
+/* 
+Redirection in tokenising formats. The scanner is a recursive-descent type as
+to know when it scans a format text and when not. 
+*/
       if (in_format && att == FORMAT_DELIMITER_SYMBOL) {
         return;
       } else if (!in_format && att == FORMAT_DELIMITER_SYMBOL) {
@@ -1591,8 +1597,8 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
 
 /*!
 \brief tokenise source file, build initial syntax tree
-\param module
-\return TRUE when tokenising ended satisfactorily, FALSE otherwise
+\param module module that reads source
+\return whether tokenising ended satisfactorily
 **/
 
 BOOL_T lexical_analyzer (MODULE_T * module)
@@ -1628,8 +1634,8 @@ BOOL_T lexical_analyzer (MODULE_T * module)
 
 /*!
 \brief whether refinement terminator
-\param p
-\return
+\param p position in syntax tree
+\return same
 **/
 
 static BOOL_T whether_refinement_terminator (NODE_T * p)
@@ -1647,7 +1653,7 @@ static BOOL_T whether_refinement_terminator (NODE_T * p)
 
 /*!
 \brief get refinement definitions in the internal source
-\param z
+\param z module that reads source
 **/
 
 void get_refinements (MODULE_T * z)
@@ -1671,19 +1677,18 @@ void get_refinements (MODULE_T * z)
 /* Ok, we accept a program with no refinements as well. */
     return;
   }
-  while (p != NULL && !IN_PRELUDE (p)
-         && whether (p, IDENTIFIER, COLON_SYMBOL, 0)) {
-    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space (ALIGNED_SIZEOF (REFINEMENT_T)), *x;
+  while (p != NULL && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, 0)) {
+    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (REFINEMENT_T)), *x;
     BOOL_T exists;
     NEXT (new_one) = NULL;
     new_one->name = SYMBOL (p);
     new_one->applications = 0;
     new_one->line_defined = LINE (p);
     new_one->line_applied = NULL;
-    new_one->tree = p;
+    new_one->node_defined = p;
     new_one->begin = NULL;
     new_one->end = NULL;
-    p = NEXT (NEXT (p));
+    p = NEXT_NEXT (p);
     if (p == NULL) {
       diagnostic_node (A68_SYNTAX_ERROR, NULL, ERROR_REFINEMENT_EMPTY, NULL);
       return;
@@ -1705,7 +1710,7 @@ void get_refinements (MODULE_T * z)
     exists = A68_FALSE;
     while (x != NULL && !exists) {
       if (x->name == new_one->name) {
-        diagnostic_node (A68_SYNTAX_ERROR, new_one->tree, ERROR_REFINEMENT_DEFINED, NULL);
+        diagnostic_node (A68_SYNTAX_ERROR, new_one->node_defined, ERROR_REFINEMENT_DEFINED, NULL);
         exists = A68_TRUE;
       }
       FORWARD (x);
@@ -1723,7 +1728,7 @@ void get_refinements (MODULE_T * z)
 
 /*!
 \brief put refinement applications in the internal source
-\param z
+\param z module that reads source
 **/
 
 void put_refinements (MODULE_T * z)
@@ -1768,7 +1773,7 @@ void put_refinements (MODULE_T * z)
 /* We found its definition. */
         y->applications++;
         if (y->applications > 1) {
-          diagnostic_node (A68_SYNTAX_ERROR, y->line_defined->top_node, ERROR_REFINEMENT_APPLIED, NULL);
+          diagnostic_node (A68_SYNTAX_ERROR, y->node_defined, ERROR_REFINEMENT_APPLIED, NULL);
           FORWARD (p);
         } else {
 /* Tie the definition in the tree. */
@@ -1806,11 +1811,11 @@ void put_refinements (MODULE_T * z)
     diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
   }
 /* Has the programmer done it well? */
-  if (error_count == 0) {
+  if (a68_prog.error_count == 0) {
     x = z->top_refinement;
     while (x != NULL) {
       if (x->applications == 0) {
-        diagnostic_node (A68_SYNTAX_ERROR, x->line_defined->top_node, ERROR_REFINEMENT_NOT_APPLIED, NULL);
+        diagnostic_node (A68_SYNTAX_ERROR, x->node_defined, ERROR_REFINEMENT_NOT_APPLIED, NULL);
       }
       FORWARD (x);
     }

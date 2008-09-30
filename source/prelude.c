@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "algol68g.h"
@@ -32,20 +31,20 @@ SYMBOL_TABLE_T *stand_env;
 static MOID_T *m, *proc_int, *proc_real, *proc_real_real, *proc_real_real_real, *proc_real_real_real_real, *proc_complex_complex, *proc_bool, *proc_char, *proc_void;
 static PACK_T *z;
 
-#define INSERT_TAG(l, n) {NEXT (n) = *(l); *(l) = (n);}
-
 /*!
 \brief enter tag in standenv symbol table
-\param a
-\param n
-\param c
-\param m
-\param p
-\param q
+\param portable whether portable
+\param a attribute
+\param n node where defined
+\param c name of token
+\param m moid of token
+\param p priority, if applicable
+\param q interpreter routine that executes this token
 **/
 
 static void add_stand_env (BOOL_T portable, int a, NODE_T * n, char *c, MOID_T * m, int p, GENIE_PROCEDURE * q)
 {
+#define INSERT_TAG(l, n) {NEXT (n) = *(l); *(l) = (n);}
   TAG_T *new_one = new_tag ();
   INFO (n)->PROCEDURE_LEVEL = 0;
   new_one->use = A68_FALSE;
@@ -71,14 +70,13 @@ static void add_stand_env (BOOL_T portable, int a, NODE_T * n, char *c, MOID_T *
   } else if (a == LABEL) {
     INSERT_TAG (&stand_env->labels, new_one);
   }
-}
-
 #undef INSERT_TAG
+}
 
 /*!
 \brief compose PROC moid from arguments - first result, than arguments
-\param m
-\return
+\param m result moid
+\return entry in mode table
 **/
 
 static MOID_T *a68_proc (MOID_T * m, ...)
@@ -106,9 +104,9 @@ static MOID_T *a68_proc (MOID_T * m, ...)
 
 /*!
 \brief enter an identifier in standenv
-\param n
-\param m
-\param q
+\param n name of identifier
+\param m mode of identifier
+\param q interpreter routine that executes this token
 **/
 
 static void a68_idf (BOOL_T portable, char *n, MOID_T * m, GENIE_PROCEDURE * q)
@@ -117,10 +115,10 @@ static void a68_idf (BOOL_T portable, char *n, MOID_T * m, GENIE_PROCEDURE * q)
 }
 
 /*!
-\brief enter a MOID in standenv
-\param p
-\param t
-\param m
+\brief enter a moid in standenv
+\param p sizety
+\param t name of moid
+\param m will point to entry in mode table
 **/
 
 static void a68_mode (int p, char *t, MOID_T ** m)
@@ -131,8 +129,8 @@ static void a68_mode (int p, char *t, MOID_T ** m)
 
 /*!
 \brief enter a priority in standenv
-\param p
-\param b
+\param p name of operator
+\param b priority of operator
 **/
 
 static void a68_prio (char *p, int b)
@@ -142,15 +140,19 @@ static void a68_prio (char *p, int b)
 
 /*!
 \brief enter operator in standenv
-\param n
-\param m
-\param q
+\param n name of operator
+\param m mode of operator
+\param q interpreter routine that executes this token
 **/
 
 static void a68_op (BOOL_T portable, char *n, MOID_T * m, GENIE_PROCEDURE * q)
 {
   add_stand_env (portable, OP_SYMBOL, some_node (TEXT (add_token (&top_token, n))), NULL, m, 0, q);
 }
+
+/*!
+\brief enter standard modes in standenv
+**/
 
 static void stand_moids (void)
 {
@@ -428,6 +430,10 @@ static void stand_moids (void)
   NAME (MODE (REF_PIPE)) = stand_env->moids;
 }
 
+/*!
+\brief set up standenv - general RR but not transput
+**/
+
 static void stand_prelude (void)
 {
 /* Identifiers. */
@@ -571,6 +577,7 @@ static void stand_prelude (void)
   a68_prio ("ELEMS", 8);
   a68_prio ("LWB", 8);
   a68_prio ("UPB", 8);
+  a68_prio ("SORT", 8);
   a68_prio ("I", 9);
   a68_prio ("+*", 9);
 /* INT ops. */
@@ -776,6 +783,21 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "ABS", m, genie_abs_char);
   m = a68_proc (MODE (CHAR), MODE (INT), NULL);
   a68_op (A68_TRUE, "REPR", m, genie_repr_char);
+  m = a68_proc (MODE (BOOL), MODE (CHAR), NULL);
+  a68_idf (A68_FALSE, "isalnum", m, genie_is_alnum);
+  a68_idf (A68_FALSE, "isalpha", m, genie_is_alpha);
+  a68_idf (A68_FALSE, "iscntrl", m, genie_is_cntrl);
+  a68_idf (A68_FALSE, "isdigit", m, genie_is_digit);
+  a68_idf (A68_FALSE, "isgraph", m, genie_is_graph);
+  a68_idf (A68_FALSE, "islower", m, genie_is_lower);
+  a68_idf (A68_FALSE, "isprint", m, genie_is_print);
+  a68_idf (A68_FALSE, "ispunct", m, genie_is_punct);
+  a68_idf (A68_FALSE, "isspace", m, genie_is_space);
+  a68_idf (A68_FALSE, "isupper", m, genie_is_upper);
+  a68_idf (A68_FALSE, "isxdigit", m, genie_is_xdigit);
+  m = a68_proc (MODE (CHAR), MODE (CHAR), NULL);
+  a68_idf (A68_FALSE, "tolower", m, genie_to_lower);
+  a68_idf (A68_FALSE, "toupper", m, genie_to_upper);
 /* BITS ops. */
   m = a68_proc (MODE (INT), MODE (BITS), NULL);
   a68_op (A68_TRUE, "ABS", m, genie_idle);
@@ -789,15 +811,11 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "/=", m, genie_ne_bits);
   a68_op (A68_TRUE, "~=", m, genie_ne_bits);
   a68_op (A68_TRUE, "^=", m, genie_ne_bits);
-  a68_op (A68_TRUE, "<", m, genie_lt_bits);
   a68_op (A68_TRUE, "<=", m, genie_le_bits);
-  a68_op (A68_TRUE, ">", m, genie_gt_bits);
   a68_op (A68_TRUE, ">=", m, genie_ge_bits);
   a68_op (A68_TRUE, "EQ", m, genie_eq_bits);
   a68_op (A68_TRUE, "NE", m, genie_ne_bits);
-  a68_op (A68_TRUE, "LT", m, genie_lt_bits);
   a68_op (A68_TRUE, "LE", m, genie_le_bits);
-  a68_op (A68_TRUE, "GT", m, genie_gt_bits);
   a68_op (A68_TRUE, "GE", m, genie_ge_bits);
   m = a68_proc (MODE (BITS), MODE (BITS), MODE (BITS), NULL);
   a68_op (A68_TRUE, "AND", m, genie_and_bits);
@@ -964,6 +982,8 @@ static void stand_prelude (void)
   a68_op (A68_FALSE, "ELEMS", m, genie_dyad_elems);
   a68_op (A68_TRUE, "LWB", m, genie_dyad_lwb);
   a68_op (A68_TRUE, "UPB", m, genie_dyad_upb);
+  m = a68_proc (MODE (ROW_STRING), MODE (ROW_STRING), NULL);
+  a68_op (A68_FALSE, "SORT", m, genie_sort_row_string);
 /* Binding for the multiple-precision library. */
 /* LONG INT. */
   m = a68_proc (MODE (LONG_INT), MODE (INT), NULL);
@@ -1004,6 +1024,7 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_mp);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_mp);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "<", m, genie_lt_long_mp);
   a68_op (A68_TRUE, "LT", m, genie_lt_long_mp);
@@ -1099,6 +1120,7 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_mp);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_mp);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "<", m, genie_lt_long_mp);
   a68_op (A68_TRUE, "LT", m, genie_lt_long_mp);
@@ -1143,6 +1165,7 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_complex);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_complex);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_complex);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_complex);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_complex);
   m = a68_proc (MODE (REF_LONG_COMPLEX), MODE (REF_LONG_COMPLEX), MODE (LONG_COMPLEX), NULL);
   a68_op (A68_TRUE, "+:=", m, genie_plusab_long_complex);
@@ -1172,15 +1195,12 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_mp);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_mp);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_mp);
-  a68_op (A68_TRUE, "<", m, genie_lt_long_mp);
-  a68_op (A68_TRUE, "LT", m, genie_lt_long_mp);
-  a68_op (A68_TRUE, "<=", m, genie_le_long_mp);
-  a68_op (A68_TRUE, "LE", m, genie_le_long_mp);
-  a68_op (A68_TRUE, ">", m, genie_gt_long_mp);
-  a68_op (A68_TRUE, "GT", m, genie_gt_long_mp);
-  a68_op (A68_TRUE, ">=", m, genie_ge_long_mp);
-  a68_op (A68_TRUE, "GE", m, genie_ge_long_mp);
+  a68_op (A68_TRUE, "<=", m, genie_le_long_bits);
+  a68_op (A68_TRUE, "LE", m, genie_le_long_bits);
+  a68_op (A68_TRUE, ">=", m, genie_ge_long_bits);
+  a68_op (A68_TRUE, "GE", m, genie_ge_long_bits);
   m = a68_proc (MODE (LONG_BITS), MODE (LONG_BITS), MODE (LONG_BITS), NULL);
   a68_op (A68_TRUE, "AND", m, genie_and_long_mp);
   a68_op (A68_TRUE, "&", m, genie_and_long_mp);
@@ -1238,6 +1258,7 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_mp);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_mp);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "<", m, genie_lt_long_mp);
   a68_op (A68_TRUE, "LT", m, genie_lt_long_mp);
@@ -1329,6 +1350,7 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_mp);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_mp);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "<", m, genie_lt_long_mp);
   a68_op (A68_TRUE, "LT", m, genie_lt_long_mp);
@@ -1373,6 +1395,7 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_complex);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_complex);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_complex);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_complex);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_complex);
   m = a68_proc (MODE (REF_LONGLONG_COMPLEX), MODE (REF_LONGLONG_COMPLEX), MODE (LONGLONG_COMPLEX), NULL);
   a68_op (A68_TRUE, "+:=", m, genie_plusab_long_complex);
@@ -1398,13 +1421,10 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "EQ", m, genie_eq_long_mp);
   a68_op (A68_TRUE, "/=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "~=", m, genie_ne_long_mp);
+  a68_op (A68_TRUE, "^=", m, genie_ne_long_mp);
   a68_op (A68_TRUE, "NE", m, genie_ne_long_mp);
-  a68_op (A68_TRUE, "<", m, genie_lt_long_mp);
-  a68_op (A68_TRUE, "LT", m, genie_lt_long_mp);
   a68_op (A68_TRUE, "<=", m, genie_le_long_mp);
   a68_op (A68_TRUE, "LE", m, genie_le_long_mp);
-  a68_op (A68_TRUE, ">", m, genie_gt_long_mp);
-  a68_op (A68_TRUE, "GT", m, genie_gt_long_mp);
   a68_op (A68_TRUE, ">=", m, genie_ge_long_mp);
   a68_op (A68_TRUE, "GE", m, genie_ge_long_mp);
   m = a68_proc (MODE (LONGLONG_BITS), MODE (LONGLONG_BITS), MODE (LONGLONG_BITS), NULL);
@@ -1538,6 +1558,10 @@ static void stand_prelude (void)
   a68_op (A68_FALSE, "SAMPLES", m, genie_sound_samples);
 }
 
+/*!
+\brief set up standenv - transput
+**/
+
 static void stand_transput (void)
 {
   a68_idf (A68_TRUE, "errorchar", MODE (CHAR), genie_error_char);
@@ -1622,6 +1646,10 @@ static void stand_transput (void)
   a68_idf (A68_TRUE, "newline", MODE (PROC_REF_FILE_VOID), genie_new_line);
   a68_idf (A68_TRUE, "newpage", MODE (PROC_REF_FILE_VOID), genie_new_page);
   a68_idf (A68_TRUE, "space", MODE (PROC_REF_FILE_VOID), genie_space);
+  a68_idf (A68_TRUE, "backspace", MODE (PROC_REF_FILE_VOID), genie_backspace);
+  m = a68_proc (MODE (INT), MODE (REF_FILE), MODE (INT), NULL);
+  a68_idf (A68_TRUE, "set", m, genie_set);
+  a68_idf (A68_TRUE, "seek", m, genie_set);
   m = a68_proc (MODE (VOID), MODE (ROW_SIMPLIN), NULL);
   a68_idf (A68_TRUE, "read", m, genie_read);
   a68_idf (A68_TRUE, "readbin", m, genie_read_bin);
@@ -1712,6 +1740,10 @@ static void stand_transput (void)
   m = a68_proc (MODE (VOID), MODE (STRING), NULL);
   a68_idf (A68_FALSE, "printstring", m, genie_print_string);
 }
+
+/*!
+\brief set up standenv - extensions
+**/
 
 static void stand_extensions (void)
 {
@@ -2199,6 +2231,23 @@ static void stand_extensions (void)
   a68_idf (A68_FALSE, "argc", m, genie_argc);
   a68_idf (A68_FALSE, "errno", m, genie_errno);
   a68_idf (A68_FALSE, "fork", m, genie_fork);
+  m = a68_proc (MODE (STRING), NULL);
+  a68_idf (A68_FALSE, "getpwd", m, genie_pwd);
+  m = a68_proc (MODE (INT), MODE (STRING), NULL);
+  a68_idf (A68_FALSE, "setpwd", m, genie_cd);
+  m = a68_proc (MODE (BOOL), MODE (STRING), NULL);
+  a68_idf (A68_FALSE, "fileisdirectory", m, genie_file_is_directory);
+  a68_idf (A68_FALSE, "fileisregular", m, genie_file_is_block_device);
+  a68_idf (A68_FALSE, "fileisregular", m, genie_file_is_char_device);
+  a68_idf (A68_FALSE, "fileisregular", m, genie_file_is_regular);
+#ifdef __S_IFIFO
+  a68_idf (A68_FALSE, "fileisfifo", m, genie_file_is_fifo);
+#endif
+#ifdef __S_IFLNK
+  a68_idf (A68_FALSE, "fileislink", m, genie_file_is_link);
+#endif
+  m = a68_proc (MODE (BITS), MODE (STRING), NULL);
+  a68_idf (A68_FALSE, "filemode", m, genie_file_mode);
   m = a68_proc (MODE (STRING), MODE (INT), NULL);
   a68_idf (A68_FALSE, "argv", m, genie_argv);
   m = proc_void;
@@ -2222,6 +2271,10 @@ static void stand_extensions (void)
   m = a68_proc (MODE (ROW_INT), NULL);
   a68_idf (A68_FALSE, "utctime", m, genie_utctime);
   a68_idf (A68_FALSE, "localtime", m, genie_localtime);
+#if defined ENABLE_DIRENT
+  m = a68_proc (MODE (ROW_STRING), MODE (STRING), NULL);
+  a68_idf (A68_FALSE, "getdirectory", m, genie_directory);
+#endif
 #if defined ENABLE_HTTP
   m = a68_proc (MODE (INT), MODE (REF_STRING), MODE (STRING), MODE (STRING), MODE (INT), NULL);
   a68_idf (A68_FALSE, "httpcontent", m, genie_http_content);

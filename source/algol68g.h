@@ -1,6 +1,6 @@
 /*!
 \file algol68g.h
-\brief
+\brief general definitions for Algol 68 Genie
 **/
 
 /*
@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if ! defined A68G_ALGOL68G_H
@@ -91,10 +90,10 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define A68_ALIGNMENT ((int) (sizeof (A68_ALIGN_T)))
 #define A68_ALIGN(s) ((int) ((s) % A68_ALIGNMENT) == 0 ? (s) : ((s) + A68_ALIGNMENT - (s) % A68_ALIGNMENT))
 
-#define ALIGNED_SIZEOF(p) ((int) A68_ALIGN (sizeof (p)))
+#define ALIGNED_SIZE_OF(p) ((int) A68_ALIGN (sizeof (p)))
 #define MOID_SIZE(p) A68_ALIGN ((p)->size)
 
-#define BUFFER_SIZE (KILOBYTE)		/* BUFFER_SIZE exceeds actual requirements. */
+#define BUFFER_SIZE (KILOBYTE)			/* BUFFER_SIZE exceeds actual requirements. */
 #define SMALL_BUFFER_SIZE 128
 #define MAX_ERRORS 8
 #define MAX_PRIORITY 9				/* Algol 68 requirement. */
@@ -140,6 +139,12 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define PRIMAL_SCOPE 0
 
+/* Type definitions. */
+
+typedef int ADDR_T, FILE_T, LEAP_T;
+typedef unsigned char BYTE_T, BOOL_T;
+typedef unsigned STATUS_MASK;
+
 /* Status Masks */
 
 #define NULL_MASK 			0x00000000
@@ -180,11 +185,14 @@ Some (necessary) macros to overcome the ambiguity in having signed or unsigned
 char on various systems. PDP-11s and IBM 370s are still haunting us with this.
 */
 
+#define IS_ALNUM(c) isalnum ((unsigned char) (c))
+#define IS_ALPHA(c) isalpha ((unsigned char) (c))
 #define IS_CNTRL(c) iscntrl ((unsigned char) (c))
 #define IS_DIGIT(c) isdigit ((unsigned char) (c))
 #define IS_GRAPH(c) isgraph ((unsigned char) (c))
 #define IS_LOWER(c) islower ((unsigned char) (c))
 #define IS_PRINT(c) isprint ((unsigned char) (c))
+#define IS_PUNCT(c) ispunct ((unsigned char) (c))
 #define IS_SPACE(c) isspace ((unsigned char) (c))
 #define IS_UPPER(c) isupper ((unsigned char) (c))
 #define IS_XDIGIT(c) isxdigit ((unsigned char) (c))
@@ -192,12 +200,6 @@ char on various systems. PDP-11s and IBM 370s are still haunting us with this.
 #define TO_UPPER(c) toupper ((unsigned char) (c))
 
 /* Type definitions. */
-
-typedef int ADDR_T, FILE_T, LEAP_T;
-typedef unsigned char BYTE_T, BOOL_T;
-typedef unsigned STATUS_MASK;
-
-/* Algol 68 type definitions. */
 
 typedef struct A68_ARRAY A68_ARRAY;
 typedef struct A68_BITS A68_BITS;
@@ -213,7 +215,6 @@ typedef struct A68_LONG_BYTES A68_LONG_BYTES;
 typedef struct A68_UNION A68_UNION;
 typedef struct A68_PROCEDURE A68_PROCEDURE;
 typedef struct A68_REAL A68_REAL;
-typedef struct A68_REF A68_REF, A68_ROW;
 typedef struct A68_TUPLE A68_TUPLE;
 typedef struct A68_SOUND A68_SOUND;
 
@@ -241,50 +242,10 @@ typedef struct SYMBOL_TABLE_T SYMBOL_TABLE_T;
 typedef struct TAG_T TAG_T;
 typedef struct TOKEN_T TOKEN_T;
 
-struct A68_HANDLE
-{
-  STATUS_MASK status;
-  BYTE_T *pointer;
-  int size;
-  MOID_T *type;
-  A68_HANDLE *next, *previous;
-};
+typedef PROPAGATOR_T PROPAGATOR_PROCEDURE (NODE_T *);
+typedef void GENIE_PROCEDURE (NODE_T *);
 
-struct A68_INT
-{
-  STATUS_MASK status;
-  int value;
-};
-
-struct A68_BITS
-{
-  STATUS_MASK status;
-  unsigned value;
-};
-
-struct A68_REAL
-{
-  STATUS_MASK status;
-  double value;
-};
-
-struct A68_CHAR
-{
-  BYTE_T status;
-  signed char value;
-};
-
-struct A68_BYTES
-{
-  STATUS_MASK status;
-  char value[BYTES_WIDTH + 1];
-};
-
-struct A68_LONG_BYTES
-{
-  STATUS_MASK status;
-  char value[LONG_BYTES_WIDTH + 1];
-};
+/* Macro's that work with fat pointers. */
 
 #define REF_SCOPE(z) (((z)->u).scope)
 #define REF_HANDLE(z) (((z)->u).handle)
@@ -299,11 +260,89 @@ struct A68_LONG_BYTES
 #define GET_REF_SCOPE(z) (IS_IN_HEAP (z) ? PRIMAL_SCOPE : REF_SCOPE (z))
 #define SET_REF_SCOPE(z, s) { if (!IS_IN_HEAP (z)) { REF_SCOPE (z) = (s);}}
 
+typedef struct A68_REF A68_REF, A68_ROW;
+
+struct A68_HANDLE
+{
+  STATUS_MASK status;
+  BYTE_T *pointer;
+  int size;
+  MOID_T *type;
+  A68_HANDLE *next, *previous;
+};
+
 struct A68_REF
 {
   STATUS_MASK status;
   ADDR_T offset;
   union {A68_HANDLE *handle; ADDR_T scope;} u;
+};
+
+/* Options struct. */
+
+struct OPTIONS_T
+{
+  OPTION_LIST_T *list;
+  BOOL_T backtrace, brackets, check_only, cross_reference, debug, moid_listing, 
+    optimise, portcheck, pragmat_sema, reductions, regression_test, run, 
+    source_listing, standard_prelude_listing, statistics_listing, 
+    stropping, trace, tree_listing, unused, verbose, version; 
+  int time_limit; 
+  STATUS_MASK nodemask;
+};
+
+/* Propagator type, that holds information for the interpreter. */
+
+struct PROPAGATOR_T
+{
+  PROPAGATOR_PROCEDURE *unit;
+  NODE_T *source;
+};
+
+/* Algol 68 type definitions. */
+
+struct A68_ARRAY
+{
+  MOID_T *type;
+  int dim, elem_size;
+  ADDR_T slice_offset, field_offset;
+  A68_REF array;
+};
+
+struct A68_BITS
+{
+  STATUS_MASK status;
+  unsigned value;
+};
+
+struct A68_BYTES
+{
+  STATUS_MASK status;
+  char value[BYTES_WIDTH + 1];
+};
+
+struct A68_CHANNEL
+{
+  STATUS_MASK status;
+  BOOL_T reset, set, get, put, bin, draw, compress;
+};
+
+struct A68_CHAR
+{
+  BYTE_T status;
+  signed char value;
+};
+
+struct A68_COLLITEM
+{
+  STATUS_MASK status;
+  int count;
+};
+
+struct A68_INT
+{
+  STATUS_MASK status;
+  int value;
 };
 
 struct A68_FORMAT
@@ -313,10 +352,10 @@ struct A68_FORMAT
   ADDR_T environ;
 };
 
-struct A68_UNION
+struct A68_LONG_BYTES
 {
   STATUS_MASK status;
-  void *value;
+  char value[LONG_BYTES_WIDTH + 1];
 };
 
 struct A68_PROCEDURE
@@ -328,24 +367,38 @@ struct A68_PROCEDURE
   ADDR_T environ;
 };
 
+struct A68_REAL
+{
+  STATUS_MASK status;
+  double value;
+};
+
+struct A68_STREAM
+{
+  char *name;
+  FILE_T fd;
+  int opened, writemood;
+};
+
 struct A68_TUPLE
 {
   int upper_bound, lower_bound, shift, span, k;
 };
 
-struct A68_ARRAY
-{
-  MOID_T *type;
-  int dim, elem_size;
-  ADDR_T slice_offset, field_offset;
-  A68_REF array;
-};
-
-struct A68_CHANNEL
+struct A68_UNION
 {
   STATUS_MASK status;
-  BOOL_T reset, set, get, put, bin, draw, compress;
+  void *value;
 };
+
+struct A68_SOUND
+{
+  STATUS_MASK status;
+  unsigned num_channels, sample_rate, bits_per_sample, num_samples;
+  A68_REF data;
+};
+
+/* The FILE mode. */
 
 struct A68_FILE
 {
@@ -378,49 +431,8 @@ struct A68_FILE
 #endif
 };
 
-struct A68_SOUND
-{
-  STATUS_MASK status;
-  unsigned num_channels, sample_rate, bits_per_sample, num_samples;
-  A68_REF data;
-};
-
-struct A68_COLLITEM
-{
-  STATUS_MASK status;
-  int count;
-};
 
 /* Internal type definitions. */
-
-typedef PROPAGATOR_T PROPAGATOR_PROCEDURE (NODE_T *);
-typedef void GENIE_PROCEDURE (NODE_T *);
-
-struct REFINEMENT_T
-{
-  REFINEMENT_T *next;
-  char *name;
-  SOURCE_LINE_T *line_defined, *line_applied;
-  int applications;
-  NODE_T *tree, *begin, *end;
-};
-
-struct PROPAGATOR_T
-{
-  PROPAGATOR_PROCEDURE *unit;
-  NODE_T *source;
-};
-
-struct SOURCE_LINE_T
-{
-  char *string, *filename;
-  DIAGNOSTIC_T *diagnostics;
-  int number, print_status;
-  BOOL_T list;
-  MODULE_T *module;
-  NODE_T *top_node;
-  SOURCE_LINE_T *next, *previous;
-};
 
 struct DIAGNOSTIC_T
 {
@@ -431,10 +443,10 @@ struct DIAGNOSTIC_T
   DIAGNOSTIC_T *next;
 };
 
-struct TOKEN_T
+struct FILES_T
 {
-  char *text;
-  TOKEN_T *less, *more;
+  char *path, *generic_name;
+  struct A68_STREAM source, listing;
 };
 
 struct KEYWORD_T
@@ -444,38 +456,44 @@ struct KEYWORD_T
   KEYWORD_T *less, *more;
 };
 
-struct TAG_T
+struct MODES_T
 {
-  SYMBOL_TABLE_T *symbol_table;
-  MOID_T *type;
-  NODE_T *node, *unit;
-  char *value;
-  GENIE_PROCEDURE *procedure;
-  BOOL_T scope_assigned, use, in_proc, stand_env_proc, loc_assigned, portable;
-  int priority, heap, scope, size, youngest_environ, number;
-  ADDR_T offset;
-  TAG_T *next, *body;
+  MOID_T *BITS, *BOOL, *BYTES, *CHANNEL, *CHAR, *COLLITEM, *COMPL, *COMPLEX,
+    *C_STRING, *ERROR, *FILE, *FORMAT, *HIP, *INT, *LONG_BITS, *LONG_BYTES,
+    *LONG_COMPL, *LONG_COMPLEX, *LONG_INT, *LONGLONG_BITS, *LONGLONG_COMPL,
+    *LONGLONG_COMPLEX, *LONGLONG_INT, *LONGLONG_REAL, *LONG_REAL, *NUMBER,
+    *PIPE, *PROC_REF_FILE_BOOL, *PROC_REF_FILE_VOID, *PROC_ROW_CHAR,
+    *PROC_STRING, *PROC_VOID, *REAL, *REF_BITS, *REF_BOOL, *REF_BYTES,
+    *REF_CHAR, *REF_COMPL, *REF_COMPLEX, *REF_FILE, *REF_FORMAT, *REF_INT,
+    *REF_LONG_BITS, *REF_LONG_BYTES, *REF_LONG_COMPL, *REF_LONG_COMPLEX,
+    *REF_LONG_INT, *REF_LONGLONG_BITS, *REF_LONGLONG_COMPL,
+    *REF_LONGLONG_COMPLEX, *REF_LONGLONG_INT, *REF_LONGLONG_REAL,
+    *REF_LONG_REAL, *REF_PIPE, *REF_REAL, *REF_REF_FILE, *REF_ROW_CHAR,
+    *REF_ROW_COMPLEX, *REF_ROW_INT, *REF_ROW_REAL, *REF_ROWROW_COMPLEX,
+    *REF_ROWROW_REAL, *REF_SOUND, *REF_STRING, *ROW_BITS, *ROW_BOOL, *ROW_CHAR,
+    *ROW_COMPLEX, *ROW_INT, *ROW_LONG_BITS, *ROW_LONGLONG_BITS, *ROW_REAL,
+    *ROW_ROW_CHAR, *ROWROW_COMPLEX, *ROWROW_REAL, *ROWS, *ROW_SIMPLIN,
+    *ROW_SIMPLOUT, *ROW_STRING, *SEMA, *SIMPLIN, *SIMPLOUT, *SOUND, *SOUND_DATA,
+    *STRING, *UNDEFINED, *VACUUM, *VOID;
 };
 
-struct SYMBOL_TABLE_T
+struct MODULE_T
 {
-  int level, nest, attribute /* MAIN, PRELUDE_T*/ ;
-  BOOL_T empty_table, initialise_frame, initialise_anon, proc_ops;
-  ADDR_T ap_increment;
-  SYMBOL_TABLE_T *previous, *outer;
-  TAG_T *identifiers, *operators, *priority, *indicants, *labels, *anonymous;
-  MOID_T *moids;
-  NODE_T *jump_to, *inits;
-};
-
-struct PACK_T
-{
-  MOID_T *type;
-  char *text;
-  NODE_T *node;
-  PACK_T *next, *previous;
-  int size;
-  ADDR_T offset;
+  FILES_T files;
+  SOURCE_LINE_T *top_line;
+  OPTIONS_T options;
+  REFINEMENT_T *top_refinement;
+  NODE_T *top_node;
+  struct {
+    SOURCE_LINE_T *save_l;
+    char *save_s;
+    char save_c;
+  } scan_state;
+  int error_count, warning_count;
+  int source_scan;
+  jmp_buf exit_compilation;
+  BOOL_T tree_listing_safe, cross_reference_safe;
+  PROPAGATOR_T global_prop;
 };
 
 struct MOID_T
@@ -494,28 +512,18 @@ struct MOID_LIST_T
   MOID_LIST_T *next;
 };
 
-struct NODE_INFO_T
-{
-  MODULE_T *module;
-  int PROCEDURE_LEVEL, priority;
-  char *char_in_line, *symbol, *expr;
-  SOURCE_LINE_T *line;
-};
-
-struct GENIE_INFO_T
-{
-  PROPAGATOR_T propagator;
-  BOOL_T whether_coercion, whether_new_lexical_level, seq_set;
-  int level, argsize, size;
-  NODE_T *parent, *seq;
-  BYTE_T *offset;
-  void *constant;
-};
-
 struct NODE_T
 {
   STATUS_MASK mask;
-  GENIE_INFO_T genie;
+  struct 
+  {
+    PROPAGATOR_T propagator;
+    BOOL_T whether_coercion, whether_new_lexical_level, seq_set;
+    int level, argsize, size;
+    NODE_T *parent, *seq;
+    BYTE_T *offset;
+    void *constant;
+  } genie;
   MOID_T *type, *partial_proc, *partial_locale;
   NODE_INFO_T *info;
   NODE_T *next, *previous, *sub, *do_od_part, *inits, *nest;
@@ -527,10 +535,52 @@ struct NODE_T
   BOOL_T need_dns, error;
 };
 
+struct NODE_INFO_T
+{
+  MODULE_T *module;
+  int PROCEDURE_LEVEL, priority;
+  char *char_in_line, *symbol, *expr;
+  SOURCE_LINE_T *line;
+};
+
+struct OPTION_LIST_T
+{
+  char *str;
+  int scan;
+  BOOL_T processed;
+  SOURCE_LINE_T *line;
+  OPTION_LIST_T *next;
+};
+
+struct PACK_T
+{
+  MOID_T *type;
+  char *text;
+  NODE_T *node;
+  PACK_T *next, *previous;
+  int size;
+  ADDR_T offset;
+};
+
 struct POSTULATE_T
 {
   MOID_T *a, *b;
   POSTULATE_T *next;
+};
+
+struct PRELUDE_T
+{
+  char *file_name;
+  PRELUDE_T *next;
+};
+
+struct REFINEMENT_T
+{
+  REFINEMENT_T *next;
+  char *name;
+  SOURCE_LINE_T *line_defined, *line_applied;
+  int applications;
+  NODE_T *node_defined, *begin, *end;
 };
 
 struct SOID_T
@@ -546,146 +596,45 @@ struct SOID_LIST_T
   SOID_LIST_T *next;
 };
 
-struct PRELUDE_T
+struct SOURCE_LINE_T
 {
-  char *file_name;
-  PRELUDE_T *next;
+  char marker[6], *string, *filename;
+  DIAGNOSTIC_T *diagnostics;
+  int number, print_status;
+  BOOL_T list;
+  MODULE_T *module;
+  SOURCE_LINE_T *next, *previous;
 };
 
-struct A68_STREAM
+struct SYMBOL_TABLE_T
 {
-  char *name;
-  FILE_T fd;
-  int opened, writemood;
+  int level, nest, attribute /* MAIN, PRELUDE_T*/ ;
+  BOOL_T empty_table, initialise_frame, initialise_anon, proc_ops;
+  ADDR_T ap_increment;
+  SYMBOL_TABLE_T *previous, *outer;
+  TAG_T *identifiers, *operators, *priority, *indicants, *labels, *anonymous;
+  MOID_T *moids;
+  NODE_T *jump_to, *inits;
 };
 
-struct FILES_T
+struct TAG_T
 {
-  char *path, *generic_name;
-  struct A68_STREAM source, listing;
+  STATUS_MASK mask;
+  SYMBOL_TABLE_T *symbol_table;
+  MOID_T *type;
+  NODE_T *node, *unit;
+  char *value;
+  GENIE_PROCEDURE *procedure;
+  BOOL_T scope_assigned, use, in_proc, stand_env_proc, loc_assigned, portable;
+  int priority, heap, scope, size, youngest_environ, number;
+  ADDR_T offset;
+  TAG_T *next, *body;
 };
 
-struct OPTION_LIST_T
+struct TOKEN_T
 {
-  char *str;
-  int scan;
-  BOOL_T processed;
-  SOURCE_LINE_T *line;
-  OPTION_LIST_T *next;
-};
-
-struct OPTIONS_T
-{
-  OPTION_LIST_T *list;
-  BOOL_T source_listing, standard_prelude_listing, tree_listing, verbose, version, cross_reference, check_only, statistics_listing, pragmat_sema, moid_listing, unused, trace, regression_test, stropping, brackets, reductions, portcheck, optimise;
-  int time_limit, run, debug, backtrace;
-  STATUS_MASK nodemask;
-};
-
-struct MODES_T
-{
-MOID_T *BITS,
-*BOOL,
-*BYTES,
-*CHANNEL,
-*CHAR,
-*COLLITEM,
-*COMPL,
-*COMPLEX,
-*C_STRING,
-*ERROR,
-*FILE,
-*FORMAT,
-*HIP,
-*INT,
-*LONG_BITS,
-*LONG_BYTES,
-*LONG_COMPL,
-*LONG_COMPLEX,
-*LONG_INT,
-*LONGLONG_BITS,
-*LONGLONG_COMPL,
-*LONGLONG_COMPLEX,
-*LONGLONG_INT,
-*LONGLONG_REAL,
-*LONG_REAL,
-*NUMBER,
-*PIPE,
-*PROC_REF_FILE_BOOL,
-*PROC_REF_FILE_VOID,
-*PROC_ROW_CHAR,
-*PROC_STRING,
-*PROC_VOID,
-*REAL,
-*REF_BITS,
-*REF_BOOL,
-*REF_BYTES,
-*REF_CHAR,
-*REF_COMPL,
-*REF_COMPLEX,
-*REF_FILE,
-*REF_FORMAT,
-*REF_INT,
-*REF_LONG_BITS,
-*REF_LONG_BYTES,
-*REF_LONG_COMPL,
-*REF_LONG_COMPLEX,
-*REF_LONG_INT,
-*REF_LONGLONG_BITS,
-*REF_LONGLONG_COMPL,
-*REF_LONGLONG_COMPLEX,
-*REF_LONGLONG_INT,
-*REF_LONGLONG_REAL,
-*REF_LONG_REAL,
-*REF_PIPE,
-*REF_REAL,
-*REF_REF_FILE,
-*REF_ROW_CHAR,
-*REF_ROW_COMPLEX,
-*REF_ROW_INT,
-*REF_ROW_REAL,
-*REF_ROWROW_COMPLEX,
-*REF_ROWROW_REAL,
-*REF_SOUND,
-*REF_STRING,
-*ROW_BITS,
-*ROW_BOOL,
-*ROW_CHAR,
-*ROW_COMPLEX,
-*ROW_INT,
-*ROW_LONG_BITS,
-*ROW_LONGLONG_BITS,
-*ROW_REAL,
-*ROW_ROW_CHAR,
-*ROWROW_COMPLEX,
-*ROWROW_REAL,
-*ROWS,
-*ROW_SIMPLIN,
-*ROW_SIMPLOUT,
-*ROW_STRING,
-*SEMA,
-*SIMPLIN,
-*SIMPLOUT,
-*SOUND,
-*SOUND_DATA,
-*STRING,
-*UNDEFINED,
-*VACUUM,
-*VOID;
-};
-
-struct MODULE_T
-{
-  FILES_T files;
-  SOURCE_LINE_T *top_line;
-  OPTIONS_T options;
-  REFINEMENT_T *top_refinement;
-  NODE_T *top_node;
-  struct {
-    SOURCE_LINE_T *save_l;
-    char *save_s;
-    char save_c;
-  } scan_state;
+  char *text;
+  TOKEN_T *less, *more;
 };
 
 /* Internal constants. */
@@ -740,7 +689,7 @@ enum ATTRIBUTES
   ASSIGN_TO_SYMBOL,
   AT_SYMBOL,
   BEGIN_SYMBOL,
-  BITS_DENOTER,
+  BITS_DENOTATION,
   BITS_PATTERN,
   BITS_SYMBOL,
   BOLD_COMMENT_SYMBOL,
@@ -764,6 +713,7 @@ enum ATTRIBUTES
   CASE_SYMBOL,
   CAST,
   CHANNEL_SYMBOL,
+  CHAR_DENOTATION,
   CHAR_SYMBOL,
   CHOICE,
   CHOICE_PATTERN,
@@ -786,7 +736,7 @@ enum ATTRIBUTES
   DEFINING_IDENTIFIER,
   DEFINING_INDICANT,
   DEFINING_OPERATOR,
-  DENOTER,
+  DENOTATION,
   DEPROCEDURING,
   DEREFERENCING,
   DIAGONAL_FUNCTION,
@@ -889,7 +839,7 @@ enum ATTRIBUTES
   INITIALISER_SERIES,
   INSERTION,
   IN_SYMBOL,
-  INT_DENOTER,
+  INT_DENOTATION,
   INTEGER_CASE_CLAUSE,
   INTEGER_CHOICE_CLAUSE,
   INTEGER_IN_PART,
@@ -955,7 +905,7 @@ enum ATTRIBUTES
   PROC_SYMBOL,
   QUALIFIER,
   RADIX_FRAME,
-  REAL_DENOTER,
+  REAL_DENOTATION,
   REAL_PATTERN,
   REAL_SYMBOL,
   REF_SYMBOL,
@@ -964,7 +914,7 @@ enum ATTRIBUTES
   ROUTINE_UNIT,
   ROW_ASSIGNATION,
   ROW_ASSIGN_SYMBOL,
-  ROW_CHAR_DENOTER,
+  ROW_CHAR_DENOTATION,
   ROW_FUNCTION,
   ROWING,
   ROWS_SYMBOL,
@@ -1053,7 +1003,7 @@ enum
 enum
 { 
   A68_NO_DIAGNOSTICS = 0, A68_ERROR = 1, A68_SYNTAX_ERROR, A68_WARNING,
-  A68_RUNTIME_ERROR, A68_STORAGE_ERROR, A68_ALL_DIAGNOSTICS, 
+  A68_RUNTIME_ERROR, A68_SUPPRESS_SEVERITY, A68_ALL_DIAGNOSTICS, 
   A68_RERUN, A68_FORCE_DIAGNOSTICS = 128, A68_FORCE_QUIT = 256
 };
 
@@ -1099,7 +1049,7 @@ enum
 #define RESET_ERRNO {errno = 0;}
 
 #define A68_UNION A68_UNION
-#define UNION_OFFSET (ALIGNED_SIZEOF (A68_UNION))
+#define UNION_OFFSET (ALIGNED_SIZE_OF (A68_UNION))
 
 /* Miscellaneous macros. */
 
@@ -1109,19 +1059,22 @@ enum
 #define ANNOTATION(p) ((p)->annotation)
 #define ATTRIBUTE(p) ((p)->attribute)
 #define BODY(p) ((p)->body)
+#define CAST(p) ((p)->cast)
 #define DEFLEXED(p) ((p)->deflexed_mode)
 #define DEFLEX(p) (DEFLEXED (p) != NULL ? DEFLEXED(p) : (p))
 #define DIM(p) ((p)->dim)
 #define ENVIRON(p) ((p)->environ)
 #define EQUIVALENT(p) ((p)->equivalent_mode)
-#define EXIT_COMPILATION longjmp(exit_compilation, 1)
+#define EXIT_COMPILATION longjmp(a68_prog.exit_compilation, 1)
 #define FILE_DEREF(p) ((A68_FILE *) ADDRESS (p))
 #define FORWARD(p) ((p) = NEXT (p))
 #define FORMAT(p) ((p)->format)
 #define GENIE_INFO(p) ((p)->genie_info)
 #define HEAP(p) ((p)->heap)
 #define INFO(p) ((p)->info)
-#define LEX_LEVEL(p) (SYMBOL_TABLE (p)->level)
+#define LESS(p) ((p)->less)
+#define LEX_LEVEL(p) (LEVEL (SYMBOL_TABLE (p)))
+#define LEVEL(p) ((p)->level)
 #define LINE_NUMBER(p) (NUMBER (LINE (p)))
 #define LINE(p) ((p)->info->line)
 #define LOCALE(p) ((p)->locale)
@@ -1130,6 +1083,7 @@ enum
 #define MODE(p) (a68_modes.p)
 #define MODULE(p) ((p)->module)
 #define MOID(p) ((p)->type)
+#define MORE(p) ((p)->more)
 #define MULTIPLE(p) ((p)->multiple_mode)
 #define NAME(p) ((p)->name)
 #define NEST(p) ((p)->nest)
@@ -1162,9 +1116,10 @@ enum
 #define TEXT(p) ((p)->text)
 #define TRIM(p) ((p)->trim)
 #define UPB(p) ((p)->upper_bound)
+#define USE(p) ((p)->use)
 #define VALUE(p) ((p)->value)
 #define WHETHER_LITERALLY(p, s) (strcmp (SYMBOL (p), s) == 0)
-#define WHETHER_NOT(p, s) (ATTRIBUTE (p) != (s))
+#define WHETHER_NOT(p, s) (! WHETHER (p, s))
 #define WHETHER(p, s) (ATTRIBUTE (p) == (s))
 
 #define SCAN_ERROR(c, u, v, txt) if (c) {scan_error (u, v, txt);}
@@ -1174,9 +1129,8 @@ enum
 /* External definitions. */
 
 extern ADDR_T fixed_heap_pointer, temp_heap_pointer;
-extern BOOL_T a68c_diags, gnu_diags, no_warnings;
+extern BOOL_T no_warnings;
 extern BOOL_T halt_typing, time_limit_flag, listing_is_safe;
-extern BOOL_T tree_listing_safe, cross_reference_safe, moid_listing_safe;
 extern BOOL_T get_fixed_heap_allowed;
 extern BYTE_T *system_stack_offset;
 extern char output_line[], edit_line[], input_line[];
@@ -1188,13 +1142,10 @@ extern double a68g_hypot (double, double);
 extern double a68g_log1p (double);
 extern double begin_of_time;
 extern double garbage_seconds;
-extern int error_count, warning_count, run_time_error_count;
 extern int garbage_collects;
-extern int source_scan;
 extern int stack_size;
 extern int symbol_table_count, mode_count;
 extern int term_width;
-extern jmp_buf exit_compilation;
 extern KEYWORD_T *top_keyword;
 extern MODES_T a68_modes;
 extern MODULE_T a68_prog;
@@ -1206,19 +1157,21 @@ extern TOKEN_T *top_token;
 
 extern int global_argc;
 extern char **global_argv;
+extern char a68g_cmd_name[];
 
 extern A68_REF heap_generator (NODE_T *, MOID_T *, int);
 extern ADDR_T calculate_internal_index (A68_TUPLE *, int);
 extern BOOL_T increment_internal_index (A68_TUPLE *, int);
 extern BOOL_T lexical_analyzer (MODULE_T *);
 extern BOOL_T match_string (char *, char *, char);
-extern BOOL_T modes_equivalent (MOID_T *, MOID_T *);
+extern BOOL_T whether_modes_equivalent (MOID_T *, MOID_T *);
 extern BOOL_T set_options (MODULE_T *, OPTION_LIST_T *, BOOL_T);
 extern BOOL_T whether_coercion (NODE_T *);
 extern BOOL_T whether_firm (MOID_T *, MOID_T *);
 extern BOOL_T whether_modes_equal (MOID_T *, MOID_T *, int);
 extern BOOL_T whether_new_lexical_level (NODE_T *);
 extern BOOL_T whether (NODE_T * p, ...);
+extern BOOL_T whether_one_of (NODE_T * p, ...);
 extern BOOL_T whether_subset (MOID_T *, MOID_T *, int);
 extern BOOL_T whether_unitable (MOID_T *, MOID_T *, int);
 extern BYTE_T *get_fixed_heap_space (size_t);
@@ -1235,9 +1188,10 @@ extern char *propagator_name (PROPAGATOR_PROCEDURE *p);
 extern char *read_string_from_tty (char *);
 extern char *standard_environ_proc_name (GENIE_PROCEDURE);
 extern double seconds (void);
-extern double ten_to_the_power (int);
+extern double ten_up (int);
 extern int count_pack_members (PACK_T *);
 extern int get_row_size (A68_TUPLE *, int);
+extern int grep_in_string (char *, char *, int *, int *);
 extern int heap_available ();
 extern int moid_size (MOID_T *);
 extern int whether_identifier_or_label_global (SYMBOL_TABLE_T *, char *);
@@ -1253,7 +1207,6 @@ extern PACK_T *absorb_union_pack (PACK_T *, int *);
 extern PACK_T *new_pack (void);
 extern POSTULATE_T *whether_postulated_pair (POSTULATE_T *, MOID_T *, MOID_T *);
 extern POSTULATE_T *whether_postulated (POSTULATE_T *, MOID_T *);
-extern size_t io_read_string (FILE_T, char *, size_t);
 extern SOURCE_LINE_T *new_source_line (void);
 extern ssize_t io_read_conv (FILE_T, void *, size_t);
 extern ssize_t io_read (FILE_T, void *, size_t);
@@ -1277,6 +1230,7 @@ extern void add_moid_list (MOID_LIST_T **, SYMBOL_TABLE_T *);
 extern void add_moid_moid_list (NODE_T *, MOID_LIST_T **);
 extern void add_option_list (OPTION_LIST_T **, char *, SOURCE_LINE_T *);
 extern void add_single_moid_to_list (MOID_LIST_T **, MOID_T *, SYMBOL_TABLE_T *);
+extern void apropos (FILE_T, char *, char *);
 extern void assign_offsets (NODE_T *);
 extern void assign_offsets_packs (MOID_LIST_T *);
 extern void assign_offsets_table (SYMBOL_TABLE_T *);
@@ -1373,7 +1327,7 @@ extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
 extern void warn_tags_threads (NODE_T *);
 extern void where (FILE_T, NODE_T *);
-extern void widen_denoter (NODE_T *);
+extern void widen_denotation (NODE_T *);
 extern void write_listing_header (MODULE_T *);
 extern void write_listing (MODULE_T *);
 extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, int);

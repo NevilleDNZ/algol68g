@@ -1,7 +1,7 @@
 <!-- RRHeader -->
 <html>
 <head>
-<title>Algol 68 Genie - Revised Report on the Algorithmic Language Algol 68</title>
+<title>Revised Report on the Algorithmic Language Algol 68 - Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -20,6 +20,7 @@ ul {font-size: 10pt; font-family: arial, sans-serif;}
 body {font-size: 10pt; font-family: arial, sans-serif;}
 tt {font-size: 10pt; font-family: "courier new", monospace;}
 code {font-size: 10pt; font-family: "courier new", monospace;}
+var {font-size: 10pt; font-weight: normal; font-style: normal; font-family: "courier new", monospace; color: darkred;}
 pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
@@ -58,8 +59,6 @@ PART V - Environment and Examples
 <td background="lines.gif">
 <p>
 <a href="algol.html"><small><b>A68G Home</b></small></a>
-<p>
-<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
 <a href="report_contents.html"><small><b>Revised Report</b></small></a>
 <p>
@@ -118,7 +117,7 @@ PART V - Environment and Examples
 a) (&cent; standard-prelude &cent;; &cent; library-prelude &cent;; &cent; system-prelude &cent;;
       PAR BEGIN &cent; system-task-1 &cent;, &cent; system-task-2 &cent;,
          (&cent; particular-prelude &cent;;
-            (start: commence: BEGIN SKIP END) ;
+            (start: commence: BEGIN SKIP END);
             &cent; particular-postlude &cent;) ,
          (&cent; another user-task &cent;) 
       END) 
@@ -126,15 +125,15 @@ b) &cent; standard-prelude (<a href="#A2">10.2</a>, <a href="#A3">10.3</a>) &cen
       &cent; system-prelude (<a href="#A41">10.4.1</a>) &cent;;
 d) &cent; system-task-1 (<a href="#A42a">10.4.2.a</a>) &cent;, &cent; system-task-2 &cent;,
       (&cent; particular-prelude &cent;;
-         (start: commence: BEGIN SKIP END) ;
+         (start: commence: BEGIN SKIP END);
          &cent; particular-postlude &cent;) ,
       (&cent; another user-task &cent;)       
 f) &cent; particular-prelude (<a href="#A51">10.5.1</a>) &cent;;
-      (start: commence: BEGIN SKIP END) ; 
+      (start: commence: BEGIN SKIP END); 
       &cent; particular-postlude (<a href="#A52">10.5.2</a>) &cent;      
 g) start: commence: BEGIN SKIP END      
 h) start: commence:
-i) stop: lock (stand in) ; lock (stand out) ; lock (stand back) }
+i) stop: lock (stand in); lock (stand out); lock (stand back) }
 </pre>
 
 <h3>
@@ -170,20 +169,20 @@ A representation of an <b>EXTERNAL-prelude</b>, <b>system-task</b> or <b>particu
 <dd>
 <a name=A13cA></a>Case A: The mark is <tt><b>P</b></tt>:  
 <br>
-&bull; <tt>-</tt>, <tt>+</tt>, <tt>&laquo;&times;, *&raquo;</tt> or <tt>/</tt> (<tt>-</tt>,  <tt>+</tt>, <tt>*</tt> or <tt>/</tt>) ; 
+&bull; <tt>-</tt>, <tt>+</tt>, <tt>&laquo;&times;, *&raquo;</tt> or <tt>/</tt> (<tt>-</tt>,  <tt>+</tt>, <tt>*</tt> or <tt>/</tt>); 
 
 <dd>
 <a name=A13cB></a>Case B: The mark is <tt><b>Q</b></tt>:  
 <br>
-&bull; <tt>&laquo;MINUSAB, -:=&raquo; , &laquo;PLUSAB, +:=&raquo;, &laquo;TIMESAB, &times;:=, *:=&raquo;</tt> or <tt>&laquo;DIVAB, /:=&raquo;</tt> (<tt>-:= , +:= , *:=</tt> or <tt>/:=</tt>) ; 
+&bull; <tt>&laquo;MINUSAB, -:=&raquo; , &laquo;PLUSAB, +:=&raquo;, &laquo;TIMESAB, &times;:=, *:=&raquo;</tt> or <tt>&laquo;DIVAB, /:=&raquo;</tt> (<tt>-:= , +:= , *:=</tt> or <tt>/:=</tt>); 
 <dd>
 <a name=A13cC></a>Case C: The mark is <tt><b>R</b></tt>:  
 <br>
-&bull; <tt>&laquo;&lt;, LT&raquo;</tt> , <tt>&laquo;&le;, LE&raquo;</tt> , <tt>&laquo;=, EQ&raquo;</tt>,  <tt>&laquo;&ne;, /=, NE&raquo;</tt> , <tt>&laquo;&ge;, GE&raquo;</tt> or <tt>&laquo;&gt;, GT&raquo;</tt>  (<tt>&lt;</tt>, <tt>&le;</tt>, =, <tt>&ne;</tt>, <tt>&ge;</tt> or <tt>&gt;</tt>) ; 
+&bull; <tt>&laquo;&lt;, LT&raquo;</tt> , <tt>&laquo;&le;, LE&raquo;</tt> , <tt>&laquo;=, EQ&raquo;</tt>,  <tt>&laquo;&ne;, /=, NE&raquo;</tt> , <tt>&laquo;&ge;, GE&raquo;</tt> or <tt>&laquo;&gt;, GT&raquo;</tt>  (<tt>&lt;</tt>, <tt>&le;</tt>, =, <tt>&ne;</tt>, <tt>&ge;</tt> or <tt>&gt;</tt>); 
 <dd>
 <a name=A13cD></a>Case D: The mark is <tt><b>E</b></tt>:  
 <br>
-&bull; <tt>&laquo;=, EQ&raquo;</tt> or <tt>&laquo;&ne;, /=, NE&raquo;</tt> (= or <tt>&ne;</tt>) ; 
+&bull; <tt>&laquo;=, EQ&raquo;</tt> or <tt>&laquo;&ne;, /=, NE&raquo;</tt> (= or <tt>&ne;</tt>); 
 </dl>
 
 <p>
@@ -196,7 +195,7 @@ A representation of an <b>EXTERNAL-prelude</b>, <b>system-task</b> or <b>particu
 <a name=A13s4></a>Step 4: If, in a given form, as possibly modified or made in the steps above, there occurs a sequence <i>S</i> of <b>symbols</b> enclosed between &laquo; and  &raquo; and if, in that <i>S</i>, <tt><b><i>L</i></b> INT</tt>, <tt><b><i>L</i></b>  REAL</tt>, <tt><b><i>L</i></b> COMPL</tt>, <tt><b><i>L</i></b> BITS</tt> or <tt><b><i>L</i></b> BYTES</tt> occurs, then <i>S</i> is replaced by a chain of a sufficient number of sequences separated by <b>and-also-symbols</b>, the <i>n</i>-th of which is a copy of <i>S</i> in which copy each occurrence of <tt><i>L</i></tt> (<tt><i>L</i></tt>, <tt> <b>K</b></tt>, <tt> <b>S</b></tt>)  is replaced by (n - 1) times <tt>long</tt> (<tt>LONG</tt>, <tt>LENG</tt>,  <tt>SHORTEN</tt>) , followed by an <b>and-also-symbol</b> and a further chain of a sufficient number of sequences separated by <b>and-also-symbols</b>, the <i>m</i>-th of which is a copy of <i>S</i> in which copy each occurrence of <tt><i>L</i></tt> (<tt><i>L</i></tt>, <tt> <b>K</b></tt>, <tt> <b>S</b></tt>) has been replaced by <i>m</i> times <tt>short</tt> (<tt>SHORT</tt>, <tt>SHORTEN</tt>, <tt>LENG</tt>);  the &laquo; and &raquo; enclosing that <i>S</i> are then deleted;  
 
 <p>
-<a name=A13s5></a>Step 5: If, in a given form <i>F</i>, as possibly modified or made in the steps above, <tt><b><i>L</i></b> INT</tt>, (<tt><b><i>L</i></b>  REAL</tt>, <tt><b><i>L</i></b> COMPL</tt>, <tt><i>L</i>  BITS</tt>, <tt><b><i>L</i></b> BYTES</tt>) occurs, then <i>F</i> is replaced by a sequence of a sufficient number of new forms, the <i>n</i>-th of which is a copy of <i>F</i> in which copy each occurrence of <tt><i>L</i></tt> (<tt><i>L</i></tt>,  <tt> <b>K</b></tt>, <tt> <b>S</b></tt>) is replaced by (n - 1) times <tt>long</tt>  (<tt>LONG</tt>, <tt>LENG</tt>, <tt>SHORTEN</tt>) , and each occurrence of <tt>long <i>L</i></tt> (<tt>LONG <i>L</i></tt>) by <i>n</i> times <tt>long</tt>  (<tt>LONG</tt>) , followed by a further sequence of a sufficient number of new forms, the <i>m</i>-th of which is a copy of <i>F</i> in which copy each occurrence of <tt><i>L</i></tt> (<tt><i>L</i></tt>, <tt> <b>K</b></tt>, <tt> <b>S</b></tt>) is replaced by <i>m</i> times <tt>short</tt> (<tt>SHORT</tt>, <tt>SHORTEN</tt>,  <tt>LENG</tt>) , and each occurrence of <tt>LONG <i>L</i></tt> (<tt>long <i>L</i></tt>) by (m - 1) times <tt>SHORT</tt> (<tt>short</tt>) ;  
+<a name=A13s5></a>Step 5: If, in a given form <i>F</i>, as possibly modified or made in the steps above, <tt><b><i>L</i></b> INT</tt>, (<tt><b><i>L</i></b>  REAL</tt>, <tt><b><i>L</i></b> COMPL</tt>, <tt><i>L</i>  BITS</tt>, <tt><b><i>L</i></b> BYTES</tt>) occurs, then <i>F</i> is replaced by a sequence of a sufficient number of new forms, the <i>n</i>-th of which is a copy of <i>F</i> in which copy each occurrence of <tt><i>L</i></tt> (<tt><i>L</i></tt>,  <tt> <b>K</b></tt>, <tt> <b>S</b></tt>) is replaced by (n - 1) times <tt>long</tt>  (<tt>LONG</tt>, <tt>LENG</tt>, <tt>SHORTEN</tt>) , and each occurrence of <tt>long <i>L</i></tt> (<tt>LONG <i>L</i></tt>) by <i>n</i> times <tt>long</tt>  (<tt>LONG</tt>) , followed by a further sequence of a sufficient number of new forms, the <i>m</i>-th of which is a copy of <i>F</i> in which copy each occurrence of <tt><i>L</i></tt> (<tt><i>L</i></tt>, <tt> <b>K</b></tt>, <tt> <b>S</b></tt>) is replaced by <i>m</i> times <tt>short</tt> (<tt>SHORT</tt>, <tt>SHORTEN</tt>,  <tt>LENG</tt>) , and each occurrence of <tt>LONG <i>L</i></tt> (<tt>long <i>L</i></tt>) by (m - 1) times <tt>SHORT</tt> (<tt>short</tt>);  
 
 <p>
 <a name=A13s6></a>Step 6: Each occurrence of <tt><b>F</b></tt> (<tt>PRIM</tt>) in any form, as possibly modified or made in the steps above, is replaced by a representation of a <b>letter-aleph-symbol</b> (<b>primal-symbol</b>) {<a href="report_4.html#94a">9.4.a</a>};   
@@ -290,13 +289,13 @@ d) MODE <b><i>L</i></b> REAL = <b>C</b> an actual-declarer  specifying the mode 
 <a name=A22e></a>
 e)  MODE CHAR = <b>C</b> an actual-declarer specifying the mode 'character'  <b>C</b>; 
 <a name=A22f></a>
-f) MODE <b><i>L</i></b> COMPL = STRUCT (<b><i>L</i></b> REAL re, im) ; 
+f) MODE <b><i>L</i></b> COMPL = STRUCT (<b><i>L</i></b> REAL re, im); 
 <a name=A22g></a>
-g) MODE <b><i>L</i></b> BITS = STRUCT ([1 : <i>L</i> bits width] BOOL <i>L</i> <b>F</b>) ; {See <a href="#A21j">10.2.1.j</a>} 
+g) MODE <b><i>L</i></b> BITS = STRUCT ([1 : <i>L</i> bits width] BOOL <i>L</i> <b>F</b>); {See <a href="#A21j">10.2.1.j</a>} 
       {The <b>field-selector</b> is hidden from the user in order that he may not 
       break open the structure; in particular, he may not subscript the field.} 
 <a name=A22h></a>
-h) MODE <b><i>L</i></b> BYTES = STRUCT ([1 : <i>L</i> bytes width] CHAR <i>L</i>  <b>F</b>) ; {See <a href="#A21m">10.2.1.m</a>}  
+h) MODE <b><i>L</i></b> BYTES = STRUCT ([1 : <i>L</i> bytes width] CHAR <i>L</i>  <b>F</b>); {See <a href="#A21m">10.2.1.m</a>}  
 <a name=A22i></a>
 i) MODE STRING = FLEX [1 : 0] CHAR;   
 </pre>
@@ -365,17 +364,17 @@ e) OP UPB = (ROWS a) INT: 1 UPB a;
 <p>
 <a name=A232a></a>
 <pre>
-a) OP OR = (BOOL b) BOOL: (a | TRUE | b) ; 
+a) OP OR = (BOOL b) BOOL: (a | TRUE | b); 
 <a name=A232b></a>
-b) OP &laquo;&amp;, AND&raquo; = (BOOL a, b) BOOL: (a | b | FALSE) ; 
+b) OP &laquo;&amp;, AND&raquo; = (BOOL a, b) BOOL: (a | b | FALSE); 
 <a name=A232c></a>
-c) OP &laquo;~, &not;, NOT&raquo; = (BOOL a) BOOL: (a | FALSE | TRUE) ; 
+c) OP &laquo;~, &not;, NOT&raquo; = (BOOL a) BOOL: (a | FALSE | TRUE); 
 <a name=A232d></a>
-d) OP &laquo;=, EQ&raquo; = (BOOL a, b) BOOL: (a AND b) OR (NOT a AND NOT b) ; 
+d) OP &laquo;=, EQ&raquo; = (BOOL a, b) BOOL: (a AND b) OR (NOT a AND NOT b); 
 <a name=A232e></a>
-e) OP &laquo;&ne;, /=, NE&raquo; = (BOOL a, b) BOOL: NOT (a = b) ;  
+e) OP &laquo;&ne;, /=, NE&raquo; = (BOOL a, b) BOOL: NOT (a = b);  
 <a name=A232f></a>
-f) OP ABS = (BOOL a) INT: (a | 1 | 0) ;
+f) OP ABS = (BOOL a) INT: (a | 1 | 0);
 </pre> 
 
 <h3>
@@ -387,11 +386,11 @@ f) OP ABS = (BOOL a) INT: (a | 1 | 0) ;
 a) OP &laquo;&lt;, LT&raquo; = (<b><i>L</i></b> INT a, b) BOOL: <b>C</b> <tt>true</tt> if the value of 'a' is smaller than 
       {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' and <tt>false</tt> otherwise <b>C</b>; 
 <a name=A233b></a>
-b) OP &laquo;&le;, <=, LE&raquo; = (<b><i>L</i></b> INT a, b) BOOL: NOT (b < a) ;
+b) OP &laquo;&le;, <=, LE&raquo; = (<b><i>L</i></b> INT a, b) BOOL: NOT (b < a);
 <a name=A233c></a>
 c) OP &laquo;=, EQ&raquo; = (<b><i>L</i></b> INT a, b) BOOL: a &le; b AND  b &le; a; 
 <a name=A233d></a>
-d) OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b> INT a, b) BOOL: NOT (a = b) ; 
+d) OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b> INT a, b) BOOL: NOT (a = b); 
 <a name=A233e></a>
 e) OP &laquo;&ge;, >=, GE&raquo; = (<b><i>L</i></b> INT a, b) BOOL: b &le; a; 
 <a name=A233f></a>
@@ -405,7 +404,7 @@ i) OP + = (<b><i>L</i></b> INT a, b) <b><i>L</i></b> INT: a - -b;
 <a name=A233j></a>
 j) OP + = (<b><i>L</i></b> INT a) <b><i>L</i></b> INT: a;  
 <a name=A233k></a>
-k) OP ABS = (<b><i>L</i></b> INT a) <b><i>L</i></b> INT: (a &lt; <i>L</i> 0 | -a | a) ; 
+k) OP ABS = (<b><i>L</i></b> INT a) <b><i>L</i></b> INT: (a &lt; <i>L</i> 0 | -a | a); 
 <a name=A233l></a>
 l) OP &laquo;&times;, *&raquo; = (<b><i>L</i></b> INT a, b) <b><i>L</i></b> INT:
       BEGIN <b><i>L</i></b> INT s := <i>L</i> 0, i := ABS b;
@@ -422,12 +421,12 @@ m) OP &laquo;&divide, %, OVER&raquo; = (<b><i>L</i></b> INT a, b) <b><i>L</i></b
      FI;
 <a name=A233n></a>
 n) OP &laquo;&divide;&times; &divide;&times;, %&times;, MOD&raquo; = (<b><i>L</i></b> INT a, i) <b><i>L</i></b> INT:
-      (<b><i>L</i></b> INT r = a - a &divide; b &times; b; r &lt; 0 | r + ABS b | r) ; 
+      (<b><i>L</i></b> INT r = a - a &divide; b &times; b; r &lt; 0 | r + ABS b | r); 
 <a name=A233o></a>
-o) OP / = (<b><i>L</i></b> INT a, b) <b><i>L</i></b>  REAL: <b><i>L</i></b>  REAL (a) / <i>L</i>  REAL (b) ; 
+o) OP / = (<b><i>L</i></b> INT a, b) <b><i>L</i></b>  REAL: <b><i>L</i></b>  REAL (a) / <i>L</i>  REAL (b); 
 <a name=A233p></a>
 p) OP &laquo;&uarr;, **, UP&raquo; = (<b><i>L</i></b> INT a, INT b) <b><i>L</i></b> INT:
-      (b &ge; 0 | <b><i>L</i></b> INT p := <b><i>L</i></b> 1; TO b DO p := p &times; a OD; p) ; 
+      (b &ge; 0 | <b><i>L</i></b> INT p := <b><i>L</i></b> 1; TO b DO p := p &times; a OD; p); 
 <a name=A233q></a>
 q) OP LENG = (<b><i>L</i></b> INT a) LONG <i>L</i>  INT: <b>C</b> the long <i>L</i> integral value lengthened
       from {<a href="report_1.html#2131e">2.1.3.1.e</a>} the value of 'a' <b>C</b>; 
@@ -438,9 +437,9 @@ r) OP SHORTEN = (LONG <b><i>L</i></b> INT a) <b><i>L</i></b> INT: <b>C</b> the <
 s) OP ODD = (<b><i>L</i></b> INT a) BOOL: ABS a &divide;&times; <i>L</i>2 = <i>L</i>1; 
 <a name=A233t></a>
 t) OP SIGN = (<i>L</i>  INT a) INT:
-      (a &gt; <i>L</i> 0 | 1 |: a &lt; <i>L</i>0 | -1 | 0) ; 
+      (a &gt; <i>L</i> 0 | 1 |: a &lt; <i>L</i>0 | -1 | 0); 
 <a name=A233u></a>
-u) OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b> INT a, b)  <b><i>L</i></b> COMPL : (a, b) ;  
+u) OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b> INT a, b)  <b><i>L</i></b> COMPL : (a, b);  
 </pre>
 
 <h3>
@@ -452,11 +451,11 @@ u) OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b> INT a, b)  <b><i>L</i></b
 a) OP &laquo;&lt;, LT&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: <b>C</b> <tt>true</tt> if the value of 'a' is smaller 
       than {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' and <tt>false</tt> otherwise <b>C</b>; 
 <a name=A234b></a>
-b) OP &laquo;&le;, <=, LE&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: NOT (b < a) ;
+b) OP &laquo;&le;, <=, LE&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: NOT (b < a);
 <a name=A234c></a>
 c) OP &laquo;=, EQ&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: a &le; b AND b &le; a; 
 <a name=A234d></a>
-d) OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: NOT (a = b) ; 
+d) OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: NOT (a = b); 
 <a name=A234e></a>
 e) OP &laquo;&ge;,  >=, GE&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: b &le; a; 
 <a name=A234f></a>
@@ -470,7 +469,7 @@ i) OP + = (<b><i>L</i></b>  REAL a, b) <b><i>L</i></b>  REAL: a - -b;
 <a name=A234j></a>
 j) OP + = (<b><i>L</i></b>  REAL a) <b><i>L</i></b>  REAL: a; 
 <a name=A234k></a>
-k) OP ABS = (<b><i>L</i></b>  REAL a) <b><i>L</i></b>  REAL: (a &lt; <i>L</i> 0 | -a | a) ; 
+k) OP ABS = (<b><i>L</i></b>  REAL a) <b><i>L</i></b>  REAL: (a &lt; <i>L</i> 0 | -a | a); 
 <a name=A234l></a>
 l) OP &laquo;&times;, *&raquo; = (<b><i>L</i></b>  REAL a, b) <b><i>L</i></b>  REAL: <b>C</b> the value of 'a' times {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' <b>C</b>; 
 <a name=A234m></a>
@@ -485,7 +484,7 @@ p) OP ROUND = (<b><i>L</i></b>  REAL a) <b><i>L</i></b> INT: <b>C</b> a <i>L</i>
       is widenable to {<a href="report_1.html#2131e">2.1.3.1.e</a>}  a <b><i>L</i></b>  REAL value differing by not more 
       than one-half from the value of 'a' <b>C</b>; 
 <a name=A234q></a>
-q) OP SIGN = (<b><i>L</i></b> REAL a) INT: (a &gt;<i>L</i> 0 | 1 |: a &lt; <i>L</i> 0 | -1 | 0) ;  
+q) OP SIGN = (<b><i>L</i></b> REAL a) INT: (a &gt;<i>L</i> 0 | 1 |: a &lt; <i>L</i> 0 | -1 | 0);  
 <a name=A234r></a>
 r) OP ENTIER = (<b><i>L</i></b> REAL a) <b><i>L</i></b> INT:
       BEGIN <b><i>L</i></b> INT j := <i>L</i> 0;
@@ -494,7 +493,7 @@ r) OP ENTIER = (<b><i>L</i></b> REAL a) <b><i>L</i></b> INT:
          j
       END;
 <a name=A234s></a>
-s) OP &laquo;+*, +*, I&raquo;  = (<b><i>L</i></b>  REAL a, b) <b><i>L</i></b> COMPL: (a, b) ;  
+s) OP &laquo;+*, +*, I&raquo;  = (<b><i>L</i></b>  REAL a, b) <b><i>L</i></b> COMPL: (a, b);  
 </pre>
 
 <h3>
@@ -503,20 +502,20 @@ s) OP &laquo;+*, +*, I&raquo;  = (<b><i>L</i></b>  REAL a, b) <b><i>L</i></b> CO
 
 <a name=A235a></a>
 <pre>
-a) OP <b>P</b> = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) <b><i>L</i></b>  REAL: a <b>P</b> <b><i>L</i></b>  REAL (b) ; 
+a) OP <b>P</b> = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) <b><i>L</i></b>  REAL: a <b>P</b> <b><i>L</i></b>  REAL (b); 
 <a name=A235b></a>
 b) OP <b>P</b> = (<b><i>L</i></b> INT a, <b><i>L</i></b>  REAL b) <b><i>L</i></b>  REAL: <b><i>L</i></b>  REAL (a) <b>P</b> b; 
 <a name=A235c></a>
-c)  OP <b>R</b> = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) BOOL: a <b>R</b> <b><i>L</i></b>  REAL (b) ; 
+c)  OP <b>R</b> = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) BOOL: a <b>R</b> <b><i>L</i></b>  REAL (b); 
 <a name=A235d></a>
 d) OP <b>R</b> = (<b><i>L</i></b> INT a, <b><i>L</i></b>  REAL b) BOOL: <b><i>L</i></b>  REAL (a) <b>R</b> b; 
 <a name=A235e></a>
-e) OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) <b><i>L</i></b> COMPL: (a, b) ; 
+e) OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) <b><i>L</i></b> COMPL: (a, b); 
 <a name=A235f></a>
-f)  OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b> INT a, <b><i>L</i></b>  REAL b) <b><i>L</i></b> COMPL: (a, b) ; 
+f)  OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b> INT a, <b><i>L</i></b>  REAL b) <b><i>L</i></b> COMPL: (a, b); 
 <a name=A235g></a>
 g) OP &laquo;&uarr;, **, UP&raquo; = (<i>L</i> REAL a, INT b) <b><i>L</i></b> REAL: 
-      (<b><i>L</i></b> REAL p := <b><i>L</i></b> 1; TO ABS b DO p := p &times; a OD; (b &ge; 0 | p | <b><i>L</i></b> 1 / p)) ;  
+      (<b><i>L</i></b> REAL p := <b><i>L</i></b> 1; TO ABS b DO p := p &times; a OD; (b &ge; 0 | p | <b><i>L</i></b> 1 / p));  
 </pre>
 
 <h3>
@@ -527,7 +526,7 @@ g) OP &laquo;&uarr;, **, UP&raquo; = (<i>L</i> REAL a, INT b) <b><i>L</i></b> RE
 <pre>
 a) OP <b>R</b> (CHAR a, b) BOOL: ABS a <b>R</b> ABS b; {<a href="#A21n">10.2.1.n</a>}
 <a name=A236b></a>
-b) OP + = (CHAR a, b) STRING: (a, b) ;  
+b) OP + = (CHAR a, b) STRING: (a, b);  
 </pre>
 
 <h3>
@@ -540,7 +539,7 @@ a) OP RE = (<b><i>L</i></b> COMPL a) <b><i>L</i></b>  REAL: re OF a;
 <a name=A237b></a>
 b) OP IM = (<b><i>L</i></b> COMPL a) <b><i>L</i></b>  REAL: im OF a;  
 <a name=A237c></a>
-c) OP ABS = (<b><i>L</i></b> COMPL a) <b><i>L</i></b>  REAL: <i>L</i>  sqrt (RE a&uarr; 2 + IM a &uarr; 2) ; 
+c) OP ABS = (<b><i>L</i></b> COMPL a) <b><i>L</i></b>  REAL: <i>L</i>  sqrt (RE a&uarr; 2 + IM a &uarr; 2); 
 <a name=A237d></a>
 d) OP ARG = (<b><i>L</i></b> COMPL a) <b><i>L</i></b>  REAL:
       IF <b><i>L</i></b>  REAL re = RE a, im = IM a;
@@ -556,41 +555,41 @@ e) OP CONJ = (<b><i>L</i></b> COMPL a) <b><i>L</i></b> COMPL: RE a I - IM a;
 <a name=A237f></a>
 f) OP &laquo;=, EQ&raquo; = (<b><i>L</i></b> COMPL a, b) BOOL: RE a = RE b AND IM a = IM b; 
 <a name=A237g></a>
-g)  OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b> COMPL a, b) BOOL: NOT (a = b) ; 
+g)  OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b> COMPL a, b) BOOL: NOT (a = b); 
 <a name=A237h></a>
-h) OP - = (<b><i>L</i></b> COMPL a, b) <b><i>L</i></b> COMPL: (RE a - RE b) I (IM a - IM b) ; 
+h) OP - = (<b><i>L</i></b> COMPL a, b) <b><i>L</i></b> COMPL: (RE a - RE b) I (IM a - IM b); 
 <a name=A237i></a>
 i) OP - = (<b><i>L</i></b> COMPL a) <b><i>L</i></b> COMPL: -RE a I -IM a; 
 <a name=A237j></a>
-j) OP + = (<b><i>L</i></b> COMPL a, b) <b><i>L</i></b> COMPL: (RE a + RE b) I (IM a + IM b) ; 
+j) OP + = (<b><i>L</i></b> COMPL a, b) <b><i>L</i></b> COMPL: (RE a + RE b) I (IM a + IM b); 
 <a name=A237k></a>
 k) OP + = (<b><i>L</i></b> COMPL a) <b><i>L</i></b> COMPL: a; 
 <a name=A237l></a>
 l) OP &laquo;&times;,*&raquo; = (<b><i>L</i></b> COMPL a, b) <b><i>L</i></b> COMPL: 
-      (RE a &times; RE b - IM a &times; IM b) I (RE a &times; IM b + IM a &times; RE b) ; 
+      (RE a &times; RE b - IM a &times; IM b) I (RE a &times; IM b + IM a &times; RE b); 
 <a name=A237m></a>
 m) OP / = (<b><i>L</i></b> COMPL a, b) <b><i>L</i></b> COMPL:
-      (<b><i>L</i></b>  REAL d = RE (b &times; CONJ b) ; <b><i>L</i></b> COMPL n = a&times; CONJ b;
-      (RE n / d) I (IM n / d)) ;
+      (<b><i>L</i></b>  REAL d = RE (b &times; CONJ b); <b><i>L</i></b> COMPL n = a&times; CONJ b;
+      (RE n / d) I (IM n / d));
 <a name=A237n></a>
 n) OP LENG = (<b><i>L</i></b> COMPL a) LONG <b><i>L</i></b> COMPL: LENG RE a I LENG IM a; 
 <a name=A237o></a>
 o) OP SHORTEN  = (LONG <b><i>L</i></b> COMPL a) <b><i>L</i></b> COMPL: SHORTEN RE a I SHORTEN IM a; 
 <a name=A237p></a>
-p) OP <b>P</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b> INT b) <b><i>L</i></b> COMPL: a <b>P</b> <b><i>L</i></b> COMPL (b) ; 
+p) OP <b>P</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b> INT b) <b><i>L</i></b> COMPL: a <b>P</b> <b><i>L</i></b> COMPL (b); 
 <a name=A237q></a>
-q) OP <b>P</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b>  REAL b) <b><i>L</i></b> COMPL: a <b>P</b> <b><i>L</i></b> COMPL (b) ; 
+q) OP <b>P</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b>  REAL b) <b><i>L</i></b> COMPL: a <b>P</b> <b><i>L</i></b> COMPL (b); 
 <a name=A237r></a>
 r) OP <b>P</b> = (<b><i>L</i></b> INT a, <b><i>L</i></b> COMPL b) <b><i>L</i></b> COMPL: <b><i>L</i></b> COMPL (a) <b>P</b> b;  
 <a name=A237s></a>
 s) OP <b>P</b> = (<b><i>L</i></b>  REAL a, <b><i>L</i></b> COMPL b) <b><i>L</i></b> COMPL: <b><i>L</i></b> COMPL (a) <b>P</b> b; 
 <a name=A237t></a>
 t) OP &laquo;&uarr;,  **, UP&raquo; = (<b><i>L</i></b> COMPL a, INT b) <b><i>L</i></b> COMPL: 
-      (<b><i>L</i></b> COMPL p := <b><i>L</i></b> 1; TO ABS b DO p := p &times; a OD; (b &ge; 0 | p | <b><i>L</i></b> 1 / p)) ; 
+      (<b><i>L</i></b> COMPL p := <b><i>L</i></b> 1; TO ABS b DO p := p &times; a OD; (b &ge; 0 | p | <b><i>L</i></b> 1 / p)); 
 <a name=A237u></a>
-u) OP <b>E</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b> INT b) BOOL: a <b>E</b> <b><i>L</i></b> COMPL (b) ; 
+u) OP <b>E</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b> INT b) BOOL: a <b>E</b> <b><i>L</i></b> COMPL (b); 
 <a name=A237v></a>
-v) OP <b>E</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b>  REAL b) BOOL: a <b>E</b> <b><i>L</i></b> COMPL (b) ; 
+v) OP <b>E</b> = (<b><i>L</i></b> COMPL a, <b><i>L</i></b>  REAL b) BOOL: a <b>E</b> <b><i>L</i></b> COMPL (b); 
 <a name=A237w></a>
 w) OP <b>E</b> =  (<b><i>L</i></b> INT a, <b><i>L</i></b> COMPL b) BOOL: b <b>E</b> a; 
 <a name=A237x></a>
@@ -611,7 +610,7 @@ a) OP &laquo;=, EQ&raquo; = (<b><i>L</i></b> BITS a, b) BOOL:
          c
       END;
 <a name=A238b></a>
-b) OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b> BITS a, b) BOOL: NOT (a = b) ; 
+b) OP &laquo;&ne;, /=, NE&raquo; = (<b><i>L</i></b> BITS a, b) BOOL: NOT (a = b); 
 <a name=A238c></a>
 c) OP OR = (<b><i>L</i></b> BITS a, b) <b><i>L</i></b> BITS :
       BEGIN <b><i>L</i></b> BITS c;
@@ -686,10 +685,10 @@ m) OP &laquo;~, &not;, NOT&raquo; = (<b><i>L</i></b> BITS a) <b><i>L</i></b> BIT
          c
       END;
 <a name=A238n></a>
-n) OP LENG = (<b><i>L</i></b> BITS a) LONG <b><i>L</i></b> BITS : long <i>L</i> bits pack (a) ; 
+n) OP LENG = (<b><i>L</i></b> BITS a) LONG <b><i>L</i></b> BITS : long <i>L</i> bits pack (a); 
 <a name=A238o></a>
 o) OP SHORTEN =  (LONG <b><i>L</i></b> BITS a) <b><i>L</i></b> BITS: <i>L</i> bits pack ([ ] BOOL (a) 
-      [long <i>L</i> bits width -  <i>L</i> bits width + 1 : ]) ;  
+      [long <i>L</i> bits width -  <i>L</i> bits width + 1 : ]);  
 </pre>
 
 <h3>
@@ -698,7 +697,7 @@ o) OP SHORTEN =  (LONG <b><i>L</i></b> BITS a) <b><i>L</i></b> BITS: <i>L</i> bi
 
 <a name=A239a></a>
 <pre>
-a) OP <b>R</b> = (<b><i>L</i></b> BYTES a, b) BOOL: STRING (a) <b>R</b> STRING (b) ; 
+a) OP <b>R</b> = (<b><i>L</i></b> BYTES a, b) BOOL: STRING (a) <b>R</b> STRING (b); 
 <a name=A239b></a>
 b) OP ELEM = (INT a, <b><i>L</i></b> BYTES b) CHAR: (<i>L</i> <b>F</b> OF b) [a]; 
 <a name=A239c></a>
@@ -711,10 +710,10 @@ c) PROC <i>L</i> bytes pack = (STRING a) <b><i>L</i></b> BYTES:
          c
       FI;
 <a name=A239d></a>
-d) OP LENG = (<b><i>L</i></b> BYTES a) LONG <b><i>L</i></b> BYTES: long <i>L</i> bytes pack (a) ; 
+d) OP LENG = (<b><i>L</i></b> BYTES a) LONG <b><i>L</i></b> BYTES: long <i>L</i> bytes pack (a); 
 <a name=A239e></a>
 e) OP SHORTEN = (LONG <b><i>L</i></b> BYTES a) <b><i>L</i></b> BYTES: 
-      <i>L</i> bytes pack (STRING (a) [ : <i>L</i> bytes width]) ;
+      <i>L</i> bytes pack (STRING (a) [ : <i>L</i> bytes width]);
 </pre>   
 
 <h3>
@@ -731,32 +730,35 @@ a) OP &laquo;&lt;, LT&raquo; = (STRING a, b) BOOL:
          (c = 0 | m &lt; n AND n &gt; 0 | c &lt; 0) 
       END;
 <a name=A23Ab></a>
-b) OP &laquo;&le;, <=, LE&raquo; = (STRING a, b) BOOL: NOT (b &lt; a) ; 
+b) OP &laquo;&le;, <=, LE&raquo; = (STRING a, b) BOOL: NOT (b &lt; a); 
 <a name=A23Ac></a>
 c) OP &laquo;=, EQ&raquo;  = (STRING a, b) BOOL: a &le; b AND b &ge; a; 
 <a name=A23Ad></a>
-d)  OP &laquo;&ne;, /=, NE&raquo; = (STRING a, b) BOOL: NOT (a = b) ; 
+d)  OP &laquo;&ne;, /=, NE&raquo; = (STRING a, b) BOOL: NOT (a = b); 
 <a name=A23Ae></a>
 e) OP &laquo;&ge;, >=, GE&raquo; = (STRING a, b) BOOL: b &le; a; 
 <a name=A23Af></a>
 f) OP &laquo;&gt;, GT&raquo; = (STRING a, b) BOOL: b < a; 
 <a name=A23Ag></a>
-g) OP <b>R</b> = (STRING a, CHAR b)  BOOL: a <b>R</b> STRING (b) ; 
+g) OP <b>R</b> = (STRING a, CHAR b)  BOOL: a <b>R</b> STRING (b); 
 <a name=A23Ah></a>
 h) OP <b>R</b> = (CHAR a, STRING b) BOOL: STRING (a) <b>R</b> b; 
 <a name=A23Ai></a>
 i) OP + = (STRING a, b) STRING:
-      (INT m= (INT la = UPB a[@1]; la &lt; 0 | 0 | la) ,
-       n = (INT lb = UPB b[@1]; lb &lt; 0 | 0 | lb) ;
+      (INT m = (INT la = UPB a[@1]; la &lt; 0 | 0 | la),
+           n = (INT lb = UPB b[@1]; lb &lt; 0 | 0 | lb);
        [1 : m + n] CHAR c;
-       (m > 0 | c[1 : m] := a[@1]); (n > 0 | c[m + 1 : m + n] := b[@1]; c) [[ANW correction - RR has wrong assignments]]
+       c[1 : m] := a[@1]; c[m + 1 : m + n] := b[@1]; c
+       <var>[[The assignments in the last line have potential bounds errors 
+         when UPB a[@1] < 0 or UPB b[@1] < 0 and should read
+         (m > 0 | c[1 : m] := a[@1]);  (n > 0 | c[m + 1 : m + n] := b[@1]); c]]</var>
       );
 <a name=A23Aj></a>
-j) OP + = (STRING a, CHAR b) STRING: a  + STRING (b) ; 
+j) OP + = (STRING a, CHAR b) STRING: a  + STRING (b); 
 <a name=A23Ak></a>
 k) OP + = (CHAR a, STRING b)  STRING: STRING (a) + b; 
 <a name=A23Al></a>
-l) OP &laquo;&times;, *&raquo; = (STRING a, INT b) STRING: (STRING c; TO b DO c := c + a OD; c) ; 
+l) OP &laquo;&times;, *&raquo; = (STRING a, INT b) STRING: (STRING c; TO b DO c := c + a OD; c); 
 <a name=A23Am></a>
 m) OP &laquo;&times;, *&raquo; = (INT a, STRING b) STRING: b &times; a;  
 <a name=A23An></a>
@@ -800,17 +802,17 @@ l) OP &laquo;DIVAB, /:=&raquo; = (REF <b><i>L</i></b>  REAL a, <i>L</i>  REAL b)
 <a name=A23Bm></a>
 m) OP &laquo;DIVAB, /:=&raquo; = (REF <b><i>L</i></b> COMPL a, <b><i>L</i></b> COMPL b) REF <b><i>L</i></b> COMPL: a := a / b;  
 <a name=A23Bn></a>
-n) OP <b>Q</b> = (REF <b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) REF <b><i>L</i></b>  REAL: a <b>Q</b> <b><i>L</i></b>  REAL (b) ; 
+n) OP <b>Q</b> = (REF <b><i>L</i></b>  REAL a, <b><i>L</i></b> INT b) REF <b><i>L</i></b>  REAL: a <b>Q</b> <b><i>L</i></b>  REAL (b); 
 <a name=A23Bo></a>
-o) OP <b>Q</b> = (REF <b><i>L</i></b> COMPL a, <b><i>L</i></b> INT b) REF <b><i>L</i></b> COMPL: a <b>Q</b> <b><i>L</i></b> COMPL (b) ; 
+o) OP <b>Q</b> = (REF <b><i>L</i></b> COMPL a, <b><i>L</i></b> INT b) REF <b><i>L</i></b> COMPL: a <b>Q</b> <b><i>L</i></b> COMPL (b); 
 <a name=A23Bp></a>
-p) OP <b>Q</b> = (REF <b><i>L</i></b> COMPL a, <b><i>L</i></b>  REAL b) REF <b><i>L</i></b> COMPL: a <b>Q</b> <b><i>L</i></b> COMPL (b) ; 
+p) OP <b>Q</b> = (REF <b><i>L</i></b> COMPL a, <b><i>L</i></b>  REAL b) REF <b><i>L</i></b> COMPL: a <b>Q</b> <b><i>L</i></b> COMPL (b); 
 <a name=A23Bq></a>
 q) OP &laquo;PLUSAB, +:=&raquo; = (REF STRING a, STRING b) REF STRING: a := a + b; 
 <a name=A23Br></a>
 r) OP &laquo;PLUSTO , +=:&raquo; = (STRING a, REF STRING b) REF STRING: b := a + b; 
 <a name=A23Bs></a>
-s) OP &laquo;PLUSAB, +:=&raquo; = (REF STRING a, CHAR b) REF STRING: a +:= STRING (b) ; 
+s) OP &laquo;PLUSAB, +:=&raquo; = (REF STRING a, CHAR b) REF STRING: a +:= STRING (b); 
 <a name=A23Bt></a>
 t) OP &laquo;PLUSTO , +=:&raquo; = (CHAR a, REF STRING b) REF STRING: STRING (a) +=: b; 
 <a name=A23Bu></a>
@@ -861,7 +863,7 @@ k) PROC <i>L</i> next random = (REF <b><i>L</i></b> INT a) <i>L</i>  REAL:
          of integral values [<i>L</i> 0, max int] into real values  [<i>L</i> 0, <b><i>L</i></b> 1) 
          {i.e., such that 0 &le; x &lt; 1} such that the sequence of real values
          so produced preserves the properties of pseudo-randomness
-         and uniform distribution of the sequence of integral values <b>C</b>) ; 
+         and uniform distribution of the sequence of integral values <b>C</b>); 
 </pre>
 
 <h3>
@@ -876,9 +878,9 @@ Any elaboration <i>A</i> {in some environ} of either of the <b>ENCLOSED-clauses<
 
 <a name=A24a></a>
 <pre>
-a) MODE SEMA = STRUCT (REF INT <b>F</b>) ; 
+a) MODE SEMA = STRUCT (REF INT <b>F</b>); 
 <a name=A24b></a>
-b) OP LEVEL = (INT a) SEMA: (SEMA s; <b>F</b> OF s := HEAP INT := a; s) ; 
+b) OP LEVEL = (INT a) SEMA: (SEMA s; <b>F</b> OF s := HEAP INT := a; s); 
 <a name=A24c></a>
 c) OP LEVEL = (SEMA a) INT: <b>F</b> OF a;  
 <a name=A24d></a>
@@ -953,11 +955,11 @@ a) MODE ? BOOK=
         POS lpos &cent; logical end of book &cent;,
         STRING idf &cent; identification &cent;,
         BOOL putting &cent; TRUE if the book may be written to &cent;,
-        INT users &cent; the number of times the book is opened &cent;) ;
+        INT users &cent; the number of times the book is opened &cent;);
 <a name=A311b></a>
 b) MODE ? TEXT = REF [ ] [ ] [ ] CHAR, MODE ? FLEXTEXT = REF FLEX [ ] FLEX [ ] FLEX [ ] CHAR;
 <a name=A311c></a>
-c) MODE ? POS = STRUCT (INT p, l, c) ;
+c) MODE ? POS = STRUCT (INT p, l, c);
 <a name=A311d></a>
 d) PRIO ? BEYOND=5,
    OP BEYOND = (POS a, b) BOOL:
@@ -968,13 +970,13 @@ d) PRIO ? BEYOND=5,
       ELSE c OF a &gt; c OF b
       FI;
 <a name=A311e></a>
-e) MODE ? BFILE = STRUCT (REF BOOK book, REF BFILE next) ;  
+e) MODE ? BFILE = STRUCT (REF BOOK book, REF BFILE next);  
 <a name=A311f></a>
 f) REF BFILE ? chainbfile := NIL;  
 <a name=A311g></a>
 g) REF BFILE ? lockedbfile := NIL;
 <a name=A311h></a>
-h) SEMA ? bfileprotect = (SEMA s; <b>F</b> OF s := PRIM INT := 1; s) ;
+h) SEMA ? bfileprotect = (SEMA s; <b>F</b> OF s := PRIM INT := 1; s);
 </pre>
 
 <h3>
@@ -995,16 +997,16 @@ results of which are collected by the computer) , or to a filestore maintained b
 <a name=A312bb></a>bb) A "conversion key" is a value of the mode specified by <tt>CONV</tt> which is used to convert characters to and from the values as stored in "internal" form and as stored in "external" form in a book. It is a structured value comprising a row of structures, each of which contains a value in internal form and its corresponding external value. The implementation may provide additional conversion keys in its <b>library-prelude</b>.  
 
 <p>
-<a name=A312cc></a>cc) Three standard channels are provided, with properties as defined below (e,f,g) ; the implementation may provide additional channels in its <b>library-prelude</b>. The channel number field is provided in order that different channels with otherwise identical possibilities may be distinguished.}   
+<a name=A312cc></a>cc) Three standard channels are provided, with properties as defined below (e,f,g); the implementation may provide additional channels in its <b>library-prelude</b>. The channel number field is provided in order that different channels with otherwise identical possibilities may be distinguished.}   
 
 <a name=A312a></a>
 <pre>
 a) MODE CHANNEL =
       STRUCT (PROC (REF BOOK) BOOL ? reset, ? set, ? get, ? put, ? bin, ? compress, ? reidf,
          PROC BOOL ? estab, PROC POS ? max pos,
-         PROC (REF BOOK) CONV ? standconv, INT ? channel number) ;
+         PROC (REF BOOK) CONV ? standconv, INT ? channel number);
 <a name=A312b></a>
-b) MODE ? CONV = STRUCT ([1: INT (SKIP) ] STRUCT (CHAR internal, external) <b>F</b>) ;
+b) MODE ? CONV = STRUCT ([1: INT (SKIP) ] STRUCT (CHAR internal, external) <b>F</b>);
 <a name=A312c></a>
 c) PROC estab possible = (CHANNEL chan) BOOL: estab OF chan;
 <a name=A312d></a>
@@ -1049,16 +1051,16 @@ g) CHANNEL stand back channel = <b>C</b> a channel value whose fields selected b
 Example: The programmer wishes to count the number of integers on his input tape. The file <tt>intape</tt> was opened in a surrounding <b>range</b>. If he writes:
 <pre>
 BEGIN INT n := 0;
-   on logical file end (intape, (REF FILE file) BOOL: GOTO f) ;
-   DO get (intape, LOC INT) ; n +:= 1 OD;
+   on logical file end (intape, (REF FILE file) BOOL: GOTO f);
+   DO get (intape, LOC INT); n +:= 1 OD;
    f: print (n) 
  END,
 </pre>
 then the assignment to the field of <tt>intape</tt> violates the scope restriction, since the scope of the routine <tt> (REF FILE file) BOOL: GOTO f</tt> is smaller than the scope of <tt>intape</tt>, so he has to write:
 <pre>
 BEGIN INT n := 0; FILE auxin := intape;
-   on logical file end (auxin, (REF FILE file) BOOL: GOTO f) ;
-   DO get (auxin, LOC INT) ; n +:= 1 OD;
+   on logical file end (auxin, (REF FILE file) BOOL: GOTO f);
+   DO get (auxin, LOC INT); n +:= 1 OD;
    f: print (n) 
  END.
 </pre>
@@ -1077,7 +1079,7 @@ Example: The programmer wishes automatically to give a heading at the start of e
 <pre>
 on page end (f, (REF FILE file) BOOL:
      (put (file, (newpage, "page number ", whole (i +:= 1, 0) ,
-         newline)) ; TRUE) 
+         newline)); TRUE) 
          &cent; it is assumed that i has been declared elsewhere &cent;) 
 </pre>
 
@@ -1089,10 +1091,10 @@ Example: The programmer wishes to read sums of money punched as <tt>"$123.45"</t
 <pre>
 on char error (stand in, (REF FILE f, REF CHAR sugg) BOOL:
    IF sugg = "0"
-   THEN CHAR c; backspace (f) ; get (f, c) ;
-      (c = "$" | get (f, sugg) ; TRUE | FALSE) 
+   THEN CHAR c; backspace (f); get (f, c);
+      (c = "$" | get (f, sugg); TRUE | FALSE) 
    ELSE FALSE
-   FI) ;
+   FI);
 INT cents; readf (($3z"."dd$, cents)) 
 </pre>
 
@@ -1124,7 +1126,7 @@ INT cents; readf (($3z"."dd$, cents))
 <br>
 &bull; <tt>compressible</tt>, which returns <tt>true</tt> if lines and pages will be compressed {<a href="#A316aa">10.3.1.6.aa</a>} during output, in which case the book is said to be "compressible";  
 <br>
-&bull; <tt>reset possible</tt>, which returns <tt>true</tt> if the file may be reset, i.e., its current position set to (1, 1, 1) ;  
+&bull; <tt>reset possible</tt>, which returns <tt>true</tt> if the file may be reset, i.e., its current position set to (1, 1, 1);  
 <br>
 &bull; <tt>set possible</tt>, which returns <tt>true</tt> if the file may be set, i.e., the current position changed to some specified value; the book is then said to be a  "random access" book and, otherwise, a "sequential access" book:  
 <br>
@@ -1136,25 +1138,25 @@ INT cents; readf (($3z"."dd$, cents))
 <a name=A313gg></a>gg) On sequential access books, <tt>undefined</tt> (<a href="#A314a">10.3.1.4.a</a>) is called if binary and character transput is alternated, i.e., after opening or resetting (<a href="#A316j">10.3.1.6.j</a>) , either is possible but, once one has taken place, the other may not until after another reset.  
 
 <p>
-<a name=A313hh></a>hh) On sequential access books, output immediately causes the logical end of the book to be moved to the current position (unless both are in the same line) ; thus input may not follow output without first resetting (<a href="#A316j">10.3.1.6.j</a>) . 
+<a name=A313hh></a>hh) On sequential access books, output immediately causes the logical end of the book to be moved to the current position (unless both are in the same line); thus input may not follow output without first resetting (<a href="#A316j">10.3.1.6.j</a>) . 
 
 <p>
 Example:
 <pre>
 BEGIN FILE f1, t2; [1: 10000] INT x; INT n := 0;
-   open (f1, "", channel 2) ;
+   open (f1, "", channel 2);
    f2 := f1;
       &cent; now f1 and f2 can be used interchangeably &cent;
-   make conv (f1, flexocode) ; make conv (f2, telexcode) ;
+   make conv (f1, flexocode); make conv (f2, telexcode);
       &cent; now f1 and f2 use different codes; flexocode and telexcode are 
       defined in the library-prelude for this implementation &cent;
-   reset (f1) ;
+   reset (f1);
       &cent; consequently, f2 is reset too &cent;
-   on logical file end (f1, (REF FILE f) BOOL: GOTO done) ;
-   FOR i DO get (f1, x [i]) ; n := i OD;
+   on logical file end (f1, (REF FILE f) BOOL: GOTO done);
+   FOR i DO get (f1, x [i]); n := i OD;
       &cent; too bad if there are more than 10000 integers in the input &cent;
 done:   
-   reset (f1) ; FOR i TO n DO put (f2, x [i]) OD;
+   reset (f1); FOR i TO n DO put (f2, x [i]) OD;
    close (f2) &cent; f1 is now closed too &cent;
 END
 </pre>
@@ -1173,34 +1175,34 @@ a) MODE FILE =
          PROC (REF FILE) BOOL ? logical file mended, ? physical file mended,
          ? page mended, ? line mended, ? format mended,
          ? value error mended,
-         PROC (REF FILE, REF CHAR) BOOL ? char error mended) ;
+         PROC (REF FILE, REF CHAR) BOOL ? char error mended);
 <a name=A313b></a>
 b) PROC get possible = (REF FILE f) BOOL:
-      (opened OF f | (get OF chan OF f) (book OF f) | undefined; SKIP) ; 
+      (opened OF f | (get OF chan OF f) (book OF f) | undefined; SKIP); 
 <a name=A313c></a>
 c) PROC put possible = (REF FILE f) BOOL:
-      (opened OF f | (put OF chan OF f) (book OF f) | undefined; SKIP) ; 
+      (opened OF f | (put OF chan OF f) (book OF f) | undefined; SKIP); 
 <a name=A313d></a>
 d) PROC bin possible = (REF FILE f) BOOL:
-      (opened OF f |  (bin OF chan OF f) (book OF f) | undefined; SKIP) ; 
+      (opened OF f |  (bin OF chan OF f) (book OF f) | undefined; SKIP); 
 <a name=A313e></a>
 e) PROC compressible = (REF FILE f) BOOL:
-      (opened OF f | (compress OF chan OF f) (book OF f) | undefined; SKIP) ; 
+      (opened OF f | (compress OF chan OF f) (book OF f) | undefined; SKIP); 
 <a name=A313f></a>
 f) PROC reset possible = (REF FILE f) BOOL:
-      (opened OF f  | (reset OF chan OF f) (book OF f) | undefined; SKIP) ; 
+      (opened OF f  | (reset OF chan OF f) (book OF f) | undefined; SKIP); 
 <a name=A313g></a>
 g) PROC set possible = (REF FILE f) BOOL:
-      (opened OF f |  (set OF chan OF f) (book OF f) | undefined; SKIP) ;
+      (opened OF f |  (set OF chan OF f) (book OF f) | undefined; SKIP);
 <a name=A313h></a>
 h) PROC reidf possible = (REF FILE f) BOOL:
-      (opened OF f  | (reidf OF chan OF f) (book OF f) | undefined; SKIP) ;
+      (opened OF f  | (reidf OF chan OF f) (book OF f) | undefined; SKIP);
 <a name=A313i></a>
 i) PROC chan = (REF FILE f) CHANNEL:
-      (opened OF f | chan OF f | undefined; SKIP) ;
+      (opened OF f | chan OF f | undefined; SKIP);
 <a name=A313j></a>
 j) PROC make conv = (REF FILE f, PROC (REF BOOK) CONV c) VOID:
-      (opened OF f | conv OF f := c (book OF f) | undefined) ;
+      (opened OF f | conv OF f := c (book OF f) | undefined);
 <a name=A313k></a>
 k) PROC make term = (REF FILE f, STRING t) VOID: term OF f := t;
 <a name=A313l></a>
@@ -1274,20 +1276,20 @@ b) PROC establish =
       BEGIN
          DOWN bfileprotect;
          PRIM BOOK book :=
-            (PRIM FLEX [1 : p] FLEX [1 : l] FLEX [1 : c] CHAR, (1, 1, 1) , idf, TRUE, 1) ;
+            (PRIM FLEX [1 : p] FLEX [1 : l] FLEX [1 : c] CHAR, (1, 1, 1) , idf, TRUE, 1);
          IF file available (chan) AND (put OF chan) (book) 
            AND estab OF chan AND NOT (POS (p, l, c) BEYOND max pos OF chan) 
            AND NOT (POS (1, 1, 1) BEYOND POS (p, l, c)) AND idfok (idf) 
          THEN   
-            (opened OF file | UP gremlins | UP bfileprotect) ;
+            (opened OF file | UP gremlins | UP bfileprotect);
             file :=
                (book, text OF book, chan, SKIP, SKIP,
                 &cent; state: &cent; HEAP BOOL := FALSE, HEAP BOOL := TRUE,
                 HEAP BOOL := FALSE, HEAP BOOL := FALSE, HEAP BOOL := TRUE,
                 HEAP POS := (1, 1, 1) , "", (standconv OF chan) (book) ,
                 &cent; event routines: &cent; <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>,  
-                (REF FILE f, REF CHAR a) BOOL: FALSE) ;
-            (NOT bin possible (file) | set char mood (file)) ;
+                (REF FILE f, REF CHAR a) BOOL: FALSE);
+            (NOT bin possible (file) | set char mood (file));
             0
          ELSE UP bfileprotect; undefined
          FI
@@ -1321,9 +1323,9 @@ d) PROC open = (REF FILE file, STRING idf, CHANNEL chan) INT:
                       opening) immediately &cent;
                 ELSE
                    users OF book +:= 1;
-                   ((put OF chan) (book) | putting OF book := TRUE) ;
+                   ((put OF chan) (book) | putting OF book := TRUE);
                    REF REF BFILE (bf) := next OF bf; &cent; remove bfile from chain &cent;
-                   ( opened OF file | UP gremlins | UP bfileprotect) ;
+                   ( opened OF file | UP gremlins | UP bfileprotect);
                    file :=
                      (book, text OF book, chan, SKIP, SKIP,
                       &cent; state: &cent; HEAP BOOL := FALSE, HEAP BOOL := FALSE,
@@ -1331,10 +1333,10 @@ d) PROC open = (REF FILE file, STRING idf, CHANNEL chan) INT:
                       HEAP BOOL := TRUE,
                       HEAP POS := (1, 1, 1) , "", (standconv OF chan) (book) ,
                       &cent; event routines: &cent; <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>,
-                      <tt>false</tt>, (REF FILE f, REF CHAR a) BOOL: FALSE) ;
-                   (NOT bin possible (file) | set char mood (file)) ;
-                   (NOT get possible (file) | set write mood (file)) ;
-                   (NOT put possible (file) | set read mood (file)) ;
+                      <tt>false</tt>, (REF FILE f, REF CHAR a) BOOL: FALSE);
+                   (NOT bin possible (file) | set char mood (file));
+                   (NOT get possible (file) | set write mood (file));
+                   (NOT put possible (file) | set read mood (file));
                    0
                 FI
             FI
@@ -1351,8 +1353,8 @@ e) PROC associate =
          PROC t = (REF BOOK a) BOOL: TRUE;
          PROC f = (REF BOOK a) BOOL: FALSE;
          CHANNEL chan = (t, t, t, t, f, f, f, BOOL: FALSE,
-            POS: (max int, max int, max int) , SKIP, SKIP) ;
-         (opened OF file | DOWN bfileprotect; UP gremlins) ;
+            POS: (max int, max int, max int) , SKIP, SKIP);
+         (opened OF file | DOWN bfileprotect; UP gremlins);
          file :=
             (HEAP BOOK := (SKIP, ( UPB sss + 1, 1, 1) , SKIP, TRUE, 1) , sss, chan,
              SKIP, SKIP,
@@ -1414,7 +1416,7 @@ n) PROC close = (REF FILE file) VOID:
             REF BOOK book = book OF file;
             putting OF book := FALSE; users OF book -:= 1;
             (text OF file | (FLEXTEXT): chainbfile := 
-                PRIM BFILE := (book, chainbfile)) ;
+                PRIM BFILE := (book, chainbfile));
          UP gremlins
       FI;
 <a name=A314o></a>
@@ -1424,7 +1426,7 @@ o) PROC lock (REF FILE file) VOID:
               REF BOOL (opened OF file) := FALSE;
               REF BOOK book = book OF file;
               putting OF book := FALSE; users OF book -:= 1;
-              (text OF file | (FLEXTEXT): lockedbfile := PRIM BFILE = (book, lockedbfile)) ;
+              (text OF file | (FLEXTEXT): lockedbfile := PRIM BFILE = (book, lockedbfile));
            UP gremlins
       FI;
 <a name=A314p></a>
@@ -1462,45 +1464,45 @@ If <i>c</i> is the current character number and <i>lb</i> is the length of the c
 
 <a name=A315a></a><pre>
 a) PROC char number = (REF FILE f) INT: 
-      (opened OF f | c OF cpos OF f | undefined) ; 
+      (opened OF f | c OF cpos OF f | undefined); 
 <a name=A315b></a>
 b) PROC line number = (REF FILE f) INT:
-      (opened OF f | l OF cpos OF f | undefined) ; 
+      (opened OF f | l OF cpos OF f | undefined); 
 <a name=A315c></a>
 c) PROC page number = (REF FILE f) INT:
-      (opened OF f | p OF cpos OF f | undefined) ; 
+      (opened OF f | p OF cpos OF f | undefined); 
 <a name=A315d></a>
 d) PROC ? current pos = (REF FILE f) POS:
-      (opened OF f | cpos OF f | undefined; SKIP) ;
+      (opened OF f | cpos OF f | undefined; SKIP);
 <a name=A315e></a>
 e) PROC ? book bounds = (REF FILE f) POS: 
-      BEGIN POS cpos = current pos (f) ; 
+      BEGIN POS cpos = current pos (f); 
             INT p = p OF cpos, l = l OF cpos; 
             CASE text OF f IN 
                (TEXT t1): 
                    (INT pb = UPB t1; 
-                    INT lb = (p &le; 0 OR p &gt; pb | 0 | UPB t1 [p]) ; 
-                    INT cb =  (l &le; 0 OR l &gt; lb | 0 | UPB t1[p][l]) ; 
+                    INT lb = (p &le; 0 OR p &gt; pb | 0 | UPB t1 [p]); 
+                    INT cb =  (l &le; 0 OR l &gt; lb | 0 | UPB t1[p][l]); 
                     (pb, lb, cb)) , 
                (FLEXTEXT t2): 
                    (INT pb  = UPB t2; 
-                    INT lb = (p &le; 0 OR p &gt; pb | 0 | UPB t2[p]) ; 
-                    INT cb = (l &le; 0 OR l &gt; lb | 0 | UPB t2[p][l]) ; 
+                    INT lb = (p &le; 0 OR p &gt; pb | 0 | UPB t2[p]); 
+                    INT cb = (l &le; 0 OR l &gt; lb | 0 | UPB t2[p][l]); 
                     (pb, lb, cb)) 
             ESAC 
       END; 
 <a name=A315f></a>
 f) PROC ? line ended = (REF FILE f) BOOL:
-      (INT c = c OF current pos (f) ; c &gt; c OF book bounds (f)) ;
+      (INT c = c OF current pos (f); c &gt; c OF book bounds (f));
 <a name=A315g></a>
 g) PROC ? page ended = (REF FILE f) BOOL:
-      (INT l = l OF current pos (f) ; l &gt; l OF book bounds (f)) ;
+      (INT l = l OF current pos (f); l &gt; l OF book bounds (f));
 <a name=A315h></a>
 h) PROC ? physical file ended = (REF FILE f) BOOL:
-      (INT p = p OF current pos (f) ; p &gt; p OF book bounds (f)) ;
+      (INT p = p OF current pos (f); p &gt; p OF book bounds (f));
 <a name=A315i></a>
 i) PROC ? logical file ended = (REF FILE f) BOOL:
-      (lpos OF book OF f BEYOND current pos (f)) ;
+      (lpos OF book OF f BEYOND current pos (f));
 </pre>  
 
 <h3>
@@ -1537,13 +1539,13 @@ beyond the logical end results in a call of <tt>undefined</tt> (a sensible syste
 a) PROC space = (REF FILE f) VOID: 
       IF NOT opened OF f THEN undefined 
       ELSE 
-         BOOL reading = (read mood OF f | TRUE |: write mood OF f |  FALSE | undefined; SKIP) ; 
-         (NOT get good line (f, reading) | undefined) ; 
+         BOOL reading = (read mood OF f | TRUE |: write mood OF f |  FALSE | undefined; SKIP); 
+         (NOT get good line (f, reading) | undefined); 
          REF POS cpos = cpos OF f; 
          IF reading THEN c OF cpos +:= 1 
          ELSE IF logical file ended (f) THEN 
                  IF bin mood OF f THEN 
-                    (text OF f | (FLEXTEXT t2): t2[p OF cpos] [l OF cpos] [c OF cpos] := SKIP) ; 
+                    (text OF f | (FLEXTEXT t2): t2[p OF cpos] [l OF cpos] [c OF cpos] := SKIP); 
                     c OF pos +:= 1; 
                     lpos OF book OF f := cpos 
                  ELSE put char (f, " ") 
@@ -1561,8 +1563,8 @@ b) PROC backspace = (REF FILE f) VOID:
 <a name=A316c></a>
 c) PROC newline = (REF FILE f) VOID: 
       IF NOT opened OF f THEN undefined 
-      ELSE BOOL reading = (read mood OF f | TRUE |: write mood OF f |  FALSE | undefined; SKIP) ;
-        (get good page (f, reading) | undefined) ; 
+      ELSE BOOL reading = (read mood OF f | TRUE |: write mood OF f |  FALSE | undefined; SKIP);
+        (get good page (f, reading) | undefined); 
         REF POS cpos = cpos OF f, lpos = lpos OF book OF f; 
         IF p OF cpos = p OF lpos AND l OF cpos =  l OF lpos 
         THEN c OF cpos := c OF lpos; 
@@ -1570,7 +1572,7 @@ c) PROC newline = (REF FILE f) VOID:
            ELSE 
               IF compressible (f) 
               THEN REF INT pl = p OF lpos, ll = l OF lpos; 
-                 FLEXTEXT text = (text OF f | (FLEXTEXT t2): t2) ; 
+                 FLEXTEXT text = (text OF f | (FLEXTEXT t2): t2); 
                  text [pl] [ll] := text [pl] [ll] [ : c OF lpos -  1] 
               ELSE WHILE NOT line ended (f) DO space (f) OD 
               FI; 
@@ -1583,8 +1585,8 @@ c) PROC newline = (REF FILE f) VOID:
 d) PROC newpage = (REF FILE f) VOID: 
       IF NOT opened OF f THEN undefined 
       ELSE 
-         BOOL reading = (read mood OF f) | TRUE |: write mood OF f |  FALSE | undefined; SKIP) ; 
-         (get good file (f, reading) | undefined) ; 
+         BOOL reading = (read mood OF f) | TRUE |: write mood OF f |  FALSE | undefined; SKIP); 
+         (get good file (f, reading) | undefined); 
          REF POS cpos = cpos OF f, lpos = lpos OF book OF f; 
          IF p OF cpos = p OF lpos 
          THEN cpos := lpos; 
@@ -1592,7 +1594,7 @@ d) PROC newpage = (REF FILE f) VOID:
             ELSE 
                IF compressible (f) AND l OF lpos &le; l OF book bounds (f) 
                THEN REF INT pl = p OF lpos, ll = l OF lpos; 
-                  FLEXTEXT text =  (text OF f | (FLEXTEXT t2): t2) ; 
+                  FLEXTEXT text =  (text OF f | (FLEXTEXT t2): t2); 
                   text[pl] [ll] := text [pl] [ll]t: c OF lpos - 1];  
                   text[pl] := text [pl] [ : (c OF lpos &gt; 1 | ll | ll - 1) ] 
                ELSE WHILE NOT page ended (f) DO newline (f) OD 
@@ -1611,23 +1613,23 @@ d) PROC newpage = (REF FILE f) VOID:
 <pre>
 e) PROC ? get good line = (REF FILE f, BOOL reading) BOOL: 
       BEGIN BOOL not ended; 
-         WHILE not ended := get good page (f, reading) ; 
+         WHILE not ended := get good page (f, reading); 
             line ended (f) AND not ended 
-         DO (NOT (line mended OF f) (f) | set mood (f, reading) ; newline (f)) OD; 
+         DO (NOT (line mended OF f) (f) | set mood (f, reading); newline (f)) OD; 
          not ended 
       END;
 <a name=A316f></a>
 f) PROC ? get good page = (REF FILE f, BOOL reading) BOOL: 
       BEGIN BOOL not ended; 
-         WHILE not ended := get good file (f, reading) ; 
+         WHILE not ended := get good file (f, reading); 
             page ended (f) AND not ended 
-         DO (NOT (page mended OF f) (f) | set mood (f, reading) ; newpage (f)) OD; 
+         DO (NOT (page mended OF f) (f) | set mood (f, reading); newpage (f)) OD; 
          not ended 
       END;
 <a name=A316g></a>
 g) PROC ? get good file = (REF FILE f, BOOL reading) BOOL:
       BEGIN BOOL not ended := TRUE; 
-         WHILE set mood (f, reading) ; 
+         WHILE set mood (f, reading); 
             not ended AND (reading | logical file ended | physical file ended) (f) 
          DO not ended := (reading  | logical file mended OF f | physical file mended OF f) (f) 
          OD;
@@ -1635,18 +1637,18 @@ g) PROC ? get good file = (REF FILE f, BOOL reading) BOOL:
       END;
 <a name=A316h></a>
 h) PROC ? set mood = (REF FILE f, BOOL reading) VOID:
-      (reading | set read mood (f) | set write mood (f)) ;
+      (reading | set read mood (f) | set write mood (f));
 <a name=A316i></a>
 i) PROC set = (REF FILE f, INT p, l, c) VOID:
       IF NOT opened OF f OR NOT get possible (f) THEN undefined 
-      ELSE BOOL reading = (read mood OF f | TRUE  |: write mood OF f | FALSE undefined; SKIP) ; 
+      ELSE BOOL reading = (read mood OF f | TRUE  |: write mood OF f | FALSE undefined; SKIP); 
          REF POS cpos = cpos OF f, lpos =  lpos OF book OF f; 
          POS ccpos = cpos; 
          IF (cpos := (p, l, c)) BEYOND lpos 
          THEN cpos := lpos; 
-            (NOT (logical file mended OF f) (f) | undefined) ; 
+            (NOT (logical file mended OF f) (f) | undefined); 
             set mood (f, reading)  
-         ELIF POS bounds = book bounds (f) ; 
+         ELIF POS bounds = book bounds (f); 
             p &lt; 1 OR p &gt; p OF bounds + 1 
             OR l &lt; 1 OR  l &gt; l OF bounds + 1 
             OR c &lt; 1 OR c &gt; c OF bounds + 1 
@@ -1657,12 +1659,12 @@ i) PROC set = (REF FILE f, INT p, l, c) VOID:
 j) PROC reset = (REF FILE f) VOID:
       IF NOT opened OF f OR NOT reset possible (f) THEN undefined
       ELSE
-         REF BOOL (read mood OF f) := NOT put possible (f) ;
-         REF BOOL (write mood OF f) := NOT get possible (f) ;
-         REF BOOL (char mood OF f) := NOT bin possible (f) ;
+         REF BOOL (read mood OF f) := NOT put possible (f);
+         REF BOOL (write mood OF f) := NOT get possible (f);
+         REF BOOL (char mood OF f) := NOT bin possible (f);
          REF BOOL (bin mood OF f) := FALSE;
-         REF POS (cpos OF f)  := (1, 1, 1);
-         {{DOWN bfileprotect; UP gremlins #ANW#}}
+         REF POS (cpos OF f)  := (1, 1, 1)
+       <var>[[; DOWN bfileprotect; UP gremlins]]</var>
       FI;
 <a name=A316k></a>
 k) PROC set char number = (REF FILE f, INT c) VOID: 
@@ -1698,7 +1700,7 @@ k) PROC set char number = (REF FILE f, INT c) VOID:
 <tt>print (whole (i, 0)) </tt> which might print <tt>"0"</tt>, <tt>"99"</tt>, <tt>"-99"</tt>, <tt>"9999"</tt> or <tt>"99999"</tt>; 
 <br>
 <tt>print (fixed (x, -6,3)) </tt> which might print <tt>"  2.718"</tt>, <tt>"27.183"</tt> or <tt>"271.83"</tt> (in which one place after the decimal point has 
-been sacrificed in order to fit the number in) ;  
+been sacrificed in order to fit the number in);  
 <br>
 <tt>print (fixed (x, 0,3)) </tt> which might print <tt>"2.718"</tt>,  <tt>"27.183"</tt> or <tt>"271.823"</tt>; 
 <br>
@@ -1707,7 +1709,7 @@ been sacrificed in order to fit the number in) ;
 
 <a name=A321a></a>
 <pre>
-a) MODE ? NUMBER= UNION (&laquo;<b><i>L</i></b>  REAL&raquo;, &laquo;<b><i>L</i></b> INT &raquo;) ;
+a) MODE ? NUMBER= UNION (&laquo;<b><i>L</i></b>  REAL&raquo;, &laquo;<b><i>L</i></b> INT &raquo;);
 <a name=A321b></a>
 b) PROC whole = (NUMBER v, INT width) STRING:
       CASE v IN  
@@ -1719,11 +1721,11 @@ b) PROC whole = (NUMBER v, INT width) STRING:
                WHILE m &divide;:= 10; length +:= 1; m &ne; <i>L</i> 0
                DO SKIP OD  
             FI;
-            STRING s := subwhole (n, length) ; 
+            STRING s := subwhole (n, length); 
             IF length = 0 OR char in string (errorchar, LOC INT, s) 
-            THEN ABS width&times;errorchar
+            THEN <var>[[undefined;]]</var> ABS width&times;errorchar
             ELSE (x &lt; <i>L</i> 0 | "-" |:  width &gt; 0 | "+" | "") PLUSTO s; 
-                 (width &ne; 0 | (ABS width - UPB s) &times; " " PLUSTO s) ;
+                 (width &ne; 0 | (ABS width - UPB s) &times; " " PLUSTO s);
                  s
             FI) &raquo;,  
          &laquo; (<b><i>L</i></b>  REAL x): fixed (x, width, 0) &raquo;
@@ -1732,26 +1734,30 @@ b) PROC whole = (NUMBER v, INT width) STRING:
 c) PROC fixed (NUMBER v, INT width, after) STRING:
       CASE v IN
          &laquo; (<b><i>L</i></b>  REAL x):
-            IF INT length := ABS width - (x &lt; <i>L</i> 0 OR width &gt; 0 | 1 | 0) ;
+            IF INT length := ABS width - (x &lt; <i>L</i> 0 OR width &gt; 0 | 1 | 0);
                after &ge; 0 AND (length &gt; after OR width = 0) 
             THEN <b><i>L</i></b>  REAL y = ABS x;
                  IF width = 0
-                 THEN length := (after = 0 | 1 | 0) ;
+                 THEN length := (after = 0 | 1 | 0);
                     WHILE y + <i>L</i> .5 &times; <i>L</i> .1 &uarr; after &ge; <i>L</i>10.0 &uarr; length
                     DO length +:= 1 OD;
                     length +:= (after = 0 | 0 | after +  1) 
                  FI;
-                 STRING s := sub fixed (y, length, after) ;
+                 STRING s := sub fixed (y, length, after);
                  IF NOT char in string (errorchar, LOC INT, s) 
-                 THEN (length &gt; UPB s AND y &lt; <b><i>L</i></b> 1.0 | "0" PLUSTO s) ;
+                 THEN (length &gt; UPB s AND y &lt; <b><i>L</i></b> 1.0 | "0" PLUSTO s);
+               <var>[[above line should read
+                 THEN (length &gt; UPB s AND y + L 0.5 + L .1 ^ after < <b><i>L</i></b> 1.0 | "0" PLUSTO s);]]</var>
                     (x &lt; <i>L</i> 0 |  "-" |: width &gt; 0 | "+" | "") PLUSTO s;
-                    (width &ne; 0 | (ABS width - UPB s) &times; " "  PLUSTO s) ;
+                    (width &ne; 0 | (ABS width - UPB s) &times; " "  PLUSTO s);
                     s
                  ELIF after &gt; 0
                  THEN fixed (v, width, after - 1) 
                  ELSE ABS width &times; errorchar 
                  FI
               ELSE undefined; ABS width &times; errorchar
+            <var>[[above line should read
+              ELIF undefined; width = 0 THEN errorchar ELSE ABS width &times; errorchar]]</var>
               FI&raquo;,
          &laquo; (<b><i>L</i></b> INT x): fixed (<b><i>L</i></b>  REAL (x) , width, after) &raquo;
          ESAC;
@@ -1762,13 +1768,16 @@ d) PROC float = (NUMBER v, INT width, after, exp) STRING:
             IF INT before = ABS width - ABS exp - (after &ne; 0| after + 1| 0) -2;
                SIGN before + SIGN after &gt; 0
             THEN STRING s, <i>L</i>  REAL y := ABS x, INT p := 0;
-                 <i>L</i> standardize (y, before, after, p) ;
-                 s :=  fixed (SIGN x &times; y, SIGN width &times; (ABS width - ABS exp - 1) , after) + "<sub>10</sub>" + whole (p, exp) ;
+                 <i>L</i> standardize (y, before, after, p);
+                 s :=  fixed (SIGN x &times; y, SIGN width &times; (ABS width - ABS exp - 1) , after) + "<sub>10</sub>" + whole (p, exp);
+                [[above line is debated]]
                  IF exp = 0 OR char in string (errorchar, LOC INT, s) 
                  THEN float (x, width, (after &ne; 0 | after - 1 | 0) , (exp &gt; 0 | exp + 1 |  exp - 1)) 
                  ELSE s 
                  FI
             ELSE undefined; ABS width &times; errorchar
+            <var>[[above line should read
+              ELIF undefined; width = 0 THEN errorchar ELSE ABS width &times; errorchar]]</var>
             FI&raquo;,
          &laquo; (<b><i>L</i></b> INT x): float (<b><i>L</i></b>  REAL (x) , width, after, exp) &raquo;
       ESAC;
@@ -1796,12 +1805,12 @@ f) PROC ? subfixed = (NUMBER v, INT width, after) STRING:
             BEGIN STRING s, INT before := 0;
                <b><i>L</i></b>  REAL y := x +  <i>L</i> .5 &times; <i>L</i> .1 &uarr; after;
                PROC choosedig = (REF <b><i>L</i></b>  REAL y) CHAR:
-                  dig char ((INT c :=  <b>S</b> ENTIER (y &times;:= <b><i>L</i></b> 10.0) ; (c &gt; 9 | c := 9) ;
-                  y -:= <b>K</b> c; c)) ;
+                  dig char ((INT c :=  <b>S</b> ENTIER (y &times;:= <b><i>L</i></b> 10.0); (c &gt; 9 | c := 9);
+                  y -:= <b>K</b> c; c));
                WHILE y &gt; <b><i>L</i></b> 10.0 &uarr; before DO before +:= 1 OD;
                y /:= <b><i>L</i></b> 10.0 &uarr; before;
                TO before DO s PLUSAB choosedig (y) OD;
-               (after &gt; 0 | s PLUSAB ".") ;
+               (after &gt; 0 | s PLUSAB ".");
                TO after DO s PLUSAB choosedig (y) OD;
                (UPB s &gt; width | width &times; errorchar | s) 
             END&raquo;
@@ -1814,7 +1823,7 @@ g) PROC ? <i>L</i> standardize = (REF <b><i>L</i></b>  REAL y, INT before, after
       BEGIN 
          <b><i>L</i></b>  REAL g = <b><i>L</i></b> 10.0 &uarr; before; <b><i>L</i></b>  REAL h = g &times; <i>L</i> .1;
          WHILE y &gt; g DO y &times;:= <i>L</i> .1; p +:= 1 OD;
-         (y &ne; <i>L</i> 0.0| WHILE y &lt; h DO y &times;:= <b><i>L</i></b> 10.0; p -:= 1 OD) ;
+         (y &ne; <i>L</i> 0.0| WHILE y &lt; h DO y &times;:= <b><i>L</i></b> 10.0; p -:= 1 OD);
          (y + <i>L</i> .5 &times; <i>L</i> .1  &uarr; after &ge; g | y := h; p +:= 1) 
       END;
 <a name=A321h></a>
@@ -1827,18 +1836,18 @@ i) PROC ? string to <i>L</i> int = (STRING s, INT radix, REF <b><i>L</i></b> INT
          <b><i>L</i></b> INT n := <i>L</i> 0, <b><i>L</i></b> INT m = <i>L</i> max int &divide; lr;
          <b><i>L</i></b> INT m1 = <i>L</i> max int - m &times; lr;
          FOR i FROM 2 TO UPB s
-         WHILE <b><i>L</i></b> INT dig = <b>K</b> char dig (s[i]) ;
+         WHILE <b><i>L</i></b> INT dig = <b>K</b> char dig (s[i]);
                safe := n &lt; m OR n = m AND dig &le; m1  
          DO n := n &times; lr + dig OD;
-         IF safe THEN i := (s[l] = "+" | n | -n) ; TRUE ELSE FALSE FI
+         IF safe THEN i := (s[l] = "+" | n | -n); TRUE ELSE FALSE FI
       END;
 <a name=A321j></a>
 j) PROC ? string to <i>L</i> real = (STRING s, REF <b><i>L</i></b>  REAL r) BOOL: 
          &cent; returns <tt>true</tt> if the absolute value of the result is &le; max real &cent;
       BEGIN
          INT e := UPB s + 1; 
-         char in string ("<sub>10</sub>", e, s) ;
-         INT p := e; char in string (".", p, s) ; 
+         char in string ("<sub>10</sub>", e, s);
+         INT p := e; char in string (".", p, s); 
          INT j := 1, length = 0, <b><i>L</i></b>  REAL x := <i>L</i> 0.0;
          &cent; skip leading zeroes: &cent;
          FOR i FROM 2 TO e -1
@@ -1846,7 +1855,7 @@ j) PROC ? string to <i>L</i> real = (STRING s, REF <b><i>L</i></b>  REAL r) BOOL
          DO j := i OD;
          FOR i FROM j + 1 TO e - 1 WHILE length &lt; <i>L</i> real width
          DO IF s [i] &ne; "."
-            THEN x := x &times; <b><i>L</i></b> 10.0 + <b>K</b> char dig (s[j := i]) ; length +:= 1
+            THEN x := x &times; <b><i>L</i></b> 10.0 + <b>K</b> char dig (s[j := i]); length +:= 1
             FI &cent; all significant digits converted &cent;
          OD;
          &cent; set preliminary exponent: &cent;
@@ -1856,7 +1865,7 @@ j) PROC ? string to <i>L</i> real = (STRING s, REF <b><i>L</i></b>  REAL r) BOOL
          &cent; prepare a representation of <i>L</i> max real to compare with the 
             <b><i>L</i></b>  REAL value to be delivered: &cent;
          <b><i>L</i></b>  REAL max stag := <i>L</i> max real, INT max exp := 0;
-         <i>L</i> standardize (max stag, length, 0, max exp) ; exp +:= expart;
+         <i>L</i> standardize (max stag, length, 0, max exp); exp +:= expart;
          IF NOT safe OR (exp &gt; max exp OR exp = max exp AND x &gt; max stag) 
          THEN FALSE 
          ELSE r := (s[1] = "+" | x | -x) &times; <b><i>L</i></b> 10.0 &uarr; exp; TRUE
@@ -1864,32 +1873,32 @@ j) PROC ? string to <i>L</i> real = (STRING s, REF <b><i>L</i></b>  REAL r) BOOL
       END;
 <a name=A321k></a>
 k) PROC ? char dig = (CHAR x) INT:
-      (x = " " | 0 | INT i; char in string (x, i, "0123456789abcdef") ; i - 1) ;
+      (x = " " | 0 | INT i; char in string (x, i, "0123456789abcdef"); i - 1);
 <a name=A321l></a>
 l) PROC char in string = (CHAR c, REF INT i, STRING s) BOOL:
       (BOOL found := FALSE;
        FOR k FROM LWB s TO UPB s WHILE NOT found 
        DO (c = s[k] | i := k; found := TRUE) OD;
-       found) ;
+       found);
 <a name=A321m></a>
 m) INT <i>L</i> int width = 
          &cent; the smallest integral value such that '<i>L</i> max int' may be 
             converted without error using the pattern n (<i>L</i> int width) d &cent;
       (INT c := 1;
        WHILE <b><i>L</i></b> 10 &uarr; (c-1) &lt; <i>L</i> .1 &times; <i>L</i> maxint DO c +:= 1  OD;
-       c) ;
+       c);
 <a name=A321n></a>
 n) INT <i>L</i> real width = 
          &cent; the smallest integral value such that different strings are 
             produced by conversion of '1.0' and of '1.0 + <i>L</i> small real' using 
             the pattern d.n (<i>L</i> real width - 1) d &cent;
-      1 - <b>S</b> ENTIER (<i>L</i> ln (<i>L</i> small real) / <i>L</i> ln (<b><i>L</i></b> 10)) ;
+      1 - <b>S</b> ENTIER (<i>L</i> ln (<i>L</i> small real) / <i>L</i> ln (<b><i>L</i></b> 10));
 <a name=A321o></a>
 o) INT <i>L</i> exp width = 
          &cent; the smallest integral value such that '<i>L</i> max real' may be
             converted without error using the pattern
             d.n (<i>L</i> real width - 1) d e n (<i>L</i> exp width) d &cent;
-      1 + <b>S</b> ENTIER (<i>L</i> ln (<i>L</i> ln (<i>L</i> max real) /<i>L</i> ln (<b><i>L</i></b> 10)) /<i>L</i> ln (<b><i>L</i></b> 10)) ;
+      1 + <b>S</b> ENTIER (<i>L</i> ln (<i>L</i> ln (<i>L</i> max real) /<i>L</i> ln (<b><i>L</i></b> 10)) /<i>L</i> ln (<b><i>L</i></b> 10));
 </pre>
 
 <h3>
@@ -1899,14 +1908,14 @@ o) INT <i>L</i> exp width =
 <a name=A322a></a>
 <pre>
 a) MODE ? SIMPLOUT = UNION (&laquo;<b><i>L</i></b> INT&raquo; , &laquo;<b><i>L</i></b>  REAL&raquo;, &laquo;<b><i>L</i></b> COMPL&raquo;, BOOL,
-      &laquo;<b><i>L</i></b> BITS&raquo;, CHAR, [ ]CHAR) ;
+      &laquo;<b><i>L</i></b> BITS&raquo;, CHAR, [ ]CHAR);
 <a name=A322b></a>
 b) MODE ? OUTTYPE = <b>C</b> an actual-declarer  specifying a mode united from 
       {<a href="report_1.html#2136a">2.1.3.6.a</a>} a sufficient set of modes none of which is <b>'void'</b> or 
       contains <b>'flexible'</b>, <b>'reference to'</b>, <b>'procedure'</b> or <b>'union of'</b> <b>C</b>;
 <a name=A322c></a>
 c) MODE ? SIMPLIN = UNION (&laquo;REF <b><i>L</i></b> INT&raquo;, &laquo;REF <i>L</i>  REAL&raquo;, &laquo;REF <b><i>L</i></b> COMPL&raquo;,
-      REF BOOL, &laquo;REF <b><i>L</i></b> BITS&raquo;, REF CHAR, REF [ ] CHAR, REF STRING) ;  
+      REF BOOL, &laquo;REF <b><i>L</i></b> BITS&raquo;, REF CHAR, REF [ ] CHAR, REF STRING);  
 <a name=A322d></a>
 d) MODE ? INTYPE = <b>C</b> an actual-declarer specifying a mode united from 
       {<a href="report_1.html#2136a">2.1.3.6.a</a>} <b>'reference to flexible row of character'</b> together with a 
@@ -2018,13 +2027,13 @@ V</i> are output (as in ff) one after the other (with no intervening spaces, and
 a) PROC put = (REF FILE f, [ ] UNION (OUTTYPE, PROC (REF FILE) VOID) x) VOID:
       IF opened OF f THEN
          FOR i TO UPB x
-         DO CASE set write mood (f) ; set char mood (f) ; x[i] IN
+         DO CASE set write mood (f); set char mood (f); x[i] IN
             (PROC (REF FILE) VOID pf): pf (f) ,
             (OUTTYPE ot):
             BEGIN [ ] SIMPLOUT y = STRAIGHTOUT ot;
                   &laquo;PROC <i>L</i> real conv = (<b><i>L</i></b>  REAL r) STRING:
                      float (r, <i>L</i> real width + <i>L</i> exp width + 4, 
-                        <i>L</i> real width - 1, <i>L</i>  exp width + 1&raquo;;
+                        <i>L</i> real width - 1, <i>L</i>  exp width + 1)&raquo;;
                   FOR j TO UPB y 
                   DO CASE y[j] IN
                      (UNION (NUMBER, &laquo;<b><i>L</i></b> COMPL&raquo;)  nc):
@@ -2035,23 +2044,23 @@ a) PROC put = (REF FILE f, [ ] UNION (OUTTYPE, PROC (REF FILE) VOID) x) VOID:
                               &laquo; (<b><i>L</i></b> COMPL z): <i>L</i> real conv (RE z) + " I" + <i>L</i> real conv (IM z) &raquo;
                            ESAC;
                            REF REF POS cpos = cpos OF f, INT n = UPB s; 
-                           WHILE nextpos (f) ;
-                                 (n &gt; c OF book bounds (f) | undefined) ;
+                           WHILE nextpos (f);
+                                 (n &gt; c OF book bounds (f) | undefined);
                                  c OF cpos + (c OF cpos = 1  | n | n + 1) &gt; c OF book bounds (f) + 1
-                           DO (NOT (line mended OF f) (f) | put (f, newline)) ;
+                           DO (NOT (line mended OF f) (f) | put (f, newline));
                               set write mood (f) 
                            OD;
-                           (c OF cpos &ne; 1 | " " PLUSTO s) ;
+                           (c OF cpos &ne; 1 | " " PLUSTO s);
                            FOR k TO UPB s DO put char (f, s[k]) OD
                         END &cent; numeric &cent;,
-                     (BOOL b): (next pos (f) ; put char (f, (b | flip | flop))) ,
+                     (BOOL b): (next pos (f); put char (f, (b | flip | flop))) ,
                      &laquo; (<b><i>L</i></b> BITS lb):
                         FOR k TO <i>L</i> bits width
                         DO put (f, (<i>L</i>  <b>F</b> OF lb) [k]) OD&raquo;,
-                     (CHAR k): (nextpos (f) ; put char (f, k)) ,
+                     (CHAR k): (nextpos (f); put char (f, k)) ,
                      ([ ] CHAR ss):
                         FOR k FROM LWB ss TO UPB ss 
-                        DO next pos (f) ; put char (f, ss[k]) OD
+                        DO next pos (f); put char (f, ss[k]) OD
                      ESAC
                   OD
             END
@@ -2063,7 +2072,7 @@ a) PROC put = (REF FILE f, [ ] UNION (OUTTYPE, PROC (REF FILE) VOID) x) VOID:
 b) PROC ? put char = (REF FILE f, CHAR char) VOID:
       IF opened OF f AND NOT line ended (f) 
       THEN REF POS cpos = cpos OF f, lpos = lpos OF book OF f;
-         set char mood (f) ; set write mood (f) ;
+         set char mood (f); set write mood (f);
          REF INT p = p OF cpos, l = l OF cpos, c  = c OF cpos;
          CHAR k; BOOL found := FALSE;
          CASE text OF f IN
@@ -2095,7 +2104,7 @@ b) PROC ? put char = (REF FILE f, CHAR char) VOID:
               IF NOT (char error mended OF f) (f, k) 
               THEN undefined; k := " "
               FI;
-              check pos (f) ; put char (f, k) 
+              check pos (f); put char (f, k) 
          FI
       ELSE undefined
       FI &cent; write mood is still set &cent; ;
@@ -2114,16 +2123,16 @@ c) PROC ? next pos = (REF FILE f) VOID:
 {For formatless input,  <tt>get</tt> (a) and <tt>read</tt> (<a href="#A51e">10.5.1.e</a>) may be used. Values from the book are assigned to each straightened name <i>N</i> from the data list as follows:  
 
 <p>
-<a name=A332aa></a>aa) If the mode of <i>N</i> is specified by <tt>REF <i>L</i>  INT</tt> , then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary) ; next, the largest string is read from the book that could be "indited" (<a href="#A3411kk">10.3.4.1.1.kk</a>) under the control of some <b>picture</b> of the form <tt>+n (k1) " "n (k2) dd</tt>  or <tt>n (k2) dd</tt> (where <tt>k1</tt> and <tt>k2</tt> yield arbitrary nonnegative integers): this string is converted to an integer and assigned to <i>N</i>; if the conversion is unsuccessful, the event routine corresponding to <tt>on value error</tt> is called.  
+<a name=A332aa></a>aa) If the mode of <i>N</i> is specified by <tt>REF <i>L</i>  INT</tt> , then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary); next, the largest string is read from the book that could be "indited" (<a href="#A3411kk">10.3.4.1.1.kk</a>) under the control of some <b>picture</b> of the form <tt>+n (k1) " "n (k2) dd</tt>  or <tt>n (k2) dd</tt> (where <tt>k1</tt> and <tt>k2</tt> yield arbitrary nonnegative integers): this string is converted to an integer and assigned to <i>N</i>; if the conversion is unsuccessful, the event routine corresponding to <tt>on value error</tt> is called.  
 
 <p>
-<a name=A332bb></a>bb) If the mode of <i>N</i> is specified by <tt>REF <i>L</i>  REAL</tt> , then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary) ; next, the largest string is read from the book that could be indited under the control of some <b>picture</b> of the form <tt>+n (k1) " " n (k2) d</tt> or <tt>n (k2) d</tt>  followed by <tt>.n (k3) d d</tt> or by <tt>ds.</tt>, possibly followed again by <tt>e n (k4) " "+n (k5) " " n (k6) d d</tt> or by <tt>e n (k5) " "n (k6) d d</tt>;  this string is converted to a real number and assigned to <i>N</i>; if the conversion is unsuccessful, the event routine corresponding to <tt>on value error</tt> is called.  
+<a name=A332bb></a>bb) If the mode of <i>N</i> is specified by <tt>REF <i>L</i>  REAL</tt> , then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary); next, the largest string is read from the book that could be indited under the control of some <b>picture</b> of the form <tt>+n (k1) " " n (k2) d</tt> or <tt>n (k2) d</tt>  followed by <tt>.n (k3) d d</tt> or by <tt>ds.</tt>, possibly followed again by <tt>e n (k4) " "+n (k5) " " n (k6) d d</tt> or by <tt>e n (k5) " "n (k6) d d</tt>;  this string is converted to a real number and assigned to <i>N</i>; if the conversion is unsuccessful, the event routine corresponding to <tt>on value error</tt> is called.  
 
 <p>
 <a name=A332cc></a>cc) If the mode of <i>N</i> is specified by <tt>REF <b><i>L</i></b> COMPL</tt> , then first, a real number is input (as in bb) and assigned to the first subname of <i>N</i>; next, the book is searched for the first character that is not a space; next, a character is input and, if it is not <tt>"I"</tt>  or <tt>"i"</tt>, then the event routine corresponding to <tt>on char error</tt>  (<a href="#A313cc">10.3.1.3.cc</a>) is called, the suggestion being <tt>"I"</tt>; finally, a real number is input and assigned to the second subname of <i>N</i>.  
 
 <p>
-<a name=A332dd></a>dd) If the mode of <i>N</i> is specified by <tt>REF BOOL</tt>, then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary) ; next, a character is read: if this character is the same as that yielded by <tt>flip</tt> (<tt>flop</tt>) , then <tt>true</tt> (<tt>false</tt>) is assigned to <i>N</i>;  otherwise, the event routine corresponding to <tt>on char error</tt> is called, the suggestion being <tt>flop</tt>.  
+<a name=A332dd></a>dd) If the mode of <i>N</i> is specified by <tt>REF BOOL</tt>, then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary); next, a character is read: if this character is the same as that yielded by <tt>flip</tt> (<tt>flop</tt>) , then <tt>true</tt> (<tt>false</tt>) is assigned to <i>N</i>;  otherwise, the event routine corresponding to <tt>on char error</tt> is called, the suggestion being <tt>flop</tt>.  
 
 <p>
 <a name=A332ee></a>ee) If the mode of <i>N</i> is specified by <tt>REF <i>L</i>  BITS</tt> , then input takes place (as in dd) to the subnames of <i>N</i> one after the other (with new lines being taken as required) .  
@@ -2147,7 +2156,7 @@ The string consisting of the characters read is assigned to <i>N</i> (note that,
 a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
       IF opened OF f THEN
       FOR i TO UPB x 
-      DO CASE set read mood (f) ;  set char mood (f) ; x[i] IN
+      DO CASE set read mood (f);  set char mood (f); x[i] IN
          (PROC (REF FILE) VOID pf): pf (f) ,
          (INTYPE it) :
          BEGIN
@@ -2157,16 +2166,16 @@ a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
                                     and <tt>false</tt> otherwise &cent;
                IF k empty AND (line ended (f) OR  logical file ended (f)) 
                THEN FALSE
-               ELSE (k empty | get char (f, k)) ;
+               ELSE (k empty | get char (f, k));
                   k empty := char in string (k, LOC INT, s) 
                FI;
-            OP ? = (CHAR c) BOOL: ? STRING (c) ;
+            OP ? = (CHAR c) BOOL: ? STRING (c);
             PRIO ! = 8;
             OP !  = (STRING s, CHAR c) CHAR: 
                      &cent; expects a character contained in 's'; if the character
                      read is not in 's', the event routine corresponding to
                      'on char error'  is called with the suggestion 'c' &cent;
-               IF (k empty | check pos (f) ; get char (f, k)) ;
+               IF (k empty | check pos (f); get char (f, k));
                   k empty := TRUE;
                   char in string (k, LOC INT, s) 
                THEN k 
@@ -2176,25 +2185,31 @@ a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
                   ELSE undefined; c
                   FI;
                   set read mood (f) 
+                <var>[[above five lines should read
+                  CHAR cc = IF (char error mended OF f) (f, sugg) THEN
+                    (char in string (sugg, LOC INT, s) | sugg | undefined; c) 
+                  ELSE undefined; c
+                  FI;
+                  set read mood (f); cc]]</var>
                FI;
             OP ! =  (CHAR s, c) CHAR: STRING (s) ! c;
             PROC skip initial spaces = VOID:
-               WHILE (k empty |  next pos (f)) ; ? " " DO SKIP OD;
+               WHILE (k empty |  next pos (f)); ? " " DO SKIP OD;
             PROC skip spaces = VOID: 
                WHILE ? " " DO SKIP OD;
             PROC read dig = STRING:
                (STRING t := "0123456789" ! "0";
-                WHILE ? "0123456789" DO t PLUSAB k OD; t) ;
+                WHILE ? "0123456789" DO t PLUSAB k OD; t);
             PROC read sign = char:
-               (CHAR t = (skipspaces; ? "+-" | k | "+") ;
-                skip spaces; t) ;
+               (CHAR t = (skipspaces; ? "+-" | k | "+");
+                skip spaces; t);
             PROC read num = STRING:
-               (CHAR t = read sign; t + read dig) ;
+               (CHAR t = read sign; t + read dig);
             PROC read real = STRING: 
                (STRING t := read sign;
-               (NOT ? "." | t PLUSAB read dig | k empty := FALSE) ;
-               (? "." | t PLUSAB "." + read dig) ;
-               (? "<sub>10</sub>\e" | t PLUSAB "<sub>10</sub>" + read num) ; t) ;
+               (NOT ? "." | t PLUSAB read dig | k empty := FALSE);
+               (? "." | t PLUSAB "." + read dig);
+               (? "<sub>10</sub>\e" | t PLUSAB "<sub>10</sub>" + read num); t);
 
             FOR j TO UPB y 
             DO BOOL incomp := FALSE;  k empty := TRUE;
@@ -2207,7 +2222,7 @@ a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
                      incomp := NOT string to <i>L</i> real (read real, rr)) &raquo;,
                &laquo; (REF <b><i>L</i></b> COMPL zz) :
                   (skip initial spaces;
-                     incomp := NOT string to <i>L</i> real (read real, re OF zz) ;
+                     incomp := NOT string to <i>L</i> real (read real, re OF zz);
                      skip spaces; "iI" ! "I;";
                      incomp := incomp OR string to <i>L</i> real (read real, im OF zz)) &raquo;
                (REF BOOL bb) :
@@ -2216,25 +2231,25 @@ a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
                &laquo; (REF <b><i>L</i></b> BITS lb) :
                   FOR i TO <i>L</i> bits width
                   DO get (f, (<i>L</i> <b>F</b> OF lb) [i]) OD&raquo;,
-               (REF CHAR cc): (next pos (f) ; get char (f, cc)) ,
+               (REF CHAR cc): (next pos (f); get char (f, cc)) ,
                (REF [ ]CHAR ss) :
                   FOR i FROM LWB ss TO UPB ss
-                  DO next pos (f) ; get char (f, ss [i]) OD,
+                  DO next pos (f); get char (f, ss [i]) OD,
                (REF STRING ss): 
                   BEGIN STRING t;
-                     WHILE check pos (f) ;
+                     WHILE check pos (f);
                         IF line ended (f) OR logical file ended (f) 
                         THEN FALSE
-                        ELSE get char (f, k) ;
+                        ELSE get char (f, k);
                              k empty := NOT char in string (k, LOC INT, term OF f) 
                         FI
                      DO t PLUSAB k OD;
                      ss := t 
                   END
                ESAC; 
-               (NOT k empty | backspace (f)) ;
+               (NOT k empty | backspace (f));
                IF incomp 
-               THEN (NOT (value error mended OF f) (f) | undefined) ;
+               THEN (NOT (value error mended OF f) (f) | undefined);
                   set read mood (f) 
                FI
             OD 
@@ -2247,7 +2262,7 @@ a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
 b) PROC ? get char = (REF FILE f, REF CHAR char) VOID:
       IF opened OF f AND NOT line ended (f) AND NOT logical file ended (f) 
       THEN REF POS cpos = cpos OF f;
-         set char mood (f) ; set read mood (f) ;
+         set char mood (f); set read mood (f);
          INT p = p OF cpos, l = l OF cpos, c = c OF cpos;
          c OF cpos +:= 1;
          char := CASE text OF f IN
@@ -2264,7 +2279,7 @@ b) PROC ? get char = (REF FILE f, REF CHAR char) VOID:
                      IF (char error mended OF f) (f, k) 
                      THEN k
                      ELSE undefined; " "
-                     FI; set read mood (f) ;
+                     FI; set read mood (f);
                 FI) 
             ESAC
       ELSE undefined
@@ -2273,7 +2288,7 @@ b) PROC ? get char = (REF FILE f, REF CHAR char) VOID:
 c) PROC ? check pos = (REF FILE f) VOID:
       BEGIN BOOL reading = read mood OF f;
           BOOL not ended := TRUE;
-          WHILE not ended := not ended AND get good page (f, reading) ;
+          WHILE not ended := not ended AND get good page (f, reading);
                 line ended (f) AND not ended
           DO not ended := (line mended OF f) (f) OD
       END;
@@ -2306,27 +2321,27 @@ A "format" is a structured value (i.e., an internal object) of mode <b>'FORMAT'<
 
 <a name=A3411A></a>
 <pre>
-A) MODE FORMAT = STRUCT (FLEX [1 : 0] PIECE <b>F</b>) ;
+A) MODE FORMAT = STRUCT (FLEX [1 : 0] PIECE <b>F</b>);
 <a name=A3411B></a>
-B) MODE PIECE = STRUCT (INT cp, count, bp, FLEX [1: 0] COLLECTION c) ;
+B) MODE PIECE = STRUCT (INT cp, count, bp, FLEX [1: 0] COLLECTION c);
 <a name=A3411C></a>
-C) MODE COLLECTION =UNION (PICTURE, COLLITEM) ;
+C) MODE COLLECTION =UNION (PICTURE, COLLITEM);
 <a name=A3411D></a>
-D) MODE COLLITEM = STRUCT (INSERTION i1, PROC INT rep, INT p, INSERTION i2) ;
+D) MODE COLLITEM = STRUCT (INSERTION i1, PROC INT rep, INT p, INSERTION i2);
 <a name=A3411E></a>
-E) MODE INSERTION = FLEX [1 : 0] STRUCT (PROC INT rep, UNION (STRING, CHAR) sa) ;
+E) MODE INSERTION = FLEX [1 : 0] STRUCT (PROC INT rep, UNION (STRING, CHAR) sa);
 <a name=A3411F></a>
-F) MODE PICTURE = STRUCT (UNION (PATTERN, CPATTERN, FPATTERN, GPATTERN, VOID) p, INSERTION i) ;
+F) MODE PICTURE = STRUCT (UNION (PATTERN, CPATTERN, FPATTERN, GPATTERN, VOID) p, INSERTION i);
 <a name=A3411G></a>
-G) MODE PATTERN = STRUCT (INT type, FLEX [1 : 0] FRAME frames) ;
+G) MODE PATTERN = STRUCT (INT type, FLEX [1 : 0] FRAME frames);
 <a name=A3411H></a>
-H) MODE FRAME = STRUCT (INSERTION i, PROC INT rep, BOOL supp, CHAR marker) ;
+H) MODE FRAME = STRUCT (INSERTION i, PROC INT rep, BOOL supp, CHAR marker);
 <a name=A3411I></a>
-I) MODE CPATTERN = STRUCT (INSERTION i, INT type, FLEX  [1 : 0] INSERTION c) ;
+I) MODE CPATTERN = STRUCT (INSERTION i, INT type, FLEX  [1 : 0] INSERTION c);
 <a name=A3411J></a>
-J) MODE FPATTERN = STRUCT (INSERTION i, PROC FORMAT pf) ;
+J) MODE FPATTERN = STRUCT (INSERTION i, PROC FORMAT pf);
 <a name=A3411K></a>
-K) MODE GPATTERN = STRUCT (INSERTION i, FLEX [1 : 0]  PROC INT spec) ;} 
+K) MODE GPATTERN = STRUCT (INSERTION i, FLEX [1 : 0]  PROC INT spec);} 
 </pre> 
 
 <p>
@@ -2469,7 +2484,7 @@ When a format has been exhausted, the event routine corresponding to <tt>on form
 <br>
 If the pattern <i>Q</i> of <i>P</i> is a <b>'choice'</b> or <b>'general'</b> pattern,    
 <dd>
-then <i>V</i> is output using <i>P</i> (See <a href="#A3431aa">10.3.4.3.1.aa,dd</a>    , <a href="#A34A1aa">10.3.4.10.1.aa</a>) ;    
+then <i>V</i> is output using <i>P</i> (See <a href="#A3431aa">10.3.4.3.1.aa,dd</a>    , <a href="#A34A1aa">10.3.4.10.1.aa</a>);    
 <br>
 otherwise, <i>V</i> is output as follows:
 <ul>     
@@ -2479,7 +2494,7 @@ If the mode of <i>V</i> is "output compatible" with <i>Q</i> (see the separate s
 <br>
 then
 <ul>
-&bull; <i>V</i> is converted into a string controlled {<a href="#A3411dd">dd</a>} by <i>Q</i> (See the appropriate section) ;
+&bull; <i>V</i> is converted into a string controlled {<a href="#A3411dd">dd</a>} by <i>Q</i> (See the appropriate section);
 </ul>
 If the mode is not output compatible, or if the conversion is unsuccessful,        
 <br>
@@ -2498,7 +2513,7 @@ otherwise, the string is "edited" (<a href="#A3411jj">jj</a>) using <i>Q</i>:
 <br>
 If the pattern <i>Q</i> of <i>P</i> is a <b>'choice'</b> or <b>'general'</b> pattern,    
 <br>
-then a value is input to <i>N</i> using <i>P</i> (see <a href="#A3481bb">10.3.4.8.1.bb,ee</a>    , <a href="#A34A1bb">10.3.4.10.1.bb</a>) ;    
+then a value is input to <i>N</i> using <i>P</i> (see <a href="#A3481bb">10.3.4.8.1.bb,ee</a>    , <a href="#A34A1bb">10.3.4.10.1.bb</a>);    
 <br>
 otherwise,    
 <ul>     
@@ -2568,7 +2583,7 @@ then
 &bull; if a sign has been found, a digit is expected, with <tt>"0"</tt> as suggestion;  
 <br>
 &bull; otherwise, either a <tt>"+"</tt> or a <tt>"-"</tt> is expected, with <tt>"0"</tt> as suggestion, and, in addition, if the sign mould contains a frame, then a space 
-preceding the first digit will be accepted as the sign (and replaced by <tt>"+"</tt>) ;
+preceding the first digit will be accepted as the sign (and replaced by <tt>"+"</tt>);
 </ul>
 otherwise, if <i>F</i> is contained in an integral mould,
 <br>
@@ -2713,7 +2728,7 @@ The direct descendents of <i>C<sub>j</sub></i>, include a first <b>insertion</b>
 <br>
 &bull; let R<sub>1</sub>, ... , R<sub>n</sub> and D<sub>1</sub>, ... , D<sub>n</sub> the {collateral} yields of U<sub>1</sub>, ... , U<sub>n</sub> and A<sub>1</sub>, ... , A<sub>n</sub>, where the yield of an <b>alignment-code</b>  is the {character which is the} intrinsic value {<a href="report_4.html#8142b">8.1.4.2.b</a>} of its <b>LETTER-symbol</b>;  
 <br>
-&bull; the descriptor of <i>W</i> is ((1, n)) ;  
+&bull; the descriptor of <i>W</i> is ((1, n));  
 <br>
 &bull; the element of <i>W</i> selected by (i) , i = 1, ..., n, is a structured value {of the mode specified by <tt>STRUCT (PROC INT rep, UNION (STRING, CHAR)  sa) </tt>} whose fields, taken in order, are  
 <ul>
@@ -2729,7 +2744,7 @@ bits-pattern</b><i> P</i>  {<a href="#A3421a">10.3.4.2.1.a</a>  , <a href="#A343
 <br>
 &bull; the fields of <i>W</i>, taken in order, are  
 <br>
-&bull; {<i>type</i>} 1 (2, 3, 4, 5) if <i>P</i> is an <b>integral-</b> (<b>real-</b>,  <b>boolean-</b>, <b>complex-</b>, <b>string-</b>) <b>-pattern</b> and 6 (8, 12,  20) if <i>P</i> is a <b>bits-pattern</b> whose constituent <b>RADIX</b> is a <b>radix-two</b> (<b>-four</b>, <b>-eight</b>, <b>-sixteen</b>) ;  
+&bull; {<i>type</i>} 1 (2, 3, 4, 5) if <i>P</i> is an <b>integral-</b> (<b>real-</b>,  <b>boolean-</b>, <b>complex-</b>, <b>string-</b>) <b>-pattern</b> and 6 (8, 12,  20) if <i>P</i> is a <b>bits-pattern</b> whose constituent <b>RADIX</b> is a <b>radix-two</b> (<b>-four</b>, <b>-eight</b>, <b>-sixteen</b>);  
 <br>
 &bull; {<i>frames</i>} a multiple value, whose mode is <b>'row of FRAME'</b>, having a descriptor ((1, n)) and <i>n</i> elements, that selected by (i) being <i>V<sub>i</sub></i>.  
 
@@ -2803,7 +2818,7 @@ c) "x=" 12z+ }
 <br>
 &bull; the remainder of <i>S</i> contains a decimal representation of <i>V</i>  determined as follows:  
 <ul>
-&bull; the elements of <i>S</i> controlled by <tt>"d"</tt> and <tt>"z"</tt> frames are the appropriate digits (thus the pattern specifies the number of digits to be used) ;  
+&bull; the elements of <i>S</i> controlled by <tt>"d"</tt> and <tt>"z"</tt> frames are the appropriate digits (thus the pattern specifies the number of digits to be used);  
 <br>
 &bull; if <i>V</i> cannot be represented by such a string, the conversion is unsuccessful;  
 </ul>
@@ -2856,7 +2871,7 @@ c) .12de+2d }
 <ul>
 &bull; if necessary, <i>V</i> is widened to a real number;  
 <br>
-&bull; the element of <i>S</i> controlled by the <tt>"."</tt> (<tt>"e"</tt>)  frame, if any, of <i>P</i> is <tt>"."</tt> (<tt>"<sub>10</sub>"</tt>) ;  <DL compact>   
+&bull; the element of <i>S</i> controlled by the <tt>"."</tt> (<tt>"e"</tt>)  frame, if any, of <i>P</i> is <tt>"."</tt> (<tt>"<sub>10</sub>"</tt>);  <DL compact>   
 <br>
 If <i>P</i> contains an <tt>"e"</tt> frame,    
 <br>
@@ -2864,7 +2879,7 @@ then
 <br>
 &bull; let <i>W</i> be the sequence of frames preceding, and <i>IP</i> be the <b>'integral'</b> pattern following, that <tt>"e"</tt> frame;    
 <br>
-&bull; an exponent <i>E</i> is calculated by standardizing <i>V</i> to the largest value convertible using <i>W</i> (see below) ;    
+&bull; an exponent <i>E</i> is calculated by standardizing <i>V</i> to the largest value convertible using <i>W</i> (see below);    
 <br>
 &bull; the part of <i>S</i> controlled by <i>IP</i> is obtained by converting <i>E</i> using <i>IP</i> (see <a href="#A3421bb">10.3.4.2.bb</a>) 
 </ul>
@@ -2872,7 +2887,7 @@ otherwise,
 <ul>
 &bull; let <i>W</i> be the whole of <i>P</i>;
 </ul>
-&bull; the elements of <i>S</i> controlled by the <tt>"d"</tt> and <tt>"z"</tt> frames of <i>W</i> are the appropriate digits to be used, and the number of digits to be placed after the decimal point, if any) ;  
+&bull; the elements of <i>S</i> controlled by the <tt>"d"</tt> and <tt>"z"</tt> frames of <i>W</i> are the appropriate digits to be used, and the number of digits to be placed after the decimal point, if any);  
 <br>
 &bull; if <i>V</i> cannot be represented by such a string, the conversion is unsuccessful. 
 
@@ -3041,7 +3056,7 @@ If the <tt>"r"</tt> frame of <i>P</i> was yielded by a <b>radix-two-</b>    (<b>
 <br>
 then
 <ul> 
-<i>I</i> is converted to a string, controlled by the integral mould of <i>P</i>, containing a binary (quaternary, octal, hexadecimal)    representation of <i>I</i> (cf. <a href="#A3421bb">10.3.4.2.1.bb</a>) ;    
+<i>I</i> is converted to a string, controlled by the integral mould of <i>P</i>, containing a binary (quaternary, octal, hexadecimal)    representation of <i>I</i> (cf. <a href="#A3421bb">10.3.4.2.1.bb</a>);    
 <br>
 &bull; if <i>I</i> cannot be represented by such a string, the conversion is unsuccessful.
 </ul> 
@@ -3253,7 +3268,7 @@ otherwise, if the mode of <i>V</i> is specified by <tt><b><i>L</i></b> INT</tt> 
 <br>
 then    
 <ul>
-&bull; if <i>Q</i> contains one (two, three) parameter (s) , <i>V</i> is converted to a string using <tt>whole</tt> (<tt>fixed</tt>, <tt>float</tt>) ;    
+&bull; if <i>Q</i> contains one (two, three) parameter (s) , <i>V</i> is converted to a string using <tt>whole</tt> (<tt>fixed</tt>, <tt>float</tt>);    
 <ul>
 &bull; the string is written using <tt>put</tt>; 
 </ul>
@@ -3293,30 +3308,30 @@ The yield, in an environ <i>E</i>, of a <b>NEST-general-pattern</b> <i>P</i> is 
 
 <a name=A35a></a>
 <pre>
-a) MODE FORMAT = STRUCT (FLEX [1: 0] PIECE <b>F</b>) ;
+a) MODE FORMAT = STRUCT (FLEX [1: 0] PIECE <b>F</b>);
    MODE ? PIECE = STRUCT (INT cp &cent; pointer to current collection &cent;,
       count &cent; number of times piece is to be repeated&cent;,
       bp &cent; back pointer &cent;,
-      FLEX [1 : 0] COLLECTION c) ;
+      FLEX [1 : 0] COLLECTION c);
    MODE ? COLLECTION = UNION (PICTURE, COLLITEM) :
    MODE ? COLLITEM = STRUCT (INSERTION i1,
       PROC INT rep; &cent; replicator &cent;,
-      INT p &cent; pointer to another piece &cent;, INSERTION i2) ;
+      INT p &cent; pointer to another piece &cent;, INSERTION i2);
    MODE ? INSERTION = FLEX [1: 0] STRUCT (PROC INT rep &cent; replicator &cent;,
-      UNION (STRING, CHAR) sa) ;
+      UNION (STRING, CHAR) sa);
    MODE ? PICTURE =
-      STRUCT (UNION (PATTERN, CPATTERN, FPATTERN, GPATTERN, VOID) p, INSERTION i) ;
+      STRUCT (UNION (PATTERN, CPATTERN, FPATTERN, GPATTERN, VOID) p, INSERTION i);
    MODE ? PATTERN = STRUCT (INT type &cent; of pattern &cent;,   
       FLEX [1: 0] FRAME frames) ,
    MODE ? FRAME = STRUCT (INSERTION i,   
       PROC INT rep &cent; replicator &cent;,
       BOOL supp &cent; <tt>true</tt> if suppressed &cent;,
-      CHAR marker) ;
+      CHAR marker);
    MODE ? CPATTERN = STRUCT (INSERTION i,
       INT type &cent; boolean or integral &cent;,
-      FLEX [1 : 0] INSERTION c) ;
-   MODE ? FPATTERN = STRUCT (INSERTION i, PROC FORMAT pf) ;
-   MODE ? GPATTERN = STRUCT (INSERTION i, FLEX [1 : 0] PROC INT spec) ;
+      FLEX [1 : 0] INSERTION c);
+   MODE ? FPATTERN = STRUCT (INSERTION i, PROC FORMAT pf);
+   MODE ? GPATTERN = STRUCT (INSERTION i, FLEX [1 : 0] PROC INT spec);
 <a name=A35b></a>
 b) PROC ? get next picture = (REF FILE f, BOOL read, REF PICTURE picture) VOID:
       BEGIN
@@ -3338,9 +3353,9 @@ b) PROC ? get next picture = (REF FILE f, BOOL read, REF PICTURE picture) VOID:
                   ([1 : UPB (i1 OF cl) ] SINSERT si;
                    bp OF alph[p OF cl] := forp; forp := SKIP;
                    (staticize insertion ( i1 OF cl, si) ,
-                      count OF aleph [p OF cl] := rep OF cl) ;
-                   (aleph :&ne;: <b>F</b> OF format OF f | undefined) ;
-                   (read | get insertion (f, si) | put insertion (f, si)) ;
+                      count OF aleph [p OF cl] := rep OF cl);
+                   (aleph :&ne;: <b>F</b> OF format OF f | undefined);
+                   (read | get insertion (f, si) | put insertion (f, si));
                    cp OF aleph[p OF cl] := 0;
                    forp := p OF cl) ,
                (PICTURE pict): (picture found := TRUE; picture := pict) 
@@ -3375,7 +3390,7 @@ b) PROC ? get next picture = (REF FILE f, BOOL read, REF PICTURE picture) VOID:
          FI OD
       END;
 <a name=A35c></a>
-c) MODE ? SINSERT = STRUCT (INT rep, UNION (STRING , CHAR) sa) ;
+c) MODE ? SINSERT = STRUCT (INT rep, UNION (STRING , CHAR) sa);
 <a name=A35d></a>
 d) PROC ? staticize insertion = (INSERTION ins, REF [ ] SINSERT sins) VOID:
       &cent; calls collaterally all the replicators in 'frames' &cent;
@@ -3388,7 +3403,7 @@ d) PROC ? staticize insertion = (INSERTION ins, REF [ ] SINSERT sins) VOID:
               staticize insertion (ins[2 : ], sins[2 : ]) 
       FI;
 <a name=A35e></a>
-e) MODE ? SFRAME = STRUCT (FLEX [1 : 0 ] SINSERT si, INT rep, BOOL supp, CHAR marker) ;
+e) MODE ? SFRAME = STRUCT (FLEX [1 : 0 ] SINSERT si, INT rep, BOOL supp, CHAR marker);
 <a name=A35f></a>
 f) PROC ? staticize frames =
       ([ ] FRAME frames, REF [ ] SFRAME sframes) VOID:  
@@ -3397,7 +3412,7 @@ f) PROC ? staticize frames =
       THEN
          [1 : UPB (i OF frames [1]) ] SINSERT si;
          (staticize insertion (i OF frames[1], si) ,
-            rep OF sframes [1] := rep OF frames [1]) ;
+            rep OF sframes [1] := rep OF frames [1]);
          si OF sframes [1] := si;
          supp OF sframes [1] := supp OF frames [1];
          marker OF sframes [1] := marker OF frames[1]
@@ -3407,7 +3422,7 @@ f) PROC ? staticize frames =
       FI;
 <a name=A35g></a>
 g) PROC ? put insertion = (REF FILE f, [ ] SINSERT si) VOID:
-      BEGIN set write mood (f) ;
+      BEGIN set write mood (f);
          FOR k TO UPB si
          DO
             CASE sa OF si[k] IN
@@ -3416,14 +3431,14 @@ g) PROC ? put insertion = (REF FILE f, [ ] SINSERT si) VOID:
                   TO rep OF si[k]
                   DO
                      FOR i TO UPB s
-                     DO checkpos (f) ; putchar (f, s[i]) OD
+                     DO checkpos (f); putchar (f, s[i]) OD
                   OD
             ESAC          
          OD
       END;
 <a name=A35h></a>
 h) PROC ? get insertion (REF FILE f, [ ] SINSERT si) VOID:
-      BEGIN set read mood (f) ;
+      BEGIN set read mood (f);
          FOR k TO UPB si
          DO
             CASE sa OF si[k] IN
@@ -3433,10 +3448,10 @@ h) PROC ? get insertion (REF FILE f, [ ] SINSERT si) VOID:
                    TO rep OF si[k]
                    DO
                       FOR i TO UPB s
-                      DO checkpos (f) ; get char (f, c) ;
+                      DO checkpos (f); get char (f, c);
                          (c &ne; s[i]
                          | (NOT (char error mended OF f) (f, c := s[i]) 
-                         | undefined) ;
+                         | undefined);
                          set read mood (f)) 
                       OD
                    OD) 
@@ -3454,11 +3469,11 @@ i) PROC ? alignment = (REF FILE f, INT r, CHAR a, BOOL read) VOID:
       THEN TO r
          DO
             IF read
-            THEN CHAR c; check pos (f) ; get char (f, c) ;
+            THEN CHAR c; check pos (f); get char (f, c);
                (c &ne; blank
                | (NOT (char error mended OF f) (f, c := blank) 
-               | undefined) ; set read mood (f)) 
-            ELSE check pos (f) ; put char (f, blank) 
+               | undefined); set read mood (f)) 
+            ELSE check pos (f); put char (f, blank) 
             FI
          OD 
       FI;
@@ -3467,11 +3482,11 @@ j) PROC ? do fpattern = (REF FILE f, FPATTERN fpattern, BOOL read) VOID:
       BEGIN FORMAT pf;
          [1 : UPB (i OF fpattern) ] SINSERT si;
          (staticize insertion (i OF fpattern, si) , 
-            pf := pf OF fpattern) ;
-         (read | get insertion (f, si) | put insertion (f, si)) ;
+            pf := pf OF fpattern);
+         (read | get insertion (f, si) | put insertion (f, si));
          REF INT forp = forp OF f;
          REF FLEX [ ] PIECE aleph = <b>F</b> OF format OF f;
-         INT m = UPB aleph, n = UPB (<b>F</b> OF pf) ;
+         INT m = UPB aleph, n = UPB (<b>F</b> OF pf);
          [1 : m + n] PIECE c; c[1 : m] := aleph;
          c[m + 1 : m + n] := <b>F</b> OF pf;
          aleph := c; bp OF aleph[m + 1] := forp;
@@ -3512,22 +3527,22 @@ k) PROC ? associate format = (REF FILE f, FORMAT format) VOID:
 a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
       IF opened OF f THEN       
       FOR k TO UPB x
-      DO CASE set write mood (f) ; set char mood (f) ; x[k] IN
+      DO CASE set write mood (f); set char mood (f); x[k] IN
          (FORMAT format): associate format (f, format) ,
          (OUTTYPE ot) :
          BEGIN INT j := 0;
             PICTURE picture, [ ] SIMPLOUT y = STRAIGHTOUT ot;
             WHILE (j +:= 1) &le; UPB y
             DO BOOL incomp := FALSE;
-               get next picture (f, FALSE, picture) ;
-               set write mood (f) ;
+               get next picture (f, FALSE, picture);
+               set write mood (f);
                [1 : UPB (i OF picture) ] SINSERT sinsert;
                CASE p OF picture IN
                (PATTERN pattern) :
                BEGIN INT rep, sfp := 1; 
                   [1 : UPB (frames OF pattern) ] SFRAME sframes;
                   (staticize frames (frames OF pattern, sframes) ,
-                     staticize insertion (i OF picture, sinsert)) ;
+                     staticize insertion (i OF picture, sinsert));
                   STRING s;
                   
                   OP ? = (STRING s) BOOL:
@@ -3543,17 +3558,17 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                         FI
                      FI;
 
-                  OP ? = (CHAR c) BOOL: ? STRING (c) ;
+                  OP ? = (CHAR c) BOOL: ? STRING (c);
 
                   PROC int pattern (REF BOOL sign mould) INT:
                      (INT l := 0;
                       WHILE ? "zuv" DO (rep &ge; 0 | l +:= rep) OD;
                       sign mould := ? "+-";
-                      WHILE ? "zd" DO (rep &ge; 0 | l +:= rep) OD; l) ;
+                      WHILE ? "zd" DO (rep &ge; 0 | l +:= rep) OD; l);
                              
                   &laquo;PROC edit <i>L</i> int (<b><i>L</i></b> INT i) VOID:
-                            (BOOL sign mould; INT l := int pattern (sign mould) ;
-                             STRING t = subwhole (ABS i, l) ;
+                            (BOOL sign mould; INT l := int pattern (sign mould);
+                             STRING t = subwhole (ABS i, l);
                              IF char in string (errorchar, LOC INT, t) OR l = 0
                                    OR NOT sign mould AND i &lt; <i>L</i> 0
                              THEN incomp := TRUE
@@ -3565,11 +3580,11 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                   &laquo;PROC edit <i>L</i> real (<b><i>L</i></b>  REAL r) VOID:
                             (INT b := 0, a := 0, e := 0, exp := 0, <b><i>L</i></b>  REAL y := ABS r,
                              BOOL sign1, STRING point := "";
-                             b := int pattern (sign1) ;
-                             (? "." | a := int pattern (LOC BOOL) ; point := ".") ;
+                             b := int pattern (sign1);
+                             (? "." | a := int pattern (LOC BOOL); point := ".");
                              IF ? "e"
-                             THEN <i>L</i> standardize (y, b, a, exp) ;
-                                edit int (exp) ;
+                             THEN <i>L</i> standardize (y, b, a, exp);
+                                edit int (exp);
                                 "<sub>10</sub>" PLUSTO s
                              FI;
                              STRING t = subfixed (y, b + a + (a &ne; 0 | 1 | 0) , a);
@@ -3582,11 +3597,11 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                              FI) &raquo;;
                          
                   &laquo;PROC edit <i>L</i> compl = (<b><i>L</i></b> COMPL z) VOID:
-                            (WHILE NOT ? "i" DO sfp +:= 1 OD; edit <i>L</i> real (IM z) ;
+                            (WHILE NOT ? "i" DO sfp +:= 1 OD; edit <i>L</i> real (IM z);
                              "I" PLUSTO s; sfp := 1; edit <i>L</i> real (RE z)) &raquo;;
                            
                   &laquo;PROC edit <i>L</i> bits (<b><i>L</i></b> BITS lb, INT radix) VOID:
-                            (<b><i>L</i></b> INT n := ABS lb; ? "r"; INT l := intpattern (LOC BOOL) ;
+                            (<b><i>L</i></b> INT n := ABS lb; ? "r"; INT l := intpattern (LOC BOOL);
                              WHILE dig char (<b>S</b> (n MOD <b>K</b> radix)) PLUSTO s;
                                  n %:= <b>K</b> radix; n &ne; <i>L</i> 0
                              DO SKIP OD;   
@@ -3596,7 +3611,7 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                              FI) &raquo;;
                         
                   PROC charcount = INT: (INT l := 0; 
-                     WHILE ? "a" DO (rep &ge; 0 | l +:= rep) OD; l) ;
+                     WHILE ? "a" DO (rep &ge; 0 | l +:= rep) OD; l);
                              
                   CASE type OF pattern IN
                &cent; integral &cent;
@@ -3640,7 +3655,7 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                BEGIN
                   [1 : UPB (i OF choice)] SINSERT si;
                   staticize insertion (i OF choice, si) :
-                  put insertion (f, si) ;
+                  put insertion (f, si);
                   INT l =
                      CASE type OF choice IN
                   &cent; boolean &cent;
@@ -3658,7 +3673,7 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                         THEN incomp := TRUE
                         ELSE
                            [1 : UPB ((c OF choice) [l])) SINSERT ci:
-                           staticize insertion ((c OF choice) [l], ci) ;
+                           staticize insertion ((c OF choice) [l], ci);
                            put insertion (f, ci) 
                         FI
                      FI;
@@ -3666,7 +3681,7 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                END,
                (FPATTERN fpattern:
                BEGIN
-                  do fpattern (f, fpattern, FALSE) ;
+                  do fpattern (f, fpattern, FALSE);
                   FOR TO UPB sinsert DO sinsert[i] := (0, "") OD;
                END,
                (GPATTERN gpattern) :
@@ -3677,13 +3692,13 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                   (staticize insertion (i OF gpattern, si) ,
                      staticize insertion (i OF picture, sinsert) ,
                      s := (n | spec[1], (spec[1], spec[2]) ,
-                          (spec[1], spec[2], spec[3]) | ())) ;
-                  put insertion (f, si) ;
+                          (spec[1], spec[2], spec[3]) | ()));
+                  put insertion (f, si);
                   IF n = 0 THEN put (f, y[j]) 
                   ELSE
                      NUMBER yj =
                         (y[j] | &laquo; (<b><i>L</i></b> INT i): i&raquo;, &laquo; (<b><i>L</i></b>  REAL r): r&raquo;
-                        | incomp := TRUE; SKIP) ;
+                        | incomp := TRUE; SKIP);
                      IF NOT incomp
                      THEN CASE n IN
                         put (f, whole (yj, s[1])) ,
@@ -3697,7 +3712,7 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                   (j -:= 1; staticize insertion (i OF picture, sinsert)) 
                ESAC;
                IF incomp
-               THEN set write mood (f) ;
+               THEN set write mood (f);
                   (NOT (value error mended OF f) (f) | put (f, y [j]) :
                      undefined) 
                FI;
@@ -3711,17 +3726,17 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
 b) PROC ? edit string (REF FILE f, STRING s, [ ] SFRAME sf) VOID:
       BEGIN BOOL supp, zs := TRUE, signput := FALSE, again, INT j := 0, sign;
          PROC copy = (CHAR c) VOID:
-            (NOT supp | check pos (f) ; put char (f, c)) ;
+            (NOT supp | check pos (f); put char (f, c));
          FOR k TO UPB sf
          DO SFRAME sfk = sf[k]; supp := supp OF sfk:
-            put insertion (f, si OF sfk) ;
+            put insertion (f, si OF sfk);
             TO rep OF sfk
             DO again := TRUE;
                WHILE again
                DO j +:= 1; again := FALSE;
                   CHAR sj = s[j], marker = marker OF sfk;
                   IF marker = "d"
-                  THEN copy (sj) ; zs := TRUE
+                  THEN copy (sj); zs := TRUE
                   ELIF marker = "z" THEN
                        (sj = "0" | copy ((zs | " " | sj)) 
                        |: sj = "+" | again := TRUE
@@ -3731,23 +3746,23 @@ b) PROC ? edit string (REF FILE f, STRING s, [ ] SFRAME sf) VOID:
                        |: sj = "-" | sign := 2; again := TRUE
                        |: sj = "0" | copy ((zs | " " | sj)) 
                        | (NOT signput |
-                         copy ((sign | (marker = "u" | "+" | " ") , "-")) ;
-                         signput := TRUE) ;
-                         copy (sj) ; zs := FALSE) 
+                         copy ((sign | (marker = "u" | "+" | " ") , "-"));
+                         signput := TRUE);
+                         copy (sj); zs := FALSE) 
                   ELIF marker = "+" then
                        (sj = "+" OR sj = "-" | copy (sj) 
-                       | (NOT signput | copy ((sign | "+", "-"))) ;
+                       | (NOT signput | copy ((sign | "+", "-")));
                           j -:= 1) 
                   ELIF marker = "-" THEN
                        (sj = "+" | copy (" ") 
                        |: sj = "-" | copy (sj) 
-                       | (NOT signput | copy ((sign | " ", "-"))) ;
+                       | (NOT signput | copy ((sign | " ", "-")));
                           j -:= 1) 
                   ELIF marker = "." THEN
                        copy (".") 
                   ELIF marker = "e" OR marker = "i"  
                        OR marker = "a" OR marker = "b"
-                  THEN copy (sj) ; zs := TRUE; signput := FALSE
+                  THEN copy (sj); zs := TRUE; signput := FALSE
                   ELIF marker = "r"
                   THEN j -:= 1
                   FI
@@ -3766,25 +3781,25 @@ b) PROC ? edit string (REF FILE f, STRING s, [ ] SFRAME sf) VOID:
 a) PROC getf = (REF FILE f, [ ] UNION (INTYPE, FORMAT) x) VOID:
       IF opened OF f THEN
          FOR k TO UPB x
-         DO CASE set read mood (f) ; set char mood (f) ; x[k] IN
+         DO CASE set read mood (f); set char mood (f); x[k] IN
             (FORMAT format): associate format (f, format) ,
             (INTYPE it) :
             BEGIN INT j := 0;
                PICTURE picture, [ ] SIMPLIN y = STRAIGHTIN it;
                WHILE (j +:=- 1) &le; UPB y
                DO BOOL incomp := FALSE;
-                  get next picture (f, TRUE, picture) ; set read mood (f) ;
+                  get next picture (f, TRUE, picture); set read mood (f);
                   [1 : UPB (i OF picture) ] SINSERT sinsert;
                   CASE p OF picture IN
                   (PATTERN pattern) :
                   BEGIN
                      [1 : UPB (frames OF pattern) ] SFRAME sframes;
                      (staticize frames (frames OF pattern, sframes) ,
-                        staticize insertion (i OF picture, sinsert)) ;
+                        staticize insertion (i OF picture, sinsert));
                      STRING s;
                      INT radix =
-                        (type OF pattern &ge; 6 | type OF pattern - 4 | 10) ;
-                     indit string (f, s, sframes, radix) ;
+                        (type OF pattern &ge; 6 | type OF pattern - 4 | 10);
+                     indit string (f, s, sframes, radix);
                      CASE type OF pattern IN
                   &cent; integral &cent;
                         (y[j] |
@@ -3803,9 +3818,9 @@ a) PROC getf = (REF FILE f, [ ] UNION (INTYPE, FORMAT) x) VOID:
                   &cent; complex &cent;
                         (y[j] |
                         &laquo; (REF <b><i>L</i></b> COMPL zz) :
-                           (INT i, BOOL bi, b2; char in string ("I", i, s) ;
-                            b1 := string to <i>L</i> real (s [ : i - 1], re OF zz) ;
-                            b2 := string to <i>L</i> real (s [i + 1 : ], im OF zz) ;
+                           (INT i, BOOL bi, b2; char in string ("I", i, s);
+                            b1 := string to <i>L</i> real (s [ : i - 1], re OF zz);
+                            b2 := string to <i>L</i> real (s [i + 1 : ], im OF zz);
                             incomp := NOT (b1 AND b2)) &raquo;
                         | incomp := TRUE) ,
                   &cent; string &cent;
@@ -3831,15 +3846,15 @@ a) PROC getf = (REF FILE f, [ ] UNION (INTYPE, FORMAT) x) VOID:
                   (CPATTERN choice) :
                   BEGIN
                      [1 : UPB (i OF choice) SINSERT si;
-                     staticize insertion (i OF choice, si) ;
-                     get insertion (f, si) ;
+                     staticize insertion (i OF choice, si);
+                     get insertion (f, si);
                      INT c = c OF cpos OF f, CHAR kk;
                      INT k := 0, BOOL found := FALSE;
                      WHILE k &lt; UPB (c OF choice) AND NOT found
                      DO k +:= 1;
                         [1 : UPB ((c OF choice) [k]) ] SINSERT si;
                         BOOL bool := TRUE;
-                        staticize insertion ((c OF choice, [k], si) ;
+                        staticize insertion ((c OF choice, [k], si);
                         STRING s;
                         FOR i TO UPB si
                         DO s PLUSAB
@@ -3848,7 +3863,7 @@ a) PROC getf = (REF FILE f, [ ] UNION (INTYPE, FORMAT) x) VOID:
                         FOR jj TO UPB s
                         WHILE bool := bool AND NOT line ended (f) 
                            AND NOT logical file ended (f) 
-                        DO get char (f, kk) ; bool := kk = s[jj] OD;
+                        DO get char (f, kk); bool := kk = s[jj] OD;
                         (NOT (found := bool) | set char number (f, c)) 
                      OD; 
                      IF NOT found THEN incomp := TRUE
@@ -3867,21 +3882,21 @@ a) PROC getf = (REF FILE f, [ ] UNION (INTYPE, FORMAT) x) VOID:
                      staticize insertion (i OF picture, sinsert) 
                   END,
                   (FPATTERN fpattern): 
-                  BEGIN do fpattern (f, fpattern, TRUE) ;
+                  BEGIN do fpattern (f, fpattern, TRUE);
                      FOR i TO UPB sinsert DO sinsert [i] := (0, "") OD;
                      j -:= 1
                   END,
                   (GPATTERN gpattern) :
                      ([1 : UPB (i OF gpattern) ] SINSERT si;
                      (staticize insertion (i OF gpattern, si) ,
-                        staticize insertion (i OF picture, sinsert)) ;
-                     get insertion (f, si) ;
+                        staticize insertion (i OF picture, sinsert));
+                     get insertion (f, si);
                      get (f, y[j])) ,
                   (VOID) :
                      (j -:= 1; staticize insertion (i OF picture, sinsert)) 
                   ESAC;
                   IF incomp
-                  THEN set read mood (f) ;
+                  THEN set read mood (f);
                      (NOT (value error mended OF f) (f) | undefined) 
                   FI;
                   get insertion (f, sinsert) 
@@ -3901,7 +3916,7 @@ b) PROC ? indit string = (REF FILE f, REF STRING s, [ ] SFRAME sf, INT radix) VO
                &cent; expects a character contained in 's'; if the character
                read is not in 's', the event routine corresponding to 'on
                char error' is called with the suggestion 'c' &cent;
-            IF CHAR k; checkpos (f) ; get char (f, k) ;
+            IF CHAR k; checkpos (f); get char (f, k);
                char in string (k, LOC INT, s) 
             THEN k
             ELSE CHAR sugg := c;
@@ -3909,7 +3924,13 @@ b) PROC ? indit string = (REF FILE f, REF STRING s, [ ] SFRAME sf, INT radix) VO
                    (char in string (sugg, LOC INT, s) | sugg | undefined; c) 
                ELSE undefined; c   
                FI;
-               set read mood (f) ;
+               set read mood (f);
+            <var>[[above five lines should read
+               CHAR cc = IF (char error mended OF f) (f, sugg) THEN
+                  (char in string (sugg, LOC INT, s) | sugg | undefined; c) 
+                 ELSE undefined; c
+                 FI;
+               set read mood (f); cc]]</var>
             FI;
 
          OP ! = (CHAR s, c) CHAR: STRING (s) ! c;
@@ -3918,15 +3939,15 @@ b) PROC ? indit string = (REF FILE f, REF STRING s, [ ] SFRAME sf, INT radix) VO
          s := "+";
          FOR k TO UPB sf
          DO SFRAME sfk = sf[k]; supp := supp OF fsk;
-            get insertion (f, si OF sfk) ;  
+            get insertion (f, si OF sfk);  
             TO rep OF sfk
             DO CHAR marker = marker OF sfk;
                IF marker = "d" THEN
-                  s PLUSAB (supp | "0" | good digits ! "0") ; zs := TRUE
+                  s PLUSAB (supp | "0" | good digits ! "0"); zs := TRUE
                  ELIF marker = "z" THEN
                     s PLUSAB (supp | "0"   
                        | CHAR c = ((zs | " " | "") + good digits) ! "0";
-                          (c &ne; " " | zs := FALSE) ; c) 
+                          (c &ne; " " | zs := FALSE); c) 
                  ELIF marker = "u" OR marker = "+" THEN
                       IF sign found
                       THEN zs := FALSE; a PLUSAB ("0123456789" ! "0") 
@@ -3947,16 +3968,16 @@ b) PROC ? indit string = (REF FILE f, REF STRING s, [ ] SFRAME sf, INT radix) VO
                  ELIF marker ="." THEN
                       s PLUSAB (supp | "." | "."! ".") 
                  ELIF marker = "e" THEN
-                      s PLUSAB (supp | "<sub>10</sub>" | "<sub>10</sub>\e" ! "<sub>10</sub>"; "<sub>10</sub>") ; sign found := FALSE;
+                      s PLUSAB (supp | "<sub>10</sub>" | "<sub>10</sub>\e" ! "<sub>10</sub>"; "<sub>10</sub>"); sign found := FALSE;
                       zs := TRUE; s PLUSAB "+"; sp := UPB s
                  ELIF marker = "i" THEN  
-                      s PLUSAB (supp | "I" | "iI"! "I"; "I") ;
+                      s PLUSAB (supp | "I" | "iI"! "I"; "I");
                       sign found := FALSE; zs := TRUE; s PLUSAB "+"; sp := UPB s
                  ELIF marker = "b" THEN  
                       s PLUSAB (flip + flop) ! flop; no sign := TRUE
                  ELIF marker = "a" THEN
-                      s PLUSAB (supp | " " | CHAR c; check pos (f) ; get char (f, c) ;
-                      c) ;
+                      s PLUSAB (supp | " " | CHAR c; check pos (f); get char (f, c);
+                      c);
                       no sign := TRUE
                  ELIF marker = "r"
                  THEN SKIP
@@ -4001,15 +4022,15 @@ b) PROC ? from bin = (REF FILE f, SIMPLOUT y. [ ] CHAR c) SIMPLOUT:
 <pre>
 a) PROC put bin = (REF FILE f, [ ] OUTTYPE ot) VOID:
       IF opened OF f THEN 
-         set bin mood (f) ; 
-         set write mood (f) ; 
+         set bin mood (f); 
+         set write mood (f); 
          FOR k TO UPB ot DO 
              [ ] SIMPLOUT y = STRAIGHTOUT ot [k]; 
              FOR j TO UPB y DO 
-                 [ ] CHAR bin = to bin (f, y[j]) ; 
+                 [ ] CHAR bin = to bin (f, y[j]); 
                  FOR i TO UPB bin DO 
-                     next pos (f) ; 
-                     set bin mood (f) ; 
+                     next pos (f); 
+                     set bin mood (f); 
                      REF POS cpos = cpos OF f, lpos = lpos OF book OF f; 
                      CASE text OF f IN 
                         (FLEXTEXT t2): t2 [p OF cpos ] [l OF cpos] [c OF cpos] := bin [i] 
@@ -4038,7 +4059,7 @@ a) PROC put bin = (REF FILE f, [ ] OUTTYPE ot) VOID:
 <pre>
 a) PROC get bin = (REF FILE f, [ ] INTYPE it) VOID:
       IF opened OF f THEN
-         set bin mood (f) ; set read mood (f) ;  
+         set bin mood (f); set read mood (f);  
          FOR k TO UPB it
          DO [ ] SIMPLIN y = STRAIGHTIN it [k];
             FOR j TO UPB y
@@ -4054,7 +4075,7 @@ a) PROC get bin = (REF FILE f, [ ] INTYPE it) VOID:
                   (REF STRING ss): ss ESAC;
                [1 : UPB (to bin (f, yj)) ] CHAR bin;
                FOR i TO UPB bin
-               DO next pos (f) ; set bin mood (f) ;
+               DO next pos (f); set bin mood (f);
                   REF POS cpos = cpos OF f;
                   bin[i] :=
                      CASE text OF f IN
@@ -4112,7 +4133,7 @@ The representation of the <b>system-prelude</b> is obtained from the following f
 
 <a name=A41a></a>
 <pre>
-a) SEMA ? gremlins = (SEMA s; <b>F</b> OF s := PRIM INT :=  0; s) ;
+a) SEMA ? gremlins = (SEMA s; <b>F</b> OF s := PRIM INT :=  0; s);
 </pre>  
 
 <h3>
@@ -4151,36 +4172,36 @@ The representation of the <b>particular-prelude</b> of each <b>user-task</b> is 
 
 <a name=A51a></a>
 <pre>
-a) <b><i>L</i></b> INT <i>L</i> last random := ROUND (<i>L</i> maxint / <i>L</i>  2) ;  
+a) <b><i>L</i></b> INT <i>L</i> last random := ROUND (<i>L</i> maxint / <i>L</i>  2);  
 <a name=A51b></a>
-b) PROC <i>L</i> random = <b><i>L</i></b>  REAL: <i>L</i> next random (<i>L</i> last random) ;
+b) PROC <i>L</i> random = <b><i>L</i></b>  REAL: <i>L</i> next random (<i>L</i> last random);
 <a name=A51c></a>
 c) FILE stand in, stand out, stand back;
-   open (stand in,  "", stand in channel) ;
-   open (stand out, "", stand out channel) ;
-   open (stand back,  "", stand back channel) ;
+   open (stand in,  "", stand in channel);
+   open (stand out, "", stand out channel);
+   open (stand back,  "", stand back channel);
 <a name=A51d></a>
 d) PROC print = ([ ] UNION (OUTTYPE, PROC (REF FILE) VOID) x) VOID:
       put (stand out, x) , 
    PROC write = ([ ] UNION (OUTTYPE, PROC (REF FILE) VOID) x) VOID:
-      put (stand out, x) ; 
+      put (stand out, x); 
 <a name=A51e></a>
 e) PROC read = ([ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
-      get (stand in, x) ; 
+      get (stand in, x); 
 <a name=A51f></a>
 f) PROC printf = ([ ] UNION (OUTTYPE, FORMAT) x) VOID:
       putf (stand out, x) , 
    PROC writef = ([ ] UNION (OUTTYPE, FORMAT) x) VOID:
-      putf (stand out, x) ;
+      putf (stand out, x);
 <a name=A51g></a>
 g) PROC readf = ([ ] UNION (INTYPE, FORMAT) x) VOID:
-      getf (stand in, x) ;  
+      getf (stand in, x);  
 <a name=A51h></a>
 h) PROC write bin = ([ ] OUTTYPE x) VOID:
-      put bin (stand back, x) ;  
+      put bin (stand back, x);  
 <a name=A51i></a>
 i) PROC read bin = ([ ] INTYPE x) VOID:
-     get bin (stand back, x) ;
+     get bin (stand back, x);
 </pre>
 
 <h3>
@@ -4192,7 +4213,7 @@ The representation of the <b>particular-postlude</b> of each <b>user-task</b> is
 
 <a name=A52a></a>
 <pre>
-a) stop: lock (stand in) ; lock (stand out) ; lock (stand back)   
+a) stop: lock (stand in); lock (stand out); lock (stand back)   
 </pre>
 
 <h3>
@@ -4207,8 +4228,8 @@ a) stop: lock (stand in) ; lock (stand out) ; lock (stand back)
 PROC compsqrt = (COMPL z) COMPL :
    &cent; the square root whose real part is nonnegative of the complex number 'z' &cent;
    BEGIN REAL x = RE z, y = IM z;
-       REAL rp = sqrt ((ABS x + sqrt (x &uarr; 2 + y &uarr; 2)) / 2) ;
-       REAL ip = (rp = 0 | 0 | y / (2 &times; rp)) ;
+       REAL rp = sqrt ((ABS x + sqrt (x &uarr; 2 + y &uarr; 2)) / 2);
+       REAL ip = (rp = 0 | 0 | y / (2 &times; rp));
        IF x &ge; 0 THEN rp I ip ELSE ABS ip I (y &ge; 0 | rp | -rp) FI
    END
 </pre>
@@ -4313,7 +4334,7 @@ PROC euler = (PROC (INT) REAL f, REAL eps, INT tim) REAL:
    BEGIN INT n := 1, t; REAL mn, ds := eps; [1 : 16] REAL m;
       REAL sum := (m[1] := f (1)) / 2;
       FOR i FROM 2 WHILE (t := ABS ds &lt; eps | t + 1 | 1)) &le; tim
-      DO mn := f (i) ;
+      DO mn := f (i);
          FOR k TO n DO mn := ((ds := mn)) + m[k]) / 2; m[k] := ds OD;
          sum +:= (ds := (ABS mn &lt; ABS m[n] AND n &lt; 16 | n +:= 1; m[n] := mn;
             mn / 2 | mn)) 
@@ -4430,24 +4451,24 @@ x1 / y1
  
 <pre>
 BEGIN
-   MODE FORM = UNION (REF CONST, REF VAR, REF TRIPLE, REF CALL) ;
-   MODE CONST = STRUCT (REAL value) ;
-   MODE VAR = STRUCT (STRING name, REAL value) ;
-   MODE TRIPLE = STRUCT (FORM left operand, INT operator, FORM right operand) ;
-   MODE FUNCTION = STRUCT (REF VAR bound var, FORM body) ;
-   MODE CALL = STRUCT (REF FUNCTION function name, FORM parameter) ;
+   MODE FORM = UNION (REF CONST, REF VAR, REF TRIPLE, REF CALL);
+   MODE CONST = STRUCT (REAL value);
+   MODE VAR = STRUCT (STRING name, REAL value);
+   MODE TRIPLE = STRUCT (FORM left operand, INT operator, FORM right operand);
+   MODE FUNCTION = STRUCT (REF VAR bound var, FORM body);
+   MODE CALL = STRUCT (REF FUNCTION function name, FORM parameter);
    INT plus = 1, minus = 2, times = 3, by = 4, to = 5;
    HEAP CONST zero, one; value OF zero := 0; value OF one := 1;
-   OP = = (FORM a, REF CONST b) BOOL: (a | (REF CONST ec): ec :=: b | FALSE) ;
+   OP = = (FORM a, REF CONST b) BOOL: (a | (REF CONST ec): ec :=: b | FALSE);
    OP + = (FORM a, b) FORM:
-      a = zero | b |: b = zero | a | HEAP TRIPLE := (a, plus, b)) ;
-   OP - = (FORM a, b) FORM: (b = zero | a | HEAP TRIPLE := (a, minus, b)) ;
+      a = zero | b |: b = zero | a | HEAP TRIPLE := (a, plus, b));
+   OP - = (FORM a, b) FORM: (b = zero | a | HEAP TRIPLE := (a, minus, b));
    OP &times; = (FORM a, b) FORM: (a = zero OR b = zero | zero |: a = one | b |: b = one | a |
-         HEAP TRIPLE := (a, times, b)) ;
+         HEAP TRIPLE := (a, times, b));
    OP / = (FORM a, b) FORM: (a = zero AND NOT (b = zero) | zero |: b = one | a |
-         HEAP TRIPLE := (a, by, b)) ;
+         HEAP TRIPLE := (a, by, b));
    OP &uarr; = (FORM a, REF CONST b) FORM:
-      (a = one OR (b :=: zero) | one |: b :=: one | a | HEAP TRIPLE := (a, to, b)) ;
+      (a = one OR (b :=: zero) | one |: b :=: one | a | HEAP TRIPLE := (a, to, b));
    PROC derivative of = (FORM e, &cent; with respect to &cent; REF VAR x) FORM:
       CASE e IN
          (REF CONST): zero,
@@ -4455,7 +4476,7 @@ BEGIN
          (REF TRIPLE et) :
             CASE FORM u = left operand OF et, v = right operand OF et;
                  FORM udash = derivative of (u, &cent; with respect to &cent; x) ,
-                 vdash = derivative of (v, &cent; with respect to &cent; x) ;
+                 vdash = derivative of (v, &cent; with respect to &cent; x);
                  operator OF et
             IN
                  udash + vdash,
@@ -4468,7 +4489,7 @@ BEGIN
          (REF CALL ef) :
             BEGIN REF FUNCTION f = function name OF ef;
                FORM g = parameter OF ef; REF VAR y = bound var OF f;
-               HEAP FUNCTION fdash := (y, derivative of (body OF f, y)) ;
+               HEAP FUNCTION fdash := (y, derivative of (body OF f, y));
                HEAP CALL := (fdash, g)) &times derivative of (g, x)
             END
       ESAC;
@@ -4478,25 +4499,25 @@ BEGIN
          (REF VAR ev): value OF ev,
          (REF TRIPLE et) :
             CASE REAL u = value of (left operand OF et) ,
-                 v = value of (right operand OF et) ;
+                 v = value of (right operand OF et);
                  operator OF et
             IN u + v, u - v, u &times; v, u / v, exp (v &times; ln (u))
             ESAC,
          (REF CALL ef) :
             BEGIN REF FUNCTION f = function name OF ef;
-               value OF bound var OF f := value of (parameter OF ef) ;
+               value OF bound var OF f := value of (parameter OF ef);
                value of (body OF f)
             END
       ESAC;
    HEAP FORM f, g;
-   HEAP VAR a := ("a", SKIP) , b := ("b", SKIP) , x := ("x", SKIP) ;
+   HEAP VAR a := ("a", SKIP) , b := ("b", SKIP) , x := ("x", SKIP);
 &cent; start here &cent;
-   read ((value OF a, value OF b, value OF x)) ;
-   f := a + x / (b + x) ;
-   g := (f + one) / (f - one) ;
+   read ((value OF a, value OF b, value OF x));
+   f := a + x / (b + x);
+   g := (f + one) / (f - one);
    print ((value OF a, value OF b, value OF x,
       value of (derivative of (g, &cent; with respect to &cent; x))))
-END &cent; example OF formula manipulation &cent;
+END &cent; example of formula manipulation &cent;
 </pre><h3>
 <a name=BB></a>11.11. Information retrieval
 </h3>
@@ -4505,10 +4526,10 @@ END &cent; example OF formula manipulation &cent;
 BEGIN
    MODE RA = REF AUTH, RB = REF BOOK;
    MODE AUTH = STRUCT (STRING name, RA next, RB book) ,
-   BOOK = STRUCT (STRING title, RB next) ;
+   BOOK = STRUCT (STRING title, RB next);
    RA auth, first auth := NIL, last auth;
    RB book; STRING name, title; INT i; FILE input, output;
-   open (input, "", remote in) ; open (output, "", remote out) ;
+   open (input, "", remote in); open (output, "", remote out);
    putf (output, ($p
       "to enter a new author, type ""author"", a space,"x
       "and his name."l
@@ -4518,7 +4539,7 @@ BEGIN
       "a space, and his name."l
       "to find the author of a book, type ""find"", a new line,"x
       "and the title."l
-      "to end, type ""end"""al$, ".")) ;
+      "to end, type ""end"""al$, "."));
 
    PROC update = VOID:
       IF RA (first auth) :=: NIL
@@ -4529,22 +4550,22 @@ BEGIN
               (name = name OF auth | GO TO known | auth := next OF auth)
            OD;
            lastauth := next OF lastauth := auth :=
-              HEAP AUTH := (name, NIL, NIL) ;
+              HEAP AUTH := (name, NIL, NIL);
     known: SKIP
       FI;
 
    DO
    try again:
       getf (input, ($c ("author", "book", "list", "find", "end", "") ,x30al,
-         80al$, i)) ;
+         80al$, i));
 
       CASE i IN
 
          &cent; author&cent;
-         getf (input, name) ; update) ,
+         getf (input, name); update) ,
 
          &cent; book &cent;
-         BEGIN getf (input, (name, title)) ; update;
+         BEGIN getf (input, (name, title)); update;
             IF RB (book OF auth) :=: NIL
             THEN book OF auth := HEAP BOOK := (title, NIL)
             ELSE book := book OF auth;
@@ -4559,29 +4580,29 @@ BEGIN
          END,
 
          &cent; list &cent;
-         BEGIN getf (input, name) ; update;
-            putf (output, ($p"author: "30all$, name)) ;
+         BEGIN getf (input, name); update;
+            putf (output, ($p"author: "30all$, name));
             IF RB (book := book OF auth) :=: NIL
             THEN put (output, ("no publications", newline))
             ELSE on page end (output,
                (REF FILE f) BOOL:
-                  (putf (f, ($p"author: "30a41k"continued"ll$, name)) ;
-                   TRUE)) ;
+                  (putf (f, ($p"author: "30a41k"continued"ll$, name));
+                   TRUE));
                WHILE RB (book) :&ne;: NIL
-               DO putf (output, ($l80a$, title OF book)) ; book := next OF book
+               DO putf (output, ($l80a$, title OF book)); book := next OF book
                OD;
                on page end (output, (REF FILE f) BOOL: FALSE)
             FI
          END,
 
          &cent; find &cent;
-         BEGIN getf (input, (LOC STRING, title)) ; auth := first auth;
+         BEGIN getf (input, (LOC STRING, title)); auth := first auth;
             WHILE RA (auth) :&ne;: NIL
             DO book := book OF auth;
                WHILE RB (book) :&ne;: NIL
                DO
                   IF title = title OF book
-                  THEN putf (output, ($l"author: "30a$, name OF auth)) ;
+                  THEN putf (output, ($l"author: "30a$, name OF auth));
                      GO TO try again
                   ELSE book := next OF book
                   FI
@@ -4592,11 +4613,11 @@ BEGIN
          END,
 
          &cent; end &cent;
-         (put (output, (new page, "signed off", close)) ; close (input) ;
+         (put (output, (new page, "signed off", close)); close (input);
           GOTO stop) ,
 
          &cent; error &cent;
-         (put (output, (newline, "mistake, try again")) ; newline (input))
+         (put (output, (newline, "mistake, try again")); newline (input))
       ESAC
    OD
 END
@@ -4606,7 +4627,7 @@ END
  
 <pre>
 BEGIN INT nmb magazine slots, nmb producers, nmb consumers;
-   read ((nmb magazine slots, nmb producers, nmb consumers)) ;
+   read ((nmb magazine slots, nmb producers, nmb consumers));
    [1 : nmb producers] FILE in file; [1 : nmb consumers] FILE out file;
    FOR i TO nmb producers DO open (in file[i], "", inchannel[i]) OD;
       &cent; 'inchannel' and 'outchannel' are defined in a surrounding range &cent;
@@ -4619,10 +4640,10 @@ BEGIN INT nmb magazine slots, nmb producers, nmb consumers;
       in buffer busy = LEVEL 1, out buffer busy = LEVEL 1;
       PROC par call = (PROC (INT) VOID p, INT n) VOID:
          &cent; call 'n' incarnations of 'p' in parallel &cent;
-         (n &gt; 0 | PAR (p (n) , par call (p, n - 1))) ;
+         (n &gt; 0 | PAR (p (n) , par call (p, n - 1)));
       PROC producer = (INT i) VOID:
          DO HEAP PAGE page;
-            get (in file[i], page) ;
+            get (in file[i], page);
             DOWN free slots; DOWN in buffer busy;
             magazine[index] := page;
             index MODAB nmb magazine slots PLUSAB 1;
@@ -4648,12 +4669,12 @@ FOR k TO 8
 DO FILE f := stand out;
    PROC p = (INT me, de, ma) VOID:
       IF ma &gt; 0 THEN
-           p (me, 6 - me - de, ma - 1) ;
-           putf (f, (me, de, ma)) ;
+           p (me, 6 - me - de, ma - 1);
+           putf (f, (me, de, ma));
            &cent; move from peg 'me' to peg 'de' piece 'ma' &cent;
            p (6-me-de, de, ma -1)
       FI ;
-   putf (f, ($l"k = "dl,n ((2 &uarr; k + 15) &divide; 16) (2(2(4(3(d)x)x)x)l)$, k)) ;
+   putf (f, ($l"k = "dl,n ((2 &uarr; k + 15) &divide; 16) (2(2(4(3(d)x)x)x)l)$, k));
    p (1, 2, k)
 OD
 </pre><!-- RRFooter -->
@@ -4672,7 +4693,7 @@ not a part of the Algol 68 Revised Report, and is distributed with
 Algol 68 Genie with kind permission of C.H. Lindsey.
 <p style="font-size: 8pt; font-color: black;">
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 12 (May 2008)
+Algol 68 Genie Mark 14 (October 2008)
 </td>
 </tr>
 </table>
