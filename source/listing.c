@@ -454,7 +454,7 @@ static void tree_listing (FILE_T f, NODE_T * q, int x, SOURCE_LINE_T * l, BOOL_T
       }
 /* Indent. */
       WRITE (f, "\n     ");
-      snprintf (output_line, BUFFER_SIZE, "%02x %02x %02x", x, (SYMBOL_TABLE (p) != NULL ? LEX_LEVEL (p) : -1), INFO (p)->PROCEDURE_LEVEL);
+      snprintf (output_line, BUFFER_SIZE, "%08x %02x %02x %02x", NUMBER (p), x, (SYMBOL_TABLE (p) != NULL ? LEX_LEVEL (p) : -1), INFO (p)->PROCEDURE_LEVEL);
       WRITE (f, output_line);
       for (k = 0; k < (x - *ld); k++) {
         WRITE (f, bar[k]);

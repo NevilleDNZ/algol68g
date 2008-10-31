@@ -88,6 +88,7 @@ ENABLE_IEEE_754 is ok for Pentiums.
 #define ENABLE_REGEX 1
 #if defined ENABLE_GRAPHICS
 #define X_DISPLAY_MISSING 1
+#define POSTSCRIPT_MISSING 1
 #endif
 #undef ENABLE_HTTP
 #undef ENABLE_PAR_CLAUSE
