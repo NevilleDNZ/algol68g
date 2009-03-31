@@ -37,7 +37,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 BOOL_T unprintable (char ch)
 {
-  return (!IS_PRINT (ch) && ch != TAB_CHAR);
+  return ((BOOL_T) (!IS_PRINT (ch) && ch != TAB_CHAR));
 }
 
 /*!
@@ -48,14 +48,14 @@ BOOL_T unprintable (char ch)
 
 char *ctrl_char (int ch)
 {
-  static char str[SMALL_BUFFER_SIZE];
+  static char loc_str[SMALL_BUFFER_SIZE];
   ch = TO_UCHAR (ch);
   if (IS_CNTRL (ch) && IS_LOWER (ch + 96)) {
-    snprintf (str, SMALL_BUFFER_SIZE, "\\^%c", ch + 96);
+    snprintf (loc_str, SMALL_BUFFER_SIZE, "\\^%c", ch + 96);
   } else {
-    snprintf (str, SMALL_BUFFER_SIZE, "\\%02x", ch);
+    snprintf (loc_str, SMALL_BUFFER_SIZE, "\\%02x", ch);
   }
-  return (str);
+  return (loc_str);
 }
 
 /*!
@@ -66,10 +66,10 @@ char *ctrl_char (int ch)
 
 static char *char_to_str (char ch)
 {
-  static char str[2];
-  str[0] = ch;
-  str[1] = NULL_CHAR;
-  return (str);
+  static char loc_str[2];
+  loc_str[0] = ch;
+  loc_str[1] = NULL_CHAR;
+  return (loc_str);
 }
 
 /*!
@@ -195,7 +195,7 @@ static char *diag_pos (SOURCE_LINE_T * p, DIAGNOSTIC_T * d)
 \param diag whether and how to print diagnostics
 **/
 
-void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
+void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * nwhere, int diag)
 {
   char *c, *c0;
   int continuations = 0;
@@ -255,7 +255,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
         new_pos = &c[1];
       } else if (unprintable (c[0])) {
         bufcpy (output_line, ctrl_char ((int) c[0]), BUFFER_SIZE);
-        len = strlen (output_line);
+        len = (int) strlen (output_line);
         new_pos = &c[1];
         col++;
       } else {
@@ -274,32 +274,32 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
 /* First see if there are diagnostics to be printed */
       BOOL_T y = A68_FALSE, z = A68_FALSE;
       DIAGNOSTIC_T *d = p->diagnostics;
-      if (d != NULL || where != NULL) {
+      if (d != NULL || nwhere != NULL) {
         char *c1;
         for (c1 = c0; c1 != c; c1++) {
-          y |= (where != NULL && p == LINE (where) ? c1 == where_pos (p, where) : A68_FALSE);
+          y |= (BOOL_T) (nwhere != NULL && p == LINE (nwhere) ? c1 == where_pos (p, nwhere) : A68_FALSE);
           if (diag != A68_NO_DIAGNOSTICS) {
             for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-              z |= (c1 == diag_pos (p, d));
+              z = (BOOL_T) (z | (c1 == diag_pos (p, d)));
             }
           }
         }
       }
 /* If diagnostics are to be printed then print marks */
       if (y || z) {
-        DIAGNOSTIC_T *d;
+        DIAGNOSTIC_T *d2;
         char *c1;
         int col_2 = 1;
         WRITE (f, "\n      ");
         for (c1 = c0; c1 != c; c1++) {
           int k = 0, diags_at_this_pos = 0;
-          for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-            if (c1 == diag_pos (p, d)) {
+          for (d2 = p->diagnostics; d2 != NULL; FORWARD (d2)) {
+            if (c1 == diag_pos (p, d2)) {
               diags_at_this_pos++;
-              k = NUMBER (d);
+              k = NUMBER (d2);
             }
           }
-          if (y == A68_TRUE && c1 == where_pos (p, where)) {
+          if (y == A68_TRUE && c1 == where_pos (p, nwhere)) {
             bufcpy (output_line, "-", BUFFER_SIZE);
           } else if (diags_at_this_pos != 0) {
             if (diag == A68_NO_DIAGNOSTICS) {
@@ -311,7 +311,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
             }
           } else {
             if (unprintable (c1[0])) {
-              int n = strlen (ctrl_char (c1[0]));
+              int n = (int) strlen (ctrl_char (c1[0]));
               col_2 += 1;
               bufcpy (output_line, "", BUFFER_SIZE);
               while (n--) {
@@ -381,9 +381,9 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
       DIAGNOSTIC_T *d = p->diagnostics;
       for (; d != NULL; FORWARD (d)) {
         if (what == A68_ALL_DIAGNOSTICS) {
-          z |= (WHETHER (d, A68_WARNING) || WHETHER (d, A68_ERROR) || WHETHER (d, A68_SYNTAX_ERROR) || WHETHER (d, A68_SUPPRESS_SEVERITY));
+          z = (BOOL_T) (z | (WHETHER (d, A68_WARNING) || WHETHER (d, A68_ERROR) || WHETHER (d, A68_SYNTAX_ERROR) || WHETHER (d, A68_SUPPRESS_SEVERITY)));
         } else if (what == A68_RUNTIME_ERROR) {
-          z |= (WHETHER (d, A68_RUNTIME_ERROR));
+          z = (BOOL_T) (z | (WHETHER (d, A68_RUNTIME_ERROR)));
         }
       }
       if (z) {
@@ -705,8 +705,8 @@ Z quoted string literal.
 	bufcat (b, "symbol", BUFFER_SIZE);\
       }\
     } else if (t[0] == 'U') {\
-      char *str = va_arg (args, char *);\
-      bufcat (b, str, BUFFER_SIZE);\
+      char *loc_string = va_arg (args, char *);\
+      bufcat (b, loc_string, BUFFER_SIZE);\
     } else if (t[0] == 'X') {\
       int att = va_arg (args, int);\
       char z[BUFFER_SIZE];\
@@ -714,12 +714,12 @@ Z quoted string literal.
       non_terminal_string (z, att);\
       bufcat (b, new_string (z), BUFFER_SIZE);\
     } else if (t[0] == 'Y') {\
-      char *str = va_arg (args, char *);\
-      bufcat (b, str, BUFFER_SIZE);\
+      char *loc_string = va_arg (args, char *);\
+      bufcat (b, loc_string, BUFFER_SIZE);\
     } else if (t[0] == 'Z') {\
-      char *str = va_arg (args, char *);\
+      char *loc_string = va_arg (args, char *);\
       bufcat (b, "\"", BUFFER_SIZE);\
-      bufcat (b, str, BUFFER_SIZE);\
+      bufcat (b, loc_string, BUFFER_SIZE);\
       bufcat (b, "\"", BUFFER_SIZE);\
     } else {\
       char q[2];\
@@ -734,20 +734,20 @@ Z quoted string literal.
 \brief give a diagnostic message
 \param sev severity
 \param p position in tree
-\param str message string
-\param ... various arguments needed by special symbols in str
+\param loc_str message string
+\param ... various arguments needed by special symbols in loc_str
 **/
 
-void diagnostic_node (int sev, NODE_T * p, char *str, ...)
+void diagnostic_node (int sev, NODE_T * p, char *loc_str, ...)
 {
   va_list args;
   MOID_T *moid = NULL;
-  char *t = str, b[BUFFER_SIZE];
+  char *t = loc_str, b[BUFFER_SIZE];
   BOOL_T force, extra_syntax = A68_TRUE, shortcut = A68_FALSE;
   int err = errno;
-  va_start (args, str);
+  va_start (args, loc_str);
   b[0] = NULL_CHAR;
-  force = (sev & A68_FORCE_DIAGNOSTICS) != 0;
+  force = (BOOL_T) ((sev & A68_FORCE_DIAGNOSTICS) != 0);
   sev &= ~A68_FORCE_DIAGNOSTICS;
 /* No warnings? */
   if (!force && sev == A68_WARNING && no_warnings) {
@@ -777,14 +777,14 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
     COMPOSE_DIAGNOSTIC;
 /* Add information from errno, if any. */
     if (err != 0) {
-      char *str = new_string (ERROR_SPECIFICATION);
-      if (str != NULL) {
+      char *loc_str2 = new_string (ERROR_SPECIFICATION);
+      if (loc_str2 != NULL) {
         char *stu;
         bufcat (b, " (", BUFFER_SIZE);
-        for (stu = str; stu[0] != NULL_CHAR; stu++) {
-          stu[0] = TO_LOWER (stu[0]);
+        for (stu = loc_str2; stu[0] != NULL_CHAR; stu++) {
+          stu[0] = (char) TO_LOWER (stu[0]);
         }
-        bufcat (b, str, BUFFER_SIZE);
+        bufcat (b, loc_str2, BUFFER_SIZE);
         bufcat (b, ")", BUFFER_SIZE);
       }
     }
@@ -802,21 +802,21 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
 \brief give a diagnostic message
 \param sev severity
 \param p position in tree
-\param str message string
-\param ... various arguments needed by special symbols in str
+\param loc_str message string
+\param ... various arguments needed by special symbols in loc_str
 **/
 
-void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
+void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *loc_str, ...)
 {
   va_list args;
   MOID_T *moid = NULL;
-  char *t = str, b[BUFFER_SIZE];
+  char *t = loc_str, b[BUFFER_SIZE];
   BOOL_T force, extra_syntax = A68_TRUE, shortcut = A68_FALSE;
   int err = errno;
   NODE_T *p = NULL;
-  va_start (args, str);
+  va_start (args, loc_str);
   b[0] = NULL_CHAR;
-  force = (sev & A68_FORCE_DIAGNOSTICS) != 0;
+  force = (BOOL_T) ((sev & A68_FORCE_DIAGNOSTICS) != 0);
   sev &= ~A68_FORCE_DIAGNOSTICS;
 /* No warnings? */
   if (!force && sev == A68_WARNING && no_warnings) {
@@ -846,14 +846,14 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
     COMPOSE_DIAGNOSTIC;
 /* Add information from errno, if any. */
     if (err != 0) {
-      char *str = new_string (ERROR_SPECIFICATION);
-      if (str != NULL) {
+      char *loc_str2 = new_string (ERROR_SPECIFICATION);
+      if (loc_str2 != NULL) {
         char *stu;
         bufcat (b, " (", BUFFER_SIZE);
-        for (stu = str; stu[0] != NULL_CHAR; stu++) {
-          stu[0] = TO_LOWER (stu[0]);
+        for (stu = loc_str2; stu[0] != NULL_CHAR; stu++) {
+          stu[0] = (char) TO_LOWER (stu[0]);
         }
-        bufcat (b, str, BUFFER_SIZE);
+        bufcat (b, loc_str2, BUFFER_SIZE);
         bufcat (b, ")", BUFFER_SIZE);
       }
     }

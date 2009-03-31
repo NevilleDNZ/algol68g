@@ -184,7 +184,7 @@ void set_par_level (NODE_T * p, int n)
 
 BOOL_T whether_main_thread (void)
 {
-  return (main_thread_id == pthread_self ());
+  return ((BOOL_T) (main_thread_id == pthread_self ()));
 }
 
 /*!
@@ -381,7 +381,7 @@ static void start_parallel_units (NODE_T * p, pthread_t parent)
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_THREAD_FAULT);
         exit_genie (p, A68_RUNTIME_ERROR);
       }
-      if (pthread_attr_setstacksize (&new_at, stack_size) != 0) {
+      if (pthread_attr_setstacksize (&new_at, (size_t) stack_size) != 0) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_THREAD_FAULT);
         exit_genie (p, A68_RUNTIME_ERROR);
       }
@@ -486,7 +486,7 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_THREAD_FAULT);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    if (pthread_attr_setstacksize (&new_at, stack_size) != 0) {
+    if (pthread_attr_setstacksize (&new_at, (size_t) stack_size) != 0) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_THREAD_FAULT);
       exit_genie (p, A68_RUNTIME_ERROR);
     }

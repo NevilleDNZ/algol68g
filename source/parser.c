@@ -217,11 +217,11 @@ static BOOL_T whether_loop_keyword (NODE_T * p)
   case WHILE_SYMBOL:
   case DO_SYMBOL:
     {
-      return (ATTRIBUTE (p));
+      return (A68_TRUE);
     }
   default:
     {
-      return (NULL_ATTRIBUTE);
+      return (A68_FALSE);
     }
   }
 }
@@ -748,14 +748,14 @@ After this we can assign symbol tables to basic blocks.
 /*!
 \brief give diagnose from top-down parser
 \param start embedding clause starts here
-\param where error issued at this point
+\param posit error issued at this point
 \param clause type of clause being processed
 \param expected token expected
 **/
 
-static void top_down_diagnose (NODE_T * start, NODE_T * where, int clause, int expected)
+static void top_down_diagnose (NODE_T * start, NODE_T * posit, int clause, int expected)
 {
-  NODE_T *issue = (where != NULL ? where : start);
+  NODE_T *issue = (posit != NULL ? posit : start);
   if (expected != 0) {
     diagnostic_node (A68_SYNTAX_ERROR, issue, ERROR_EXPECTED_NEAR, expected, clause, SYMBOL (start), start->info->line, NULL);
   } else {
@@ -817,7 +817,7 @@ static int whether_loop_cast_formula (NODE_T * p)
 static NODE_T *top_down_skip_loop_unit (NODE_T * p)
 {
 /* Unit may start with, or consist of, a loop. */
-  if (whether_loop_keyword (p) != NULL_ATTRIBUTE) {
+  if (whether_loop_keyword (p)) {
     p = top_down_loop (p);
   }
 /* Skip rest of unit. */
@@ -833,16 +833,16 @@ static NODE_T *top_down_skip_loop_unit (NODE_T * p)
         k = whether_loop_cast_formula (p);
       }
 /* ... may be followed by a loop clause. */
-      if (whether_loop_keyword (p) != NULL_ATTRIBUTE) {
+      if (whether_loop_keyword (p)) {
         p = top_down_loop (p);
       }
-    } else if (whether_loop_keyword (p) != NULL_ATTRIBUTE || WHETHER (p, OD_SYMBOL)) {
+    } else if (whether_loop_keyword (p) || WHETHER (p, OD_SYMBOL)) {
 /* new loop or end-of-loop. */
       return (p);
     } else if (WHETHER (p, COLON_SYMBOL)) {
       FORWARD (p);
 /* skip routine header: loop clause. */
-      if (p != NULL && whether_loop_keyword (p) != NULL_ATTRIBUTE) {
+      if (p != NULL && whether_loop_keyword (p)) {
         p = top_down_loop (p);
       }
     } else if (whether_one_of (p, SEMI_SYMBOL, COMMA_SYMBOL, NULL_ATTRIBUTE)
@@ -867,7 +867,7 @@ static NODE_T *top_down_skip_loop_series (NODE_T * p)
   BOOL_T z;
   do {
     p = top_down_skip_loop_unit (p);
-    z = (p != NULL && (whether_one_of (p, SEMI_SYMBOL, EXIT_SYMBOL, COMMA_SYMBOL, COLON_SYMBOL, NULL_ATTRIBUTE)));
+    z = (BOOL_T) (p != NULL && (whether_one_of (p, SEMI_SYMBOL, EXIT_SYMBOL, COMMA_SYMBOL, COLON_SYMBOL, NULL_ATTRIBUTE)));
     if (z) {
       FORWARD (p);
     }
@@ -1557,12 +1557,12 @@ static void try_reduction (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
       keep_matching = A68_FALSE;
     } else if (arg == WILDCARD) {
 /* WILDCARD matches any Algol68G non terminal, but no keyword. */
-      keep_matching = (non_terminal_string (edit_line, ATTRIBUTE (p)) != NULL);
+      keep_matching = (BOOL_T) (non_terminal_string (edit_line, ATTRIBUTE (p)) != NULL);
     } else {
       if (arg >= 0) {
-        keep_matching = (arg == ATTRIBUTE (p));
+        keep_matching = (BOOL_T) (arg == ATTRIBUTE (p));
       } else {
-        keep_matching = (arg != ATTRIBUTE (p));
+        keep_matching = (BOOL_T) (arg != ATTRIBUTE (p));
       }
     }
     if (keep_matching) {
@@ -1586,12 +1586,12 @@ static void try_reduction (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     WRITE (STDOUT_FILENO, output_line);
     for (q = head; q != NULL && tail != NULL && q != NEXT (tail); FORWARD (q), count++) {
       int gatt = ATTRIBUTE (q);
-      char *z = non_terminal_string (input_line, gatt);
+      char *str = non_terminal_string (input_line, gatt);
       if (count > 0) {
         WRITE (STDOUT_FILENO, ", ");
       }
-      if (z != NULL) {
-        WRITE (STDOUT_FILENO, z);
+      if (str != NULL) {
+        WRITE (STDOUT_FILENO, str);
         if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTATION || gatt == INDICANT) {
           snprintf (output_line, BUFFER_SIZE, " \"%s\"", SYMBOL (q));
           WRITE (STDOUT_FILENO, output_line);
@@ -1671,7 +1671,7 @@ static void reduce_particular_program (NODE_T * p)
   try_reduction (q, NULL, NULL, PARTICULAR_PROGRAM, LABEL, ENCLOSED_CLAUSE, NULL_ATTRIBUTE);
   try_reduction (q, NULL, NULL, PARTICULAR_PROGRAM, ENCLOSED_CLAUSE, NULL_ATTRIBUTE);
   if (SUB (p) == NULL || NEXT (p) != NULL) {
-    recover_from_error (p, PARTICULAR_PROGRAM, (a68_prog.error_count - error_count_0) > MAX_ERRORS);
+    recover_from_error (p, PARTICULAR_PROGRAM, (BOOL_T) ((a68_prog.error_count - error_count_0) > MAX_ERRORS));
   }
 }
 
@@ -1708,7 +1708,7 @@ as the parser can repair some faults. This gives less spurious diagnostics.
 BOOL_T reduce_phrase (NODE_T * p, int expect)
 {
   int error_count_0 = a68_prog.error_count, error_count_02;
-  BOOL_T declarer_pack = (expect == STRUCTURE_PACK || expect == PARAMETER_PACK || expect == FORMAL_DECLARERS || expect == UNION_PACK || expect == SPECIFIER);
+  BOOL_T declarer_pack = (BOOL_T) (expect == STRUCTURE_PACK || expect == PARAMETER_PACK || expect == FORMAL_DECLARERS || expect == UNION_PACK || expect == SPECIFIER);
 /* Sample all info needed to decide whether a bold tag is operator or indicant. */
   extract_indicants (p);
   if (!declarer_pack) {
@@ -1738,7 +1738,7 @@ BOOL_T reduce_phrase (NODE_T * p, int expect)
   }
 /* Do something intelligible if parsing failed. */
   if (SUB (p) == NULL || NEXT (p) != NULL) {
-    recover_from_error (p, expect, (a68_prog.error_count - error_count_0) > MAX_ERRORS);
+    recover_from_error (p, expect, (BOOL_T) ((a68_prog.error_count - error_count_0) > MAX_ERRORS));
     return (A68_FALSE);
   } else {
     return (A68_TRUE);
@@ -2083,7 +2083,7 @@ static BOOL_T whether_formal_bounds (NODE_T * p)
     case IDENTIFIER:
     case OPERATOR:
       {
-        return (whether_formal_bounds (SUB (p)) && whether_formal_bounds (NEXT (p)));
+        return ((BOOL_T) (whether_formal_bounds (SUB (p)) && whether_formal_bounds (NEXT (p))));
       }
     default:
       {
@@ -2840,7 +2840,7 @@ static void reduce_formulae (NODE_T * p)
         }
         z = A68_TRUE;
         while (z) {
-          NODE_T *op = NEXT (q);
+          NODE_T *op2 = NEXT (q);
           z = A68_FALSE;
           if (operator_with_priority (q, priority)) {
             try_reduction (q, NULL, &z, FORMULA, FORMULA, OPERATOR, SECONDARY, NULL_ATTRIBUTE);
@@ -2852,7 +2852,7 @@ static void reduce_formulae (NODE_T * p)
             try_reduction (q, NULL, &z, FORMULA, FORMULA, OPERATOR, FORMULA, NULL_ATTRIBUTE);
           }
           if (priority == 0 && z) {
-            diagnostic_node (A68_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
+            diagnostic_node (A68_SYNTAX_ERROR, op2, ERROR_NO_PRIORITY, NULL);
           }
         }
       }
@@ -2875,12 +2875,11 @@ static NODE_T *reduce_dyadic (NODE_T * p, int u)
       return (NULL);
     } else if (WHETHER (p, OPERATOR)) {
 /* Reduce monadic formulas. */
-      NODE_T *q;
+      NODE_T *q = p;
       BOOL_T z;
-      q = p;
       do {
         PRIO (INFO (q)) = 10;
-        z = (NEXT (q) != NULL) && (WHETHER (NEXT (q), OPERATOR));
+        z = (BOOL_T) ((NEXT (q) != NULL) && (WHETHER (NEXT (q), OPERATOR)));
         if (z) {
           FORWARD (q);
         }
@@ -3871,7 +3870,7 @@ static void extract_priorities (NODE_T * p)
           if (len > 1 && SYMBOL (q)[len - 1] == '=') {
             int k;
             NODE_T *y = q;
-            char *sym = (char *) get_temp_heap_space (len + 1);
+            char *sym = (char *) get_temp_heap_space ((size_t) (len + 1));
             bufcpy (sym, SYMBOL (q), len + 1);
             sym[len - 1] = NULL_CHAR;
             SYMBOL (q) = TEXT (add_token (&top_token, sym));
@@ -3937,7 +3936,7 @@ static void extract_operators (NODE_T * p)
 /* The scanner cannot separate operator and "=" sign so we do this here. */
             int len = (int) strlen (SYMBOL (q));
             if (len > 1 && SYMBOL (q)[len - 1] == '=') {
-              char *sym = (char *) get_temp_heap_space (len + 1);
+              char *sym = (char *) get_temp_heap_space ((size_t) (len + 1));
               bufcpy (sym, SYMBOL (q), len + 1);
               sym[len - 1] = NULL_CHAR;
               SYMBOL (q) = TEXT (add_token (&top_token, sym));

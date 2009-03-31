@@ -51,7 +51,7 @@ static void option_error (SOURCE_LINE_T * l, char *option, char *info)
   int k;
   snprintf (output_line, BUFFER_SIZE, "%s", option);
   for (k = 0; output_line[k] != NULL_CHAR; k++) {
-    output_line[k] = TO_LOWER (output_line[k]);
+    output_line[k] = (char) TO_LOWER (output_line[k]);
   }
   if (info != NULL) {
     snprintf (edit_line, BUFFER_SIZE, "%s option \"%s\"", info, output_line);
@@ -183,10 +183,10 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   car = a68g_strchr (p, '=');
   if (car == NULL) {
     FORWARD (*i);
-    *error = (*i == NULL);
+    *error = (BOOL_T) (*i == NULL);
     if (!error && strcmp ((*i)->str, "=") == 0) {
       FORWARD (*i);
-      *error = ((*i) == NULL);
+      *error = (BOOL_T) ((*i) == NULL);
     }
     if (!*error) {
       num = (*i)->str;
@@ -202,7 +202,7 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
     char *postfix;
     RESET_ERRNO;
     k = strtol (num, &postfix, 0);      /* Accept also octal and hex. */
-    *error = (postfix == num);
+    *error = (BOOL_T) (postfix == num);
     if (errno != 0 || *error) {
       option_error (start_l, start_c, NULL);
       *error = A68_TRUE;
@@ -275,7 +275,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
     char *start_c = i->str;
     if (!(i->processed)) {
 /* Accept UNIX '-option [=] value' */
-      BOOL_T minus_sign = ((i->str)[0] == '-');
+      BOOL_T minus_sign = (BOOL_T) ((i->str)[0] == '-');
       char *p = strip_sign (i->str);
       if (!minus_sign && cmd_line) {
 /* Item without '-'s is generic filename. */
@@ -352,7 +352,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         } else if ((FORWARD (i)) != NULL) {
           BOOL_T error = A68_FALSE;
           if (strcmp (i->str, "=") == 0) {
-            error = (FORWARD (i)) == NULL;
+            error = (BOOL_T) ((FORWARD (i)) == NULL);
           }
           if (!error) {
             char name[BUFFER_SIZE];
@@ -611,7 +611,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
   for (; j != NULL; FORWARD (j)) {
     j->processed = A68_TRUE;
   }
-  return (errno == 0);
+  return ((BOOL_T) (errno == 0));
 }
 
 /*!
@@ -668,8 +668,8 @@ void default_options (MODULE_T * module)
 void read_rc_options (MODULE_T * module)
 {
   FILE *f;
-  int len = 2 + strlen (a68g_cmd_name) + strlen ("rc");
-  char *name = (char *) get_heap_space (len);
+  int len = 2 + (int) strlen (a68g_cmd_name) + (int) strlen ("rc");
+  char *name = (char *) get_heap_space ((size_t) len);
   bufcpy (name, ".", len);
   bufcat (name, a68g_cmd_name, len);
   bufcat (name, "rc", len);

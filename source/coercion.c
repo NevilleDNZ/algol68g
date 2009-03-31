@@ -112,7 +112,7 @@ static char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, i
           if (WHETHER (MOID (u), SERIES_MODE)) {
             mode_error_text (n, MOID (u), q, context, deflex, depth + 1);
           } else if (!whether_coercible (MOID (u), q, context, deflex)) {
-            int len = strlen (txt);
+            int len = (int) strlen (txt);
             if (len > BUFFER_SIZE / 2) {
               snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
             } else {
@@ -135,7 +135,7 @@ static char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, i
     } else {
       for (; u != NULL; FORWARD (u)) {
         if (!whether_coercible (MOID (u), SLICE (SUB (q)), context, deflex)) {
-          int len = strlen (txt);
+          int len = (int) strlen (txt);
           if (len > BUFFER_SIZE / 2) {
             snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
           } else {
@@ -155,7 +155,7 @@ static char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, i
     } else {
       for (; u != NULL; FORWARD (u)) {
         if (!whether_coercible (MOID (u), SLICE (q), context, deflex)) {
-          int len = strlen (txt);
+          int len = (int) strlen (txt);
           if (len > BUFFER_SIZE / 2) {
             snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
           } else {
@@ -175,7 +175,7 @@ static char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, i
     } else {
       for (; u != NULL && v != NULL; FORWARD (u), FORWARD (v)) {
         if (!whether_coercible (MOID (u), MOID (v), context, deflex)) {
-          int len = strlen (txt);
+          int len = (int) strlen (txt);
           if (len > BUFFER_SIZE / 2) {
             snprintf (TAIL (txt), BUFFER_SIZE, " etcetera");
           } else {
@@ -291,17 +291,17 @@ void make_soid (SOID_T * s, int sort, MOID_T * type, int attribute)
 /*!
 \brief add SOID data structure to soid list
 \param root top soid list
-\param where position in tree
+\param nwhere position in tree
 \param soid entry to add
 **/
 
-static void add_to_soid_list (SOID_LIST_T ** root, NODE_T * where, SOID_T * soid)
+static void add_to_soid_list (SOID_LIST_T ** root, NODE_T * nwhere, SOID_T * soid)
 {
   if (*root != NULL) {
-    add_to_soid_list (&(NEXT (*root)), where, soid);
+    add_to_soid_list (&(NEXT (*root)), nwhere, soid);
   } else {
     SOID_LIST_T *new_one = (SOID_LIST_T *) get_temp_heap_space (ALIGNED_SIZE_OF (SOID_LIST_T));
-    new_one->where = where;
+    new_one->where = nwhere;
     new_one->yield = (SOID_T *) get_temp_heap_space (ALIGNED_SIZE_OF (SOID_T));
     make_soid (new_one->yield, SORT (soid), MOID (soid), 0);
     NEXT (new_one) = NULL;
@@ -431,7 +431,7 @@ static MOID_T *register_extra_mode (MOID_T * u)
   for (z = top_moid_list; z != NULL; FORWARD (z)) {
     MOID_T *v = MOID (z);
     POSTULATE_T *save = top_postulate;
-    BOOL_T w = EQUIVALENT (v) == NULL && whether_modes_equivalent (v, u);
+    BOOL_T w = (BOOL_T) (EQUIVALENT (v) == NULL && whether_modes_equivalent (v, u));
     top_postulate = save;
     if (w) {
       return (v);
@@ -542,7 +542,7 @@ BOOL_T whether_deprefable (MOID_T * p)
   if (WHETHER (p, REF_SYMBOL)) {
     return (A68_TRUE);
   } else {
-    return (WHETHER (p, PROC_SYMBOL) && PACK (p) == NULL);
+    return ((BOOL_T) (WHETHER (p, PROC_SYMBOL) && PACK (p) == NULL));
   }
 }
 
@@ -719,13 +719,13 @@ static BOOL_T whether_transput_mode (MOID_T * p, char rw)
     PACK_T *q = PACK (p);
     BOOL_T k = A68_TRUE;
     for (; q != NULL && k; FORWARD (q)) {
-      k &= (whether_transput_mode (MOID (q), rw) || whether_proc_ref_file_void_or_format (MOID (q)));
+      k = (BOOL_T) (k & (whether_transput_mode (MOID (q), rw) || whether_proc_ref_file_void_or_format (MOID (q))));
     }
     return (k);
   } else if (WHETHER (p, FLEX_SYMBOL)) {
-    return (rw == 'w' ? whether_transput_mode (SUB (p), rw) : A68_FALSE);
+    return ((BOOL_T) (rw == 'w' ? whether_transput_mode (SUB (p), rw) : A68_FALSE));
   } else if (WHETHER (p, ROW_SYMBOL)) {
-    return (whether_transput_mode (SUB (p), rw) || whether_proc_ref_file_void_or_format (SUB (p)));
+    return ((BOOL_T) (whether_transput_mode (SUB (p), rw) || whether_proc_ref_file_void_or_format (SUB (p))));
   } else {
     return (A68_FALSE);
   }
@@ -757,7 +757,7 @@ static BOOL_T whether_readable_mode (MOID_T * p)
   if (whether_proc_ref_file_void_or_format (p)) {
     return (A68_TRUE);
   } else {
-    return (WHETHER (p, REF_SYMBOL) ? whether_transput_mode (SUB (p), 'r') : A68_FALSE);
+    return ((BOOL_T) (WHETHER (p, REF_SYMBOL) ? whether_transput_mode (SUB (p), 'r') : A68_FALSE));
   }
 }
 
@@ -769,7 +769,7 @@ static BOOL_T whether_readable_mode (MOID_T * p)
 
 static BOOL_T whether_name_struct (MOID_T * p)
 {
-  return (p->name != NULL ? WHETHER (DEFLEX (SUB (p)), STRUCT_SYMBOL) : A68_FALSE);
+  return ((BOOL_T) (p->name != NULL ? WHETHER (DEFLEX (SUB (p)), STRUCT_SYMBOL) : A68_FALSE));
 }
 
 /*!
@@ -790,13 +790,13 @@ BOOL_T whether_modes_equal (MOID_T * u, MOID_T * v, int deflex)
     case FORCE_DEFLEXING:
       {
 /* Allow any interchange between FLEX [] A and [] A. */
-        return (DEFLEX (u) == DEFLEX (v));
+        return ((BOOL_T) (DEFLEX (u) == DEFLEX (v)));
       }
     case ALIAS_DEFLEXING:
 /* Cannot alias [] A to FLEX [] A, but vice versa is ok. */
       {
         if (u->has_ref) {
-          return (DEFLEX (u) == v);
+          return ((BOOL_T) (DEFLEX (u) == v));
         } else {
           return (whether_modes_equal (u, v, SAFE_DEFLEXING));
         }
@@ -874,7 +874,7 @@ BOOL_T whether_subset (MOID_T * p, MOID_T * q, int deflex)
   PACK_T *u = PACK (p);
   BOOL_T j = A68_TRUE;
   for (; u != NULL && j; FORWARD (u)) {
-    j = j && whether_moid_in_pack (MOID (u), PACK (q), deflex);
+    j = (BOOL_T) (j && whether_moid_in_pack (MOID (u), PACK (q), deflex));
   }
   return (j);
 }
@@ -1109,7 +1109,7 @@ static BOOL_T whether_widenable (MOID_T * p, MOID_T * q)
 {
   MOID_T *z = widens_to (p, q);
   if (z != NULL) {
-    return (z == q ? A68_TRUE : whether_widenable (z, q));
+    return ((BOOL_T) (z == q ? A68_TRUE : whether_widenable (z, q)));
   } else {
     return (A68_FALSE);
   }
@@ -1123,7 +1123,7 @@ static BOOL_T whether_widenable (MOID_T * p, MOID_T * q)
 
 static BOOL_T whether_ref_row (MOID_T * p)
 {
-  return (p->name != NULL ? WHETHER (DEFLEX (SUB (p)), ROW_SYMBOL) : A68_FALSE);
+  return ((BOOL_T) (p->name != NULL ? WHETHER (DEFLEX (SUB (p)), ROW_SYMBOL) : A68_FALSE));
 }
 
 /*!
@@ -1213,7 +1213,7 @@ static BOOL_T whether_strongly_coercible (MOID_T * p, MOID_T * q, int deflex)
 
 BOOL_T whether_firm (MOID_T * p, MOID_T * q)
 {
-  return (whether_firmly_coercible (p, q, SAFE_DEFLEXING) || whether_firmly_coercible (q, p, SAFE_DEFLEXING));
+  return ((BOOL_T) (whether_firmly_coercible (p, q, SAFE_DEFLEXING) || whether_firmly_coercible (q, p, SAFE_DEFLEXING)));
 }
 
 /*!
@@ -1312,7 +1312,7 @@ static BOOL_T basic_coercions (MOID_T * p, MOID_T * q, int c, int deflex)
   if (p == q) {
     return (A68_TRUE);
   } else if (c == NO_SORT) {
-    return (p == q);
+    return ((BOOL_T) (p == q));
   } else if (c == SOFT) {
     return (whether_softly_coercible (p, q, deflex));
   } else if (c == WEAK) {
@@ -1410,7 +1410,7 @@ static BOOL_T whether_balanced (NODE_T * n, SOID_LIST_T * y, int sort)
     BOOL_T k = A68_FALSE;
     for (; y != NULL && !k; FORWARD (y)) {
       SOID_T *z = y->yield;
-      k = WHETHER_NOT (MOID (z), STOWED_MODE);
+      k = (BOOL_T) (WHETHER_NOT (MOID (z), STOWED_MODE));
     }
     if (k == A68_FALSE) {
       diagnostic_node (A68_ERROR, n, ERROR_NO_UNIQUE_MODE);
@@ -1963,10 +1963,10 @@ static void mode_check_brief_op_declaration (NODE_T * p)
   } else if (WHETHER (p, DEFINING_OPERATOR)) {
     SOID_T y;
     if (MOID (p) != MOID (NEXT_NEXT (p))) {
-      SOID_T y, x;
-      make_soid (&y, NO_SORT, MOID (NEXT_NEXT (p)), 0);
+      SOID_T y2, x;
+      make_soid (&y2, NO_SORT, MOID (NEXT_NEXT (p)), 0);
       make_soid (&x, NO_SORT, MOID (p), 0);
-      cannot_coerce (NEXT_NEXT (p), MOID (&y), MOID (&x), STRONG, SKIP_DEFLEXING, ROUTINE_TEXT);
+      cannot_coerce (NEXT_NEXT (p), MOID (&y2), MOID (&x), STRONG, SKIP_DEFLEXING, ROUTINE_TEXT);
     }
     mode_check_routine_text (SUB (NEXT_NEXT (p)), &y);
   } else {
@@ -2316,16 +2316,16 @@ static void mode_check_unit_list_2 (NODE_T * p, SOID_T * x, SOID_T * y)
   SOID_LIST_T *top_sl = NULL;
   if (MOID (x) != NULL) {
     if (WHETHER (MOID (x), FLEX_SYMBOL)) {
-      SOID_T y;
-      make_soid (&y, SORT (x), SLICE (SUB (MOID (x))), 0);
-      mode_check_unit_list (&top_sl, SUB (p), &y);
+      SOID_T y2;
+      make_soid (&y2, SORT (x), SLICE (SUB (MOID (x))), 0);
+      mode_check_unit_list (&top_sl, SUB (p), &y2);
     } else if (WHETHER (MOID (x), ROW_SYMBOL)) {
-      SOID_T y;
-      make_soid (&y, SORT (x), SLICE (MOID (x)), 0);
-      mode_check_unit_list (&top_sl, SUB (p), &y);
+      SOID_T y2;
+      make_soid (&y2, SORT (x), SLICE (MOID (x)), 0);
+      mode_check_unit_list (&top_sl, SUB (p), &y2);
     } else if (WHETHER (MOID (x), STRUCT_SYMBOL)) {
-      PACK_T *y = PACK (MOID (x));
-      mode_check_struct_display (&top_sl, SUB (p), &y);
+      PACK_T *y2 = PACK (MOID (x));
+      mode_check_struct_display (&top_sl, SUB (p), &y2);
     } else {
       mode_check_unit_list (&top_sl, SUB (p), x);
     }
@@ -3014,8 +3014,8 @@ static void mode_check_cast (NODE_T * p, SOID_T * x, SOID_T * y)
   make_soid (&w, STRONG, MOID (p), 0);
   w.cast = A68_TRUE;
   mode_check_enclosed (SUB_NEXT (p), &w, y);
-  if (!whether_coercible_in_context (y, &w, ALIAS_DEFLEXING)) {
-    cannot_coerce (NEXT (p), MOID (y), MOID (&w), STRONG, ALIAS_DEFLEXING, ENCLOSED_CLAUSE);
+  if (!whether_coercible_in_context (y, &w, SAFE_DEFLEXING)) {
+    cannot_coerce (NEXT (p), MOID (y), MOID (&w), STRONG, SAFE_DEFLEXING, ENCLOSED_CLAUSE);
   }
   make_soid (y, SORT (x), MOID (p), 0);
 }
@@ -4089,9 +4089,9 @@ static void coerce_loop (NODE_T * p)
       un_p = do_p;
     }
     if (un_p != NULL && WHETHER (un_p, UNTIL_PART)) {
-      SOID_T w;
-      make_soid (&w, MEEK, MODE (BOOL), 0);
-      coerce_serial (NEXT_SUB (un_p), &w, A68_TRUE);
+      SOID_T sw;
+      make_soid (&sw, MEEK, MODE (BOOL), 0);
+      coerce_serial (NEXT_SUB (un_p), &sw, A68_TRUE);
     }
   }
 }
@@ -4258,13 +4258,13 @@ static void coerce_formula (NODE_T * p, SOID_T * q)
   } else {
     if (TAX (NEXT (p)) != NULL && TAX (NEXT (p)) != error_tag) {
       SOID_T s;
-      NODE_T *op = NEXT (p), *q = NEXT_NEXT (p);
+      NODE_T *op = NEXT (p), *nq = NEXT_NEXT (p);
       MOID_T *w = MOID (op);
       MOID_T *u = MOID (PACK (w)), *v = MOID (NEXT (PACK (w)));
       make_soid (&s, STRONG, u, 0);
       coerce_operand (p, &s);
       make_soid (&s, STRONG, v, 0);
-      coerce_operand (q, &s);
+      coerce_operand (nq, &s);
     }
   }
 }

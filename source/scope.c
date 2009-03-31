@@ -66,7 +66,7 @@ static TUPLE_T scope_make_tuple (int e, int t)
 {
   static TUPLE_T z;
   z.level = e;
-  z.transient = t;
+  z.transient = (BOOL_T) t;
   return (z);
 }
 
@@ -122,7 +122,7 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
       errors++;
     }
   }
-  return (errors == 0);
+  return ((BOOL_T) (errors == 0));
 }
 
 /*!
@@ -480,7 +480,7 @@ static void scope_arguments (NODE_T * p)
 static BOOL_T whether_transient_row (MOID_T * m)
 {
   if (WHETHER (m, REF_SYMBOL)) {
-    return (WHETHER (SUB (m), FLEX_SYMBOL));
+    return ((BOOL_T) (WHETHER (SUB (m), FLEX_SYMBOL)));
   } else {
     return (A68_FALSE);
   }
@@ -583,7 +583,7 @@ static BOOL_T whether_transient_selection (MOID_T * m)
   if (WHETHER (m, REF_SYMBOL)) {
     return (whether_transient_selection (SUB (m)));
   } else {
-    return (WHETHER (m, FLEX_SYMBOL));
+    return ((BOOL_T) (WHETHER (m, FLEX_SYMBOL)));
   }
 }
 

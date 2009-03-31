@@ -282,7 +282,7 @@ PROPAGATOR_T genie_identity_relation_isnt_nil (NODE_T * p)
   UP_SWEEP_SEMA;
   GENIE_GET_UNIT_ADDRESS (lhs, A68_REF, x);
   stack_pointer = pop_sp;
-  PUSH_PRIMITIVE (p, !IS_NIL (*x), A68_BOOL);
+  PUSH_PRIMITIVE (p, (BOOL_T) (!IS_NIL (*x)), A68_BOOL);
   DOWN_SWEEP_SEMA;
   return (PROPAGATOR (p));
 }
@@ -297,7 +297,7 @@ PROPAGATOR_T NAME (NODE_T * p)\
   GENIE_GET_UNIT_ADDRESS (u, TYPE, x);\
   GENIE_GET_UNIT_ADDRESS (v, TYPE, y);\
   stack_pointer = pop_sp;\
-  PUSH_PRIMITIVE (p, VALUE (x) OP VALUE (y), A68_BOOL);\
+  PUSH_PRIMITIVE (p, (BOOL_T) (VALUE (x) OP VALUE (y)), A68_BOOL);\
   DOWN_SWEEP_SEMA;\
   return (PROPAGATOR (p));\
 }

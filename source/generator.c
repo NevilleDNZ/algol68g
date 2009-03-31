@@ -162,7 +162,7 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
   z = (A68_HANDLE *) handle_segment;
   free_handles = z;
   busy_handles = NULL;
-  max = (int) handle_pool_size / sizeof (A68_HANDLE);
+  max = (int) handle_pool_size / (int) sizeof (A68_HANDLE);
   free_handle_count = max;
   max_handle_count = max;
   for (k = 0; k < max; k++) {
@@ -216,8 +216,8 @@ static void colour_row_elements (A68_REF * z, MOID_T * m)
     BOOL_T done = A68_FALSE;
     initialise_internal_index (tup, DIM (arr));
     while (!done) {
-      ADDR_T index = calculate_internal_index (tup, DIM (arr));
-      ADDR_T addr = ROW_ELEMENT (arr, index);
+      ADDR_T iindex = calculate_internal_index (tup, DIM (arr));
+      ADDR_T addr = ROW_ELEMENT (arr, iindex);
       colour_object (&elem[addr], SUB (m));
       done = increment_internal_index (tup, DIM (arr));
     }
@@ -343,7 +343,7 @@ static void colour_heap (ADDR_T fp)
 \brief join all active blocks in the heap
 **/
 
-static void defragment_heap ()
+static void defragment_heap (void)
 {
   A68_HANDLE *z;
 /* Free handles. */
@@ -494,7 +494,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
     x = give_handle (p, mode);
     SIZE (x) = size;
     POINTER (x) = HEAP_ADDRESS (heap_pointer);
-    FILL (x->pointer, 0, (unsigned) size);
+    FILL (x->pointer, 0, size);
     SET_REF_SCOPE (&z, PRIMAL_SCOPE);
     REF_HANDLE (&z) = x;
     ABNORMAL_END (((long) ADDRESS (&z)) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);

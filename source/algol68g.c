@@ -167,14 +167,14 @@ int main (int argc, char *argv[])
   global_argv = argv;
 /* Get command name and discard path. */
   bufcpy (a68g_cmd_name, argv[0], BUFFER_SIZE);
-  for (k = strlen (a68g_cmd_name) - 1; k >= 0; k--) {
+  for (k = (int) strlen (a68g_cmd_name) - 1; k >= 0; k--) {
 #if defined ENABLE_WIN32
     char delim = '\\';
 #else
     char delim = '/';
 #endif
     if (a68g_cmd_name[k] == delim) {
-      MOVE (&a68g_cmd_name[0], &a68g_cmd_name[k + 1], strlen (a68g_cmd_name) - k + 1);
+      MOVE (&a68g_cmd_name[0], &a68g_cmd_name[k + 1], (int) strlen (a68g_cmd_name) - k + 1);
       k = -1;
     }
   }
@@ -257,8 +257,8 @@ int main (int argc, char *argv[])
 static void whether_extension (char *ext)
 {
   if (a68_prog.files.source.fd == -1) {
-    int len = strlen (a68_prog.files.source.name) + strlen (ext) + 1;
-    char *fn2 = (char *) get_heap_space (len);
+    int len = (int) strlen (a68_prog.files.source.name) + (int) strlen (ext) + 1;
+    char *fn2 = (char *) get_heap_space ((size_t) len);
     bufcpy (fn2, a68_prog.files.source.name, len);
     bufcat (fn2, ext, len);
     a68_prog.files.source.fd = open (fn2, O_RDONLY | O_BINARY);
@@ -325,7 +325,7 @@ Accept various silent extensions.
 /* Isolate the path name. */
   a68_prog.files.path = new_string (a68_prog.files.generic_name);
   path_set = A68_FALSE;
-  for (k = strlen (a68_prog.files.path); k >= 0 && path_set == A68_FALSE; k--) {
+  for (k = (int) strlen (a68_prog.files.path); k >= 0 && path_set == A68_FALSE; k--) {
 #if defined ENABLE_WIN32
     char delim = '\\';
 #else
@@ -340,8 +340,8 @@ Accept various silent extensions.
     a68_prog.files.path[0] = NULL_CHAR;
   }
 /* Listing file. */
-  len = 1 + strlen (a68_prog.files.source.name) + strlen (LISTING_EXTENSION);
-  a68_prog.files.listing.name = (char *) get_heap_space (len);
+  len = 1 + (int) strlen (a68_prog.files.source.name) + (int) strlen (LISTING_EXTENSION);
+  a68_prog.files.listing.name = (char *) get_heap_space ((size_t) len);
   bufcpy (a68_prog.files.listing.name, a68_prog.files.source.name, len);
   bufcat (a68_prog.files.listing.name, LISTING_EXTENSION, len);
 /* Tokeniser. */
@@ -469,11 +469,11 @@ Accept various silent extensions.
   }
 /* Mode checker. */
   if (a68_prog.error_count == 0) {
-    a68_prog.cross_reference_safe = A68_FALSE;
     announce_phase ("mode checker");
     mode_checker (a68_prog.top_node);
     maintain_mode_table (a68_prog.top_node);
   }
+  a68_prog.cross_reference_safe = (BOOL_T) (a68_prog.error_count == 0);
 /* Coercion inserter. */
   if (a68_prog.error_count == 0) {
     announce_phase ("coercion enforcer");

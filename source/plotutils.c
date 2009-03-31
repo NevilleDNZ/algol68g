@@ -738,11 +738,11 @@ const colour_info A68_COLOURS[COLOUR_NAMES + 1] = {
 \brief searches colour in the list
 \param p position in tree
 \param name colour name
-\param index set to index in table
+\param iindex set to iindex in table
 \return whether colour name is found
 **/
 
-static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
+static BOOL_T string_to_colour (NODE_T * p, char *name, int *iindex)
 {
   A68_REF z_ref = heap_generator (p, MODE (C_STRING), (int) (1 + strlen (name)));
   char *z = (char *) ADDRESS (&z_ref);
@@ -752,7 +752,7 @@ static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
   j = 0;
   for (i = 0; name[i] != NULL_CHAR; i++) {
     if (name[i] != BLANK_CHAR) {
-      z[j++] = TO_LOWER (name[i]);
+      z[j++] = (char) TO_LOWER (name[i]);
     }
     z[j] = 0;
   }
@@ -761,7 +761,7 @@ static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
   for (i = 0; i < COLOUR_NAMES && !k; i++) {
     if (!strcmp (A68_COLOURS[i].name, z)) {
       k = A68_TRUE;
-      *index = i;
+      *iindex = i;
     }
   }
   return (k);
@@ -782,7 +782,7 @@ static BOOL_T scan_int (char **z, int *k)
   }
   if (y[0] != NULL_CHAR) {
     (*k) = strtol (y, z, 10);
-    return (errno == 0);
+    return ((BOOL_T) (errno == 0));
   } else {
     return (A68_FALSE);
   }
@@ -1302,7 +1302,7 @@ void genie_draw_colour_name (NODE_T * p)
   A68_FILE *f;
   A68_REF name_ref;
   char *name;
-  int index;
+  int iindex;
   double x, y, z;
   plPlotter *plotter;
   POP_REF (p, &ref_c);
@@ -1312,13 +1312,13 @@ void genie_draw_colour_name (NODE_T * p)
   name_ref = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, ref_c));
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
-  if (!string_to_colour (p, name, &index)) {
+  if (!string_to_colour (p, name, &iindex)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  x = (double) (A68_COLOURS[index].r) / (double) (0xff);
-  y = (double) (A68_COLOURS[index].g) / (double) (0xff);
-  z = (double) (A68_COLOURS[index].b) / (double) (0xff);
+  x = (double) (A68_COLOURS[iindex].r) / (double) (0xff);
+  y = (double) (A68_COLOURS[iindex].g) / (double) (0xff);
+  z = (double) (A68_COLOURS[iindex].b) / (double) (0xff);
   plotter = set_up_device (p, f);
   f->device.red = x;
   f->device.green = y;
@@ -1339,7 +1339,7 @@ void genie_draw_background_colour_name (NODE_T * p)
   A68_FILE *f;
   A68_REF name_ref;
   char *name;
-  int index;
+  int iindex;
   double x, y, z;
   plPlotter *plotter;
   POP_REF (p, &ref_c);
@@ -1349,13 +1349,13 @@ void genie_draw_background_colour_name (NODE_T * p)
   name_ref = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, ref_c));
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
-  if (!string_to_colour (p, name, &index)) {
+  if (!string_to_colour (p, name, &iindex)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  x = (double) (A68_COLOURS[index].r) / (double) (0xff);
-  y = (double) (A68_COLOURS[index].g) / (double) (0xff);
-  z = (double) (A68_COLOURS[index].b) / (double) (0xff);
+  x = (double) (A68_COLOURS[iindex].r) / (double) (0xff);
+  y = (double) (A68_COLOURS[iindex].g) / (double) (0xff);
+  z = (double) (A68_COLOURS[iindex].b) / (double) (0xff);
   plotter = set_up_device (p, f);
   f->device.red = x;
   f->device.green = y;
@@ -1404,7 +1404,7 @@ void genie_draw_linewidth (NODE_T * p)
   CHECK_REF (p, ref_file, MODE (REF_FILE));
   f = (A68_FILE *) ADDRESS (&ref_file);
   plotter = set_up_device (p, f);
-  pl_linewidth_r (plotter, (VALUE (&width) * f->device.window_y_size));
+  pl_linewidth_r (plotter, (int) (VALUE (&width) * (double) f->device.window_y_size));
 }
 
 /*!
