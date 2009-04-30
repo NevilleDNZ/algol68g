@@ -127,7 +127,7 @@ void genie_garbage_seconds (NODE_T * p)
 \return size available in bytes
 **/
 
-int heap_available ()
+int heap_available (void)
 {
   return (heap_size - heap_pointer);
 }
@@ -416,8 +416,8 @@ void sweep_heap (NODE_T * p, ADDR_T fp)
     defragment_heap ();
 /* Stats and logging. */
     garbage_collects++;
-    int_to_mp (p, garbage_freed, (int) garbage_bytes_freed, LONG_MP_DIGITS);
-    add_mp (p, garbage_total_freed, garbage_total_freed, garbage_freed, LONG_MP_DIGITS);
+    (void) int_to_mp (p, garbage_freed, (int) garbage_bytes_freed, LONG_MP_DIGITS);
+    (void) add_mp (p, garbage_total_freed, garbage_total_freed, garbage_freed, LONG_MP_DIGITS);
   }
   t1 = seconds ();
   if (t1 > t0) {
@@ -489,7 +489,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
     A68_HANDLE *x;
     A68_REF z;
     PREEMPTIVE_SWEEP;
-    STATUS (&z) = (INITIALISED_MASK | IN_HEAP_MASK);
+    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | IN_HEAP_MASK);
     OFFSET (&z) = 0;
     x = give_handle (p, mode);
     SIZE (x) = size;
@@ -754,7 +754,7 @@ void genie_generator_internal (NODE_T * p, MOID_T * ref_mode, TAG_T * tag, LEAP_
   UP_SWEEP_SEMA;
 /* Set up a REF MODE object, either in the stack or in the heap. */
   if (leap == LOC_SYMBOL) {
-    STATUS (&name) = INITIALISED_MASK | IN_FRAME_MASK;
+    STATUS (&name) = (STATUS_MASK) (INITIALISED_MASK | IN_FRAME_MASK);
     REF_HANDLE (&name) = &nil_handle;
     name.offset = frame_pointer + FRAME_INFO_SIZE + tag->offset;
     SET_REF_SCOPE (&name, frame_pointer);

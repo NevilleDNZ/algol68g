@@ -1,0 +1,9 @@
+Mark 17, May 2009
+
+* Adds C-style placeholders in formats
+* Adds warnings when tags hide declarations with larger reach
+* Regression fixes:
+  1. The while-part range was not visible from deeper ranges in case a loop-clause was the sole unit of a routine-text
+  2. SKIP did not generate a value for some modes
+* Lint-free source code
+* Documentation updates

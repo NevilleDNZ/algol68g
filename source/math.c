@@ -85,9 +85,9 @@ void gsl_permutation_set (const gsl_permutation * p, const size_t i, const size_
 void torrix_error_handler (const char *reason, const char *file, int line, int gsl_errno)
 {
   if (line != 0) {
-    snprintf (edit_line, BUFFER_SIZE, "%s in line %d of file %s", reason, line, file);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s in line %d of file %s", reason, line, file) >= 0);
   } else {
-    snprintf (edit_line, BUFFER_SIZE, "%s", reason);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s", reason) >= 0);
   }
   diagnostic_node (A68_RUNTIME_ERROR, error_node, ERROR_TORRIX, edit_line, gsl_strerror (gsl_errno), NULL);
   exit_genie (error_node, A68_RUNTIME_ERROR);
@@ -560,7 +560,7 @@ static void op_ab (NODE_T * p, MOID_T * m, MOID_T * n, GENIE_PROCEDURE * op)
   error_node = p;
   u = dereference_ref_row (p, m, par_size);
   v = (A68_REF *) STACK_OFFSET (-par_size);
-  op (p);
+  (*op) (p);
   *DEREF (A68_ROW, &u) = *v;
   *v = u;
 }
@@ -2368,9 +2368,9 @@ void genie_matrix_ch_solve (NODE_T * p)
 void fft_error_handler (const char *reason, const char *file, int line, int gsl_errno)
 {
   if (line != 0) {
-    snprintf (edit_line, BUFFER_SIZE, "%s in line %d of file %s", reason, line, file);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s in line %d of file %s", reason, line, file) >= 0);
   } else {
-    snprintf (edit_line, BUFFER_SIZE, "%s", reason);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s", reason) >= 0);
   }
   diagnostic_node (A68_RUNTIME_ERROR, error_node, ERROR_FFT, edit_line, gsl_strerror (gsl_errno), NULL);
   exit_genie (error_node, A68_RUNTIME_ERROR);
@@ -2782,9 +2782,9 @@ void genie_fft_inverse (NODE_T * p)
 void laplace_error_handler (const char *reason, const char *file, int line, int gsl_errno)
 {
   if (line != 0) {
-    snprintf (edit_line, BUFFER_SIZE, "%s in line %d of file %s", reason, line, file);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s in line %d of file %s", reason, line, file) >= 0);
   } else {
-    snprintf (edit_line, BUFFER_SIZE, "%s", reason);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s", reason) >= 0);
   }
   diagnostic_node (A68_RUNTIME_ERROR, error_node, ERROR_LAPLACE, edit_line, gsl_strerror (gsl_errno), NULL);
   exit_genie (error_node, A68_RUNTIME_ERROR);

@@ -21,11 +21,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-For the things we have to learn before we can do them,
-                               we learn by doing them.
-
-                     - Aristotle, Nichomachean Ethics
-
 Algol68G is an Algol 68 interpreter.
 
 Please refer to the documentation that comes with this distribution for a
@@ -64,12 +59,12 @@ static void compiler_interpreter (void);
 void state_license (FILE_T f)
 {
 #define P(s)\
-  snprintf (output_line, BUFFER_SIZE, "%s\n", (s));\
+  CHECK_RETVAL (snprintf(output_line, (size_t) BUFFER_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, output_line);
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
   }
-  snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s (%s), copyright 2001-%s J. Marcel van der Veer.\n", REVISION, RELEASE_DATE, RELEASE_YEAR);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Algol 68 Genie %s (%s), copyright 2001-%s J. Marcel van der Veer.\n", REVISION, RELEASE_DATE, RELEASE_YEAR) >= 0);
   WRITE (f, output_line);
   P ("Algol 68 Genie is free software covered by the GNU General Public License.");
   P ("There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.");
@@ -92,43 +87,43 @@ void state_version (FILE_T f)
   WRITELN (f, "");
 #if ! defined ENABLE_WIN32
 #if defined __GNUC__ && defined GCC_VERSION
-  snprintf (output_line, BUFFER_SIZE, "Compiled on %s with gcc %s\n", OS_NAME, GCC_VERSION);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Compiled on %s with gcc %s\n", OS_NAME, GCC_VERSION) >= 0);
   WRITE (f, output_line);
 #else
-  snprintf (output_line, BUFFER_SIZE, "Compiled on %s\n", OS_NAME);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Compiled on %s\n", OS_NAME) >= 0);
   WRITE (f, output_line);
 #endif
 #endif
 #if ! defined ENABLE_WIN32
-  snprintf (output_line, BUFFER_SIZE, "Configured on %s with options \"%s\"\n", CONFIGURE_DATE, CONFIGURE_OPTIONS);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Configured on %s with options \"%s\"\n", CONFIGURE_DATE, CONFIGURE_OPTIONS) >= 0);
   WRITE (f, output_line);
 #endif
 #if defined ENABLE_GRAPHICS && defined A68_LIBPLOT_VERSION
-  snprintf (output_line, BUFFER_SIZE, "GNU libplot %s\n", A68_LIBPLOT_VERSION);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "GNU libplot %s\n", A68_LIBPLOT_VERSION) >= 0);
   WRITE (f, output_line);
 #endif
 #if defined ENABLE_NUMERICAL && defined A68_GSL_VERSION
-  snprintf (output_line, BUFFER_SIZE, "GNU Scientific Library %s\n", A68_GSL_VERSION);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "GNU Scientific Library %s\n", A68_GSL_VERSION) >= 0);
   WRITE (f, output_line);
 #endif
 #if defined ENABLE_POSTGRESQL && defined A68_PG_VERSION
-  snprintf (output_line, BUFFER_SIZE, "PostgreSQL libpq %s\n", A68_PG_VERSION);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "PostgreSQL libpq %s\n", A68_PG_VERSION) >= 0);
   WRITE (f, output_line);
 #endif
-  snprintf (output_line, BUFFER_SIZE, "Alignment %d bytes\n", A68_ALIGNMENT);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Alignment %d bytes\n", A68_ALIGNMENT) >= 0);
   WRITE (f, output_line);
   default_mem_sizes ();
-  snprintf (output_line, BUFFER_SIZE, "Default frame stack size: %ld kB\n", frame_stack_size / KILOBYTE);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Default frame stack size: %d kB\n", frame_stack_size / KILOBYTE) >= 0);
   WRITE (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "Default expression stack size: %ld kB\n", expr_stack_size / KILOBYTE);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Default expression stack size: %d kB\n", expr_stack_size / KILOBYTE) >= 0);
   WRITE (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "Default heap size: %ld kB\n", heap_size / KILOBYTE);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Default heap size: %d kB\n", heap_size / KILOBYTE) >= 0);
   WRITE (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "Default handle pool size: %ld kB\n", handle_pool_size / KILOBYTE);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Default handle pool size: %d kB\n", handle_pool_size / KILOBYTE) >= 0);
   WRITE (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "Default stack overhead: %ld kB\n", storage_overhead / KILOBYTE);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Default stack overhead: %d kB\n", storage_overhead / KILOBYTE) >= 0);
   WRITE (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "Effective system stack size: %ld kB\n", stack_size / KILOBYTE);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Effective system stack size: %d kB\n", stack_size / KILOBYTE) >= 0);
   WRITE (f, output_line);
 }
 
@@ -140,15 +135,15 @@ void state_version (FILE_T f)
 void online_help (FILE_T f)
 {
 #define P(s)\
-  snprintf (output_line, BUFFER_SIZE, "%s\n", (s));\
+  CHECK_RETVAL (snprintf(output_line, (size_t) BUFFER_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, output_line);
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
   }
   state_license (f);
-  snprintf (output_line, BUFFER_SIZE, "Usage: %s [options | filename]", a68g_cmd_name);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "Usage: %s [options | filename]", a68g_cmd_name) >= 0);
   WRITELN (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "For help: %s -apropos [keyword]", a68g_cmd_name);
+  CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "For help: %s -apropos [keyword]", a68g_cmd_name) >= 0);
   WRITELN (f, output_line);
 }
 
@@ -297,7 +292,6 @@ static void compiler_interpreter (void)
   a68_prog.tree_listing_safe = A68_FALSE;
   a68_prog.cross_reference_safe = A68_FALSE;
   old_postulate = NULL;
-  error_tag = (TAG_T *) new_tag;
 /* File set-up. */
   SCAN_ERROR (a68_prog.files.generic_name == NULL, NULL, NULL, ERROR_NO_INPUT_FILE);
   a68_prog.files.source.name = new_string (a68_prog.files.generic_name);
@@ -348,6 +342,7 @@ Accept various silent extensions.
   a68_prog.files.source.opened = A68_TRUE;
   announce_phase ("initialiser");
   init_before_tokeniser ();
+  error_tag = (TAG_T *) new_tag ();
   if (a68_prog.error_count == 0) {
     int frame_stack_size_2 = frame_stack_size;
     int expr_stack_size_2 = expr_stack_size;
@@ -371,7 +366,7 @@ Accept various silent extensions.
       diagnostics_to_terminal (a68_prog.top_line, A68_ALL_DIAGNOSTICS);
       return;
     }
-    close (a68_prog.files.source.fd);
+    CHECK_RETVAL (close (a68_prog.files.source.fd) == 0);
     a68_prog.files.source.opened = A68_FALSE;
     prune_echoes (&a68_prog, a68_prog.options.list);
     a68_prog.tree_listing_safe = A68_TRUE;
@@ -473,7 +468,7 @@ Accept various silent extensions.
     mode_checker (a68_prog.top_node);
     maintain_mode_table (a68_prog.top_node);
   }
-  a68_prog.cross_reference_safe = (BOOL_T) (a68_prog.error_count == 0);
+  a68_prog.cross_reference_safe = /* (BOOL_T) (a68_prog.error_count == 0) */ A68_TRUE;
 /* Coercion inserter. */
   if (a68_prog.error_count == 0) {
     announce_phase ("coercion enforcer");
@@ -539,7 +534,7 @@ Accept various silent extensions.
 /* Normal end of program. */
     diagnostics_to_terminal (a68_prog.top_line, A68_RUNTIME_ERROR);
     if (a68_prog.options.debug || a68_prog.options.trace) {
-      snprintf (output_line, BUFFER_SIZE, "\nGenie finished in %.2f seconds\n", seconds () - cputime_0);
+      CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "\nGenie finished in %.2f seconds\n", seconds () - cputime_0) >= 0);
       WRITE (STDOUT_FILENO, output_line);
     }
   }
@@ -556,7 +551,7 @@ Accept various silent extensions.
     write_listing_header (&a68_prog);
     source_listing (&a68_prog);
     write_listing (&a68_prog);
-    close (a68_prog.files.listing.fd);
+    CHECK_RETVAL (close (a68_prog.files.listing.fd) == 0);
     a68_prog.files.listing.opened = A68_FALSE;
   }
 }
@@ -572,7 +567,7 @@ void a68g_exit (int code)
   bufcpy (name, ".", BUFFER_SIZE);
   bufcat (name, a68g_cmd_name, BUFFER_SIZE);
   bufcat (name, ".x", BUFFER_SIZE);
-  remove (name);
+  (void) (remove (name));
   io_close_tty_line ();
 #if defined ENABLE_CURSES
 /* "curses" might still be open if it was not closed from A68, or the program
@@ -591,7 +586,7 @@ void a68g_exit (int code)
 static void announce_phase (char *t)
 {
   if (a68_prog.options.verbose) {
-    snprintf (output_line, BUFFER_SIZE, "%s: %s", a68g_cmd_name, t);
+    CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "%s: %s", a68g_cmd_name, t) >= 0);
     io_close_tty_line ();
     WRITE (STDOUT_FILENO, output_line);
   }

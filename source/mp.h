@@ -82,13 +82,13 @@ enum
 #define IS_ZERO_MP(z) (MP_DIGIT (z, 1) == (MP_DIGIT_T) 0)
 
 #define MOVE_MP(z, x, digits) {\
-  MP_DIGIT_T *m_d = (z), *m_s = (x); int m_k = digits + 2;\
-  while (m_k--) {*m_d++ = *m_s++;}\
+  MP_DIGIT_T *_m_d = (z), *_m_s = (x); int _m_k = digits + 2;\
+  while (_m_k--) {*_m_d++ = *_m_s++;}\
   }
 
 #define MOVE_DIGITS(z, x, digits) {\
-  MP_DIGIT_T *m_d = (z), *m_s = (x); int m_k = digits;\
-  while (m_k--) {*m_d++ = *m_s++;}\
+  MP_DIGIT_T *_m_d = (z), *_m_s = (x); int _m_k = digits;\
+  while (_m_k--) {*_m_d++ = *_m_s++;}\
   }
 
 #define TEST_MP_INIT(p, z, m) {\
@@ -106,9 +106,10 @@ enum
   }}
 
 #define SET_MP_ZERO(z, digits) {\
-  MP_DIGIT_T *m_d = &MP_DIGIT ((z), 1); int m_k = digits;\
-  MP_STATUS (z) = INITIALISED_MASK; MP_EXPONENT (z) = 0.0;\
-  while (m_k--) {*m_d++ = 0.0;}\
+  MP_DIGIT_T *_m_d = &MP_DIGIT ((z), 1); int _m_k = digits;\
+  MP_STATUS (z) = (MP_DIGIT_T) INITIALISED_MASK;\
+  MP_EXPONENT (z) = 0.0;\
+  while (_m_k--) {*_m_d++ = 0.0;}\
   }
 
 /* stack_mp: allocate temporary space in the evaluation stack. */

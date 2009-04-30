@@ -128,7 +128,7 @@ void print_internal_index (FILE_T f, A68_TUPLE * tup, int dim)
   for (k = 0; k < dim; k++) {
     A68_TUPLE *ref = &tup[k];
     char buf[BUFFER_SIZE];
-    snprintf (buf, BUFFER_SIZE, "%d", ref->k);
+    CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "%d", ref->k) >= 0);
     WRITE (f, buf);
     if (k < dim - 1) {
       WRITE (f, ", ");
@@ -274,7 +274,7 @@ A68_REF empty_row (NODE_T * p, MOID_T * u)
   arr->elem_size = moid_size (SLICE (u));
   arr->slice_offset = 0;
   arr->field_offset = 0;
-  STATUS (&ARRAY (arr)) = INITIALISED_MASK | IN_HEAP_MASK;
+  STATUS (&ARRAY (arr)) = (STATUS_MASK) (INITIALISED_MASK | IN_HEAP_MASK);
   ARRAY (arr).offset = 0;
   REF_HANDLE (&(ARRAY (arr))) = &nil_handle;
   for (k = 0; k < dim; k++) {
@@ -440,7 +440,7 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR
     BYTE_T *src_a, *dst_a;
     A68_REF dst = new_arr, src;
     dst.offset += offset;
-    STATUS (&src) = INITIALISED_MASK | IN_STACK_MASK;
+    STATUS (&src) = (STATUS_MASK) (INITIALISED_MASK | IN_STACK_MASK);
     src.offset = sp + offset;
     REF_HANDLE (&src) = &nil_handle;
     dst_a = ADDRESS (&dst);
@@ -646,22 +646,22 @@ PROPAGATOR_T genie_rowing (NODE_T * p)
 /* REF ROW, decide whether we want A->[] A or [] A->[,] A. */
     MOID_T *mode = SUB (MOID (p));
     if (DIM (DEFLEX (mode)) >= 2) {
-      genie_rowing_ref_row_row (p);
+      (void) genie_rowing_ref_row_row (p);
       self.unit = genie_rowing_ref_row_row;
       self.source = p;
     } else {
-      genie_rowing_ref_row_of_row (p);
+      (void) genie_rowing_ref_row_of_row (p);
       self.unit = genie_rowing_ref_row_of_row;
       self.source = p;
     }
   } else {
 /* ROW, decide whether we want A->[] A or [] A->[,] A. */
     if (DIM (DEFLEX (MOID (p))) >= 2) {
-      genie_rowing_row_row (p);
+      (void) genie_rowing_row_row (p);
       self.unit = genie_rowing_row_row;
       self.source = p;
     } else {
-      genie_rowing_row_of_row (p);
+      (void) genie_rowing_row_of_row (p);
       self.unit = genie_rowing_row_of_row;
       self.source = p;
     }
@@ -940,7 +940,7 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
         src_a = ADDRESS (&new_old);
         dst_a = ADDRESS (&new_dst);
         if (WHETHER (elem_mode, STRUCT_SYMBOL)) {
-          genie_assign_stowed (new_old, &new_dst, p, elem_mode);
+          (void) genie_assign_stowed (new_old, &new_dst, p, elem_mode);
         } else if (WHETHER (elem_mode, FLEX_SYMBOL) || elem_mode == MODE (STRING)) {
 /* Algol68G does not know ghost elements. NIL means an initially empty row. */
           A68_REF dst_addr = *(A68_REF *) dst_a;
@@ -955,7 +955,7 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
           if (IS_NIL (dst_addr)) {
             *(A68_REF *) dst_a = *(A68_REF *) src_a;
           } else {
-            genie_assign_stowed (*(A68_REF *) src_a, &dst_addr, p, elem_mode);
+            (void) genie_assign_stowed (*(A68_REF *) src_a, &dst_addr, p, elem_mode);
           }
         } else if (WHETHER (elem_mode, UNION_SYMBOL)) {
           genie_copy_union (p, dst_a, src_a, new_old);
@@ -1001,7 +1001,7 @@ A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
       if (MOID (fields)->has_rows) {
         if (WHETHER (MOID (fields), STRUCT_SYMBOL)) {
 /* STRUCT (STRUCT (..) ..) */
-          genie_assign_stowed (old_field, &new_field, p, MOID (fields));
+          (void) genie_assign_stowed (old_field, &new_field, p, MOID (fields));
         } else if (WHETHER (MOID (fields), FLEX_SYMBOL)
                    || MOID (fields) == MODE (STRING)) {
 /* STRUCT (FLEX [] A ..) */
@@ -1010,7 +1010,7 @@ A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
 /* STRUCT ([] A ..) */
           A68_REF arr_src = *(A68_REF *) src_a;
           A68_REF arr_dst = *(A68_REF *) dst_a;
-          genie_assign_row (arr_src, &arr_dst, p, MOID (fields));
+          (void) genie_assign_row (arr_src, &arr_dst, p, MOID (fields));
         } else if (WHETHER (MOID (fields), UNION_SYMBOL)) {
 /* UNION (..) */
           genie_copy_union (p, dst_a, src_a, old_field);
@@ -1066,11 +1066,11 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
   int span, k;
   char buf[BUFFER_SIZE];
   INDENT (level);
-  snprintf (buf, BUFFER_SIZE, "%s at %p pointing at %p", moid_to_string (m, 80, NULL), w, (void *) ADDRESS ((A68_ROW *) w));
+  CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "%s at %p pointing at %p", moid_to_string (m, 80, NULL), w, (void *) ADDRESS ((A68_ROW *) w)) >= 0);
   WRITE (f, buf);
   if (IS_NIL (*(A68_REF *) w)) {
     INDENT (level);
-    snprintf (buf, BUFFER_SIZE, "NIL - returning");
+    CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "NIL - returning") >= 0);
     WRITE (f, buf);
     return;
   }
@@ -1081,7 +1081,7 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
         dump_stowed (p, f, &((BYTE_T *) w)[fields->offset], MOID (fields), level + 1);
       } else {
         INDENT (level);
-        snprintf (buf, BUFFER_SIZE, "%s %s at %p", moid_to_string (MOID (fields), 80, NULL), fields->text, &((BYTE_T *) w)[fields->offset]);
+        CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "%s %s at %p", moid_to_string (MOID (fields), 80, NULL), fields->text, &((BYTE_T *) w)[fields->offset]) >= 0);
         WRITE (f, buf);
       }
     }
@@ -1092,7 +1092,7 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
       if (um->has_rows) {
         dump_stowed (p, f, &((BYTE_T *) w)[UNION_OFFSET], um, level + 1);
       } else {
-        (void) snprintf (buf, BUFFER_SIZE, " holds %s at %p", moid_to_string (um, 80, NULL), &((BYTE_T *) w)[UNION_OFFSET]);
+        CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, " holds %s at %p", moid_to_string (um, 80, NULL), &((BYTE_T *) w)[UNION_OFFSET]) >= 0);
         WRITE (f, buf);
       }
     }
@@ -1104,12 +1104,12 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
     for (k = 0, span = 1; k < DIM (arr); k++) {
       A68_TUPLE *z = &tup[k];
       INDENT (level);
-      snprintf (buf, BUFFER_SIZE, "tuple %d has lwb=%d and upb=%d", k, LWB (z), UPB (z));
+      CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "tuple %d has lwb=%d and upb=%d", k, LWB (z), UPB (z)) >= 0);
       WRITE (f, buf);
       span *= ROW_SIZE (z);
     }
     INDENT (level);
-    snprintf (buf, BUFFER_SIZE, "elems=%d, elem size=%d, slice_offset=%d, field_offset=%d", span, arr->elem_size, arr->slice_offset, arr->field_offset);
+    CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "elems=%d, elem size=%d, slice_offset=%d, field_offset=%d", span, arr->elem_size, arr->slice_offset, arr->field_offset) >= 0);
     WRITE (f, buf);
     if (span > 0) {
       initialise_internal_index (tup, DIM (arr));
@@ -1125,7 +1125,7 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
           dump_stowed (p, f, elem_p, elem_mode, level + 3);
         } else {
           INDENT (level);
-          snprintf (buf, BUFFER_SIZE, "%s [%d] at %p", moid_to_string (elem_mode, 80, NULL), iindex, elem_p);
+          CHECK_RETVAL (snprintf (buf, (size_t) BUFFER_SIZE, "%s [%d] at %p", moid_to_string (elem_mode, 80, NULL), iindex, elem_p) >= 0);
           WRITE (f, buf);
           print_item (p, f, elem_p, elem_mode);
         }
@@ -1469,7 +1469,6 @@ PROPAGATOR_T genie_row_function (NODE_T * p)
   return (self);
 }
 
-
 /*!
 \brief push description for column vector
 \param p position in tree
@@ -1592,7 +1591,7 @@ void genie_sort_row_string (NODE_T * p)
         exit_genie (p, A68_RUNTIME_ERROR);
       }
       ptrs[j] = (char *) STACK_TOP;
-      a_to_c_string (p, (char *) STACK_TOP, ref);
+      CHECK_RETVAL (a_to_c_string (p, (char *) STACK_TOP, ref) != NULL);
       INCREMENT_STACK_POINTER (p, len);
     }
     qsort (ptrs, (size_t) size, sizeof (char *), qstrcmp);

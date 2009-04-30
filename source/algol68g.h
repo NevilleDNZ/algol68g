@@ -23,6 +23,12 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #if ! defined A68G_ALGOL68G_H
 #define A68G_ALGOL68G_H
 
+/* Type definitions. */
+
+typedef int ADDR_T, FILE_T, LEAP_T;
+typedef unsigned char BYTE_T, BOOL_T;
+typedef unsigned STATUS_MASK;
+
 /* Includes needed by most files. */
 
 #include "version.h"
@@ -48,6 +54,15 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include <pthread.h>
 #endif
 
+#if defined ENABLE_CURSES
+#include <curses.h>
+#if defined ENABLE_WIN32
+#undef FD_READ
+#undef FD_WRITE
+#include <winsock.h>
+#endif
+#endif
+
 #if defined ENABLE_POSTGRESQL
 #include <libpq-fe.h>
 #endif
@@ -64,6 +79,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #if defined ENABLE_WIN32
+typedef unsigned __off_t;
 #define S_IRGRP 0x040
 #define S_IROTH 0x004
 #if defined __MSVCRT__ && defined _environ
@@ -77,13 +93,13 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 /* Constants. */
 
-#define KILOBYTE (1024L)
+#define KILOBYTE ((int) 1024)
 #define MEGABYTE (KILOBYTE * KILOBYTE)
 #define GIGABYTE (KILOBYTE * MEGABYTE)
 
 #define LISTING_EXTENSION ".l"
-#define A68_TRUE 1
-#define A68_FALSE 0
+#define A68_TRUE ((BOOL_T) 1)
+#define A68_FALSE ((BOOL_T) 0)
 #define TIME_FORMAT "%A %d-%b-%Y %H:%M:%S"
 
 #define A68_ALIGN_T int
@@ -95,7 +111,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #define BUFFER_SIZE (KILOBYTE)			/* BUFFER_SIZE exceeds actual requirements. */
 #define SMALL_BUFFER_SIZE 128
-#define MAX_ERRORS 8
+#define MAX_ERRORS 10
 #define MAX_PRIORITY 9				/* Algol 68 requirement. */
 #define MIN_MEM_SIZE (32 * KILOBYTE)		/* Stack, heap blocks not smaller than this in kB. */
 #define MAX_LINE_WIDTH (BUFFER_SIZE / 2)	/* Must be smaller than BUFFER_SIZE */
@@ -138,12 +154,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #define NOMADS  	"></=*"
 
 #define PRIMAL_SCOPE 0
-
-/* Type definitions. */
-
-typedef int ADDR_T, FILE_T, LEAP_T;
-typedef unsigned char BYTE_T, BOOL_T;
-typedef unsigned STATUS_MASK;
 
 /* Status Masks */
 
@@ -370,7 +380,7 @@ struct A68_LONG_BYTES
 struct A68_PROCEDURE
 {
   STATUS_MASK status;
-  void *body;
+  union {NODE_T *node; GENIE_PROCEDURE *proc;} body;
   A68_HANDLE *locale;
   MOID_T *type;
   ADDR_T environ;
@@ -386,7 +396,7 @@ struct A68_STREAM
 {
   char *name;
   FILE_T fd;
-  int opened, writemood;
+  BOOL_T opened, writemood;
 };
 
 struct A68_TUPLE
@@ -653,42 +663,19 @@ enum
   UPPER_STROPPING = 1, QUOTE_STROPPING
 };
 
-enum MODE_ATTRIBUTES
-{
-  MODE_BITS,
-  MODE_BOOL,
-  MODE_BYTES,
-  MODE_CHAR,
-  MODE_COMPLEX,
-  MODE_FILE,
-  MODE_FORMAT,
-  MODE_INT,
-  MODE_LONGLONG_BITS,
-  MODE_LONGLONG_COMPLEX,
-  MODE_LONGLONG_INT,
-  MODE_LONGLONG_REAL,
-  MODE_LONG_BITS,
-  MODE_LONG_BYTES,
-  MODE_LONG_COMPLEX,
-  MODE_LONG_INT,
-  MODE_LONG_REAL,
-  MODE_NO_CHECK,
-  MODE_PIPE,
-  MODE_REAL,
-  MODE_SOUND
-};
-
 enum ATTRIBUTES
 {
   NULL_ATTRIBUTE = 0,
   A68_PATTERN,
   ACCO_SYMBOL,
+  ACTUAL_DECLARER_MARK,
   ALT_DO_PART,
   ALT_DO_SYMBOL,
   ALT_EQUALS_SYMBOL,
   ALT_FORMAL_BOUNDS_LIST,
   ANDF_SYMBOL,
   AND_FUNCTION,
+  ANONYMOUS,
   ARGUMENT,
   ARGUMENT_LIST,
   ASSERTION,
@@ -698,6 +685,7 @@ enum ATTRIBUTES
   ASSIGN_TO_SYMBOL,
   AT_SYMBOL,
   BEGIN_SYMBOL,
+  BITS_C_PATTERN,
   BITS_DENOTATION,
   BITS_PATTERN,
   BITS_SYMBOL,
@@ -722,6 +710,7 @@ enum ATTRIBUTES
   CASE_SYMBOL,
   CAST,
   CHANNEL_SYMBOL,
+  CHAR_C_PATTERN,
   CHAR_DENOTATION,
   CHAR_SYMBOL,
   CHOICE,
@@ -771,29 +760,34 @@ enum ATTRIBUTES
   ENVIRON_SYMBOL,
   EQUALS_SYMBOL,
   ERROR,
+  ERROR_IDENTIFIER,
   ESAC_SYMBOL,
   EXIT_SYMBOL,
   EXPONENT_FRAME,
   FALSE_SYMBOL,
+  FIELD,
   FIELD_IDENTIFIER,
   FILE_SYMBOL,
+  FIRM,
   FI_SYMBOL,
   FIXED_C_PATTERN,
   FLEX_SYMBOL,
   FLOAT_C_PATTERN,
   FORMAL_BOUNDS,
   FORMAL_BOUNDS_LIST,
+  FORMAL_DECLARER_MARK,
   FORMAL_DECLARERS,
   FORMAL_DECLARERS_LIST,
   FORMAT_A_FRAME,
+  FORMAT_CLOSE_SYMBOL,
   FORMAT_DELIMITER_SYMBOL,
   FORMAT_D_FRAME,
   FORMAT_E_FRAME,
+  FORMAT_IDENTIFIER,
   FORMAT_I_FRAME,
   FORMAT_ITEM_A,
   FORMAT_ITEM_B,
   FORMAT_ITEM_C,
-  FORMAT_CLOSE_SYMBOL,
   FORMAT_ITEM_D,
   FORMAT_ITEM_E,
   FORMAT_ITEM_ESCAPE,
@@ -808,7 +802,6 @@ enum ATTRIBUTES
   FORMAT_ITEM_MINUS,
   FORMAT_ITEM_N,
   FORMAT_ITEM_O,
-  FORMAT_OPEN_SYMBOL,
   FORMAT_ITEM_P,
   FORMAT_ITEM_PLUS,
   FORMAT_ITEM_POINT,
@@ -822,6 +815,7 @@ enum ATTRIBUTES
   FORMAT_ITEM_X,
   FORMAT_ITEM_Y,
   FORMAT_ITEM_Z,
+  FORMAT_OPEN_SYMBOL,
   FORMAT_PATTERN,
   FORMAT_POINT_FRAME,
   FORMAT_SYMBOL,
@@ -832,6 +826,7 @@ enum ATTRIBUTES
   FOR_SYMBOL,
   FROM_PART,
   FROM_SYMBOL,
+  GENERAL_C_PATTERN,
   GENERAL_PATTERN,
   GENERATOR,
   GENERIC_ARGUMENT,
@@ -867,17 +862,43 @@ enum ATTRIBUTES
   LABEL_IDENTIFIER,
   LABEL_SEQUENCE,
   LITERAL,
+  LOCAL_LABEL,
   LOC_SYMBOL,
   LONGETY,
   LONG_SYMBOL,
   LOOP_CLAUSE,
+  LOOP_IDENTIFIER,
   MAIN_SYMBOL,
+  MEEK,
+  MODE_BITS,
+  MODE_BOOL,
+  MODE_BYTES,
+  MODE_CHAR,
+  MODE_COMPLEX,
   MODE_DECLARATION,
+  MODE_FILE,
+  MODE_FORMAT,
+  MODE_INT,
+  MODE_LONG_BITS,
+  MODE_LONG_BYTES,
+  MODE_LONG_COMPLEX,
+  MODE_LONG_INT,
+  MODE_LONGLONG_BITS,
+  MODE_LONGLONG_COMPLEX,
+  MODE_LONGLONG_INT,
+  MODE_LONGLONG_REAL,
+  MODE_LONG_REAL,
+  MODE_NO_CHECK,
+  MODE_PIPE,
+  MODE_REAL,
+  MODE_SOUND,
   MODE_SYMBOL,
   MONADIC_FORMULA,
   MONAD_SEQUENCE,
   NIHIL,
   NIL_SYMBOL,
+  NORMAL_IDENTIFIER,
+  NO_SORT,
   OCCA_SYMBOL,
   OD_SYMBOL,
   OF_SYMBOL,
@@ -896,6 +917,7 @@ enum ATTRIBUTES
   OUT_TYPE_MODE,
   PARALLEL_CLAUSE,
   PARAMETER,
+  PARAMETER_IDENTIFIER,
   PARAMETER_LIST,
   PARAMETER_PACK,
   PAR_SYMBOL,
@@ -912,6 +934,7 @@ enum ATTRIBUTES
   PROCEDURE_VARIABLE_DECLARATION,
   PROCEDURING,
   PROC_SYMBOL,
+  PROTECT_FROM_SWEEP,
   QUALIFIER,
   RADIX_FRAME,
   REAL_DENOTATION,
@@ -941,18 +964,21 @@ enum ATTRIBUTES
   SKIP,
   SKIP_SYMBOL,
   SLICE,
+  SOFT,
   SOME_CLAUSE,
   SOUND_SYMBOL,
   SPECIFIED_UNIT,
   SPECIFIED_UNIT_LIST,
   SPECIFIED_UNIT_UNIT,
   SPECIFIER,
+  SPECIFIER_IDENTIFIER,
   STANDARD,
   STATIC_REPLICATOR,
   STOWED_MODE,
   STRING_C_PATTERN,
   STRING_PATTERN,
   STRING_SYMBOL,
+  STRONG,
   STRUCT_SYMBOL,
   STRUCTURED_FIELD,
   STRUCTURED_FIELD_LIST,
@@ -986,8 +1012,10 @@ enum ATTRIBUTES
   UNTIL_PART,
   UNTIL_SYMBOL,
   VARIABLE_DECLARATION,
+  VIRTUAL_DECLARER_MARK,
   VOIDING,
   VOID_SYMBOL,
+  WEAK,
   WHILE_PART,
   WHILE_SYMBOL,
   WIDENING,
@@ -995,26 +1023,18 @@ enum ATTRIBUTES
 };
 
 enum
-{ VIRTUAL_DECLARER_MARK, ACTUAL_DECLARER_MARK, FORMAL_DECLARER_MARK };
-
-enum
-{ NO_SORT, SOFT, WEAK, MEEK, FIRM, STRONG };
-
-enum
-{
-  NORMAL_IDENTIFIER, ERROR_IDENTIFIER, LOOP_IDENTIFIER, FORMAT_IDENTIFIER,
-  PARAMETER_IDENTIFIER, SPECIFIER_IDENTIFIER, LOCAL_LABEL, ANONYMOUS, PROTECT_FROM_SWEEP
-};
-
-enum
 { NOT_PRINTED, TO_PRINT, PRINTED };
 
-enum
-{ 
-  A68_NO_DIAGNOSTICS = 0, A68_ERROR = 1, A68_SYNTAX_ERROR, A68_WARNING,
-  A68_RUNTIME_ERROR, A68_SUPPRESS_SEVERITY, A68_ALL_DIAGNOSTICS, 
-  A68_RERUN, A68_FORCE_DIAGNOSTICS = 128, A68_FORCE_QUIT = 256
-};
+#define A68_NO_DIAGNOSTICS 0
+#define A68_ERROR 1
+#define A68_SYNTAX_ERROR 2
+#define A68_WARNING 3
+#define A68_RUNTIME_ERROR 4
+#define A68_SUPPRESS_SEVERITY 5
+#define A68_ALL_DIAGNOSTICS 6
+#define A68_RERUN 7
+#define A68_FORCE_DIAGNOSTICS 128
+#define A68_FORCE_QUIT 256
 
 enum
 { NO_DEFLEXING = 1, SAFE_DEFLEXING, ALIAS_DEFLEXING, FORCE_DEFLEXING, SKIP_DEFLEXING };
@@ -1026,38 +1046,54 @@ enum
 #define SIGN(n) ((n) == 0 ? 0 : ((n) > 0 ? 1 : -1))
 
 #define COPY(d, s, n) {\
-  int m_k = (n); BYTE_T *m_u = (BYTE_T *) (d), *m_v = (BYTE_T *) (s);\
-  while (m_k--) {*m_u++ = *m_v++;}}
+  int _m_k = (n); BYTE_T *_m_u = (BYTE_T *) (d), *_m_v = (BYTE_T *) (s);\
+  while (_m_k--) {*_m_u++ = *_m_v++;}}
 
 #define COPY_ALIGNED(d, s, n) {\
-  int m_k = (n); A68_ALIGN_T *m_u = (A68_ALIGN_T *) (d), *m_v = (A68_ALIGN_T *) (s);\
-  while (m_k > 0) {*m_u++ = *m_v++; m_k -= A68_ALIGNMENT;}}
+  int _m_k = (n); A68_ALIGN_T *_m_u = (A68_ALIGN_T *) (d), *_m_v = (A68_ALIGN_T *) (s);\
+  while (_m_k > 0) {*_m_u++ = *_m_v++; _m_k -= A68_ALIGNMENT;}}
 
 #define MOVE(d, s, n) {\
-  int m_k = (int) (n); BYTE_T *m_d = (BYTE_T *) (d), *m_s = (BYTE_T *) (s);\
-  if (m_s < m_d) {\
-    m_d += m_k; m_s += m_k;\
-    while (m_k--) {*(--m_d) = *(--m_s);}\
+  int _m_k = (int) (n); BYTE_T *_m_d = (BYTE_T *) (d), *_m_s = (BYTE_T *) (s);\
+  if (_m_s < _m_d) {\
+    _m_d += _m_k; _m_s += _m_k;\
+    while (_m_k--) {*(--_m_d) = *(--_m_s);}\
   } else {\
-    while (m_k--) {*(m_d++) = *(m_s++);}\
+    while (_m_k--) {*(_m_d++) = *(_m_s++);}\
   }}
 
 #define FILL(d, s, n) {\
-   int m_k = (n); BYTE_T *m_u = (BYTE_T *) (d), m_v = (BYTE_T) (s);\
-   while (m_k--) {*m_u++ = m_v;}}
+   int _m_k = (n); BYTE_T *_m_u = (BYTE_T *) (d), _m_v = (BYTE_T) (s);\
+   while (_m_k--) {*_m_u++ = _m_v;}}
 
 #define FILL_ALIGNED(d, s, n) {\
-   int m_k = (n); A68_ALIGN_T *m_u = (A68_ALIGN_T *) (d), m_v = (A68_ALIGN_T) (s);\
-   while (m_k > 0) {*m_u++ = m_v; m_k -= A68_ALIGNMENT;}}
+   int _m_k = (n); A68_ALIGN_T *_m_u = (A68_ALIGN_T *) (d), _m_v = (A68_ALIGN_T) (s);\
+   while (_m_k > 0) {*_m_u++ = _m_v; _m_k -= A68_ALIGNMENT;}}
 
 #define ABNORMAL_END(p, reason, info) {\
   if (p) {\
     abend (reason, info, __FILE__, __LINE__);\
   }}
 
+#if defined ENABLE_CURSES
+#define CHECK_RETVAL(f) {\
+  extern BOOL_T curses_active;\
+  if (!(f)) {\
+    if (curses_active == A68_TRUE) {\
+      (void) attrset (A_NORMAL);\
+      (void) endwin ();\
+      curses_active = A68_FALSE;\
+    }\
+    ABNORMAL_END(A68_TRUE, "Return value failure", ERROR_SPECIFICATION)\
+  }}
+#else
+#define CHECK_RETVAL(f) {\
+  ABNORMAL_END((!(f)), "Return value failure", ERROR_SPECIFICATION)\
+  }
+#endif
+
 #define RESET_ERRNO {errno = 0;}
 
-#define A68_UNION A68_UNION
 #define UNION_OFFSET (ALIGNED_SIZE_OF (A68_UNION))
 
 /* Miscellaneous macros. */
@@ -1230,7 +1266,7 @@ extern TAG_T *find_tag_local (SYMBOL_TABLE_T *, int, char *);
 extern TAG_T *new_tag (void);
 extern TOKEN_T *add_token (TOKEN_T **, char *);
 extern TOKEN_T *find_token (TOKEN_T **, char *);
-extern unsigned long a68g_strtoul (char *, char **, int);
+extern unsigned a68g_strtoul (char *, char **, int);
 extern void a68g_exit (int);
 extern void abend (char *, char *, char *, int);
 extern void acronym (char *, char *);

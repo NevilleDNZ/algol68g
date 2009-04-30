@@ -147,7 +147,6 @@ static BOOL_T whether_mappable_routine (char *z)
 #undef ACCEPT
 }
 
-
 /*!
 \brief map "short sqrt" onto "sqrt" etcetera
 \param u name of routine
@@ -345,7 +344,7 @@ static void tax_for_identifiers (NODE_T * p)
     tax_for_identifiers (SUB (p));
     if (WHETHER (p, FOR_SYMBOL)) {
       if ((FORWARD (p)) != NULL) {
-        add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (INT), LOOP_IDENTIFIER);
+        (void) add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (INT), LOOP_IDENTIFIER);
       }
     }
   }
@@ -459,7 +458,6 @@ static void structure_fields_test (NODE_T * p)
     structure_fields_test (SUB (p));
   }
 }
-
 
 /*!
 \brief incestuous union test
@@ -629,6 +627,27 @@ static void already_declared (NODE_T * n, int a)
 }
 
 /*!
+\brief whether tag has already been declared in this range
+\param n name of tag
+\param a attribute of tag
+**/
+
+static void already_declared_hidden (NODE_T * n, int a)
+{
+  TAG_T *s;
+  if (find_tag_local (SYMBOL_TABLE (n), a, SYMBOL (n)) != NULL) {
+    diagnostic_node (A68_ERROR, n, ERROR_MULTIPLE_TAG);
+  }
+  if ((s = find_tag_global (PREVIOUS (SYMBOL_TABLE (n)), a, SYMBOL (n))) != NULL) {
+    if (SYMBOL_TABLE (s) == stand_env) {
+      diagnostic_node (A68_WARNING, n, WARNING_HIDES_PRELUDE, MOID (s), SYMBOL (n));
+    } else {
+      diagnostic_node (A68_WARNING, n, WARNING_HIDES, SYMBOL (n));
+    }
+  }
+}
+
+/*!
 \brief add tag to local symbol table
 \param s table where to insert
 \param a attribute
@@ -650,21 +669,21 @@ TAG_T *add_tag (SYMBOL_TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
 /*    TAX(n) = z; */
     switch (a) {
     case IDENTIFIER:{
-        already_declared (n, IDENTIFIER);
-        already_declared (n, LABEL);
+        already_declared_hidden (n, IDENTIFIER);
+        already_declared_hidden (n, LABEL);
         INSERT_TAG (&s->identifiers, z);
         break;
       }
     case INDICANT:{
-        already_declared (n, INDICANT);
+        already_declared_hidden (n, INDICANT);
         already_declared (n, OP_SYMBOL);
         already_declared (n, PRIO_SYMBOL);
         INSERT_TAG (&s->indicants, z);
         break;
       }
     case LABEL:{
-        already_declared (n, LABEL);
-        already_declared (n, IDENTIFIER);
+        already_declared_hidden (n, LABEL);
+        already_declared_hidden (n, IDENTIFIER);
         INSERT_TAG (&s->labels, z);
         break;
       }
@@ -1255,10 +1274,13 @@ void finalise_symbol_table_setup (NODE_T * p, int l)
         PREVIOUS (SYMBOL_TABLE (SUB (q))) = s;
         finalise_symbol_table_setup (SUB (q), l + 1);
         if (WHETHER (q, WHILE_PART)) {
+/* This was a bug that went 15 years unnoticed ! */
+          SYMBOL_TABLE_T *s2 = SYMBOL_TABLE (SUB (q));
           if ((FORWARD (q)) == NULL) {
             return;
           }
           if (WHETHER (q, ALT_DO_PART)) {
+            PREVIOUS (SYMBOL_TABLE (SUB (q))) = s2;
             LEX_LEVEL (SUB (q)) = l + 2;
             finalise_symbol_table_setup (SUB (q), l + 2);
           }
@@ -1561,7 +1583,12 @@ void jumps_from_procs (NODE_T * p)
       if (WHETHER (u, GOTO_SYMBOL)) {
         FORWARD (u);
       }
-      USE (TAX (u)) = A68_TRUE;
+      if ((TAX (u) == NULL) && (MOID (u) == NULL) && (find_tag_global (SYMBOL_TABLE (u), LABEL, SYMBOL (u)) == NULL)) {
+        (void) add_tag (SYMBOL_TABLE (u), LABEL, u, NULL, LOCAL_LABEL);
+        diagnostic_node (A68_ERROR, u, ERROR_UNDECLARED_TAG_1);
+      } else {
+         USE (TAX (u)) = A68_TRUE;
+      }
     } else {
       jumps_from_procs (SUB (p));
     }
