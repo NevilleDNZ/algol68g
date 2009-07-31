@@ -1850,8 +1850,8 @@ void genie_matrix_times_matrix (NODE_T * p)
   error_node = p;
   v = pop_matrix (p, A68_TRUE);
   u = pop_matrix (p, A68_TRUE);
-  len1 = (int) (v->size2);
-  len2 = (int) (u->size1);
+  len2 = (int) (v->size2);
+  len1 = (int) (u->size1);
   w = gsl_matrix_alloc ((size_t) len1, (size_t) len2);
   gsl_matrix_set_zero (w);
   rc = gsl_blas_dgemm (CblasNoTrans, CblasNoTrans, 1.0, u, v, 0.0, w);

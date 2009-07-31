@@ -99,7 +99,7 @@ ENABLE_IEEE_754 is ok for Pentiums.
 #endif
 
 /*
-OS_2_VERSION and PRE_MACOS_X_VERSION have been decommitted since Mark 9.1.
+OS_2_VERSION and PRE_MACOS_X_VERSION have been decommitted since version 1.9.1.
 */
 
 #endif

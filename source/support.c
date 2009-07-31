@@ -28,7 +28,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 ADDR_T fixed_heap_pointer, temp_heap_pointer;
-POSTULATE_T *top_postulate, *old_postulate;
+POSTULATE_T *top_postulate, *top_postulate_list;
 KEYWORD_T *top_keyword;
 TOKEN_T *top_token;
 BOOL_T get_fixed_heap_allowed;
@@ -183,11 +183,38 @@ void renumber_nodes (NODE_T * p, int *n)
 NODE_INFO_T *new_node_info (void)
 {
   NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (NODE_INFO_T));
+  new_node_infos++;
   MODULE (z) = NULL;
   z->PROCEDURE_LEVEL = 0;
   z->char_in_line = NULL;
   z->symbol = NULL;
   z->line = NULL;
+  return (z);
+}
+
+/*!
+\brief new_genie_info
+\return same
+**/
+
+GENIE_INFO_T *new_genie_info (void)
+{
+  GENIE_INFO_T *z = (GENIE_INFO_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (GENIE_INFO_T));
+  new_genie_infos++;
+  z->propagator.unit = NULL;
+  z->propagator.source = NULL;
+  z->partial_proc = NULL;
+  z->partial_locale = NULL;
+  z->whether_coercion = A68_FALSE;
+  z->whether_new_lexical_level = A68_FALSE;
+  z->need_dns = A68_FALSE;
+  z->parent = NULL;
+  z->offset = NULL;
+  z->constant = NULL;
+  z->level = 0;
+  z->argsize = 0;
+  z->size = 0;
+  z->protect_sweep = NULL;
   return (z);
 }
 
@@ -199,34 +226,21 @@ NODE_INFO_T *new_node_info (void)
 NODE_T *new_node (void)
 {
   NODE_T *z = (NODE_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (NODE_T));
-  MASK (z) = NULL_MASK;
-  z->info = new_node_info ();
-  z->reduction = 0;
-  ATTRIBUTE (z) = 0;
-  z->annotation = 0;
-  z->error = A68_FALSE;
-  z->need_dns = A68_FALSE;
-  PROPAGATOR (z).unit = NULL;
-  PROPAGATOR (z).source = NULL;
-  z->genie.whether_coercion = A68_FALSE;
-  z->genie.whether_new_lexical_level = A68_FALSE;
-  z->genie.seq = NULL;
-  z->genie.seq_set = A68_FALSE;
-  z->genie.parent = NULL;
-  z->genie.constant = NULL;
-  z->genie.argsize = 0;
-  z->partial_proc = NULL;
-  z->partial_locale = NULL;
+  new_nodes++;
+  STATUS (z) = NULL_MASK;
   SYMBOL_TABLE (z) = NULL;
+  INFO (z) = NULL;
+  GENIE (z) = NULL;
+  ATTRIBUTE (z) = 0;
+  ANNOTATION (z) = 0;
   MOID (z) = NULL;
   NEXT (z) = NULL;
   PREVIOUS (z) = NULL;
   SUB (z) = NULL;
   NEST (z) = NULL;
-  z->inits = NULL;
-  PACK (z) = NULL;
   TAX (z) = NULL;
-  z->protect_sweep = NULL;
+  SEQUENCE (z) = NULL;
+  PACK (z) = NULL;
   return (z);
 }
 
@@ -257,7 +271,7 @@ SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
   z->anonymous = NULL;
   z->moids = NULL;
   z->jump_to = NULL;
-  z->inits = NULL;
+  SEQUENCE (z) = NULL;
   return (z);
 }
 
@@ -269,6 +283,7 @@ SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
 MOID_T *new_moid (void)
 {
   MOID_T *z = (MOID_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (MOID_T));
+  new_modes++;
   ATTRIBUTE (z) = 0;
   NUMBER (z) = 0;
   DIM (z) = 0;
@@ -319,8 +334,8 @@ PACK_T *new_pack (void)
 TAG_T *new_tag (void)
 {
   TAG_T *z = (TAG_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (TAG_T));
-  MASK (z) = NULL_MASK;
-  SYMBOL_TABLE (z) = NULL;
+  STATUS (z) = NULL_MASK;
+  TAG_TABLE (z) = NULL;
   MOID (z) = NULL;
   NODE (z) = NULL;
   z->unit = NULL;
@@ -476,7 +491,10 @@ void make_sub (NODE_T * p, NODE_T * q, int t)
 {
   NODE_T *z = new_node ();
   ABNORMAL_END (p == NULL || q == NULL, ERROR_INTERNAL_CONSISTENCY, "make_sub");
-  MOVE (z, p, ALIGNED_SIZE_OF (NODE_T));
+  *z = *p;
+  if (GENIE (p) != NULL) {
+    GENIE (z) = new_genie_info ();
+  }
   PREVIOUS (z) = NULL;
   if (p == q) {
     NEXT (z) = NULL;
@@ -588,6 +606,8 @@ BOOL_T whether_new_lexical_level (NODE_T * p)
 NODE_T *some_node (char *t)
 {
   NODE_T *z = new_node ();
+  INFO (z) = new_node_info ();
+  GENIE (z) = new_genie_info ();
   SYMBOL (z) = t;
   return (z);
 }
@@ -599,17 +619,26 @@ NODE_T *some_node (char *t)
 void init_postulates (void)
 {
   top_postulate = NULL;
-  old_postulate = NULL;
+  top_postulate_list = NULL;
 }
 
 /*!
-\brief make old elem-list available for new use
+\brief make old postulates available for new use
+\param start start of list to save
+\param stop first element to not save
 **/
 
-void reset_postulates (void)
+void free_postulate_list (POSTULATE_T *start, POSTULATE_T *stop)
 {
-  old_postulate = top_postulate;
-  top_postulate = NULL;
+  POSTULATE_T *last;
+  if (start == NULL && stop == NULL) {
+    return;
+  }
+  for (last = start; NEXT (last) != stop; FORWARD (last)) {
+    /* skip */;
+  }
+  NEXT (last) = top_postulate_list;
+  top_postulate_list = start;
 }
 
 /*!
@@ -622,11 +651,12 @@ void reset_postulates (void)
 void make_postulate (POSTULATE_T ** p, MOID_T * a, MOID_T * b)
 {
   POSTULATE_T *new_one;
-  if (old_postulate != NULL) {
-    new_one = old_postulate;
-    old_postulate = NEXT (old_postulate);
+  if (top_postulate_list != NULL) {
+    new_one = top_postulate_list;
+    FORWARD (top_postulate_list);
   } else {
     new_one = (POSTULATE_T *) get_temp_heap_space ((size_t) ALIGNED_SIZE_OF (POSTULATE_T));
+    new_postulates++;
   }
   new_one->a = a;
   new_one->b = b;
@@ -758,29 +788,6 @@ TOKEN_T *find_token (TOKEN_T ** p, char *t)
 }
 
 /*!
-\brief add keyword to the tree
-\param p top keyword
-\param a attribute
-\param t keyword text
-**/
-
-static void add_keyword (KEYWORD_T ** p, int a, char *t)
-{
-  while (*p != NULL) {
-    int k = strcmp (t, TEXT (*p));
-    if (k < 0) {
-      p = &LESS (*p);
-    } else {
-      p = &MORE (*p);
-    }
-  }
-  *p = (KEYWORD_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (KEYWORD_T));
-  ATTRIBUTE (*p) = a;
-  TEXT (*p) = t;
-  LESS (*p) = MORE (*p) = NULL;
-}
-
-/*!
 \brief find keyword, from token name
 \param p top keyword
 \param t token text to find
@@ -825,115 +832,6 @@ KEYWORD_T *find_keyword_from_attribute (KEYWORD_T * p, int a)
       return (NULL);
     }
   }
-}
-
-/*!
-\brief make tables of keywords and non-terminals
-**/
-
-void set_up_tables (void)
-{
-/* Entries are randomised to balance the tree. */
-  add_keyword (&top_keyword, DIAGONAL_SYMBOL, "DIAG");
-  add_keyword (&top_keyword, TRANSPOSE_SYMBOL, "TRNSP");
-  add_keyword (&top_keyword, ROW_SYMBOL, "ROW");
-  add_keyword (&top_keyword, COLUMN_SYMBOL, "COL");
-  add_keyword (&top_keyword, ROW_ASSIGN_SYMBOL, "::=");
-  add_keyword (&top_keyword, SOUND_SYMBOL, "SOUND");
-  add_keyword (&top_keyword, ANDF_SYMBOL, "THEF");
-  add_keyword (&top_keyword, ORF_SYMBOL, "ELSF");
-  add_keyword (&top_keyword, POINT_SYMBOL, ".");
-  add_keyword (&top_keyword, ACCO_SYMBOL, "{");
-  add_keyword (&top_keyword, OCCA_SYMBOL, "}");
-  add_keyword (&top_keyword, CODE_SYMBOL, "CODE");
-  add_keyword (&top_keyword, EDOC_SYMBOL, "EDOC");
-  add_keyword (&top_keyword, ENVIRON_SYMBOL, "ENVIRON");
-  add_keyword (&top_keyword, COLON_SYMBOL, ":");
-  add_keyword (&top_keyword, THEN_BAR_SYMBOL, "|");
-  add_keyword (&top_keyword, SUB_SYMBOL, "[");
-  add_keyword (&top_keyword, BY_SYMBOL, "BY");
-  add_keyword (&top_keyword, OP_SYMBOL, "OP");
-  add_keyword (&top_keyword, COMMA_SYMBOL, ",");
-  add_keyword (&top_keyword, AT_SYMBOL, "AT");
-  add_keyword (&top_keyword, PRIO_SYMBOL, "PRIO");
-  add_keyword (&top_keyword, STYLE_I_COMMENT_SYMBOL, "CO");
-  add_keyword (&top_keyword, END_SYMBOL, "END");
-  add_keyword (&top_keyword, GO_SYMBOL, "GO");
-  add_keyword (&top_keyword, TO_SYMBOL, "TO");
-  add_keyword (&top_keyword, ELSE_BAR_SYMBOL, "|:");
-  add_keyword (&top_keyword, THEN_SYMBOL, "THEN");
-  add_keyword (&top_keyword, TRUE_SYMBOL, "TRUE");
-  add_keyword (&top_keyword, PROC_SYMBOL, "PROC");
-  add_keyword (&top_keyword, FOR_SYMBOL, "FOR");
-  add_keyword (&top_keyword, GOTO_SYMBOL, "GOTO");
-  add_keyword (&top_keyword, ANDF_SYMBOL, "ANDTH");
-  add_keyword (&top_keyword, ORF_SYMBOL, "OREL");
-  add_keyword (&top_keyword, WHILE_SYMBOL, "WHILE");
-  add_keyword (&top_keyword, IS_SYMBOL, ":=:");
-  add_keyword (&top_keyword, ASSIGN_TO_SYMBOL, "=:");
-  add_keyword (&top_keyword, COMPLEX_SYMBOL, "COMPLEX");
-  add_keyword (&top_keyword, COMPL_SYMBOL, "COMPL");
-  add_keyword (&top_keyword, FROM_SYMBOL, "FROM");
-  add_keyword (&top_keyword, BOLD_PRAGMAT_SYMBOL, "PRAGMAT");
-  add_keyword (&top_keyword, BOLD_COMMENT_SYMBOL, "COMMENT");
-  add_keyword (&top_keyword, DO_SYMBOL, "DO");
-  add_keyword (&top_keyword, STYLE_II_COMMENT_SYMBOL, "#");
-  add_keyword (&top_keyword, CASE_SYMBOL, "CASE");
-  add_keyword (&top_keyword, LOC_SYMBOL, "LOC");
-  add_keyword (&top_keyword, CHAR_SYMBOL, "CHAR");
-  add_keyword (&top_keyword, ISNT_SYMBOL, ":/=:");
-  add_keyword (&top_keyword, REF_SYMBOL, "REF");
-  add_keyword (&top_keyword, NIL_SYMBOL, "NIL");
-  add_keyword (&top_keyword, ASSIGN_SYMBOL, ":=");
-  add_keyword (&top_keyword, FI_SYMBOL, "FI");
-  add_keyword (&top_keyword, FILE_SYMBOL, "FILE");
-  add_keyword (&top_keyword, PAR_SYMBOL, "PAR");
-  add_keyword (&top_keyword, ASSERT_SYMBOL, "ASSERT");
-  add_keyword (&top_keyword, OUSE_SYMBOL, "OUSE");
-  add_keyword (&top_keyword, IN_SYMBOL, "IN");
-  add_keyword (&top_keyword, LONG_SYMBOL, "LONG");
-  add_keyword (&top_keyword, SEMI_SYMBOL, ";");
-  add_keyword (&top_keyword, EMPTY_SYMBOL, "EMPTY");
-  add_keyword (&top_keyword, MODE_SYMBOL, "MODE");
-  add_keyword (&top_keyword, IF_SYMBOL, "IF");
-  add_keyword (&top_keyword, OD_SYMBOL, "OD");
-  add_keyword (&top_keyword, OF_SYMBOL, "OF");
-  add_keyword (&top_keyword, STRUCT_SYMBOL, "STRUCT");
-  add_keyword (&top_keyword, STYLE_I_PRAGMAT_SYMBOL, "PR");
-  add_keyword (&top_keyword, BUS_SYMBOL, "]");
-  add_keyword (&top_keyword, SKIP_SYMBOL, "SKIP");
-  add_keyword (&top_keyword, SHORT_SYMBOL, "SHORT");
-  add_keyword (&top_keyword, IS_SYMBOL, "IS");
-  add_keyword (&top_keyword, ESAC_SYMBOL, "ESAC");
-  add_keyword (&top_keyword, CHANNEL_SYMBOL, "CHANNEL");
-  add_keyword (&top_keyword, ANDF_SYMBOL, "ANDF");
-  add_keyword (&top_keyword, ORF_SYMBOL, "ORF");
-  add_keyword (&top_keyword, REAL_SYMBOL, "REAL");
-  add_keyword (&top_keyword, STRING_SYMBOL, "STRING");
-  add_keyword (&top_keyword, BOOL_SYMBOL, "BOOL");
-  add_keyword (&top_keyword, ISNT_SYMBOL, "ISNT");
-  add_keyword (&top_keyword, FALSE_SYMBOL, "FALSE");
-  add_keyword (&top_keyword, UNION_SYMBOL, "UNION");
-  add_keyword (&top_keyword, OUT_SYMBOL, "OUT");
-  add_keyword (&top_keyword, OPEN_SYMBOL, "(");
-  add_keyword (&top_keyword, BEGIN_SYMBOL, "BEGIN");
-  add_keyword (&top_keyword, FLEX_SYMBOL, "FLEX");
-  add_keyword (&top_keyword, VOID_SYMBOL, "VOID");
-  add_keyword (&top_keyword, BITS_SYMBOL, "BITS");
-  add_keyword (&top_keyword, ELSE_SYMBOL, "ELSE");
-  add_keyword (&top_keyword, DOWNTO_SYMBOL, "DOWNTO");
-  add_keyword (&top_keyword, UNTIL_SYMBOL, "UNTIL");
-  add_keyword (&top_keyword, EXIT_SYMBOL, "EXIT");
-  add_keyword (&top_keyword, HEAP_SYMBOL, "HEAP");
-  add_keyword (&top_keyword, INT_SYMBOL, "INT");
-  add_keyword (&top_keyword, BYTES_SYMBOL, "BYTES");
-  add_keyword (&top_keyword, PIPE_SYMBOL, "PIPE");
-  add_keyword (&top_keyword, FORMAT_SYMBOL, "FORMAT");
-  add_keyword (&top_keyword, SEMA_SYMBOL, "SEMA");
-  add_keyword (&top_keyword, CLOSE_SYMBOL, ")");
-  add_keyword (&top_keyword, AT_SYMBOL, "@");
-  add_keyword (&top_keyword, ELIF_SYMBOL, "ELIF");
-  add_keyword (&top_keyword, FORMAT_DELIMITER_SYMBOL, "$");
 }
 
 /* A list of 10 ^ 2 ^ n for conversion purposes on IEEE 754 platforms. */

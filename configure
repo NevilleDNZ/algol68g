@@ -21,15 +21,15 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="17"
-REVISION="Mark $VERSION_NUMBER"
+VERSION_NUMBER="1.18.0"
+REVISION="Version $VERSION_NUMBER"
 MAN_NUMBER="5"
-MONTH="May"
+MONTH="August"
 YEAR="2009"
 DATE=`date +"%e %B %Y %H:%M"`
 TIME_STAMP="$MONTH $YEAR"
 RELEASE_DATE="released $TIME_STAMP"
-PACKAGE="algol68g-mk$VERSION_NUMBER"
+PACKAGE="algol68g-$VERSION_NUMBER"
 warnings=
 libplot=
 libgsl=
@@ -41,7 +41,7 @@ SYS_LIB=/usr/lib
 SYS_BIN=/usr/bin
 USR_LOC=/usr/local
 LOC_INC=$USR_LOC/include
-USR_CHK="./regression-mk$VERSION_NUMBER"
+USR_CHK="./regression-$VERSION_NUMBER"
 USR_DOC="./doc"
 USR_HTML_TEMPLATES="$USR_DOC/html"
 USR_LATEX_TEMPLATES="$USR_DOC/latex"
@@ -54,7 +54,8 @@ TEST_REF_FILE="$USR_CHK/regression-ref"
 BATCH_FILE="$USR_CHK/regression.bat"
 LINK_COLOUR="blue"
 BACKGROUND_COLOUR="#e0e0e8"
-echo "$A68G_NAME $REVISION $RELEASE_DATE ($PACKAGE) `uname -mrs` $DATE"
+echo "Algol 68 Genie $REVISION $RELEASE_DATE"
+echo "$PACKAGE `uname -mrs` $DATE"
 #
 USERID=`whoami`
 POWERPC=`uname -a | grep powerpc`
@@ -62,6 +63,7 @@ PPC=`uname -a | grep ppc`
 X86=`uname -a | grep [3456]86`
 BSD=`uname -s | grep BSD`
 OPENBSD=`uname -s | grep OpenBSD`
+MACOSX=`uname -a | grep Darwin`
 #
 # Option processing
 #
@@ -179,7 +181,7 @@ do
 --incdir[=]DIR  	set include-directory for compilation to DIR
 --libdir[=]DIR  	set library-directory for compilation to DIR
 --mandir[=]DIR  	set target directory for manual page to DIR
---profile                set profiling mode
+--profile               set profiling mode
 --threads       	use POSIX threads enabling the parallel clause
 --version       	print version and exit
 --warn			give warning messages during compilation
@@ -719,7 +721,7 @@ fi
 # Find IEEE-754 compatibility
 #
 printf "checking for IEEE 754 floating point compatibility ... "
-if [ -n "$POWERPC" -o -n "$PPC" -o -n "$X86" ]
+if [ -n "$POWERPC" -o -n "$PPC" -o -n "$X86" -o -n "$MACOSX" ]
 then
 	echo "yes"
 	echo "IEEE_754_FLAG=-DENABLE_IEEE_754" 1>>$BUILD_FILE
@@ -737,6 +739,10 @@ fi
 #
 # Finish Makefile
 #
+if [ -n "$MACOSX" ]
+then
+	echo "MACOSX_FLAG=-DENABLE_MACOSX" 1>>$BUILD_FILE
+fi
 printf "STD_CFLAGS=" 1>>$BUILD_FILE
 if [ -d /opt/local/include ]
 then
@@ -755,6 +761,7 @@ else
 fi
 #
 printf "STD_LD_FLAGS=" 1>>$BUILD_FILE
+printf -- "-ltermcap " 1>>$BUILD_FILE
 #
 if [ -d /opt/local/lib ]
 then
@@ -776,7 +783,7 @@ echo "HS=`echo $USR_SRC/*.h | sort | sed 's/\.\/[a-zA-Z0-9]*\///g'`" 1>>$BUILD_F
 echo "CS=`echo $USR_SRC/*.c | sort | sed 's/\.\/[a-zA-Z0-9]*\///g' | sed 's/\.c/\.o/g'`" 1>>$BUILD_FILE
 #
 cat >>$BUILD_FILE <<\_BUILD_EOF
-FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(READLINE_FLAG) $(DIRENT_FLAG) $(CFLAGS)
+FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(READLINE_FLAG) $(DIRENT_FLAG) $(MACOSX_FLAG) $(CFLAGS)
 all:    a68g
 a68g:   $(CS)
 	@echo "building a68g ..."
@@ -1047,7 +1054,7 @@ then
 			exit 1 ;;
 	esac
 	printf "checking whether $PACKAGE exists ... "
-	./a68g -version >& /dev/null
+	./a68g -version > /dev/null
 	case $?
 	in
 		0)

@@ -1789,7 +1789,6 @@ int char_scanner (A68_FILE * f)
 /* File is associated with a STRING. Give next CHAR. 
    When we're outside the STRING give EOF_CHAR. 
 */
-
     A68_REF z = *(A68_REF *) (ADDRESS (&f->string));    /* Dereference REF STRING. */
     A68_ARRAY *a;
     A68_TUPLE *t;
@@ -2198,37 +2197,33 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
   if (f->eof) {
     end_of_file_error (p, ref_file);
   } else {
-    int ch = char_scanner (f);
-    BOOL_T go_on = A68_TRUE;
+    BOOL_T go_on; int ch;
     reset_transput_buffer (INPUT_BUFFER);
+    ch = char_scanner (f);
+    go_on = A68_TRUE;
     while (go_on) {
-      if (ch == EOF_CHAR) {
-        go_on = A68_FALSE;
-      } else if (term != NULL && a68g_strchr (term, ch) != NULL) {
+      if (ch == EOF_CHAR || f->eof) {
+        if (get_transput_buffer_index (INPUT_BUFFER) == 0) {
+          end_of_file_error (p, ref_file);
+        }
         go_on = A68_FALSE;
       } else if (IS_NL_FF (ch)) {
-        A68_BOOL *z = (A68_BOOL *) STACK_TOP;
         ADDR_T pop_sp = stack_pointer;
+        unchar_scanner (p, f, (char) ch);
         if (ch == NEWLINE_CHAR) {
           on_event_handler (p, f->line_end_mended, ref_file);
         } else if (ch == FORMFEED_CHAR) {
           on_event_handler (p, f->page_end_mended, ref_file);
         }
         stack_pointer = pop_sp;
-        if (VALUE (z) == A68_TRUE) {
-          ch = char_scanner (f);
-        } else {
-          go_on = A68_FALSE;
-        }
+        go_on = A68_FALSE;
+      } else if (term != NULL && a68g_strchr (term, ch) != NULL) {
+        go_on = A68_FALSE;
+        unchar_scanner (p, f, (char) ch);
       } else {
         add_char_transput_buffer (p, INPUT_BUFFER, (char) ch);
         ch = char_scanner (f);
       }
-    }
-    if (ch != EOF_CHAR) {
-      unchar_scanner (p, f, (char) ch);
-    } else if (get_transput_buffer_index (INPUT_BUFFER) == 0) {
-      end_of_file_error (p, ref_file);
     }
   }
 }
@@ -2793,7 +2788,7 @@ void genie_read_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     for (; q != NULL; FORWARD (q)) {
-      genie_read_standard (p, MOID (q), &item[q->offset], ref_file);
+      genie_read_standard (p, MOID (q), &item[OFFSET (q)], ref_file);
     }
   } else if (WHETHER (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
@@ -3097,7 +3092,7 @@ void genie_write_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     for (; q != NULL; FORWARD (q)) {
-      BYTE_T *elem = &item[q->offset];
+      BYTE_T *elem = &item[OFFSET (q)];
       CHECK_INIT_GENERIC (p, elem, MOID (q));
       genie_write_standard (p, MOID (q), elem, ref_file);
     }
@@ -3293,7 +3288,7 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     for (; q != NULL; FORWARD (q)) {
-      genie_read_bin_standard (p, MOID (q), &item[q->offset], ref_file);
+      genie_read_bin_standard (p, MOID (q), &item[OFFSET (q)], ref_file);
     }
   } else if (WHETHER (mode, ROW_SYMBOL) || WHETHER (mode, FLEX_SYMBOL)) {
     MOID_T *deflexed = DEFLEX (mode);
@@ -3519,7 +3514,7 @@ static void genie_write_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, 
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     for (; q != NULL; FORWARD (q)) {
-      BYTE_T *elem = &item[q->offset];
+      BYTE_T *elem = &item[OFFSET (q)];
       CHECK_INIT_GENERIC (p, elem, MOID (q));
       genie_write_bin_standard (p, MOID (q), elem, ref_file);
     }
@@ -5097,7 +5092,7 @@ static void open_format_frame (NODE_T * p, A68_REF ref_file, A68_FORMAT * fmt, B
   dollar = SUB (BODY (fmt));
   OPEN_PROC_FRAME (dollar, ENVIRON (fmt));
 /* Save old format. */
-  save = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, TAX (dollar)->offset);
+  save = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, OFFSET (TAX (dollar)));
   *save = (embedded == EMBEDDED_FORMAT ? FORMAT (file) : nil_format);
   FORMAT (file) = *fmt;
 /* Reset all collitems. */
@@ -5121,7 +5116,7 @@ format text calls "on format end".
 */
   A68_FILE *file = FILE_DEREF (&ref_file);
   NODE_T *dollar = SUB (BODY (&FORMAT (file)));
-  A68_FORMAT *save = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, TAX (dollar)->offset);
+  A68_FORMAT *save = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, OFFSET (TAX (dollar)));
   if (IS_NIL_FORMAT (save)) {
 /* Not embedded, outermost format: execute event routine. */
     A68_BOOL z;
@@ -6842,7 +6837,7 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     for (; q != NULL; FORWARD (q)) {
-      BYTE_T *elem = &item[q->offset];
+      BYTE_T *elem = &item[OFFSET (q)];
       CHECK_INIT_GENERIC (p, elem, MOID (q));
       genie_write_standard_format (p, MOID (q), elem, ref_file);
     }
@@ -6890,7 +6885,7 @@ static void purge_format_write (NODE_T * p, A68_REF ref_file)
     }
     file = FILE_DEREF (&ref_file);
     dollar = SUB (BODY (&FORMAT (file)));
-    old_fmt = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, TAX (dollar)->offset);
+    old_fmt = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, OFFSET (TAX (dollar)));
     go_on = (BOOL_T) ! IS_NIL_FORMAT (old_fmt);
     if (go_on) {
 /* Pop embedded format and proceed. */
@@ -7661,7 +7656,7 @@ static void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (mode);
     for (; q != NULL; FORWARD (q)) {
-      BYTE_T *elem = &item[q->offset];
+      BYTE_T *elem = &item[OFFSET (q)];
       genie_read_standard_format (p, MOID (q), elem, ref_file);
     }
   } else if (WHETHER (mode, ROW_SYMBOL) || WHETHER (mode, FLEX_SYMBOL)) {
@@ -7713,7 +7708,7 @@ static void purge_format_read (NODE_T * p, A68_REF ref_file)
     }
     file = FILE_DEREF (&ref_file);
     dollar = SUB (BODY (&FORMAT (file)));
-    old_fmt = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, TAX (dollar)->offset);
+    old_fmt = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, OFFSET (TAX (dollar)));
     go_on = (BOOL_T) ! IS_NIL_FORMAT (old_fmt);
     if (go_on) {
 /* Pop embedded format and proceed. */

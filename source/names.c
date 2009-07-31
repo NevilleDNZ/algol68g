@@ -66,7 +66,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "BY_PART",
   "BY_SYMBOL",
   "BYTES_SYMBOL",
-  "CALL, SLICE OR FIELD",
+  "CALL",
   "CASE_PART",
   "CASE_SYMBOL",
   "CAST",
@@ -76,6 +76,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "CHAR_SYMBOL",
   "CHOICE",
   "CHOICE_PATTERN",
+  "CLASS_SYMBOL",
   "CLOSED_CLAUSE",
   "CLOSE_SYMBOL",
   "CODE_CLAUSE",
@@ -90,6 +91,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "COMPLEX_SYMBOL",
   "COMPL_SYMBOL",
   "CONDITIONAL_CLAUSE",
+  "CONSTRUCT",
   "DECLARATION_LIST",
   "DECLARER",
   "DEFINING_IDENTIFIER",
@@ -128,6 +130,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "FALSE_SYMBOL",
   "FIELD",
   "FIELD_IDENTIFIER",
+  "FIELD_SELECTION",
   "FILE_SYMBOL",
   "FIRM",
   "FI_SYMBOL",
@@ -256,6 +259,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "MODE_SYMBOL",
   "MONADIC_FORMULA",
   "MONAD_SEQUENCE",
+  "NEW_SYMBOL",
   "NIHIL",
   "NIL_SYMBOL",
   "NORMAL_IDENTIFIER",
@@ -324,10 +328,11 @@ static char *attribute_names[WILDCARD + 1] = {
   "SIGN_MOULD",
   "SKIP",
   "SKIP_SYMBOL",
-  "SLICE OR CALL",
+  "SLICE",
   "SOFT",
   "SOME_CLAUSE",
   "SOUND_SYMBOL",
+  "SPECIFICATION",
   "SPECIFIED_UNIT",
   "SPECIFIED_UNIT_LIST",
   "SPECIFIED_UNIT_UNIT",
@@ -480,8 +485,8 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_deproceduring) {
     return ("genie_deproceduring");
   }
-  if (p == genie_dereference_loc_identifier) {
-    return ("genie_dereference_loc_identifier");
+  if (p == genie_dereference_frame_identifier) {
+    return ("genie_dereference_frame_identifier");
   }
   if (p == genie_dereference_selection_name_quick) {
     return ("genie_dereference_selection_name_quick");
@@ -603,8 +608,11 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == (PROPAGATOR_PROCEDURE *) genie_int_case) {
     return ("genie_int_case");
   }
-  if (p == genie_loc_identifier) {
-    return ("genie_loc_identifier");
+  if (p == genie_field_selection) {
+    return ("genie_field_selection");
+  }
+  if (p == genie_frame_identifier) {
+    return ("genie_frame_identifier");
   }
   if (p == (PROPAGATOR_PROCEDURE *) genie_loop) {
     return ("genie_loop");

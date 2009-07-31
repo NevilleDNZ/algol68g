@@ -121,6 +121,9 @@ static void insert_node (NODE_T * p, int att)
 {
   NODE_T *q = new_node ();
   *q = *p;
+  if (GENIE (p) != NULL) {
+    GENIE (q) = new_genie_info ();
+  }
   ATTRIBUTE (q) = att;
   NEXT (p) = q;
   PREVIOUS (q) = p;
@@ -1459,6 +1462,9 @@ Filling in gives one format for such construct; this helps later passes.
 */
   NODE_T *z = new_node ();
   *z = *p;
+  if (GENIE (p) != NULL) {
+    GENIE (z) = new_genie_info ();
+  }
   PREVIOUS (z) = p;
   SUB (z) = NULL;
   ATTRIBUTE (z) = a;
@@ -1582,10 +1588,7 @@ static void try_reduction (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     NODE_T *q;
     int count = 0;
     reductions++;
-    if (!((reductions == head->reduction + 1) && NEXT (head) == NULL)) {
-      where (STDOUT_FILENO, head);
-    }
-    head->reduction = reductions;
+    where (STDOUT_FILENO, head);
     CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "\nReduction %d: %s<-", reductions, non_terminal_string (edit_line, result)) >= 0);
     WRITE (STDOUT_FILENO, output_line);
     for (q = head; q != NULL && tail != NULL && q != NEXT (tail); FORWARD (q), count++) {
@@ -2438,17 +2441,12 @@ static void reduce_primaries (NODE_T * p, int expect)
       if (WHETHER (q, PRIMARY) && x != NULL) {
         if (WHETHER (x, OPEN_SYMBOL)) {
           reduce_subordinate (NEXT (q), GENERIC_ARGUMENT);
-          try_reduction (q, NULL, &z, SLICE, PRIMARY, GENERIC_ARGUMENT, NULL_ATTRIBUTE);
-          try_reduction (q, NULL, &z, PRIMARY, SLICE, NULL_ATTRIBUTE);
-/*
-	  reduce_subordinate (NEXT (q), ARGUMENT);
-	  try_reduction (q, NULL, &z, CALL, PRIMARY, ARGUMENT, NULL_ATTRIBUTE);
-	  try_reduction (q, NULL, &z, PRIMARY, CALL, NULL_ATTRIBUTE);
-*/
+          try_reduction (q, NULL, &z, SPECIFICATION, PRIMARY, GENERIC_ARGUMENT, NULL_ATTRIBUTE);
+          try_reduction (q, NULL, &z, PRIMARY, SPECIFICATION, NULL_ATTRIBUTE);
         } else if (WHETHER (x, SUB_SYMBOL)) {
           reduce_subordinate (NEXT (q), GENERIC_ARGUMENT);
-          try_reduction (q, NULL, &z, SLICE, PRIMARY, GENERIC_ARGUMENT, NULL_ATTRIBUTE);
-          try_reduction (q, NULL, &z, PRIMARY, SLICE, NULL_ATTRIBUTE);
+          try_reduction (q, NULL, &z, SPECIFICATION, PRIMARY, GENERIC_ARGUMENT, NULL_ATTRIBUTE);
+          try_reduction (q, NULL, &z, PRIMARY, SPECIFICATION, NULL_ATTRIBUTE);
         }
       }
     }
@@ -2530,22 +2528,22 @@ void reduce_c_pattern (NODE_T * p, int pr, int let)
 {
   NODE_T *q;
   for (q = p; q != NULL; FORWARD (q)) {
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, REPLICATOR, let, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_PLUS, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, REPLICATOR, let, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_MINUS, FORMAT_ITEM_PLUS, REPLICATOR, FORMAT_ITEM_POINT, REPLICATOR, let, NULL_ATTRIBUTE);
   }
 }
 
@@ -2728,21 +2726,21 @@ static void reduce_format_texts (NODE_T * p)
   }
   ambiguous_patterns (p);
   for (q = p; q != NULL; FORWARD (q)) {
-    try_reduction (q, NULL, NULL, A68_PATTERN, BITS_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, BITS_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, CHAR_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, FIXED_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, FLOAT_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, GENERAL_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, INTEGRAL_C_PATTERN, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, A68_PATTERN, STRING_C_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, BITS_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, BOOLEAN_PATTERN, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, A68_PATTERN, CHAR_C_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, CHOICE_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, COMPLEX_PATTERN, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, A68_PATTERN, FIXED_C_PATTERN, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, A68_PATTERN, FLOAT_C_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, FORMAT_PATTERN, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, A68_PATTERN, GENERAL_C_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, GENERAL_PATTERN, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, A68_PATTERN, INTEGRAL_C_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, INTEGRAL_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, REAL_PATTERN, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, A68_PATTERN, STRING_C_PATTERN, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, A68_PATTERN, STRING_PATTERN, NULL_ATTRIBUTE);
   }
 /* Pictures. */
@@ -2780,6 +2778,7 @@ static void reduce_secondaries (NODE_T * p)
     try_reduction (q, NULL, NULL, SECONDARY, PRIMARY, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, GENERATOR, LOC_SYMBOL, DECLARER, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, GENERATOR, HEAP_SYMBOL, DECLARER, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, GENERATOR, NEW_SYMBOL, DECLARER, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, SECONDARY, GENERATOR, NULL_ATTRIBUTE);
   }
   z = A68_TRUE;
@@ -2943,8 +2942,8 @@ static void reduce_tertiaries (NODE_T * p)
     try_reduction (q, NULL, NULL, IDENTITY_RELATION, TERTIARY, ISNT_SYMBOL, TERTIARY, NULL_ATTRIBUTE);
   }
   for (q = p; q != NULL; FORWARD (q)) {
-    try_reduction (q, a68_extension, NULL, AND_FUNCTION, TERTIARY, ANDF_SYMBOL, TERTIARY, NULL_ATTRIBUTE);
-    try_reduction (q, a68_extension, NULL, OR_FUNCTION, TERTIARY, ORF_SYMBOL, TERTIARY, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, AND_FUNCTION, TERTIARY, ANDF_SYMBOL, TERTIARY, NULL_ATTRIBUTE);
+    try_reduction (q, NULL, NULL, OR_FUNCTION, TERTIARY, ORF_SYMBOL, TERTIARY, NULL_ATTRIBUTE);
   }
 }
 
@@ -3010,8 +3009,8 @@ static void reduce_units (NODE_T * p)
   for (q = p; q != NULL; FORWARD (q)) {
     try_reduction (q, NULL, NULL, UNIT, ASSIGNATION, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, UNIT, IDENTITY_RELATION, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, UNIT, AND_FUNCTION, NULL_ATTRIBUTE);
-    try_reduction (q, NULL, NULL, UNIT, OR_FUNCTION, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, UNIT, AND_FUNCTION, NULL_ATTRIBUTE);
+    try_reduction (q, a68_extension, NULL, UNIT, OR_FUNCTION, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, UNIT, ROUTINE_TEXT, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, UNIT, JUMP, NULL_ATTRIBUTE);
     try_reduction (q, NULL, NULL, UNIT, SKIP, NULL_ATTRIBUTE);
@@ -4147,10 +4146,16 @@ static void extract_declarations (NODE_T * p)
     if (whether (q, HEAP_SYMBOL, DECLARER, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
       make_sub (q, q, QUALIFIER);
     }
+    if (whether (q, NEW_SYMBOL, DECLARER, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
+      make_sub (q, q, QUALIFIER);
+    }
     if (whether (q, LOC_SYMBOL, PROC_SYMBOL, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
       make_sub (q, q, QUALIFIER);
     }
     if (whether (q, HEAP_SYMBOL, PROC_SYMBOL, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
+      make_sub (q, q, QUALIFIER);
+    }
+    if (whether (q, NEW_SYMBOL, PROC_SYMBOL, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
       make_sub (q, q, QUALIFIER);
     }
   }
