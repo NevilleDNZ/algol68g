@@ -2235,7 +2235,7 @@ static void stand_extensions (void)
   m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_STRING), NO_MOID);
   a68_idf (A68_EXT, "subinstring", m, genie_sub_in_string);
 #endif
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
   m = proc_void;
   a68_idf (A68_EXT, "cursesstart", m, genie_curses_start);
   a68_idf (A68_EXT, "cursesend", m, genie_curses_end);
@@ -17881,7 +17881,7 @@ Be sure to know what you are doing when you use this, but on the other hand,
 "reset" will always restore your terminal. 
 */
 
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
 
 #define CHECK_CURSES_RETVAL(f) {\
   if (!(f)) {\
@@ -18082,7 +18082,7 @@ void genie_curses_move (NODE_T * p)
   CHECK_CURSES_RETVAL(move (VALUE (&i), VALUE (&j)) != ERR);
 }
 
-#endif /* HAVE_CURSES_H && defined HAVE_LIBNCURSES */
+#endif /* HAVE_CURSES */
 
 #if defined HAVE_REGEX_H
 /*!

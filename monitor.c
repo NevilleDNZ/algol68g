@@ -2381,7 +2381,7 @@ void single_step (NODE_T * p, unsigned mask)
   if (LINE_NUMBER (p) == 0) {
     return;
   }
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
   genie_curses_end (NO_NODE);
 #endif
   if (mask == (unsigned) BREAKPOINT_ERROR_MASK) {

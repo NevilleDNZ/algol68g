@@ -54,15 +54,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #endif
 #endif
 
-/* Curses is curses */
-
-#if defined HAVE_LIBNCURSES && ! defined HAVE_LIBCURSES
-#define HAVE_LIBCURSES
-#endif
-
 /* Do we have an editor? */
 
-#if (defined HAVE_CURSES_H && defined HAVE_LIBCURSES && defined HAVE_REGEX_H)
+#if (defined HAVE_CURSES && defined HAVE_REGEX_H)
 #define HAVE_EDITOR
 #endif
 
@@ -1334,7 +1328,7 @@ struct A68_FILE
     abend ((char *) reason, (char *) info, __FILE__, __LINE__);\
   }}
 
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
 #define ASSERT(f) {\
   if (!(f)) {\
     if (a68g_curses_mode == A68_TRUE) {\
@@ -2763,7 +2757,7 @@ extern double cputime_0, garbage_seconds;
 extern int block_gc, frame_stack_size, expr_stack_size, heap_size, handle_pool_size, free_handle_count, max_handle_count, garbage_collects, global_argc, global_level, max_lex_lvl, new_nodes, new_modes, new_postulates, new_node_infos, new_genie_infos, stack_limit, frame_stack_limit, expr_stack_limit, stack_size, storage_overhead, symbol_table_count, mode_count, term_heigth, term_width, varying_mp_digits;
 extern jmp_buf genie_exit_label;
 
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
 extern BOOL_T a68g_curses_mode;
 #endif
 
@@ -3068,7 +3062,7 @@ extern void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 extern void write_source_listing (void);
 extern void write_tree_listing (void);
 
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
 extern void edit (char *);
 #endif
 
@@ -4045,7 +4039,7 @@ extern GPROC genie_vector_sub;
 extern GPROC genie_vector_times_matrix;
 #endif
 
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
 extern GPROC genie_curses_clear;
 extern GPROC genie_curses_columns;
 extern GPROC genie_curses_end;

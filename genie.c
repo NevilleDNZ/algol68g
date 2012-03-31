@@ -203,7 +203,7 @@ void change_masks (NODE_T * p, unsigned mask, BOOL_T set)
 
 void exit_genie (NODE_T * p, int ret)
 {
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
   genie_curses_end (p);
 #endif
   if (!in_execution) {
