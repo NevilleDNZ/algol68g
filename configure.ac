@@ -1,4 +1,4 @@
-AC_INIT([algol68g], [2.4], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [2.4.1], [Marcel van der Veer <algol68g@xs4all.nl>])
 #
 # Algol 68 Genie "configure.ac" from "a68g-tools".
 #
@@ -168,10 +168,10 @@ AC_ARG_ENABLE(postgresql, [AS_HELP_STRING([--enable-postgresql], [if installed, 
 #
 
 AC_MSG_NOTICE([initialising...])
-AM_INIT_AUTOMAKE([gnu])
+AM_INIT_AUTOMAKE([subdir-objects])
 AC_PREFIX_DEFAULT(/usr/local)
-AC_CONFIG_SRCDIR([a68g.h])
-AC_CONFIG_HEADERS([a68g-config.h])
+AC_CONFIG_SRCDIR([source/a68g.h])
+AC_CONFIG_HEADERS([source/a68g-config.h])
 AC_PROG_INSTALL
 AC_CHECK_PROG(a68g_exists, a68g, "yes")
 

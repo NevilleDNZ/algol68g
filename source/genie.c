@@ -27,7 +27,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #include "a68g.h"
 
 A68_HANDLE nil_handle = { 
-  INITIALISED_MASK, 
+  INIT_MASK, 
   NO_BYTE, 
   0, 
   NO_MOID, 
@@ -36,7 +36,7 @@ A68_HANDLE nil_handle = {
 };
 
 A68_REF nil_ref = { 
-(STATUS_MASK) (INITIALISED_MASK | NIL_MASK), 
+(STATUS_MASK) (INIT_MASK | NIL_MASK), 
   0, 
   0, 
   NO_HANDLE 
@@ -693,7 +693,7 @@ void initialise_frame (NODE_T * p)
       if (PRIO (_a_) == ROUTINE_TEXT) {
         int youngest = YOUNGEST_ENVIRON (TAX (NODE (_a_)));
         A68_PROCEDURE *_z_ = (A68_PROCEDURE *) (FRAME_OBJECT (OFFSET (_a_)));
-        STATUS (_z_) = INITIALISED_MASK;
+        STATUS (_z_) = INIT_MASK;
         NODE (&(BODY (_z_))) = NODE (_a_);
         if (youngest > 0) {
           STATIC_LINK_FOR_FRAME (ENVIRON (_z_), 1 + youngest);
@@ -706,7 +706,7 @@ void initialise_frame (NODE_T * p)
       } else if (PRIO (_a_) == FORMAT_TEXT) {
         int youngest = YOUNGEST_ENVIRON (TAX (NODE (_a_)));
         A68_FORMAT *_z_ = (A68_FORMAT *) (FRAME_OBJECT (OFFSET (_a_)));
-        STATUS (_z_) = INITIALISED_MASK;
+        STATUS (_z_) = INIT_MASK;
         BODY (_z_) = NODE (_a_);
         if (youngest > 0) {
           STATIC_LINK_FOR_FRAME (ENVIRON (_z_), 1 + youngest);
@@ -790,23 +790,23 @@ void genie_check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q)
   case MODE_LONGLONG_BITS:
     {
       MP_T *z = (MP_T *) w;
-      CHECK_INIT (p, (unsigned) z[0] & INITIALISED_MASK, q);
+      CHECK_INIT (p, (unsigned) z[0] & INIT_MASK, q);
       return;
     }
   case MODE_LONG_COMPLEX:
     {
       MP_T *r = (MP_T *) w;
       MP_T *i = (MP_T *) (w + size_long_mp ());
-      CHECK_INIT (p, (unsigned) r[0] & INITIALISED_MASK, q);
-      CHECK_INIT (p, (unsigned) i[0] & INITIALISED_MASK, q);
+      CHECK_INIT (p, (unsigned) r[0] & INIT_MASK, q);
+      CHECK_INIT (p, (unsigned) i[0] & INIT_MASK, q);
       return;
     }
   case MODE_LONGLONG_COMPLEX:
     {
       MP_T *r = (MP_T *) w;
       MP_T *i = (MP_T *) (w + size_longlong_mp ());
-      CHECK_INIT (p, (unsigned) r[0] & INITIALISED_MASK, q);
-      CHECK_INIT (p, (unsigned) i[0] & INITIALISED_MASK, q);
+      CHECK_INIT (p, (unsigned) r[0] & INIT_MASK, q);
+      CHECK_INIT (p, (unsigned) i[0] & INIT_MASK, q);
       return;
     }
   case MODE_BOOL:
@@ -941,7 +941,7 @@ static PROP_T genie_widening_int_to_real (NODE_T * p)
   EXECUTE_UNIT (SUB (p));
   INCREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_REAL) - ALIGNED_SIZE_OF (A68_INT));
   VALUE (z) = (double) VALUE (i);
-  STATUS (z) = INITIALISED_MASK;
+  STATUS (z) = INIT_MASK;
   return (GPROP (p));
 }
 
@@ -998,7 +998,7 @@ static PROP_T genie_widening (NODE_T * p)
     EXECUTE_UNIT (SUB (p));
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
     make_constant_widening (p, MODE (LONG_COMPLEX), &self);
   } else if (COERCE_FROM_TO (p, MODE (LONGLONG_REAL), MODE (LONGLONG_COMPLEX))) {
     MP_T *z;
@@ -1006,7 +1006,7 @@ static PROP_T genie_widening (NODE_T * p)
     EXECUTE_UNIT (SUB (p));
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
     make_constant_widening (p, MODE (LONGLONG_COMPLEX), &self);
   }
 /* COMPLEX widenings */
@@ -1068,7 +1068,7 @@ static PROP_T genie_widening (NODE_T * p)
     base = ADDRESS (&row) + MOID_SIZE (MODE (BOOL)) * (BITS_WIDTH - 1);
     bit = 1;
     for (k = BITS_WIDTH - 1; k >= 0; k--, base -= MOID_SIZE (MODE (BOOL)), bit <<= 1) {
-      STATUS ((A68_BOOL *) base) = INITIALISED_MASK;
+      STATUS ((A68_BOOL *) base) = INIT_MASK;
       VALUE ((A68_BOOL *) base) = (BOOL_T) ((VALUE (&x) & bit) != 0 ? A68_TRUE : A68_FALSE);
     }
     PUSH_REF (p, z);
@@ -1107,7 +1107,7 @@ static PROP_T genie_widening (NODE_T * p)
       unsigned bit = 0x1;
       int j;
       for (j = 0; j < MP_BITS_BITS && k >= 0; j++) {
-        STATUS ((A68_BOOL *) base) = INITIALISED_MASK;
+        STATUS ((A68_BOOL *) base) = INIT_MASK;
         VALUE ((A68_BOOL *) base) = (BOOL_T) ((bits[words - 1] & bit) ? A68_TRUE : A68_FALSE);
         base -= MOID_SIZE (MODE (BOOL));
         bit <<= 1;
@@ -1143,7 +1143,7 @@ static void genie_proceduring (NODE_T * p)
   NODE_T *jump = SUB (p);
   NODE_T *q = SUB (jump);
   NODE_T *label = (IS (q, GOTO_SYMBOL) ? NEXT (q) : q);
-  STATUS (&z) = INITIALISED_MASK;
+  STATUS (&z) = INIT_MASK;
   NODE (&(BODY (&z))) = jump;
   STATIC_LINK_FOR_FRAME (ENVIRON (&z), 1 + TAG_LEX_LEVEL (TAX (label)));
   LOCALE (&z) = NO_HANDLE;
@@ -1482,7 +1482,7 @@ void genie_partial_call (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * 
     } else {
 /* Move argument from stack to locale */
       A68_BOOL w;
-      STATUS (&w) = INITIALISED_MASK;
+      STATUS (&w) = INIT_MASK;
       VALUE (&w) = A68_TRUE;
       *(A68_BOOL *) & u[0] = w;
       COPY (&(u[ALIGNED_SIZE_OF (A68_BOOL)]), v, MOID_SIZE (MOID (t)));
@@ -1997,7 +1997,7 @@ static PROP_T genie_denotation (NODE_T * p)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
     UNIT (&self) = genie_constant;
-    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | CONSTANT_MASK);
+    STATUS (&z) = INIT_MASK;
     CONSTANT (GINFO (p)) = (void *) get_heap_space ((size_t) ALIGNED_SIZE_OF (A68_INT));
     SIZE (GINFO (p)) = ALIGNED_SIZE_OF (A68_INT);
     COPY (CONSTANT (GINFO (p)), &z, ALIGNED_SIZE_OF (A68_INT));
@@ -2010,7 +2010,7 @@ static PROP_T genie_denotation (NODE_T * p)
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTATION, moid);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | CONSTANT_MASK);
+    STATUS (&z) = INIT_MASK;
     UNIT (&self) = genie_constant;
     CONSTANT (GINFO (p)) = (void *) get_heap_space ((size_t) ALIGNED_SIZE_OF (A68_REAL));
     SIZE (GINFO (p)) = ALIGNED_SIZE_OF (A68_REAL);
@@ -2032,7 +2032,7 @@ static PROP_T genie_denotation (NODE_T * p)
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTATION, moid);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    z[0] = (double) (INITIALISED_MASK | CONSTANT_MASK);
+    z[0] = (MP_T) INIT_MASK;
     UNIT (&self) = genie_constant;
     CONSTANT (GINFO (p)) = (void *) get_heap_space ((size_t) size);
     SIZE (GINFO (p)) = size;
@@ -2053,7 +2053,7 @@ static PROP_T genie_denotation (NODE_T * p)
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTATION, moid);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    z[0] = (MP_T) (INITIALISED_MASK | CONSTANT_MASK);
+    z[0] = (MP_T) INIT_MASK;
     UNIT (&self) = genie_constant;
     CONSTANT (GINFO (p)) = (void *) get_heap_space ((size_t) size);
     SIZE (GINFO (p)) = size;
@@ -2067,7 +2067,7 @@ static PROP_T genie_denotation (NODE_T * p)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
     UNIT (&self) = genie_constant;
-    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | CONSTANT_MASK);
+    STATUS (&z) = INIT_MASK;
     CONSTANT (GINFO (p)) = (void *) get_heap_space ((size_t) ALIGNED_SIZE_OF (A68_BITS));
     SIZE (GINFO (p)) = ALIGNED_SIZE_OF (A68_BITS);
     COPY (CONSTANT (GINFO (p)), &z, ALIGNED_SIZE_OF (A68_BITS));
@@ -2088,7 +2088,7 @@ static PROP_T genie_denotation (NODE_T * p)
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTATION, moid);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    z[0] = (MP_T) (INITIALISED_MASK | CONSTANT_MASK);
+    z[0] = (MP_T) INIT_MASK;
     UNIT (&self) = genie_constant;
     CONSTANT (GINFO (p)) = (void *) get_heap_space ((size_t) size);
     SIZE (GINFO (p)) = size;
@@ -2146,7 +2146,7 @@ static PROP_T genie_identifier_standenv_proc (NODE_T * p)
 {
   A68_PROCEDURE z;
   TAG_T *q = TAX (p);
-  STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | STANDENV_PROC_MASK);
+  STATUS (&z) = (STATUS_MASK) (INIT_MASK | STANDENV_PROC_MASK);
   PROCEDURE (&(BODY (&z))) = PROCEDURE (q);
   ENVIRON (&z) = 0;
   LOCALE (&z) = NO_HANDLE;
@@ -2805,28 +2805,28 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     MP_T *z;
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
   } else if (u == MODE (LONG_REAL) || u == MODE (LONGLONG_REAL)) {
     int digits = get_mp_digits (u);
     MP_T *z;
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
   } else if (u == MODE (LONG_BITS) || u == MODE (LONGLONG_BITS)) {
     int digits = get_mp_digits (u);
     MP_T *z;
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
   } else if (u == MODE (LONG_COMPLEX) || u == MODE (LONGLONG_COMPLEX)) {
     int digits = get_mp_digits (u);
     MP_T *z;
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
     STACK_MP (z, p, digits);
     SET_MP_ZERO (z, digits);
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
   } else if (IS (u, REF_SYMBOL)) {
 /* All REFs are NIL */
     PUSH_REF (p, nil_ref);
@@ -2850,7 +2850,7 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
   } else if (IS (u, PROC_SYMBOL)) {
 /* PROC */
     A68_PROCEDURE z;
-    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | SKIP_PROCEDURE_MASK);
+    STATUS (&z) = (STATUS_MASK) (INIT_MASK | SKIP_PROCEDURE_MASK);
     (NODE (&BODY (&z))) = NO_NODE;
     ENVIRON (&z) = 0;
     LOCALE (&z) = NO_HANDLE;
@@ -2859,7 +2859,7 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
   } else if (u == MODE (FORMAT)) {
 /* FORMAT etc. - what arbitrary FORMAT could mean anything at all? */
     A68_FORMAT z;
-    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | SKIP_FORMAT_MASK);
+    STATUS (&z) = (STATUS_MASK) (INIT_MASK | SKIP_FORMAT_MASK);
     BODY (&z) = NO_NODE;
     ENVIRON (&z) = 0;
     PUSH_FORMAT (p, z);
@@ -2893,7 +2893,7 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     int size = MOID_SIZE (MODE (SOUND));
     INCREMENT_STACK_POINTER (p, size);
     FILL (z, 0, size);
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
   } else {
     BYTE_T *_sp_ = STACK_TOP;
     int size = ALIGNED_SIZE_OF (u);
@@ -3487,7 +3487,7 @@ void genie_identity_dec (NODE_T * p)
         STACK_DNS (src, src_mode, frame_pointer);
         FRAME_DNS (frame_pointer) = pop_dns;
 /* Make a temporary REF to the object in the frame */
-        STATUS (&loc) = (STATUS_MASK) (INITIALISED_MASK | IN_FRAME_MASK);
+        STATUS (&loc) = (STATUS_MASK) (INIT_MASK | IN_FRAME_MASK);
         REF_HANDLE (&loc) = &nil_handle;
         OFFSET (&loc) = frame_pointer + FRAME_INFO_SIZE + OFFSET (TAX (p));
         REF_SCOPE (&loc) = frame_pointer;
@@ -4008,7 +4008,7 @@ This warning can be safely ignored.
     while (siga) {
       if (for_part != NO_NODE) {
         A68_INT *z = (A68_INT *) (FRAME_OBJECT (OFFSET (TAX (for_part))));
-        STATUS (z) = INITIALISED_MASK;
+        STATUS (z) = INIT_MASK;
         VALUE (z) = counter;
       }
       stack_pointer = pop_sp;
@@ -4071,7 +4071,7 @@ This warning can be safely ignored.
     while (siga) {
       if (for_part != NO_NODE) {
         A68_INT *z = (A68_INT *) (FRAME_OBJECT (OFFSET (TAX (for_part))));
-        STATUS (z) = INITIALISED_MASK;
+        STATUS (z) = INIT_MASK;
         VALUE (z) = counter;
       }
       stack_pointer = pop_sp;
@@ -4337,7 +4337,7 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
   base = ADDRESS (&row);
   for (k = 0; k < width; k++) {
     A68_CHAR *ch = (A68_CHAR *) & (base[k * ALIGNED_SIZE_OF (A68_CHAR)]);
-    STATUS (ch) = INITIALISED_MASK;
+    STATUS (ch) = INIT_MASK;
     VALUE (ch) = TO_UCHAR (str[k]);
   }
   return (z);
@@ -4451,7 +4451,7 @@ A68_REF empty_row (NODE_T * p, MOID_T * u)
   } else {
     ARRAY (arr) = nil_ref;
   }
-  STATUS (&ARRAY (arr)) = (STATUS_MASK) (INITIALISED_MASK | IN_HEAP_MASK);
+  STATUS (&ARRAY (arr)) = (STATUS_MASK) (INIT_MASK | IN_HEAP_MASK);
   for (k = 0; k < dim; k++) {
     LWB (&tup[k]) = 1;
     UPB (&tup[k]) = 0;
@@ -4602,7 +4602,7 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int len, ADDR_T sp)
   for (k = 0; k < len * ELEM_SIZE (arr); k += ELEM_SIZE (arr)) {
     A68_REF dst = new_arr, src;
     OFFSET (&dst) += k;
-    STATUS (&src) = (STATUS_MASK) (INITIALISED_MASK | IN_STACK_MASK);
+    STATUS (&src) = (STATUS_MASK) (INIT_MASK | IN_STACK_MASK);
     OFFSET (&src) = sp + k;
     REF_HANDLE (&src) = &nil_handle;
     if (HAS_ROWS (elem_mode)) {
@@ -5046,7 +5046,7 @@ static void genie_clone_stack (NODE_T *p, MOID_T *srcm, A68_REF *dst, A68_REF *t
 {
 /* STRUCT, UNION, [FLEX] [] or SOUND */
   A68_REF stack, *src, a68_clone;
-  STATUS (&stack) = (STATUS_MASK) (INITIALISED_MASK | IN_STACK_MASK);
+  STATUS (&stack) = (STATUS_MASK) (INIT_MASK | IN_STACK_MASK);
   OFFSET (&stack) = stack_pointer;
   REF_HANDLE (&stack) = &nil_handle;
   src = DEREF (A68_REF, &stack);
@@ -5597,8 +5597,11 @@ static void colour_row_elements (A68_REF * z, MOID_T * m)
   A68_ARRAY *arr;
   A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, z);
-/* Empty rows are trivial since we don't recognise ghost elements */
-  if (get_row_size (tup, DIM (arr)) > 0) {
+  if (get_row_size (tup, DIM (arr)) == 0) {
+/* Empty rows have a ghost elements */
+    BYTE_T *elem = ADDRESS (&ARRAY (arr));
+    colour_object (&elem[0], SUB (m));
+  } else {
 /* The multi-dimensional garbage collector */
     BYTE_T *elem = ADDRESS (&ARRAY (arr));
     BOOL_T done = A68_FALSE;
@@ -5874,7 +5877,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
   if (heap_available () >= size) {
     A68_HANDLE *x;
     A68_REF z;
-    STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | IN_HEAP_MASK);
+    STATUS (&z) = (STATUS_MASK) (INIT_MASK | IN_HEAP_MASK);
     OFFSET (&z) = 0;
     x = give_handle (p, mode);
     SIZE (x) = size;
@@ -6157,7 +6160,7 @@ approach differs from the CDC ALGOL 68 approach that put all
 generators in the heap.
 */
   if (leap == LOC_SYMBOL) {
-    STATUS (&name) = (STATUS_MASK) (INITIALISED_MASK | IN_FRAME_MASK);
+    STATUS (&name) = (STATUS_MASK) (INIT_MASK | IN_FRAME_MASK);
     REF_HANDLE (&name) = &nil_handle;
     OFFSET (&name) = frame_pointer + FRAME_INFO_SIZE + OFFSET (tag);
     REF_SCOPE (&name) = frame_pointer;
