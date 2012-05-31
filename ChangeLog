@@ -1,6 +1,14 @@
+6.2012 - 2.4
+Adds pretty-printer.
+Simplifies the garbage collector.
+Adds procedure "read line".
+Adds procedure "on gc event".
+Fixes error in option --handles.
+Adds option --storage [=] n.
+Removed the field-selector extension.
+
 4.2012 - 2.3.9
 Fixed curses build issue.
-
 
 4.2012 - 2.3.8
 Source code maintenance.
