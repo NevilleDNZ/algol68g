@@ -5,7 +5,7 @@
 @section Copyright
 
 This file is part of Algol68G - an Algol 68 compiler-interpreter.
-Copyright 2001-2015 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright 2001-2016 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 @section License
 
@@ -207,7 +207,7 @@ void state_license (FILE_T f)
   }
   ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Algol 68 Genie %s\n", PACKAGE_VERSION) >= 0);
   WRITE (f, output_line);
-  ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Copyright 2015 %s.\n", PACKAGE_BUGREPORT) >= 0);
+  ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Copyright 2016 %s.\n", PACKAGE_BUGREPORT) >= 0);
   WRITE (f, output_line);
   PR ("");
   ASSERT (snprintf (output_line, SNPRINTF_SIZE, "This is free software covered by the GNU General Public License.\n") >= 0);
