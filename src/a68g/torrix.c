@@ -289,7 +289,7 @@ void torrix_error_handler (const char *reason, const char *file, int line, int g
 
 //! @brief Detect math errors, mainly in BLAS functions.
 
-static void torrix_test_error (int rc)
+void torrix_test_error (int rc)
 {
   if (rc != 0) {
     torrix_error_handler ("math error", "", 0, rc);
@@ -298,7 +298,7 @@ static void torrix_test_error (int rc)
 
 //! @brief Pop [] INT on the stack as gsl_permutation.
 
-static gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
+gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
 {
   A68_REF desc;
   A68_ARRAY *arr;
@@ -327,7 +327,7 @@ static gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
 
 //! @brief Push gsl_permutation on the stack as [] INT.
 
-static void push_permutation (NODE_T * p, gsl_permutation * v)
+void push_permutation (NODE_T * p, gsl_permutation * v)
 {
   A68_REF desc, row;
   A68_ARRAY arr;
@@ -349,7 +349,7 @@ static void push_permutation (NODE_T * p, gsl_permutation * v)
 
 //! @brief Pop [] REAL on the stack as gsl_vector.
 
-static gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
+gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
 {
   A68_REF desc;
   A68_ARRAY *arr;
@@ -378,7 +378,7 @@ static gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
 
 //! @brief Push gsl_vector on the stack as [] REAL.
 
-static void push_vector (NODE_T * p, gsl_vector * v)
+void push_vector (NODE_T * p, gsl_vector * v)
 {
   A68_REF desc, row;
   A68_ARRAY arr;
@@ -401,7 +401,7 @@ static void push_vector (NODE_T * p, gsl_vector * v)
 
 //! @brief Pop [,] REAL on the stack as gsl_matrix.
 
-static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
+gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
 {
   A68_REF desc;
   A68_ARRAY *arr;
@@ -435,7 +435,7 @@ static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
 
 //! @brief Push gsl_matrix on the stack as [,] REAL.
 
-static void push_matrix (NODE_T * p, gsl_matrix * a)
+void push_matrix (NODE_T * p, gsl_matrix * a)
 {
   A68_REF desc, row;
   A68_ARRAY arr;
@@ -479,7 +479,7 @@ static void push_matrix (NODE_T * p, gsl_matrix * a)
 
 //! @brief Pop [] COMPLEX on the stack as gsl_vector_complex.
 
-static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
+gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
 {
   A68_REF desc;
   A68_ARRAY *arr;
@@ -512,7 +512,7 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
 
 //! @brief Push gsl_vector_complex on the stack as [] COMPLEX.
 
-static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
+void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
 {
   A68_REF desc, row;
   A68_ARRAY arr;
@@ -539,7 +539,7 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
 
 //! @brief Pop [,] COMPLEX on the stack as gsl_matrix_complex.
 
-static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
+gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
 {
   A68_REF desc;
   A68_ARRAY *arr;
@@ -576,7 +576,7 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
 
 //! @brief Push gsl_matrix_complex on the stack as [,] COMPLEX.
 
-static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
+void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
 {
   A68_REF desc, row;
   A68_ARRAY arr;
@@ -624,7 +624,7 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
 
 //! @brief Generically perform operation and assign result (+:=, -:=, ...) .
 
-static void op_ab_torrix (NODE_T * p, MOID_T * m, MOID_T * n, GPROC * op)
+void op_ab_torrix (NODE_T * p, MOID_T * m, MOID_T * n, GPROC * op)
 {
   ADDR_T parm_size = SIZE (m) + SIZE (n);
   A68_REF dst, src, *save = (A68_REF *) STACK_OFFSET (-parm_size);

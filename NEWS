@@ -1,3 +1,9 @@
+Version 3.1.0, November 2022
+* Fix several bugs reported for 3.0.0-8.
+* Apply several OS dependent patches reported for 3.0.0-8.
+* READ and INCLUDE relative to the source file, not the present working directory.
+  This conforms to the C preprocessor standard.
+
 Versions 3.0.1-8, January/September 2022
 * Fix several bugs reported for 3.0.0-7.
 * Apply several OS dependent patches reported for 3.0.0-7.
