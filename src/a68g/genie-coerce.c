@@ -1,23 +1,27 @@
-//! @file genie.c
+//! @file genie-coerce.c
 //! @author J. Marcel van der Veer
-//
+//!
 //! @section Copyright
-//
-// This file is part of Algol68G - an Algol 68 compiler-interpreter.
-// Copyright 2001-2022 J. Marcel van der Veer <algol68g@xs4all.nl>.
-//
+//!
+//! This file is part of Algol68G - an Algol 68 compiler-interpreter.
+//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//!
 //! @section License
-//
-// This program is free software; you can redistribute it and/or modify it 
-// under the terms of the GNU General Public License as published by the 
-// Free Software Foundation; either version 3 of the License, or 
-// (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but 
-// WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
-// or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for 
-// more details. You should have received a copy of the GNU General Public 
-// License along with this program. If not, see <http://www.gnu.org/licenses/>.
+//!
+//! This program is free software; you can redistribute it and/or modify it 
+//! under the terms of the GNU General Public License as published by the 
+//! Free Software Foundation; either version 3 of the License, or 
+//! (at your option) any later version.
+//!
+//! This program is distributed in the hope that it will be useful, but 
+//! WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY 
+//! or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for 
+//! more details. You should have received a copy of the GNU General Public 
+//! License along with this program. If not, see [http://www.gnu.org/licenses/].
+
+//! @section Synopsis
+//!
+//! Interpreter mode coercion routines.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -95,7 +99,7 @@ PROP_T genie_widen (NODE_T * p)
   } else if (COERCE_FROM_TO (p, M_INT, M_LONG_INT)) {
     EXECUTE_UNIT (SUB (p));
 #if (A68_LEVEL >= 3)
-    genie_lengthen_int_to_int_16 (p);
+    genie_lengthen_int_to_double_int (p);
 #else
     genie_lengthen_int_to_mp (p);
 #endif
@@ -103,14 +107,14 @@ PROP_T genie_widen (NODE_T * p)
   } else if (COERCE_FROM_TO (p, M_LONG_INT, M_LONG_LONG_INT)) {
     EXECUTE_UNIT (SUB (p));
 #if (A68_LEVEL >= 3)
-    genie_lengthen_int_16_to_mp (p);
+    genie_lengthen_double_int_to_mp (p);
 #else
     genie_lengthen_mp_to_long_mp (p);
 #endif
     make_constant_widening (p, M_LONG_LONG_INT, &self);
   } else if (COERCE_FROM_TO (p, M_LONG_INT, M_LONG_REAL)) {
 #if (A68_LEVEL >= 3)
-    (void) genie_widen_int_16_to_real_16 (p);
+    (void) genie_widen_double_int_to_double_real (p);
 #else
 // 1-1 mapping.
     EXECUTE_UNIT (SUB (p));
@@ -125,7 +129,7 @@ PROP_T genie_widen (NODE_T * p)
   else if (COERCE_FROM_TO (p, M_REAL, M_LONG_REAL)) {
     EXECUTE_UNIT (SUB (p));
 #if (A68_LEVEL >= 3)
-    genie_lengthen_real_to_real_16 (p);
+    genie_lengthen_real_to_double_real (p);
 #else
     genie_lengthen_real_to_mp (p);
 #endif
@@ -133,7 +137,7 @@ PROP_T genie_widen (NODE_T * p)
   } else if (COERCE_FROM_TO (p, M_LONG_REAL, M_LONG_LONG_REAL)) {
     EXECUTE_UNIT (SUB (p));
 #if (A68_LEVEL >= 3)
-    genie_lengthen_real_16_to_mp (p);
+    genie_lengthen_double_real_to_mp (p);
 #else
     genie_lengthen_mp_to_long_mp (p);
 #endif
@@ -144,7 +148,7 @@ PROP_T genie_widen (NODE_T * p)
     make_constant_widening (p, M_COMPLEX, &self);
   } else if (COERCE_FROM_TO (p, M_LONG_REAL, M_LONG_COMPLEX)) {
 #if (A68_LEVEL >= 3)
-    QUAD_WORD_T z;
+    DOUBLE_NUM_T z;
     z.f = 0.0q;
     EXECUTE_UNIT (SUB (p));
     PUSH_VALUE (p, z, A68_LONG_REAL);
@@ -161,7 +165,7 @@ PROP_T genie_widen (NODE_T * p)
 // COMPLEX widenings.
     EXECUTE_UNIT (SUB (p));
 #if (A68_LEVEL >= 3)
-    genie_lengthen_complex_to_complex_32 (p);
+    genie_lengthen_complex_to_double_compl (p);
 #else
     genie_lengthen_complex_to_mp_complex (p);
 #endif
@@ -169,7 +173,7 @@ PROP_T genie_widen (NODE_T * p)
   } else if (COERCE_FROM_TO (p, M_LONG_COMPLEX, M_LONG_LONG_COMPLEX)) {
     EXECUTE_UNIT (SUB (p));
 #if (A68_LEVEL >= 3)
-    genie_lengthen_complex_32_to_long_mp_complex (p);
+    genie_lengthen_double_compl_to_long_mp_complex (p);
 #else
     genie_lengthen_mp_complex_to_long_mp_complex (p);
 #endif
