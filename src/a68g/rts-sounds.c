@@ -35,8 +35,16 @@
 // Implementation of SOUND values.
 
 #define MAX_BYTES 4
-#define A68_LITTLE_ENDIAN A68_TRUE
-#define A68_BIG_ENDIAN A68_FALSE
+
+#if (__BYTE_ORDER == __LITTLE_ENDIAN)
+  #define A68_LITTLE_ENDIAN A68_TRUE
+  #define A68_BIG_ENDIAN A68_FALSE
+#elif (__BYTE_ORDER == __BIG_ENDIAN)
+  #define A68_LITTLE_ENDIAN A68_FALSE
+  #define A68_BIG_ENDIAN A68_TRUE
+#else
+  #error "undefined endianness"
+#endif
 
 // From public Microsoft RIFF documentation.
 

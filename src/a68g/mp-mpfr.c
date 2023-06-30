@@ -154,14 +154,14 @@ void genie_mpfr_mp (NODE_T * p)
 
 //! @brief mpfr_beta_inc
 
-void mpfr_beta_inc (mpfr_t I, mpfr_t s, mpfr_t t, mpfr_t x, mpfr_rnd_t rnd)
+void mpfr_beta_inc (mpfr_t Ix, mpfr_t s, mpfr_t t, mpfr_t x, mpfr_rnd_t rnd)
 {
 // Incomplete beta function I{x}(s, t).
 // From a continued fraction, see dlmf.nist.gov/8.17; Lentz's algorithm.
   errno = EDOM;                 // Until proven otherwise
 //mpfr_printf ("%.128Rf", x);
   if (mpfr_cmp_d (x, 0) < 0 || mpfr_cmp_d (x, 1) > 0) {
-    mpfr_set_nan (I);
+    mpfr_set_nan (Ix);
   } else {
     mpfr_t a, b, c, d, e, F, T, W;
     int N, m, cont = A68_TRUE;
@@ -176,8 +176,8 @@ void mpfr_beta_inc (mpfr_t I, mpfr_t s, mpfr_t t, mpfr_t x, mpfr_rnd_t rnd)
     if (mpfr_cmp (x, c) > 0) {
 // B{x}(s, t) = 1 - B{1-x}(t, s)
       mpfr_d_sub (d, 1, x, rnd);
-      mpfr_beta_inc (I, t, s, d, rnd);
-      mpfr_d_sub (I, 1, I, rnd);
+      mpfr_beta_inc (Ix, t, s, d, rnd);
+      mpfr_d_sub (Ix, 1, Ix, rnd);
       mpfr_clears (a, b, c, d, e, F, T, W, NO_MPFR);
       return;
     }
@@ -240,7 +240,7 @@ void mpfr_beta_inc (mpfr_t I, mpfr_t s, mpfr_t t, mpfr_t x, mpfr_rnd_t rnd)
     mpfr_mul (b, F, a, rnd);
     mpfr_div (b, b, W, rnd);
     mpfr_div (b, b, s, rnd);
-    mpfr_set (I, b, rnd);
+    mpfr_set (Ix, b, rnd);
     mpfr_clears (a, b, c, d, e, F, T, W, NO_MPFR);
   }
 }

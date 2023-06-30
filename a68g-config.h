@@ -37,11 +37,20 @@
 /* Define to 1 if you have the <ctype.h> header file. */
 #define HAVE_CTYPE_H 1
 
-/* Define this if curses was detected */
+/* Define to 1 if a SysV or X/Open compatible Curses library is present */
 /* #undef HAVE_CURSES */
 
-/* Define to 1 if you have the <curses.h> header file. */
+/* Define to 1 if library supports color (enhanced functions) */
+/* #undef HAVE_CURSES_COLOR */
+
+/* Define to 1 if library supports X/Open Enhanced functions */
+/* #undef HAVE_CURSES_ENHANCED */
+
+/* Define to 1 if <curses.h> is present */
 /* #undef HAVE_CURSES_H */
+
+/* Define to 1 if library supports certain obsolete features */
+/* #undef HAVE_CURSES_OBSOLETE */
 
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
@@ -52,6 +61,9 @@
 
 /* Define to 1 if you have the <dlfcn.h> header file. */
 /* #undef HAVE_DLFCN_H */
+
+/* Define to 1 if you have the <endian.h> header file. */
+#define HAVE_ENDIAN_H 1
 
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
@@ -176,9 +188,6 @@
 /* Define to 1 if you have the `mpfr' library (-lmpfr). */
 /* #undef HAVE_LIBMPFR */
 
-/* Define to 1 if you have the `ncurses' library (-lncurses). */
-/* #undef HAVE_LIBNCURSES */
-
 /* Define to 1 if you have the `plot' library (-lplot). */
 /* #undef HAVE_LIBPLOT */
 
@@ -194,20 +203,11 @@
 /* Define to 1 if you have the `quadmath' library (-lquadmath). */
 /* #undef HAVE_LIBQUADMATH */
 
-/* Define to 1 if you have the `readline' library (-lreadline). */
-/* #undef HAVE_LIBREADLINE */
-
 /* Define to 1 if you have the `Rmath' library (-lRmath). */
 /* #undef HAVE_LIBRMATH */
 
 /* Define to 1 if you have the `root' library (-lroot). */
 /* #undef HAVE_LIBROOT */
-
-/* Define to 1 if you have the `tic' library (-ltic). */
-/* #undef HAVE_LIBTIC */
-
-/* Define to 1 if you have the `tinfo' library (-ltinfo). */
-/* #undef HAVE_LIBTINFO */
 
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
@@ -236,17 +236,29 @@
 /* Define to 1 if you have the `memmove' function. */
 #define HAVE_MEMMOVE 1
 
-/* Define to 1 if you have the <memory.h> header file. */
-#define HAVE_MEMORY_H 1
-
 /* Define to 1 if you have the `memset' function. */
 #define HAVE_MEMSET 1
 
 /* Define to 1 if you have the <mpfr.h> header file. */
 /* #undef HAVE_MPFR_H */
 
-/* Define to 1 if you have the <ncurses/curses.h> header file. */
+/* Define to 1 if the Ncurses library is present */
+/* #undef HAVE_NCURSES */
+
+/* Define to 1 if the NcursesW library is present */
+/* #undef HAVE_NCURSESW */
+
+/* Define to 1 if <ncursesw/curses.h> is present */
+/* #undef HAVE_NCURSESW_CURSES_H */
+
+/* Define to 1 if <ncursesw.h> is present */
+/* #undef HAVE_NCURSESW_H */
+
+/* Define to 1 if <ncurses/curses.h> is present */
 /* #undef HAVE_NCURSES_CURSES_H */
+
+/* Define to 1 if <ncurses.h> is present */
+/* #undef HAVE_NCURSES_H */
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 /* #undef HAVE_NDIR_H */
@@ -283,15 +295,6 @@
 
 /* Define to 1 if you have the <quadmath.h> header file. */
 /* #undef HAVE_QUADMATH_H */
-
-/* Define this if readline was detected */
-/* #undef HAVE_READLINE */
-
-/* Define to 1 if you have the <readline/history.h> header file. */
-/* #undef HAVE_READLINE_HISTORY_H */
-
-/* Define to 1 if you have the <readline/readline.h> header file. */
-/* #undef HAVE_READLINE_READLINE_H */
 
 /* Define to 1 if you have the <regex.h> header file. */
 #define HAVE_REGEX_H 1
@@ -416,7 +419,7 @@
 #define PACKAGE_NAME "algol68g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "algol68g 3.2.0"
+#define PACKAGE_STRING "algol68g 3.2.1"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "algol68g"
@@ -425,15 +428,18 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.2.0"
+#define PACKAGE_VERSION "3.2.1"
 
-/* Define to 1 if you have the ANSI C header files. */
+/* Define to 1 if all of the C90 standard headers exist (not just the ones
+   required in a freestanding environment). This macro is provided for
+   backward compatibility; new code need not use it. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.2.0"
+#define VERSION "3.2.1"
 
-/* Define to 1 if type `char' is unsigned and you are not using gcc.  */
+/* Define to 1 if type `char' is unsigned and your compiler does not
+   predefine this macro.  */
 #ifndef __CHAR_UNSIGNED__
 /* # undef __CHAR_UNSIGNED__ */
 #endif

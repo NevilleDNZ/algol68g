@@ -149,7 +149,11 @@ void state_version (FILE_T f)
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_CURSES)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With curses %s\n", NCURSES_VERSION) >= 0);
+  #if defined (NCURSES_VERSION)
+    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With ncurses %s\n", NCURSES_VERSION) >= 0);
+  #else
+    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With curses support\n") >= 0);
+  #endif
   WRITE (f, A68 (output_line));
 #endif
 #if defined (_CS_GNU_LIBC_VERSION) && defined (BUILD_UNIX)

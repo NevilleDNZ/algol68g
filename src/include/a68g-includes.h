@@ -25,265 +25,278 @@
 // Includes
 
 #if defined (HAVE_SYS_TYPES_H)
-#include <sys/types.h>
+#  include <sys/types.h>
 #endif
 
 #if defined (HAVE_STDIO_H)
-#include <stdio.h>
+#  include <stdio.h>
 #endif
 
 #if defined (HAVE_LIMITS_H)
-#include <limits.h>
+#  include <limits.h>
 #endif
 
 #if defined (HAVE_ASSERT_H)
-#include <assert.h>
+#  include <assert.h>
 #endif
 
 #if defined (HAVE_CONIO_H)
-#include <conio.h>
+#  include <conio.h>
 #endif
 
 #if defined (HAVE_CTYPE_H)
-#include <ctype.h>
-#endif
-
-#if defined (HAVE_CURSES_H)
-#include <curses.h>
-#elif defined (HAVE_NCURSES_CURSES_H)
-#include <ncurses/curses.h>
+#  include <ctype.h>
 #endif
 
 #if defined (HAVE_LIBGEN_H)
 // libgen selects Posix versions of dirname/basename in stead of GNU versions.
-#include <libgen.h>
+#  include <libgen.h>
 #endif
 
 #if defined (HAVE_READLINE_READLINE_H)
-#include <readline/readline.h>
+#  include <readline/readline.h>
 #endif
 
 #if defined (HAVE_READLINE_HISTORY_H)
-#include <readline/history.h>
+#  include <readline/history.h>
 #endif
 
 #if defined (HAVE_DIRENT_H)
-#include <dirent.h>
+#  include <dirent.h>
 #endif
 
 #if defined (HAVE_DL)
-#include <dlfcn.h>
+#  include <dlfcn.h>
+#endif
+
+#if defined (HAVE_ENDIAN_H)
+#  include <endian.h>
 #endif
 
 #if defined (HAVE_ERRNO_H)
-#include <errno.h>
+#  include <errno.h>
 #endif
 
 #if defined (HAVE_FCNTL_H)
-#include <fcntl.h>
+#  include <fcntl.h>
 #endif
 
 #if defined (HAVE_FENV_H)
-#include <fenv.h>
+#  include <fenv.h>
 #endif
 
 #if defined (HAVE_FLOAT_H)
-#include <float.h>
+#  include <float.h>
 #endif
 
 #if defined (HAVE_LIBPQ_FE_H)
-# if ! defined (A68_OPTIMISE)
-#  include <libpq-fe.h>
-# endif
+#  if ! defined (A68_OPTIMISE)
+#    include <libpq-fe.h>
+#  endif
 #endif
 
 #if defined (HAVE_MATH_H)
-#include <math.h>
+#  include <math.h>
 #endif
 
 #if defined (HAVE_COMPLEX_H)
-#include <complex.h>
-#undef I
+#  include <complex.h>
 #endif
 
 #if defined (HAVE_NETDB_H)
-#include <netdb.h>
+#  include <netdb.h>
 #endif
 
 #if defined (HAVE_NETINET_IN_H)
-#include <netinet/in.h>
+#  include <netinet/in.h>
 #endif
 
 #if defined (HAVE_GNU_PLOTUTILS)
-#include <plot.h>
+#  include <plot.h>
 #endif
 
 #if defined (HAVE_PTHREAD_H)
-#include <pthread.h>
+#  include <pthread.h>
 #endif
 
 #if defined (HAVE_QUADMATH_H)
-#include <quadmath.h>
+#  include <quadmath.h>
 #endif
 
 #if defined (HAVE_SETJMP_H)
-#include <setjmp.h>
+#  include <setjmp.h>
 #endif
 
 #if defined (HAVE_SIGNAL_H)
-#include <signal.h>
+#  include <signal.h>
 #endif
 
 #if defined (HAVE_STDARG_H)
-#include <stdarg.h>
+#  include <stdarg.h>
 #endif
 
 #if defined (HAVE_STDBOOL_H)
-#include <stdbool.h>
+#  include <stdbool.h>
 #endif
 
 #if defined (HAVE_STDDEF_H)
-#include <stddef.h>
+#  include <stddef.h>
 #endif
 
 #if defined (HAVE_STDINT_H)
-#include <stdint.h>
+#  include <stdint.h>
 #endif
 
 #if defined (HAVE_STDLIB_H)
-#include <stdlib.h>
+#  include <stdlib.h>
 #endif
 
 #if defined (HAVE_STRING_H)
-#include <string.h>
+#  include <string.h>
 #endif
 
 #if defined (HAVE_STRINGS_H)
-#include <strings.h>
+#  include <strings.h>
 #endif
 
 #if (defined (HAVE_TERMIOS_H) && ! defined (TIOCGWINSZ))
-#include <termios.h>
+#  include <termios.h>
 #elif (defined (HAVE_TERMIOS_H) && ! defined (GWINSZ_IN_SYS_IOCTL))
-#include <termios.h>
+#  include <termios.h>
 #endif
 
 #if defined (HAVE_TIME_H)
-#include <time.h>
+#  include <time.h>
 #endif
 
 #if defined (HAVE_UNISTD_H)
-#include <unistd.h>
+#  include <unistd.h>
 #endif
 
 #if defined (HAVE_SYS_IOCTL_H)
-#include <sys/ioctl.h>
+#  include <sys/ioctl.h>
 #endif
 
 #if defined (HAVE_SYS_RESOURCE_H)
-#include <sys/resource.h>
+#  include <sys/resource.h>
 #endif
 
 #if defined (HAVE_SYS_SOCKET_H)
-#include <sys/socket.h>
+#  include <sys/socket.h>
 #endif
 
 #if defined (HAVE_SYS_STAT_H)
-#include <sys/stat.h>
+#  include <sys/stat.h>
 #endif
 
 #if defined (HAVE_SYS_TIME_H)
-#include <sys/time.h>
+#  include <sys/time.h>
 #endif
 
 #if defined (HAVE_SYS_WAIT_H)
-#include <sys/wait.h>
+#  include <sys/wait.h>
 #endif
 
 #if defined (HAVE_GNU_MPFR)
-#define MPFR_WANT_FLOAT128
-#include <gmp.h>
-#include <mpfr.h>
+#  define MPFR_WANT_FLOAT128
+#  include <gmp.h>
+#  include <mpfr.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_BLAS_H)
-#include <gsl/gsl_blas.h>
+#  include <gsl/gsl_blas.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_COMPLEX_H)
-#include <gsl/gsl_complex.h>
+#  include <gsl/gsl_complex.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_COMPLEX_MATH_H)
-#include <gsl/gsl_complex_math.h>
+#  include <gsl/gsl_complex_math.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_EIGEN_H)
-#include <gsl/gsl_eigen.h>
+#  include <gsl/gsl_eigen.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_ERRNO_H)
-#include <gsl/gsl_errno.h>
+#  include <gsl/gsl_errno.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_FFT_COMPLEX_H)
-#include <gsl/gsl_fft_complex.h>
+#  include <gsl/gsl_fft_complex.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_INTEGRATION_H)
-#include <gsl/gsl_integration.h>
+#  include <gsl/gsl_integration.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_SF_H)
-#include <gsl/gsl_sf.h>
+#  include <gsl/gsl_sf.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_SF_ELLINT_H)
-#include <gsl/gsl_sf_ellint.h>
+#  include <gsl/gsl_sf_ellint.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_SF_HERMITE_H)
-#include <gsl/gsl_sf_hermite.h>
+#  include <gsl/gsl_sf_hermite.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_LINALG_H)
-#include <gsl/gsl_linalg.h>
+#  include <gsl/gsl_linalg.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_MATH_H)
-#include <gsl/gsl_math.h>
+#  include <gsl/gsl_math.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_MATRIX_H)
-#include <gsl/gsl_matrix.h>
+#  include <gsl/gsl_matrix.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_PERMUTATION_H)
-#include <gsl/gsl_permutation.h>
+#  include <gsl/gsl_permutation.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_SF_H)
-#include <gsl/gsl_sf.h>
+#  include <gsl/gsl_sf.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_STATISTICS_H)
-#include <gsl/gsl_statistics.h>
+#  include <gsl/gsl_statistics.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_VECTOR_H)
-#include <gsl/gsl_vector.h>
+#  include <gsl/gsl_vector.h>
 #endif
 
 #if defined (HAVE_GSL_GSL_VERSION_H)
-#include <gsl/gsl_version.h>
+#  include <gsl/gsl_version.h>
+#endif
+
+#if defined (HAVE_CURSES)
+#  if defined (HAVE_NCURSESW_CURSES_H)
+#    include <ncursesw/curses.h>
+#  elif defined (HAVE_NCURSESW_H)
+#    include <ncursesw.h>
+#  elif defined (HAVE_NCURSES_CURSES_H)
+#    include <ncurses/curses.h>
+#  elif defined (HAVE_NCURSES_H)
+#    include <ncurses.h>
+#  elif defined (HAVE_CURSES_H)
+#    include <curses.h>
+#  else
+#    error "Curses header file required"
+#  endif
 #endif
 
 #if defined (HAVE_REGEX_H)
-# if defined (BUILD_WIN32)
-#  include "a68g-regex.h"
-# else
-#  include <regex.h>
-# endif
+#  if defined (BUILD_WIN32)
+#    include "a68g-regex.h"
+#  else
+#    include <regex.h>
+#  endif
 #endif
 
 #endif
