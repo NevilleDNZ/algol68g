@@ -21,7 +21,11 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for procedure calls.
+
+// Algol 68 Genie implements Charles Lindsey's proposal for partial parametrization.
+// A procedure has a locale to store parameters until the pack is complete, and only
+// then the procedure is actually called.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -70,10 +74,10 @@ void genie_partial_call (NODE_T * p, MOID_T * p_mode, MOID_T * pproc, MOID_T * p
   }
 // Move arguments from stack to locale using pmap.
   BYTE_T *u = POINTER (locale), *v = STACK_ADDRESS (pop_sp);
-  PACK_T *s = PACK (p_mode), *t = PACK (pmap);
 // Uninitialised arguments are VOID.
   int voids = 0;
-  for (; t != NO_PACK && s != NO_PACK; FORWARD (t)) {
+  PACK_T *s = PACK (p_mode);
+  for (PACK_T *t = PACK (pmap); t != NO_PACK && s != NO_PACK; FORWARD (t)) {
 // Skip already initialised arguments.
     while (u != NULL && VALUE ((A68_BOOL *) & u[0])) {
       u = &(u[SIZE (M_BOOL) + SIZE (MOID (s))]);
@@ -98,14 +102,12 @@ void genie_partial_call (NODE_T * p, MOID_T * p_mode, MOID_T * pproc, MOID_T * p
   }
   A68_SP = pop_sp;
   LOCALE (&z) = locale;
-// Is closure complete?.
+// When closure is complete, push locale onto the stack and call procedure body.
   if (voids == 0) {
-// Closure is complete. Push locale onto the stack and call procedure body.
     A68_SP = pop_sp;
     u = POINTER (locale);
     v = STACK_ADDRESS (A68_SP);
-    s = PACK (p_mode);
-    for (; s != NO_PACK; FORWARD (s)) {
+    for (s = PACK (p_mode); s != NO_PACK; FORWARD (s)) {
       int size = SIZE (MOID (s));
       COPY (v, &u[SIZE (M_BOOL)], size);
       u = &(u[SIZE (M_BOOL) + size]);
@@ -137,13 +139,12 @@ void genie_call_procedure (NODE_T * p, MOID_T * p_mode, MOID_T * pproc, MOID_T *
     NODE_T *body = NODE (&(BODY (z)));
     if (IS (body, ROUTINE_TEXT)) {
       NODE_T *entry = SUB (body);
-      PACK_T *args = PACK (p_mode);
       ADDR_T fp0 = 0;
 // Copy arguments from stack to frame.
       OPEN_PROC_FRAME (entry, ENVIRON (z));
       INIT_STATIC_FRAME (entry);
       FRAME_DNS (A68_FP) = pop_fp;
-      for (; args != NO_PACK; FORWARD (args)) {
+      for (PACK_T *args = PACK (p_mode); args != NO_PACK; FORWARD (args)) {
         int size = SIZE (MOID (args));
         COPY ((FRAME_OBJECT (fp0)), STACK_ADDRESS (pop_sp + fp0), size);
         fp0 += size;
@@ -196,10 +197,10 @@ PROP_T genie_call_standenv_quick (NODE_T * p)
 {
   NODE_T *save = A68 (f_entry);
   A68 (f_entry) = p;
-  NODE_T *pr = SUB (p), *q = SEQUENCE (p);
+  NODE_T *pr = SUB (p);
   TAG_T *proc = TAX (SOURCE (&GPROP (pr)));
 // Get arguments.
-  for (; q != NO_NODE; q = SEQUENCE (q)) {
+  for (NODE_T *q = SEQUENCE (p); q != NO_NODE; q = SEQUENCE (q)) {
     GENIE_UNIT_NO_GC (q);
     STACK_DNS (p, MOID (q), A68_FP);
   }

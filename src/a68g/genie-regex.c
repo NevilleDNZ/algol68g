@@ -32,9 +32,9 @@
 
 //! @brief Return code for regex interface.
 
-void push_grep_rc (NODE_T * p, int rc)
+static void push_grep_ret (NODE_T * p, int ret)
 {
-  switch (rc) {
+  switch (ret) {
   case 0: {
       PUSH_VALUE (p, 0, A68_INT);
       return;
@@ -59,10 +59,10 @@ void push_grep_rc (NODE_T * p, int rc)
 int grep_in_string (char *pat, char *str, int *start, int *end)
 {
   regex_t compiled;
-  int rc = regcomp (&compiled, pat, REG_NEWLINE | REG_EXTENDED);
-  if (rc != 0) {
+  int ret = regcomp (&compiled, pat, REG_NEWLINE | REG_EXTENDED);
+  if (ret != 0) {
     regfree (&compiled);
-    return rc;
+    return ret;
   }
   int nmatch = (int) (RE_NSUB (&compiled));
   if (nmatch == 0) {
@@ -73,10 +73,10 @@ int grep_in_string (char *pat, char *str, int *start, int *end)
     regfree (&compiled);
     return 2;
   }
-  rc = regexec (&compiled, str, (size_t) nmatch, matches, 0);
-  if (rc != 0) {
+  ret = regexec (&compiled, str, (size_t) nmatch, matches, 0);
+  if (ret != 0) {
     regfree (&compiled);
-    return rc;
+    return ret;
   }
 // Find widest match. Do not assume it is the first one.
   int widest = 0, max_k = 0;
@@ -115,9 +115,9 @@ void genie_grep_in_string (NODE_T * p)
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
   add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) & ref_str);
   regex_t compiled;
-  int rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
-  if (rc != 0) {
-    push_grep_rc (p, rc);
+  int ret = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  if (ret != 0) {
+    push_grep_ret (p, ret);
     regfree (&compiled);
     return;
   }
@@ -127,14 +127,14 @@ void genie_grep_in_string (NODE_T * p)
   }
   regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NULL) {
-    rc = 2;
-    PUSH_VALUE (p, rc, A68_INT);
+    ret = 2;
+    PUSH_VALUE (p, ret, A68_INT);
     regfree (&compiled);
     return;
   }
-  rc = regexec (&compiled, get_transput_buffer (STRING_BUFFER), (size_t) nmatch, matches, 0);
-  if (rc != 0) {
-    push_grep_rc (p, rc);
+  ret = regexec (&compiled, get_transput_buffer (STRING_BUFFER), (size_t) nmatch, matches, 0);
+  if (ret != 0) {
+    push_grep_ret (p, ret);
     regfree (&compiled);
     return;
   }
@@ -158,7 +158,7 @@ void genie_grep_in_string (NODE_T * p)
     VALUE (i) = (int) (RM_EO (&(matches[max_k]))) + (int) (LOWER_BOUND (tup)) - 1;
   }
   a68_free (matches);
-  push_grep_rc (p, 0);
+  push_grep_ret (p, 0);
 }
 
 //! @brief PROC grep in substring = (STRING, STRING, REF INT, REF INT) INT
@@ -179,9 +179,9 @@ void genie_grep_in_substring (NODE_T * p)
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
   add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) & ref_str);
   regex_t compiled;
-  int rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
-  if (rc != 0) {
-    push_grep_rc (p, rc);
+  int ret = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  if (ret != 0) {
+    push_grep_ret (p, ret);
     regfree (&compiled);
     return;
   }
@@ -191,14 +191,14 @@ void genie_grep_in_substring (NODE_T * p)
   }
   regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NULL) {
-    rc = 2;
-    PUSH_VALUE (p, rc, A68_INT);
+    ret = 2;
+    PUSH_VALUE (p, ret, A68_INT);
     regfree (&compiled);
     return;
   }
-  rc = regexec (&compiled, get_transput_buffer (STRING_BUFFER), (size_t) nmatch, matches, REG_NOTBOL);
-  if (rc != 0) {
-    push_grep_rc (p, rc);
+  ret = regexec (&compiled, get_transput_buffer (STRING_BUFFER), (size_t) nmatch, matches, REG_NOTBOL);
+  if (ret != 0) {
+    push_grep_ret (p, ret);
     regfree (&compiled);
     return;
   }
@@ -222,7 +222,7 @@ void genie_grep_in_substring (NODE_T * p)
     VALUE (i) = (int) (RM_EO (&(matches[max_k]))) + (int) (LOWER_BOUND (tup)) - 1;
   }
   a68_free (matches);
-  push_grep_rc (p, 0);
+  push_grep_ret (p, 0);
 }
 
 //! @brief PROC sub in string = (STRING, STRING, REF STRING) INT
@@ -243,9 +243,9 @@ void genie_sub_in_string (NODE_T * p)
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
   add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) DEREF (A68_REF, &ref_str));
   regex_t compiled;
-  int rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
-  if (rc != 0) {
-    push_grep_rc (p, rc);
+  int ret = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  if (ret != 0) {
+    push_grep_ret (p, ret);
     regfree (&compiled);
     return;
   }
@@ -255,13 +255,13 @@ void genie_sub_in_string (NODE_T * p)
   }
   regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NULL) {
-    PUSH_VALUE (p, rc, A68_INT);
+    PUSH_VALUE (p, ret, A68_INT);
     regfree (&compiled);
     return;
   }
-  rc = regexec (&compiled, get_transput_buffer (STRING_BUFFER), (size_t) nmatch, matches, 0);
-  if (rc != 0) {
-    push_grep_rc (p, rc);
+  ret = regexec (&compiled, get_transput_buffer (STRING_BUFFER), (size_t) nmatch, matches, 0);
+  if (ret != 0) {
+    push_grep_ret (p, ret);
     regfree (&compiled);
     return;
   }
@@ -286,5 +286,5 @@ void genie_sub_in_string (NODE_T * p)
   }
   *DEREF (A68_REF, &ref_str) = c_to_a_string (p, get_transput_buffer (REPLACE_BUFFER), DEFAULT_WIDTH);
   a68_free (matches);
-  push_grep_rc (p, 0);
+  push_grep_ret (p, 0);
 }

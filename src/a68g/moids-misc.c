@@ -36,13 +36,12 @@ void absorb_series_pack (MOID_T ** p)
 {
   BOOL_T siga;
   do {
-    PACK_T *z = NO_PACK, *t;
+    PACK_T *z = NO_PACK;
     siga = A68_FALSE;
-    for (t = PACK (*p); t != NO_PACK; FORWARD (t)) {
+    for (PACK_T *t = PACK (*p); t != NO_PACK; FORWARD (t)) {
       if (MOID (t) != NO_MOID && IS (MOID (t), SERIES_MODE)) {
-        PACK_T *s;
         siga = A68_TRUE;
-        for (s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
+        for (PACK_T *s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
           add_mode_to_pack (&z, MOID (s), NO_TEXT, NODE (s));
         }
       } else {
@@ -77,25 +76,24 @@ MOID_T *absorb_related_subsets (MOID_T * m)
 {
 // For instance invalid UNION (PROC REF UNION (A, B), A, B) -> valid UNION (A, B),
 // which is used in balancing conformity clauses.
-  int mods;
+  BOOL_T siga;
   do {
-    PACK_T *u = NO_PACK, *v;
-    mods = 0;
-    for (v = PACK (m); v != NO_PACK; FORWARD (v)) {
+    PACK_T *u = NO_PACK;
+    siga = A68_FALSE;
+    for (PACK_T *v = PACK (m); v != NO_PACK; FORWARD (v)) {
       MOID_T *n = depref_completely (MOID (v));
       if (IS (n, UNION_SYMBOL) && is_subset (n, m, SAFE_DEFLEXING)) {
 // Unpack it.
-        PACK_T *w;
-        for (w = PACK (n); w != NO_PACK; FORWARD (w)) {
+        for (PACK_T *w = PACK (n); w != NO_PACK; FORWARD (w)) {
           add_mode_to_pack (&u, MOID (w), NO_TEXT, NODE (w));
         }
-        mods++;
+        siga = A68_TRUE;
       } else {
         add_mode_to_pack (&u, MOID (v), NO_TEXT, NODE (v));
       }
     }
     PACK (m) = absorb_union_pack (u);
-  } while (mods != 0);
+  } while (siga);
   return m;
 }
 
@@ -105,13 +103,12 @@ void absorb_series_union_pack (MOID_T ** p)
 {
   BOOL_T siga;
   do {
-    PACK_T *z = NO_PACK, *t;
+    PACK_T *z = NO_PACK;
     siga = A68_FALSE;
-    for (t = PACK (*p); t != NO_PACK; FORWARD (t)) {
+    for (PACK_T *t = PACK (*p); t != NO_PACK; FORWARD (t)) {
       if (MOID (t) != NO_MOID && (IS (MOID (t), SERIES_MODE) || IS (MOID (t), UNION_SYMBOL))) {
-        PACK_T *s;
         siga = A68_TRUE;
-        for (s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
+        for (PACK_T *s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
           add_mode_to_pack (&z, MOID (s), NO_TEXT, NODE (s));
         }
       } else {
@@ -126,9 +123,6 @@ void absorb_series_union_pack (MOID_T ** p)
 
 MOID_T *make_united_mode (MOID_T * m)
 {
-  MOID_T *u;
-  PACK_T *w;
-  int mods;
   if (m == NO_MOID) {
     return M_ERROR;
   } else if (ATTRIBUTE (m) != SERIES_MODE) {
@@ -141,22 +135,18 @@ MOID_T *make_united_mode (MOID_T * m)
 // Straighten the series.
   absorb_series_union_pack (&m);
 // Copy the series into a UNION.
-  u = new_moid ();
+  MOID_T *u = new_moid ();
   ATTRIBUTE (u) = UNION_SYMBOL;
   PACK (u) = NO_PACK;
-  w = PACK (m);
-  for (w = PACK (m); w != NO_PACK; FORWARD (w)) {
+  for (PACK_T *w = PACK (m); w != NO_PACK; FORWARD (w)) {
     add_mode_to_pack (&(PACK (u)), MOID (w), NO_TEXT, NODE (m));
   }
 // Absorb and contract the new UNION.
-  do {
-    mods = 0;
-    absorb_series_union_pack (&u);
-    DIM (u) = count_pack_members (PACK (u));
-    PACK (u) = absorb_union_pack (PACK (u));
-    contract_union (u);
-    DIM (u) = count_pack_members (PACK (u));
-  } while (mods != 0);
+  absorb_series_union_pack (&u);
+  DIM (u) = count_pack_members (PACK (u));
+  PACK (u) = absorb_union_pack (PACK (u));
+  contract_union (u);
+  DIM (u) = count_pack_members (PACK (u));
 // A UNION of one mode is that mode itself.
   if (DIM (u) == 1) {
     return MOID (PACK (u));
@@ -184,8 +174,7 @@ BOOL_T is_mode_isnt_well (MOID_T * p)
   } else if (!IF_MODE_IS_WELL (p)) {
     return A68_TRUE;
   } else if (PACK (p) != NO_PACK) {
-    PACK_T *q = PACK (p);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (p); q != NO_PACK; FORWARD (q)) {
       if (!IF_MODE_IS_WELL (MOID (q))) {
         return A68_TRUE;
       }
@@ -199,8 +188,8 @@ BOOL_T is_mode_isnt_well (MOID_T * p)
 void free_soid_list (SOID_T * root)
 {
   if (root != NO_SOID) {
-    SOID_T *q;
-    for (q = root; NEXT (q) != NO_SOID; FORWARD (q)) {
+    SOID_T *q = root;
+    for (; NEXT (q) != NO_SOID; FORWARD (q)) {
       ;
     }
     NEXT (q) = A68 (top_soid_list);
@@ -491,11 +480,10 @@ MOID_T *unites_to (MOID_T * m, MOID_T * u)
 {
 // Uniting U (m).
   MOID_T *v = NO_MOID;
-  PACK_T *p;
   if (u == M_SIMPLIN || u == M_SIMPLOUT) {
     return m;
   }
-  for (p = PACK (u); p != NO_PACK; FORWARD (p)) {
+  for (PACK_T *p = PACK (u); p != NO_PACK; FORWARD (p)) {
 // Prefer []->[] over []->FLEX [].
     if (m == MOID (p)) {
       v = MOID (p);
@@ -522,9 +510,8 @@ BOOL_T is_moid_in_pack (MOID_T * u, PACK_T * v, int deflex)
 
 BOOL_T is_subset (MOID_T * p, MOID_T * q, int deflex)
 {
-  PACK_T *u = PACK (p);
   BOOL_T j = A68_TRUE;
-  for (; u != NO_PACK && j; FORWARD (u)) {
+  for (PACK_T *u = PACK (p); u != NO_PACK && j; FORWARD (u)) {
     j = (BOOL_T) (j && is_moid_in_pack (MOID (u), PACK (q), deflex));
   }
   return j;
@@ -551,9 +538,8 @@ void investigate_firm_relations (PACK_T * u, PACK_T * v, BOOL_T * all, BOOL_T * 
   *all = A68_TRUE;
   *some = A68_FALSE;
   for (; v != NO_PACK; FORWARD (v)) {
-    PACK_T *w;
     BOOL_T k = A68_FALSE;
-    for (w = u; w != NO_PACK; FORWARD (w)) {
+    for (PACK_T *w = u; w != NO_PACK; FORWARD (w)) {
       k |= is_coercible (MOID (w), MOID (v), FIRM, FORCE_DEFLEXING);
     }
     *some |= k;
@@ -840,24 +826,22 @@ BOOL_T is_coercible_stowed (MOID_T * p, MOID_T * q, int c, int deflex)
   } else if (q == M_VOID) {
     return A68_TRUE;
   } else if (IS_FLEX (q)) {
-    PACK_T *u = PACK (p);
     BOOL_T j = A68_TRUE;
-    for (; u != NO_PACK && j; FORWARD (u)) {
+    for (PACK_T *u = PACK (p); u != NO_PACK && j; FORWARD (u)) {
       j &= is_coercible (MOID (u), SLICE (SUB (q)), c, deflex);
     }
     return j;
   } else if (IS_ROW (q)) {
-    PACK_T *u = PACK (p);
     BOOL_T j = A68_TRUE;
-    for (; u != NO_PACK && j; FORWARD (u)) {
+    for (PACK_T *u = PACK (p); u != NO_PACK && j; FORWARD (u)) {
       j &= is_coercible (MOID (u), SLICE (q), c, deflex);
     }
     return j;
   } else if (IS (q, PROC_SYMBOL) || IS (q, STRUCT_SYMBOL)) {
-    PACK_T *u = PACK (p), *v = PACK (q);
     if (DIM (p) != DIM (q)) {
       return A68_FALSE;
     } else {
+      PACK_T *u = PACK (p), *v = PACK (q);
       BOOL_T j = A68_TRUE;
       while (u != NO_PACK && v != NO_PACK && j) {
         j &= is_coercible (MOID (u), MOID (v), c, deflex);
@@ -886,9 +870,8 @@ BOOL_T is_coercible_series (MOID_T * p, MOID_T * q, int c, int deflex)
   } else if (PACK (p) == NO_PACK) {
     return is_coercible (p, q, c, deflex);
   } else {
-    PACK_T *u = PACK (p);
     BOOL_T j = A68_TRUE;
-    for (; u != NO_PACK && j; FORWARD (u)) {
+    for (PACK_T *u = PACK (p); u != NO_PACK && j; FORWARD (u)) {
       if (MOID (u) != NO_MOID) {
         j &= is_coercible (MOID (u), q, c, deflex);
       }
@@ -959,10 +942,9 @@ MOID_T *get_balanced_mode (MOID_T * m, int sort, BOOL_T return_depreffed, int de
     BOOL_T siga = A68_TRUE;
 // Test for increasing depreffing.
     for (depref_level = 0; siga; depref_level++) {
-      PACK_T *p;
       siga = A68_FALSE;
 // Test the whole pack.
-      for (p = PACK (m); p != NO_PACK; FORWARD (p)) {
+      for (PACK_T *p = PACK (m); p != NO_PACK; FORWARD (p)) {
 // HIPs are not eligible of course.
         if (MOID (p) != M_HIP) {
           MOID_T *candidate = MOID (p);
@@ -973,11 +955,10 @@ MOID_T *get_balanced_mode (MOID_T * m, int sort, BOOL_T return_depreffed, int de
           }
 // Only need testing if all allowed deprefs succeeded.
           if (k == 0) {
-            PACK_T *q;
             MOID_T *to = (return_depreffed ? depref_completely (candidate) : candidate);
             BOOL_T all_coercible = A68_TRUE;
             siga = A68_TRUE;
-            for (q = PACK (m); q != NO_PACK && all_coercible; FORWARD (q)) {
+            for (PACK_T *q = PACK (m); q != NO_PACK && all_coercible; FORWARD (q)) {
               MOID_T *from = MOID (q);
               if (p != q && from != to) {
                 all_coercible &= is_coercible (from, to, sort, deflex);

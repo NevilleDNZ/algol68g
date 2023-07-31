@@ -19,6 +19,10 @@
 //! more details. You should have received a copy of the GNU General Public 
 //! License along with this program. If not, see [http://www.gnu.org/licenses/].
 
+//! @section Synopsis
+//!
+//! Internal type definitions.
+
 #if !defined (__A68G_TYPES_H__)
 #define __A68G_TYPES_H__
 
@@ -167,7 +171,7 @@ struct OPTIONS_T
 
 struct MOID_T
 {
-  int attribute, dim, number, short_id, size, digits, sizec, digitsc;
+  int attribute, dim, number, short_id, size, digits, size_compl, digits_compl;
   BOOL_T has_rows, use, portable, derivate;
   NODE_T *node;
   PACK_T *pack;
@@ -327,14 +331,15 @@ struct A68_REF
 //! An A68_ARRAY is followed by one A68_TUPLE per dimension.
 //! 
 //! @verbatim
-//! A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements
-//!                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension
+//! A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements.
+//!                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension.
 //!                ...           |
 //!                A68_TUPLE dim |
 //!                ...           |
 //!                ...           |
-//!                Element 1 <---+   Element: Sequential row elements, in the heap
-//!                ...                        Not always contiguous - trims!
+//!                Element 1 <---+   Sequential row elements in the heap.
+//!                ... 
+//!                Element n
 //! @endverbatim
 
 struct A68_ARRAY

@@ -19,6 +19,10 @@
 //! more details. You should have received a copy of the GNU General Public 
 //! License along with this program. If not, see [http://www.gnu.org/licenses/].
 
+//! @section Synopsis
+//!
+//! Interpreter related definitions.
+
 #if !defined (__A68G_GENIE_H__)
 #define __A68G_GENIE_H__
 
@@ -79,6 +83,18 @@
 
 // Macros for row-handling
 
+// An A68G row is a reference to a descriptor in the heap:
+//
+// A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements.
+//                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension.
+//                ...           |
+//                A68_TUPLE dim |
+//                ...           |
+//                ...           |
+//                Element 1 <---+   Sequential row elements in the heap.
+//                ...
+//                Element n
+
 #define DESCRIPTOR_SIZE(n) (SIZE_ALIGNED (A68_ARRAY) + (n) * SIZE_ALIGNED (A68_TUPLE))
 
 #define NEW_ROW_1D(des, row, arr, tup, row_m, mod, upb)\
@@ -97,37 +113,37 @@
   K (&(tup)) = 0;\
   PUT_DESCRIPTOR ((arr), (tup), &(des));
 
-#define GET_DESCRIPTOR(a, t, p)\
-  a = (A68_ARRAY *) ARRAY_ADDRESS (p);\
-  t = (A68_TUPLE *) & (((BYTE_T *) (a)) [SIZE_ALIGNED (A68_ARRAY)]);
+#define GET_DESCRIPTOR(arr, tup, p)\
+  arr = (A68_ARRAY *) ARRAY_ADDRESS (p);\
+  tup = (A68_TUPLE *) & (((BYTE_T *) (arr)) [SIZE_ALIGNED (A68_ARRAY)]);
 
-#define GET_DESCRIPTOR2(a, t1, t2, p)\
-  a = (A68_ARRAY *) ARRAY_ADDRESS (p);\
-  t1 = (A68_TUPLE *) & (((BYTE_T *) (a)) [SIZE_ALIGNED (A68_ARRAY)]);\
-  t2 = (A68_TUPLE *) & (((BYTE_T *) (a)) [SIZE_ALIGNED (A68_ARRAY) + sizeof (A68_TUPLE)]);
+#define GET_DESCRIPTOR2(arr, tup1, tup2, p)\
+  arr = (A68_ARRAY *) ARRAY_ADDRESS (p);\
+  tup1 = (A68_TUPLE *) & (((BYTE_T *) (arr)) [SIZE_ALIGNED (A68_ARRAY)]);\
+  tup2 = (A68_TUPLE *) & (((BYTE_T *) (arr)) [SIZE_ALIGNED (A68_ARRAY) + sizeof (A68_TUPLE)]);
 
-#define PUT_DESCRIPTOR(a, t1, p) {\
+#define PUT_DESCRIPTOR(arr, tup, p) {\
   BYTE_T *a_p = ARRAY_ADDRESS (p);\
-  *(A68_ARRAY *) a_p = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_ALIGNED (A68_ARRAY)]) = (t1);\
+  *(A68_ARRAY *) a_p = (arr);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_ALIGNED (A68_ARRAY)]) = (tup);\
   }
 
-#define PUT_DESCRIPTOR2(a, t1, t2, p) {\
+#define PUT_DESCRIPTOR2(arr, tup1, tup2, p) {\
   BYTE_T *a_p = ARRAY_ADDRESS (p);\
-  *(A68_ARRAY *) a_p = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_ALIGNED (A68_ARRAY)]) = (t1);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_ALIGNED (A68_ARRAY) + sizeof (A68_TUPLE)]) = (t2);\
+  *(A68_ARRAY *) a_p = (arr);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_ALIGNED (A68_ARRAY)]) = (tup1);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_ALIGNED (A68_ARRAY) + sizeof (A68_TUPLE)]) = (tup2);\
   }
 
-#define ROW_SIZE(t) ((LWB (t) <= UPB (t)) ? (UPB (t) - LWB (t) + 1) : 0)
-#define ROW_ELEMENT(a, k) (((ADDR_T) k + SLICE_OFFSET (a)) * ELEM_SIZE (a) + FIELD_OFFSET (a))
-#define INDEX_1_DIM(a, t, k) ROW_ELEMENT (a, (SPAN (t) * (int) (k) - SHIFT (t)))
+#define ROW_SIZE(tup) ((LWB (tup) <= UPB (tup)) ? (UPB (tup) - LWB (tup) + 1) : 0)
+#define ROW_ELEMENT(arr, k) (((ADDR_T) k + SLICE_OFFSET (arr)) * ELEM_SIZE (arr) + FIELD_OFFSET (arr))
+#define INDEX_1_DIM(arr, tup, k) ROW_ELEMENT (arr, (SPAN (tup) * (int) (k) - SHIFT (tup)))
 
-#define VECTOR_OFFSET(a, t)\
-  ((LWB (t) * SPAN (t) - SHIFT (t) + SLICE_OFFSET (a)) * ELEM_SIZE (a) + FIELD_OFFSET (a))
+#define VECTOR_OFFSET(arr, tup)\
+  ((LWB (tup) * SPAN (tup) - SHIFT (tup) + SLICE_OFFSET (arr)) * ELEM_SIZE (arr) + FIELD_OFFSET (arr))
 
-#define MATRIX_OFFSET(a, t1, t2)\
-  ((LWB (t1) * SPAN (t1) - SHIFT (t1) + LWB (t2) * SPAN (t2) - SHIFT (t2) + SLICE_OFFSET (a)) * ELEM_SIZE (a) + FIELD_OFFSET (a))
+#define MATRIX_OFFSET(arr, tup1, tup2)\
+  ((LWB (tup1) * SPAN (tup1) - SHIFT (tup1) + LWB (tup2) * SPAN (tup2) - SHIFT (tup2) + SLICE_OFFSET (arr)) * ELEM_SIZE (arr) + FIELD_OFFSET (arr))
 
 // Execution
 
@@ -210,7 +226,7 @@
   VALUE (x) = f (p, VALUE (x));\
   MATH_RTE (p, errno != 0, M_REAL, NO_TEXT);
 
-// Macro's for standard environ
+// Macros for standard environ
 
 #define A68_ENV_INT(n, k) void n (NODE_T *p) {PUSH_PRIMAL (p, (k), INT);}
 #define A68_ENV_REAL(n, z) void n (NODE_T *p) {PUSH_PRIMAL (p, (z), REAL);}

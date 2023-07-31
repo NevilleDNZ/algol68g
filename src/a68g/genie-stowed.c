@@ -23,6 +23,18 @@
 //!
 //! Interpreter routines for STOWED values.
 
+// An A68G row is a reference to a descriptor in the heap:
+//
+// A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements.
+//                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension.
+//                ...           |
+//                A68_TUPLE dim |
+//                ...           |
+//                ...           |
+//                Element 1 <---+   Sequential row elements in the heap.
+//                ...
+//                Element n
+
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-frames.h"
@@ -238,9 +250,9 @@ PROP_T genie_slice (NODE_T * p)
         SOURCE (&self) = p;
       }
     } else {
-      BYTE_T *stack_top = STACK_TOP;
+      BYTE_T *tos = STACK_TOP;
       PUSH (p, &((ADDRESS (&(ARRAY (arr))))[ROW_ELEMENT (arr, index)]), SIZE (m_slice));
-      genie_check_initialisation (p, stack_top, m_slice);
+      genie_check_initialisation (p, tos, m_slice);
     }
     return self;
   } else if (ANNOTATION (indexer) == TRIMMER) {

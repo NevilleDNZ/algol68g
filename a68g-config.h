@@ -80,6 +80,9 @@
 /* Define to 1 if you have the <errno.h> header file. */
 #define HAVE_ERRNO_H 1
 
+/* Define to 1 if you have the <execinfo.h> header file. */
+#define HAVE_EXECINFO_H 1
+
 /* Define to 1 if you have the `exit' function. */
 #define HAVE_EXIT 1
 
@@ -437,7 +440,7 @@
 #define PACKAGE_NAME "algol68g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "algol68g 3.3.0"
+#define PACKAGE_STRING "algol68g 3.3.5"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "algol68g"
@@ -446,7 +449,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.3.0"
+#define PACKAGE_VERSION "3.3.5"
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -454,7 +457,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.3.0"
+#define VERSION "3.3.5"
 
 /* Define to 1 if type `char' is unsigned and your compiler does not
    predefine this macro.  */

@@ -144,8 +144,7 @@ void compiler (FILE_T out)
     WRITE (STDOUT_FILENO, A68 (output_line));
   }
 //
-  int k;
-  for (k = 0; k < A68_OPT (unic_pointer); k++) {
+  for (int k = 0; k < A68_OPT (unic_pointer); k++) {
     a68_free (UNIC_NAME (k));
   }
 }
@@ -343,8 +342,7 @@ char *make_unic_name (char *buf, char *name, char *tag, char *ext)
 
 char *signed_in_name (char *name)
 {
-  int k;
-  for (k = 0; k < A68_OPT (unic_pointer); k++) {
+  for (int k = 0; k < A68_OPT (unic_pointer); k++) {
     if (strcmp (UNIC_NAME (k), name) == 0) {
       return UNIC_NAME (k);
     }
@@ -385,8 +383,7 @@ void sign_in (int action, int phase, char *idf, void *info, int number)
 
 BOOK_T *signed_in (int action, int phase, char *idf)
 {
-  int k;
-  for (k = 0; k < A68_OPT (cse_pointer); k++) {
+  for (int k = 0; k < A68_OPT (cse_pointer); k++) {
     if (IDF (&A68_OPT (cse_book)[k]) == idf && ACTION (&A68_OPT (cse_book)[k]) == action && PHASE (&A68_OPT (cse_book)[k]) >= phase) {
       return &(A68_OPT (cse_book)[k]);
     }
@@ -780,9 +777,8 @@ char *compile_identifier (NODE_T * p, FILE_T out)
 // Some identifiers in standenv cannot be pushed.
 // Examples are cputime, or clock that are procedures in disguise.
     if (A68_STANDENV_PROC (TAX (p))) {
-      int k;
       BOOL_T ok = A68_FALSE;
-      for (k = 0; PROCEDURE (&constants[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&constants[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (p)) == PROCEDURE (&constants[k])) {
           ok = A68_TRUE;
         }

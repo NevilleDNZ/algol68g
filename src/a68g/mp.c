@@ -134,7 +134,7 @@ int width_to_mp_digits (int n)
 void raw_write_mp (char *str, MP_T * z, int digs)
 {
   fprintf (stdout, "\n(%d digits)%s", digs, str);
-  for (unt i = 1; i <= digs; i++) {
+  for (int i = 1; i <= digs; i++) {
 #if (A68_LEVEL >= 3)
     fprintf (stdout, " %09lld", (MP_INT_T) MP_DIGIT (z, i));
 #else
@@ -223,7 +223,7 @@ BOOL_T same_mp (NODE_T * p, MP_T * x, MP_T * y, int digs)
 {
   (void) p;
   if ((MP_STATUS (x) == MP_STATUS (y)) && (MP_EXPONENT (x) == MP_EXPONENT (y))) {
-    for (unt k = digs; k >= 1; k--) {
+    for (int k = digs; k >= 1; k--) {
       if (MP_DIGIT (x, k) != MP_DIGIT (y, k)) {
         return A68_FALSE;
       }
@@ -248,7 +248,7 @@ MP_T *align_mp (MP_T * z, INT_T * expo, int digs)
     (*expo)--;
   }
 // Optimising below code does not make the library noticeably faster.
-  for (unt i = 1; i <= shift; i++) {
+  for (int i = 1; i <= shift; i++) {
     INT_T carry = 0;
     for (INT_T j = 1; j <= digs; j++) {
       MP_INT_T k = ((MP_INT_T) MP_DIGIT (z, j)) % 10;
@@ -350,7 +350,7 @@ MP_T *int_to_mp (NODE_T * p, MP_T * z, INT_T k, int digs)
     n++;
   }
   set_mp (z, 0, n, digs);
-  for (unt j = 1 + n; j >= 1; j--) {
+  for (int j = 1 + n; j >= 1; j--) {
     MP_DIGIT (z, j) = (MP_T) (k % MP_RADIX);
     k /= MP_RADIX;
   }
@@ -368,7 +368,7 @@ MP_T *unt_to_mp (NODE_T * p, MP_T * z, UNSIGNED_T k, int digs)
     n++;
   }
   set_mp (z, 0, n, digs);
-  for (unt j = 1 + n; j >= 1; j--) {
+  for (int j = 1 + n; j >= 1; j--) {
     MP_DIGIT (z, j) = (MP_T) (k % MP_RADIX);
     k /= MP_RADIX;
   }
@@ -431,7 +431,7 @@ MP_T *real_to_mp (NODE_T * p, MP_T * z, REAL_T x, int digs)
 // Transport digs of x to the mantissa of z.
   INT_T sum = 0, weight = (MP_RADIX / 10);
   int j = 1;
-  for (unt k = 0; a != 0.0 && j <= digs && k < REAL_DIGITS; k++) {
+  for (int k = 0; a != 0.0 && j <= digs && k < REAL_DIGITS; k++) {
     REAL_T u = a * 10;
     REAL_T v = floor (u);
     a = u - v;
@@ -466,13 +466,13 @@ REAL_T mp_to_real (NODE_T * p, MP_T * z, int digs)
     REAL_T terms[1 + MP_MAX_DIGITS];
     REAL_T weight = ten_up ((int) (MP_EXPONENT (z) * LOG_MP_RADIX));
     unt lim = MIN (digs, MP_MAX_DIGITS);
-    for (unt k = 1; k <= lim; k++) {
+    for (int k = 1; k <= lim; k++) {
       terms[k] = ABS (MP_DIGIT (z, k)) * weight;
       weight /= MP_RADIX;
     }
 // Sum terms from small to large.
     REAL_T sum = 0;
-    for (unt k = lim; k >= 1; k--) {
+    for (int k = lim; k >= 1; k--) {
       sum += terms[k];
     }
     CHECK_REAL (p, sum);
@@ -486,7 +486,7 @@ static inline void norm_mp_light (MP_T * w, int k, int digs)
 {
 // Bring every digit back to [0 .. MP_RADIX>.
   MP_T *z = &MP_DIGIT (w, digs);
-  for (unt j = digs; j >= k; j--, z--) {
+  for (int j = digs; j >= k; j--, z--) {
     if (z[0] >= MP_RADIX) {
       z[0] -= (MP_T) MP_RADIX;
       z[-1] += 1;
@@ -502,8 +502,8 @@ static inline void norm_mp_light (MP_T * w, int k, int digs)
 static inline void norm_mp (MP_T * w, int k, int digs)
 {
 // Bring every digit back to [0 .. MP_RADIX>.
-  unt j; MP_T *z;
-  for (j = digs, z = &MP_DIGIT (w, digs); j >= k; j--, z--) {
+  MP_T *z = &MP_DIGIT (w, digs);
+  for (int j = digs; j >= k; j--, z--) {
     if (z[0] >= (MP_T) MP_RADIX) {
       MP_T carry = (MP_T) ((MP_INT_T) (z[0] / (MP_T) MP_RADIX));
       z[0] -= carry * (MP_T) MP_RADIX;
@@ -625,7 +625,7 @@ MP_T *lengthen_mp (NODE_T * p, MP_T * z, int digs_z, MP_T * x, int digs_x)
       MP_EXPONENT (z) = MP_EXPONENT (x);
       MP_STATUS (z) = MP_STATUS (x);
     }
-    for (unt j = 1 + digs_x; j <= digs_z; j++) {
+    for (int j = 1 + digs_x; j <= digs_z; j++) {
       MP_DIGIT (z, j) = (MP_T) 0;
     }
   }
@@ -663,14 +663,14 @@ MP_T *add_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
     MP_T *w = nil_mp (p, digs_h);
     if (MP_EXPONENT (x) == MP_EXPONENT (y)) {
       MP_EXPONENT (w) = (MP_T) 1 + MP_EXPONENT (x);
-      for (unt j = 1; j <= digs; j++) {
+      for (int j = 1; j <= digs; j++) {
         MP_DIGIT (w, j + 1) = MP_DIGIT (x, j) + MP_DIGIT (y, j);
       }
       MP_DIGIT (w, digs_h) = (MP_T) 0;
     } else if (MP_EXPONENT (x) > MP_EXPONENT (y)) {
       int shl_y = (int) MP_EXPONENT (x) - (int) MP_EXPONENT (y);
       MP_EXPONENT (w) = (MP_T) 1 + MP_EXPONENT (x);
-      for (unt j = 1; j < digs_h; j++) {
+      for (int j = 1; j < digs_h; j++) {
         int i_y = j - shl_y;
         MP_T x_j = (j > digs ? 0 : MP_DIGIT (x, j));
         MP_T y_j = (i_y <= 0 || i_y > digs ? 0 : MP_DIGIT (y, i_y));
@@ -679,7 +679,7 @@ MP_T *add_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
     } else {
       int shl_x = (int) MP_EXPONENT (y) - (int) MP_EXPONENT (x);
       MP_EXPONENT (w) = (MP_T) 1 + MP_EXPONENT (y);
-      for (unt j = 1; j < digs_h; j++) {
+      for (int j = 1; j < digs_h; j++) {
         int i_x = j - shl_x;
         MP_T x_j = (i_x <= 0 || i_x > digs ? 0 : MP_DIGIT (x, i_x));
         MP_T y_j = (j > digs ? 0 : MP_DIGIT (y, j));
@@ -732,14 +732,14 @@ MP_T *sub_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
     MP_T *w = nil_mp (p, digs_h);
     if (MP_EXPONENT (x) == MP_EXPONENT (y)) {
       MP_EXPONENT (w) = (MP_T) 1 + MP_EXPONENT (x);
-      for (unt j = 1; j <= digs; j++) {
+      for (int j = 1; j <= digs; j++) {
         MP_DIGIT (w, j + 1) = MP_DIGIT (x, j) - MP_DIGIT (y, j);
       }
       MP_DIGIT (w, digs_h) = (MP_T) 0;
     } else if (MP_EXPONENT (x) > MP_EXPONENT (y)) {
       int shl_y = (int) MP_EXPONENT (x) - (int) MP_EXPONENT (y);
       MP_EXPONENT (w) = (MP_T) 1 + MP_EXPONENT (x);
-      for (unt j = 1; j < digs_h; j++) {
+      for (int j = 1; j < digs_h; j++) {
         int i_y = j - shl_y;
         MP_T x_j = (j > digs ? 0 : MP_DIGIT (x, j));
         MP_T y_j = (i_y <= 0 || i_y > digs ? 0 : MP_DIGIT (y, i_y));
@@ -748,7 +748,7 @@ MP_T *sub_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
     } else {
       int shl_x = (int) MP_EXPONENT (y) - (int) MP_EXPONENT (x);
       MP_EXPONENT (w) = (MP_T) 1 + MP_EXPONENT (y);
-      for (unt j = 1; j < digs_h; j++) {
+      for (int j = 1; j < digs_h; j++) {
         int i_x = j - shl_x;
         MP_T x_j = (i_x <= 0 || i_x > digs ? 0 : MP_DIGIT (x, i_x));
         MP_T y_j = (j > digs ? 0 : MP_DIGIT (y, j));
@@ -758,14 +758,14 @@ MP_T *sub_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 // Correct if we subtract large from small.
     if (MP_DIGIT (w, 2) <= 0) {
       fnz = -1;
-      for (unt j = 2; j <= digs_h && fnz < 0; j++) {
+      for (int j = 2; j <= digs_h && fnz < 0; j++) {
         if (MP_DIGIT (w, j) != 0) {
           fnz = j;
         }
       }
       negative = (BOOL_T) (MP_DIGIT (w, fnz) < 0);
       if (negative) {
-        for (unt j = fnz; j <= digs_h; j++) {
+        for (int j = fnz; j <= digs_h; j++) {
           MP_DIGIT (w, j) = -MP_DIGIT (w, j);
         }
       }
@@ -773,7 +773,7 @@ MP_T *sub_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 // Normalise.
     norm_mp_light (w, 2, digs_h);
     fnz = -1;
-    for (unt j = 1; j <= digs_h && fnz < 0; j++) {
+    for (int j = 1; j <= digs_h && fnz < 0; j++) {
       if (MP_DIGIT (w, j) != 0) {
         fnz = j;
       }
@@ -819,7 +819,7 @@ MP_T *mul_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
   MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_T *w = lit_mp (p, 0, MP_EXPONENT (x) + MP_EXPONENT (y) + 1, digs_h);
   int oflow = (int) FLOOR_MP ((MP_REAL_T) MAX_REPR_INT / (2 * MP_REAL_RADIX * MP_REAL_RADIX)) - 1;
-  for (unt i = digs; i >= 1; i--) {
+  for (int i = digs; i >= 1; i--) {
     MP_T yi = MP_DIGIT (y, i);
     if (yi != 0) {
       int k = digs_h - i;
@@ -898,7 +898,7 @@ MP_T *div_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 // Estimate the denominator. For small MP_RADIX add: MP_DIGIT (y, 4) / MP_REAL_RADIX.
   MP_REAL_T den = (MP_DIGIT (y, 1) * MP_REAL_RADIX + MP_DIGIT (y, 2)) * MP_REAL_RADIX + MP_DIGIT (y, 3);
   MP_T *t = &MP_DIGIT (w, 2);
-  for (unt k = 1, len = digs + 2, first = 3; k <= digs + 2; k++, len++, first++, t++) {
+  for (int k = 1, len = digs + 2, first = 3; k <= digs + 2; k++, len++, first++, t++) {
 // Estimate quotient digit.
     MP_REAL_T q, nom = ((t[-1] * MP_REAL_RADIX + t[0]) * MP_REAL_RADIX + t[1]) * MP_REAL_RADIX + (wdigs >= (first + 2) ? t[2] : 0);
     if (nom == 0) {
@@ -911,7 +911,7 @@ MP_T *div_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
         lim = first + nzdigs - 1;
       }
       MP_T *u = t, *v = &MP_DIGIT (y, 1);
-      for (unt j = first; j <= lim; j++) {
+      for (int j = first; j <= lim; j++) {
         (u++)[0] -= q * (v++)[0];
       }
     }
@@ -1099,7 +1099,7 @@ MP_T *div_mp_digit (NODE_T * p, MP_T * z, MP_T * x, MP_T y, int digs)
 // Estimate the denominator.
     MP_REAL_T den = (MP_REAL_T) y * MP_REAL_RADIX * MP_REAL_RADIX;
     MP_T *t = &MP_DIGIT (w, 2);
-    for (unt k = 1, first = 3; k <= digs + 2; k++, first++, t++) {
+    for (int k = 1, first = 3; k <= digs + 2; k++, first++, t++) {
 // Estimate quotient digit and correct.
       MP_REAL_T nom = ((t[-1] * MP_REAL_RADIX + t[0]) * MP_REAL_RADIX + t[1]) * MP_REAL_RADIX + (wdigs >= (first + 2) ? t[2] : 0);
       MP_REAL_T q = (MP_T) (MP_INT_T) (nom / den);

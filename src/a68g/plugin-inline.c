@@ -274,8 +274,7 @@ void inline_identifier (NODE_T * p, FILE_T out, int phase)
     }
   } else if (phase == L_YIELD) {
     if (A68_STANDENV_PROC (TAX (p))) {
-      int k;
-      for (k = 0; PROCEDURE (&constants[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&constants[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (p)) == PROCEDURE (&constants[k])) {
           undent (out, CODE (&constants[k]));
           return;
@@ -573,9 +572,8 @@ void inline_monadic_formula (NODE_T * p, FILE_T out, int phase)
       (void) add_declaration (&A68_OPT (root_idf), inline_mode (M_COMPLEX), 0, acc);
       inline_unit (rhs, out, L_DECLARE);
     } else if (phase == L_EXECUTE) {
-      int k;
       inline_unit (rhs, out, L_EXECUTE);
-      for (k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&monadics[k])) {
           indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&monadics[k]), acc));
           inline_unit (rhs, out, L_YIELD);
@@ -713,9 +711,8 @@ void inline_call (NODE_T * p, FILE_T out, int phase)
       (void) add_declaration (&A68_OPT (root_idf), inline_mode (M_COMPLEX), 0, acc);
       inline_single_argument (args, out, L_DECLARE);
     } else if (phase == L_EXECUTE) {
-      int k;
       inline_single_argument (args, out, L_EXECUTE);
-      for (k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (idf)) == PROCEDURE (&functions[k])) {
           indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&functions[k]), acc));
           inline_single_argument (args, out, L_YIELD);

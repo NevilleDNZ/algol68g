@@ -308,9 +308,8 @@ void add_string_transput_buffer (NODE_T * p, int k, char *ch)
 void add_a_string_transput_buffer (NODE_T * p, int k, BYTE_T * ref)
 {
   A68_REF row = *(A68_REF *) ref;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
   CHECK_INIT (p, INITIALISED (&row), M_ROWS);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &row);
   if (ROW_SIZE (tup) > 0) {
     BYTE_T *base_address = DEREF (BYTE_T, &ARRAY (arr));
@@ -351,42 +350,42 @@ char pop_char_transput_buffer (int k)
 
 void add_c_string_to_a_string (NODE_T * p, A68_REF ref_str, char *s)
 {
-  int l_2 = (int) strlen (s);
+  int len_2 = (int) strlen (s);
 // left part.
   CHECK_REF (p, ref_str, M_REF_STRING);
   A68_REF a = *DEREF (A68_REF, &ref_str);
   CHECK_INIT (p, INITIALISED (&a), M_STRING);
-  A68_ARRAY *a_1; A68_TUPLE *t_1;
-  GET_DESCRIPTOR (a_1, t_1, &a);
-  int l_1 = ROW_SIZE (t_1);
+  A68_ARRAY *arr_1; A68_TUPLE *tup_1;
+  GET_DESCRIPTOR (arr_1, tup_1, &a);
+  int len_1 = ROW_SIZE (tup_1);
 // Sum string.
   A68_REF c = heap_generator (p, M_STRING, DESCRIPTOR_SIZE (1));
-  A68_REF d = heap_generator_2 (p, M_STRING, l_1 + l_2, SIZE (M_CHAR));
+  A68_REF d = heap_generator_2 (p, M_STRING, len_1 + len_2, SIZE (M_CHAR));
 // Calculate again since garbage collector might have moved data.
 // Todo: GC should not move volatile data.
-  GET_DESCRIPTOR (a_1, t_1, &a);
+  GET_DESCRIPTOR (arr_1, tup_1, &a);
 // Make descriptor of new string.
-  A68_ARRAY *a_3; A68_TUPLE *t_3;
-  GET_DESCRIPTOR (a_3, t_3, &c);
-  DIM (a_3) = 1;
-  MOID (a_3) = M_CHAR;
-  ELEM_SIZE (a_3) = SIZE (M_CHAR);
-  SLICE_OFFSET (a_3) = 0;
-  FIELD_OFFSET (a_3) = 0;
-  ARRAY (a_3) = d;
-  LWB (t_3) = 1;
-  UPB (t_3) = l_1 + l_2;
-  SHIFT (t_3) = LWB (t_3);
-  SPAN (t_3) = 1;
+  A68_ARRAY *arr_3; A68_TUPLE *tup_3;
+  GET_DESCRIPTOR (arr_3, tup_3, &c);
+  DIM (arr_3) = 1;
+  MOID (arr_3) = M_CHAR;
+  ELEM_SIZE (arr_3) = SIZE (M_CHAR);
+  SLICE_OFFSET (arr_3) = 0;
+  FIELD_OFFSET (arr_3) = 0;
+  ARRAY (arr_3) = d;
+  LWB (tup_3) = 1;
+  UPB (tup_3) = len_1 + len_2;
+  SHIFT (tup_3) = LWB (tup_3);
+  SPAN (tup_3) = 1;
 // add strings.
-  BYTE_T *b_1 = (ROW_SIZE (t_1) > 0 ? DEREF (BYTE_T, &ARRAY (a_1)) : NO_BYTE);
-  BYTE_T *b_3 = DEREF (BYTE_T, &ARRAY (a_3));
+  BYTE_T *b_1 = (ROW_SIZE (tup_1) > 0 ? DEREF (BYTE_T, &ARRAY (arr_1)) : NO_BYTE);
+  BYTE_T *b_3 = DEREF (BYTE_T, &ARRAY (arr_3));
   int u = 0;
-  for (int v = LWB (t_1); v <= UPB (t_1); v++) {
-    MOVE ((BYTE_T *) & b_3[u], (BYTE_T *) & b_1[INDEX_1_DIM (a_1, t_1, v)], SIZE (M_CHAR));
+  for (int v = LWB (tup_1); v <= UPB (tup_1); v++) {
+    MOVE ((BYTE_T *) & b_3[u], (BYTE_T *) & b_1[INDEX_1_DIM (arr_1, tup_1, v)], SIZE (M_CHAR));
     u += SIZE (M_CHAR);
   }
-  for (int v = 0; v < l_2; v++) {
+  for (int v = 0; v < len_2; v++) {
     A68_CHAR ch;
     STATUS (&ch) = INIT_MASK;
     VALUE (&ch) = s[v];
@@ -1135,8 +1134,6 @@ void genie_set (NODE_T * p)
   }
   if (!IS_NIL (STRING (file))) {
     A68_REF z = *DEREF (A68_REF, &STRING (file));
-    A68_ARRAY *a;
-    A68_TUPLE *t;
     int size;
 // Circumvent buffering problems.
     STRPOS (file) -= get_transput_buffer_index (TRANSPUT_BUFFER (file));
@@ -1145,8 +1142,9 @@ void genie_set (NODE_T * p)
 // Now set.
     CHECK_INT_ADDITION (p, STRPOS (file), VALUE (&pos));
     STRPOS (file) += VALUE (&pos);
-    GET_DESCRIPTOR (a, t, &z);
-    size = ROW_SIZE (t);
+    A68_ARRAY *arr; A68_TUPLE *tup;
+    GET_DESCRIPTOR (arr, tup, &z);
+    size = ROW_SIZE (tup);
     if (size <= 0 || STRPOS (file) < 0 || STRPOS (file) >= size) {
       A68_BOOL res;
       on_event_handler (p, FILE_END_MENDED (FILE_DEREF (&ref_file)), ref_file);
@@ -1458,15 +1456,15 @@ int char_scanner (A68_FILE * f)
   } else {
 // File is associated with a STRING. Give next CHAR. 
 // When we're outside the STRING give EOF_CHAR. 
-    A68_REF z = *DEREF (A68_REF, &STRING (f)); A68_ARRAY *a; A68_TUPLE *t;
-    GET_DESCRIPTOR (a, t, &z);
-    int k = STRPOS (f) + LWB (t);
-    if (ROW_SIZE (t) <= 0 || k < LWB (t) || k > UPB (t)) {
+    A68_REF z = *DEREF (A68_REF, &STRING (f)); A68_ARRAY *arr; A68_TUPLE *tup;
+    GET_DESCRIPTOR (arr, tup, &z);
+    int k = STRPOS (f) + LWB (tup);
+    if (ROW_SIZE (tup) <= 0 || k < LWB (tup) || k > UPB (tup)) {
       END_OF_FILE (f) = A68_TRUE;
       return EOF_CHAR;
     } else {
-      BYTE_T *base = DEREF (BYTE_T, &ARRAY (a));
-      A68_CHAR *ch = (A68_CHAR *) & (base[INDEX_1_DIM (a, t, k)]);
+      BYTE_T *base = DEREF (BYTE_T, &ARRAY (arr));
+      A68_CHAR *ch = (A68_CHAR *) & (base[INDEX_1_DIM (arr, tup, k)]);
       STRPOS (f)++;
       return VALUE (ch);
     }

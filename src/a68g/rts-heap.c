@@ -196,8 +196,7 @@ BOOL_T moid_needs_colouring (MOID_T * m)
   } else if (IS_FLEX (m) || IS_ROW (m)) {
     return A68_TRUE;
   } else if (IS_STRUCT (m) || IS_UNION (m)) {
-    PACK_T *p = PACK (m);
-    for (; p != NO_PACK; FORWARD (p)) {
+    for (PACK_T *p = PACK (m); p != NO_PACK; FORWARD (p)) {
       if (moid_needs_colouring (MOID (p))) {
         return A68_TRUE;
       }
@@ -212,8 +211,7 @@ BOOL_T moid_needs_colouring (MOID_T * m)
 
 void colour_row_elements (A68_REF * z, MOID_T * m)
 {
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, z);
   if (get_row_size (tup, DIM (arr)) == 0) {
 // Empty rows have a ghost elements.
@@ -225,8 +223,8 @@ void colour_row_elements (A68_REF * z, MOID_T * m)
     BOOL_T done = A68_FALSE;
     initialise_internal_index (tup, DIM (arr));
     while (!done) {
-      ADDR_T iindex = calculate_internal_index (tup, DIM (arr));
-      ADDR_T addr = ROW_ELEMENT (arr, iindex);
+      ADDR_T index = calculate_internal_index (tup, DIM (arr));
+      ADDR_T addr = ROW_ELEMENT (arr, index);
       colour_object (&elem[addr], SUB (m));
       done = increment_internal_index (tup, DIM (arr));
     }
@@ -262,13 +260,12 @@ void colour_object (BYTE_T * item, MOID_T * m)
 // Claim the descriptor and the row itself.
     A68_REF *z = (A68_REF *) item;
     if (INITIALISED (z) && IS_IN_HEAP (z)) {
-      A68_ARRAY *arr;
-      A68_TUPLE *tup;
       if (STATUS_TEST (REF_HANDLE (z), COOKIE_MASK)) {
         return;
       }
 // An array is ALWAYS in the heap.
       STATUS_SET (REF_HANDLE (z), (COOKIE_MASK | COLOUR_MASK));
+      A68_ARRAY *arr; A68_TUPLE *tup;
       GET_DESCRIPTOR (arr, tup, z);
       if (REF_HANDLE (&(ARRAY (arr))) != NO_HANDLE) {
 // Assume its initialisation.
@@ -283,8 +280,7 @@ void colour_object (BYTE_T * item, MOID_T * m)
     }
   } else if (IS_STRUCT (m)) {
 // STRUCTures - colour fields.
-    PACK_T *p = PACK (m);
-    for (; p != NO_PACK; FORWARD (p)) {
+    for (PACK_T *p = PACK (m); p != NO_PACK; FORWARD (p)) {
       colour_object (&item[OFFSET (p)], MOID (p));
     }
   } else if (IS_UNION (m)) {
@@ -299,9 +295,8 @@ void colour_object (BYTE_T * item, MOID_T * m)
     A68_PROCEDURE *z = (A68_PROCEDURE *) item;
     if (INITIALISED (z) && LOCALE (z) != NO_HANDLE && !(STATUS_TEST (LOCALE (z), COOKIE_MASK))) {
       BYTE_T *u = POINTER (LOCALE (z));
-      PACK_T *s = PACK (MOID (z));
       STATUS_SET (LOCALE (z), (COOKIE_MASK | COLOUR_MASK));
-      for (; s != NO_PACK; FORWARD (s)) {
+      for (PACK_T *s = PACK (MOID (z)); s != NO_PACK; FORWARD (s)) {
         if (VALUE ((A68_BOOL *) & u[0]) == A68_TRUE) {
           colour_object (&u[SIZE (M_BOOL)], MOID (s));
         }
@@ -326,11 +321,10 @@ void colour_heap (ADDR_T fp)
     NODE_T *p = FRAME_TREE (fp);
     TABLE_T *q = TABLE (p);
     if (q != NO_TABLE) {
-      TAG_T *i;
-      for (i = IDENTIFIERS (q); i != NO_TAG; FORWARD (i)) {
+      for (TAG_T *i = IDENTIFIERS (q); i != NO_TAG; FORWARD (i)) {
         colour_object (FRAME_LOCAL (fp, OFFSET (i)), MOID (i));
       }
-      for (i = ANONYMOUS (q); i != NO_TAG; FORWARD (i)) {
+      for (TAG_T *i = ANONYMOUS (q); i != NO_TAG; FORWARD (i)) {
         if (PRIO (i) == GENERATOR) {
           colour_object (FRAME_LOCAL (fp, OFFSET (i)), MOID (i));
         }
@@ -477,16 +471,13 @@ A68_HANDLE *give_handle (NODE_T * p, MOID_T * a68m)
 
 A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
 {
-// Align.
   ABEND (size < 0, ERROR_INVALID_SIZE, __func__);
   size = A68_ALIGN (size);
-// Now give it.
   if (heap_available () >= size) {
-    A68_HANDLE *x;
     A68_REF z;
     STATUS (&z) = (STATUS_MASK_T) (INIT_MASK | IN_HEAP_MASK);
     OFFSET (&z) = 0;
-    x = give_handle (p, mode);
+    A68_HANDLE *x = give_handle (p, mode);
     SIZE (x) = size;
     POINTER (x) = HEAP_ADDRESS (A68_HP);
     FILL (POINTER (x), 0, size);
@@ -664,12 +655,9 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * addr, NODE_T ** decl, ADDR_T *
   } else if (IS (p, BOUNDS)) {
     A68_REF desc;
     MOID_T *rmod = MOID (p), *smod = MOID (NEXT (p));
-    A68_ARRAY *arr;
-    A68_TUPLE *tup;
     BYTE_T *bounds = STACK_ADDRESS (*cur_sp);
-    int k, dim = DIM (DEFLEX (rmod));
-    int esiz = SIZE (smod), rsiz = 1;
-    BOOL_T alloc_sub, alloc_str;
+    int dim = DIM (DEFLEX (rmod)), esiz = SIZE (smod), rsiz = 1;
+    BOOL_T alloc_sub = A68_FALSE, alloc_str = A68_FALSE;
     NODE_T *in = SUB_NEXT (p);
     if (IS (in, INDICANT) && IS_LITERALLY (in, "STRING")) {
       alloc_str = A68_TRUE;
@@ -679,8 +667,9 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * addr, NODE_T ** decl, ADDR_T *
       alloc_str = A68_FALSE;
     }
     desc = heap_generator (p, rmod, DESCRIPTOR_SIZE (dim));
+    A68_ARRAY *arr; A68_TUPLE *tup;
     GET_DESCRIPTOR (arr, tup, &desc);
-    for (k = 0; k < dim; k++) {
+    for (int k = 0; k < dim; k++) {
       CHECK_INIT (p, INITIALISED ((A68_INT *) bounds), M_INT);
       LWB (&tup[k]) = VALUE ((A68_INT *) bounds);
       bounds += SIZE (M_INT);
@@ -702,9 +691,8 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * addr, NODE_T ** decl, ADDR_T *
     if (rsiz == 0) {
 // Generate a ghost element.
       ADDR_T top_sp = *cur_sp;
-      BYTE_T *elem;
       ARRAY (arr) = heap_generator (p, rmod, esiz);
-      elem = ADDRESS (&(ARRAY (arr)));
+      BYTE_T *elem = ADDRESS (&(ARRAY (arr)));
       if (alloc_sub) {
         genie_generator_stowed (NEXT (p), &(elem[0]), NO_VAR, cur_sp);
         top_sp = *cur_sp;
@@ -714,10 +702,9 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * addr, NODE_T ** decl, ADDR_T *
       (*cur_sp) = top_sp;
     } else {
       ADDR_T pop_sp = *cur_sp, top_sp = *cur_sp;
-      BYTE_T *elem;
       ARRAY (arr) = heap_generator_2 (p, rmod, rsiz, esiz);
-      elem = ADDRESS (&(ARRAY (arr)));
-      for (k = 0; k < rsiz; k++) {
+      BYTE_T *elem = ADDRESS (&(ARRAY (arr)));
+      for (int k = 0; k < rsiz; k++) {
         if (alloc_sub) {
           (*cur_sp) = pop_sp;
           genie_generator_stowed (NEXT (p), &(elem[k * esiz]), NO_VAR, cur_sp);
@@ -746,8 +733,8 @@ void genie_generator_internal (NODE_T * p, MOID_T * ref_mode, TAG_T * tag, LEAP_
     OFFSET (&name) = A68_FP + FRAME_INFO_SIZE + OFFSET (tag);
     REF_SCOPE (&name) = A68_FP;
   } else if (leap == -LOC_SYMBOL && NON_LOCAL (p) != NO_TABLE) {
-    ADDR_T lev;
     name = heap_generator (p, mode, SIZE (mode));
+    ADDR_T lev;
     FOLLOW_SL (lev, LEVEL (NON_LOCAL (p)));
     REF_SCOPE (&name) = lev;
   } else if (leap == -LOC_SYMBOL) {
@@ -773,16 +760,16 @@ void genie_generator_internal (NODE_T * p, MOID_T * ref_mode, TAG_T * tag, LEAP_
 
 PROP_T genie_generator (NODE_T * p)
 {
-  PROP_T self;
   ADDR_T pop_sp = A68_SP;
-  A68_REF z;
   if (NEXT_SUB (p) != NO_NODE) {
     genie_generator_bounds (NEXT_SUB (p));
   }
   genie_generator_internal (NEXT_SUB (p), MOID (p), TAX (p), -ATTRIBUTE (SUB (p)), pop_sp);
+  A68_REF z;
   POP_REF (p, &z);
   A68_SP = pop_sp;
   PUSH_REF (p, z);
+  PROP_T self;
   UNIT (&self) = genie_generator;
   SOURCE (&self) = p;
   return self;
@@ -794,9 +781,7 @@ PROP_T genie_generator (NODE_T * p)
 
 void discard_heap (void)
 {
-  if (A68_HEAP != NO_BYTE) {
-    a68_free (A68_HEAP);
-  }
+  a68_free (A68_HEAP);
   A68 (fixed_heap_pointer) = 0;
   A68 (temp_heap_pointer) = 0;
 }

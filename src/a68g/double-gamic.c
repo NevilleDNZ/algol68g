@@ -93,7 +93,37 @@
 #define TOL_DIFF 0.2q           // Tolerance factor used for the approximation of I_{x,y}^{mu,p} using differences
 #define TOL_ROMBERG 0.1q        // Tolerance factor used to stop the Romberg iterations
 
-// double_plim: compute plim (x), the limit of the partition of the domain (p,x)
+//! @brief compute the G-function in the domain x < 0 and |x| < max (1,p-1)
+// using a recursive integration by parts relation.
+// This function cannot be used when mu > 0.
+//
+// p > 0, integer
+// x < 0, |x| < max (1,p-1)
+
+void double_G_ibp (DOUBLE_T * Gibp, DOUBLE_T p, DOUBLE_T x)
+{
+  BOOL_T odd = (INT_T) (p) % 2 != 0;
+  DOUBLE_T t = fabs_double (x), del;
+  DOUBLE_T tt = 1.0q / (t * t), c = 1.0q / t, d = (p - 1.0q);
+  DOUBLE_T s = c * (t - d);
+  INT_T l = 0;
+  BOOL_T stop;
+  do {
+    c *= d * (d - 1.0q) * tt;
+    d -= 2.0q;
+    del = c * (t - d);
+    s += del;
+    l++;
+    stop = fabs_double (del) < fabs_double (s) * EPS;
+  }
+  while ((l < floor_double ((p - 2.0q) / 2.0q)) && !stop);
+  if (odd && !stop) {
+    s += d * c / t;
+  }
+  *Gibp = ((odd ? -1.0q : 1.0q) * exp_double (-t + lgamma_double (p) - (p - 1.0q) * log_double (t)) + s) / t;
+}
+
+//! @brief compute plim (x), the limit of the partition of the domain (p,x)
 // detailed in the paper.
 //
 //            |      x              if   0 < x
@@ -146,36 +176,6 @@ void double_G_cfrac_lower (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
   *Gcfrac = f;
 }
 
-//! @brief compute the G-function in the domain x < 0 and |x| < max (1,p-1)
-// using a recursive integration by parts relation.
-// This function cannot be used when mu > 0.
-//
-// p > 0, integer
-// x < 0, |x| < max (1,p-1)
-
-void double_G_ibp (DOUBLE_T * Gibp, DOUBLE_T p, DOUBLE_T x)
-{
-  BOOL_T odd = (INT_T) (p) % 2 != 0;
-  DOUBLE_T t = fabs_double (x), del;
-  DOUBLE_T tt = 1.0q / (t * t), c = 1.0q / t, d = (p - 1.0q);
-  DOUBLE_T s = c * (t - d);
-  INT_T l = 0;
-  BOOL_T stop;
-  do {
-    c *= d * (d - 1.0q) * tt;
-    d -= 2.0q;
-    del = c * (t - d);
-    s += del;
-    l++;
-    stop = fabs_double (del) < fabs_double (s) * EPS;
-  }
-  while ((l < floor_double ((p - 2.0q) / 2.0q)) && !stop);
-  if (odd && !stop) {
-    s += d * c / t;
-  }
-  *Gibp = ((odd ? -1.0q : 1.0q) * exp_double (-t + lgamma_double (p) - (p - 1.0q) * log_double (t)) + s) / t;
-}
-
 //! @brief compute the G-function in the domain x > p using a
 // continued fraction.
 //
@@ -184,8 +184,6 @@ void double_G_ibp (DOUBLE_T * Gibp, DOUBLE_T p, DOUBLE_T x)
 
 void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
 {
-  DOUBLE_T c, d, del, f, an, bn;
-  INT_T i, n;
 // Special case
   if (isinf_double (x)) {
     *Gcfrac = 0.0q;
@@ -194,9 +192,9 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
 // Evaluate the continued fraction using Modified Lentz's method. However,
 // as detailed in the paper, perform manually the first pass (n=1), of the
 // initial Modified Lentz's method.
-  an = 1.0q;
-  bn = x + 1.0q - p;
+  DOUBLE_T an = 1.0q, bn = x + 1.0q - p, c, d, del, f;
   BOOL_T t = (bn != 0.0q);
+  INT_T n;
   if (t) {
 // b{1} is non-zero
     f = an / bn;
@@ -212,7 +210,7 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
     d = 1.0q / bn;
     n = 3;
   }
-  i = n - 1;
+  INT_T i = n - 1;
   do {
     an = -i * (i - p);
     bn += 2.0q;
@@ -322,7 +320,6 @@ void double_romberg_estimate (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUB
 
 void deltagammainc_double (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUBLE_T y, DOUBLE_T mu, DOUBLE_T p)
 {
-  DOUBLE_T mA, mB, mx, my, nA, nB, nx, ny;
 // Particular cases
   if (isinf_double (x) && isinf_double (y)) {
     *rho = 0.0q;
@@ -339,10 +336,12 @@ void deltagammainc_double (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUBLE_
     return;
   }
 // Initialization
+  DOUBLE_T mA, mB, mx, my, nA, nB;
+
   double_G_func (&mx, p, mu * x);
-  nx = (isinf_double (x) ? a68_dneginf () : -mu * x + p * log_double (x));
+  DOUBLE_T nx = (isinf_double (x) ? a68_dneginf () : -mu * x + p * log_double (x));
   double_G_func (&my, p, mu * y);
-  ny = (isinf_double (y) ? a68_dneginf () : -mu * y + p * log_double (y));
+  DOUBLE_T ny = (isinf_double (y) ? a68_dneginf () : -mu * y + p * log_double (y));
 
 // Compute (mA,nA) and (mB,nB) such as I_{x,y}^{mu,p} can be
 // approximated by the difference A-B, where A >= B >= 0, A = mA*exp (nA) an 

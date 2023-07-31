@@ -87,11 +87,10 @@ void scope_add (SCOPE_T ** sl, NODE_T * p, TUPLE_T tup)
 
 BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
 {
-  SCOPE_T *s;
   int errors = 0;
 // Transient names cannot be stored.
   if (mask & TRANSIENT) {
-    for (s = top; s != NO_SCOPE; FORWARD (s)) {
+    for (SCOPE_T *s = top; s != NO_SCOPE; FORWARD (s)) {
       if (TRANSIENT (&TUPLE (s)) & TRANSIENT) {
         diagnostic (A68_ERROR, WHERE (s), ERROR_TRANSIENT_NAME);
         STATUS_SET (WHERE (s), SCOPE_ERROR_MASK);
@@ -100,7 +99,7 @@ BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
     }
   }
 // Potential scope violations.
-  for (s = top; s != NO_SCOPE; FORWARD (s)) {
+  for (SCOPE_T *s = top; s != NO_SCOPE; FORWARD (s)) {
     if (dest < LEVEL (&TUPLE (s)) && !STATUS_TEST (WHERE (s), SCOPE_ERROR_MASK)) {
       MOID_T *ws = MOID (WHERE (s));
       if (ws != NO_MOID) {
@@ -527,10 +526,9 @@ void scope_routine_text (NODE_T * p, SCOPE_T ** s)
 {
   NODE_T *q = SUB (p), *routine = (IS (q, PARAMETER_PACK) ? NEXT (q) : q);
   SCOPE_T *x = NO_SCOPE;
-  TUPLE_T routine_tuple;
   scope_statement (NEXT_NEXT (routine), &x);
   (void) scope_check (x, TRANSIENT, LEX_LEVEL (p));
-  routine_tuple = scope_make_tuple (YOUNGEST_ENVIRON (TAX (p)), NOT_TRANSIENT);
+  TUPLE_T routine_tuple = scope_make_tuple (YOUNGEST_ENVIRON (TAX (p)), NOT_TRANSIENT);
   scope_add (s, p, routine_tuple);
 }
 

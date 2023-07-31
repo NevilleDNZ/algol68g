@@ -742,8 +742,8 @@ MOID_T *new_moid (void)
   HAS_ROWS (z) = A68_FALSE;
   SIZE (z) = 0;
   DIGITS (z) = 0;
-  SIZEC (z) = 0;
-  DIGITSC (z) = 0;
+  SIZE_COMPL (z) = 0;
+  DIGITS_COMPL (z) = 0;
   PORTABLE (z) = A68_TRUE;
   DERIVATE (z) = A68_FALSE;
   NODE (z) = NO_NODE;

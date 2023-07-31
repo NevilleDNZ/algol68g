@@ -81,7 +81,7 @@ char *char_to_str (char ch)
   return txt;
 }
 
-//! @brief Pretty-print diagnostic .
+//! @brief Pretty-print diagnostic.
 
 void pretty_diag (FILE_T f, char *p)
 {

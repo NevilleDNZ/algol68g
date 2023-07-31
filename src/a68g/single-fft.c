@@ -31,7 +31,7 @@
 
 //! @brief Map GSL error handler onto a68g error handler.
 
-void fft_error_handler (const char *reason, const char *file, int line, int gsl_errno)
+static void fft_error_handler (const char *reason, const char *file, int line, int gsl_errno)
 {
   if (line != 0) {
     ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s in line %d of file %s", reason, line, file) >= 0);
@@ -44,10 +44,10 @@ void fft_error_handler (const char *reason, const char *file, int line, int gsl_
 
 //! @brief Detect math errors.
 
-void fft_test_error (int rc)
+static void fft_test_error (int ret)
 {
-  if (rc != 0) {
-    fft_error_handler ("math error", "", 0, rc);
+  if (ret != 0) {
+    fft_error_handler ("math error", "", 0, ret);
   }
 }
 
@@ -55,27 +55,23 @@ void fft_test_error (int rc)
 
 REAL_T *pop_array_real (NODE_T * p, int *len)
 {
-  A68_REF desc;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  int inc, iindex, k;
-  BYTE_T *base;
-  REAL_T *v;
 // Pop arguments.
+  A68_REF desc;
   POP_REF (p, &desc);
   CHECK_REF (p, desc, M_ROW_REAL);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &desc);
   *len = ROW_SIZE (tup);
   if ((*len) <= 0) {
     return NO_REAL;
   }
-  v = (REAL_T *) get_heap_space (2 * (size_t) (*len) * sizeof (REAL_T));
+  REAL_T *v = (REAL_T *) get_heap_space (2 * (size_t) (*len) * sizeof (REAL_T));
   fft_test_error (v == NO_REAL ? GSL_ENOMEM : GSL_SUCCESS);
-  base = DEREF (BYTE_T, &ARRAY (arr));
-  iindex = VECTOR_OFFSET (arr, tup);
-  inc = SPAN (tup) * ELEM_SIZE (arr);
-  for (k = 0; k < (*len); k++, iindex += inc) {
-    A68_REAL *x = (A68_REAL *) (base + iindex);
+  BYTE_T *base = DEREF (BYTE_T, &ARRAY (arr));
+  int index = VECTOR_OFFSET (arr, tup);
+  int inc = SPAN (tup) * ELEM_SIZE (arr);
+  for (int k = 0; k < (*len); k++, index += inc) {
+    A68_REAL *x = (A68_REAL *) (base + index);
     CHECK_INIT (p, INITIALISED (x), M_REAL);
     v[2 * k] = VALUE (x);
     v[2 * k + 1] = 0.0;
@@ -87,17 +83,13 @@ REAL_T *pop_array_real (NODE_T * p, int *len)
 
 void push_array_real (NODE_T * p, REAL_T * v, int len)
 {
-  A68_REF desc, row;
-  A68_ARRAY arr;
-  A68_TUPLE tup;
-  int inc, iindex, k;
-  BYTE_T *base;
+  A68_REF desc, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (desc, row, arr, tup, M_ROW_REAL, M_REAL, len);
-  base = DEREF (BYTE_T, &ARRAY (&arr));
-  iindex = VECTOR_OFFSET (&arr, &tup);
-  inc = SPAN (&tup) * ELEM_SIZE (&arr);
-  for (k = 0; k < len; k++, iindex += inc) {
-    A68_REAL *x = (A68_REAL *) (base + iindex);
+  BYTE_T *base = DEREF (BYTE_T, &ARRAY (&arr));
+  int index = VECTOR_OFFSET (&arr, &tup);
+  int inc = SPAN (&tup) * ELEM_SIZE (&arr);
+  for (int k = 0; k < len; k++, index += inc) {
+    A68_REAL *x = (A68_REAL *) (base + index);
     STATUS (x) = INIT_MASK;
     VALUE (x) = v[2 * k];
     CHECK_REAL (p, VALUE (x));
@@ -109,28 +101,24 @@ void push_array_real (NODE_T * p, REAL_T * v, int len)
 
 REAL_T *pop_array_complex (NODE_T * p, int *len)
 {
-  A68_REF desc;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  int inc, iindex, k;
-  BYTE_T *base;
-  REAL_T *v;
 // Pop arguments.
+  A68_REF desc;
   POP_REF (p, &desc);
   CHECK_REF (p, desc, M_ROW_COMPLEX);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &desc);
   *len = ROW_SIZE (tup);
   if ((*len) <= 0) {
     return NO_REAL;
   }
-  v = (REAL_T *) get_heap_space (2 * (size_t) (*len) * sizeof (REAL_T));
+  REAL_T *v = (REAL_T *) get_heap_space (2 * (size_t) (*len) * sizeof (REAL_T));
   fft_test_error (v == NO_REAL ? GSL_ENOMEM : GSL_SUCCESS);
-  base = DEREF (BYTE_T, &ARRAY (arr));
-  iindex = VECTOR_OFFSET (arr, tup);
-  inc = SPAN (tup) * ELEM_SIZE (arr);
-  for (k = 0; k < (*len); k++, iindex += inc) {
-    A68_REAL *re = (A68_REAL *) (base + iindex);
-    A68_REAL *im = (A68_REAL *) (base + iindex + SIZE (M_REAL));
+  BYTE_T *base = DEREF (BYTE_T, &ARRAY (arr));
+  int index = VECTOR_OFFSET (arr, tup);
+  int inc = SPAN (tup) * ELEM_SIZE (arr);
+  for (int k = 0; k < (*len); k++, index += inc) {
+    A68_REAL *re = (A68_REAL *) (base + index);
+    A68_REAL *im = (A68_REAL *) (base + index + SIZE (M_REAL));
     CHECK_INIT (p, INITIALISED (re), M_COMPLEX);
     CHECK_INIT (p, INITIALISED (im), M_COMPLEX);
     v[2 * k] = VALUE (re);
@@ -143,18 +131,14 @@ REAL_T *pop_array_complex (NODE_T * p, int *len)
 
 void push_array_complex (NODE_T * p, REAL_T * v, int len)
 {
-  A68_REF desc, row;
-  A68_ARRAY arr;
-  A68_TUPLE tup;
-  int inc, iindex, k;
-  BYTE_T *base;
+  A68_REF desc, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (desc, row, arr, tup, M_ROW_COMPLEX, M_COMPLEX, len);
-  base = DEREF (BYTE_T, &ARRAY (&arr));
-  iindex = VECTOR_OFFSET (&arr, &tup);
-  inc = SPAN (&tup) * ELEM_SIZE (&arr);
-  for (k = 0; k < len; k++, iindex += inc) {
-    A68_REAL *re = (A68_REAL *) (base + iindex);
-    A68_REAL *im = (A68_REAL *) (base + iindex + SIZE (M_REAL));
+  BYTE_T *base = DEREF (BYTE_T, &ARRAY (&arr));
+  int index = VECTOR_OFFSET (&arr, &tup);
+  int inc = SPAN (&tup) * ELEM_SIZE (&arr);
+  for (int k = 0; k < len; k++, index += inc) {
+    A68_REAL *re = (A68_REAL *) (base + index);
+    A68_REAL *im = (A68_REAL *) (base + index + SIZE (M_REAL));
     STATUS (re) = INIT_MASK;
     VALUE (re) = v[2 * k];
     STATUS (im) = INIT_MASK;
@@ -170,22 +154,17 @@ void genie_prime_factors (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
   A68_INT n;
-  A68_REF desc, row;
-  A68_ARRAY arr;
-  A68_TUPLE tup;
-  int len, inc, iindex, k;
-  BYTE_T *base;
-  gsl_fft_complex_wavetable *wt;
   POP_OBJECT (p, &n, A68_INT);
   CHECK_INIT (p, INITIALISED (&n), M_INT);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) (VALUE (&n)));
-  len = (int) (NF (wt));
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) (VALUE (&n)));
+  int len = (int) (NF (wt));
+  A68_REF desc, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (desc, row, arr, tup, M_ROW_INT, M_INT, len);
-  base = DEREF (BYTE_T, &ARRAY (&arr));
-  iindex = VECTOR_OFFSET (&arr, &tup);
-  inc = SPAN (&tup) * ELEM_SIZE (&arr);
-  for (k = 0; k < len; k++, iindex += inc) {
-    A68_INT *x = (A68_INT *) (base + iindex);
+  BYTE_T *base = DEREF (BYTE_T, &ARRAY (&arr));
+  int index = VECTOR_OFFSET (&arr, &tup);
+  int inc = SPAN (&tup) * ELEM_SIZE (&arr);
+  for (int k = 0; k < len; k++, index += inc) {
+    A68_INT *x = (A68_INT *) (base + index);
     STATUS (x) = INIT_MASK;
     VALUE (x) = (int) ((FACTOR (wt))[k]);
   }
@@ -199,22 +178,17 @@ void genie_prime_factors (NODE_T * p)
 void genie_fft_complex_forward (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
-  int len, rc;
-  REAL_T *data;
-  gsl_fft_complex_wavetable *wt;
-  gsl_fft_complex_workspace *ws;
-  data = pop_array_complex (p, &len);
+  int len;
+  REAL_T *data = pop_array_complex (p, &len);
   fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
-  ws = gsl_fft_complex_workspace_alloc ((size_t) len);
-  rc = gsl_fft_complex_forward (data, 1, (size_t) len, wt, ws);
-  fft_test_error (rc);
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
+  gsl_fft_complex_workspace *ws = gsl_fft_complex_workspace_alloc ((size_t) len);
+  int ret = gsl_fft_complex_forward (data, 1, (size_t) len, wt, ws);
+  fft_test_error (ret);
   push_array_complex (p, data, len);
   gsl_fft_complex_wavetable_free (wt);
   gsl_fft_complex_workspace_free (ws);
-  if (data != NO_REAL) {
-    a68_free (data);
-  }
+  a68_free (data);
   (void) gsl_set_error_handler (save_handler);
 }
 
@@ -223,22 +197,17 @@ void genie_fft_complex_forward (NODE_T * p)
 void genie_fft_complex_backward (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
-  int len, rc;
-  REAL_T *data;
-  gsl_fft_complex_wavetable *wt;
-  gsl_fft_complex_workspace *ws;
-  data = pop_array_complex (p, &len);
+  int len;
+  REAL_T *data = pop_array_complex (p, &len);
   fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
-  ws = gsl_fft_complex_workspace_alloc ((size_t) len);
-  rc = gsl_fft_complex_backward (data, 1, (size_t) len, wt, ws);
-  fft_test_error (rc);
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
+  gsl_fft_complex_workspace *ws = gsl_fft_complex_workspace_alloc ((size_t) len);
+  int ret = gsl_fft_complex_backward (data, 1, (size_t) len, wt, ws);
+  fft_test_error (ret);
   push_array_complex (p, data, len);
   gsl_fft_complex_wavetable_free (wt);
   gsl_fft_complex_workspace_free (ws);
-  if (data != NO_REAL) {
-    a68_free (data);
-  }
+  a68_free (data);
   (void) gsl_set_error_handler (save_handler);
 }
 
@@ -247,22 +216,17 @@ void genie_fft_complex_backward (NODE_T * p)
 void genie_fft_complex_inverse (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
-  int len, rc;
-  REAL_T *data;
-  gsl_fft_complex_wavetable *wt;
-  gsl_fft_complex_workspace *ws;
-  data = pop_array_complex (p, &len);
+  int len;
+  REAL_T *data = pop_array_complex (p, &len);
   fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
-  ws = gsl_fft_complex_workspace_alloc ((size_t) len);
-  rc = gsl_fft_complex_inverse (data, 1, (size_t) len, wt, ws);
-  fft_test_error (rc);
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
+  gsl_fft_complex_workspace *ws = gsl_fft_complex_workspace_alloc ((size_t) len);
+  int ret = gsl_fft_complex_inverse (data, 1, (size_t) len, wt, ws);
+  fft_test_error (ret);
   push_array_complex (p, data, len);
   gsl_fft_complex_wavetable_free (wt);
   gsl_fft_complex_workspace_free (ws);
-  if (data != NO_REAL) {
-    a68_free (data);
-  }
+  a68_free (data);
   (void) gsl_set_error_handler (save_handler);
 }
 
@@ -271,22 +235,17 @@ void genie_fft_complex_inverse (NODE_T * p)
 void genie_fft_forward (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
-  int len, rc;
-  REAL_T *data;
-  gsl_fft_complex_wavetable *wt;
-  gsl_fft_complex_workspace *ws;
-  data = pop_array_real (p, &len);
+  int len;
+  REAL_T *data = pop_array_real (p, &len);
   fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
-  ws = gsl_fft_complex_workspace_alloc ((size_t) len);
-  rc = gsl_fft_complex_forward (data, 1, (size_t) len, wt, ws);
-  fft_test_error (rc);
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
+  gsl_fft_complex_workspace *ws = gsl_fft_complex_workspace_alloc ((size_t) len);
+  int ret = gsl_fft_complex_forward (data, 1, (size_t) len, wt, ws);
+  fft_test_error (ret);
   push_array_complex (p, data, len);
   gsl_fft_complex_wavetable_free (wt);
   gsl_fft_complex_workspace_free (ws);
-  if (data != NO_REAL) {
-    a68_free (data);
-  }
+  a68_free (data);
   (void) gsl_set_error_handler (save_handler);
 }
 
@@ -295,22 +254,17 @@ void genie_fft_forward (NODE_T * p)
 void genie_fft_backward (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
-  int len, rc;
-  REAL_T *data;
-  gsl_fft_complex_wavetable *wt;
-  gsl_fft_complex_workspace *ws;
-  data = pop_array_complex (p, &len);
+  int len;
+  REAL_T *data = pop_array_complex (p, &len);
   fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
-  ws = gsl_fft_complex_workspace_alloc ((size_t) len);
-  rc = gsl_fft_complex_backward (data, 1, (size_t) len, wt, ws);
-  fft_test_error (rc);
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
+  gsl_fft_complex_workspace *ws = gsl_fft_complex_workspace_alloc ((size_t) len);
+  int ret = gsl_fft_complex_backward (data, 1, (size_t) len, wt, ws);
+  fft_test_error (ret);
   push_array_real (p, data, len);
   gsl_fft_complex_wavetable_free (wt);
   gsl_fft_complex_workspace_free (ws);
-  if (data != NO_REAL) {
-    a68_free (data);
-  }
+  a68_free (data);
   (void) gsl_set_error_handler (save_handler);
 }
 
@@ -319,22 +273,17 @@ void genie_fft_backward (NODE_T * p)
 void genie_fft_inverse (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (fft_error_handler);
-  int len, rc;
-  REAL_T *data;
-  gsl_fft_complex_wavetable *wt;
-  gsl_fft_complex_workspace *ws;
-  data = pop_array_complex (p, &len);
+  int len;
+  REAL_T *data = pop_array_complex (p, &len);
   fft_test_error (len == 0 ? GSL_EDOM : GSL_SUCCESS);
-  wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
-  ws = gsl_fft_complex_workspace_alloc ((size_t) len);
-  rc = gsl_fft_complex_inverse (data, 1, (size_t) len, wt, ws);
-  fft_test_error (rc);
+  gsl_fft_complex_wavetable *wt = gsl_fft_complex_wavetable_alloc ((size_t) len);
+  gsl_fft_complex_workspace *ws = gsl_fft_complex_workspace_alloc ((size_t) len);
+  int ret = gsl_fft_complex_inverse (data, 1, (size_t) len, wt, ws);
+  fft_test_error (ret);
   push_array_real (p, data, len);
   gsl_fft_complex_wavetable_free (wt);
   gsl_fft_complex_workspace_free (ws);
-  if (data != NO_REAL) {
-    a68_free (data);
-  }
+  a68_free (data);
   (void) gsl_set_error_handler (save_handler);
 }
 

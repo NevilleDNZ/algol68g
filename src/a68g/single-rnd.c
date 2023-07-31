@@ -104,14 +104,13 @@ static taus113_state_t rng_state;
 unt taus113_get (void *vstate)
 {
   taus113_state_t *state = (taus113_state_t *) vstate;
-  unt long b1, b2, b3, b4;
-  b1 = ((((state->z1 << 6UL) & MASK) ^ state->z1) >> 13UL);
+  unt long b1 = ((((state->z1 << 6UL) & MASK) ^ state->z1) >> 13UL);
   state->z1 = ((((state->z1 & 4294967294UL) << 18UL) & MASK) ^ b1);
-  b2 = ((((state->z2 << 2UL) & MASK) ^ state->z2) >> 27UL);
+  unt long b2 = ((((state->z2 << 2UL) & MASK) ^ state->z2) >> 27UL);
   state->z2 = ((((state->z2 & 4294967288UL) << 2UL) & MASK) ^ b2);
-  b3 = ((((state->z3 << 13UL) & MASK) ^ state->z3) >> 21UL);
+  unt long b3 = ((((state->z3 << 13UL) & MASK) ^ state->z3) >> 21UL);
   state->z3 = ((((state->z3 & 4294967280UL) << 7UL) & MASK) ^ b3);
-  b4 = ((((state->z4 << 3UL) & MASK) ^ state->z4) >> 12UL);
+  unt long b4 = ((((state->z4 << 3UL) & MASK) ^ state->z4) >> 12UL);
   state->z4 = ((((state->z4 & 4294967168UL) << 13UL) & MASK) ^ b4);
   return (state->z1 ^ state->z2 ^ state->z3 ^ state->z4);
 }

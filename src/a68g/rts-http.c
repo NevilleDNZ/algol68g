@@ -67,23 +67,23 @@ int a68_connect (int socket_id, struct sockaddr * addr, size_t addrlen, struct t
   if (fcntl (socket_id, F_SETFL, flags | O_NONBLOCK) < 0) {
     return -1;
   }
-  int rc = connect (socket_id, addr, addrlen);
-  if (rc < 0) {
+  int ret = connect (socket_id, addr, addrlen);
+  if (ret < 0) {
     if (errno == EINPROGRESS) {
       fd_set wait_set;
       FD_ZERO (&wait_set);
       FD_SET (socket_id, &wait_set);
-      rc = select (socket_id + 1, NULL, &wait_set, NULL, timeout);
+      ret = select (socket_id + 1, NULL, &wait_set, NULL, timeout);
     }
   } else {
-    rc = 1;
+    ret = 1;
   }
   if (fcntl (socket_id, F_SETFL, flags) < 0) {
     return -1;
   }
-  if (rc < 0) {
+  if (ret < 0) {
     return -1;
-  } else if (rc == 0) {
+  } else if (ret == 0) {
     errno = ETIMEDOUT;
     return 1;
   } else {

@@ -476,7 +476,7 @@ void mp_romberg_iterations
   (void) add_mp (q, &R[IX (adr0, digs)], trm, trn, digs);
 // REAL_T pow4 = 4;
   MP_T *pow4 = lit_mp (q, 4, 0, digs);
-  for (unt m = 1; m <= n; m++) {
+  for (int m = 1; m <= n; m++) {
 //  R[adr0 + m] = (pow4 * R[adr0 + (m - 1)] - R[adr0_prev + (m - 1)]) / (pow4 - 1);
     (void) mul_mp (q, trm, pow4, &R[IX (adr0 + m - 1, digs)], digs);
     (void) sub_mp (q, trm, trm, &R[IX (adr0_prev + m - 1, digs)], digs);

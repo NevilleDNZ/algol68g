@@ -95,8 +95,8 @@ static char *win32_realpath (char *name, char *resolved)
   } else {
     res = resolved;
   }
-  int rc = GetFullPathName (name, PATH_MAX, res, (char **) NO_TEXT);
-  if (rc == 0) {
+  int ret = GetFullPathName (name, PATH_MAX, res, (char **) NO_TEXT);
+  if (ret == 0) {
     return NO_TEXT;
   } else {
     win32_slash (res);

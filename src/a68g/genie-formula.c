@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for formulas.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -36,11 +36,8 @@
 
 PROP_T genie_identity_relation (NODE_T * p)
 {
-  PROP_T self;
   NODE_T *lhs = SUB (p), *rhs = NEXT_NEXT (lhs);
   A68_REF x, y;
-  UNIT (&self) = genie_identity_relation;
-  SOURCE (&self) = p;
   GENIE_UNIT (lhs);
   POP_REF (p, &y);
   GENIE_UNIT (rhs);
@@ -50,14 +47,16 @@ PROP_T genie_identity_relation (NODE_T * p)
   } else {
     PUSH_VALUE (p, (BOOL_T) (ADDRESS (&x) != ADDRESS (&y)), A68_BOOL);
   }
+  PROP_T self;
+  UNIT (&self) = genie_identity_relation;
+  SOURCE (&self) = p;
   return self;
 }
 
-//! @brief Push result of ANDF.
+//! @brief Push result of ANDF or THEF.
 
 PROP_T genie_and_function (NODE_T * p)
 {
-  PROP_T self;
   A68_BOOL x;
   GENIE_UNIT (SUB (p));
   POP_OBJECT (p, &x, A68_BOOL);
@@ -66,16 +65,16 @@ PROP_T genie_and_function (NODE_T * p)
   } else {
     PUSH_VALUE (p, A68_FALSE, A68_BOOL);
   }
+  PROP_T self;
   UNIT (&self) = genie_and_function;
   SOURCE (&self) = p;
   return self;
 }
 
-//! @brief Push result of ORF.
+//! @brief Push result of ORF or ELSF.
 
 PROP_T genie_or_function (NODE_T * p)
 {
-  PROP_T self;
   A68_BOOL x;
   GENIE_UNIT (SUB (p));
   POP_OBJECT (p, &x, A68_BOOL);
@@ -84,6 +83,7 @@ PROP_T genie_or_function (NODE_T * p)
   } else {
     PUSH_VALUE (p, A68_TRUE, A68_BOOL);
   }
+  PROP_T self;
   UNIT (&self) = genie_or_function;
   SOURCE (&self) = p;
   return self;
@@ -93,9 +93,9 @@ PROP_T genie_or_function (NODE_T * p)
 
 void genie_call_operator (NODE_T * p, ADDR_T pop_sp)
 {
-  A68_PROCEDURE *z;
   ADDR_T pop_fp = A68_FP;
   MOID_T *pr_mode = MOID (TAX (p));
+  A68_PROCEDURE *z;
   FRAME_GET (z, A68_PROCEDURE, p);
   genie_call_procedure (p, pr_mode, MOID (z), pr_mode, z, pop_sp, pop_fp);
   STACK_DNS (p, SUB (pr_mode), A68_FP);
@@ -107,15 +107,15 @@ PROP_T genie_monadic (NODE_T * p)
 {
   NODE_T *op = SUB (p);
   NODE_T *u = NEXT (op);
-  PROP_T self;
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   GENIE_UNIT (u);
   STACK_DNS (u, MOID (u), A68_FP);
   if (PROCEDURE (TAX (op)) != NO_GPROC) {
     (void) ((*(PROCEDURE (TAX (op)))) (op));
   } else {
-    genie_call_operator (op, sp);
+    genie_call_operator (op, pop_sp);
   }
+  PROP_T self;
   UNIT (&self) = genie_monadic;
   SOURCE (&self) = p;
   return self;
@@ -160,10 +160,10 @@ PROP_T genie_dyadic (NODE_T * p)
 
 PROP_T genie_formula (NODE_T * p)
 {
-  PROP_T self, lhs, rhs;
   NODE_T *u = SUB (p);
   NODE_T *op = NEXT (u);
   ADDR_T pop_sp = A68_SP;
+  PROP_T self, lhs, rhs;
   UNIT (&self) = genie_formula;
   SOURCE (&self) = p;
   GENIE_UNIT_2 (u, lhs);

@@ -40,11 +40,11 @@ MP_T *erf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   } else {
     ADDR_T pop_sp = A68_SP;
 // Note we need double precision!
-    int gdigs = FUN_DIGITS (2 * digs), sign;
     BOOL_T siga = A68_TRUE;
+    int sign = MP_SIGN (x);
+    int gdigs = FUN_DIGITS (2 * digs);
     MP_T *y_g = nil_mp (p, gdigs);
     MP_T *z_g = len_mp (p, x, digs, gdigs);
-    sign = MP_SIGN (x);
     (void) abs_mp (p, z_g, z_g, gdigs);
     (void) set_mp (y_g, gdigs * LOG_MP_RADIX, 0, gdigs);
     (void) sqrt_mp (p, y_g, y_g, gdigs);
@@ -61,7 +61,7 @@ MP_T *erf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
       (void) mul_mp (p, y_g, z_g, z_g, gdigs);
       SET_MP_ONE (s_g, gdigs);
       SET_MP_ONE (t_g, gdigs);
-      for (unt k = 1; siga; k++) {
+      for (int k = 1; siga; k++) {
         (void) mul_mp (p, t_g, y_g, t_g, gdigs);
         (void) div_mp_digit (p, t_g, t_g, (MP_T) k, gdigs);
         (void) div_mp_digit (p, u_g, t_g, (MP_T) (2 * k + 1), gdigs);
@@ -100,7 +100,7 @@ MP_T *erfc_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *inverf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  int gdigs, sign;
+  int gdigs;
   BOOL_T siga = A68_TRUE;
 // Precision adapts to the argument, but not too much.
 // If this is not precise enough, you need more digs
@@ -131,7 +131,7 @@ MP_T *inverf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 #endif
   MP_T *x_g = len_mp (p, x, digs, gdigs);
   MP_T *y_g = nil_mp (p, gdigs);
-  sign = MP_SIGN (x);
+  int sign = MP_SIGN (x);
   (void) abs_mp (p, x_g, x_g, gdigs);
   SET_MP_ONE (y_g, gdigs);
   (void) sub_mp (p, y_g, x_g, y_g, gdigs);
@@ -219,7 +219,7 @@ void mp_gamma_table (NODE_T *p, int digs)
     MP_T *hlf = nil_mp (p, gdigs);
     MP_T *fac = lit_mp (p, 1, 0, gdigs);
     SET_MP_HALF (hlf, gdigs);
-    for (unt k = 1; k < b; k++) {
+    for (int k = 1; k < b; k++) {
       set_mp (dk, k, 0, gdigs);
       (void) sub_mp (p, ak, db, dk, gdigs);
       (void) sub_mp (p, dz, dk, hlf, gdigs);
@@ -435,7 +435,7 @@ MP_T *beta_inc_mp (NODE_T * p, MP_T * z, MP_T * s, MP_T *t, MP_T *x, int digs)
   MP_T *u = lit_mp (p, 1, 0, gdigs);
   MP_T *v = nil_mp (p, gdigs);
   MP_T *w = nil_mp (p, gdigs);
-  for (unt N = 0; cont && N < lim; N++) {
+  for (int N = 0; cont && N < lim; N++) {
     if (N == 0) {
       SET_MP_ONE (T, gdigs);
     } else if (N % 2 == 0) {

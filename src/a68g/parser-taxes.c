@@ -355,10 +355,9 @@ void tax_parameter_list (NODE_T * p)
 // parameters are always local.
       HEAP (add_tag (TABLE (p), IDENTIFIER, p, NO_MOID, PARAMETER_IDENTIFIER)) = LOC_SYMBOL;
     } else if (IS (p, DECLARER)) {
-      TAG_T *s;
       tax_parameter_list (NEXT (p));
 // last identifier entries are identifiers with this declarer.
-      for (s = IDENTIFIERS (TABLE (p)); s != NO_TAG && MOID (s) == NO_MOID; FORWARD (s)) {
+      for (TAG_T *s = IDENTIFIERS (TABLE (p)); s != NO_TAG && MOID (s) == NO_MOID; FORWARD (s)) {
         MOID (s) = MOID (p);
       }
       tax_parameters (SUB (p));

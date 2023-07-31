@@ -107,8 +107,8 @@ MP_T *mpfr_to_mp (NODE_T * p, MP_T * z, mpfr_t * x, int digits)
     expo++;
   }
 // Transport digits of x to the mantissa of z.
-  INT_T sum = 0, W = (MP_RADIX / 10); int j, k;
-  for (k = 0, j = 1; j <= digits && k < mpfr_digits (); k++) {
+  INT_T sum = 0, W = (MP_RADIX / 10); int j = 1;
+  for (int k = 0; j <= digits && k < mpfr_digits (); k++) {
     mpfr_mul_ui (t, u, 10, DEFAULT);
     mpfr_floor (v, t);
     mpfr_frac (u, t, DEFAULT);

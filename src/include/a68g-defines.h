@@ -19,6 +19,10 @@
 //! more details. You should have received a copy of the GNU General Public 
 //! License along with this program. If not, see [http://www.gnu.org/licenses/].
 
+//! @section Synopsis
+//!
+//! General macro definitions.
+
 #if !defined (__A68G_DEFINES_H__)
 #define __A68G_DEFINES_H__
 
@@ -286,7 +290,7 @@
 #define DEVICE_OPENED(p) ((p)->device_opened)
 #define DIAGNOSTICS(p) ((p)->diagnostics)
 #define DIGITS(p) ((p)->digits)
-#define DIGITSC(p) ((p)->digitsc)
+#define DIGITS_COMPL(p) ((p)->digits_compl)
 #define DIM(p) ((p)->dim)
 #define DISPLAY(p) ((p)->display)
 #define DRAW(p) ((p)->draw)
@@ -564,7 +568,7 @@
 #define SIZE(p) ((p)->size)
 #define SIZE1(p) ((p)->size1)
 #define SIZE2(p) ((p)->size2)
-#define SIZEC(p) ((p)->sizec)
+#define SIZE_COMPL(p) ((p)->size_compl)
 #define SLICE(p) ((p)->slice)
 #define SLICE_OFFSET(p) ((p)->slice_offset)
 #define SO(p) ((p)->so)

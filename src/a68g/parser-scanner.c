@@ -555,8 +555,7 @@ int get_source_size (void)
 
 void append_environ (char *str[], LINE_T ** ref_l, int *line_num, char *name)
 {
-  int k;
-  for (k = 0; str[k] != NO_TEXT; k++) {
+  for (int k = 0; str[k] != NO_TEXT; k++) {
     int zero_line_num = 0;
     (*line_num)++;
     append_source_line (str[k], ref_l, &zero_line_num, name);

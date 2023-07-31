@@ -19,6 +19,10 @@
 //! more details. You should have received a copy of the GNU General Public 
 //! License along with this program. If not, see [http://www.gnu.org/licenses/].
 
+//! @section Synopsis
+//!
+//! Internal math tables.
+
 static const REAL_T factable[A68_MAX_FAC + 1] = {
   1.000000000000000000000e0, // 0  
   1.000000000000000000000e0, // 1  
