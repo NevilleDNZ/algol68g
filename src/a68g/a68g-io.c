@@ -48,10 +48,9 @@ void io_close_tty_line (void)
 
 char get_stdin_char (void)
 {
-  ssize_t j;
   char ch[4];
   errno = 0;
-  j = io_read_conv (STDIN_FILENO, &(ch[0]), 1);
+  ssize_t j = io_read_conv (STDIN_FILENO, &(ch[0]), 1);
   ABEND (j < 0, ERROR_ACTION, __func__);
   return (char) (j == 1 ? ch[0] : EOF_CHAR);
 }
@@ -69,7 +68,6 @@ char *read_string_from_tty (char *prompt)
   A68 (chars_in_tty_line) = (int) strlen (A68 (input_line));
   a68_free (line);
   return A68 (input_line);
-
 #else
   int ch, k = 0, n;
   if (prompt != NO_TEXT) {
@@ -99,17 +97,14 @@ char *read_string_from_tty (char *prompt)
 
 void io_write_string (FILE_T f, const char *z)
 {
-  ssize_t j;
   errno = 0;
   if (f != STDOUT_FILENO && f != STDERR_FILENO) {
 // Writing to file.
-    j = io_write_conv (f, z, strlen (z));
+    ssize_t j = io_write_conv (f, z, strlen (z));
     ABEND (j < 0, ERROR_ACTION, __func__);
   } else {
-// Writing to TTY.
-    int first, k;
-// Write parts until end-of-string.
-    first = 0;
+// Writing to TTY parts until end-of-string.
+    int first = 0, k;
     do {
       k = first;
 // How far can we get?.
@@ -119,7 +114,7 @@ void io_write_string (FILE_T f, const char *z)
       if (k > first) {
 // Write these characters.
         int n = k - first;
-        j = io_write_conv (f, &(z[first]), (size_t) n);
+        ssize_t j = io_write_conv (f, &(z[first]), (size_t) n);
         ABEND (j < 0, ERROR_ACTION, __func__);
         A68 (chars_in_tty_line) += n;
       }
@@ -127,7 +122,7 @@ void io_write_string (FILE_T f, const char *z)
 // Pretty-print newline.
         k++;
         first = k;
-        j = io_write_conv (f, NEWLINE_STRING, 1);
+        ssize_t j = io_write_conv (f, NEWLINE_STRING, 1);
         ABEND (j < 0, ERROR_ACTION, __func__);
         A68 (chars_in_tty_line) = 0;
       }

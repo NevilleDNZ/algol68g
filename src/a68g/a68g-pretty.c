@@ -32,6 +32,8 @@
 #include "a68g-prelude.h"
 #include "a68g-optimiser.h"
 
+#define MAX_INDENT 60
+
 #define ONE_LINER (A68_TRUE)
 #define KEYWORD (A68_TRUE)
 #define BLANK {put_str (" ");}
@@ -51,7 +53,9 @@ void put_nl (void)
 {
   WRITE (A68_INDENT (fd), "\n");
   for (A68_INDENT (col) = 1; A68_INDENT (col) < A68_INDENT (ind); A68_INDENT (col)++) {
-    WRITE (A68_INDENT (fd), " ");
+    if (A68_INDENT (col) <= MAX_INDENT) {
+      WRITE (A68_INDENT (fd), " ");
+    }
   }
 }
 
@@ -786,95 +790,38 @@ void indent_format (NODE_T * p)
       } else {
         switch (ATTRIBUTE (p)) {
         case FORMAT_ITEM_A:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_B:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_C:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_D:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_E:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_ESCAPE:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_F:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_G:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_H:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_I:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_J:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_K:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_L:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_M:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_MINUS:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_N:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_O:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_P:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_PLUS:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_POINT:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_Q:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_R:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_S:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_T:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_U:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_V:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_W:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_X:
-          put_sym (p, !KEYWORD);
-          break;
         case FORMAT_ITEM_Y:
-          put_sym (p, !KEYWORD);
-          break;
-        case FORMAT_ITEM_Z:
-          put_sym (p, !KEYWORD);
-          break;
+        case FORMAT_ITEM_Z: {
+            put_sym (p, !KEYWORD);
+            break;
+          }
         }
       }
     }

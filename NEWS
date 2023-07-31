@@ -1,3 +1,9 @@
+Version 3.3.0, August 2023
+* Minor fixes.
+* Add procedure "https content" (UNIX).
+* Add procedures "puts", "gets", "putsf", "getsf" and
+  "string", "stringf".
+
 Version 3.2.1, July 2023
 * Minor fixes.
 * Distribution updates.

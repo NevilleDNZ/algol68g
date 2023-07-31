@@ -147,9 +147,8 @@ void genie_shorten_mp_to_int (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
   int digs = DIGITS (mode), size = SIZE (mode);
-  MP_T *z;
   DECREMENT_STACK_POINTER (p, size);
-  z = (MP_T *) STACK_TOP;
+  MP_T *z = (MP_T *) STACK_TOP;
   MP_STATUS (z) = (MP_T) INIT_MASK;
   PUSH_VALUE (p, mp_to_int (p, z, digs), A68_INT);
 }
@@ -172,9 +171,8 @@ void genie_shorten_mp_to_real (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
   int digs = DIGITS (mode), size = SIZE (mode);
-  MP_T *z;
   DECREMENT_STACK_POINTER (p, size);
-  z = (MP_T *) STACK_TOP;
+  MP_T *z = (MP_T *) STACK_TOP;
   MP_STATUS (z) = (MP_T) INIT_MASK;
   PUSH_VALUE (p, mp_to_real (p, z, digs), A68_REAL);
 }
@@ -623,9 +621,8 @@ void genie_pow_mp_int (NODE_T * p)
   MOID_T *mode = LHS_MODE (p);
   int digs = DIGITS (mode), size = SIZE (mode);
   A68_INT k;
-  MP_T *x;
   POP_OBJECT (p, &k, A68_INT);
-  x = (MP_T *) STACK_OFFSET (-size);
+  MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) pow_mp_int (p, x, x, VALUE (&k), digs);
   MP_STATUS (x) = (MP_T) INIT_MASK;
 }
@@ -723,9 +720,8 @@ void genie_pow_mp_int_int (NODE_T * p)
   MOID_T *m = LHS_MODE (p);
   int digs = DIGITS (m), size = SIZE (m);
   A68_INT k;
-  MP_T *x;
   POP_OBJECT (p, &k, A68_INT);
-  x = (MP_T *) STACK_OFFSET (-size);
+  MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) pow_mp_int (p, x, x, VALUE (&k), digs);
   test_mp_int_range (p, x, m);
   MP_STATUS (x) = (MP_T) INIT_MASK;
@@ -937,9 +933,8 @@ void genie_shorten_long_mp_complex_to_mp_complex (NODE_T * p)
   int digs = DIGITS (M_LONG_REAL), size = SIZE (M_LONG_REAL);
   int gdigs = DIGITS (M_LONG_LONG_REAL), size_g = SIZE (M_LONG_LONG_REAL);
   ADDR_T pop_sp = A68_SP;
-  MP_T *a, *b;
-  b = (MP_T *) STACK_OFFSET (-size_g);
-  a = (MP_T *) STACK_OFFSET (-2 * size_g);
+  MP_T *b = (MP_T *) STACK_OFFSET (-size_g);
+  MP_T *a = (MP_T *) STACK_OFFSET (-2 * size_g);
   (void) shorten_mp (p, a, digs, a, gdigs);
   (void) shorten_mp (p, &a[LEN_MP (digs)], digs, b, gdigs);
   A68_SP = pop_sp;
@@ -1114,12 +1109,9 @@ void genie_pow_mp_complex_int (NODE_T * p)
 {
   MOID_T *mode = SUB_MOID (p);
   int digs = DIGITSC (mode), size = SIZEC (mode);
-  ADDR_T pop_sp;
   A68_INT j;
-  int expo;
-  BOOL_T negative;
   POP_OBJECT (p, &j, A68_INT);
-  pop_sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   MP_T *im_x = (MP_T *) STACK_OFFSET (-size);
   MP_T *re_x = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *re_z = lit_mp (p, 1, 0, digs);
@@ -1130,8 +1122,8 @@ void genie_pow_mp_complex_int (NODE_T * p)
   (void) move_mp (im_y, im_x, digs);
   MP_T *rea = nil_mp (p, digs);
   MP_T *acc = nil_mp (p, digs);
-  expo = 1;
-  negative = (BOOL_T) (VALUE (&j) < 0);
+  int expo = 1;
+  BOOL_T negative = (BOOL_T) (VALUE (&j) < 0);
   if (negative) {
     VALUE (&j) = -VALUE (&j);
   }

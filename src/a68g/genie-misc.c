@@ -37,6 +37,47 @@
 #define FD_READ 0
 #define FD_WRITE 1
 
+//! @brief Nop for the genie, for instance '+' for INT or REAL.
+
+void genie_idle (NODE_T * p)
+{
+  (void) p;
+}
+
+//! @brief Unimplemented feature handler.
+
+void genie_unimplemented (NODE_T * p)
+{
+  diagnostic (A68_RUNTIME_ERROR, p, ERROR_UNIMPLEMENTED);
+  exit_genie (p, A68_RUNTIME_ERROR);
+}
+
+//! @brief PROC sleep = (INT) INT
+
+void genie_sleep (NODE_T * p)
+{
+  A68_INT secs;
+  POP_OBJECT (p, &secs, A68_INT);
+  int wait = VALUE (&secs);
+  PRELUDE_ERROR (wait < 0, p, ERROR_INVALID_ARGUMENT, M_INT);
+  while (wait > 0) {
+    wait = (int) sleep ((unt) wait);
+  }
+  PUSH_VALUE (p, (INT_T) 0, A68_INT);
+}
+
+//! @brief PROC system = (STRING) INT
+
+void genie_system (NODE_T * p)
+{
+  A68_REF cmd;
+  POP_REF (p, &cmd);
+  CHECK_INIT (p, INITIALISED (&cmd), M_STRING);
+  int size = 1 + a68_string_size (p, cmd);
+  A68_REF ref_z = heap_generator (p, M_C_STRING, 1 + size);
+  PUSH_VALUE (p, system (a_to_c_string (p, DEREF (char, &ref_z), cmd)), A68_INT);
+}
+
 //! @brief PROC (PROC VOID) VOID on gc event
 
 void genie_on_gc_event (NODE_T * p)
@@ -75,4 +116,22 @@ void genie_system_stack_pointer (NODE_T * p)
 {
   BYTE_T stack_offset;
   PUSH_VALUE (p, (int) (A68 (system_stack_offset) - &stack_offset), A68_INT);
+}
+
+//! @brief PROC d1mach (INT) REAL
+
+void genie_d1mach (NODE_T *p)
+{
+  A68_INT i;
+  POP_OBJECT (p, &i, A68_INT);
+  PUSH_VALUE (p, a68g_d1mach (VALUE (&i)), A68_REAL);
+}
+
+//! @brief PROC i1mach (INT) INT
+
+void genie_i1mach (NODE_T *p)
+{
+  A68_INT i;
+  POP_OBJECT (p, &i, A68_INT);
+  PUSH_VALUE (p, a68g_i1mach (VALUE (&i)), A68_INT);
 }

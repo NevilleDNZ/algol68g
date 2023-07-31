@@ -409,7 +409,7 @@ char *gen_deproceduring (NODE_T * p, FILE_T out, int compose_fun)
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OPEN_PROC_FRAME (body, ENVIRON (%s));\n", fun));
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "INIT_STATIC_FRAME (body);\n"));
 // Execute procedure.
-    indent (out, "EXECUTE_UNIT_TRACE (NEXT_NEXT (body));\n");
+    indent (out, "GENIE_UNIT_TRACE (NEXT_NEXT (body));\n");
     indent (out, "if (A68_FP == A68_MON (finish_frame_pointer)) {\n");
     A68_OPT (indentation)++;
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));
@@ -452,14 +452,14 @@ char *gen_voiding_deproceduring (NODE_T * p, FILE_T out, int compose_fun)
     print_declarations (out, A68_OPT (root_idf));
 // Initialise.
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = A68_SP;\n", pop));
-    if (compose_fun != A68_MAKE_NOTHING) {
-    }
+//  if (compose_fun != A68_MAKE_NOTHING) {
+//  }
     get_stack (idf, out, fun, "A68_PROCEDURE");
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "body = SUB (NODE (&BODY (%s)));\n", fun));
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OPEN_PROC_FRAME (body, ENVIRON (%s));\n", fun));
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "INIT_STATIC_FRAME (body);\n"));
 // Execute procedure.
-    indent (out, "EXECUTE_UNIT_TRACE (NEXT_NEXT (body));\n");
+    indent (out, "GENIE_UNIT_TRACE (NEXT_NEXT (body));\n");
     indent (out, "if (A68_FP == A68_MON (finish_frame_pointer)) {\n");
     A68_OPT (indentation)++;
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));
@@ -546,7 +546,7 @@ char *gen_call (NODE_T * p, FILE_T out, int compose_fun)
     inline_arguments (args, out, L_YIELD, &size);
 // Execute procedure.
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_SP = %s;\n", pop));
-    indent (out, "EXECUTE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
+    indent (out, "GENIE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
     indent (out, "if (A68_FP == A68_MON (finish_frame_pointer)) {\n");
     A68_OPT (indentation)++;
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));
@@ -614,7 +614,7 @@ char *gen_voiding_call (NODE_T * p, FILE_T out, int compose_fun)
     inline_arguments (args, out, L_YIELD, &size);
 // Execute procedure.
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_SP = %s;\n", pop));
-    indent (out, "EXECUTE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
+    indent (out, "GENIE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
     indent (out, "if (A68_FP == A68_MON (finish_frame_pointer)) {\n");
     A68_OPT (indentation)++;
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));
@@ -699,7 +699,6 @@ char *gen_voiding_assignation_slice (NODE_T * p, FILE_T out, int compose_fun)
     char *symbol = NSYMBOL (SUB (prim));
     char drf[NAME_SIZE], idf[NAME_SIZE], arr[NAME_SIZE], tup[NAME_SIZE], elm[NAME_SIZE], pop[NAME_SIZE];
     static char fn[NAME_SIZE];
-    INT_T k;
     comment_source (p, out);
     (void) make_name (pop, PUP, "", NUMBER (p));
     (void) make_name (fn, moid_with_name ("void_", MOID (SUB (p)), "_assign"), "", NUMBER (p));
@@ -729,7 +728,7 @@ char *gen_voiding_assignation_slice (NODE_T * p, FILE_T out, int compose_fun)
       (void) make_name (elm, ELM, "", n);
       (void) make_name (drf, DRF, "", n);
     }
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_DECLARE, &k, NO_TEXT);
     inline_unit (src, out, L_DECLARE);
     print_declarations (out, A68_OPT (root_idf));
@@ -878,30 +877,26 @@ void gen_declaration_list (NODE_T * p, FILE_T out, int *decs, char *pop)
     case MODE_DECLARATION:
     case PROCEDURE_DECLARATION:
     case BRIEF_OPERATOR_DECLARATION:
-    case PRIORITY_DECLARATION:
-      {
+    case PRIORITY_DECLARATION: {
 // No action needed.
         (*decs)++;
         return;
       }
-    case OPERATOR_DECLARATION:
-      {
+    case OPERATOR_DECLARATION: {
         indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "genie_operator_dec (_NODE_ (%d));", NUMBER (SUB (p))));
         inline_comment_source (p, out);
         undent (out, NEWLINE_STRING);
         (*decs)++;
         break;
       }
-    case IDENTITY_DECLARATION:
-      {
+    case IDENTITY_DECLARATION: {
         indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "genie_identity_dec (_NODE_ (%d));", NUMBER (SUB (p))));
         inline_comment_source (p, out);
         undent (out, NEWLINE_STRING);
         (*decs)++;
         break;
       }
-    case VARIABLE_DECLARATION:
-      {
+    case VARIABLE_DECLARATION: {
         char declarer[NAME_SIZE];
         (void) make_name (declarer, DEC, "", NUMBER (SUB (p)));
         indent (out, "{");
@@ -916,8 +911,7 @@ void gen_declaration_list (NODE_T * p, FILE_T out, int *decs, char *pop)
         (*decs)++;
         break;
       }
-    case PROCEDURE_VARIABLE_DECLARATION:
-      {
+    case PROCEDURE_VARIABLE_DECLARATION: {
         indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "genie_proc_variable_dec (_NODE_ (%d));", NUMBER (SUB (p))));
         inline_comment_source (p, out);
         undent (out, NEWLINE_STRING);
@@ -925,8 +919,7 @@ void gen_declaration_list (NODE_T * p, FILE_T out, int *decs, char *pop)
         (*decs)++;
         break;
       }
-    default:
-      {
+    default: {
         gen_declaration_list (SUB (p), out, decs, pop);
         break;
       }
@@ -964,8 +957,7 @@ void gen_serial_clause (NODE_T * p, FILE_T out, NODE_T ** last, int *units, int 
       }
     } else
       switch (ATTRIBUTE (p)) {
-      case UNIT:
-        {
+      case UNIT: {
           (*last) = p;
           CODE_EXECUTE (p);
           inline_comment_source (p, out);
@@ -973,8 +965,7 @@ void gen_serial_clause (NODE_T * p, FILE_T out, NODE_T ** last, int *units, int 
           (*units)++;
           return;
         }
-      case SEMI_SYMBOL:
-        {
+      case SEMI_SYMBOL: {
           if (IS (*last, UNIT) && MOID (*last) == M_VOID) {
             break;
           } else if (IS (*last, DECLARATION_LIST)) {
@@ -984,14 +975,12 @@ void gen_serial_clause (NODE_T * p, FILE_T out, NODE_T ** last, int *units, int 
           }
           break;
         }
-      case DECLARATION_LIST:
-        {
+      case DECLARATION_LIST: {
           (*last) = p;
           gen_declaration_list (SUB (p), out, decs, pop);
           break;
         }
-      default:
-        {
+      default: {
           gen_serial_clause (SUB (p), out, last, units, decs, pop, compose_fun);
           break;
         }
@@ -1152,13 +1141,12 @@ char *gen_conditional_clause (NODE_T * p, FILE_T out, int compose_fun)
   static char fn[NAME_SIZE];
   char pop[NAME_SIZE];
   int units = 0, decs = 0;
-  NODE_T *q, *last;
 // We only compile IF basic unit or ELIF basic unit, so we save on opening frames.
 // Check worthiness of the clause.
   if (MOID (p) != M_VOID) {
     return NO_TEXT;
   }
-  q = SUB (p);
+  NODE_T *q = SUB (p);
   while (q != NO_NODE && is_one_of (q, IF_PART, OPEN_PART, ELIF_IF_PART, ELSE_OPEN_PART, STOP)) {
     if (!basic_serial (NEXT_SUB (q), 1)) {
       return NO_TEXT;
@@ -1181,7 +1169,7 @@ char *gen_conditional_clause (NODE_T * p, FILE_T out, int compose_fun)
   while (q != NO_NODE && is_one_of (q, IF_PART, OPEN_PART, ELIF_IF_PART, ELSE_OPEN_PART, STOP)) {
     FORWARD (q);
     while (q != NO_NODE && (IS (q, THEN_PART) || IS (q, ELSE_PART) || IS (q, CHOICE))) {
-      last = NO_NODE;
+      NODE_T *last = NO_NODE;
       units = decs = 0;
       gen_serial_clause (NEXT_SUB (q), out, &last, &units, &decs, pop, A68_MAKE_OTHERS);
       FORWARD (q);
@@ -1320,13 +1308,12 @@ char *gen_int_case_clause (NODE_T * p, FILE_T out, int compose_fun)
   static char fn[NAME_SIZE];
   char pop[NAME_SIZE];
   int units = 0, decs = 0, k = 0, count = 0;
-  NODE_T *q, *last;
 // We only compile CASE basic unit.
 // Check worthiness of the clause.
   if (MOID (p) != M_VOID) {
     return NO_TEXT;
   }
-  q = SUB (p);
+  NODE_T *q = SUB (p);
   if (q != NO_NODE && is_one_of (q, CASE_PART, OPEN_PART, STOP)) {
     if (!basic_serial (NEXT_SUB (q), 1)) {
       return NO_TEXT;
@@ -1351,7 +1338,6 @@ char *gen_int_case_clause (NODE_T * p, FILE_T out, int compose_fun)
   if (q != NO_NODE && is_one_of (q, CASE_PART, OPEN_PART, STOP)) {
     FORWARD (q);
     if (q != NO_NODE && is_one_of (q, CASE_IN_PART, CHOICE, STOP)) {
-      last = NO_NODE;
       units = decs = 0;
       k = 0;
       do {
@@ -1361,7 +1347,7 @@ char *gen_int_case_clause (NODE_T * p, FILE_T out, int compose_fun)
       FORWARD (q);
     }
     if (q != NO_NODE && is_one_of (q, OUT_PART, CHOICE, STOP)) {
-      last = NO_NODE;
+      NODE_T *last = NO_NODE;
       units = decs = 0;
       gen_serial_clause (NEXT_SUB (q), out, &last, &units, &decs, pop, A68_MAKE_OTHERS);
       FORWARD (q);
@@ -1418,7 +1404,7 @@ char *gen_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
   NODE_T *for_part = NO_NODE, *from_part = NO_NODE, *by_part = NO_NODE, *to_part = NO_NODE, *downto_part = NO_NODE, *while_part = NO_NODE, *sc;
   static char fn[NAME_SIZE];
   char idf[NAME_SIZE], z[NAME_SIZE], pop[NAME_SIZE];
-  NODE_T *q = SUB (p), *last = NO_NODE;
+  NODE_T *q = SUB (p);
   int units, decs;
   BOOL_T gc, need_reinit;
 // FOR identifier.
@@ -1478,6 +1464,7 @@ char *gen_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
   }
 // Loop clause is compiled.
   units = decs = 0;
+  NODE_T *last = NO_NODE;
   gen_serial_clause (sc, out, &last, &units, &decs, pop, A68_MAKE_OTHERS);
   gc = (decs > 0);
   comment_source (p, out);

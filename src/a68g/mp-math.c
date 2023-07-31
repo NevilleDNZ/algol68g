@@ -211,9 +211,8 @@ MP_T *hypot_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 MP_T *exp_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
 // Argument is reduced by using exp (z / (2 ** n)) ** (2 ** n) = exp(z).
-  int m, n, gdigs = FUN_DIGITS (digs);
+  int gdigs = FUN_DIGITS (digs);
   ADDR_T pop_sp = A68_SP;
-  BOOL_T iterate;
   if (MP_DIGIT (x, 1) == 0) {
     SET_MP_ONE (z, digs);
     return z;
@@ -223,7 +222,7 @@ MP_T *exp_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   MP_T *a68_pow = nil_mp (p, gdigs);
   MP_T *fac = nil_mp (p, gdigs);
   MP_T *tmp = nil_mp (p, gdigs);
-  m = 0;
+  int m = 0;
 // Scale x down.
   while (eps_mp (x_g, gdigs)) {
     m++;
@@ -258,12 +257,12 @@ MP_T *exp_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   (void) add_mp (p, sum, sum, tmp, gdigs);
   (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
   (void) set_mp (fac, (MP_T) (MP_T) 3628800, 0, gdigs);
-  n = 10;
-  iterate = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
-  while (iterate) {
+  int n = 10;
+  BOOL_T iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+  while (iter) {
     (void) div_mp (p, tmp, a68_pow, fac, gdigs);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (sum) - gdigs)) {
-      iterate = A68_FALSE;
+      iter = A68_FALSE;
     } else {
       (void) add_mp (p, sum, sum, tmp, gdigs);
       (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
@@ -286,9 +285,8 @@ MP_T *exp_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 
 MP_T *expm1_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
-  int n, gdigs = FUN_DIGITS (digs);
+  int gdigs = FUN_DIGITS (digs);
   ADDR_T pop_sp = A68_SP;
-  BOOL_T iterate;
   if (MP_DIGIT (x, 1) == 0) {
     SET_MP_ONE (z, digs);
     return z;
@@ -326,12 +324,12 @@ MP_T *expm1_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   (void) add_mp (p, sum, sum, tmp, gdigs);
   (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
   (void) set_mp (fac, (MP_T) (MP_T) 3628800, 0, gdigs);
-  n = 10;
-  iterate = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
-  while (iterate) {
+  int n = 10;
+  BOOL_T iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+  while (iter) {
     (void) div_mp (p, tmp, a68_pow, fac, gdigs);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (sum) - gdigs)) {
-      iterate = A68_FALSE;
+      iter = A68_FALSE;
     } else {
       (void) add_mp (p, sum, sum, tmp, gdigs);
       (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
@@ -398,7 +396,7 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Depending on the argument we choose either Taylor or Newton.
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  BOOL_T negative, scale;
+  BOOL_T neg, scale;
   MP_T expo = 0;
   if (MP_DIGIT (x, 1) <= 0) {
     errno = EDOM;
@@ -407,8 +405,8 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   MP_T *x_g = len_mp (p, x, digs, gdigs);
   MP_T *z_g = nil_mp (p, gdigs);
 // We use ln (1 / x) = - ln (x).
-  negative = (BOOL_T) (MP_EXPONENT (x_g) < 0);
-  if (negative) {
+  neg = (BOOL_T) (MP_EXPONENT (x_g) < 0);
+  if (neg) {
     (void) rec_mp (p, x_g, x_g, digs);
   }
 // We want correct results for extreme arguments. We scale when "x_g" exceeds
@@ -422,18 +420,17 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Taylor sum for x close to unity.
 // ln (x) = (x - 1) - (x - 1) ** 2 / 2 + (x - 1) ** 3 / 3 - ...
 // This is faster for small x and avoids cancellation.
-    int n = 2;
-    BOOL_T iterate;
     MP_T *tmp = nil_mp (p, gdigs);
     MP_T *a68_pow = nil_mp (p, gdigs);
     (void) minus_one_mp (p, x_g, x_g, gdigs);
     (void) mul_mp (p, a68_pow, x_g, x_g, gdigs);
     (void) move_mp (z_g, x_g, gdigs);
-    iterate = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
-    while (iterate) {
+    int n = 2;
+    BOOL_T iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+    while (iter) {
       (void) div_mp_digit (p, tmp, a68_pow, (MP_T) n, gdigs);
       if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - gdigs)) {
-        iterate = A68_FALSE;
+        iter = A68_FALSE;
       } else {
         MP_DIGIT (tmp, 1) = (EVEN (n) ? -MP_DIGIT (tmp, 1) : MP_DIGIT (tmp, 1));
         (void) add_mp (p, z_g, z_g, tmp, gdigs);
@@ -452,9 +449,8 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 #endif
     int decimals = DOUBLE_ACCURACY;
     do {
-      int hdigs;
       decimals <<= 1;
-      hdigs = MINIMUM (1 + decimals / LOG_MP_RADIX, gdigs);
+      int hdigs = MINIMUM (1 + decimals / LOG_MP_RADIX, gdigs);
       (void) exp_mp (p, tmp, z_g, hdigs);
       (void) div_mp (p, tmp, x_g, tmp, hdigs);
       (void) minus_one_mp (p, z_g, z_g, hdigs);
@@ -469,7 +465,7 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     (void) mul_mp_digit (p, ln_base, ln_base, (MP_T) expo, gdigs);
     (void) add_mp (p, z_g, z_g, ln_base, gdigs);
   }
-  if (negative) {
+  if (neg) {
     MP_DIGIT (z_g, 1) = -MP_DIGIT (z_g, 1);
   }
   (void) shorten_mp (p, z, digs, z_g, gdigs);
@@ -652,8 +648,7 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
 // Use triple-angle relation to reduce argument.
   ADDR_T pop_sp = A68_SP;
-  int m, n, gdigs = FUN_DIGITS (digs);
-  BOOL_T flip, negative, iterate, even;
+  int gdigs = FUN_DIGITS (digs);
 // We will use "pi".
   MP_T *pi = nil_mp (p, gdigs);
   MP_T *tpi = nil_mp (p, gdigs);
@@ -667,13 +662,13 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Argument reduction (2): sin (-x) = sin (x)
 //                         sin (x) = - sin (x - pi); pi < x <= 2 pi
 //                         sin (x) = sin (pi - x);   pi / 2 < x <= pi
-  negative = (BOOL_T) (MP_DIGIT (x_g, 1) < 0);
-  if (negative) {
+  BOOL_T neg = (BOOL_T) (MP_DIGIT (x_g, 1) < 0);
+  if (neg) {
     MP_DIGIT (x_g, 1) = -MP_DIGIT (x_g, 1);
   }
   MP_T *tmp = nil_mp (p, gdigs);
   (void) sub_mp (p, tmp, x_g, pi, gdigs);
-  flip = (BOOL_T) (MP_DIGIT (tmp, 1) > 0);
+  BOOL_T flip = (BOOL_T) (MP_DIGIT (tmp, 1) > 0);
   if (flip) {                   // x > pi
     (void) sub_mp (p, x_g, x_g, pi, gdigs);
   }
@@ -683,7 +678,7 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   }
 // Argument reduction (3): (follows from De Moivre's theorem)
 // sin (3x) = sin (x) * (3 - 4 sin ^ 2 (x))
-  m = 0;
+  int m = 0;
   while (eps_mp (x_g, gdigs)) {
     m++;
     (void) div_mp_digit (p, x_g, x_g, (MP_T) 3, gdigs);
@@ -706,13 +701,12 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   (void) sub_mp (p, z_g, z_g, tmp, gdigs);
   (void) mul_mp (p, a68_pow, a68_pow, sqr, gdigs);
   (void) set_mp (fac, (MP_T) 362880, 0, gdigs);
-  n = 9;
-  even = A68_TRUE;
-  iterate = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
-  while (iterate) {
+  int n = 9;
+  BOOL_T even = A68_TRUE, iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+  while (iter) {
     (void) div_mp (p, tmp, a68_pow, fac, gdigs);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - gdigs)) {
-      iterate = A68_FALSE;
+      iter = A68_FALSE;
     } else {
       if (even) {
         (void) add_mp (p, z_g, z_g, tmp, gdigs);
@@ -736,7 +730,7 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     (void) mul_mp (p, z_g, a68_pow, z_g, gdigs);
   }
   (void) shorten_mp (p, z, digs, z_g, gdigs);
-  if (negative ^ flip) {
+  if (neg ^ flip) {
     MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
   }
 // Exit.
@@ -773,7 +767,6 @@ MP_T *tan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Use tan (x) = sin (x) / sqrt (1 - sin ^ 2 (x)).
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  BOOL_T negate;
   MP_T *pi = nil_mp (p, gdigs);
   MP_T *hpi = nil_mp (p, gdigs);
   (void) mp_pi (p, pi, MP_PI, gdigs);
@@ -783,13 +776,14 @@ MP_T *tan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   MP_T *sns = nil_mp (p, digs);
   MP_T *cns = nil_mp (p, digs);
 // Argument mod pi.
+  BOOL_T neg;
   (void) mod_mp (p, x_g, x_g, pi, gdigs);
   if (MP_DIGIT (x_g, 1) >= 0) {
     (void) sub_mp (p, y_g, x_g, hpi, gdigs);
-    negate = (BOOL_T) (MP_DIGIT (y_g, 1) > 0);
+    neg = (BOOL_T) (MP_DIGIT (y_g, 1) > 0);
   } else {
     (void) add_mp (p, y_g, x_g, hpi, gdigs);
-    negate = (BOOL_T) (MP_DIGIT (y_g, 1) < 0);
+    neg = (BOOL_T) (MP_DIGIT (y_g, 1) < 0);
   }
   (void) shorten_mp (p, x, digs, x_g, gdigs);
 // tan(x) = sin(x) / sqrt (1 - sin ** 2 (x)).
@@ -803,7 +797,7 @@ MP_T *tan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     return NaN_MP;
   }
   A68_SP = pop_sp;
-  if (negate) {
+  if (neg) {
     MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
   }
   return z;
@@ -848,7 +842,7 @@ MP_T *acos_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  BOOL_T negative = (BOOL_T) (MP_DIGIT (x, 1) < 0);
+  BOOL_T neg = (BOOL_T) (MP_DIGIT (x, 1) < 0);
   if (MP_DIGIT (x, 1) == 0) {
     (void) mp_pi (p, z, MP_HALF_PI, digs);
     A68_SP = pop_sp;
@@ -871,7 +865,7 @@ MP_T *acos_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   }
   (void) shorten_mp (p, y, digs, x_g, gdigs);
   (void) atan_mp (p, z, y, digs);
-  if (negative) {
+  if (neg) {
     (void) mp_pi (p, y, MP_PI, digs);
     (void) add_mp (p, z, z, y, digs);
   }
@@ -893,8 +887,8 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   int gdigs = FUN_DIGITS (digs);
   MP_T *x_g = len_mp (p, x, digs, gdigs);
   MP_T *z_g = nil_mp (p, gdigs);
-  BOOL_T negative = (BOOL_T) (MP_DIGIT (x_g, 1) < 0);
-  if (negative) {
+  BOOL_T neg = (BOOL_T) (MP_DIGIT (x_g, 1) < 0);
+  if (neg) {
     MP_DIGIT (x_g, 1) = -MP_DIGIT (x_g, 1);
   }
 // For larger arguments we use atan(x) = pi/2 - atan(1/x).
@@ -906,20 +900,18 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Taylor sum for x close to zero.
 // arctan (x) = x - x ** 3 / 3 + x ** 5 / 5 - x ** 7 / 7 + ..
 // This is faster for small x and avoids cancellation
-    int n = 3;
-    BOOL_T iterate, even;
     MP_T *tmp = nil_mp (p, gdigs);
     MP_T *a68_pow = nil_mp (p, gdigs);
     MP_T *sqr = nil_mp (p, gdigs);
     (void) mul_mp (p, sqr, x_g, x_g, gdigs);
     (void) mul_mp (p, a68_pow, sqr, x_g, gdigs);
     (void) move_mp (z_g, x_g, gdigs);
-    even = A68_FALSE;
-    iterate = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
-    while (iterate) {
+    int n = 3;
+    BOOL_T even = A68_FALSE, iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+    while (iter) {
       (void) div_mp_digit (p, tmp, a68_pow, (MP_T) n, gdigs);
       if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - gdigs)) {
-        iterate = A68_FALSE;
+        iter = A68_FALSE;
       } else {
         if (even) {
           (void) add_mp (p, z_g, z_g, tmp, gdigs);
@@ -934,7 +926,6 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     }
   } else {
 // Newton's method: x<n+1> = x<n> - cos (x<n>) * (sin (x<n>) - a cos (x<n>)).
-    int decimals, hdigs;
     MP_T *tmp = nil_mp (p, gdigs);
     MP_T *sns = nil_mp (p, gdigs);
     MP_T *cns = nil_mp (p, gdigs);
@@ -944,10 +935,10 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 #else
     (void) real_to_mp (p, z_g, atan (mp_to_real (p, x_g, gdigs)), gdigs);
 #endif
-    decimals = DOUBLE_ACCURACY;
+    int decimals = DOUBLE_ACCURACY;
     do {
       decimals <<= 1;
-      hdigs = MINIMUM (1 + decimals / LOG_MP_RADIX, gdigs);
+      int hdigs = MINIMUM (1 + decimals / LOG_MP_RADIX, gdigs);
       (void) sin_mp (p, sns, z_g, hdigs);
       (void) mul_mp (p, tmp, sns, sns, hdigs);
       (void) one_minus_mp (p, tmp, tmp, hdigs);
@@ -963,7 +954,7 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     (void) sub_mp (p, z_g, mp_pi (p, hpi, MP_HALF_PI, gdigs), z_g, gdigs);
   }
   (void) shorten_mp (p, z, digs, z_g, gdigs);
-  MP_DIGIT (z, 1) = (negative ? -MP_DIGIT (z, 1) : MP_DIGIT (z, 1));
+  MP_DIGIT (z, 1) = (neg ? -MP_DIGIT (z, 1) : MP_DIGIT (z, 1));
 // Exit.
   A68_SP = pop_sp;
   return z;
@@ -1051,7 +1042,6 @@ MP_T *cot_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Use tan (x) = sin (x) / sqrt (1 - sin ^ 2 (x)).
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  BOOL_T negate;
   MP_T *pi = nil_mp (p, gdigs);
   MP_T *hpi = nil_mp (p, gdigs);
   (void) mp_pi (p, pi, MP_PI, gdigs);
@@ -1061,13 +1051,14 @@ MP_T *cot_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   MP_T *sns = nil_mp (p, digs);
   MP_T *cns = nil_mp (p, digs);
 // Argument mod pi.
+  BOOL_T neg;
   (void) mod_mp (p, x_g, x_g, pi, gdigs);
   if (MP_DIGIT (x_g, 1) >= 0) {
     (void) sub_mp (p, y_g, x_g, hpi, gdigs);
-    negate = (BOOL_T) (MP_DIGIT (y_g, 1) > 0);
+    neg = (BOOL_T) (MP_DIGIT (y_g, 1) > 0);
   } else {
     (void) add_mp (p, y_g, x_g, hpi, gdigs);
-    negate = (BOOL_T) (MP_DIGIT (y_g, 1) < 0);
+    neg = (BOOL_T) (MP_DIGIT (y_g, 1) < 0);
   }
   (void) shorten_mp (p, x, digs, x_g, gdigs);
 // tan(x) = sin(x) / sqrt (1 - sin ** 2 (x)).
@@ -1081,7 +1072,7 @@ MP_T *cot_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     return NaN_MP;
   }
   A68_SP = pop_sp;
-  if (negate) {
+  if (neg) {
     MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
   }
   return z;

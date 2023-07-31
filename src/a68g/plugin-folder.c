@@ -116,8 +116,7 @@ BOOL_T constant_call (NODE_T * p)
     NODE_T *prim = SUB (p);
     NODE_T *idf = stems_from (prim, IDENTIFIER);
     if (idf != NO_NODE) {
-      int k;
-      for (k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (idf)) == PROCEDURE (&functions[k])) {
           NODE_T *args = NEXT (prim);
           return constant_argument (args);
@@ -134,8 +133,7 @@ BOOL_T constant_monadic_formula (NODE_T * p)
 {
   if (IS (p, MONADIC_FORMULA)) {
     NODE_T *op = SUB (p);
-    int k;
-    for (k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
+    for (int k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
       if (PROCEDURE (TAX (op)) == PROCEDURE (&monadics[k])) {
         NODE_T *rhs = NEXT (op);
         return constant_unit (rhs);
@@ -155,8 +153,7 @@ BOOL_T constant_formula (NODE_T * p)
     if (op == NO_NODE) {
       return constant_monadic_formula (lhs);
     } else {
-      int k;
-      for (k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&dyadics[k])) {
           NODE_T *rhs = NEXT (op);
           return (BOOL_T) (constant_unit (lhs) && constant_unit (rhs));

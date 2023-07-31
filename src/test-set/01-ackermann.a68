@@ -23,7 +23,7 @@ PROC ackermann = (INT m, n) INT:
      FI;
 
 FOR m TO 3 
-DO FOR n TO 6 
+DO FOR n TO 4 
    DO print ((whole (m, 0), blank, whole (n, 0), blank, whole (ackermann (m, n), 0), newline))
    OD
 OD

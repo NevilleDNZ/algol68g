@@ -48,35 +48,35 @@
 
 // From public Microsoft RIFF documentation.
 
-#define	WAVE_FORMAT_UNKNOWN		(0x0000)
-#define	WAVE_FORMAT_PCM			(0x0001)
-#define	WAVE_FORMAT_ADPCM		(0x0002)
+#define WAVE_FORMAT_UNKNOWN             (0x0000)
+#define WAVE_FORMAT_PCM                 (0x0001)
+#define WAVE_FORMAT_ADPCM               (0x0002)
 #define WAVE_FORMAT_IEEE_FLOAT          (0x0003)
-#define WAVE_FORMAT_IBM_FORMAT_CVSD	(0x0005)
-#define	WAVE_FORMAT_ALAW		(0x0006)
-#define	WAVE_FORMAT_MULAW		(0x0007)
-#define	WAVE_FORMAT_OKI_ADPCM		(0x0010)
-#define WAVE_FORMAT_DVI_ADPCM		(0x0011)
-#define WAVE_FORMAT_MEDIASPACE_ADPCM	(0x0012)
-#define WAVE_FORMAT_SIERRA_ADPCM	(0x0013)
-#define WAVE_FORMAT_G723_ADPCM		(0X0014)
-#define	WAVE_FORMAT_DIGISTD		(0x0015)
-#define	WAVE_FORMAT_DIGIFIX		(0x0016)
-#define WAVE_FORMAT_YAMAHA_ADPCM	(0x0020)
-#define WAVE_FORMAT_SONARC		(0x0021)
-#define WAVE_FORMAT_DSPGROUP_TRUESPEECH	(0x0022)
-#define WAVE_FORMAT_ECHOSCI1		(0x0023)
-#define WAVE_FORMAT_AUDIOFILE_AF36	(0x0024)
-#define WAVE_FORMAT_APTX		(0x0025)
-#define WAVE_FORMAT_AUDIOFILE_AF10	(0x0026)
+#define WAVE_FORMAT_IBM_FORMAT_CVSD     (0x0005)
+#define WAVE_FORMAT_ALAW                (0x0006)
+#define WAVE_FORMAT_MULAW               (0x0007)
+#define WAVE_FORMAT_OKI_ADPCM           (0x0010)
+#define WAVE_FORMAT_DVI_ADPCM           (0x0011)
+#define WAVE_FORMAT_MEDIASPACE_ADPCM    (0x0012)
+#define WAVE_FORMAT_SIERRA_ADPCM        (0x0013)
+#define WAVE_FORMAT_G723_ADPCM          (0X0014)
+#define WAVE_FORMAT_DIGISTD             (0x0015)
+#define WAVE_FORMAT_DIGIFIX             (0x0016)
+#define WAVE_FORMAT_YAMAHA_ADPCM        (0x0020)
+#define WAVE_FORMAT_SONARC              (0x0021)
+#define WAVE_FORMAT_DSPGROUP_TRUESPEECH (0x0022)
+#define WAVE_FORMAT_ECHOSCI1            (0x0023)
+#define WAVE_FORMAT_AUDIOFILE_AF36      (0x0024)
+#define WAVE_FORMAT_APTX                (0x0025)
+#define WAVE_FORMAT_AUDIOFILE_AF10      (0x0026)
 #define WAVE_FORMAT_DOLBY_AC2           (0x0030)
 #define WAVE_FORMAT_GSM610              (0x0031)
-#define WAVE_FORMAT_ANTEX_ADPCME	(0x0033)
-#define WAVE_FORMAT_CONTROL_RES_VQLPC	(0x0034)
-#define WAVE_FORMAT_DIGIREAL		(0x0035)
-#define WAVE_FORMAT_DIGIADPCM		(0x0036)
-#define WAVE_FORMAT_CONTROL_RES_CR10	(0x0037)
-#define WAVE_FORMAT_NMS_VBXADPCM	(0x0038)
+#define WAVE_FORMAT_ANTEX_ADPCME        (0x0033)
+#define WAVE_FORMAT_CONTROL_RES_VQLPC   (0x0034)
+#define WAVE_FORMAT_DIGIREAL            (0x0035)
+#define WAVE_FORMAT_DIGIADPCM           (0x0036)
+#define WAVE_FORMAT_CONTROL_RES_CR10    (0x0037)
+#define WAVE_FORMAT_NMS_VBXADPCM        (0x0038)
 #define WAVE_FORMAT_ROCKWELL_ADPCM      (0x003b)
 #define WAVE_FORMAT_ROCKWELL_DIGITALK   (0x003c)
 #define WAVE_FORMAT_G721_ADPCM          (0x0040)
@@ -85,16 +85,16 @@
 #define WAVE_FORMAT_MPEGLAYER3          (0x0055)
 #define WAVE_FORMAT_G726_ADPCM          (0x0064)
 #define WAVE_FORMAT_G722_ADPCM          (0x0065)
-#define WAVE_FORMAT_IBM_FORMAT_MULAW	(0x0101)
-#define WAVE_FORMAT_IBM_FORMAT_ALAW	(0x0102)
-#define WAVE_FORMAT_IBM_FORMAT_ADPCM	(0x0103)
-#define WAVE_FORMAT_CREATIVE_ADPCM	(0x0200)
-#define WAVE_FORMAT_FM_TOWNS_SND	(0x0300)
-#define WAVE_FORMAT_OLIGSM		(0x1000)
-#define WAVE_FORMAT_OLIADPCM		(0x1001)
-#define WAVE_FORMAT_OLICELP		(0x1002)
-#define WAVE_FORMAT_OLISBC		(0x1003)
-#define WAVE_FORMAT_OLIOPR		(0x1004)
+#define WAVE_FORMAT_IBM_FORMAT_MULAW    (0x0101)
+#define WAVE_FORMAT_IBM_FORMAT_ALAW     (0x0102)
+#define WAVE_FORMAT_IBM_FORMAT_ADPCM    (0x0103)
+#define WAVE_FORMAT_CREATIVE_ADPCM      (0x0200)
+#define WAVE_FORMAT_FM_TOWNS_SND        (0x0300)
+#define WAVE_FORMAT_OLIGSM              (0x1000)
+#define WAVE_FORMAT_OLIADPCM            (0x1001)
+#define WAVE_FORMAT_OLICELP             (0x1002)
+#define WAVE_FORMAT_OLISBC              (0x1003)
+#define WAVE_FORMAT_OLIOPR              (0x1004)
 #define WAVE_FORMAT_EXTENSIBLE          (0xfffe)
 
 static unt pow256[] = { 1, 256, 65536, 16777216 };
@@ -150,200 +150,151 @@ char *code_unt (NODE_T * p, unt n)
 char *format_category (unt n)
 {
   switch (n) {
-  case WAVE_FORMAT_UNKNOWN:
-    {
+  case WAVE_FORMAT_UNKNOWN: {
       return "WAVE_FORMAT_UNKNOWN";
     }
-  case WAVE_FORMAT_PCM:
-    {
-      return "WAVE_FORMAT_PCM	";
+  case WAVE_FORMAT_PCM: {
+      return "WAVE_FORMAT_PCM ";
     }
-  case WAVE_FORMAT_ADPCM:
-    {
+  case WAVE_FORMAT_ADPCM: {
       return "WAVE_FORMAT_ADPCM";
     }
-  case WAVE_FORMAT_IEEE_FLOAT:
-    {
+  case WAVE_FORMAT_IEEE_FLOAT: {
       return "WAVE_FORMAT_IEEE_FLOAT";
     }
-  case WAVE_FORMAT_IBM_FORMAT_CVSD:
-    {
+  case WAVE_FORMAT_IBM_FORMAT_CVSD: {
       return "WAVE_FORMAT_IBM_FORMAT_CVSD";
     }
-  case WAVE_FORMAT_ALAW:
-    {
+  case WAVE_FORMAT_ALAW: {
       return "WAVE_FORMAT_ALAW";
     }
-  case WAVE_FORMAT_MULAW:
-    {
+  case WAVE_FORMAT_MULAW: {
       return "WAVE_FORMAT_MULAW";
     }
-  case WAVE_FORMAT_OKI_ADPCM:
-    {
+  case WAVE_FORMAT_OKI_ADPCM: {
       return "WAVE_FORMAT_OKI_ADPCM";
     }
-  case WAVE_FORMAT_DVI_ADPCM:
-    {
+  case WAVE_FORMAT_DVI_ADPCM: {
       return "WAVE_FORMAT_DVI_ADPCM";
     }
-  case WAVE_FORMAT_MEDIASPACE_ADPCM:
-    {
+  case WAVE_FORMAT_MEDIASPACE_ADPCM: {
       return "WAVE_FORMAT_MEDIASPACE_ADPCM";
     }
-  case WAVE_FORMAT_SIERRA_ADPCM:
-    {
+  case WAVE_FORMAT_SIERRA_ADPCM: {
       return "WAVE_FORMAT_SIERRA_ADPCM";
     }
-  case WAVE_FORMAT_G723_ADPCM:
-    {
+  case WAVE_FORMAT_G723_ADPCM: {
       return "WAVE_FORMAT_G723_ADPCM";
     }
-  case WAVE_FORMAT_DIGISTD:
-    {
+  case WAVE_FORMAT_DIGISTD: {
       return "WAVE_FORMAT_DIGISTD";
     }
-  case WAVE_FORMAT_DIGIFIX:
-    {
+  case WAVE_FORMAT_DIGIFIX: {
       return "WAVE_FORMAT_DIGIFIX";
     }
-  case WAVE_FORMAT_YAMAHA_ADPCM:
-    {
+  case WAVE_FORMAT_YAMAHA_ADPCM: {
       return "WAVE_FORMAT_YAMAHA_ADPCM";
     }
-  case WAVE_FORMAT_SONARC:
-    {
+  case WAVE_FORMAT_SONARC: {
       return "WAVE_FORMAT_SONARC";
     }
-  case WAVE_FORMAT_DSPGROUP_TRUESPEECH:
-    {
+  case WAVE_FORMAT_DSPGROUP_TRUESPEECH: {
       return "WAVE_FORMAT_DSPGROUP_TRUESPEECH";
     }
-  case WAVE_FORMAT_ECHOSCI1:
-    {
+  case WAVE_FORMAT_ECHOSCI1: {
       return "WAVE_FORMAT_ECHOSCI1";
     }
-  case WAVE_FORMAT_AUDIOFILE_AF36:
-    {
+  case WAVE_FORMAT_AUDIOFILE_AF36: {
       return "WAVE_FORMAT_AUDIOFILE_AF36";
     }
-  case WAVE_FORMAT_APTX:
-    {
+  case WAVE_FORMAT_APTX: {
       return "WAVE_FORMAT_APTX";
     }
-  case WAVE_FORMAT_AUDIOFILE_AF10:
-    {
+  case WAVE_FORMAT_AUDIOFILE_AF10: {
       return "WAVE_FORMAT_AUDIOFILE_AF10";
     }
-  case WAVE_FORMAT_DOLBY_AC2:
-    {
+  case WAVE_FORMAT_DOLBY_AC2: {
       return "WAVE_FORMAT_DOLBY_AC2";
     }
-  case WAVE_FORMAT_GSM610:
-    {
+  case WAVE_FORMAT_GSM610: {
       return "WAVE_FORMAT_GSM610 ";
     }
-  case WAVE_FORMAT_ANTEX_ADPCME:
-    {
+  case WAVE_FORMAT_ANTEX_ADPCME: {
       return "WAVE_FORMAT_ANTEX_ADPCME";
     }
-  case WAVE_FORMAT_CONTROL_RES_VQLPC:
-    {
+  case WAVE_FORMAT_CONTROL_RES_VQLPC: {
       return "WAVE_FORMAT_CONTROL_RES_VQLPC";
     }
-  case WAVE_FORMAT_DIGIREAL:
-    {
+  case WAVE_FORMAT_DIGIREAL: {
       return "WAVE_FORMAT_DIGIREAL";
     }
-  case WAVE_FORMAT_DIGIADPCM:
-    {
+  case WAVE_FORMAT_DIGIADPCM: {
       return "WAVE_FORMAT_DIGIADPCM";
     }
-  case WAVE_FORMAT_CONTROL_RES_CR10:
-    {
+  case WAVE_FORMAT_CONTROL_RES_CR10: {
       return "WAVE_FORMAT_CONTROL_RES_CR10";
     }
-  case WAVE_FORMAT_NMS_VBXADPCM:
-    {
+  case WAVE_FORMAT_NMS_VBXADPCM: {
       return "WAVE_FORMAT_NMS_VBXADPCM";
     }
-  case WAVE_FORMAT_ROCKWELL_ADPCM:
-    {
+  case WAVE_FORMAT_ROCKWELL_ADPCM: {
       return "WAVE_FORMAT_ROCKWELL_ADPCM";
     }
-  case WAVE_FORMAT_ROCKWELL_DIGITALK:
-    {
+  case WAVE_FORMAT_ROCKWELL_DIGITALK: {
       return "WAVE_FORMAT_ROCKWELL_DIGITALK";
     }
-  case WAVE_FORMAT_G721_ADPCM:
-    {
+  case WAVE_FORMAT_G721_ADPCM: {
       return "WAVE_FORMAT_G721_ADPCM";
     }
-  case WAVE_FORMAT_G728_CELP:
-    {
+  case WAVE_FORMAT_G728_CELP: {
       return "WAVE_FORMAT_G728_CELP";
     }
-  case WAVE_FORMAT_MPEG:
-    {
+  case WAVE_FORMAT_MPEG: {
       return "WAVE_FORMAT_MPEG";
     }
-  case WAVE_FORMAT_MPEGLAYER3:
-    {
+  case WAVE_FORMAT_MPEGLAYER3: {
       return "WAVE_FORMAT_MPEGLAYER3";
     }
-  case WAVE_FORMAT_G726_ADPCM:
-    {
+  case WAVE_FORMAT_G726_ADPCM: {
       return "WAVE_FORMAT_G726_ADPCM";
     }
-  case WAVE_FORMAT_G722_ADPCM:
-    {
+  case WAVE_FORMAT_G722_ADPCM: {
       return "WAVE_FORMAT_G722_ADPCM";
     }
-  case WAVE_FORMAT_IBM_FORMAT_MULAW:
-    {
+  case WAVE_FORMAT_IBM_FORMAT_MULAW: {
       return "WAVE_FORMAT_IBM_FORMAT_MULAW";
     }
-  case WAVE_FORMAT_IBM_FORMAT_ALAW:
-    {
+  case WAVE_FORMAT_IBM_FORMAT_ALAW: {
       return "WAVE_FORMAT_IBM_FORMAT_ALAW";
     }
-  case WAVE_FORMAT_IBM_FORMAT_ADPCM:
-    {
+  case WAVE_FORMAT_IBM_FORMAT_ADPCM: {
       return "WAVE_FORMAT_IBM_FORMAT_ADPCM";
     }
-  case WAVE_FORMAT_CREATIVE_ADPCM:
-    {
+  case WAVE_FORMAT_CREATIVE_ADPCM: {
       return "WAVE_FORMAT_CREATIVE_ADPCM";
     }
-  case WAVE_FORMAT_FM_TOWNS_SND:
-    {
+  case WAVE_FORMAT_FM_TOWNS_SND: {
       return "WAVE_FORMAT_FM_TOWNS_SND";
     }
-  case WAVE_FORMAT_OLIGSM:
-    {
+  case WAVE_FORMAT_OLIGSM: {
       return "WAVE_FORMAT_OLIGSM";
     }
-  case WAVE_FORMAT_OLIADPCM:
-    {
+  case WAVE_FORMAT_OLIADPCM: {
       return "WAVE_FORMAT_OLIADPCM";
     }
-  case WAVE_FORMAT_OLICELP:
-    {
+  case WAVE_FORMAT_OLICELP: {
       return "WAVE_FORMAT_OLICELP";
     }
-  case WAVE_FORMAT_OLISBC:
-    {
+  case WAVE_FORMAT_OLISBC: {
       return "WAVE_FORMAT_OLISBC";
     }
-  case WAVE_FORMAT_OLIOPR:
-    {
+  case WAVE_FORMAT_OLIOPR: {
       return "WAVE_FORMAT_OLIOPR";
     }
-  case WAVE_FORMAT_EXTENSIBLE:
-    {
+  case WAVE_FORMAT_EXTENSIBLE: {
       return "WAVE_FORMAT_EXTENSIBLE";
     }
-  default:
-    {
+  default: {
       return "other";
     }
   }

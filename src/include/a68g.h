@@ -58,17 +58,6 @@
 // REAL_T should be a REAL*8 for external libs.
 typedef double REAL_T; 
 
-// Can we access the internet?
-#if defined (BUILD_WIN32)
-#  undef BUILD_HTTP
-#else
-#  if (defined (HAVE_NETDB_H) && defined (HAVE_NETINET_IN_H) && defined (HAVE_SYS_SOCKET_H))
-#    if (defined (BUILD_LINUX) || defined (BUILD_BSD) || defined (BUILD_HAIKU))
-#      define BUILD_HTTP
-#    endif
-#  endif
-#endif
-
 // Compatibility.
 
 #if ! defined (O_BINARY)
@@ -160,6 +149,9 @@ extern void init_tty (void);
 extern void install_signal_handlers (void);
 extern void online_help (FILE_T);
 extern void state_version (FILE_T);
+
+extern int a68g_i1mach (int);
+extern REAL_T a68g_d1mach (int);
 
 // Below from R mathlib
 

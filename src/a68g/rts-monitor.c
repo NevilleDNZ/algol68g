@@ -30,6 +30,41 @@
 // The monitor allows single stepping (unit-wise through serial/enquiry
 // clauses) and has basic means for inspecting call-frame stack and heap. 
 
+// breakpoint clear [all], clear breakpoints and watchpoint expression.
+// breakpoint clear breakpoints, clear breakpoints.
+// breakpoint clear watchpoint, clear watchpoint expression.
+// breakpoint [list], list breakpoints.
+// breakpoint 'n' clear, clear breakpoints in line 'n'.
+// breakpoint 'n' if 'expression', break in line 'n' when expression evaluates to true.
+// breakpoint 'n', set breakpoints in line 'n'.
+// breakpoint watch 'expression', break on watchpoint expression when it evaluates to true.
+// calls [n], print 'n' frames in the call stack (default n=3).
+// continue, resume, continue execution.
+// do 'command', exec 'command', pass 'command' to the shell and print return code.
+// elems [n], print first 'n' elements of rows (default n=24).
+// evaluate 'expression', x 'expression', print result of 'expression'.
+// examine 'n', print value of symbols named 'n' in the call stack.
+// exit, hx, quit, terminates the program.
+// finish, out, continue execution until current procedure incarnation is finished.
+// frame 0, set current stack frame to top of frame stack.
+// frame 'n', set current stack frame to 'n'.
+// frame, print contents of the current stack frame.
+// heap 'n', print contents of the heap with address not greater than 'n'.
+// help [expression], print brief help text.
+// ht, halts typing to standard output.
+// list [n], show 'n' lines around the interrupted line (default n=10).
+// next, continue execution to next interruptable unit (do not enter routine-texts).
+// prompt 's', set prompt to 's'.
+// rerun, restart, restarts a program without resetting breakpoints.
+// reset, restarts a program and resets breakpoints.
+// rt, resumes typing to standard output.
+// sizes, print size of memory segments.
+// stack [n], print 'n' frames in the stack (default n=3).
+// step, continue execution to next interruptable unit.
+// until 'n', continue execution until line number 'n' is reached.
+// where, print the interrupted line.
+// xref 'n', give detailed information on source line 'n'.
+
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-frames.h"
@@ -39,7 +74,7 @@
 #include "a68g-parser.h"
 #include "a68g-listing.h"
 
-#define CANNOT_SHOW " unprintable value or uninitialised value"
+#define CANNOT_SHOW " unprintable or uninitialised value"
 #define MAX_ROW_ELEMS 24
 #define NOT_A_NUM (-1)
 #define NO_VALUE " uninitialised value"
@@ -137,7 +172,6 @@ void monitor_error (char *msg, char *info)
 
 void scan_sym (FILE_T f, NODE_T * p)
 {
-  int k = 0;
   (void) f;
   (void) p;
   A68_MON (symbol)[0] = NULL_CHAR;
@@ -170,8 +204,8 @@ void scan_sym (FILE_T f, NODE_T * p)
     }
     return;
   } else if (A68_MON (expr)[A68_MON (pos)] == QUOTE_CHAR) {
-    BOOL_T cont = A68_TRUE;
     A68_MON (pos)++;
+    BOOL_T cont = A68_TRUE; int k = 0;
     while (cont) {
       while (A68_MON (expr)[A68_MON (pos)] != QUOTE_CHAR) {
         A68_MON (symbol)[k++] = A68_MON (expr)[A68_MON (pos)++];
@@ -186,6 +220,7 @@ void scan_sym (FILE_T f, NODE_T * p)
     A68_MON (attr) = ROW_CHAR_DENOTATION;
     return;
   } else if (IS_LOWER (A68_MON (expr)[A68_MON (pos)])) {
+    int k = 0;
     while (IS_LOWER (A68_MON (expr)[A68_MON (pos)]) || IS_DIGIT (A68_MON (expr)[A68_MON (pos)]) || IS_SPACE (A68_MON (expr)[A68_MON (pos)])) {
       if (IS_SPACE (A68_MON (expr)[A68_MON (pos)])) {
         A68_MON (pos)++;
@@ -197,7 +232,7 @@ void scan_sym (FILE_T f, NODE_T * p)
     A68_MON (attr) = IDENTIFIER;
     return;
   } else if (IS_UPPER (A68_MON (expr)[A68_MON (pos)])) {
-    KEYWORD_T *kw;
+    KEYWORD_T *kw; int k = 0;
     while (IS_UPPER (A68_MON (expr)[A68_MON (pos)])) {
       A68_MON (symbol)[k++] = A68_MON (expr)[A68_MON (pos)++];
     }
@@ -210,6 +245,7 @@ void scan_sym (FILE_T f, NODE_T * p)
     }
     return;
   } else if (IS_DIGIT (A68_MON (expr)[A68_MON (pos)])) {
+    int k = 0;
     while (IS_DIGIT (A68_MON (expr)[A68_MON (pos)])) {
       A68_MON (symbol)[k++] = A68_MON (expr)[A68_MON (pos)++];
     }
@@ -249,6 +285,7 @@ void scan_sym (FILE_T f, NODE_T * p)
     A68_MON (attr) = REAL_DENOTATION;
     return;
   } else if (strchr (MONADS, A68_MON (expr)[A68_MON (pos)]) != NO_TEXT || strchr (NOMADS, A68_MON (expr)[A68_MON (pos)]) != NO_TEXT) {
+    int k = 0;
     A68_MON (symbol)[k++] = A68_MON (expr)[A68_MON (pos)++];
     if (strchr (NOMADS, A68_MON (expr)[A68_MON (pos)]) != NO_TEXT) {
       A68_MON (symbol)[k++] = A68_MON (expr)[A68_MON (pos)++];
@@ -334,9 +371,9 @@ TAG_T *find_tag (TABLE_T * table, int a, char *name)
 
 int prio (FILE_T f, NODE_T * p)
 {
-  TAG_T *s = find_tag (A68_STANDENV, PRIO_SYMBOL, A68_MON (symbol));
   (void) p;
   (void) f;
+  TAG_T *s = find_tag (A68_STANDENV, PRIO_SYMBOL, A68_MON (symbol));
   if (s == NO_TAG) {
     monitor_error ("unknown operator, cannot set priority", A68_MON (symbol));
     return 0;
@@ -387,8 +424,8 @@ void deref (NODE_T * p, int k, int context)
 
 MOID_T *search_mode (int refs, int leng, char *indy)
 {
-  MOID_T *m = NO_MOID, *z = NO_MOID;
-  for (m = TOP_MOID (&A68_JOB); m != NO_MOID; FORWARD (m)) {
+  MOID_T *z = NO_MOID;
+  for (MOID_T *m = TOP_MOID (&A68_JOB); m != NO_MOID; FORWARD (m)) {
     if (NODE (m) != NO_NODE) {
       if (indy == NSYMBOL (NODE (m)) && leng == DIM (m)) {
         z = m;
@@ -402,7 +439,7 @@ MOID_T *search_mode (int refs, int leng, char *indy)
     monitor_error ("unknown indicant", indy);
     return NO_MOID;
   }
-  for (m = TOP_MOID (&A68_JOB); m != NO_MOID; FORWARD (m)) {
+  for (MOID_T *m = TOP_MOID (&A68_JOB); m != NO_MOID; FORWARD (m)) {
     int k = 0;
     while (IS_REF (m)) {
       k++;
@@ -422,8 +459,7 @@ MOID_T *search_mode (int refs, int leng, char *indy)
 
 TAG_T *search_operator (char *sym, MOID_T * x, MOID_T * y)
 {
-  TAG_T *t;
-  for (t = OPERATORS (A68_STANDENV); t != NO_TAG; FORWARD (t)) {
+  for (TAG_T *t = OPERATORS (A68_STANDENV); t != NO_TAG; FORWARD (t)) {
     if (strcmp (NSYMBOL (NODE (t)), sym) == 0) {
       PACK_T *p = PACK (MOID (t));
       if (x == MOID (p)) {
@@ -480,8 +516,7 @@ void search_identifier (FILE_T f, NODE_T * p, ADDR_T a68_link, char *sym)
     search_identifier (f, p, dynamic_a68_link, sym);
   } else {
     TABLE_T *q = A68_STANDENV;
-    TAG_T *i = IDENTIFIERS (q);
-    for (; i != NO_TAG; FORWARD (i)) {
+    for (TAG_T *i = IDENTIFIERS (q); i != NO_TAG; FORWARD (i)) {
       if (strcmp (NSYMBOL (NODE (i)), sym) == 0) {
         if (IS (MOID (i), PROC_SYMBOL)) {
           static A68_PROCEDURE z;
@@ -492,7 +527,9 @@ void search_identifier (FILE_T f, NODE_T * p, ADDR_T a68_link, char *sym)
           MOID (&z) = MOID (i);
           PUSH_PROCEDURE (p, z);
         } else {
-          (*(PROCEDURE (i))) (p);
+          NODE_T tmp = *p;
+          MOID (&tmp) = MOID (i); // MP routines consult mode from node.
+          (*(PROCEDURE (i))) (&tmp);
         }
         push_mode (f, MOID (i));
         return;
@@ -506,15 +543,14 @@ void search_identifier (FILE_T f, NODE_T * p, ADDR_T a68_link, char *sym)
 
 void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int top, int top_sp)
 {
-  int k;
-  PACK_T *u;
-  ADDR_T pop_sp = top_sp;
   (void) f;
   if ((top - bot) != DIM (proc)) {
     monitor_error ("invalid procedure argument count", NO_TEXT);
   }
   QUIT_ON_ERROR;
-  for (k = bot, u = PACK (proc); k < top; k++, FORWARD (u)) {
+  ADDR_T pop_sp = top_sp;
+  PACK_T *u = PACK (proc);
+  for (int k = bot; k < top; k++, FORWARD (u)) {
     if (A68_MON (_m_stack)[k] == MOID (u)) {
       PUSH (p, STACK_ADDRESS (pop_sp), SIZE (MOID (u)));
       pop_sp += SIZE (MOID (u));
@@ -541,9 +577,6 @@ void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int top, in
 
 void selection (FILE_T f, NODE_T * p, char *field)
 {
-  BOOL_T name;
-  MOID_T *moid;
-  PACK_T *u, *v;
   SCAN_CHECK (f, p);
   if (A68_MON (attr) != IDENTIFIER && A68_MON (attr) != OPEN_SYMBOL) {
     monitor_error ("invalid selection syntax", NO_TEXT);
@@ -551,6 +584,7 @@ void selection (FILE_T f, NODE_T * p, char *field)
   QUIT_ON_ERROR;
   PARSE_CHECK (f, p, MAX_PRIORITY + 1);
   deref (p, A68_MON (_m_sp) - 1, WEAK);
+  BOOL_T name; MOID_T *moid; PACK_T *u, *v;
   if (IS_REF (TOP_MODE)) {
     name = A68_TRUE;
     u = PACK (NAME (TOP_MODE));
@@ -588,21 +622,18 @@ void selection (FILE_T f, NODE_T * p, char *field)
 
 void call (FILE_T f, NODE_T * p, int depth)
 {
-  A68_PROCEDURE z;
-  NODE_T q;
-  int args, old_m_sp;
-  MOID_T *proc;
   (void) depth;
   QUIT_ON_ERROR;
   deref (p, A68_MON (_m_sp) - 1, STRONG);
-  proc = A68_MON (_m_stack)[--A68_MON (_m_sp)];
-  old_m_sp = A68_MON (_m_sp);
+  MOID_T *proc = A68_MON (_m_stack)[--A68_MON (_m_sp)];
   if (!IS (proc, PROC_SYMBOL)) {
     monitor_error ("invalid procedure mode", moid_to_string (proc, MOID_WIDTH, NO_NODE));
   }
   QUIT_ON_ERROR;
+  ADDR_T old_m_sp = A68_MON (_m_sp);
+  A68_PROCEDURE z;
   POP_PROCEDURE (p, &z);
-  args = A68_MON (_m_sp);
+  int args = A68_MON (_m_sp);
   ADDR_T top_sp = A68_SP;
   if (A68_MON (attr) == OPEN_SYMBOL) {
     do {
@@ -615,6 +646,7 @@ void call (FILE_T f, NODE_T * p, int depth)
     SCAN_CHECK (f, p);
   }
   coerce_arguments (f, p, proc, args, A68_MON (_m_sp), top_sp);
+  NODE_T q;
   if (STATUS (&z) & STANDENV_PROC_MASK) {
     MOID (&q) = A68_MON (_m_stack)[--A68_MON (_m_sp)];
     INFO (&q) = INFO (p);
@@ -631,16 +663,10 @@ void call (FILE_T f, NODE_T * p, int depth)
 
 void slice (FILE_T f, NODE_T * p, int depth)
 {
-  MOID_T *moid, *res;
-  A68_REF z;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  ADDR_T address;
-  int dim, k, iindex, args;
-  BOOL_T name;
   (void) depth;
   QUIT_ON_ERROR;
   deref (p, A68_MON (_m_sp) - 1, WEAK);
+  BOOL_T name; MOID_T *moid, *res;
   if (IS_REF (TOP_MODE)) {
     name = A68_TRUE;
     res = NAME (TOP_MODE);
@@ -656,16 +682,19 @@ void slice (FILE_T f, NODE_T * p, int depth)
   }
   QUIT_ON_ERROR;
 // Get descriptor.
+  A68_REF z;
   POP_REF (p, &z);
   CHECK_MON_REF (p, z, moid);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &z);
+  int dim;
   if (IS_FLEX (moid)) {
     dim = DIM (SUB (moid));
   } else {
     dim = DIM (moid);
   }
-// Get iindexer.
-  args = A68_MON (_m_sp);
+// Get indexer.
+  int args = A68_MON (_m_sp);
   if (A68_MON (attr) == SUB_SYMBOL) {
     do {
       SCAN_CHECK (f, p);
@@ -680,23 +709,24 @@ void slice (FILE_T f, NODE_T * p, int depth)
     monitor_error ("invalid slice index count", NO_TEXT);
   }
   QUIT_ON_ERROR;
-  for (k = 0, iindex = 0; k < dim; k++, A68_MON (_m_sp)--) {
+  int k = 0, index = 0;
+  for (; k < dim; k++, A68_MON (_m_sp)--) {
     A68_TUPLE *t = &(tup[dim - k - 1]);
-    A68_INT i;
     deref (p, A68_MON (_m_sp) - 1, MEEK);
     if (TOP_MODE != M_INT) {
       monitor_error ("invalid indexer mode", moid_to_string (TOP_MODE, MOID_WIDTH, NO_NODE));
     }
     QUIT_ON_ERROR;
+    A68_INT i;
     POP_OBJECT (p, &i, A68_INT);
     if (VALUE (&i) < LOWER_BOUND (t) || VALUE (&i) > UPPER_BOUND (t)) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
     QUIT_ON_ERROR;
-    iindex += SPAN (t) * VALUE (&i) - SHIFT (t);
+    index += SPAN (t) * VALUE (&i) - SHIFT (t);
   }
-  address = ROW_ELEMENT (arr, iindex);
+  ADDR_T address = ROW_ELEMENT (arr, index);
   if (name) {
     z = ARRAY (arr);
     OFFSET (&z) += address;
@@ -762,19 +792,17 @@ void parse (FILE_T f, NODE_T * p, int depth)
 // Dyadic expressions.
       PARSE_CHECK (f, p, depth + 1);
       while (A68_MON (attr) == OPERATOR && prio (f, p) == depth) {
-        int args;
-        NODE_T q;
-        TAG_T *opt;
         BUFFER name;
         bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
-        args = A68_MON (_m_sp) - 1;
+        int args = A68_MON (_m_sp) - 1;
         ADDR_T top_sp = A68_SP - SIZE (A68_MON (_m_stack)[args]);
         SCAN_CHECK (f, p);
         PARSE_CHECK (f, p, depth + 1);
-        opt = search_operator (name, A68_MON (_m_stack)[A68_MON (_m_sp) - 2], TOP_MODE);
+        TAG_T *opt = search_operator (name, A68_MON (_m_stack)[A68_MON (_m_sp) - 2], TOP_MODE);
         QUIT_ON_ERROR;
         coerce_arguments (f, p, MOID (opt), args, A68_MON (_m_sp), top_sp);
         A68_MON (_m_sp) -= 2;
+        NODE_T q;
         MOID (&q) = MOID (opt);
         INFO (&q) = INFO (p);
         NSYMBOL (&q) = NSYMBOL (p);
@@ -783,19 +811,17 @@ void parse (FILE_T f, NODE_T * p, int depth)
       }
     }
   } else if (A68_MON (attr) == OPERATOR) {
-    int args;
-    NODE_T q;
-    TAG_T *opt;
     BUFFER name;
     bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
-    args = A68_MON (_m_sp);
+    int args = A68_MON (_m_sp);
     ADDR_T top_sp = A68_SP;
     SCAN_CHECK (f, p);
     PARSE_CHECK (f, p, depth);
-    opt = search_operator (name, TOP_MODE, NO_MOID);
+    TAG_T *opt = search_operator (name, TOP_MODE, NO_MOID);
     QUIT_ON_ERROR;
     coerce_arguments (f, p, MOID (opt), args, A68_MON (_m_sp), top_sp);
     A68_MON (_m_sp)--;
+    NODE_T q;
     MOID (&q) = MOID (opt);
     INFO (&q) = INFO (p);
     NSYMBOL (&q) = NSYMBOL (p);
@@ -840,7 +866,6 @@ void parse (FILE_T f, NODE_T * p, int depth)
     }
   } else if (A68_MON (attr) == LONG_SYMBOL) {
     int length = 0;
-    MOID_T *m;
     while (A68_MON (attr) == LONG_SYMBOL) {
       length++;
       SCAN_CHECK (f, p);
@@ -867,6 +892,7 @@ void parse (FILE_T f, NODE_T * p, int depth)
       return;
     }
 // L INT or L REAL denotation.
+    MOID_T *m;
     if (A68_MON (attr) == INT_DENOTATION) {
       m = (length == 1 ? M_LONG_INT : M_LONG_LONG_INT);
     } else if (A68_MON (attr) == REAL_DENOTATION) {
@@ -921,10 +947,8 @@ void parse (FILE_T f, NODE_T * p, int depth)
       PUSH_VALUE (p, A68_MON (symbol)[0], A68_CHAR);
       push_mode (f, M_CHAR);
     } else {
-      A68_REF z;
-      A68_ARRAY *arr;
-      A68_TUPLE *tup;
-      z = c_to_a_string (p, A68_MON (symbol), DEFAULT_WIDTH);
+      A68_REF z = c_to_a_string (p, A68_MON (symbol), DEFAULT_WIDTH);
+      A68_ARRAY *arr; A68_TUPLE *tup;
       GET_DESCRIPTOR (arr, tup, &z);
       BLOCK_GC_HANDLE (&z);
       BLOCK_GC_HANDLE (&(ARRAY (arr)));
@@ -946,7 +970,6 @@ void parse (FILE_T f, NODE_T * p, int depth)
     push_mode (f, M_HIP);
     SCAN_CHECK (f, p);
   } else if (A68_MON (attr) == REAL_SYMBOL) {
-    A68_INT k;
     SCAN_CHECK (f, p);
     if (A68_MON (attr) != OPEN_SYMBOL) {
       monitor_error ("cast expects open-symbol", NO_TEXT);
@@ -961,13 +984,12 @@ void parse (FILE_T f, NODE_T * p, int depth)
       monitor_error ("invalid cast argument mode", moid_to_string (TOP_MODE, MOID_WIDTH, NO_NODE));
     }
     QUIT_ON_ERROR;
+    A68_INT k;
     POP_OBJECT (p, &k, A68_INT);
     PUSH_VALUE (p, (REAL_T) VALUE (&k), A68_REAL);
     TOP_MODE = M_REAL;
   } else if (A68_MON (attr) == IDENTIFIER) {
     ADDR_T old_sp = A68_SP;
-    BOOL_T init;
-    MOID_T *moid;
     BUFFER name;
     bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
     SCAN_CHECK (f, p);
@@ -978,8 +1000,9 @@ void parse (FILE_T f, NODE_T * p, int depth)
       QUIT_ON_ERROR;
       call_or_slice (f, p, depth);
     }
-    moid = TOP_MODE;
     QUIT_ON_ERROR;
+    MOID_T *moid = TOP_MODE;
+    BOOL_T init;
     if (check_initialisation (p, STACK_ADDRESS (old_sp), moid, &init)) {
       if (init == A68_FALSE) {
         monitor_error (NO_VALUE, name);
@@ -1059,8 +1082,6 @@ void evaluate (FILE_T f, NODE_T * p, char *str)
 
 int get_num_arg (char *num, char **rest)
 {
-  char *end;
-  int k;
   if (rest != NO_VAR) {
     *rest = NO_TEXT;
   }
@@ -1070,7 +1091,8 @@ int get_num_arg (char *num, char **rest)
   SKIP_ONE_SYMBOL (num);
   if (IS_DIGIT (num[0])) {
     errno = 0;
-    k = (int) a68_strtou (num, &end, 10);
+    char *end;
+    int k = (int) a68_strtou (num, &end, 10);
     if (end != num && errno == 0) {
       if (rest != NO_VAR) {
         *rest = end;
@@ -1096,42 +1118,36 @@ BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result
   (void) p;
   switch (SHORT_ID (q)) {
   case MODE_NO_CHECK:
-  case UNION_SYMBOL:
-    {
+  case UNION_SYMBOL: {
       initialised = A68_TRUE;
       recognised = A68_TRUE;
       break;
     }
-  case REF_SYMBOL:
-    {
+  case REF_SYMBOL: {
       A68_REF *z = (A68_REF *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case PROC_SYMBOL:
-    {
+  case PROC_SYMBOL: {
       A68_PROCEDURE *z = (A68_PROCEDURE *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_INT:
-    {
+  case MODE_INT: {
       A68_INT *z = (A68_INT *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_REAL:
-    {
+  case MODE_REAL: {
       A68_REAL *z = (A68_REAL *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_COMPLEX:
-    {
+  case MODE_COMPLEX: {
       A68_REAL *r = (A68_REAL *) w;
       A68_REAL *i = (A68_REAL *) (w + SIZE_ALIGNED (A68_REAL));
       initialised = (BOOL_T) (INITIALISED (r) && INITIALISED (i));
@@ -1140,15 +1156,13 @@ BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result
     }
 #if (A68_LEVEL >= 3)
   case MODE_LONG_INT:
-  case MODE_LONG_BITS:
-    {
+  case MODE_LONG_BITS: {
       A68_LONG_INT *z = (A68_LONG_INT *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_LONG_REAL:
-    {
+  case MODE_LONG_REAL: {
       A68_LONG_REAL *z = (A68_LONG_REAL *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
@@ -1157,8 +1171,7 @@ BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result
 #else
   case MODE_LONG_INT:
   case MODE_LONG_REAL:
-  case MODE_LONG_BITS:
-    {
+  case MODE_LONG_BITS: {
       MP_T *z = (MP_T *) w;
       initialised = (BOOL_T) ((unt) MP_STATUS (z) & INIT_MASK);
       recognised = A68_TRUE;
@@ -1167,80 +1180,69 @@ BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result
 #endif
   case MODE_LONG_LONG_INT:
   case MODE_LONG_LONG_REAL:
-  case MODE_LONG_LONG_BITS:
-    {
+  case MODE_LONG_LONG_BITS: {
       MP_T *z = (MP_T *) w;
       initialised = (BOOL_T) ((unt) MP_STATUS (z) & INIT_MASK);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_LONG_COMPLEX:
-    {
+  case MODE_LONG_COMPLEX: {
       MP_T *r = (MP_T *) w;
       MP_T *i = (MP_T *) (w + size_mp ());
       initialised = (BOOL_T) (((unt) MP_STATUS (r) & INIT_MASK) && ((unt) MP_STATUS (i) & INIT_MASK));
       recognised = A68_TRUE;
       break;
     }
-  case MODE_LONG_LONG_COMPLEX:
-    {
+  case MODE_LONG_LONG_COMPLEX: {
       MP_T *r = (MP_T *) w;
       MP_T *i = (MP_T *) (w + size_mp ());
       initialised = (BOOL_T) (((unt) MP_STATUS (r) & INIT_MASK) && ((unt) MP_STATUS (i) & INIT_MASK));
       recognised = A68_TRUE;
       break;
     }
-  case MODE_BOOL:
-    {
+  case MODE_BOOL: {
       A68_BOOL *z = (A68_BOOL *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_CHAR:
-    {
+  case MODE_CHAR: {
       A68_CHAR *z = (A68_CHAR *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_BITS:
-    {
+  case MODE_BITS: {
       A68_BITS *z = (A68_BITS *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_BYTES:
-    {
+  case MODE_BYTES: {
       A68_BYTES *z = (A68_BYTES *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_LONG_BYTES:
-    {
+  case MODE_LONG_BYTES: {
       A68_LONG_BYTES *z = (A68_LONG_BYTES *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_FILE:
-    {
+  case MODE_FILE: {
       A68_FILE *z = (A68_FILE *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_FORMAT:
-    {
+  case MODE_FORMAT: {
       A68_FORMAT *z = (A68_FORMAT *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
       break;
     }
-  case MODE_PIPE:
-    {
+  case MODE_PIPE: {
       A68_REF *pipe_read = (A68_REF *) w;
       A68_REF *pipe_write = (A68_REF *) (w + A68_REF_SIZE);
       A68_INT *pid = (A68_INT *) (w + 2 * A68_REF_SIZE);
@@ -1248,8 +1250,7 @@ BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result
       recognised = A68_TRUE;
       break;
     }
-  case MODE_SOUND:
-    {
+  case MODE_SOUND: {
       A68_SOUND *z = (A68_SOUND *) w;
       initialised = INITIALISED (z);
       recognised = A68_TRUE;
@@ -1344,17 +1345,16 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
     if (!INITIALISED ((A68_REF *) item)) {
       WRITE (STDOUT_FILENO, NO_VALUE);
     } else {
-      A68_ARRAY *arr;
-      A68_TUPLE *tup;
-      int count = 0, act_count = 0, elems;
+      A68_ARRAY *arr; A68_TUPLE *tup;
       GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
-      elems = get_row_size (tup, DIM (arr));
+      int elems = get_row_size (tup, DIM (arr));
       ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %d element(s)", elems) >= 0);
       WRITE (f, A68 (output_line));
       if (get_row_size (tup, DIM (arr)) != 0) {
         BYTE_T *base_addr = ADDRESS (&ARRAY (arr));
         BOOL_T done = A68_FALSE;
         initialise_internal_index (tup, DIM (arr));
+        int count = 0, act_count = 0;
         while (!done && ++count <= (A68_MON (max_row_elems) + 1)) {
           if (count <= A68_MON (max_row_elems)) {
             ADDR_T row_index = calculate_internal_index (tup, DIM (arr));
@@ -1376,9 +1376,8 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
     }
     A68_MON (tabs) = old_tabs;
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
     A68_MON (tabs)++;
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
       indent_crlf (f);
       ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     %s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH, NO_NODE), TEXT (q)) >= 0);
@@ -1455,9 +1454,9 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
 
 void show_frame_item (FILE_T f, NODE_T * p, ADDR_T a68_link, TAG_T * q, int modif)
 {
+  (void) p;
   ADDR_T addr = a68_link + FRAME_INFO_SIZE + OFFSET (q);
   ADDR_T loc = FRAME_INFO_SIZE + OFFSET (q);
-  (void) p;
   indent_crlf (STDOUT_FILENO);
   if (modif != ANONYMOUS) {
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") %s \"%s\"", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE), NSYMBOL (NODE (q))) >= 0);
@@ -1465,14 +1464,12 @@ void show_frame_item (FILE_T f, NODE_T * p, ADDR_T a68_link, TAG_T * q, int modi
     show_item (f, p, FRAME_ADDRESS (addr), MOID (q));
   } else {
     switch (PRIO (q)) {
-    case GENERATOR:
-      {
+    case GENERATOR: {
         ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") LOC %s", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE)) >= 0);
         WRITE (STDOUT_FILENO, A68 (output_line));
         break;
       }
-    default:
-      {
+    default: {
         ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") internal %s", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE)) >= 0);
         WRITE (STDOUT_FILENO, A68 (output_line));
         break;
@@ -1496,11 +1493,11 @@ void show_frame_items (FILE_T f, NODE_T * p, ADDR_T a68_link, TAG_T * q, int mod
 
 void intro_frame (FILE_T f, NODE_T * p, ADDR_T a68_link, int *printed)
 {
-  TABLE_T *q = TABLE (p);
   if (*printed > 0) {
     WRITELN (f, "");
   }
   (*printed)++;
+  TABLE_T *q = TABLE (p);
   where_in_source (f, p);
   ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Stack frame %d at frame(" A68_LU "), level=%d, size=" A68_LU " bytes", FRAME_NUMBER (a68_link), a68_link, LEVEL (q), (UNSIGNED_T) (FRAME_INCREMENT (a68_link) + FRAME_INFO_SIZE)) >= 0);
   WRITELN (f, A68 (output_line));
@@ -1775,10 +1772,9 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
       ADDR_T old_sp = A68_SP;
       evaluate (STDOUT_FILENO, p, sym);
       if (A68_MON (mon_errors) == 0 && A68_MON (_m_sp) > 0) {
-        MOID_T *res;
         BOOL_T cont = A68_TRUE;
         while (cont) {
-          res = A68_MON (_m_stack)[0];
+          MOID_T *res = A68_MON (_m_stack)[0];
           WRITELN (STDOUT_FILENO, "(");
           WRITE (STDOUT_FILENO, moid_to_string (res, MOID_WIDTH, NO_NODE));
           WRITE (STDOUT_FILENO, ")");
@@ -1989,8 +1985,7 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
     }
     return A68_FALSE;
   } else if (match_string (cmd, "LINk", BLANK_CHAR)) {
-    int k = get_num_arg (cmd, NO_VAR);
-    int printed = 0;
+    int k = get_num_arg (cmd, NO_VAR), printed = 0;
     if (k > 0) {
       stack_a68_link_dump (STDOUT_FILENO, A68_FP, k, &printed);
     } else if (k == NOT_A_NUM) {
@@ -1998,8 +1993,7 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
     }
     return A68_FALSE;
   } else if (match_string (cmd, "STAck", BLANK_CHAR) || match_string (cmd, "BT", BLANK_CHAR)) {
-    int k = get_num_arg (cmd, NO_VAR);
-    int printed = 0;
+    int k = get_num_arg (cmd, NO_VAR), printed = 0;
     if (k > 0) {
       stack_dump (STDOUT_FILENO, A68_FP, k, &printed);
     } else if (k == NOT_A_NUM) {
@@ -2052,20 +2046,18 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
     return A68_FALSE;
   } else if (match_string (cmd, "XRef", NULL_CHAR)) {
     int k = LINE_NUMBER (p);
-    LINE_T *line = TOP_LINE (&A68_JOB);
-    for (; line != NO_LINE; FORWARD (line)) {
+    for (LINE_T *line = TOP_LINE (&A68_JOB); line != NO_LINE; FORWARD (line)) {
       if (NUMBER (line) > 0 && NUMBER (line) == k) {
         list_source_line (STDOUT_FILENO, line, A68_TRUE);
       }
     }
     return A68_FALSE;
   } else if (match_string (cmd, "XRef", BLANK_CHAR)) {
-    LINE_T *line = TOP_LINE (&A68_JOB);
     int k = get_num_arg (cmd, NO_VAR);
     if (k == NOT_A_NUM) {
       monitor_error ("line number expected", NO_TEXT);
     } else {
-      for (; line != NO_LINE; FORWARD (line)) {
+      for (LINE_T *line = TOP_LINE (&A68_JOB); line != NO_LINE; FORWARD (line)) {
         if (NUMBER (line) > 0 && NUMBER (line) == k) {
           list_source_line (STDOUT_FILENO, line, A68_TRUE);
         }
@@ -2276,15 +2268,14 @@ void genie_break (NODE_T * p)
 
 void genie_evaluate (NODE_T * p)
 {
-  A68_REF u, v;
-  v = empty_string (p);
 // Pop argument.
+  A68_REF u;
   POP_REF (p, (A68_REF *) & u);
   volatile ADDR_T top_sp = A68_SP;
   CHECK_MON_REF (p, u, M_STRING);
   reset_transput_buffer (UNFORMATTED_BUFFER);
   add_a_string_transput_buffer (p, UNFORMATTED_BUFFER, (BYTE_T *) & u);
-  v = c_to_a_string (p, get_transput_buffer (UNFORMATTED_BUFFER), DEFAULT_WIDTH);
+  A68_REF v = c_to_a_string (p, get_transput_buffer (UNFORMATTED_BUFFER), DEFAULT_WIDTH);
 // Evaluate in the monitor.
   A68_MON (in_monitor) = A68_TRUE;
   A68_MON (mon_errors) = 0;

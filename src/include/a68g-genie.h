@@ -131,20 +131,30 @@
 
 // Execution
 
-#define EXECUTE_UNIT_2(p, dest) {\
+#define GENIE_UNIT_2(p, dest) {\
   PROP_T *_prop_ = &GPROP (p);\
   dest = (*(UNIT (_prop_))) (SOURCE (_prop_));}
 
-#define EXECUTE_UNIT(p) {\
+#define GENIE_UNIT_NO_GC_2(p, dest) {\
+  A68_GC (sema) ++;\
+  GENIE_UNIT_2 ((p), (dest));\
+  A68_GC (sema) --;}
+
+#define GENIE_UNIT(p) {\
   PROP_T *_prop_ = &GPROP (p);\
   (void) (*(UNIT (_prop_))) (SOURCE (_prop_));}
 
-#define EXECUTE_UNIT_TRACE(p) {\
+#define GENIE_UNIT_NO_GC(p) {\
+  A68_GC (sema) ++;\
+  GENIE_UNIT ((p));\
+  A68_GC (sema) --;}
+
+#define GENIE_UNIT_TRACE(p) {\
   if (STATUS_TEST (p, (BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK | \
       BREAKPOINT_INTERRUPT_MASK | BREAKPOINT_WATCH_MASK | BREAKPOINT_TRACE_MASK))) {\
     single_step ((p), STATUS (p));\
   }\
-  EXECUTE_UNIT (p);}
+  GENIE_UNIT (p);}
 
 // Stuff for the garbage collector
 
@@ -317,7 +327,7 @@
 
 // Interpreter macros
 
-#define INITIALISED(z)  ((BOOL_T) (STATUS (z) & INIT_MASK))
+#define INITIALISED(z) ((BOOL_T) (STATUS (z) & INIT_MASK))
 #define MODULAR_MATH(z) ((BOOL_T) (STATUS (z) & MODULAR_MASK))
 #define LHS_MODE(p) (MOID (PACK (MOID (p))))
 #define RHS_MODE(p) (MOID (NEXT (PACK (MOID (p)))))
@@ -435,5 +445,6 @@ extern A68_REF genie_make_rowrow (NODE_T *, MOID_T *, int, ADDR_T);
 
 extern void genie_clone_stack (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
 extern void genie_serial_units_no_label (NODE_T *, ADDR_T, NODE_T **);
+extern void genie_jump (NODE_T *);
 
 #endif

@@ -16,11 +16,17 @@
 /* Define this if a good pthread installation was detected */
 /* #undef BUILD_PARALLEL_CLAUSE */
 
+/* Define this if a good WWW installation was detected */
+/* #undef BUILD_WWW */
+
 /* Define to 1 if `TIOCGWINSZ' requires <sys/ioctl.h>. */
 #define GWINSZ_IN_SYS_IOCTL 1
 
 /* Define to 1 if you have the `aligned_alloc' function. */
 #define HAVE_ALIGNED_ALLOC 1
+
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+/* #undef HAVE_ARPA_INET_H */
 
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
@@ -36,6 +42,12 @@
 
 /* Define to 1 if you have the <ctype.h> header file. */
 #define HAVE_CTYPE_H 1
+
+/* Define this if a good curl installation was detected */
+/* #undef HAVE_CURL */
+
+/* Define to 1 if you have the <curl/curl.h> header file. */
+/* #undef HAVE_CURL_CURL_H */
 
 /* Define to 1 if a SysV or X/Open compatible Curses library is present */
 /* #undef HAVE_CURSES */
@@ -170,6 +182,9 @@
 /* Define if isnan() is available */
 #define HAVE_ISNAN 1
 
+/* Define to 1 if you have the `curl' library (-lcurl). */
+/* #undef HAVE_LIBCURL */
+
 /* Define to 1 if you have the <libgen.h> header file. */
 #define HAVE_LIBGEN_H 1
 
@@ -267,7 +282,7 @@
 #define HAVE_NETDB_H 1
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
-#define HAVE_NETINET_IN_H 1
+/* #undef HAVE_NETINET_IN_H */
 
 /* Define this if /opt/local/pgsql/include was detected */
 /* #undef HAVE_OPT_LOCAL_PGSQL_INCLUDE */
@@ -364,6 +379,9 @@
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #define HAVE_SYS_RESOURCE_H 1
 
+/* Define to 1 if you have the <sys/select.h> header file. */
+/* #undef HAVE_SYS_SELECT_H */
+
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #define HAVE_SYS_SOCKET_H 1
 
@@ -419,7 +437,7 @@
 #define PACKAGE_NAME "algol68g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "algol68g 3.2.1"
+#define PACKAGE_STRING "algol68g 3.3.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "algol68g"
@@ -428,7 +446,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.2.1"
+#define PACKAGE_VERSION "3.3.0"
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -436,7 +454,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.2.1"
+#define VERSION "3.3.0"
 
 /* Define to 1 if type `char' is unsigned and your compiler does not
    predefine this macro.  */

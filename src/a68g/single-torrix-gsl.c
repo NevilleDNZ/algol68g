@@ -239,7 +239,7 @@ void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
   int len1 = (int) (SIZE1 (a)), len2 = (int) (SIZE2 (a));
   A68_REF desc, row; A68_ARRAY arr; A68_TUPLE tup1, tup2;
   desc = heap_generator (p, M_ROW_ROW_COMPLEX, DESCRIPTOR_SIZE (2));
-  row = heap_generator (p, M_ROW_ROW_COMPLEX, len1 * len2 * 2 * SIZE (M_REAL));
+  row = heap_generator_3 (p, M_ROW_ROW_COMPLEX, len1, len2, 2 * SIZE (M_REAL));
   DIM (&arr) = 2;
   MOID (&arr) = M_COMPLEX;
   ELEM_SIZE (&arr) = 2 * SIZE (M_REAL);

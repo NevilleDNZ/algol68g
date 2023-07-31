@@ -39,19 +39,16 @@
 
 //! @brief 10 ** expo
 
-static DOUBLE_T pow_10_double[] = {
-  10.0q, 100.0q, 1.0e4q, 1.0e8q, 1.0e16q, 1.0e32q, 1.0e64q, 1.0e128q, 1.0e256q, 1.0e512q, 1.0e1024q, 1.0e2048q, 1.0e4096q
-};
-
 DOUBLE_T ten_up_double (int expo)
 {
-// This way appears sufficiently accurate.
-  DOUBLE_T dbl_expo = 1.0q, *dep;
-  BOOL_T neg_expo;
+  static DOUBLE_T pow_10_double[] = {
+    10.0q, 100.0q, 1.0e4q, 1.0e8q, 1.0e16q, 1.0e32q, 1.0e64q, 1.0e128q, 1.0e256q, 1.0e512q, 1.0e1024q, 1.0e2048q, 1.0e4096q
+  };
+// This appears sufficiently accurate.
   if (expo == 0) {
     return 1.0q;
   }
-  neg_expo = (BOOL_T) (expo < 0);
+  BOOL_T neg_expo = (BOOL_T) (expo < 0);
   if (neg_expo) {
     expo = -expo;
   }
@@ -60,7 +57,8 @@ DOUBLE_T ten_up_double (int expo)
     errno = EDOM;
   }
   ABEND (expo > MAX_DOUBLE_EXPO, ERROR_INVALID_VALUE, __func__);
-  for (dep = pow_10_double; expo != 0; expo >>= 1, dep++) {
+  DOUBLE_T dbl_expo = 1.0q;
+  for (DOUBLE_T *dep = pow_10_double; expo != 0; expo >>= 1, dep++) {
     if (expo & 0x1) {
       dbl_expo *= *dep;
     }
@@ -70,22 +68,21 @@ DOUBLE_T ten_up_double (int expo)
 
 #endif
 
-static REAL_T pow_10[] = {
-  10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256
-};
-
 //! @brief 10 ** expo
 
 REAL_T ten_up (int expo)
 {
-// This way appears sufficiently accurate.
-  REAL_T dbl_expo = 1.0, *dep;
+  static REAL_T pow_10[] = {
+    10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256
+  };
+// This appears sufficiently accurate.
   BOOL_T neg_expo = (BOOL_T) (expo < 0);
   if (neg_expo) {
     expo = -expo;
   }
   ABEND (expo > MAX_REAL_EXPO, ERROR_INVALID_VALUE, __func__);
-  for (dep = pow_10; expo != 0; expo >>= 1, dep++) {
+  REAL_T dbl_expo = 1.0;
+  for (REAL_T *dep = pow_10; expo != 0; expo >>= 1, dep++) {
     if (expo & 0x1) {
       dbl_expo *= *dep;
     }

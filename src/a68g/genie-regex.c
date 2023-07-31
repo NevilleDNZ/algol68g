@@ -30,23 +30,45 @@
 #include "a68g-double.h"
 #include "a68g-transput.h"
 
+//! @brief Return code for regex interface.
+
+void push_grep_rc (NODE_T * p, int rc)
+{
+  switch (rc) {
+  case 0: {
+      PUSH_VALUE (p, 0, A68_INT);
+      return;
+    }
+  case REG_NOMATCH: {
+      PUSH_VALUE (p, 1, A68_INT);
+      return;
+    }
+  case REG_ESPACE: {
+      PUSH_VALUE (p, 3, A68_INT);
+      return;
+    }
+  default: {
+      PUSH_VALUE (p, 2, A68_INT);
+      return;
+    }
+  }
+}
+
 //! @brief grep in string (STRING, STRING, REF INT, REF INT) INT.
 
 int grep_in_string (char *pat, char *str, int *start, int *end)
 {
-  int rc, nmatch, k, max_k, widest;
   regex_t compiled;
-  regmatch_t *matches;
-  rc = regcomp (&compiled, pat, REG_NEWLINE | REG_EXTENDED);
+  int rc = regcomp (&compiled, pat, REG_NEWLINE | REG_EXTENDED);
   if (rc != 0) {
     regfree (&compiled);
     return rc;
   }
-  nmatch = (int) (RE_NSUB (&compiled));
+  int nmatch = (int) (RE_NSUB (&compiled));
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
+  regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NO_REGMATCH) {
     regfree (&compiled);
     return 2;
@@ -57,9 +79,8 @@ int grep_in_string (char *pat, char *str, int *start, int *end)
     return rc;
   }
 // Find widest match. Do not assume it is the first one.
-  widest = 0;
-  max_k = 0;
-  for (k = 0; k < nmatch; k++) {
+  int widest = 0, max_k = 0;
+  for (int k = 0; k < nmatch; k++) {
     int dif = (int) RM_EO (&matches[k]) - (int) RM_SO (&matches[k]);
     if (dif > widest) {
       widest = dif;
@@ -76,66 +97,35 @@ int grep_in_string (char *pat, char *str, int *start, int *end)
   return 0;
 }
 
-//! @brief Return code for regex interface.
-
-void push_grep_rc (NODE_T * p, int rc)
-{
-  switch (rc) {
-  case 0:
-    {
-      PUSH_VALUE (p, 0, A68_INT);
-      return;
-    }
-  case REG_NOMATCH:
-    {
-      PUSH_VALUE (p, 1, A68_INT);
-      return;
-    }
-  case REG_ESPACE:
-    {
-      PUSH_VALUE (p, 3, A68_INT);
-      return;
-    }
-  default:
-    {
-      PUSH_VALUE (p, 2, A68_INT);
-      return;
-    }
-  }
-}
-
 //! @brief PROC grep in string = (STRING, STRING, REF INT, REF INT) INT
 
 void genie_grep_in_string (NODE_T * p)
 {
-  A68_REF ref_pat, ref_beg, ref_end, ref_str, row;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  int rc, nmatch, k, max_k, widest;
-  regex_t compiled;
-  regmatch_t *matches;
+  A68_REF ref_pat, ref_beg, ref_end, ref_str;
   POP_REF (p, &ref_end);
   POP_REF (p, &ref_beg);
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pat);
-  row = *(A68_REF *) & ref_str;
+  A68_REF row = *(A68_REF *) & ref_str;
   CHECK_INIT (p, INITIALISED (&row), M_ROWS);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &row);
   reset_transput_buffer (PATTERN_BUFFER);
   reset_transput_buffer (STRING_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
   add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) & ref_str);
-  rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  regex_t compiled;
+  int rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
   if (rc != 0) {
     push_grep_rc (p, rc);
     regfree (&compiled);
     return;
   }
-  nmatch = (int) (RE_NSUB (&compiled));
+  int nmatch = (int) (RE_NSUB (&compiled));
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
+  regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NULL) {
     rc = 2;
     PUSH_VALUE (p, rc, A68_INT);
@@ -149,9 +139,8 @@ void genie_grep_in_string (NODE_T * p)
     return;
   }
 // Find widest match. Do not assume it is the first one.
-  widest = 0;
-  max_k = 0;
-  for (k = 0; k < nmatch; k++) {
+  int widest = 0, max_k = 0;
+  for (int k = 0; k < nmatch; k++) {
     int dif = (int) (RM_EO (&(matches[k]))) - (int) (RM_SO (&(matches[k])));
     if (dif > widest) {
       widest = dif;
@@ -176,34 +165,31 @@ void genie_grep_in_string (NODE_T * p)
 
 void genie_grep_in_substring (NODE_T * p)
 {
-  A68_REF ref_pat, ref_beg, ref_end, ref_str, row;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  int rc, nmatch, k, max_k, widest;
-  regex_t compiled;
-  regmatch_t *matches;
+  A68_REF ref_pat, ref_beg, ref_end, ref_str;
   POP_REF (p, &ref_end);
   POP_REF (p, &ref_beg);
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pat);
-  row = *(A68_REF *) & ref_str;
+  A68_REF row = *(A68_REF *) & ref_str;
   CHECK_INIT (p, INITIALISED (&row), M_ROWS);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &row);
   reset_transput_buffer (PATTERN_BUFFER);
   reset_transput_buffer (STRING_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
   add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) & ref_str);
-  rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  regex_t compiled;
+  int rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
   if (rc != 0) {
     push_grep_rc (p, rc);
     regfree (&compiled);
     return;
   }
-  nmatch = (int) (RE_NSUB (&compiled));
+  int nmatch = (int) (RE_NSUB (&compiled));
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
+  regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NULL) {
     rc = 2;
     PUSH_VALUE (p, rc, A68_INT);
@@ -217,9 +203,8 @@ void genie_grep_in_substring (NODE_T * p)
     return;
   }
 // Find widest match. Do not assume it is the first one.
-  widest = 0;
-  max_k = 0;
-  for (k = 0; k < nmatch; k++) {
+  int widest = 0, max_k = 0;
+  for (int k = 0; k < nmatch; k++) {
     int dif = (int) (RM_EO (&(matches[k]))) - (int) (RM_SO (&(matches[k])));
     if (dif > widest) {
       widest = dif;
@@ -245,10 +230,6 @@ void genie_grep_in_substring (NODE_T * p)
 void genie_sub_in_string (NODE_T * p)
 {
   A68_REF ref_pat, ref_rep, ref_str;
-  int rc, nmatch, k, max_k, widest, begin, end;
-  char *txt;
-  regex_t compiled;
-  regmatch_t *matches;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_rep);
   POP_REF (p, &ref_pat);
@@ -261,17 +242,18 @@ void genie_sub_in_string (NODE_T * p)
   reset_transput_buffer (PATTERN_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
   add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) DEREF (A68_REF, &ref_str));
-  rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  regex_t compiled;
+  int rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
   if (rc != 0) {
     push_grep_rc (p, rc);
     regfree (&compiled);
     return;
   }
-  nmatch = (int) (RE_NSUB (&compiled));
+  int nmatch = (int) (RE_NSUB (&compiled));
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
+  regmatch_t *matches = a68_alloc ((size_t) (nmatch * SIZE_ALIGNED (regmatch_t)), __func__, __LINE__);
   if (nmatch > 0 && matches == NULL) {
     PUSH_VALUE (p, rc, A68_INT);
     regfree (&compiled);
@@ -284,24 +266,22 @@ void genie_sub_in_string (NODE_T * p)
     return;
   }
 // Find widest match. Do not assume it is the first one.
-  widest = 0;
-  max_k = 0;
-  for (k = 0; k < nmatch; k++) {
+  int widest = 0, max_k = 0;
+  for (int k = 0; k < nmatch; k++) {
     int dif = (int) RM_EO (&(matches[k])) - (int) RM_SO (&(matches[k]));
     if (dif > widest) {
       widest = dif;
       max_k = k;
     }
   }
-  begin = (int) RM_SO (&(matches[max_k])) + 1;
-  end = (int) RM_EO (&(matches[max_k]));
 // Substitute text.
-  txt = get_transput_buffer (STRING_BUFFER);
-  for (k = 0; k < begin - 1; k++) {
+  int begin = (int) RM_SO (&(matches[max_k])) + 1, end = (int) RM_EO (&(matches[max_k]));
+  char *txt = get_transput_buffer (STRING_BUFFER);
+  for (int k = 0; k < begin - 1; k++) {
     plusab_transput_buffer (p, REPLACE_BUFFER, txt[k]);
   }
   add_a_string_transput_buffer (p, REPLACE_BUFFER, (BYTE_T *) & ref_rep);
-  for (k = end; k < get_transput_buffer_size (STRING_BUFFER); k++) {
+  for (int k = end; k < get_transput_buffer_size (STRING_BUFFER); k++) {
     plusab_transput_buffer (p, REPLACE_BUFFER, txt[k]);
   }
   *DEREF (A68_REF, &ref_str) = c_to_a_string (p, get_transput_buffer (REPLACE_BUFFER), DEFAULT_WIDTH);

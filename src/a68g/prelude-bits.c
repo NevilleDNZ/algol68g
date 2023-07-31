@@ -40,7 +40,6 @@
 
 void stand_longlong_bits (void)
 {
-  MOID_T *m;
 // LONG LONG BITS in software, vintage
   a68_mode (2, "BITS", &M_LONG_LONG_BITS);
 // REF LONG LONG BITS
@@ -53,7 +52,7 @@ void stand_longlong_bits (void)
   a68_idf (A68_STD, "longlongbitswidth", M_INT, genie_long_mp_bits_width);
   a68_idf (A68_STD, "longlongmaxbits", M_LONG_LONG_BITS, genie_long_mp_max_bits);
 //
-  m = a68_proc (M_LONG_LONG_BITS, M_ROW_BOOL, NO_MOID);
+  MOID_T *m = a68_proc (M_LONG_LONG_BITS, M_ROW_BOOL, NO_MOID);
   a68_idf (A68_STD, "longlongbitspack", m, genie_long_bits_pack);
   A68C_DEFIO (longlongbits, long_mp_bits, LONG_LONG_BITS);
 //

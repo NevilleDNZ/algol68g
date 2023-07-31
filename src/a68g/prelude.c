@@ -90,10 +90,10 @@ void add_a68_standenv (BOOL_T portable, int a, NODE_T * n, char *c, MOID_T * m, 
 
 MOID_T *a68_proc (MOID_T * m, ...)
 {
-  MOID_T *y, **z = &TOP_MOID (&A68_JOB);
-  PACK_T *p = NO_PACK, *q = NO_PACK;
   va_list attribute;
   va_start (attribute, m);
+  PACK_T *p = NO_PACK, *q = NO_PACK;
+  MOID_T *y;
   while ((y = va_arg (attribute, MOID_T *)) != NO_MOID) {
     PACK_T *new_one = new_pack ();
     MOID (new_one) = y;
@@ -107,7 +107,7 @@ MOID_T *a68_proc (MOID_T * m, ...)
     q = new_one;
   }
   va_end (attribute);
-  return add_mode (z, PROC_SYMBOL, count_pack_members (p), NO_NODE, m, p);
+  return add_mode (&TOP_MOID (&A68_JOB), PROC_SYMBOL, count_pack_members (p), NO_NODE, m, p);
 }
 
 //! @brief Enter an identifier in standenv.
@@ -142,8 +142,6 @@ void a68_op (BOOL_T portable, char *n, MOID_T * m, GPROC * q)
 
 void stand_moids (void)
 {
-  MOID_T *m;
-  PACK_T *z;
 // Primitive A68 moids.
   a68_mode (0, "VOID", &M_VOID);
 // Standard precision.
@@ -237,7 +235,7 @@ void stand_moids (void)
   HAS_ROWS (M_ROW_BOOL) = A68_TRUE;
   SLICE (M_ROW_BOOL) = M_BOOL;
 // FLEX [] BOOL.
-  m = add_mode (&TOP_MOID (&A68_JOB), FLEX_SYMBOL, 0, NO_NODE, M_ROW_BOOL, NO_PACK);
+  MOID_T *m = add_mode (&TOP_MOID (&A68_JOB), FLEX_SYMBOL, 0, NO_NODE, M_ROW_BOOL, NO_PACK);
   HAS_ROWS (m) = A68_TRUE;
   M_FLEX_ROW_BOOL = m;
 // [] BITS.
@@ -279,7 +277,7 @@ void stand_moids (void)
   M_PROC_STRING = add_mode (&TOP_MOID (&A68_JOB), PROC_SYMBOL, 0, NO_NODE, M_STRING, NO_PACK);
   DEFLEXED (M_PROC_STRING) = M_PROC_ROW_CHAR;
 // COMPLEX.
-  z = NO_PACK;
+  PACK_T *z = NO_PACK;
   (void) add_mode_to_pack (&z, M_REAL, TEXT (add_token (&A68 (top_token), "im")), NO_NODE);
   (void) add_mode_to_pack (&z, M_REAL, TEXT (add_token (&A68 (top_token), "re")), NO_NODE);
   m = add_mode (&TOP_MOID (&A68_JOB), STRUCT_SYMBOL, count_pack_members (z), NO_NODE, NO_MOID, z);
@@ -378,7 +376,6 @@ void stand_moids (void)
 
 void stand_prelude (void)
 {
-  MOID_T *m;
 // Identifiers.
   a68_idf (A68_STD, "intlengths", M_INT, genie_int_lengths);
   a68_idf (A68_STD, "intshorths", M_INT, genie_int_shorths);
@@ -428,16 +425,18 @@ void stand_prelude (void)
   a68_idf (A68_EXT, "seconds", M_REAL, genie_cputime);
   a68_idf (A68_EXT, "clock", M_REAL, genie_cputime);
   a68_idf (A68_EXT, "cputime", M_REAL, genie_cputime);
-  m = a68_proc (M_VOID, A68_MCACHE (proc_void), NO_MOID);
-  a68_idf (A68_EXT, "ongcevent", m, genie_on_gc_event);
-  a68_idf (A68_EXT, "collections", A68_MCACHE (proc_int), genie_garbage_collections);
-  a68_idf (A68_EXT, "garbagecollections", A68_MCACHE (proc_int), genie_garbage_collections);
-  a68_idf (A68_EXT, "garbagerefused", A68_MCACHE (proc_int), genie_garbage_refused);
+  MOID_T *m = a68_proc (M_VOID, A68_MCACHE (proc_void), NO_MOID);
   a68_idf (A68_EXT, "blocks", A68_MCACHE (proc_int), genie_block);
-  a68_idf (A68_EXT, "garbage", A68_MCACHE (proc_int), genie_garbage_freed);
-  a68_idf (A68_EXT, "garbagefreed", A68_MCACHE (proc_int), genie_garbage_freed);
+  a68_idf (A68_EXT, "collections", A68_MCACHE (proc_int), genie_garbage_collections);
   a68_idf (A68_EXT, "collectseconds", A68_MCACHE (proc_real), genie_garbage_seconds);
+  a68_idf (A68_EXT, "garbage", A68_MCACHE (proc_int), genie_garbage_freed);
+  a68_idf (A68_EXT, "garbagecollections", A68_MCACHE (proc_int), genie_garbage_collections);
+  a68_idf (A68_EXT, "garbagefreed", A68_MCACHE (proc_int), genie_garbage_freed);
+  a68_idf (A68_EXT, "garbagerefused", A68_MCACHE (proc_int), genie_garbage_refused);
   a68_idf (A68_EXT, "garbageseconds", A68_MCACHE (proc_real), genie_garbage_seconds);
+  a68_idf (A68_EXT, "ongcevent", m, genie_on_gc_event);
+  a68_idf (A68_EXT, "sweeps", A68_MCACHE (proc_int), genie_garbage_collections);
+  a68_idf (A68_EXT, "sweepsrefused", A68_MCACHE (proc_int), genie_garbage_refused);
   a68_idf (A68_EXT, "stackpointer", M_INT, genie_stack_pointer);
   a68_idf (A68_EXT, "systemstackpointer", M_INT, genie_system_stack_pointer);
   a68_idf (A68_EXT, "systemstacksize", M_INT, genie_system_stack_size);
@@ -459,8 +458,11 @@ void stand_prelude (void)
   a68_idf (A68_EXT, "evaluate", m, genie_evaluate);
   m = a68_proc (M_INT, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "system", m, genie_system);
-  m = a68_proc (M_INT, M_INT, NO_MOID);
+  m = A68_MCACHE (proc_int_int);
   a68_idf (A68_EXT, "sleep", m, genie_sleep);
+// Machine environ parameters.
+  a68_idf (A68_EXT, "i1mach", A68_MCACHE (proc_int_int), genie_i1mach);
+  a68_idf (A68_EXT, "d1mach", A68_MCACHE (proc_int_real), genie_d1mach);
 // BITS procedures.
   m = a68_proc (M_BITS, M_ROW_BOOL, NO_MOID);
   a68_idf (A68_STD, "bitspack", m, genie_bits_pack);
@@ -975,6 +977,8 @@ void stand_prelude (void)
   a68_op (A68_STD, "ABS", m, genie_abs_mp);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp);
+  m = a68_proc (M_INT, M_LONG_LONG_REAL, NO_MOID);
+  a68_op (A68_STD, "SIGN", m, genie_sign_mp);
 //
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_idf (A68_EXT, "longlongarccosdg", m, genie_acosdg_mp);
@@ -1216,7 +1220,6 @@ void stand_prelude (void)
   a68_idf (A68_EXT, "qcsqrt", m, genie_sqrt_mp_complex);
   a68_idf (A68_EXT, "qctanh", m, genie_tanh_mp_complex);
   a68_idf (A68_EXT, "qctan", m, genie_tan_mp_complex);
-
 // BYTES ops.
   m = a68_proc (M_BYTES, M_STRING, NO_MOID);
   a68_idf (A68_STD, "bytespack", m, genie_bytespack);
@@ -1418,7 +1421,6 @@ void stand_prelude (void)
 void stand_mp_level_2 (void)
 {
 #if (A68_LEVEL <= 2)
-  MOID_T *m;
   a68_idf (A68_STD, "dpi", M_LONG_REAL, genie_pi_mp);
   a68_idf (A68_STD, "longpi", M_LONG_REAL, genie_pi_mp);
   a68_idf (A68_STD, "longmaxbits", M_LONG_BITS, genie_long_max_bits);
@@ -1431,7 +1433,7 @@ void stand_mp_level_2 (void)
   a68_idf (A68_STD, "longinf", M_LONG_REAL, genie_infinity_mp);
   a68_idf (A68_STD, "longmininf", M_LONG_REAL, genie_minus_infinity_mp);
 // LONG INT in software
-  m = a68_proc (M_LONG_INT, M_LONG_INT, NO_MOID);
+  MOID_T *m = a68_proc (M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp);
   a68_op (A68_STD, "ABS", m, genie_abs_mp);
@@ -1810,7 +1812,6 @@ void stand_mp_level_2 (void)
 void stand_mp_level_3 (void)
 {
 #if (A68_LEVEL >= 3)
-  MOID_T *m;
   a68_idf (A68_STD, "dpi", M_LONG_REAL, genie_pi_double);
   a68_idf (A68_STD, "longpi", M_LONG_REAL, genie_pi_double);
   a68_idf (A68_STD, "longmaxbits", M_LONG_BITS, genie_double_max_bits);
@@ -1823,7 +1824,7 @@ void stand_mp_level_3 (void)
   a68_idf (A68_STD, "longinf", M_LONG_REAL, genie_infinity_double);
   a68_idf (A68_STD, "longmininf", M_LONG_REAL, genie_minus_infinity_double);
 // LONG INT as 128 bit
-  m = a68_proc (M_LONG_INT, M_LONG_INT, NO_MOID);
+  MOID_T *m = a68_proc (M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_double_int);
   a68_op (A68_STD, "ABS", m, genie_abs_double_int);
@@ -2310,7 +2311,6 @@ void stand_mp_level_3 (void)
 
 void stand_transput (void)
 {
-  MOID_T *m;
   a68_idf (A68_EXT, "blankcharacter", M_CHAR, genie_blank_char);
   a68_idf (A68_EXT, "formfeedcharacter", M_CHAR, genie_formfeed_char);
   a68_idf (A68_EXT, "formfeedchar", M_CHAR, genie_formfeed_char);
@@ -2327,7 +2327,7 @@ void stand_transput (void)
   a68_idf (A68_STD, "flop", M_CHAR, genie_flop_char);
   a68_idf (A68_STD, "nullchar", M_CHAR, genie_null_char);
 //
-  m = a68_proc (M_STRING, M_HEX_NUMBER, M_INT, M_INT, NO_MOID);
+  MOID_T *m = a68_proc (M_STRING, M_HEX_NUMBER, M_INT, M_INT, NO_MOID);
   a68_idf (A68_STD, "bits", m, genie_bits);
 //
   m = a68_proc (M_STRING, M_NUMBER, M_INT, NO_MOID);
@@ -2440,7 +2440,17 @@ void stand_transput (void)
   a68_idf (A68_STD, "put", m, genie_write_file);
   a68_idf (A68_STD, "putf", m, genie_write_file_format);
   a68_idf (A68_STD, "putbin", m, genie_write_bin_file);
-
+//
+  m = a68_proc (M_VOID, M_REF_STRING, M_ROW_SIMPLIN, NO_MOID);
+  a68_idf (A68_EXT, "gets", m, genie_get_text);
+  a68_idf (A68_EXT, "getsf", m, genie_getf_text);
+  m = a68_proc (M_VOID, M_REF_STRING, M_ROW_SIMPLOUT, NO_MOID);
+  a68_idf (A68_EXT, "puts", m, genie_put_text);
+  a68_idf (A68_EXT, "putsf", m, genie_putf_text);
+  m = a68_proc (M_REF_STRING, M_REF_STRING, M_ROW_SIMPLOUT, NO_MOID);
+  a68_idf (A68_EXT, "string", m, genie_string);
+  a68_idf (A68_EXT, "stringf", m, genie_stringf);
+//
   A68C_DEFIO (bits, bits, BITS);
   A68C_DEFIO (bool, bool, BOOL);
   A68C_DEFIO (char, char, CHAR);
@@ -2467,9 +2477,8 @@ void stand_transput (void)
 
 void stand_extensions (void)
 {
-  MOID_T *m = NO_MOID;
 // UNIX things.
-  m = A68_MCACHE (proc_int);
+  MOID_T *m = A68_MCACHE (proc_int);
   a68_idf (A68_EXT, "rows", m, genie_rows);
   a68_idf (A68_EXT, "columns", m, genie_columns);
   a68_idf (A68_EXT, "argc", m, genie_argc);
@@ -2544,10 +2553,13 @@ void stand_extensions (void)
   m = a68_proc (M_ROW_STRING, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "getdirectory", m, genie_directory);
 #endif
-#if defined (BUILD_HTTP)
+#if defined (BUILD_WWW)
   m = a68_proc (M_INT, M_REF_STRING, M_STRING, M_STRING, M_INT, NO_MOID);
   a68_idf (A68_EXT, "httpcontent", m, genie_http_content);
   a68_idf (A68_EXT, "tcprequest", m, genie_tcp_request);
+#if defined (HAVE_CURL)
+  a68_idf (A68_EXT, "httpscontent", m, genie_https_content);
+#endif
 #endif
 }
 
@@ -2555,9 +2567,8 @@ void stand_extensions (void)
 
 void stand_plot (void)
 {
-  MOID_T *m = NO_MOID;
 // Drawing.
-  m = a68_proc (M_BOOL, M_REF_FILE, M_STRING, M_STRING, NO_MOID);
+  MOID_T *m = a68_proc (M_BOOL, M_REF_FILE, M_STRING, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "drawdevice", m, genie_make_device);
   a68_idf (A68_EXT, "makedevice", m, genie_make_device);
 //
@@ -2619,7 +2630,6 @@ void stand_plot (void)
 
 void stand_curses (void)
 {
-  MOID_T *m;
   a68_idf (A68_EXT, "cursesstart", A68_MCACHE (proc_void), genie_curses_start);
   a68_idf (A68_EXT, "cursesend", A68_MCACHE (proc_void), genie_curses_end);
   a68_idf (A68_EXT, "cursesclear", A68_MCACHE (proc_void), genie_curses_clear);
@@ -2639,7 +2649,7 @@ void stand_curses (void)
   a68_idf (A68_EXT, "cursesblueinverse", A68_MCACHE (proc_void), genie_curses_blue_inverse);
   a68_idf (A68_EXT, "curseswhiteinverse", A68_MCACHE (proc_void), genie_curses_white_inverse);
 //
-  m = A68_MCACHE (proc_char);
+  MOID_T *m = A68_MCACHE (proc_char);
   a68_idf (A68_EXT, "cursesgetchar", m, genie_curses_getchar);
 //
   m = a68_proc (M_VOID, M_CHAR, NO_MOID);
@@ -2662,8 +2672,7 @@ void stand_curses (void)
 
 void stand_postgresql (void)
 {
-  MOID_T *m = NO_MOID;
-  m = a68_proc (M_INT, M_REF_FILE, M_STRING, M_REF_STRING, NO_MOID);
+  MOID_T *m = a68_proc (M_INT, M_REF_FILE, M_STRING, M_REF_STRING, NO_MOID);
   a68_idf (A68_EXT, "pqconnectdb", m, genie_pq_connectdb);
 //
   m = a68_proc (M_INT, M_REF_FILE, NO_MOID);

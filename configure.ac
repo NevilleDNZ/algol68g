@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.2.1, configure.ac
+# Algol 68 Genie 3.3.0, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.2.1], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.3.0], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 # Check whether compiler supports $1 as a command-line option. 
@@ -115,24 +115,26 @@ esac
 # Extra options.
 #
 
-AC_ARG_ENABLE(clang, [AS_HELP_STRING([--enable-clang], [prefer clang over gcc if both are installed (default is "no")])], , enable_clang=no) 
-AC_ARG_ENABLE(stable, [AS_HELP_STRING([--enable-stable], [conservative build without optional libraries (default is "no")])], , enable_stable=no) 
-AC_ARG_ENABLE(core, [AS_HELP_STRING([--enable-core], [build without optional libraries or plugin compiler (default is "no")])], , enable_core=no) 
-AC_ARG_ENABLE(generic, [AS_HELP_STRING([--enable-generic], [build for non-GNU systems (default is "no")])], , enable_generic=no) 
-AC_ARG_ENABLE(compiler, [AS_HELP_STRING([--enable-compiler], [enable plugin compiler (default is "yes")])], , enable_compiler=yes) 
-AC_ARG_ENABLE(quadmath, [AS_HELP_STRING([--enable-quadmath], [if available, enable GCC quadmath library (default is "yes")])], , enable_quadmath=yes)
-AC_ARG_ENABLE(mathlib, [AS_HELP_STRING([--enable-mathlib], [if available, enable R mathlib library (default is "yes")])], , enable_mathlib=yes) 
-AC_ARG_ENABLE(curses, [AS_HELP_STRING([--enable-curses], [if available, enable curses library (default is "yes")])], , enable_curses=yes) 
-AC_ARG_ENABLE(gsl, [AS_HELP_STRING([--enable-gsl], [if available, enable GNU scientific library (default is "yes")])], , enable_gsl=yes) 
-AC_ARG_ENABLE(mpfr, [AS_HELP_STRING([--enable-mpfr], [if available, enable GNU MPFR (default is "yes")])], , enable_mpfr=yes) 
-AC_ARG_ENABLE(parallel, [AS_HELP_STRING([--enable-parallel], [enable Algol 68 parallel-clause (default is "yes")])], , enable_parallel=yes) 
-AC_ARG_ENABLE(plotutils, [AS_HELP_STRING([--enable-plotutils], [if available, enable GNU plotting utilities (default is "yes")])], , enable_plotutils=yes) 
-AC_ARG_ENABLE(postgresql, [AS_HELP_STRING([--enable-postgresql], [if available, enable PostgreSQL (default is "yes")])], , enable_postgresql=yes) 
-AC_ARG_ENABLE(readline, [AS_HELP_STRING([--enable-readline], [if available, enable readline library (default is "yes")])], , enable_readline=yes) 
-AC_ARG_ENABLE(standard-types, [AS_HELP_STRING([--enable-standard-types], [enable int*4 and real*8 modes (default is "yes")])], , enable_standard_types=yes) 
-AC_ARG_ENABLE(long-types, [AS_HELP_STRING([--enable-long-types], [if available, enable int*8 and real*10, real*16 modes (default is "yes")])], , enable_long_types=yes) 
-AC_ARG_ENABLE(pic, [AS_HELP_STRING([--enable-pic=option], [if using gcc, enable option to generate PIC (default is "-fPIC")])], , enable_pic="-fPIC") 
 AC_ARG_ENABLE(arch, [AS_HELP_STRING([--enable-arch=cpu], [if using gcc, enable emitting architecture-tuned assembly code (default is "no")])], , enable_arch=no) 
+AC_ARG_ENABLE(clang, [AS_HELP_STRING([--enable-clang], [prefer clang over gcc if both are installed (default is "no")])], , enable_clang=no) 
+AC_ARG_ENABLE(compiler, [AS_HELP_STRING([--enable-compiler], [enable plugin compiler (default is "yes")])], , enable_compiler=yes) 
+AC_ARG_ENABLE(core, [AS_HELP_STRING([--enable-core], [build without optional libraries or plugin compiler (default is "no")])], , enable_core=no) 
+AC_ARG_ENABLE(curl, [AS_HELP_STRING([--enable-curl], [enable fetching web page contents (default is "yes")])], , enable_curl="yes") 
+AC_ARG_ENABLE(curses, [AS_HELP_STRING([--enable-curses], [enable curses library (default is "yes")])], , enable_curses=yes) 
+AC_ARG_ENABLE(generic, [AS_HELP_STRING([--enable-generic], [build for non-GNU systems (default is "no")])], , enable_generic=no) 
+AC_ARG_ENABLE(gsl, [AS_HELP_STRING([--enable-gsl], [enable GNU scientific library (default is "yes")])], , enable_gsl=yes) 
+AC_ARG_ENABLE(long-types, [AS_HELP_STRING([--enable-long-types], [enable int*8 and real*10, real*16 modes (default is "yes")])], , enable_long_types=yes) 
+AC_ARG_ENABLE(mathlib, [AS_HELP_STRING([--enable-mathlib], [enable R mathlib library (default is "yes")])], , enable_mathlib=yes) 
+AC_ARG_ENABLE(mpfr, [AS_HELP_STRING([--enable-mpfr], [enable GNU MPFR (default is "yes")])], , enable_mpfr=yes) 
+AC_ARG_ENABLE(parallel, [AS_HELP_STRING([--enable-parallel], [enable Algol 68 parallel-clause (default is "yes")])], , enable_parallel=yes) 
+AC_ARG_ENABLE(pic, [AS_HELP_STRING([--enable-pic=option], [if using gcc, enable option to generate PIC (default is "-fPIC")])], , enable_pic="-fPIC") 
+AC_ARG_ENABLE(plotutils, [AS_HELP_STRING([--enable-plotutils], [enable GNU plotting utilities (default is "yes")])], , enable_plotutils=yes) 
+AC_ARG_ENABLE(postgresql, [AS_HELP_STRING([--enable-postgresql], [enable PostgreSQL (default is "yes")])], , enable_postgresql=yes) 
+AC_ARG_ENABLE(quadmath, [AS_HELP_STRING([--enable-quadmath], [enable GCC quadmath library (default is "yes")])], , enable_quadmath=yes)
+AC_ARG_ENABLE(readline, [AS_HELP_STRING([--enable-readline], [enable readline library (default is "yes")])], , enable_readline=yes) 
+AC_ARG_ENABLE(stable, [AS_HELP_STRING([--enable-stable], [conservative build without optional libraries (default is "no")])], , enable_stable=no) 
+AC_ARG_ENABLE(standard-types, [AS_HELP_STRING([--enable-standard-types], [enable int*4 and real*8 modes (default is "yes")])], , enable_standard_types=yes) 
+AC_ARG_ENABLE(www, [AS_HELP_STRING([--enable-www], [enable fetching web page contents (default is "yes")])], , enable_www="yes") 
 
 AC_CHECK_PROG(a68g_exists, a68g, "yes", "no")
 AC_CHECK_PROG(sed_exists, sed, "yes", "no")
@@ -351,13 +353,16 @@ fi
 
 if test "x$enable_core" = "xyes"; then
   enable_compiler=no
+  enable_curl=no
+  enable_curses=no
   enable_gsl=no
   enable_mathlib=no
+  enable_mpfr=no
   enable_parallel=no
   enable_plotutils=no
-  enable_readline=no
-  enable_curses=no
   enable_postgresql=no
+  enable_readline=no
+  enable_www=no
 fi
 
 #
@@ -447,7 +452,7 @@ AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIOCGWINSZ
 
-AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h fcntl.h fenv.h float.h libgen.h limits.h netdb.h netinet/in.h regex.h setjmp.h signal.h stdarg.h stddef.h stdio.h stdlib.h sys/ioctl.h sys/resource.h sys/socket.h sys/time.h termios.h time.h])
+AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h fcntl.h fenv.h float.h libgen.h limits.h netdb.h regex.h setjmp.h signal.h stdarg.h stddef.h stdio.h stdlib.h sys/ioctl.h sys/resource.h sys/socket.h sys/time.h termios.h time.h])
 
 #
 # Functions we expect
@@ -701,6 +706,26 @@ if test "x$enable_postgresql" = "xyes"; then
   fi
 fi
 
+if test "x$enable_www" = "xyes"; then
+  AC_MSG_NOTICE([Internet...])
+  AC_CHECK_HEADERS([sys/select.h], [], [enable_www=no], [])
+  AC_CHECK_HEADERS([sys/socket.h], [], [enable_www=no], [])
+  AC_CHECK_HEADERS([sys/types.h], [], [enable_www=no], [])
+  AC_CHECK_HEADERS([arpa/inet.h], [], [enable_www=no], [])
+  AC_CHECK_HEADERS([netinet/in.h], [], [enable_www=no], [])
+  if test "x$enable_www" = "xyes"; then
+    AC_DEFINE(BUILD_WWW, 1, [Define this if a good WWW installation was detected]) 
+    if test "x$enable_curl" = "xyes"; then
+      AC_MSG_NOTICE([cURL...])
+      AC_CHECK_HEADERS([curl/curl.h], [], [enable_curl=no], [])
+      AC_CHECK_LIB([curl], [curl_easy_init], [], [enable_curl=no])
+      if test "x$enable_curl" = "xyes"; then
+        AC_DEFINE(HAVE_CURL, 1, [Define this if a good curl installation was detected]) 
+      fi
+    fi
+  fi
+fi
+
 if test "x$enable_compiler" = "xyes"; then
   libdl_found=no
   AC_MSG_NOTICE([Dynamic loader via libdl...])
@@ -744,11 +769,6 @@ fi
 if test "x$enable_mpfr" = "xyes"; then
   AC_MSG_NOTICE([building with GNU MPFR])
 fi
-if test "x$enable_mpfr" = "xno"; then
-  if test "x$GCC" = "xyes"; then
-    AC_MSG_NOTICE([GNU MPFR found but not used])
-  fi
-fi
 if test "x$enable_mathlib" = "xyes"; then
   AC_MSG_NOTICE([building with R mathlib])
 fi
@@ -763,6 +783,12 @@ if test "x$enable_plotutils" = "xyes"; then
 fi
 if test "x$enable_postgresql" = "xyes"; then
   AC_MSG_NOTICE([building with PostgreSQL])
+fi
+if test "x$enable_www" = "xyes"; then
+  AC_MSG_NOTICE([building with WWW support])
+fi
+if test "x$enable_curl" = "xyes"; then
+  AC_MSG_NOTICE([building with curl])
 fi
 if test "x$enable_compiler" = "xyes"; then
   AC_MSG_NOTICE([building plugin compiler])

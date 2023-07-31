@@ -37,7 +37,6 @@
 
 void stand_mathlib (void)
 {
-  MOID_T *m;
 // R specific special functions
   a68_idf (A68_EXT, "rdigamma", A68_MCACHE (proc_real_real), genie_R_digamma_real);
   a68_idf (A68_EXT, "rtrigamma", A68_MCACHE (proc_real_real), genie_R_trigamma_real);
@@ -45,7 +44,7 @@ void stand_mathlib (void)
   a68_idf (A68_EXT, "rpentagamma", A68_MCACHE (proc_real_real), genie_R_pentagamma_real);
   a68_idf (A68_EXT, "rpsigamma", A68_MCACHE (proc_real_real_real), genie_R_psigamma_real);
 // R distribution related functions
-  m = A68_MCACHE (proc_real_real);
+  MOID_T *m = A68_MCACHE (proc_real_real);
   a68_idf (A68_EXT, "rrt", m, genie_R_rt_real);
   a68_idf (A68_EXT, "rrchisq", m, genie_R_rchisq_real);
   a68_idf (A68_EXT, "rrexp", m, genie_R_rexp_real);

@@ -122,7 +122,7 @@ struct GC_GLOBALS_T
 {
   A68_HANDLE *available_handles, *busy_handles;
   UNSIGNED_T free_handles, max_handles, sweeps, refused, freed, total;
-  unt preemptive;
+  unt preemptive, sema;
   REAL_T seconds;
 };
 

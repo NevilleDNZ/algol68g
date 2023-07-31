@@ -472,11 +472,7 @@ void include_files (LINE_T * top)
         if (fn != NO_TEXT) {
           bufcpy (fnb, fn, BUFFER_SIZE);
         } else {
-          char err[PATH_MAX + 1];
-          bufcpy (err, ERROR_SOURCE_FILE_OPEN, PATH_MAX);
-          bufcat (err, " ", PATH_MAX);
-          bufcat (err, fnb, PATH_MAX);
-          SCAN_ERROR (A68_TRUE, NO_LINE, NO_TEXT, err);
+          SCAN_ERROR (A68_TRUE, NO_LINE, NO_TEXT, ERROR_SOURCE_FILE_INCLUDE_OPEN);
         }
         fnwid = (int) strlen (fnb) + 1;
         fn = (char *) get_fixed_heap_space ((size_t) fnwid);
@@ -491,8 +487,7 @@ void include_files (LINE_T * top)
 // Access the file.
         errno = 0;
         fd = open (fn, O_RDONLY | O_BINARY);
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "*%s \"%s\"", ERROR_SOURCE_FILE_OPEN, fn) >= 0);
-        SCAN_ERROR (fd == -1, start_l, start_c, A68 (edit_line));
+        SCAN_ERROR (fd == -1, start_l, start_c, ERROR_SOURCE_FILE_INCLUDE_OPEN);
         errno = 0;
         fsize = (int) lseek (fd, 0, SEEK_END);
         ASSERT (fsize >= 0);
@@ -829,98 +824,98 @@ char *pragment (int type, LINE_T ** ref_l, char **ref_c)
 int get_format_item (char ch)
 {
   switch (TO_LOWER (ch)) {
-  case 'a':{
+  case 'a': {
       return FORMAT_ITEM_A;
     }
-  case 'b':{
+  case 'b': {
       return FORMAT_ITEM_B;
     }
-  case 'c':{
+  case 'c': {
       return FORMAT_ITEM_C;
     }
-  case 'd':{
+  case 'd': {
       return FORMAT_ITEM_D;
     }
-  case 'e':{
+  case 'e': {
       return FORMAT_ITEM_E;
     }
-  case 'f':{
+  case 'f': {
       return FORMAT_ITEM_F;
     }
-  case 'g':{
+  case 'g': {
       return FORMAT_ITEM_G;
     }
-  case 'h':{
+  case 'h': {
       return FORMAT_ITEM_H;
     }
-  case 'i':{
+  case 'i': {
       return FORMAT_ITEM_I;
     }
-  case 'j':{
+  case 'j': {
       return FORMAT_ITEM_J;
     }
-  case 'k':{
+  case 'k': {
       return FORMAT_ITEM_K;
     }
   case 'l':
-  case '/':{
+  case '/': {
       return FORMAT_ITEM_L;
     }
-  case 'm':{
+  case 'm': {
       return FORMAT_ITEM_M;
     }
-  case 'n':{
+  case 'n': {
       return FORMAT_ITEM_N;
     }
-  case 'o':{
+  case 'o': {
       return FORMAT_ITEM_O;
     }
-  case 'p':{
+  case 'p': {
       return FORMAT_ITEM_P;
     }
-  case 'q':{
+  case 'q': {
       return FORMAT_ITEM_Q;
     }
-  case 'r':{
+  case 'r': {
       return FORMAT_ITEM_R;
     }
-  case 's':{
+  case 's': {
       return FORMAT_ITEM_S;
     }
-  case 't':{
+  case 't': {
       return FORMAT_ITEM_T;
     }
-  case 'u':{
+  case 'u': {
       return FORMAT_ITEM_U;
     }
-  case 'v':{
+  case 'v': {
       return FORMAT_ITEM_V;
     }
-  case 'w':{
+  case 'w': {
       return FORMAT_ITEM_W;
     }
-  case 'x':{
+  case 'x': {
       return FORMAT_ITEM_X;
     }
-  case 'y':{
+  case 'y': {
       return FORMAT_ITEM_Y;
     }
-  case 'z':{
+  case 'z': {
       return FORMAT_ITEM_Z;
     }
-  case '+':{
+  case '+': {
       return FORMAT_ITEM_PLUS;
     }
-  case '-':{
+  case '-': {
       return FORMAT_ITEM_MINUS;
     }
-  case POINT_CHAR:{
+  case POINT_CHAR: {
       return FORMAT_ITEM_POINT;
     }
-  case '%':{
+  case '%': {
       return FORMAT_ITEM_ESCAPE;
     }
-  default:{
+  default: {
       return 0;
     }
   }
@@ -1313,8 +1308,7 @@ BOOL_T open_nested_clause (int att)
   case WHILE_SYMBOL:
   case DO_SYMBOL:
   case SUB_SYMBOL:
-  case ACCO_SYMBOL:
-    {
+  case ACCO_SYMBOL: {
       return A68_TRUE;
     }
   }
@@ -1332,8 +1326,7 @@ BOOL_T close_nested_clause (int att)
   case ESAC_SYMBOL:
   case OD_SYMBOL:
   case BUS_SYMBOL:
-  case OCCA_SYMBOL:
-    {
+  case OCCA_SYMBOL: {
       return A68_TRUE;
     }
   }
@@ -1446,12 +1439,11 @@ void tokenise_source (NODE_T ** root, int level, BOOL_T in_format, LINE_T ** l, 
         case COLON_SYMBOL:
         case COMMA_SYMBOL:
         case DOTDOT_SYMBOL:
-        case SEMI_SYMBOL:
-          {
+        case SEMI_SYMBOL: {
             GINFO (q) = NO_GINFO;
             break;
           }
-        default:{
+        default: {
             GINFO (q) = new_genie_info ();
             break;
           }

@@ -126,8 +126,16 @@ am_a68g_OBJECTS = ./src/a68g/a68g-a68g-apropos.$(OBJEXT) \
 	./src/a68g/a68g-double.$(OBJEXT) \
 	./src/a68g/a68g-double-gamic.$(OBJEXT) \
 	./src/a68g/a68g-double-math.$(OBJEXT) \
+	./src/a68g/a68g-genie-assign.$(OBJEXT) \
 	./src/a68g/a68g-genie.$(OBJEXT) \
+	./src/a68g/a68g-genie-call.$(OBJEXT) \
 	./src/a68g/a68g-genie-coerce.$(OBJEXT) \
+	./src/a68g/a68g-genie-declaration.$(OBJEXT) \
+	./src/a68g/a68g-genie-denotation.$(OBJEXT) \
+	./src/a68g/a68g-genie-enclosed.$(OBJEXT) \
+	./src/a68g/a68g-genie-formula.$(OBJEXT) \
+	./src/a68g/a68g-genie-hip.$(OBJEXT) \
+	./src/a68g/a68g-genie-identifier.$(OBJEXT) \
 	./src/a68g/a68g-genie-misc.$(OBJEXT) \
 	./src/a68g/a68g-genie-regex.$(OBJEXT) \
 	./src/a68g/a68g-genie-rows.$(OBJEXT) \
@@ -176,12 +184,15 @@ am_a68g_OBJECTS = ./src/a68g/a68g-a68g-apropos.$(OBJEXT) \
 	./src/a68g/a68g-rts-enquiries.$(OBJEXT) \
 	./src/a68g/a68g-rts-formatted.$(OBJEXT) \
 	./src/a68g/a68g-rts-heap.$(OBJEXT) \
+	./src/a68g/a68g-rts-http.$(OBJEXT) \
+	./src/a68g/a68g-rts-https.$(OBJEXT) \
+	./src/a68g/a68g-rts-internal.$(OBJEXT) \
 	./src/a68g/a68g-rts-monitor.$(OBJEXT) \
 	./src/a68g/a68g-rts-parallel.$(OBJEXT) \
 	./src/a68g/a68g-rts-plotutils.$(OBJEXT) \
 	./src/a68g/a68g-rts-postgresql.$(OBJEXT) \
-	./src/a68g/a68g-rts-socket.$(OBJEXT) \
 	./src/a68g/a68g-rts-sounds.$(OBJEXT) \
+	./src/a68g/a68g-rts-stowed.$(OBJEXT) \
 	./src/a68g/a68g-rts-transput.$(OBJEXT) \
 	./src/a68g/a68g-rts-unformatted.$(OBJEXT) \
 	./src/a68g/a68g-single-blas.$(OBJEXT) \
@@ -236,7 +247,15 @@ am__depfiles_remade = ./src/a68g/$(DEPDIR)/a68g-a68g-apropos.Po \
 	./src/a68g/$(DEPDIR)/a68g-double-gamic.Po \
 	./src/a68g/$(DEPDIR)/a68g-double-math.Po \
 	./src/a68g/$(DEPDIR)/a68g-double.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-assign.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-call.Po \
 	./src/a68g/$(DEPDIR)/a68g-genie-coerce.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-declaration.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-denotation.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-formula.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-hip.Po \
+	./src/a68g/$(DEPDIR)/a68g-genie-identifier.Po \
 	./src/a68g/$(DEPDIR)/a68g-genie-misc.Po \
 	./src/a68g/$(DEPDIR)/a68g-genie-regex.Po \
 	./src/a68g/$(DEPDIR)/a68g-genie-rows.Po \
@@ -287,12 +306,15 @@ am__depfiles_remade = ./src/a68g/$(DEPDIR)/a68g-a68g-apropos.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-heap.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-http.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-https.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-internal.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-postgresql.Po \
-	./src/a68g/$(DEPDIR)/a68g-rts-socket.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-sounds.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-stowed.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-transput.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-unformatted.Po \
 	./src/a68g/$(DEPDIR)/a68g-single-blas.Po \
@@ -562,8 +584,16 @@ a68g_SOURCES = \
 ./src/a68g/double.c \
 ./src/a68g/double-gamic.c \
 ./src/a68g/double-math.c \
+./src/a68g/genie-assign.c \
 ./src/a68g/genie.c \
+./src/a68g/genie-call.c \
 ./src/a68g/genie-coerce.c \
+./src/a68g/genie-declaration.c \
+./src/a68g/genie-denotation.c \
+./src/a68g/genie-enclosed.c \
+./src/a68g/genie-formula.c \
+./src/a68g/genie-hip.c \
+./src/a68g/genie-identifier.c \
 ./src/a68g/genie-misc.c \
 ./src/a68g/genie-regex.c \
 ./src/a68g/genie-rows.c \
@@ -613,12 +643,15 @@ a68g_SOURCES = \
 ./src/a68g/rts-enquiries.c \
 ./src/a68g/rts-formatted.c \
 ./src/a68g/rts-heap.c \
+./src/a68g/rts-http.c \
+./src/a68g/rts-https.c \
+./src/a68g/rts-internal.c \
 ./src/a68g/rts-monitor.c \
 ./src/a68g/rts-parallel.c \
 ./src/a68g/rts-plotutils.c \
 ./src/a68g/rts-postgresql.c \
-./src/a68g/rts-socket.c \
 ./src/a68g/rts-sounds.c \
+./src/a68g/rts-stowed.c \
 ./src/a68g/rts-transput.c \
 ./src/a68g/rts-unformatted.c \
 ./src/a68g/single-blas.c \
@@ -724,25 +757,28 @@ TESTS = \
 	./src/test-set/04-digits.a68\
 	./src/test-set/05-end-of-time.a68\
 	./src/test-set/06-fft.a68\
-	./src/test-set/07-fibonacci-grammar.a68\
-	./src/test-set/08-formula-manipulation.a68\
-	./src/test-set/09-gammainc.a68\
-	./src/test-set/10-guldens.a68\
-	./src/test-set/11-hamming.a68\
-	./src/test-set/12-hilbert.a68\
-	./src/test-set/13-lisp.a68\
-	./src/test-set/14-mandelbrot.a68\
-	./src/test-set/15-mastermind.a68\
-	./src/test-set/16-math.a68\
-	./src/test-set/17-matrix.a68\
-	./src/test-set/18-procedures.a68\
-	./src/test-set/19-pseudo-switch.a68\
-	./src/test-set/20-queens.a68\
-	./src/test-set/21-quicksort.a68\
-	./src/test-set/22-rationals.a68\
-	./src/test-set/23-semana-santa.a68\
-	./src/test-set/24-tukey.a68\
-	./src/test-set/25-whetstones.a68
+	./src/test-set/07-fft-par.a68\
+	./src/test-set/08-fibonacci-grammar.a68\
+	./src/test-set/09-formula-manipulation.a68\
+	./src/test-set/10-gammainc.a68\
+	./src/test-set/11-guldens.a68\
+	./src/test-set/12-hamming.a68\
+	./src/test-set/13-hilbert-matrix.a68\
+	./src/test-set/14-lisp.a68\
+	./src/test-set/15-mandelbrot.a68\
+	./src/test-set/16-mastermind.a68\
+	./src/test-set/17-math.a68\
+	./src/test-set/18-matrix.a68\
+	./src/test-set/19-procedures.a68\
+	./src/test-set/20-pseudo-switch.a68\
+	./src/test-set/21-queens.a68\
+	./src/test-set/22-quicksort.a68\
+	./src/test-set/23-rationals.a68\
+	./src/test-set/24-semana-santa.a68\
+	./src/test-set/25-tukey.a68\
+	./src/test-set/26-whetstones.a68\
+	./src/test-set/27-www.a68\
+	./src/test-set/28-zeroin.a68
 
 @EXPORT_DYNAMIC_FALSE@a68g_LDFLAGS = 
 @EXPORT_DYNAMIC_TRUE@a68g_LDFLAGS = -Wl,--export-dynamic
@@ -886,9 +922,25 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-double-math.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-assign.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-genie.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-call.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-genie-coerce.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-declaration.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-denotation.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-enclosed.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-formula.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-hip.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-genie-identifier.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-genie-misc.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
@@ -988,6 +1040,12 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-heap.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-http.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-https.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-internal.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-monitor.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-parallel.$(OBJEXT): src/a68g/$(am__dirstamp) \
@@ -996,9 +1054,9 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-postgresql.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
-./src/a68g/a68g-rts-socket.$(OBJEXT): src/a68g/$(am__dirstamp) \
-	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-sounds.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-stowed.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-transput.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
@@ -1065,7 +1123,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-double-gamic.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-double-math.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-double.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-assign.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-call.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-coerce.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-declaration.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-denotation.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-formula.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-hip.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-identifier.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-misc.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-regex.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-genie-rows.Po@am__quote@ # am--include-marker
@@ -1116,12 +1182,15 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-heap.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-http.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-https.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-internal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-postgresql.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-socket.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-sounds.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-stowed.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-transput.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-unformatted.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-single-blas.Po@am__quote@ # am--include-marker
@@ -1401,6 +1470,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-double-math.obj `if test -f './src/a68g/double-math.c'; then $(CYGPATH_W) './src/a68g/double-math.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/double-math.c'; fi`
 
+./src/a68g/a68g-genie-assign.o: ./src/a68g/genie-assign.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-assign.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-assign.Tpo -c -o ./src/a68g/a68g-genie-assign.o `test -f './src/a68g/genie-assign.c' || echo '$(srcdir)/'`./src/a68g/genie-assign.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-assign.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-assign.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-assign.c' object='./src/a68g/a68g-genie-assign.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-assign.o `test -f './src/a68g/genie-assign.c' || echo '$(srcdir)/'`./src/a68g/genie-assign.c
+
+./src/a68g/a68g-genie-assign.obj: ./src/a68g/genie-assign.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-assign.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-assign.Tpo -c -o ./src/a68g/a68g-genie-assign.obj `if test -f './src/a68g/genie-assign.c'; then $(CYGPATH_W) './src/a68g/genie-assign.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-assign.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-assign.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-assign.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-assign.c' object='./src/a68g/a68g-genie-assign.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-assign.obj `if test -f './src/a68g/genie-assign.c'; then $(CYGPATH_W) './src/a68g/genie-assign.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-assign.c'; fi`
+
 ./src/a68g/a68g-genie.o: ./src/a68g/genie.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie.Tpo -c -o ./src/a68g/a68g-genie.o `test -f './src/a68g/genie.c' || echo '$(srcdir)/'`./src/a68g/genie.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie.Tpo ./src/a68g/$(DEPDIR)/a68g-genie.Po
@@ -1415,6 +1498,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie.obj `if test -f './src/a68g/genie.c'; then $(CYGPATH_W) './src/a68g/genie.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie.c'; fi`
 
+./src/a68g/a68g-genie-call.o: ./src/a68g/genie-call.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-call.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-call.Tpo -c -o ./src/a68g/a68g-genie-call.o `test -f './src/a68g/genie-call.c' || echo '$(srcdir)/'`./src/a68g/genie-call.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-call.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-call.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-call.c' object='./src/a68g/a68g-genie-call.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-call.o `test -f './src/a68g/genie-call.c' || echo '$(srcdir)/'`./src/a68g/genie-call.c
+
+./src/a68g/a68g-genie-call.obj: ./src/a68g/genie-call.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-call.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-call.Tpo -c -o ./src/a68g/a68g-genie-call.obj `if test -f './src/a68g/genie-call.c'; then $(CYGPATH_W) './src/a68g/genie-call.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-call.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-call.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-call.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-call.c' object='./src/a68g/a68g-genie-call.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-call.obj `if test -f './src/a68g/genie-call.c'; then $(CYGPATH_W) './src/a68g/genie-call.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-call.c'; fi`
+
 ./src/a68g/a68g-genie-coerce.o: ./src/a68g/genie-coerce.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-coerce.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-coerce.Tpo -c -o ./src/a68g/a68g-genie-coerce.o `test -f './src/a68g/genie-coerce.c' || echo '$(srcdir)/'`./src/a68g/genie-coerce.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-coerce.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-coerce.Po
@@ -1428,6 +1525,90 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-coerce.c' object='./src/a68g/a68g-genie-coerce.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-coerce.obj `if test -f './src/a68g/genie-coerce.c'; then $(CYGPATH_W) './src/a68g/genie-coerce.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-coerce.c'; fi`
+
+./src/a68g/a68g-genie-declaration.o: ./src/a68g/genie-declaration.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-declaration.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Tpo -c -o ./src/a68g/a68g-genie-declaration.o `test -f './src/a68g/genie-declaration.c' || echo '$(srcdir)/'`./src/a68g/genie-declaration.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-declaration.c' object='./src/a68g/a68g-genie-declaration.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-declaration.o `test -f './src/a68g/genie-declaration.c' || echo '$(srcdir)/'`./src/a68g/genie-declaration.c
+
+./src/a68g/a68g-genie-declaration.obj: ./src/a68g/genie-declaration.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-declaration.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Tpo -c -o ./src/a68g/a68g-genie-declaration.obj `if test -f './src/a68g/genie-declaration.c'; then $(CYGPATH_W) './src/a68g/genie-declaration.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-declaration.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-declaration.c' object='./src/a68g/a68g-genie-declaration.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-declaration.obj `if test -f './src/a68g/genie-declaration.c'; then $(CYGPATH_W) './src/a68g/genie-declaration.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-declaration.c'; fi`
+
+./src/a68g/a68g-genie-denotation.o: ./src/a68g/genie-denotation.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-denotation.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Tpo -c -o ./src/a68g/a68g-genie-denotation.o `test -f './src/a68g/genie-denotation.c' || echo '$(srcdir)/'`./src/a68g/genie-denotation.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-denotation.c' object='./src/a68g/a68g-genie-denotation.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-denotation.o `test -f './src/a68g/genie-denotation.c' || echo '$(srcdir)/'`./src/a68g/genie-denotation.c
+
+./src/a68g/a68g-genie-denotation.obj: ./src/a68g/genie-denotation.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-denotation.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Tpo -c -o ./src/a68g/a68g-genie-denotation.obj `if test -f './src/a68g/genie-denotation.c'; then $(CYGPATH_W) './src/a68g/genie-denotation.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-denotation.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-denotation.c' object='./src/a68g/a68g-genie-denotation.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-denotation.obj `if test -f './src/a68g/genie-denotation.c'; then $(CYGPATH_W) './src/a68g/genie-denotation.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-denotation.c'; fi`
+
+./src/a68g/a68g-genie-enclosed.o: ./src/a68g/genie-enclosed.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-enclosed.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Tpo -c -o ./src/a68g/a68g-genie-enclosed.o `test -f './src/a68g/genie-enclosed.c' || echo '$(srcdir)/'`./src/a68g/genie-enclosed.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-enclosed.c' object='./src/a68g/a68g-genie-enclosed.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-enclosed.o `test -f './src/a68g/genie-enclosed.c' || echo '$(srcdir)/'`./src/a68g/genie-enclosed.c
+
+./src/a68g/a68g-genie-enclosed.obj: ./src/a68g/genie-enclosed.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-enclosed.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Tpo -c -o ./src/a68g/a68g-genie-enclosed.obj `if test -f './src/a68g/genie-enclosed.c'; then $(CYGPATH_W) './src/a68g/genie-enclosed.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-enclosed.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-enclosed.c' object='./src/a68g/a68g-genie-enclosed.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-enclosed.obj `if test -f './src/a68g/genie-enclosed.c'; then $(CYGPATH_W) './src/a68g/genie-enclosed.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-enclosed.c'; fi`
+
+./src/a68g/a68g-genie-formula.o: ./src/a68g/genie-formula.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-formula.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-formula.Tpo -c -o ./src/a68g/a68g-genie-formula.o `test -f './src/a68g/genie-formula.c' || echo '$(srcdir)/'`./src/a68g/genie-formula.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-formula.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-formula.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-formula.c' object='./src/a68g/a68g-genie-formula.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-formula.o `test -f './src/a68g/genie-formula.c' || echo '$(srcdir)/'`./src/a68g/genie-formula.c
+
+./src/a68g/a68g-genie-formula.obj: ./src/a68g/genie-formula.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-formula.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-formula.Tpo -c -o ./src/a68g/a68g-genie-formula.obj `if test -f './src/a68g/genie-formula.c'; then $(CYGPATH_W) './src/a68g/genie-formula.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-formula.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-formula.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-formula.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-formula.c' object='./src/a68g/a68g-genie-formula.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-formula.obj `if test -f './src/a68g/genie-formula.c'; then $(CYGPATH_W) './src/a68g/genie-formula.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-formula.c'; fi`
+
+./src/a68g/a68g-genie-hip.o: ./src/a68g/genie-hip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-hip.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-hip.Tpo -c -o ./src/a68g/a68g-genie-hip.o `test -f './src/a68g/genie-hip.c' || echo '$(srcdir)/'`./src/a68g/genie-hip.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-hip.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-hip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-hip.c' object='./src/a68g/a68g-genie-hip.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-hip.o `test -f './src/a68g/genie-hip.c' || echo '$(srcdir)/'`./src/a68g/genie-hip.c
+
+./src/a68g/a68g-genie-hip.obj: ./src/a68g/genie-hip.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-hip.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-hip.Tpo -c -o ./src/a68g/a68g-genie-hip.obj `if test -f './src/a68g/genie-hip.c'; then $(CYGPATH_W) './src/a68g/genie-hip.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-hip.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-hip.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-hip.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-hip.c' object='./src/a68g/a68g-genie-hip.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-hip.obj `if test -f './src/a68g/genie-hip.c'; then $(CYGPATH_W) './src/a68g/genie-hip.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-hip.c'; fi`
+
+./src/a68g/a68g-genie-identifier.o: ./src/a68g/genie-identifier.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-identifier.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Tpo -c -o ./src/a68g/a68g-genie-identifier.o `test -f './src/a68g/genie-identifier.c' || echo '$(srcdir)/'`./src/a68g/genie-identifier.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-identifier.c' object='./src/a68g/a68g-genie-identifier.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-identifier.o `test -f './src/a68g/genie-identifier.c' || echo '$(srcdir)/'`./src/a68g/genie-identifier.c
+
+./src/a68g/a68g-genie-identifier.obj: ./src/a68g/genie-identifier.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-identifier.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Tpo -c -o ./src/a68g/a68g-genie-identifier.obj `if test -f './src/a68g/genie-identifier.c'; then $(CYGPATH_W) './src/a68g/genie-identifier.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-identifier.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Tpo ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/genie-identifier.c' object='./src/a68g/a68g-genie-identifier.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-genie-identifier.obj `if test -f './src/a68g/genie-identifier.c'; then $(CYGPATH_W) './src/a68g/genie-identifier.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/genie-identifier.c'; fi`
 
 ./src/a68g/a68g-genie-misc.o: ./src/a68g/genie-misc.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-genie-misc.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-genie-misc.Tpo -c -o ./src/a68g/a68g-genie-misc.o `test -f './src/a68g/genie-misc.c' || echo '$(srcdir)/'`./src/a68g/genie-misc.c
@@ -2115,6 +2296,48 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-heap.obj `if test -f './src/a68g/rts-heap.c'; then $(CYGPATH_W) './src/a68g/rts-heap.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-heap.c'; fi`
 
+./src/a68g/a68g-rts-http.o: ./src/a68g/rts-http.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-http.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo -c -o ./src/a68g/a68g-rts-http.o `test -f './src/a68g/rts-http.c' || echo '$(srcdir)/'`./src/a68g/rts-http.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-http.c' object='./src/a68g/a68g-rts-http.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-http.o `test -f './src/a68g/rts-http.c' || echo '$(srcdir)/'`./src/a68g/rts-http.c
+
+./src/a68g/a68g-rts-http.obj: ./src/a68g/rts-http.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-http.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo -c -o ./src/a68g/a68g-rts-http.obj `if test -f './src/a68g/rts-http.c'; then $(CYGPATH_W) './src/a68g/rts-http.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-http.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-http.c' object='./src/a68g/a68g-rts-http.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-http.obj `if test -f './src/a68g/rts-http.c'; then $(CYGPATH_W) './src/a68g/rts-http.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-http.c'; fi`
+
+./src/a68g/a68g-rts-https.o: ./src/a68g/rts-https.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-https.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo -c -o ./src/a68g/a68g-rts-https.o `test -f './src/a68g/rts-https.c' || echo '$(srcdir)/'`./src/a68g/rts-https.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-https.c' object='./src/a68g/a68g-rts-https.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-https.o `test -f './src/a68g/rts-https.c' || echo '$(srcdir)/'`./src/a68g/rts-https.c
+
+./src/a68g/a68g-rts-https.obj: ./src/a68g/rts-https.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-https.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo -c -o ./src/a68g/a68g-rts-https.obj `if test -f './src/a68g/rts-https.c'; then $(CYGPATH_W) './src/a68g/rts-https.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-https.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-https.c' object='./src/a68g/a68g-rts-https.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-https.obj `if test -f './src/a68g/rts-https.c'; then $(CYGPATH_W) './src/a68g/rts-https.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-https.c'; fi`
+
+./src/a68g/a68g-rts-internal.o: ./src/a68g/rts-internal.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-internal.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-internal.Tpo -c -o ./src/a68g/a68g-rts-internal.o `test -f './src/a68g/rts-internal.c' || echo '$(srcdir)/'`./src/a68g/rts-internal.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-internal.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-internal.c' object='./src/a68g/a68g-rts-internal.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-internal.o `test -f './src/a68g/rts-internal.c' || echo '$(srcdir)/'`./src/a68g/rts-internal.c
+
+./src/a68g/a68g-rts-internal.obj: ./src/a68g/rts-internal.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-internal.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-internal.Tpo -c -o ./src/a68g/a68g-rts-internal.obj `if test -f './src/a68g/rts-internal.c'; then $(CYGPATH_W) './src/a68g/rts-internal.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-internal.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-internal.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-internal.c' object='./src/a68g/a68g-rts-internal.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-internal.obj `if test -f './src/a68g/rts-internal.c'; then $(CYGPATH_W) './src/a68g/rts-internal.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-internal.c'; fi`
+
 ./src/a68g/a68g-rts-monitor.o: ./src/a68g/rts-monitor.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-monitor.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Tpo -c -o ./src/a68g/a68g-rts-monitor.o `test -f './src/a68g/rts-monitor.c' || echo '$(srcdir)/'`./src/a68g/rts-monitor.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po
@@ -2171,20 +2394,6 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-postgresql.obj `if test -f './src/a68g/rts-postgresql.c'; then $(CYGPATH_W) './src/a68g/rts-postgresql.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-postgresql.c'; fi`
 
-./src/a68g/a68g-rts-socket.o: ./src/a68g/rts-socket.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-socket.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-socket.Tpo -c -o ./src/a68g/a68g-rts-socket.o `test -f './src/a68g/rts-socket.c' || echo '$(srcdir)/'`./src/a68g/rts-socket.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-socket.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-socket.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-socket.c' object='./src/a68g/a68g-rts-socket.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-socket.o `test -f './src/a68g/rts-socket.c' || echo '$(srcdir)/'`./src/a68g/rts-socket.c
-
-./src/a68g/a68g-rts-socket.obj: ./src/a68g/rts-socket.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-socket.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-socket.Tpo -c -o ./src/a68g/a68g-rts-socket.obj `if test -f './src/a68g/rts-socket.c'; then $(CYGPATH_W) './src/a68g/rts-socket.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-socket.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-socket.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-socket.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-socket.c' object='./src/a68g/a68g-rts-socket.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-socket.obj `if test -f './src/a68g/rts-socket.c'; then $(CYGPATH_W) './src/a68g/rts-socket.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-socket.c'; fi`
-
 ./src/a68g/a68g-rts-sounds.o: ./src/a68g/rts-sounds.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-sounds.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-sounds.Tpo -c -o ./src/a68g/a68g-rts-sounds.o `test -f './src/a68g/rts-sounds.c' || echo '$(srcdir)/'`./src/a68g/rts-sounds.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-sounds.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-sounds.Po
@@ -2198,6 +2407,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-sounds.c' object='./src/a68g/a68g-rts-sounds.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-sounds.obj `if test -f './src/a68g/rts-sounds.c'; then $(CYGPATH_W) './src/a68g/rts-sounds.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-sounds.c'; fi`
+
+./src/a68g/a68g-rts-stowed.o: ./src/a68g/rts-stowed.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-stowed.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Tpo -c -o ./src/a68g/a68g-rts-stowed.o `test -f './src/a68g/rts-stowed.c' || echo '$(srcdir)/'`./src/a68g/rts-stowed.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-stowed.c' object='./src/a68g/a68g-rts-stowed.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-stowed.o `test -f './src/a68g/rts-stowed.c' || echo '$(srcdir)/'`./src/a68g/rts-stowed.c
+
+./src/a68g/a68g-rts-stowed.obj: ./src/a68g/rts-stowed.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-stowed.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Tpo -c -o ./src/a68g/a68g-rts-stowed.obj `if test -f './src/a68g/rts-stowed.c'; then $(CYGPATH_W) './src/a68g/rts-stowed.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-stowed.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-stowed.c' object='./src/a68g/a68g-rts-stowed.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-stowed.obj `if test -f './src/a68g/rts-stowed.c'; then $(CYGPATH_W) './src/a68g/rts-stowed.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-stowed.c'; fi`
 
 ./src/a68g/a68g-rts-transput.o: ./src/a68g/rts-transput.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-transput.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-transput.Tpo -c -o ./src/a68g/a68g-rts-transput.o `test -f './src/a68g/rts-transput.c' || echo '$(srcdir)/'`./src/a68g/rts-transput.c
@@ -2922,7 +3145,15 @@ distclean: distclean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-double-gamic.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-double-math.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-double.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-assign.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-call.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-coerce.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-formula.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-hip.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-misc.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-regex.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-rows.Po
@@ -2973,12 +3204,15 @@ distclean: distclean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-heap.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-postgresql.Po
-	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-socket.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-sounds.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-transput.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-unformatted.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-single-blas.Po
@@ -3061,7 +3295,15 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-double-gamic.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-double-math.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-double.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-assign.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-call.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-coerce.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-declaration.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-denotation.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-enclosed.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-formula.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-hip.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-identifier.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-misc.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-regex.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-genie-rows.Po
@@ -3112,12 +3354,15 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-heap.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-postgresql.Po
-	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-socket.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-sounds.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-stowed.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-transput.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-unformatted.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-single-blas.Po

@@ -61,31 +61,32 @@ BOOL_T unprintable (char ch)
 
 char *ctrl_char (int ch)
 {
-  static char loc_str[SMALL_BUFFER_SIZE];
+  static char txt[SMALL_BUFFER_SIZE];
   ch = TO_UCHAR (ch);
   if (IS_CNTRL (ch) && IS_LOWER (ch + 96)) {
-    ASSERT (snprintf (loc_str, (size_t) SMALL_BUFFER_SIZE, "\\^%c", ch + 96) >= 0);
+    ASSERT (snprintf (txt, (size_t) SMALL_BUFFER_SIZE, "\\^%c", ch + 96) >= 0);
   } else {
-    ASSERT (snprintf (loc_str, (size_t) SMALL_BUFFER_SIZE, "\\%02x", (unt) ch) >= 0);
+    ASSERT (snprintf (txt, (size_t) SMALL_BUFFER_SIZE, "\\%02x", (unt) ch) >= 0);
   }
-  return loc_str;
+  return txt;
 }
 
 //! @brief Widen single char to string.
 
 char *char_to_str (char ch)
 {
-  static char loc_str[2];
-  loc_str[0] = ch;
-  loc_str[1] = NULL_CHAR;
-  return loc_str;
+  static char txt[2];
+  txt[0] = ch;
+  txt[1] = NULL_CHAR;
+  return txt;
 }
 
 //! @brief Pretty-print diagnostic .
 
 void pretty_diag (FILE_T f, char *p)
 {
-  int pos = 1, line_width = (f == STDOUT_FILENO ? A68 (term_width) : MAX_TERM_WIDTH);
+  int line_width = (f == STDOUT_FILENO ? A68 (term_width) : MAX_TERM_WIDTH);
+  int pos = 1;
   while (p[0] != NULL_CHAR) {
     char *q;
     int k;
@@ -182,11 +183,7 @@ char *diag_pos (LINE_T * p, DIAGNOSTIC_T * d)
 
 void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
 {
-  char *c, *c0;
-  int continuations = 0;
-  int pos = 5, col;
   int line_width = (f == STDOUT_FILENO ? A68 (term_width) : MAX_TERM_WIDTH);
-  BOOL_T line_ended;
 // Terminate properly.
   if ((STRING (p))[strlen (STRING (p)) - 1] == NEWLINE_CHAR) {
     (STRING (p))[strlen (STRING (p)) - 1] = NULL_CHAR;
@@ -207,9 +204,11 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
   }
   WRITE (f, A68 (output_line));
 // Pretty print line.
+  char *c, *c0;
   c = c0 = STRING (p);
-  col = 1;
-  line_ended = A68_FALSE;
+  int pos = 5, col = 1;
+  int continuations = 0;
+  BOOL_T line_ended = A68_FALSE;
   while (!line_ended) {
     int len = 0;
     char *new_pos = NO_TEXT;
@@ -354,21 +353,20 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
 
 //! @brief Write diagnostics to STDOUT.
 
-void diagnostics_to_terminal (LINE_T * p, int what)
+void diagnostics_to_terminal (LINE_T * p, int sev)
 {
   for (; p != NO_LINE; FORWARD (p)) {
     if (DIAGNOSTICS (p) != NO_DIAGNOSTIC) {
       BOOL_T z = A68_FALSE;
-      DIAGNOSTIC_T *d = DIAGNOSTICS (p);
-      for (; d != NO_DIAGNOSTIC; FORWARD (d)) {
-        if (what == A68_ALL_DIAGNOSTICS) {
+      for (DIAGNOSTIC_T *d = DIAGNOSTICS (p); d != NO_DIAGNOSTIC; FORWARD (d)) {
+        if (sev == A68_ALL_DIAGNOSTICS) {
           z = (BOOL_T) (z | (IS (d, A68_WARNING) || IS (d, A68_ERROR) || IS (d, A68_SYNTAX_ERROR) || IS (d, A68_MATH_ERROR) || IS (d, A68_RUNTIME_ERROR) || IS (d, A68_SUPPRESS_SEVERITY)));
-        } else if (what == A68_RUNTIME_ERROR) {
+        } else if (sev == A68_RUNTIME_ERROR) {
           z = (BOOL_T) (z | (IS (d, A68_RUNTIME_ERROR) || (IS (d, A68_MATH_ERROR))));
         }
       }
       if (z) {
-        write_source_line (STDOUT_FILENO, p, NO_NODE, what);
+        write_source_line (STDOUT_FILENO, p, NO_NODE, sev);
       }
     }
   }
@@ -402,36 +400,28 @@ void scan_warning (LINE_T * u, char *v, char *txt)
 char *get_severity (int sev)
 {
   switch (sev) {
-  case A68_ERROR:
-    {
+  case A68_ERROR: {
       return "error";
     }
-  case A68_SYNTAX_ERROR:
-    {
+  case A68_SYNTAX_ERROR: {
       return "syntax error";
     }
-  case A68_RUNTIME_ERROR:
-    {
+  case A68_RUNTIME_ERROR: {
       return "runtime error";
     }
-  case A68_MATH_ERROR:
-    {
+  case A68_MATH_ERROR: {
       return "math error";
     }
-  case A68_MATH_WARNING:
-    {
+  case A68_MATH_WARNING: {
       return "math warning";
     }
-  case A68_WARNING:
-    {
+  case A68_WARNING: {
       return "warning";
     }
-  case A68_SUPPRESS_SEVERITY:
-    {
+  case A68_SUPPRESS_SEVERITY: {
       return NO_TEXT;
     }
-  default:
-    {
+  default: {
       return NO_TEXT;
     }
   }
@@ -441,13 +431,13 @@ char *get_severity (int sev)
 
 void write_diagnostic (int sev, char *b)
 {
-  char st[SMALL_BUFFER_SIZE];
+  char txt[SMALL_BUFFER_SIZE];
   char *severity = get_severity (sev);
   if (severity == NO_TEXT) {
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s.", A68 (a68_cmd_name), b) >= 0);
   } else {
-    bufcpy (st, get_severity (sev), SMALL_BUFFER_SIZE);
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s: %s.", A68 (a68_cmd_name), st, b) >= 0);
+    bufcpy (txt, get_severity (sev), SMALL_BUFFER_SIZE);
+    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s: %s.", A68 (a68_cmd_name), txt, b) >= 0);
   }
   io_close_tty_line ();
   pretty_diag (STDOUT_FILENO, A68 (output_line));
@@ -674,6 +664,7 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
           } else if (t[0] == 'D') {
             int a = va_arg (args, int);
             BUFFER d;
+            BUFCLR (d);
             ASSERT (snprintf (d, SNPRINTF_SIZE, "%d", a) >= 0);
             bufcat (b, d, BUFFER_SIZE);
           } else if (t[0] == 'H') {

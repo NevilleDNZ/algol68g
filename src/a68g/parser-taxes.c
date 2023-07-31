@@ -82,28 +82,27 @@ void tax_format_texts (NODE_T *);
 int first_tag_global (TABLE_T * table, char *name)
 {
   if (table != NO_TABLE) {
-    TAG_T *s = NO_TAG;
-    for (s = IDENTIFIERS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = IDENTIFIERS (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return IDENTIFIER;
       }
     }
-    for (s = INDICANTS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = INDICANTS (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return INDICANT;
       }
     }
-    for (s = LABELS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = LABELS (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return LABEL;
       }
     }
-    for (s = OPERATORS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = OPERATORS (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return OP_SYMBOL;
       }
     }
-    for (s = PRIO (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = PRIO (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return PRIO_SYMBOL;
       }
@@ -216,22 +215,18 @@ TAG_T *bind_lengthety_identifier (char *u)
 // "short print" or "long char in string".
   if (CAR (u, "short")) {
     do {
-      char *v;
-      TAG_T *w;
       u = &u[strlen ("short")];
-      v = TEXT (add_token (&A68 (top_token), u));
-      w = find_tag_local (A68_STANDENV, IDENTIFIER, v);
+      char *v = TEXT (add_token (&A68 (top_token), u));
+      TAG_T *w = find_tag_local (A68_STANDENV, IDENTIFIER, v);
       if (w != NO_TAG && is_mappable_routine (v)) {
         return w;
       }
     } while (CAR (u, "short"));
   } else if (CAR (u, "long")) {
     do {
-      char *v;
-      TAG_T *w;
       u = &u[strlen ("long")];
-      v = TEXT (add_token (&A68 (top_token), u));
-      w = find_tag_local (A68_STANDENV, IDENTIFIER, v);
+      char *v = TEXT (add_token (&A68 (top_token), u));
+      TAG_T *w = find_tag_local (A68_STANDENV, IDENTIFIER, v);
       if (w != NO_TAG && is_mappable_routine (v)) {
         return w;
       }
@@ -249,14 +244,14 @@ void bind_identifier_tag_to_symbol_table (NODE_T * p)
     bind_identifier_tag_to_symbol_table (SUB (p));
     if (is_one_of (p, IDENTIFIER, DEFINING_IDENTIFIER, STOP)) {
       int att = first_tag_global (TABLE (p), NSYMBOL (p));
-      TAG_T *z;
       if (att == STOP) {
-        if ((z = bind_lengthety_identifier (NSYMBOL (p))) != NO_TAG) {
+        TAG_T *z = bind_lengthety_identifier (NSYMBOL (p));
+        if (z != NO_TAG) {
           MOID (p) = MOID (z);
         }
         TAX (p) = z;
       } else {
-        z = find_tag_global (TABLE (p), att, NSYMBOL (p));
+        TAG_T *z = find_tag_global (TABLE (p), att, NSYMBOL (p));
         if (att == IDENTIFIER && z != NO_TAG) {
           MOID (p) = MOID (z);
         } else if (att == LABEL && z != NO_TAG) {
@@ -546,11 +541,11 @@ void already_declared (NODE_T * n, int a)
 
 void already_declared_hidden (NODE_T * n, int a)
 {
-  TAG_T *s;
   if (find_tag_local (TABLE (n), a, NSYMBOL (n)) != NO_TAG) {
     diagnostic (A68_ERROR, n, ERROR_MULTIPLE_TAG);
   }
-  if ((s = find_tag_global (PREVIOUS (TABLE (n)), a, NSYMBOL (n))) != NO_TAG) {
+  TAG_T *s = find_tag_global (PREVIOUS (TABLE (n)), a, NSYMBOL (n));
+  if (s != NO_TAG) {
     if (TAG_TABLE (s) == A68_STANDENV) {
       diagnostic (A68_WARNING, n, WARNING_HIDES_PRELUDE, MOID (s), NSYMBOL (n));
     } else {
@@ -572,41 +567,41 @@ TAG_T *add_tag (TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
     NODE (z) = n;
 //    TAX(n) = z;.
     switch (a) {
-    case IDENTIFIER:{
+    case IDENTIFIER: {
         already_declared_hidden (n, IDENTIFIER);
         already_declared_hidden (n, LABEL);
         INSERT_TAG (&IDENTIFIERS (s), z);
         break;
       }
-    case INDICANT:{
+    case INDICANT: {
         already_declared_hidden (n, INDICANT);
         already_declared (n, OP_SYMBOL);
         already_declared (n, PRIO_SYMBOL);
         INSERT_TAG (&INDICANTS (s), z);
         break;
       }
-    case LABEL:{
+    case LABEL: {
         already_declared_hidden (n, LABEL);
         already_declared_hidden (n, IDENTIFIER);
         INSERT_TAG (&LABELS (s), z);
         break;
       }
-    case OP_SYMBOL:{
+    case OP_SYMBOL: {
         already_declared (n, INDICANT);
         INSERT_TAG (&OPERATORS (s), z);
         break;
       }
-    case PRIO_SYMBOL:{
+    case PRIO_SYMBOL: {
         already_declared (n, PRIO_SYMBOL);
         already_declared (n, INDICANT);
         INSERT_TAG (&PRIO (s), z);
         break;
       }
-    case ANONYMOUS:{
+    case ANONYMOUS: {
         INSERT_TAG (&ANONYMOUS (s), z);
         break;
       }
-    default:{
+    default: {
         ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
       }
     }
@@ -623,27 +618,27 @@ TAG_T *find_tag_global (TABLE_T * table, int a, char *name)
   if (table != NO_TABLE) {
     TAG_T *s = NO_TAG;
     switch (a) {
-    case IDENTIFIER:{
+    case IDENTIFIER: {
         s = IDENTIFIERS (table);
         break;
       }
-    case INDICANT:{
+    case INDICANT: {
         s = INDICANTS (table);
         break;
       }
-    case LABEL:{
+    case LABEL: {
         s = LABELS (table);
         break;
       }
-    case OP_SYMBOL:{
+    case OP_SYMBOL: {
         s = OPERATORS (table);
         break;
       }
-    case PRIO_SYMBOL:{
+    case PRIO_SYMBOL: {
         s = PRIO (table);
         break;
       }
-    default:{
+    default: {
         ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
         break;
       }
@@ -664,13 +659,12 @@ TAG_T *find_tag_global (TABLE_T * table, int a, char *name)
 int is_identifier_or_label_global (TABLE_T * table, char *name)
 {
   if (table != NO_TABLE) {
-    TAG_T *s;
-    for (s = IDENTIFIERS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = IDENTIFIERS (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return IDENTIFIER;
       }
     }
-    for (s = LABELS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = LABELS (table); s != NO_TAG; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         return LABEL;
       }
@@ -1120,15 +1114,14 @@ void finalise_symbol_table_setup (NODE_T * p, int l)
 
 void preliminary_symbol_table_setup (NODE_T * p)
 {
-  NODE_T *q;
   TABLE_T *s = TABLE (p);
   BOOL_T not_a_for_range = A68_FALSE;
 // let the tree point to the current symbol table.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     TABLE (q) = s;
   }
 // insert new tables when required.
-  for (q = p; q != NO_NODE && !not_a_for_range; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE && !not_a_for_range; FORWARD (q)) {
     if (SUB (q) != NO_NODE) {
 // BEGIN ... END, CODE ... EDOC, DEF ... FED, DO ... OD, $ ... $, { ... } are ranges.
       if (is_one_of (q, BEGIN_SYMBOL, DO_SYMBOL, ALT_DO_SYMBOL, FORMAT_DELIMITER_SYMBOL, ACCO_SYMBOL, STOP)) {
@@ -1234,7 +1227,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
   }
 // FOR identifiers will go to the DO ... OD range.
   if (!not_a_for_range) {
-    for (q = p; q != NO_NODE; FORWARD (q)) {
+    for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
       if (IS (q, FOR_SYMBOL)) {
         NODE_T *r = q;
         TABLE (NEXT (q)) = NO_TABLE;

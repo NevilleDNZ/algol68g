@@ -64,8 +64,8 @@ gsl_matrix *column_mean (gsl_matrix *DATA)
 
 static gsl_matrix *left_columns (NODE_T *p, gsl_matrix *X, int cols)
 {
-  unt M = SIZE1 (X), N = SIZE2 (X);
   MATH_RTE (p, cols < 0, M_INT, "invalid number of columns");
+  unt M = SIZE1 (X), N = SIZE2 (X);
   if (cols == 0 || cols > N) {
     cols = N;
   }
@@ -483,16 +483,16 @@ void genie_matrix_pls1 (NODE_T *p)
 // Decompose E and F.
   gsl_matrix *EIGEN = NO_REAL_MATRIX, *nE = NO_REAL_MATRIX, *nF = NO_REAL_MATRIX; 
   gsl_vector *Sv = gsl_vector_calloc (Nk);
-  BOOL_T go_on = A68_TRUE;
+  BOOL_T siga = A68_TRUE;
   gsl_matrix *eigens = NO_REAL_MATRIX, *lat = NO_REAL_MATRIX, *pl = NO_REAL_MATRIX, *ql = NO_REAL_MATRIX;
-  for (int k = 0; k < Nk && go_on; k ++) {
+  for (int k = 0; k < Nk && siga; k ++) {
 // E weight from E, F covariance.
 // eigens = Eᵀ * f / | Eᵀ * f |
     a68_dgemm (FLIP, SELF, 1.0, E, F, 0.0, &eigens);
     REAL_T norm = matrix_norm (eigens);
     if (k > 0 && (norm / gsl_vector_get (Sv, 0)) < VALUE (&lim)) {
       Nk = k;
-      go_on = A68_FALSE;
+      siga = A68_FALSE;
     } else {
       ASSERT_GSL (gsl_matrix_scale (eigens, 1.0 / norm));
       gsl_vector_set (Sv, k, norm);
@@ -603,8 +603,8 @@ void genie_matrix_pls2 (NODE_T *p)
   gsl_matrix *eigens = NO_REAL_MATRIX;
   gsl_matrix *t = NO_REAL_MATRIX, *b = NO_REAL_MATRIX, *c = NO_REAL_MATRIX;
   gsl_matrix *pl = NO_REAL_MATRIX, *ql = NO_REAL_MATRIX, *nP = NO_REAL_MATRIX, *nC = NO_REAL_MATRIX;
-  BOOL_T go_on = A68_TRUE;
-  for (int k = 0; k < Nk && go_on; k ++) {
+  BOOL_T siga = A68_TRUE;
+  for (int k = 0; k < Nk && siga; k ++) {
     REAL_T norm_e, norm;
     for (int j = 0; j < PLS_MAX_ITER; j ++) {
       gsl_matrix_memcpy (u0, u);
@@ -634,7 +634,7 @@ void genie_matrix_pls2 (NODE_T *p)
     }
     if (k > 0 && (norm_e / gsl_vector_get (Sv, 0)) < VALUE (&lim)) {
       Nk = k;
-      go_on = A68_FALSE;
+      siga = A68_FALSE;
     } else {
       gsl_vector_set (Sv, k, norm_e);
 // X factor loading and deflation.
