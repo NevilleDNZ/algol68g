@@ -1,11 +1,11 @@
 //! @file single-rnd.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -45,12 +45,9 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-//
 // This is a maximally equidistributed combined, collision free 
 // Tausworthe generator, with a period ~2^{113}. The sequence is,
-//
 //   x_n = (z1_n ^ z2_n ^ z3_n ^ z4_n)  
-//
 //   b = (((z1_n <<  6) ^ z1_n) >> 13)
 //   z1_{n+1} = (((z1_n & 4294967294) << 18) ^ b)
 //   b = (((z2_n <<  2) ^ z2_n) >> 27)
@@ -59,20 +56,17 @@
 //   z3_{n+1} = (((z3_n & 4294967280) <<  7) ^ b)
 //   b = (((z4_n <<  3)  ^ z4_n) >> 12)
 //   z4_{n+1} = (((z4_n & 4294967168) << 13) ^ b)
-//
 // computed modulo 2^32. In the formulas above '^' means exclusive-or 
 // (C-notation), not exponentiation. 
 // The algorithm is for 32-bit integers, hence a bitmask is used to clear 
 // all but least significant 32 bits, after left shifts, to make the code 
 // work on architectures where integers are 64-bit.
-//
 // The generator is initialized with 
 // z{i+1} = (69069 * zi) MOD 2^32 where z0 is the seed provided
 // During initialization a check is done to make sure that the initial seeds 
 // have a required number of their most significant bits set.
 // After this, the state is passed through the RNG 10 times to ensure the
 // state satisfies a recurrence relation.
-//
 // References:
 //   P. L'Ecuyer, "Tables of Maximally-Equidistributed Combined LFSR Generators",
 //   Mathematics of Computation, 68, 225 (1999), 261--269.

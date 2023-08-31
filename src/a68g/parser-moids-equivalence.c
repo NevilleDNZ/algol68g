@@ -1,11 +1,11 @@
 //! @file parser-moids-equivalence.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -28,9 +28,10 @@
 #include "a68g-parser.h"
 
 // Routines for establishing equivalence of modes.
-//
 // After I made this mode equivalencer (in 1993), I found:
+//
 // Algol Bulletin 30.3.3 C.H.A. Koster: On infinite modes, 86-89 [1969],
+//
 // which essentially concurs with this test on mode equivalence I wrote.
 // It is elementary logic anyway: prove equivalence, assuming equivalence.
 

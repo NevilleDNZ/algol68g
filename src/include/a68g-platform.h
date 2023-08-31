@@ -1,11 +1,11 @@
 //! @file a68g-platform.h
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -60,7 +60,6 @@
 #endif
 
 // Decide on A68G "LEVEL".
-//
 // LEVEL 3 uses INT*8, REAL*10 and REAL*16 data types, when available in hardware.
 // LEVEL 2 builds generic A68G with INT*4 and REAL*8 data types.
 // LEVEL 1 is reserved for (possible) restrictive builds.

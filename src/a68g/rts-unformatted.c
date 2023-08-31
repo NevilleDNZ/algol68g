@@ -1,11 +1,11 @@
 //! @file rts-unformatted.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -2332,7 +2332,6 @@ void standardise (REAL_T * y, int before, int after, int *p)
 {
 // This according RR, but for REAL the last digits are approximate.
 // A68G 3 uses DOUBLE precision version.
-//
 //int g = 1.0; for (int j = 0; j < before; j++) { g *= 10.0; }
   REAL_T g = ten_up (before);
   REAL_T h = g / 10.0;

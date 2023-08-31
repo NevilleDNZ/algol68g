@@ -1,8 +1,8 @@
 #
-ww
-ww
-wwww
-wwbb
+cc
+cc
+cccc
+ccbb
 #
 COMMENT
 
@@ -19,6 +19,7 @@ COMMENT
 PR quiet regression PR
 
 # This breaks a unique code of `n' pegs and `m' colours you think of. #
+# After the program published on Rosetta Code by Marcel van der Veer. #
 
 INT pegs = 4, colours = 6;
 
@@ -63,7 +64,7 @@ PROC break code = (LIST sieved) VOID:
          OD;
          printf (($gl$, z));
          FOR i TO UPB z
-         DO (z[i] = "w" | col ok |: z[i] = "b" | pos ok) +:= 1 
+         DO (z[i] = "c" | col ok |: z[i] = "b" | pos ok) +:= 1 
          OD;
          (pos ok = pegs | stop);
      # Survivors are combinations with score as entered. #

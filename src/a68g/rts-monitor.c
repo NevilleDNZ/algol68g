@@ -1,11 +1,11 @@
 //! @file monitor.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -26,7 +26,6 @@
 // This is a basic monitor for Algol68G. It activates when the interpreter
 // receives SIGINT (CTRL-C, for instance) or when PROC VOID break, debug or
 // evaluate is called, or when a runtime error occurs and --debug is selected.
-//
 // The monitor allows single stepping (unit-wise through serial/enquiry
 // clauses) and has basic means for inspecting call-frame stack and heap. 
 

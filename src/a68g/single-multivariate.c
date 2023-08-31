@@ -1,11 +1,11 @@
 //! @file single-multivariate.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -24,10 +24,8 @@
 //! REAL multivariate regression.
 
 // This code implements least square regression methods:
-//
 //   OLS - Ordinary Least Squares
 //   PCR - Principle Component Regression, OLS after dimension reduction
-//
 //   TLS - Total Least Squares
 //   PLS - Partial Least Squares, TLS after dimension reduction
 
@@ -85,7 +83,6 @@ void compute_pseudo_inverse (NODE_T *p, gsl_matrix **mpinv, gsl_matrix *X, REAL_
 // The Moore-Penrose pseudo inverse gives a least-square approximate solution
 // for a system of linear equations not having an exact solution.
 // Multivariate statistics is a well known application.
-//
   MATH_RTE (p, X == NO_REAL_MATRIX, M_ROW_ROW_REAL, "empty data matrix");
   MATH_RTE (p, lim < 0, M_REAL, "invalid limit");
   unt M = SIZE1 (X), N = SIZE2 (X);  
@@ -157,7 +154,6 @@ gsl_matrix *pca_svd (gsl_matrix *X, gsl_vector ** Sv)
 {
 // In PCA, SVD is closely related to eigenvector decomposition of the covariance matrix:
 // If Cov = XᵀX = VLVᵀ and X = USVᵀ then XᵀX = VSUᵀUSVᵀ = VS²Vᵀ, hence L = S².
-//
 // M samples, N features.
   unt M = SIZE1 (X), N = SIZE2 (X);
 // GSL does thin SVD, only handles M >= N, overdetermined systems.    
@@ -197,7 +193,6 @@ void genie_matrix_pinv_lim (NODE_T * p)
 // Compute the Moore-Penrose pseudo inverse of a MxN matrix.
 // G. Strang. "Linear Algebra and its applications", 2nd edition.
 // Academic Press [1980].
-//
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
   A68_REAL lim;
   POP_OBJECT (p, &lim, A68_REAL);
@@ -262,7 +257,6 @@ void genie_matrix_pca_cv (NODE_T * p)
 // Forming the covariance matrix squares the condition number.
 // Hence this routine might loose more significant digits than SVD.
 // On the other hand, using PCA one looks for dominant eigenvectors.
-//
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
   A68_REF singulars;
   POP_REF (p, &singulars);
@@ -302,7 +296,6 @@ void genie_matrix_pca_cv (NODE_T * p)
 void genie_matrix_pca_svd (NODE_T * p)
 {
 // Principal component analysis of a MxN matrix by Jacobi SVD.
-//
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
   A68_REF singulars;
   POP_REF (p, &singulars);
@@ -333,7 +326,6 @@ void genie_matrix_pca_svd (NODE_T * p)
 void genie_matrix_pcr (NODE_T * p)
 {
 // Principal Component Regression of a MxN matrix by Jacobi SVD.
-//
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
 // Pop arguments.
 // 'lim' is minimum relative length to first eigenvector.
@@ -342,7 +334,6 @@ void genie_matrix_pcr (NODE_T * p)
 // 'Nc' is maximum number of eigenvectors.
   A68_INT Nc;
   POP_OBJECT (p, &Nc, A68_INT); 
-//
   A68_REF singulars;
   POP_REF (p, &singulars);
 // Y data vector, features in a single column
@@ -413,11 +404,9 @@ void genie_matrix_ols (NODE_T *p)
 // TLS relates to PLS as OLS relates to PCR.
 // Note that X is an MxN matrix and Y, β are Nx1 column vectors.
 // OLS can implemented (inefficiently) as PCR with maximum number of singular values:
-//
 //  PUSH_VALUE (p, 0.0, A68_REAL);
 //  PUSH_VALUE (p, 0, A68_INT);
 //  genie_matrix_pcr (p);
-//
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
 // X and Y matrices.
   gsl_matrix *Y = pop_matrix (p, A68_TRUE);
@@ -429,7 +418,6 @@ void genie_matrix_ols (NODE_T *p)
 // Yield results.
   push_matrix (p, beta);
   (void) gsl_set_error_handler (save_handler);
-//
   a68_matrix_free (beta);
   a68_matrix_free (mpinv);
   a68_matrix_free (X);
@@ -441,19 +429,14 @@ void genie_matrix_ols (NODE_T *p)
 void genie_matrix_pls1 (NODE_T *p)
 {
 // PLS decomposes X and Y data concurrently as
-//
 // X = T Pᵀ + E
 // Y = U Qᵀ + F
-//
 // PLS1 is a widely used algorithm appropriate for the vector Y case.
-//
 // This procedure computes PLS1 with SVD solver for β,
 // by a NIPALS algorithm with orthonormal scores and loadings.
 // See Ulf Indahl, Journal of Chemometrics 28(3) 168-180 [2014].
-//
 // Note that E is an MxN matrix and F, β are Nx1 column vectors.
 // This for consistency with PLS2.
-//
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
 // Pop arguments.
 // 'lim' is minimum relative length to first eigenvector.
@@ -462,7 +445,6 @@ void genie_matrix_pls1 (NODE_T *p)
 // 'Nc' is maximum number of eigenvectors.
   A68_INT Nc;
   POP_OBJECT (p, &Nc, A68_INT); 
-//
   A68_REF singulars;
   POP_REF (p, &singulars);
 // X and Y matrices.
@@ -552,14 +534,11 @@ void genie_matrix_pls1 (NODE_T *p)
 void genie_matrix_pls2 (NODE_T *p)
 {
 // PLS decomposes X and Y data concurrently as
-//
 // X = T Pᵀ + E
 // Y = U Qᵀ + F
-//
 // Generic orthodox NIPALS, following Hervé Abdi, University of Texas.
 // "Partial Least Squares Regression and Projection on Latent Structure Regression",
 // Computational Statistics [2010].
-//
 #define PLS_MAX_ITER 100
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
 // Pop arguments.
@@ -569,7 +548,6 @@ void genie_matrix_pls2 (NODE_T *p)
 // 'Nc' is maximum number of eigenvectors.
   A68_INT Nc;
   POP_OBJECT (p, &Nc, A68_INT); 
-//
   A68_REF singulars;
   POP_REF (p, &singulars);
 // X and Y matrices.
@@ -660,7 +638,6 @@ void genie_matrix_pls2 (NODE_T *p)
   for (int k = 0; k < Nk; k++) {
     gsl_matrix_set (D, k, k, gsl_vector_get (dD, k));
   }
-//
   gsl_matrix *mpinv = NO_REAL_MATRIX;
   compute_pseudo_inverse (p, &mpinv, nP, SMALL_EIGEN);
   gsl_matrix *z = NO_REAL_MATRIX, *beta = NO_REAL_MATRIX;

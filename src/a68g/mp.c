@@ -1,11 +1,11 @@
 //! @file mp.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -24,13 +24,11 @@
 //! [LONG] LONG INT, REAL routines.
 
 // Multiprecision calculations are useful in these cases:
-//
 // Ill-conditioned linear systems
 // Summation of large series
 // Long-time or large-scale simulations
 // Small-scale phenomena
 // 'Experimental mathematics'
-//
 // The routines in this library follow algorithms as described in the
 // literature, notably
 // 
@@ -39,7 +37,6 @@
 // 
 //   D.M. Smith, "A Multiple-Precision Division Algorithm"
 //   Mathematics of Computation 66 (1996) 157-163
-//
 //   The GNU MPFR library documentation
 // 
 // Multiprecision libraries are (freely) available, but this one is particularly 
@@ -47,7 +44,7 @@
 // 
 //    LONG INT, LONG REAL, LONG COMPLEX, LONG BITS
 //    LONG LONG INT, LONG LONG REAL, LONG LONG COMPLEX, LONG LONG BITS
-//
+// 
 // Note that recent implementations of GCC make available 64-bit LONG INT and 
 // 128-bit LONG REAL. This suits many multiprecision needs already. 
 // On such platforms, below code is used for LONG LONG modes only.
@@ -60,7 +57,6 @@
 // user-definable precision. Precisions span about 30 decimal digits for
 // LONG modes up to (default) about 60 decimal digits for LONG LONG modes, a
 // range that is thought to be adequate for most multiprecision applications.
-//
 // Although the maximum length of a number is in principle unbound, this 
 // implementation is not designed for more than a few hundred decimal places. 
 // At higher precisions, expect a performance penalty with respect to
@@ -75,7 +71,6 @@
 // in a large base. Layout of a mp number "z" is:
 // 
 //    MP_T *z;
-//
 //    MP_STATUS (z)        Status word
 //    MP_EXPONENT (z)      Exponent with base MP_RADIX
 //    MP_DIGIT (z, 1 .. N) Digits 1 .. N
@@ -856,10 +851,8 @@ MP_T *div_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 // This is O(N^2) but runs faster than straightforward methods by skipping
 // most of the intermediate normalisation and recovering from wrong
 // guesses without separate correction steps.
-//
 // Depending on application, div_mp cost is circa 3 times that of mul_mp.
 // Therefore Newton-Raphson division makes no sense here.
-//
   if (IS_ZERO_MP (y)) {
     errno = ERANGE;
     return NaN_MP;
@@ -870,7 +863,6 @@ MP_T *div_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 #else
   int oflow = (int) FLOOR_MP ((MP_REAL_T) MAX_REPR_INT / (2 * MP_REAL_RADIX * MP_REAL_RADIX)) - 1;
 #endif
-//
   MP_T x_1 = MP_DIGIT (x, 1), y_1 = MP_DIGIT (y, 1);
   MP_DIGIT (x, 1) = ABS (x_1);
   MP_DIGIT (y, 1) = ABS (y_1);
@@ -1081,7 +1073,6 @@ MP_T *div_mp_digit (NODE_T * p, MP_T * z, MP_T * x, MP_T y, int digs)
   MP_DIGIT (x, 1) = ABS (x_1);
   MP_STATUS (z) = (MP_T) INIT_MASK;
   y = ABS (y_1);
-//
   if (y == 2) {
     (void) half_mp (p, z, x, digs);
   } else if (y == 10) {

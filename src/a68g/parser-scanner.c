@@ -1,11 +1,11 @@
 //! @file parser-scanner.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -408,7 +408,6 @@ void include_files (LINE_T * top)
 // in A68 source code. User reports do not indicate sophisticated use of INCLUDE, 
 // so this is fine for now.
 // TODO - some day we might need `app', analogous to `cpp'.
-//
   BOOL_T make_pass = A68_TRUE;
   while (make_pass) {
     LINE_T *s, *t, *u = top;

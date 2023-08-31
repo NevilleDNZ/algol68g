@@ -1,11 +1,11 @@
 //! @file prelude-bits.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -48,14 +48,11 @@ void stand_longlong_bits (void)
   M_ROW_LONG_LONG_BITS = add_mode (&TOP_MOID (&A68_JOB), ROW_SYMBOL, 1, NO_NODE, M_LONG_LONG_BITS, NO_PACK);
   HAS_ROWS (M_ROW_LONG_LONG_BITS) = A68_TRUE;
   SLICE (M_ROW_LONG_LONG_BITS) = M_LONG_LONG_BITS;
-//
   a68_idf (A68_STD, "longlongbitswidth", M_INT, genie_long_mp_bits_width);
   a68_idf (A68_STD, "longlongmaxbits", M_LONG_LONG_BITS, genie_long_mp_max_bits);
-//
   MOID_T *m = a68_proc (M_LONG_LONG_BITS, M_ROW_BOOL, NO_MOID);
   a68_idf (A68_STD, "longlongbitspack", m, genie_long_bits_pack);
   A68C_DEFIO (longlongbits, long_mp_bits, LONG_LONG_BITS);
-//
   m = a68_proc (M_LONG_LONG_BITS, M_LONG_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_idle);
   m = a68_proc (M_LONG_LONG_BITS, M_LONG_BITS, NO_MOID);

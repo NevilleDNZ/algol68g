@@ -1,11 +1,11 @@
 //! @file plugin.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -140,7 +140,6 @@ void plugin_driver_emit (FILE_T out)
     io_close_tty_line ();
     WRITE (A68_STDOUT, A68 (output_line));
   }
-//
   for (int k = 0; k < A68_OPT (unic_pointer); k++) {
     a68_free (UNIC_NAME (k));
   }

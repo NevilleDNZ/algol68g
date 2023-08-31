@@ -1,11 +1,11 @@
 //! @file mp-bits.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -43,7 +43,6 @@
 // would not be worth the while.
 // Hence in recent a68c versions, LONG BITS is a 128-bit quad word,
 // and LONG LONG BITS is mapped onto LONG BITS.
-//
 // Below code is left in a68g for reference purposes, and in case a build of
 // a version < 3 would be required.
 

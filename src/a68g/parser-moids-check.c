@@ -1,11 +1,11 @@
 //! @file parser-moids-check.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -838,8 +838,8 @@ TAG_T *find_operator (TABLE_T * s, char *n, MOID_T * x, MOID_T * y)
     return z;
   }
 // (C.2) Vector and matrix "strong coercions" in standard environ.
-  u = depref_completely (x);
-  v = depref_completely (y);
+  u = DEFLEX (depref_completely (x));
+  v = DEFLEX (depref_completely (y));
   if ((u == M_ROW_REAL || u == M_ROW_ROW_REAL)
       || (v == M_ROW_REAL || v == M_ROW_ROW_REAL)
       || (u == M_ROW_COMPLEX || u == M_ROW_ROW_COMPLEX)

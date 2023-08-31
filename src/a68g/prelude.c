@@ -1,11 +1,11 @@
 //! @file prelude.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -548,10 +548,8 @@ void stand_prelude (void)
   a68_op (A68_STD, "-", m, genie_minus_int);
   a68_op (A68_STD, "ABS", m, genie_abs_int);
   a68_op (A68_STD, "SIGN", m, genie_sign_int);
-//
   m = a68_proc (M_BOOL, M_INT, NO_MOID);
   a68_op (A68_STD, "ODD", m, genie_odd_int);
-//
   m = a68_proc (M_BOOL, M_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_int);
   a68_op (A68_STD, "/=", m, genie_ne_int);
@@ -567,7 +565,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "LE", m, genie_le_int);
   a68_op (A68_STD, "GT", m, genie_gt_int);
   a68_op (A68_STD, "GE", m, genie_ge_int);
-//
   m = a68_proc (M_INT, M_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_int);
   a68_op (A68_STD, "-", m, genie_sub_int);
@@ -579,10 +576,8 @@ void stand_prelude (void)
   a68_op (A68_STD, "**", m, genie_pow_int);
   a68_op (A68_STD, "UP", m, genie_pow_int);
   a68_op (A68_STD, "^", m, genie_pow_int);
-//
   m = a68_proc (M_REAL, M_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "/", m, genie_div_int);
-//
   m = a68_proc (M_REF_INT, M_REF_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_int);
   a68_op (A68_STD, "-:=", m, genie_minusab_int);
@@ -603,7 +598,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "SIGN", m, genie_sign_real);
   a68_op (A68_STD, "ROUND", m, genie_round_real);
   a68_op (A68_STD, "ENTIER", m, genie_entier_real);
-//
   m = a68_proc (M_BOOL, M_REAL, M_REAL, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_real);
   a68_op (A68_STD, "/=", m, genie_ne_real);
@@ -619,7 +613,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "LE", m, genie_le_real);
   a68_op (A68_STD, "GT", m, genie_gt_real);
   a68_op (A68_STD, "GE", m, genie_ge_real);
-//
   m = A68_MCACHE (proc_real_real_real);
   a68_op (A68_STD, "+", m, genie_add_real);
   a68_op (A68_STD, "-", m, genie_sub_real);
@@ -628,12 +621,10 @@ void stand_prelude (void)
   a68_op (A68_STD, "**", m, genie_pow_real);
   a68_op (A68_STD, "UP", m, genie_pow_real);
   a68_op (A68_STD, "^", m, genie_pow_real);
-//
   m = a68_proc (M_REAL, M_REAL, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_real_int);
   a68_op (A68_STD, "UP", m, genie_pow_real_int);
   a68_op (A68_STD, "^", m, genie_pow_real_int);
-//
   m = a68_proc (M_REF_REAL, M_REF_REAL, M_REAL, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_real);
   a68_op (A68_STD, "-:=", m, genie_minusab_real);
@@ -715,22 +706,18 @@ void stand_prelude (void)
   m = a68_proc (M_COMPLEX, M_REAL, M_REAL, NO_MOID);
   a68_op (A68_STD, "I", m, genie_i_complex);
   a68_op (A68_STD, "+*", m, genie_i_complex);
-//
   m = a68_proc (M_COMPLEX, M_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "I", m, genie_i_int_complex);
   a68_op (A68_STD, "+*", m, genie_i_int_complex);
-//
   m = a68_proc (M_REAL, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "RE", m, genie_re_complex);
   a68_op (A68_STD, "IM", m, genie_im_complex);
   a68_op (A68_STD, "ABS", m, genie_abs_complex);
   a68_op (A68_STD, "ARG", m, genie_arg_complex);
-//
   m = A68_MCACHE (proc_complex_complex);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_complex);
   a68_op (A68_STD, "CONJ", m, genie_conj_complex);
-//
   m = a68_proc (M_BOOL, M_COMPLEX, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_complex);
   a68_op (A68_STD, "/=", m, genie_ne_complex);
@@ -738,18 +725,15 @@ void stand_prelude (void)
   a68_op (A68_STD, "^=", m, genie_ne_complex);
   a68_op (A68_STD, "EQ", m, genie_eq_complex);
   a68_op (A68_STD, "NE", m, genie_ne_complex);
-//
   m = a68_proc (M_COMPLEX, M_COMPLEX, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_complex);
   a68_op (A68_STD, "-", m, genie_sub_complex);
   a68_op (A68_STD, "*", m, genie_mul_complex);
   a68_op (A68_STD, "/", m, genie_div_complex);
-//
   m = a68_proc (M_COMPLEX, M_COMPLEX, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_complex_int);
   a68_op (A68_STD, "UP", m, genie_pow_complex_int);
   a68_op (A68_STD, "^", m, genie_pow_complex_int);
-//
   m = a68_proc (M_REF_COMPLEX, M_REF_COMPLEX, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_complex);
   a68_op (A68_STD, "-:=", m, genie_minusab_complex);
@@ -759,7 +743,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_complex);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_complex);
   a68_op (A68_STD, "DIVAB", m, genie_divab_complex);
-//
   m = A68_MCACHE (proc_complex_complex);
   a68_id2 (A68_EXT, "complexarccosh", "cacosh", m, genie_acosh_complex);
   a68_id2 (A68_EXT, "complexarccos", "cacos", m, genie_acos_complex);
@@ -831,14 +814,11 @@ void stand_prelude (void)
 // BITS ops.
   m = a68_proc (M_INT, M_BITS, NO_MOID);
   a68_op (A68_STD, "ABS", m, genie_abs_bits);
-//
   m = a68_proc (M_BITS, M_INT, NO_MOID);
   a68_op (A68_STD, "BIN", m, genie_bin_int);
-//
   m = a68_proc (M_BITS, M_BITS, NO_MOID);
   a68_op (A68_STD, "NOT", m, genie_not_bits);
   a68_op (A68_STD, "~", m, genie_not_bits);
-//
   m = a68_proc (M_BOOL, M_BITS, M_BITS, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_bits);
   a68_op (A68_STD, "/=", m, genie_ne_bits);
@@ -856,7 +836,6 @@ void stand_prelude (void)
   a68_op (A68_EXT, "LT", m, genie_lt_bits);
   a68_op (A68_EXT, "GT", m, genie_gt_bits);
 #endif
-//
   m = a68_proc (M_BITS, M_BITS, M_BITS, NO_MOID);
   a68_op (A68_STD, "AND", m, genie_and_bits);
   a68_op (A68_STD, "&", m, genie_and_bits);
@@ -867,7 +846,6 @@ void stand_prelude (void)
   a68_op (A68_EXT, "*", m, genie_times_bits);
   a68_op (A68_EXT, "OVER", m, genie_over_bits);
   a68_op (A68_EXT, "MOD", m, genie_over_bits);
-//
   m = a68_proc (M_BITS, M_BITS, M_INT, NO_MOID);
   a68_op (A68_STD, "SHL", m, genie_shl_bits);
   a68_op (A68_STD, "UP", m, genie_shl_bits);
@@ -875,10 +853,8 @@ void stand_prelude (void)
   a68_op (A68_STD, "DOWN", m, genie_shr_bits);
   a68_op (A68_EXT, "ROL", m, genie_rol_bits);
   a68_op (A68_EXT, "ROR", m, genie_ror_bits);
-//
   m = a68_proc (M_BOOL, M_INT, M_BITS, NO_MOID);
   a68_op (A68_STD, "ELEM", m, genie_elem_bits);
-//
   m = a68_proc (M_BITS, M_INT, M_BITS, NO_MOID);
   a68_op (A68_STD, "SET", m, genie_set_bits);
   a68_op (A68_STD, "CLEAR", m, genie_clear_bits);
@@ -887,17 +863,13 @@ void stand_prelude (void)
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp);
   a68_op (A68_STD, "ABS", m, genie_abs_mp);
-//
   m = a68_proc (M_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "SIGN", m, genie_sign_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "ODD", m, genie_odd_mp);
-//
   m = a68_proc (M_LONG_LONG_INT, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "ENTIER", m, genie_entier_mp);
   a68_op (A68_STD, "ROUND", m, genie_round_mp);
-//
   m = a68_proc (M_LONG_LONG_INT, M_LONG_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_mp_int);
   a68_op (A68_STD, "-", m, genie_sub_mp_int);
@@ -906,7 +878,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "%", m, genie_over_mp);
   a68_op (A68_STD, "MOD", m, genie_mod_mp);
   a68_op (A68_STD, "%*", m, genie_mod_mp);
-//
   m = a68_proc (M_REF_LONG_LONG_INT, M_REF_LONG_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_mp_int);
   a68_op (A68_STD, "-:=", m, genie_minusab_mp_int);
@@ -918,10 +889,8 @@ void stand_prelude (void)
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_mp_int);
   a68_op (A68_STD, "OVERAB", m, genie_overab_mp);
   a68_op (A68_STD, "MODAB", m, genie_modab_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "/", m, genie_div_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "EQ", m, genie_eq_mp);
   a68_op (A68_STD, "NE", m, genie_ne_mp);
@@ -937,11 +906,9 @@ void stand_prelude (void)
   a68_op (A68_STD, "/=", m, genie_ne_mp);
   a68_op (A68_STD, "^=", m, genie_ne_mp);
   a68_op (A68_STD, "~=", m, genie_ne_mp);
-//
   m = a68_proc (M_LONG_LONG_INT, M_LONG_LONG_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_mp_int_int);
   a68_op (A68_STD, "^", m, genie_pow_mp_int_int);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "I", m, genie_idle);
   a68_op (A68_STD, "+*", m, genie_idle);
@@ -952,7 +919,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "-", m, genie_minus_mp);
   m = a68_proc (M_INT, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SIGN", m, genie_sign_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longlongarccosdg", "qacosdg", m, genie_acosdg_mp);
   a68_id2 (A68_EXT, "longlongarccosh", "qacosh", m, genie_acosh_mp);
@@ -1001,7 +967,6 @@ void stand_prelude (void)
   a68_id2 (A68_STD, "longlongsin", "qsin", m, genie_sin_mp);
   a68_id2 (A68_STD, "longlongsqrt", "qsqrt", m, genie_sqrt_mp);
   a68_id2 (A68_STD, "longlongtan", "qtan", m, genie_tan_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longlongarctan2dg", "qatan2dg", m, genie_atan2dg_mp);
   a68_id2 (A68_EXT, "longlongarctan2", "qatan2", m, genie_atan2_mp);
@@ -1010,13 +975,10 @@ void stand_prelude (void)
   a68_id2 (A68_EXT, "longlonggammaincgf", "qgammaincgf", m, genie_gamma_inc_gf_mp);
   a68_id2 (A68_EXT, "longlonggammainc", "qgammainc", m, genie_gamma_inc_h_mp);
   a68_id2 (A68_EXT, "longlonglnbeta", "qlnbeta", m, genie_lnbeta_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longlongbetainc", "qbetainc", m, genie_beta_inc_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longlonggammaincg", "qgammaincg", m, genie_gamma_inc_g_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_mp);
   a68_op (A68_STD, "-", m, genie_sub_mp);
@@ -1025,7 +987,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "**", m, genie_pow_mp);
   a68_op (A68_STD, "UP", m, genie_pow_mp);
   a68_op (A68_STD, "^", m, genie_pow_mp);
-//
   m = a68_proc (M_REF_LONG_LONG_REAL, M_REF_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_mp);
   a68_op (A68_STD, "-:=", m, genie_minusab_mp);
@@ -1035,7 +996,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_mp);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_mp);
   a68_op (A68_STD, "DIVAB", m, genie_divab_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_mp);
   a68_op (A68_STD, "EQ", m, genie_eq_mp);
@@ -1051,12 +1011,10 @@ void stand_prelude (void)
   a68_op (A68_STD, "GT", m, genie_gt_mp);
   a68_op (A68_STD, ">=", m, genie_ge_mp);
   a68_op (A68_STD, "GE", m, genie_ge_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_mp_int);
   a68_op (A68_STD, "UP", m, genie_pow_mp_int);
   a68_op (A68_STD, "^", m, genie_pow_mp_int);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "I", m, genie_idle);
   a68_op (A68_STD, "+*", m, genie_idle);
@@ -1066,23 +1024,19 @@ void stand_prelude (void)
   a68_op (A68_STD, "IM", m, genie_im_mp_complex);
   a68_op (A68_STD, "ARG", m, genie_arg_mp_complex);
   a68_op (A68_STD, "ABS", m, genie_abs_mp_complex);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp_complex);
   a68_op (A68_STD, "CONJ", m, genie_conj_mp_complex);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_mp_complex);
   a68_op (A68_STD, "-", m, genie_sub_mp_complex);
   a68_op (A68_STD, "*", m, genie_mul_mp_complex);
   a68_op (A68_STD, "/", m, genie_div_mp_complex);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_mp_complex_int);
   a68_op (A68_STD, "UP", m, genie_pow_mp_complex_int);
   a68_op (A68_STD, "^", m, genie_pow_mp_complex_int);
-//
   m = a68_proc (M_BOOL, M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_mp_complex);
   a68_op (A68_STD, "EQ", m, genie_eq_mp_complex);
@@ -1090,7 +1044,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "~=", m, genie_ne_mp_complex);
   a68_op (A68_STD, "^=", m, genie_ne_mp_complex);
   a68_op (A68_STD, "NE", m, genie_ne_mp_complex);
-//
   m = a68_proc (M_REF_LONG_LONG_COMPLEX, M_REF_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_mp_complex);
   a68_op (A68_STD, "-:=", m, genie_minusab_mp_complex);
@@ -1100,7 +1053,6 @@ void stand_prelude (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_mp_complex);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_mp_complex);
   a68_op (A68_STD, "DIVAB", m, genie_divab_mp_complex);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_id2 (A68_EXT, "longlongcomplexarccosh", "qcacosh", m, genie_acosh_mp_complex);
   a68_id2 (A68_EXT, "longlongcomplexarccos", "qcacos", m, genie_acos_mp_complex);
@@ -1120,21 +1072,16 @@ void stand_prelude (void)
 // BYTES ops.
   m = a68_proc (M_BYTES, M_STRING, NO_MOID);
   a68_idf (A68_STD, "bytespack", m, genie_bytespack);
-//
   m = a68_proc (M_CHAR, M_INT, M_BYTES, NO_MOID);
   a68_op (A68_STD, "ELEM", m, genie_elem_bytes);
-//
   m = a68_proc (M_BYTES, M_BYTES, M_BYTES, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_bytes);
-//
   m = a68_proc (M_REF_BYTES, M_REF_BYTES, M_BYTES, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_bytes);
   a68_op (A68_STD, "PLUSAB", m, genie_plusab_bytes);
-//
   m = a68_proc (M_REF_BYTES, M_BYTES, M_REF_BYTES, NO_MOID);
   a68_op (A68_STD, "+=:", m, genie_plusto_bytes);
   a68_op (A68_STD, "PLUSTO", m, genie_plusto_bytes);
-//
   m = a68_proc (M_BOOL, M_BYTES, M_BYTES, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_bytes);
   a68_op (A68_STD, "/=", m, genie_ne_bytes);
@@ -1153,27 +1100,20 @@ void stand_prelude (void)
 // LONG BYTES ops.
   m = a68_proc (M_LONG_BYTES, M_BYTES, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_leng_bytes);
-//
   m = a68_proc (M_BYTES, M_LONG_BYTES, NO_MOID);
   a68_idf (A68_STD, "SHORTEN", m, genie_shorten_bytes);
-//
   m = a68_proc (M_LONG_BYTES, M_STRING, NO_MOID);
   a68_idf (A68_STD, "longbytespack", m, genie_long_bytespack);
-//
   m = a68_proc (M_CHAR, M_INT, M_LONG_BYTES, NO_MOID);
   a68_op (A68_STD, "ELEM", m, genie_elem_long_bytes);
-//
   m = a68_proc (M_LONG_BYTES, M_LONG_BYTES, M_LONG_BYTES, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_long_bytes);
-//
   m = a68_proc (M_REF_LONG_BYTES, M_REF_LONG_BYTES, M_LONG_BYTES, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_long_bytes);
   a68_op (A68_STD, "PLUSAB", m, genie_plusab_long_bytes);
-//
   m = a68_proc (M_REF_LONG_BYTES, M_LONG_BYTES, M_REF_LONG_BYTES, NO_MOID);
   a68_op (A68_STD, "+=:", m, genie_plusto_long_bytes);
   a68_op (A68_STD, "PLUSTO", m, genie_plusto_long_bytes);
-//
   m = a68_proc (M_BOOL, M_LONG_BYTES, M_LONG_BYTES, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_long_bytes);
   a68_op (A68_STD, "/=", m, genie_ne_long_bytes);
@@ -1205,60 +1145,45 @@ void stand_prelude (void)
   a68_op (A68_STD, "LE", m, genie_le_string);
   a68_op (A68_STD, "GE", m, genie_ge_string);
   a68_op (A68_STD, "GT", m, genie_gt_string);
-//
   m = a68_proc (M_STRING, M_CHAR, M_CHAR, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_char);
-//
   m = a68_proc (M_STRING, M_STRING, M_STRING, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_string);
-//
   m = a68_proc (M_REF_STRING, M_REF_STRING, M_STRING, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_string);
   a68_op (A68_STD, "PLUSAB", m, genie_plusab_string);
-//
   m = a68_proc (M_REF_STRING, M_REF_STRING, M_INT, NO_MOID);
   a68_op (A68_STD, "*:=", m, genie_timesab_string);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_string);
-//
   m = a68_proc (M_REF_STRING, M_STRING, M_REF_STRING, NO_MOID);
   a68_op (A68_STD, "+=:", m, genie_plusto_string);
   a68_op (A68_STD, "PLUSTO", m, genie_plusto_string);
-//
   m = a68_proc (M_STRING, M_STRING, M_INT, NO_MOID);
   a68_op (A68_STD, "*", m, genie_times_string_int);
-//
   m = a68_proc (M_STRING, M_INT, M_STRING, NO_MOID);
   a68_op (A68_STD, "*", m, genie_times_int_string);
-//
   m = a68_proc (M_STRING, M_INT, M_CHAR, NO_MOID);
   a68_op (A68_STD, "*", m, genie_times_int_char);
-//
   m = a68_proc (M_STRING, M_CHAR, M_INT, NO_MOID);
   a68_op (A68_STD, "*", m, genie_times_char_int);
-//
   m = a68_proc (M_CHAR, M_INT, M_ROW_CHAR, NO_MOID);
   a68_op (A68_STD, "ELEM", m, genie_elem_string);
-//
   m = a68_proc (M_STRING, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "realpath", m, genie_realpath);
 // SEMA ops.
 #if defined (BUILD_PARALLEL_CLAUSE)
   m = a68_proc (M_SEMA, M_INT, NO_MOID);
   a68_op (A68_STD, "LEVEL", m, genie_level_sema_int);
-//
   m = a68_proc (M_INT, M_SEMA, NO_MOID);
   a68_op (A68_STD, "LEVEL", m, genie_level_int_sema);
-//
   m = a68_proc (M_VOID, M_SEMA, NO_MOID);
   a68_op (A68_STD, "UP", m, genie_up_sema);
   a68_op (A68_STD, "DOWN", m, genie_down_sema);
 #else
   m = a68_proc (M_SEMA, M_INT, NO_MOID);
   a68_op (A68_STD, "LEVEL", m, genie_unimplemented);
-//
   m = a68_proc (M_INT, M_SEMA, NO_MOID);
   a68_op (A68_STD, "LEVEL", m, genie_unimplemented);
-//
   m = a68_proc (M_VOID, M_SEMA, NO_MOID);
   a68_op (A68_STD, "UP", m, genie_unimplemented);
   a68_op (A68_STD, "DOWN", m, genie_unimplemented);
@@ -1268,12 +1193,10 @@ void stand_prelude (void)
   a68_op (A68_EXT, "ELEMS", m, genie_monad_elems);
   a68_op (A68_STD, "LWB", m, genie_monad_lwb);
   a68_op (A68_STD, "UPB", m, genie_monad_upb);
-//
   m = a68_proc (M_INT, M_INT, M_ROWS, NO_MOID);
   a68_op (A68_EXT, "ELEMS", m, genie_dyad_elems);
   a68_op (A68_STD, "LWB", m, genie_dyad_lwb);
   a68_op (A68_STD, "UPB", m, genie_dyad_upb);
-//
   m = a68_proc (M_ROW_STRING, M_ROW_STRING, NO_MOID);
   a68_op (A68_EXT, "SORT", m, genie_sort_row_string);
 // Some "terminators" to handle the mapping of very short or very long modes.
@@ -1281,22 +1204,16 @@ void stand_prelude (void)
 // silently mapped onto REAL.
   m = a68_proc (M_LONG_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_idle);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_idle);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_idle);
-//
   m = a68_proc (M_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_idle);
-//
   m = a68_proc (M_REAL, M_REAL, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_idle);
-//
   m = a68_proc (M_COMPLEX, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_idle);
-//
   m = a68_proc (M_BITS, M_BITS, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_idle);
 // SOUND/RIFF procs.
@@ -1333,33 +1250,24 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp);
   a68_op (A68_STD, "ABS", m, genie_abs_mp);
-//
   m = a68_proc (M_LONG_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_int_to_mp);
-//
   m = a68_proc (M_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_mp_to_int);
   a68_op (A68_STD, "SIGN", m, genie_sign_mp);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_mp_to_long_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_long_mp_to_mp);
-//
   m = a68_proc (M_LONG_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_mp_to_long_mp);
-//
   m = a68_proc (M_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_long_mp_to_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "ODD", m, genie_odd_mp);
-//
   m = a68_proc (M_LONG_INT, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "ENTIER", m, genie_entier_mp);
   a68_op (A68_STD, "ROUND", m, genie_round_mp);
-//
   m = a68_proc (M_LONG_INT, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_mp_int);
   a68_op (A68_STD, "-", m, genie_sub_mp_int);
@@ -1368,7 +1276,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "%", m, genie_over_mp);
   a68_op (A68_STD, "MOD", m, genie_mod_mp);
   a68_op (A68_STD, "%*", m, genie_mod_mp);
-//
   m = a68_proc (M_REF_LONG_INT, M_REF_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_mp_int);
   a68_op (A68_STD, "-:=", m, genie_minusab_mp_int);
@@ -1380,7 +1287,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_mp_int);
   a68_op (A68_STD, "OVERAB", m, genie_overab_mp);
   a68_op (A68_STD, "MODAB", m, genie_modab_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_mp);
   a68_op (A68_STD, "EQ", m, genie_eq_mp);
@@ -1396,21 +1302,16 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "GT", m, genie_gt_mp);
   a68_op (A68_STD, ">=", m, genie_ge_mp);
   a68_op (A68_STD, "GE", m, genie_ge_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "/", m, genie_div_mp);
-//
   m = a68_proc (M_LONG_INT, M_LONG_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_mp_int_int);
   a68_op (A68_STD, "^", m, genie_pow_mp_int_int);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "I", m, genie_idle);
   a68_op (A68_STD, "+*", m, genie_idle);
-//
   m = a68_proc (M_LONG_REAL, M_REAL, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_real_to_mp);
-//
   m = a68_proc (M_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_mp_to_real);
 // LONG REAL in software
@@ -1418,7 +1319,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp);
   a68_op (A68_STD, "ABS", m, genie_abs_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longarccosdg", "dacosdg", m, genie_acosdg_mp);
   a68_id2 (A68_EXT, "longarccosh", "dacosh", m, genie_acosh_mp);
@@ -1468,11 +1368,9 @@ void stand_mp_level_2 (void)
   a68_id2 (A68_STD, "longsin", "dsin", m, genie_sin_mp);
   a68_id2 (A68_STD, "longsqrt", "dsqrt", m, genie_sqrt_mp);
   a68_id2 (A68_STD, "longtan", "dtan", m,  genie_tan_mp);
-//
   m = a68_proc (M_LONG_REAL, NO_MOID);
   a68_idf (A68_STD, "longnextrandom", m, genie_long_next_random);
   a68_idf (A68_STD, "longrandom", m, genie_long_next_random);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longarctan2", "datan2", m, genie_atan2_mp);
   a68_id2 (A68_EXT, "longarctan2dg", "datan2dg", m, genie_atan2dg_mp);
@@ -1481,16 +1379,12 @@ void stand_mp_level_2 (void)
   a68_id2 (A68_EXT, "longgammaincf", "dgammaincf", m, genie_gamma_inc_f_mp);
   a68_id2 (A68_EXT, "longgammaincgf", "dgammaincgf", m, genie_gamma_inc_gf_mp);
   a68_id2 (A68_EXT, "longlnbeta", "dlnbeta", m, genie_lnbeta_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longbetainc", "dbetainc", m, genie_beta_inc_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longgammaincg", "dgammaincg", m, genie_gamma_inc_g_mp);
-//
   m = a68_proc (M_INT, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SIGN", m, genie_sign_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_mp);
   a68_op (A68_STD, "-", m, genie_sub_mp);
@@ -1499,7 +1393,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "**", m, genie_pow_mp);
   a68_op (A68_STD, "UP", m, genie_pow_mp);
   a68_op (A68_STD, "^", m, genie_pow_mp);
-//
   m = a68_proc (M_REF_LONG_REAL, M_REF_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_mp);
   a68_op (A68_STD, "-:=", m, genie_minusab_mp);
@@ -1509,7 +1402,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_mp);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_mp);
   a68_op (A68_STD, "DIVAB", m, genie_divab_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_mp);
   a68_op (A68_STD, "EQ", m, genie_eq_mp);
@@ -1525,50 +1417,40 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "GT", m, genie_gt_mp);
   a68_op (A68_STD, ">=", m, genie_ge_mp);
   a68_op (A68_STD, "GE", m, genie_ge_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_mp_int);
   a68_op (A68_STD, "UP", m, genie_pow_mp_int);
   a68_op (A68_STD, "^", m, genie_pow_mp_int);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "I", m, genie_idle);
   a68_op (A68_STD, "+*", m, genie_idle);
 // LONG COMPLEX in software
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_mp_complex_to_long_mp_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_long_mp_complex_to_mp_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_complex_to_mp_complex);
-//
   m = a68_proc (M_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_mp_complex_to_complex);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "RE", m, genie_re_mp_complex);
   a68_op (A68_STD, "IM", m, genie_im_mp_complex);
   a68_op (A68_STD, "ARG", m, genie_arg_mp_complex);
   a68_op (A68_STD, "ABS", m, genie_abs_mp_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_mp_complex);
   a68_op (A68_STD, "CONJ", m, genie_conj_mp_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_mp_complex);
   a68_op (A68_STD, "-", m, genie_sub_mp_complex);
   a68_op (A68_STD, "*", m, genie_mul_mp_complex);
   a68_op (A68_STD, "/", m, genie_div_mp_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_mp_complex_int);
   a68_op (A68_STD, "UP", m, genie_pow_mp_complex_int);
   a68_op (A68_STD, "^", m, genie_pow_mp_complex_int);
-//
   m = a68_proc (M_BOOL, M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_mp_complex);
   a68_op (A68_STD, "EQ", m, genie_eq_mp_complex);
@@ -1576,7 +1458,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "~=", m, genie_ne_mp_complex);
   a68_op (A68_STD, "^=", m, genie_ne_mp_complex);
   a68_op (A68_STD, "NE", m, genie_ne_mp_complex);
-//
   m = a68_proc (M_REF_LONG_COMPLEX, M_REF_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_mp_complex);
   a68_op (A68_STD, "-:=", m, genie_minusab_mp_complex);
@@ -1586,7 +1467,6 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_mp_complex);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_mp_complex);
   a68_op (A68_STD, "DIVAB", m, genie_divab_mp_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_id2 (A68_EXT, "longcomplexarccos", "dcacos", m, genie_acos_mp_complex);
   a68_id2 (A68_EXT, "longcomplexarccosh", "dcacosh", m, genie_acosh_mp_complex);
@@ -1607,23 +1487,17 @@ void stand_mp_level_2 (void)
 // LONG BITS in software
   m = a68_proc (M_LONG_BITS, M_ROW_BOOL, NO_MOID);
   a68_idf (A68_STD, "longbitspack", m, genie_long_bits_pack);
-//
   m = a68_proc (M_LONG_INT, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "ABS", m, genie_idle);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "BIN", m, genie_bin_mp);
-//
   m = a68_proc (M_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_mp_to_bits);
-//
   m = a68_proc (M_LONG_BITS, M_BITS, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_unt_to_mp);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "NOT", m, genie_not_mp);
   a68_op (A68_STD, "~", m, genie_not_mp);
-//
   m = a68_proc (M_BOOL, M_LONG_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_mp);
   a68_op (A68_STD, "EQ", m, genie_eq_mp);
@@ -1635,22 +1509,18 @@ void stand_mp_level_2 (void)
   a68_op (A68_STD, "LE", m, genie_le_long_bits);
   a68_op (A68_STD, ">=", m, genie_ge_long_bits);
   a68_op (A68_STD, "GE", m, genie_ge_long_bits);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "AND", m, genie_and_mp);
   a68_op (A68_STD, "&", m, genie_and_mp);
   a68_op (A68_STD, "OR", m, genie_or_mp);
   a68_op (A68_EXT, "XOR", m, genie_xor_mp);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_BITS, M_INT, NO_MOID);
   a68_op (A68_STD, "SHL", m, genie_shl_mp);
   a68_op (A68_STD, "UP", m, genie_shl_mp);
   a68_op (A68_STD, "SHR", m, genie_shr_mp);
   a68_op (A68_STD, "DOWN", m, genie_shr_mp);
-//
   m = a68_proc (M_BOOL, M_INT, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "ELEM", m, genie_elem_long_bits);
-//
   m = a68_proc (M_LONG_BITS, M_INT, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "SET", m, genie_set_long_bits);
   a68_op (A68_STD, "CLEAR", m, genie_clear_long_bits);
@@ -1675,24 +1545,18 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_double_int);
   a68_op (A68_STD, "ABS", m, genie_abs_double_int);
-//
   m = a68_proc (M_LONG_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_int_to_double_int);
-//
   m = a68_proc (M_LONG_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_double_int_to_mp);
-//
   m = a68_proc (M_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_long_int_to_int);
   a68_op (A68_STD, "SIGN", m, genie_sign_double_int);
-//
   m = a68_proc (M_BOOL, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "ODD", m, genie_odd_double_int);
-//
   m = a68_proc (M_LONG_INT, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "ENTIER", m, genie_entier_double);
   a68_op (A68_STD, "ROUND", m, genie_round_double);
-//
   m = a68_proc (M_LONG_INT, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_double_int);
   a68_op (A68_STD, "-", m, genie_sub_double_int);
@@ -1701,11 +1565,9 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "%", m, genie_over_double_int);
   a68_op (A68_STD, "MOD", m, genie_mod_double_int);
   a68_op (A68_STD, "%*", m, genie_mod_double_int);
-//
   m = a68_proc (M_LONG_INT, M_LONG_INT, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_double_int_int);
   a68_op (A68_STD, "^", m, genie_pow_double_int_int);
-//
   m = a68_proc (M_REF_LONG_INT, M_REF_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_double_int);
   a68_op (A68_STD, "-:=", m, genie_minusab_double_int);
@@ -1717,10 +1579,8 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_double_int);
   a68_op (A68_STD, "OVERAB", m, genie_overab_double_int);
   a68_op (A68_STD, "MODAB", m, genie_modab_double_int);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "/", m, genie_div_double_int);
-//
   m = a68_proc (M_BOOL, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_double_int);
   a68_op (A68_STD, "EQ", m, genie_eq_double_int);
@@ -1741,10 +1601,8 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_double);
   a68_op (A68_STD, "ABS", m, genie_abs_double);
-//
   m = a68_proc (M_INT, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SIGN", m, genie_sign_double);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_double);
   a68_op (A68_STD, "-", m, genie_sub_double);
@@ -1753,27 +1611,20 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "**", m, genie_pow_double);
   a68_op (A68_STD, "UP", m, genie_pow_double);
   a68_op (A68_STD, "^", m, genie_pow_double);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_double_int);
   a68_op (A68_STD, "UP", m, genie_pow_double_int);
   a68_op (A68_STD, "^", m, genie_pow_double_int);
-//
   m = a68_proc (M_LONG_REAL, M_REAL, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_real_to_double);
-//
   m = a68_proc (M_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_double_to_real);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_double_to_mp);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_mp_to_double);
-//
   m = a68_proc (M_LONG_INT, M_LONG_LONG_INT, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_mp_to_double_int);
-//
   m = a68_proc (M_REF_LONG_REAL, M_REF_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_double);
   a68_op (A68_STD, "-:=", m, genie_minusab_double);
@@ -1783,7 +1634,6 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_double);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_double);
   a68_op (A68_STD, "DIVAB", m, genie_divab_double);
-//
   m = a68_proc (M_BOOL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_double);
   a68_op (A68_STD, "EQ", m, genie_eq_double);
@@ -1799,7 +1649,6 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "GT", m, genie_gt_double);
   a68_op (A68_STD, ">=", m, genie_ge_double);
   a68_op (A68_STD, "GE", m, genie_ge_double);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longarccosdg", "dacosdg", m, genie_acosdg_double);
   a68_id2 (A68_EXT, "longarccosh", "dacosh", m, genie_acosh_double);
@@ -1836,7 +1685,6 @@ void stand_mp_level_3 (void)
   a68_id2 (A68_EXT, "longtandg", "dtandg", m, genie_tandg_double);
   a68_id2 (A68_EXT, "longtanh", "dtanh", m, genie_tanh_double);
   a68_id2 (A68_EXT, "longtanpi", "dtanpi", m, genie_tanpi_double);
-//
   a68_id2 (A68_STD, "longarccos", "dacos", m, genie_acos_double);
   a68_id2 (A68_STD, "longarcsin", "dasin", m, genie_asin_double);
   a68_id2 (A68_STD, "longarctan", "datan", m, genie_atan_double);
@@ -1848,11 +1696,9 @@ void stand_mp_level_3 (void)
   a68_id2 (A68_STD, "longsin", "dsin", m, genie_sin_double);
   a68_id2 (A68_STD, "longsqrt", "dsqrt", m, genie_sqrt_double);
   a68_id2 (A68_STD, "longtan", "dtan", m, genie_tan_double);
-//
   m = a68_proc (M_LONG_REAL, NO_MOID);
   a68_idf (A68_STD, "longnextrandom", m, genie_next_random_double);
   a68_idf (A68_STD, "longrandom", m, genie_next_random_double);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longarctan2dg", "datan2dg", m, genie_atan2dg_double);
   a68_id2 (A68_EXT, "longarctan2", "datan2", m, genie_atan2_double);
@@ -1861,32 +1707,24 @@ void stand_mp_level_3 (void)
   a68_id2 (A68_EXT, "longgammaincf", "dgammaincf", m, genie_gamma_inc_f_double);
   a68_id2 (A68_EXT, "longgammainc", "dgammainc", m, genie_gamma_inc_h_double);
   a68_id2 (A68_EXT, "longlnbeta", "dlnbeta", m, genie_ln_beta_double);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longbetainc", "dbetainc", m, genie_beta_inc_cf_double);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "longgammaincg", "dgammaincg", m, genie_gamma_inc_g_double);
 // LONG BITS as 128 bit
   m = a68_proc (M_LONG_BITS, M_ROW_BOOL, NO_MOID);
   a68_idf (A68_STD, "longbitspack", m, genie_double_bits_pack);
-//
   m = a68_proc (M_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_double_bits_to_bits);
-//
   m = a68_proc (M_LONG_BITS, M_BITS, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_bits_to_double_bits);
-//
   m = a68_proc (M_LONG_INT, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "ABS", m, genie_idle);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "BIN", m, genie_bin_double_int);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "NOT", m, genie_not_double_bits);
   a68_op (A68_STD, "~", m, genie_not_double_bits);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "AND", m, genie_and_double_bits);
   a68_op (A68_STD, "&", m, genie_and_double_bits);
@@ -1897,7 +1735,6 @@ void stand_mp_level_3 (void)
   a68_op (A68_EXT, "*", m, genie_times_double_bits);
   a68_op (A68_EXT, "OVER", m, genie_over_double_bits);
   a68_op (A68_EXT, "MOD", m, genie_over_double_bits);
-//
   m = a68_proc (M_BOOL, M_LONG_BITS, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_double_bits);
   a68_op (A68_STD, "/=", m, genie_ne_double_bits);
@@ -1913,14 +1750,11 @@ void stand_mp_level_3 (void)
   a68_op (A68_EXT, ">", m, genie_gt_double_bits);
   a68_op (A68_EXT, "LT", m, genie_lt_double_bits);
   a68_op (A68_EXT, "GT", m, genie_gt_double_bits);
-//
   m = a68_proc (M_BOOL, M_INT, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "ELEM", m, genie_elem_double_bits);
-//
   m = a68_proc (M_LONG_BITS, M_INT, M_LONG_BITS, NO_MOID);
   a68_op (A68_STD, "SET", m, genie_set_double_bits);
   a68_op (A68_STD, "CLEAR", m, genie_clear_double_bits);
-//
   m = a68_proc (M_LONG_BITS, M_LONG_BITS, M_INT, NO_MOID);
   a68_op (A68_STD, "SHL", m, genie_shl_double_bits);
   a68_op (A68_STD, "UP", m, genie_shl_double_bits);
@@ -1931,35 +1765,27 @@ void stand_mp_level_3 (void)
 // LONG COMPLEX as 2 x 128 bit.
   m = a68_proc (M_LONG_COMPLEX, M_COMPLEX, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_complex_to_double_compl);
-//
   m = a68_proc (M_LONG_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "LENG", m, genie_lengthen_double_compl_to_long_mp_complex);
-//
   m = a68_proc (M_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_double_compl_to_complex);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "SHORTEN", m, genie_shorten_long_mp_complex_to_double_compl);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_op (A68_STD, "I", m, genie_i_double_compl);
   a68_op (A68_STD, "+*", m, genie_i_double_compl);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_INT, M_LONG_INT, NO_MOID);
   a68_op (A68_STD, "I", m, genie_i_int_double_compl);
   a68_op (A68_STD, "+*", m, genie_i_int_double_compl);
-//
   m = a68_proc (M_LONG_REAL, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "RE", m, genie_re_double_compl);
   a68_op (A68_STD, "IM", m, genie_im_double_compl);
   a68_op (A68_STD, "ABS", m, genie_abs_double_compl);
   a68_op (A68_STD, "ARG", m, genie_arg_double_compl);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_idle);
   a68_op (A68_STD, "-", m, genie_minus_double_compl);
   a68_op (A68_STD, "CONJ", m, genie_conj_double_compl);
-//
   m = a68_proc (M_BOOL, M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "=", m, genie_eq_double_compl);
   a68_op (A68_STD, "/=", m, genie_ne_double_compl);
@@ -1967,18 +1793,15 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "^=", m, genie_ne_double_compl);
   a68_op (A68_STD, "EQ", m, genie_eq_double_compl);
   a68_op (A68_STD, "NE", m, genie_ne_double_compl);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+", m, genie_add_double_compl);
   a68_op (A68_STD, "-", m, genie_sub_double_compl);
   a68_op (A68_STD, "*", m, genie_mul_double_compl);
   a68_op (A68_STD, "/", m, genie_div_double_compl);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, M_INT, NO_MOID);
   a68_op (A68_STD, "**", m, genie_pow_double_compl_int);
   a68_op (A68_STD, "UP", m, genie_pow_double_compl_int);
   a68_op (A68_STD, "^", m, genie_pow_double_compl_int);
-//
   m = a68_proc (M_REF_LONG_COMPLEX, M_REF_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_op (A68_STD, "+:=", m, genie_plusab_double_compl);
   a68_op (A68_STD, "-:=", m, genie_minusab_double_compl);
@@ -1988,7 +1811,6 @@ void stand_mp_level_3 (void)
   a68_op (A68_STD, "MINUSAB", m, genie_minusab_double_compl);
   a68_op (A68_STD, "TIMESAB", m, genie_timesab_double_compl);
   a68_op (A68_STD, "DIVAB", m, genie_divab_double_compl);
-//
   m = a68_proc (M_LONG_COMPLEX, M_LONG_COMPLEX, NO_MOID);
   a68_id2 (A68_EXT, "longcomplexarccosh", "dcacosh", m, genie_acosh_double_compl);
   a68_id2 (A68_EXT, "longcomplexarccos", "dcacos", m, genie_acos_double_compl);
@@ -2010,15 +1832,12 @@ void stand_mp_level_3 (void)
 #if defined (HAVE_GNU_MPFR)
   m = a68_proc (M_LONG_REAL, M_LONG_REAL, M_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "mpfrlonggammainc", "mpfrdgammainc", m, genie_gamma_inc_double_mpfr);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_STD, "mpfrlonglongbeta", "mpfrqbeta", m, genie_beta_mpfr);
   a68_id2 (A68_STD, "mpfrlonglonggammainc", "mpfrqgammainc", m, genie_gamma_inc_mpfr);
   a68_id2 (A68_STD, "mpfrlonglonglnbeta", "mpfrqlnbeta", m, genie_ln_beta_mpfr);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_STD, "mpfrlonglongbetainc", "mpfrqbetainc", m, genie_beta_inc_mpfr);
-//
   m = a68_proc (M_LONG_LONG_REAL, M_LONG_LONG_REAL, NO_MOID);
   a68_id2 (A68_EXT, "mpfrlonglongerfc", "mpfrqerfc", m, genie_mpfr_erfc_mp);
   a68_id2 (A68_EXT, "mpfrlonglongerf", "mpfrqerf", m, genie_mpfr_erf_mp);
@@ -2048,19 +1867,14 @@ void stand_transput (void)
   a68_idf (A68_STD, "flip", M_CHAR, genie_flip_char);
   a68_idf (A68_STD, "flop", M_CHAR, genie_flop_char);
   a68_idf (A68_STD, "nullchar", M_CHAR, genie_null_char);
-//
   MOID_T *m = a68_proc (M_STRING, M_HEX_NUMBER, M_INT, M_INT, NO_MOID);
   a68_idf (A68_STD, "bits", m, genie_bits);
-//
   m = a68_proc (M_STRING, M_NUMBER, M_INT, NO_MOID);
   a68_idf (A68_STD, "whole", m, genie_whole);
-//
   m = a68_proc (M_STRING, M_NUMBER, M_INT, M_INT, NO_MOID);
   a68_idf (A68_STD, "fixed", m, genie_fixed);
-//
   m = a68_proc (M_STRING, M_NUMBER, M_INT, M_INT, M_INT, NO_MOID);
   a68_idf (A68_STD, "float", m, genie_float);
-//
   m = a68_proc (M_STRING, M_NUMBER, M_INT, M_INT, M_INT, M_INT, NO_MOID);
   a68_idf (A68_STD, "real", m, genie_real);
   a68_idf (A68_STD, "standin", M_REF_FILE, genie_stand_in);
@@ -2072,21 +1886,16 @@ void stand_transput (void)
   a68_idf (A68_EXT, "standdrawchannel", M_CHANNEL, genie_stand_draw_channel);
   a68_idf (A68_STD, "standbackchannel", M_CHANNEL, genie_stand_back_channel);
   a68_idf (A68_EXT, "standerrorchannel", M_CHANNEL, genie_stand_error_channel);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_STRING, NO_MOID);
   a68_idf (A68_STD, "maketerm", m, genie_make_term);
-//
   m = a68_proc (M_BOOL, M_CHAR, M_REF_INT, M_STRING, NO_MOID);
   a68_idf (A68_STD, "charinstring", m, genie_char_in_string);
   a68_idf (A68_EXT, "lastcharinstring", m, genie_last_char_in_string);
-//
   m = a68_proc (M_BOOL, M_STRING, M_REF_INT, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "stringinstring", m, genie_string_in_string);
-//
   m = a68_proc (M_STRING, M_REF_FILE, NO_MOID);
   a68_idf (A68_EXT, "idf", m, genie_idf);
   a68_idf (A68_EXT, "term", m, genie_term);
-//
   m = a68_proc (M_STRING, NO_MOID);
   a68_idf (A68_EXT, "programidf", m, genie_program_idf);
 // Event routines.
@@ -2119,10 +1928,8 @@ void stand_transput (void)
   m = a68_proc (M_INT, M_REF_FILE, M_STRING, M_CHANNEL, NO_MOID);
   a68_idf (A68_STD, "open", m, genie_open);
   a68_idf (A68_STD, "establish", m, genie_establish);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_REF_STRING, NO_MOID);
   a68_idf (A68_STD, "associate", m, genie_associate);
-//
   m = a68_proc (M_INT, M_REF_FILE, M_CHANNEL, NO_MOID);
   a68_idf (A68_EXT, "rewind", M_PROC_REF_FILE_VOID, genie_reset);
   a68_idf (A68_STD, "backspace", M_PROC_REF_FILE_VOID, genie_backspace);
@@ -2135,16 +1942,13 @@ void stand_transput (void)
   a68_idf (A68_STD, "reset", M_PROC_REF_FILE_VOID, genie_reset);
   a68_idf (A68_STD, "scratch", M_PROC_REF_FILE_VOID, genie_erase);
   a68_idf (A68_STD, "space", M_PROC_REF_FILE_VOID, genie_space);
-//
   m = a68_proc (M_INT, M_REF_FILE, M_INT, NO_MOID);
   a68_idf (A68_STD, "set", m, genie_set);
   a68_idf (A68_STD, "seek", m, genie_set);
-//
   m = a68_proc (M_VOID, M_ROW_SIMPLIN, NO_MOID);
   a68_idf (A68_STD, "read", m, genie_read);
   a68_idf (A68_STD, "readbin", m, genie_read_bin);
   a68_idf (A68_STD, "readf", m, genie_read_format);
-//
   m = a68_proc (M_VOID, M_ROW_SIMPLOUT, NO_MOID);
   a68_idf (A68_STD, "printbin", m, genie_write_bin);
   a68_idf (A68_STD, "printf", m, genie_write_format);
@@ -2152,17 +1956,14 @@ void stand_transput (void)
   a68_idf (A68_STD, "writebin", m, genie_write_bin);
   a68_idf (A68_STD, "writef", m, genie_write_format);
   a68_idf (A68_STD, "write", m, genie_write);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_ROW_SIMPLIN, NO_MOID);
   a68_idf (A68_STD, "get", m, genie_read_file);
   a68_idf (A68_STD, "getf", m, genie_read_file_format);
   a68_idf (A68_STD, "getbin", m, genie_read_bin_file);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_ROW_SIMPLOUT, NO_MOID);
   a68_idf (A68_STD, "put", m, genie_write_file);
   a68_idf (A68_STD, "putf", m, genie_write_file_format);
   a68_idf (A68_STD, "putbin", m, genie_write_bin_file);
-//
   m = a68_proc (M_VOID, M_REF_STRING, M_ROW_SIMPLIN, NO_MOID);
   a68_idf (A68_EXT, "gets", m, genie_get_text);
   a68_idf (A68_EXT, "getsf", m, genie_getf_text);
@@ -2172,7 +1973,6 @@ void stand_transput (void)
   m = a68_proc (M_REF_STRING, M_REF_STRING, M_ROW_SIMPLOUT, NO_MOID);
   a68_idf (A68_EXT, "string", m, genie_string);
   a68_idf (A68_EXT, "stringf", m, genie_stringf);
-//
   A68C_DEFIO (bits, bits, BITS);
   A68C_DEFIO (bool, bool, BOOL);
   A68C_DEFIO (char, char, CHAR);
@@ -2207,13 +2007,10 @@ void stand_extensions (void)
   a68_idf (A68_EXT, "a68gargc", m, genie_a68g_argc);
   a68_idf (A68_EXT, "errno", m, genie_errno);
   a68_idf (A68_EXT, "fork", m, genie_fork);
-//
   m = a68_proc (M_STRING, NO_MOID);
   a68_idf (A68_EXT, "getpwd", m, genie_pwd);
-//
   m = a68_proc (M_INT, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "setpwd", m, genie_cd);
-//
   m = a68_proc (M_BOOL, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "fileisdirectory", m, genie_file_is_directory);
   a68_idf (A68_EXT, "fileisblockdevice", m, genie_file_is_block_device);
@@ -2227,48 +2024,36 @@ void stand_extensions (void)
 #endif
   m = a68_proc (M_BITS, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "filemode", m, genie_file_mode);
-//
   m = a68_proc (M_STRING, M_INT, NO_MOID);
   a68_idf (A68_EXT, "argv", m, genie_argv);
   a68_idf (A68_EXT, "a68gargv", m, genie_a68g_argv);
   a68_idf (A68_EXT, "reseterrno", A68_MCACHE (proc_void), genie_reset_errno);
-//
   m = a68_proc (M_STRING, M_INT, NO_MOID);
   a68_idf (A68_EXT, "strerror", m, genie_strerror);
-//
   m = a68_proc (M_INT, M_STRING, M_ROW_STRING, M_ROW_STRING, NO_MOID);
   a68_idf (A68_EXT, "exec", m, genie_exec);
   a68_idf (A68_EXT, "execve", m, genie_exec);
-//
   m = a68_proc (M_PIPE, NO_MOID);
   a68_idf (A68_EXT, "createpipe", m, genie_create_pipe);
-//
   m = a68_proc (M_INT, M_STRING, M_ROW_STRING, M_ROW_STRING, NO_MOID);
   a68_idf (A68_EXT, "execsub", m, genie_exec_sub);
   a68_idf (A68_EXT, "execvechild", m, genie_exec_sub);
-//
   m = a68_proc (M_PIPE, M_STRING, M_ROW_STRING, M_ROW_STRING, NO_MOID);
   a68_idf (A68_EXT, "execsubpipeline", m, genie_exec_sub_pipeline);
   a68_idf (A68_EXT, "execvechildpipe", m, genie_exec_sub_pipeline);
-//
   m = a68_proc (M_INT, M_STRING, M_ROW_STRING, M_ROW_STRING, M_REF_STRING, NO_MOID);
   a68_idf (A68_EXT, "execsuboutput", m, genie_exec_sub_output);
   a68_idf (A68_EXT, "execveoutput", m, genie_exec_sub_output);
-//
   m = a68_proc (M_STRING, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "getenv", m, genie_getenv);
-//
   m = a68_proc (M_VOID, M_INT, NO_MOID);
   a68_idf (A68_EXT, "waitpid", m, genie_waitpid);
-//
   m = a68_proc (M_ROW_INT, NO_MOID);
   a68_idf (A68_EXT, "utctime", m, genie_utctime);
   a68_idf (A68_EXT, "localtime", m, genie_localtime);
-//
   m = a68_proc (M_INT, M_STRING, M_STRING, M_REF_INT, M_REF_INT, NO_MOID);
   a68_idf (A68_EXT, "grepinstring", m, genie_grep_in_string);
   a68_idf (A68_EXT, "grepinsubstring", m, genie_grep_in_substring);
-//
   m = a68_proc (M_INT, M_STRING, M_STRING, M_REF_STRING, NO_MOID);
   a68_idf (A68_EXT, "subinstring", m, genie_sub_in_string);
 #if defined (HAVE_DIRENT_H)
@@ -2293,23 +2078,18 @@ void stand_plot (void)
   MOID_T *m = a68_proc (M_BOOL, M_REF_FILE, M_STRING, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "drawdevice", m, genie_make_device);
   a68_idf (A68_EXT, "makedevice", m, genie_make_device);
-//
   m = a68_proc (M_REAL, M_REF_FILE, NO_MOID);
   a68_idf (A68_EXT, "drawaspect", m, genie_draw_aspect);
-//
   m = a68_proc (M_VOID, M_REF_FILE, NO_MOID);
   a68_idf (A68_EXT, "drawclear", m, genie_draw_clear);
   a68_idf (A68_EXT, "drawerase", m, genie_draw_clear);
   a68_idf (A68_EXT, "drawflush", m, genie_draw_show);
   a68_idf (A68_EXT, "drawshow", m, genie_draw_show);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_INT, NO_MOID);
   a68_idf (A68_EXT, "drawfillstyle", m, genie_draw_fillstyle);
-//
   m = a68_proc (M_STRING, M_INT, NO_MOID);
   a68_idf (A68_EXT, "drawgetcolourname", m, genie_draw_get_colour_name);
   a68_idf (A68_EXT, "drawgetcolorname", m, genie_draw_get_colour_name);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_REAL, M_REAL, M_REAL, NO_MOID);
   a68_idf (A68_EXT, "drawcolor", m, genie_draw_colour);
   a68_idf (A68_EXT, "drawcolour", m, genie_draw_colour);
@@ -2318,27 +2098,21 @@ void stand_plot (void)
   a68_idf (A68_EXT, "drawcircle", m, genie_draw_circle);
   a68_idf (A68_EXT, "drawball", m, genie_draw_atom);
   a68_idf (A68_EXT, "drawstar", m, genie_draw_star);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_REAL, M_REAL, NO_MOID);
   a68_idf (A68_EXT, "drawpoint", m, genie_draw_point);
   a68_idf (A68_EXT, "drawline", m, genie_draw_line);
   a68_idf (A68_EXT, "drawmove", m, genie_draw_move);
   a68_idf (A68_EXT, "drawrect", m, genie_draw_rect);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_CHAR, M_CHAR, M_ROW_CHAR, NO_MOID);
   a68_idf (A68_EXT, "drawtext", m, genie_draw_text);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_ROW_CHAR, NO_MOID);
   a68_idf (A68_EXT, "drawlinestyle", m, genie_draw_linestyle);
   a68_idf (A68_EXT, "drawfontname", m, genie_draw_fontname);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_REAL, NO_MOID);
   a68_idf (A68_EXT, "drawlinewidth", m, genie_draw_linewidth);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_INT, NO_MOID);
   a68_idf (A68_EXT, "drawfontsize", m, genie_draw_fontsize);
   a68_idf (A68_EXT, "drawtextangle", m, genie_draw_textangle);
-//
   m = a68_proc (M_VOID, M_REF_FILE, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "drawcolorname", m, genie_draw_colour_name);
   a68_idf (A68_EXT, "drawcolourname", m, genie_draw_colour_name);
@@ -2370,20 +2144,15 @@ void stand_curses (void)
   a68_idf (A68_EXT, "cursesmagentainverse", A68_MCACHE (proc_void), genie_curses_magenta_inverse);
   a68_idf (A68_EXT, "cursesblueinverse", A68_MCACHE (proc_void), genie_curses_blue_inverse);
   a68_idf (A68_EXT, "curseswhiteinverse", A68_MCACHE (proc_void), genie_curses_white_inverse);
-//
   MOID_T *m = A68_MCACHE (proc_char);
   a68_idf (A68_EXT, "cursesgetchar", m, genie_curses_getchar);
-//
   m = a68_proc (M_VOID, M_CHAR, NO_MOID);
   a68_idf (A68_EXT, "cursesputchar", m, genie_curses_putchar);
-//
   m = a68_proc (M_VOID, M_INT, M_INT, NO_MOID);
   a68_idf (A68_EXT, "cursesmove", m, genie_curses_move);
-//
   m = A68_MCACHE (proc_int);
   a68_idf (A68_EXT, "curseslines", m, genie_curses_lines);
   a68_idf (A68_EXT, "cursescolumns", m, genie_curses_columns);
-//
   m = a68_proc (M_BOOL, M_CHAR, NO_MOID);
   a68_idf (A68_EXT, "cursesdelchar", m, genie_curses_del_char);
 }
@@ -2396,16 +2165,13 @@ void stand_postgresql (void)
 {
   MOID_T *m = a68_proc (M_INT, M_REF_FILE, M_STRING, M_REF_STRING, NO_MOID);
   a68_idf (A68_EXT, "pqconnectdb", m, genie_pq_connectdb);
-//
   m = a68_proc (M_INT, M_REF_FILE, NO_MOID);
   a68_idf (A68_EXT, "pqfinish", m, genie_pq_finish);
   a68_idf (A68_EXT, "pqreset", m, genie_pq_reset);
-//
   m = a68_proc (M_INT, M_REF_FILE, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "pqparameterstatus", m, genie_pq_parameterstatus);
   a68_idf (A68_EXT, "pqexec", m, genie_pq_exec);
   a68_idf (A68_EXT, "pqfnumber", m, genie_pq_fnumber);
-//
   m = a68_proc (M_INT, M_REF_FILE, NO_MOID);
   a68_idf (A68_EXT, "pqntuples", m, genie_pq_ntuples);
   a68_idf (A68_EXT, "pqnfields", m, genie_pq_nfields);
@@ -2424,11 +2190,9 @@ void stand_postgresql (void)
   a68_idf (A68_EXT, "pqserverversion", m, genie_pq_serverversion);
   a68_idf (A68_EXT, "pqsocket", m, genie_pq_socket);
   a68_idf (A68_EXT, "pqbackendpid", m, genie_pq_backendpid);
-//
   m = a68_proc (M_INT, M_REF_FILE, M_INT, NO_MOID);
   a68_idf (A68_EXT, "pqfname", m, genie_pq_fname);
   a68_idf (A68_EXT, "pqfformat", m, genie_pq_fformat);
-//
   m = a68_proc (M_INT, M_REF_FILE, M_INT, M_INT, NO_MOID);
   a68_idf (A68_EXT, "pqgetvalue", m, genie_pq_getvalue);
   a68_idf (A68_EXT, "pqgetisnull", m, genie_pq_getisnull);
@@ -2448,7 +2212,6 @@ void stand_linux (void)
 void make_standard_environ (void)
 {
   stand_moids ();
-//
   A68_MCACHE (proc_bool) = a68_proc (M_BOOL, NO_MOID);
   A68_MCACHE (proc_char) = a68_proc (M_CHAR, NO_MOID);
   A68_MCACHE (proc_complex_complex) = a68_proc (M_COMPLEX, M_COMPLEX, NO_MOID);
@@ -2469,7 +2232,6 @@ void make_standard_environ (void)
   A68_MCACHE (proc_real_real_real_real_real_real) = a68_proc (M_REAL, M_REAL, M_REAL, M_REAL, M_REAL, M_REAL, NO_MOID);
   A68_MCACHE (proc_real_ref_real_ref_int_void) = a68_proc (M_VOID, M_REAL, M_REF_REAL, M_REF_INT, NO_MOID);
   A68_MCACHE (proc_void) = a68_proc (M_VOID, NO_MOID);
-//
   stand_prelude ();
   stand_mp_level_2 ();
   stand_mp_level_3 ();

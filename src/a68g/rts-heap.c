@@ -1,11 +1,11 @@
 //! @file rts-heap.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -68,12 +68,10 @@
 // 
 // Bound-count is maximised when generator_stowed is entered recursively. 
 // Bound-count is advanced when completing a STRUCTURED_FIELD.
-//
 // Note that A68G will not extend stack frames. Thus only 'static' LOC generators
 // are in the stack, and 'dynamic' LOC generators go into the heap. These local 
 // REFs in the heap get local scope however, and A68G's approach differs from the 
 // CDC ALGOL 68 approach that put all generators in the heap.
-//
 // Note that part of memory is called 'COMMON'. This is meant for future extension
 // where a68g would need to point to external objects. The adressing scheme is that
 // of a HEAP pointer - handle pointer + offset.
