@@ -26,12 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-physics.h"
-#include "a68g-numbers.h"
-#include "a68g-optimiser.h"
-#include "a68g-double.h"
-#include "a68g-transput.h"
 
 #define VECTOR_SIZE 512
 #define FD_READ 0
@@ -116,22 +110,4 @@ void genie_system_stack_pointer (NODE_T * p)
 {
   BYTE_T stack_offset;
   PUSH_VALUE (p, (int) (A68 (system_stack_offset) - &stack_offset), A68_INT);
-}
-
-//! @brief PROC d1mach (INT) REAL
-
-void genie_d1mach (NODE_T *p)
-{
-  A68_INT i;
-  POP_OBJECT (p, &i, A68_INT);
-  PUSH_VALUE (p, a68g_d1mach (VALUE (&i)), A68_REAL);
-}
-
-//! @brief PROC i1mach (INT) INT
-
-void genie_i1mach (NODE_T *p)
-{
-  A68_INT i;
-  POP_OBJECT (p, &i, A68_INT);
-  PUSH_VALUE (p, a68g_i1mach (VALUE (&i)), A68_INT);
 }

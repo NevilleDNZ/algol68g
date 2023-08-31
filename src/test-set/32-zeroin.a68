@@ -14,6 +14,20 @@ PR quiet regression PR
 
 COMMENT
 
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
 @section Synopsis
 
 Zeroin is a classic root-finding algorithm.
@@ -29,7 +43,7 @@ The Mathematical Centre ("Stichting Mathematisch Centrum" or SMC) was a Dutch
 non-profit institution aiming at the promotion of pure mathematics and its 
 applications. 
 
-SMC is now "Stichting Centrum voor Wiskunde en Informatica" (CWI). The test set 
+SMC is now "Stichting Centrum Wiskunde & Informatica" (CWI). The test set 
 is available as an open access publication from the CWI repository:
 
    https://ir.cwi.nl/pub/
@@ -88,7 +102,7 @@ BEGIN MODE NUM = LONG LONG REAL;
               buf
          FI;
       
-      NUM eps = 5 * long long small real;
+      NUM eps = long small real;
   
       PROC solve = (NUM u, v, PROC (NUM) NUM f, STRING s) VOID:
            IF u >= v
@@ -103,12 +117,13 @@ BEGIN MODE NUM = LONG LONG REAL;
                 FI;
                 new line (standout)
            FI;
+
+      MODE FUN = PROC (NUM) NUM;
+      PROC pow = (FUN f, INT n, NUM x) NUM: f (x) ** n;
+      OP ** = (FUN f, INT n) FUN: pow (f, n, );
   
-      solve (-1, 0, (NUM x) NUM : qexp (x) - x * x, "exp (x) - x * x");
-      solve (1, 10, (NUM x) NUM : qln (x) - x + 2, "ln (x) - x + 2");
-      solve (0,  5, (NUM x) NUM : x * x - 4, "x * x - 4");
-      solve (1,1.5, (NUM x) NUM : qsin (3 * x), "sin (3 * x)");
-      solve (-1, 1, (NUM x) NUM : x * x + 1, "x * x + 1") 
+      solve (-long long pi, long long pi, (NUM x) NUM : (long long sin **2) (x) - 1, "sin^2 x - 1");
+      solve (-1, 1, (NUM x) NUM: x * x + 1, "x^2 + 1");
 
       EXIT
 
@@ -119,27 +134,12 @@ COMMENT
 
 Output:
 
-Expression: exp (x) - x * x
-[-1, 0]
-x: -.70346742249839165204981860185990
-y: -0
-
-Expression: ln (x) - x + 2
-[1, 10]
-x: 3.14619322062058258523706102852137
+Expression: sin^2 x -1
+[-3.14159265358979323846264338327950, 3.14159265358979323846264338327950]
+x: 1.57079632679489661923132169163975
 y: 0
 
-Expression: x * x - 4
-[0, 5]
-x: 2
-y: 0
-
-Expression: sin (3 * x)
-[1, 1.5]
-x: 1.04719755119659774615421446109317
-y: 0
-
-Expression: x * x + 1
+Expression: x^2 + 1
 [-1, 1]
 zeroin cannot find a root
 

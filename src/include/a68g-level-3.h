@@ -60,16 +60,21 @@ typedef A68_LONG_REAL A68_LONG_COMPLEX[2];
 #define A68_FRAME_ALIGN(s) (A68_ALIGN(s))
 #define SIGNQ(n) ((n) == 0.0q ? 0 : ((n) > 0 ? 1 : -1))
 
-extern void standardise_double (DOUBLE_T *, int, int, int *);
-extern DOUBLE_T ten_up_double (int);
-extern BOOL_T convert_radix_double (NODE_T *, DOUBLE_NUM_T, int, int);
+void standardise_double (DOUBLE_T *, int, int, int *);
+DOUBLE_T ten_up_double (int);
+BOOL_T convert_radix_double (NODE_T *, DOUBLE_NUM_T, int, int);
 
+// Native CPU support for MP_REAL_T is preferred.
+#if defined (HAVE_FLT80)
 typedef long double MP_REAL_T;
+#else
+typedef DOUBLE_T MP_REAL_T;
+#endif
+
 typedef INT_T MP_INT_T;
 typedef UNSIGNED_T MP_BITS_T;
 typedef INT_T MP_T;
 
 #define FLOOR_MP floorl
-#define DOUBLE_MIN_10_EXP LDBL_MIN_10_EXP
 
 #endif

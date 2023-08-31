@@ -26,8 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-double.h"
 #include "a68g-transput.h"
 
 // Transput - General routines and unformatted transput.
@@ -49,7 +47,7 @@ void init_file_entry (int k)
     POS (fe) = NO_NODE;
     IS_OPEN (fe) = A68_FALSE;
     IS_TMP (fe) = A68_FALSE;
-    FD (fe) = A68_NO_FILENO;
+    FD (fe) = A68_NO_FILE;
     IDF (fe) = nil_ref;
   }
 }
@@ -94,7 +92,7 @@ void close_file_entry (NODE_T * p, int k)
     FILE_ENTRY *fe = &(A68 (file_entries)[k]);
     if (IS_OPEN (fe)) {
 // Close the file.
-      if (FD (fe) != A68_NO_FILENO && close (FD (fe)) == -1) {
+      if (FD (fe) != A68_NO_FILE && close (FD (fe)) == -1) {
         init_file_entry (k);
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_CLOSE);
         exit_genie (p, A68_RUNTIME_ERROR);
@@ -113,7 +111,7 @@ void free_file_entry (NODE_T * p, int k)
     FILE_ENTRY *fe = &(A68 (file_entries)[k]);
     if (IS_OPEN (fe)) {
 // Attempt to remove a temp file, but ignore failure.
-      if (FD (fe) != A68_NO_FILENO && IS_TMP (fe)) {
+      if (FD (fe) != A68_NO_FILE && IS_TMP (fe)) {
         if (!IS_NIL (IDF (fe))) {
           char *filename;
           CHECK_INIT (p, INITIALISED (&(IDF (fe))), M_ROWS);
@@ -401,7 +399,7 @@ void write_purge_buffer (NODE_T * p, A68_REF ref_file, int k)
 {
   A68_FILE *file = FILE_DEREF (&ref_file);
   if (IS_NIL (STRING (file))) {
-    if (!(FD (file) == STDOUT_FILENO && A68 (halt_typing))) {
+    if (!(FD (file) == A68_STDOUT && A68 (halt_typing))) {
       WRITE (FD (file), get_transput_buffer (k));
     }
   } else {
@@ -616,7 +614,7 @@ void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, BOOL_T 
     IDENTIFICATION (f) = heap_generator (p, M_C_STRING, len);
     BLOCK_GC_HANDLE (&(IDENTIFICATION (f)));
     bufcpy (DEREF (char, &IDENTIFICATION (f)), filename, len);
-    FD (f) = A68_NO_FILENO;
+    FD (f) = A68_NO_FILE;
     READ_MOOD (f) = A68_FALSE;
     WRITE_MOOD (f) = A68_FALSE;
     CHAR_MOOD (f) = A68_FALSE;
@@ -660,11 +658,11 @@ void genie_init_transput (NODE_T * p)
   init_channel (&(A68 (stand_draw_channel)), A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE);
 #endif
 // Files.
-  init_file (p, &(A68 (stand_in)), A68 (stand_in_channel), STDIN_FILENO, A68_TRUE, A68_FALSE, A68_TRUE, "A68_STANDIN");
-  init_file (p, &(A68 (stand_out)), A68 (stand_out_channel), STDOUT_FILENO, A68_FALSE, A68_TRUE, A68_TRUE, "A68_STANDOUT");
-  init_file (p, &(A68 (stand_back)), A68 (stand_back_channel), A68_NO_FILENO, A68_FALSE, A68_FALSE, A68_FALSE, NO_TEXT);
-  init_file (p, &(A68 (stand_error)), A68 (stand_error_channel), STDERR_FILENO, A68_FALSE, A68_TRUE, A68_TRUE, "A68_STANDERROR");
-  init_file (p, &(A68 (skip_file)), A68 (skip_channel), A68_NO_FILENO, A68_FALSE, A68_FALSE, A68_FALSE, NO_TEXT);
+  init_file (p, &(A68 (stand_in)), A68 (stand_in_channel), A68_STDIN, A68_TRUE, A68_FALSE, A68_TRUE, "A68_STANDIN");
+  init_file (p, &(A68 (stand_out)), A68 (stand_out_channel), A68_STDOUT, A68_FALSE, A68_TRUE, A68_TRUE, "A68_STANDOUT");
+  init_file (p, &(A68 (stand_back)), A68 (stand_back_channel), A68_NO_FILE, A68_FALSE, A68_FALSE, A68_FALSE, NO_TEXT);
+  init_file (p, &(A68 (stand_error)), A68 (stand_error_channel), A68_STDERR, A68_FALSE, A68_TRUE, A68_TRUE, "A68_STANDERROR");
+  init_file (p, &(A68 (skip_file)), A68 (skip_channel), A68_NO_FILE, A68_FALSE, A68_FALSE, A68_FALSE, NO_TEXT);
 }
 
 //! @brief PROC (REF FILE) STRING idf
@@ -844,7 +842,7 @@ void genie_open (NODE_T * p)
   ASSERT (a_to_c_string (p, DEREF (char, &IDENTIFICATION (file)), ref_iden) != NO_TEXT);
   TERMINATOR (file) = nil_ref;
   FORMAT (file) = nil_format;
-  FD (file) = A68_NO_FILENO;
+  FD (file) = A68_NO_FILE;
   if (INITIALISED (&(STRING (file))) && !IS_NIL (STRING (file))) {
     UNBLOCK_GC_HANDLE (DEREF (A68_REF, &STRING (file)));
   }
@@ -900,7 +898,7 @@ void genie_establish (NODE_T * p)
   ASSERT (a_to_c_string (p, DEREF (char, &IDENTIFICATION (file)), ref_iden) != NO_TEXT);
   TERMINATOR (file) = nil_ref;
   FORMAT (file) = nil_format;
-  FD (file) = A68_NO_FILENO;
+  FD (file) = A68_NO_FILE;
   if (INITIALISED (&(STRING (file))) && !IS_NIL (STRING (file))) {
     UNBLOCK_GC_HANDLE (DEREF (A68_REF, &STRING (file)));
   }
@@ -938,7 +936,7 @@ void genie_create (NODE_T * p)
   IDENTIFICATION (file) = nil_ref;
   TERMINATOR (file) = nil_ref;
   FORMAT (file) = nil_format;
-  FD (file) = A68_NO_FILENO;
+  FD (file) = A68_NO_FILE;
   if (INITIALISED (&(STRING (file))) && !IS_NIL (STRING (file))) {
     UNBLOCK_GC_HANDLE (DEREF (A68_REF, &STRING (file)));
   }
@@ -986,7 +984,7 @@ void genie_associate (NODE_T * p)
   IDENTIFICATION (file) = nil_ref;
   TERMINATOR (file) = nil_ref;
   FORMAT (file) = nil_format;
-  FD (file) = A68_NO_FILENO;
+  FD (file) = A68_NO_FILE;
   if (INITIALISED (&(STRING (file))) && !IS_NIL (STRING (file))) {
     UNBLOCK_GC_HANDLE (DEREF (A68_REF, &STRING (file)));
   }
@@ -1018,7 +1016,7 @@ void genie_close (NODE_T * p)
     return;
   }
 #endif
-  FD (file) = A68_NO_FILENO;
+  FD (file) = A68_NO_FILE;
   OPENED (file) = A68_FALSE;
   unblock_transput_buffer (TRANSPUT_BUFFER (file));
   set_default_event_procedures (file);
@@ -1049,11 +1047,11 @@ void genie_lock (NODE_T * p)
   errno = 0;
   ASSERT (fchmod (FD (file), (mode_t) 0x0) != -1);
 #endif
-  if (FD (file) != A68_NO_FILENO && close (FD (file)) == -1) {
+  if (FD (file) != A68_NO_FILE && close (FD (file)) == -1) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_LOCK);
     exit_genie (p, A68_RUNTIME_ERROR);
   } else {
-    FD (file) = A68_NO_FILENO;
+    FD (file) = A68_NO_FILE;
     OPENED (file) = A68_FALSE;
     unblock_transput_buffer (TRANSPUT_BUFFER (file));
     set_default_event_procedures (file);
@@ -1081,7 +1079,7 @@ void genie_erase (NODE_T * p)
     return;
   }
 #endif
-  if (FD (file) != A68_NO_FILENO && close (FD (file)) == -1) {
+  if (FD (file) != A68_NO_FILE && close (FD (file)) == -1) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
     exit_genie (p, A68_RUNTIME_ERROR);
   } else {
@@ -1155,7 +1153,7 @@ void genie_set (NODE_T * p)
       }
     }
     PUSH_VALUE (p, STRPOS (file), A68_INT);
-  } else if (FD (file) == A68_NO_FILENO) {
+  } else if (FD (file) == A68_NO_FILE) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_RESET);
     exit_genie (p, A68_RUNTIME_ERROR);
   } else {
@@ -1218,7 +1216,7 @@ void genie_reset (NODE_T * p)
   WRITE_MOOD (file) = A68_FALSE;
   CHAR_MOOD (file) = A68_FALSE;
   DRAW_MOOD (file) = A68_FALSE;
-  FD (file) = A68_NO_FILENO;
+  FD (file) = A68_NO_FILE;
 //  set_default_event_procedures (file);.
 }
 

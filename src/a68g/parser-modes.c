@@ -26,7 +26,6 @@
 #include "a68g.h"
 #include "a68g-postulates.h"
 #include "a68g-parser.h"
-#include "a68g-prelude.h"
 
 // Mode collection, equivalencing and derived modes.
 

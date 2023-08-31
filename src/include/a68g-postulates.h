@@ -26,10 +26,10 @@
 #if !defined (__A68G_POSTULATES_H__)
 #define __A68G_POSTULATES_H__
 
-extern void init_postulates (void);
-extern void free_postulate_list (POSTULATE_T *, POSTULATE_T *);
-extern void make_postulate (POSTULATE_T **, MOID_T *, MOID_T *);
-extern POSTULATE_T *is_postulated (POSTULATE_T *, MOID_T *);
-extern POSTULATE_T *is_postulated_pair (POSTULATE_T *, MOID_T *, MOID_T *);
+void init_postulates (void);
+void free_postulate_list (POSTULATE_T *, POSTULATE_T *);
+void make_postulate (POSTULATE_T **, MOID_T *, MOID_T *);
+POSTULATE_T *is_postulated (POSTULATE_T *, MOID_T *);
+POSTULATE_T *is_postulated_pair (POSTULATE_T *, MOID_T *, MOID_T *);
 
 #endif

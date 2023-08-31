@@ -78,10 +78,8 @@
 
 #include "a68g.h"
 #include "a68g-genie.h"
-#include "a68g-prelude.h"
-#include "a68g-double.h"
 #include "a68g-mp.h"
-#include "a68g-lib.h"
+#include "a68g-prelude.h"
 
 // Processing time of Abergel's algorithms rises steeply with precision.
 #define MAX_PRECISION (LONG_LONG_MP_DIGITS + LONG_MP_DIGITS)
@@ -457,7 +455,7 @@ void mp_romberg_iterations
     (void) div_mp (q, trm, trm, pow2, digs);
     (void) half_mp (q, trm, trm, digs);
     (void) add_mp (q, xx, x, trm, digs);
-//  sum += exp (-mu * xx + (p - 1) * a68_ln (xx) - sigma);
+//  sum += exp (-mu * xx + (p - 1) * a68_ln_real (xx) - sigma);
     (void) ln_mp (q, trn, xx, digs);
     (void) minus_one_mp (q, trm, p, digs);
     (void) mul_mp (q, trm, trm, trn, digs);
@@ -604,7 +602,7 @@ void Dgamic_mp (NODE_T *q, MP_T * rho, MP_T * sigma, MP_T *x, MP_T *y, MP_T *mu,
   MP_T *mux = nil_mp (q, digs);
   MP_T *muy = nil_mp (q, digs);
 // Initialization
-// nx = (a68_isinf (x) ? a68_neginf () : -mu * x + p * ln (x));
+// nx = (a68_isinf_real (x) ? a68_neginf_double_real () : -mu * x + p * ln (x));
   if (PLUS_INF_MP (x)) {
     SET_MP_ZERO (mx, digs);
     MP_STATUS (nx) = (UNSIGNED_T) MP_STATUS (nx) | MINUS_INF_MASK;
@@ -615,7 +613,7 @@ void Dgamic_mp (NODE_T *q, MP_T * rho, MP_T * sigma, MP_T *x, MP_T *y, MP_T *mu,
     (void) mul_mp (q, nx, p, nx, digs);
     (void) sub_mp (q, nx, nx, mux, digs);
   }
-// ny = (a68_isinf (y) ? a68_neginf () : -mu * y + p * ln (y));
+// ny = (a68_isinf_real (y) ? a68_neginf_double_real () : -mu * y + p * ln (y));
   if (PLUS_INF_MP (y)) {
     SET_MP_ZERO (my, digs);
     MP_STATUS (ny) = (UNSIGNED_T) MP_STATUS (ny) | MINUS_INF_MASK;

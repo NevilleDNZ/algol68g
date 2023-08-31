@@ -26,8 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-double.h"
 #include "a68g-transput.h"
 
 // OP (CHAR, CHAR) BOOL.
@@ -386,7 +384,7 @@ void genie_elem_bytes (NODE_T * p)
   POP_OBJECT (p, &j, A68_BYTES);
   A68_INT i;
   POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
   if (VALUE (&i) > (int) strlen (VALUE (&j))) {
     genie_null_char (p);
   } else {
@@ -401,7 +399,7 @@ void genie_bytespack (NODE_T * p)
   A68_REF z;
   POP_REF (p, &z);
   CHECK_REF (p, z, M_STRING);
-  PRELUDE_ERROR (a68_string_size (p, z) > BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_STRING);
+  PRELUDE_ERROR (a68_string_size (p, z) > A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_STRING);
   A68_BYTES b;
   STATUS (&b) = INIT_MASK;
   ASSERT (a_to_c_string (p, VALUE (&b), z) != NO_TEXT);
@@ -414,8 +412,8 @@ void genie_add_bytes (NODE_T * p)
 {
   A68_BYTES *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_BYTES);
-  PRELUDE_ERROR (((int) strlen (VALUE (i)) + (int) strlen (VALUE (j))) > BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
-  bufcat (VALUE (i), VALUE (j), BYTES_WIDTH);
+  PRELUDE_ERROR (((int) strlen (VALUE (i)) + (int) strlen (VALUE (j))) > A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
+  bufcat (VALUE (i), VALUE (j), A68_BYTES_WIDTH);
 }
 
 //! @brief OP +:= = (REF BYTES, BYTES) REF BYTES
@@ -436,11 +434,11 @@ void genie_plusto_bytes (NODE_T * p)
   CHECK_INIT (p, INITIALISED (address), M_BYTES);
   A68_BYTES i;
   POP_OBJECT (p, &i, A68_BYTES);
-  PRELUDE_ERROR (((int) strlen (VALUE (address)) + (int) strlen (VALUE (&i))) > BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
+  PRELUDE_ERROR (((int) strlen (VALUE (address)) + (int) strlen (VALUE (&i))) > A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
   A68_BYTES j;
-  bufcpy (VALUE (&j), VALUE (&i), BYTES_WIDTH);
-  bufcat (VALUE (&j), VALUE (address), BYTES_WIDTH);
-  bufcpy (VALUE (address), VALUE (&j), BYTES_WIDTH);
+  bufcpy (VALUE (&j), VALUE (&i), A68_BYTES_WIDTH);
+  bufcat (VALUE (&j), VALUE (address), A68_BYTES_WIDTH);
+  bufcpy (VALUE (address), VALUE (&j), A68_BYTES_WIDTH);
   PUSH_REF (p, z);
 }
 
@@ -486,7 +484,7 @@ void genie_shorten_bytes (NODE_T * p)
 {
   A68_LONG_BYTES a;
   POP_OBJECT (p, &a, A68_LONG_BYTES);
-  PRELUDE_ERROR (strlen (VALUE (&a)) >= BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
+  PRELUDE_ERROR (strlen (VALUE (&a)) >= A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
   PUSH_BYTES (p, VALUE (&a));
 }
 
@@ -498,7 +496,7 @@ void genie_elem_long_bytes (NODE_T * p)
   POP_OBJECT (p, &j, A68_LONG_BYTES);
   A68_INT i;
   POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > A68_LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
   if (VALUE (&i) > (int) strlen (VALUE (&j))) {
     genie_null_char (p);
   } else {
@@ -513,7 +511,7 @@ void genie_long_bytespack (NODE_T * p)
   A68_REF z;
   POP_REF (p, &z);
   CHECK_REF (p, z, M_STRING);
-  PRELUDE_ERROR (a68_string_size (p, z) > LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_STRING);
+  PRELUDE_ERROR (a68_string_size (p, z) > A68_LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_STRING);
   A68_LONG_BYTES b;
   STATUS (&b) = INIT_MASK;
   ASSERT (a_to_c_string (p, VALUE (&b), z) != NO_TEXT);
@@ -526,8 +524,8 @@ void genie_add_long_bytes (NODE_T * p)
 {
   A68_LONG_BYTES *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_LONG_BYTES);
-  PRELUDE_ERROR (((int) strlen (VALUE (i)) + (int) strlen (VALUE (j))) > LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_LONG_BYTES);
-  bufcat (VALUE (i), VALUE (j), LONG_BYTES_WIDTH);
+  PRELUDE_ERROR (((int) strlen (VALUE (i)) + (int) strlen (VALUE (j))) > A68_LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_LONG_BYTES);
+  bufcat (VALUE (i), VALUE (j), A68_LONG_BYTES_WIDTH);
 }
 
 //! @brief OP +:= = (REF LONG BYTES, LONG BYTES) REF LONG BYTES
@@ -548,11 +546,11 @@ void genie_plusto_long_bytes (NODE_T * p)
   CHECK_INIT (p, INITIALISED (address), M_LONG_BYTES);
   A68_LONG_BYTES i;
   POP_OBJECT (p, &i, A68_LONG_BYTES);
-  PRELUDE_ERROR (((int) strlen (VALUE (address)) + (int) strlen (VALUE (&i))) > LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_LONG_BYTES);
+  PRELUDE_ERROR (((int) strlen (VALUE (address)) + (int) strlen (VALUE (&i))) > A68_LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_LONG_BYTES);
   A68_LONG_BYTES j;
-  bufcpy (VALUE (&j), VALUE (&i), LONG_BYTES_WIDTH);
-  bufcat (VALUE (&j), VALUE (address), LONG_BYTES_WIDTH);
-  bufcpy (VALUE (address), VALUE (&j), LONG_BYTES_WIDTH);
+  bufcpy (VALUE (&j), VALUE (&i), A68_LONG_BYTES_WIDTH);
+  bufcat (VALUE (&j), VALUE (address), A68_LONG_BYTES_WIDTH);
+  bufcpy (VALUE (address), VALUE (&j), A68_LONG_BYTES_WIDTH);
   PUSH_REF (p, z);
 }
 

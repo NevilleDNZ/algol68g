@@ -27,8 +27,6 @@
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
 #include "a68g-prelude-gsl.h"
-#include "a68g-double.h"
-#include "a68g-numbers.h"
 
 #if defined (HAVE_GSL)
 

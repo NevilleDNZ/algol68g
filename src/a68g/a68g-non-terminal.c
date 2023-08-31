@@ -24,14 +24,6 @@
 //! Non-terminal tables.
 
 #include "a68g.h"
-#include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-genie.h"
-#include "a68g-postulates.h"
-#include "a68g-parser.h"
-#include "a68g-options.h"
-#include "a68g-optimiser.h"
-#include "a68g-listing.h"
 
 // Translate int attributes to string names.
 

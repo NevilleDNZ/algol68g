@@ -247,7 +247,7 @@ BOOL_T a68_mkstemp (char *fn, int flags, mode_t permissions)
       bufcat (tfilename, ".tmp", BUFFER_SIZE);
       errno = 0;
       FILE_T fd = open (tfilename, flags | O_EXCL, permissions);
-      good_file = (BOOL_T) (fd != A68_NO_FILENO && errno == 0);
+      good_file = (BOOL_T) (fd != A68_NO_FILE && errno == 0);
       if (good_file) {
         (void) close (fd);
       }
@@ -289,7 +289,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int flags, mode_t permi
   } else if (IS_NIL (IDENTIFICATION (file))) {
 // No identification, so generate a unique identification..
     if (reading) {
-      return A68_NO_FILENO;
+      return A68_NO_FILE;
     } else {
       BUFFER tfilename;
       int len;
@@ -492,7 +492,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     set_lw (b, 0x0);
     if (a[0] == FLIP_CHAR || a[0] == FLOP_CHAR) {
 // [] BOOL denotation is "TTFFFFTFT ...".
-      if (strlen (a) > (size_t) LONG_BITS_WIDTH) {
+      if (strlen (a) > (size_t) A68_LONG_BITS_WIDTH) {
         errno = ERANGE;
         ret = A68_FALSE;
       } else {
@@ -500,7 +500,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
         UNSIGNED_T k = 0x1;
         for (int j = (int) strlen (a) - 1; j >= 0; j--) {
           if (a[j] == FLIP_CHAR) {
-            if (n <= LONG_BITS_WIDTH / 2) {
+            if (n <= A68_LONG_BITS_WIDTH / 2) {
               LW (b) |= k;
             } else {
               HW (b) |= k;
@@ -526,7 +526,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     MP_T *z = (MP_T *) item;
     if (a[0] == FLIP_CHAR || a[0] == FLOP_CHAR) {
 // [] BOOL denotation is "TTFFFFTFT ...".
-      if (strlen (a) > (size_t) BITS_WIDTH) {
+      if (strlen (a) > (size_t) A68_BITS_WIDTH) {
         errno = ERANGE;
         status = A68_FALSE;
       } else {
@@ -591,7 +591,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     int status = A68_TRUE;
     if (a[0] == FLIP_CHAR || a[0] == FLOP_CHAR) {
 // [] BOOL denotation is "TTFFFFTFT ...".
-      if (strlen (a) > (size_t) BITS_WIDTH) {
+      if (strlen (a) > (size_t) A68_BITS_WIDTH) {
         errno = ERANGE;
         status = A68_FALSE;
       } else {
@@ -785,7 +785,7 @@ void open_for_reading (NODE_T * p, A68_REF ref_file)
   }
   if (!READ_MOOD (file) && !WRITE_MOOD (file)) {
     if (IS_NIL (STRING (file))) {
-      if ((FD (file) = open_physical_file (p, ref_file, A68_READ_ACCESS, 0)) == A68_NO_FILENO) {
+      if ((FD (file) = open_physical_file (p, ref_file, A68_READ_ACCESS, 0)) == A68_NO_FILE) {
         open_error (p, ref_file, "getting");
       }
     } else {
@@ -842,12 +842,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH_VALUE (p, VALUE (z), A68_INT);
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_INT)));
     if (mod == FORMAT_ITEM_G) {
-      PUSH_VALUE (p, INT_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_INT_WIDTH + 1, A68_INT);
       genie_whole (p);
     } else if (mod == FORMAT_ITEM_H) {
-      PUSH_VALUE (p, REAL_WIDTH + EXP_WIDTH + 4, A68_INT);
-      PUSH_VALUE (p, REAL_WIDTH - 1, A68_INT);
-      PUSH_VALUE (p, EXP_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_REAL_WIDTH + A68_EXP_WIDTH + 4, A68_INT);
+      PUSH_VALUE (p, A68_REAL_WIDTH - 1, A68_INT);
+      PUSH_VALUE (p, A68_EXP_WIDTH + 1, A68_INT);
       PUSH_VALUE (p, 3, A68_INT);
       genie_real (p);
     }
@@ -860,12 +860,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH (p, z, SIZE (M_LONG_INT));
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_LONG_INT)));
     if (mod == FORMAT_ITEM_G) {
-      PUSH_VALUE (p, LONG_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_WIDTH + 1, A68_INT);
       genie_whole (p);
     } else if (mod == FORMAT_ITEM_H) {
-      PUSH_VALUE (p, LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4, A68_INT);
-      PUSH_VALUE (p, LONG_REAL_WIDTH - 1, A68_INT);
-      PUSH_VALUE (p, LONG_EXP_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_REAL_WIDTH + A68_LONG_EXP_WIDTH + 4, A68_INT);
+      PUSH_VALUE (p, A68_LONG_REAL_WIDTH - 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_EXP_WIDTH + 1, A68_INT);
       PUSH_VALUE (p, 3, A68_INT);
       genie_real (p);
     }
@@ -876,9 +876,9 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH_UNION (p, M_LONG_REAL);
     PUSH_VALUE (p, VALUE (z), A68_LONG_REAL);
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_LONG_REAL)));
-    PUSH_VALUE (p, LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4, A68_INT);
-    PUSH_VALUE (p, LONG_REAL_WIDTH - 1, A68_INT);
-    PUSH_VALUE (p, LONG_EXP_WIDTH + 1, A68_INT);
+    PUSH_VALUE (p, A68_LONG_REAL_WIDTH + A68_LONG_EXP_WIDTH + 4, A68_INT);
+    PUSH_VALUE (p, A68_LONG_REAL_WIDTH - 1, A68_INT);
+    PUSH_VALUE (p, A68_LONG_EXP_WIDTH + 1, A68_INT);
     if (mod == FORMAT_ITEM_G) {
       genie_float (p);
     } else if (mod == FORMAT_ITEM_H) {
@@ -889,11 +889,11 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
   }
   if (moid == M_LONG_BITS) {
     A68_LONG_BITS *z = (A68_LONG_BITS *) item;
-    char *s = stack_string (p, 8 + LONG_BITS_WIDTH);
+    char *s = stack_string (p, 8 + A68_LONG_BITS_WIDTH);
     int n = 0;
     for (int w = 0; w <= 1; w++) {
       UNSIGNED_T bit = D_SIGN;
-      for (int j = 0; j < BITS_WIDTH; j++) {
+      for (int j = 0; j < A68_BITS_WIDTH; j++) {
         if (w == 0) {
           s[n] = (char) ((HW (VALUE (z)) & bit) ? FLIP_CHAR : FLOP_CHAR);
         } else {
@@ -932,12 +932,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH (p, z, SIZE (M_LONG_INT));
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_LONG_INT)));
     if (mod == FORMAT_ITEM_G) {
-      PUSH_VALUE (p, LONG_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_WIDTH + 1, A68_INT);
       genie_whole (p);
     } else if (mod == FORMAT_ITEM_H) {
-      PUSH_VALUE (p, LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4, A68_INT);
-      PUSH_VALUE (p, LONG_REAL_WIDTH - 1, A68_INT);
-      PUSH_VALUE (p, LONG_EXP_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_REAL_WIDTH + A68_LONG_EXP_WIDTH + 4, A68_INT);
+      PUSH_VALUE (p, A68_LONG_REAL_WIDTH - 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_EXP_WIDTH + 1, A68_INT);
       PUSH_VALUE (p, 3, A68_INT);
       genie_real (p);
     }
@@ -949,12 +949,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH (p, z, SIZE (M_LONG_LONG_INT));
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_LONG_LONG_INT)));
     if (mod == FORMAT_ITEM_G) {
-      PUSH_VALUE (p, LONG_LONG_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_LONG_WIDTH + 1, A68_INT);
       genie_whole (p);
     } else if (mod == FORMAT_ITEM_H) {
-      PUSH_VALUE (p, LONG_LONG_REAL_WIDTH + LONG_LONG_EXP_WIDTH + 4, A68_INT);
-      PUSH_VALUE (p, LONG_LONG_REAL_WIDTH - 1, A68_INT);
-      PUSH_VALUE (p, LONG_LONG_EXP_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_LONG_REAL_WIDTH + A68_LONG_LONG_EXP_WIDTH + 4, A68_INT);
+      PUSH_VALUE (p, A68_LONG_LONG_REAL_WIDTH - 1, A68_INT);
+      PUSH_VALUE (p, A68_LONG_LONG_EXP_WIDTH + 1, A68_INT);
       PUSH_VALUE (p, 3, A68_INT);
       genie_real (p);
     }
@@ -965,9 +965,9 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH_UNION (p, M_REAL);
     PUSH_VALUE (p, VALUE (z), A68_REAL);
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_REAL)));
-    PUSH_VALUE (p, REAL_WIDTH + EXP_WIDTH + 4, A68_INT);
-    PUSH_VALUE (p, REAL_WIDTH - 1, A68_INT);
-    PUSH_VALUE (p, EXP_WIDTH + 1, A68_INT);
+    PUSH_VALUE (p, A68_REAL_WIDTH + A68_EXP_WIDTH + 4, A68_INT);
+    PUSH_VALUE (p, A68_REAL_WIDTH - 1, A68_INT);
+    PUSH_VALUE (p, A68_EXP_WIDTH + 1, A68_INT);
     if (mod == FORMAT_ITEM_G) {
       genie_float (p);
     } else if (mod == FORMAT_ITEM_H) {
@@ -981,9 +981,9 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH_UNION (p, M_LONG_REAL);
     PUSH (p, z, (int) SIZE (M_LONG_REAL));
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_LONG_REAL)));
-    PUSH_VALUE (p, LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4, A68_INT);
-    PUSH_VALUE (p, LONG_REAL_WIDTH - 1, A68_INT);
-    PUSH_VALUE (p, LONG_EXP_WIDTH + 1, A68_INT);
+    PUSH_VALUE (p, A68_LONG_REAL_WIDTH + A68_LONG_EXP_WIDTH + 4, A68_INT);
+    PUSH_VALUE (p, A68_LONG_REAL_WIDTH - 1, A68_INT);
+    PUSH_VALUE (p, A68_LONG_EXP_WIDTH + 1, A68_INT);
     if (mod == FORMAT_ITEM_G) {
       genie_float (p);
     } else if (mod == FORMAT_ITEM_H) {
@@ -997,9 +997,9 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     PUSH_UNION (p, M_LONG_LONG_REAL);
     PUSH (p, z, (int) SIZE (M_LONG_LONG_REAL));
     INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_LONG_LONG_REAL)));
-    PUSH_VALUE (p, LONG_LONG_REAL_WIDTH + LONG_LONG_EXP_WIDTH + 4, A68_INT);
-    PUSH_VALUE (p, LONG_LONG_REAL_WIDTH - 1, A68_INT);
-    PUSH_VALUE (p, LONG_LONG_EXP_WIDTH + 1, A68_INT);
+    PUSH_VALUE (p, A68_LONG_LONG_REAL_WIDTH + A68_LONG_LONG_EXP_WIDTH + 4, A68_INT);
+    PUSH_VALUE (p, A68_LONG_LONG_REAL_WIDTH - 1, A68_INT);
+    PUSH_VALUE (p, A68_LONG_LONG_EXP_WIDTH + 1, A68_INT);
     if (mod == FORMAT_ITEM_G) {
       genie_float (p);
     } else if (mod == FORMAT_ITEM_H) {
@@ -1010,13 +1010,13 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
   }
   if (moid == M_BITS) {
     A68_BITS *z = (A68_BITS *) item;
-    char *str = stack_string (p, 8 + BITS_WIDTH);
+    char *str = stack_string (p, 8 + A68_BITS_WIDTH);
     UNSIGNED_T bit = 0x1;
     int j;
-    for (j = 1; j < BITS_WIDTH; j++) {
+    for (j = 1; j < A68_BITS_WIDTH; j++) {
       bit <<= 1;
     }
-    for (j = 0; j < BITS_WIDTH; j++) {
+    for (j = 0; j < A68_BITS_WIDTH; j++) {
       str[j] = (char) ((VALUE (z) & bit) ? FLIP_CHAR : FLOP_CHAR);
       bit >>= 1;
     }
@@ -1127,7 +1127,7 @@ void open_for_writing (NODE_T * p, A68_REF ref_file)
   }
   if (!READ_MOOD (file) && !WRITE_MOOD (file)) {
     if (IS_NIL (STRING (file))) {
-      if ((FD (file) = open_physical_file (p, ref_file, A68_WRITE_ACCESS, A68_PROTECTION)) == A68_NO_FILENO) {
+      if ((FD (file) = open_physical_file (p, ref_file, A68_WRITE_ACCESS, A68_PROTECTION)) == A68_NO_FILE) {
         open_error (p, ref_file, "putting");
       }
     } else {
@@ -1348,7 +1348,7 @@ void genie_read_bin_file (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!READ_MOOD (file) && !WRITE_MOOD (file)) {
-    if ((FD (file) = open_physical_file (p, ref_file, A68_READ_ACCESS | O_BINARY, 0)) == A68_NO_FILENO) {
+    if ((FD (file) = open_physical_file (p, ref_file, A68_READ_ACCESS | O_BINARY, 0)) == A68_NO_FILE) {
       open_error (p, ref_file, "binary getting");
     }
     DRAW_MOOD (file) = A68_FALSE;
@@ -1509,7 +1509,7 @@ void genie_write_bin_file (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!READ_MOOD (file) && !WRITE_MOOD (file)) {
-    if ((FD (file) = open_physical_file (p, ref_file, A68_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == A68_NO_FILENO) {
+    if ((FD (file) = open_physical_file (p, ref_file, A68_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == A68_NO_FILE) {
       open_error (p, ref_file, "binary putting");
     }
     DRAW_MOOD (file) = A68_FALSE;
@@ -1813,7 +1813,7 @@ char *whole (NODE_T * p)
     MP_T *n = (MP_T *) (STACK_OFFSET (A68_UNION_SIZE));
     A68_SP = arg_sp;            // We keep the mp where it's at
     if (MP_EXPONENT (n) >= (MP_T) digits) {
-      int max_length = (mode == M_LONG_INT ? LONG_INT_WIDTH : LONG_LONG_INT_WIDTH);
+      int max_length = (mode == M_LONG_INT ? A68_LONG_INT_WIDTH : A68_LONG_LONG_INT_WIDTH);
       int length = (VALUE (&width) == 0 ? max_length : VALUE (&width));
       char *s = stack_string (p, 1 + length);
       (void) error_chars (s, length);
@@ -1912,7 +1912,7 @@ char *long_sub_fixed (NODE_T * p, MP_T * x, int digits, int width, int after)
   str[0] = NULL_CHAR;
   int len = 0;
   for (int j = 0; j < before; j++) {
-    char ch = (char) (len < LONG_LONG_REAL_WIDTH ? long_choose_dig (p, y, digits) : '0');
+    char ch = (char) (len < A68_LONG_LONG_REAL_WIDTH ? long_choose_dig (p, y, digits) : '0');
     (void) string_plusab_char (str, ch, strwid);
     len++;
   }
@@ -1920,7 +1920,7 @@ char *long_sub_fixed (NODE_T * p, MP_T * x, int digits, int width, int after)
     (void) string_plusab_char (str, POINT_CHAR, strwid);
   }
   for (int j = 0; j < after; j++) {
-    char ch = (char) (len < LONG_LONG_REAL_WIDTH ? long_choose_dig (p, y, digits) : '0');
+    char ch = (char) (len < A68_LONG_LONG_REAL_WIDTH ? long_choose_dig (p, y, digits) : '0');
     (void) string_plusab_char (str, ch, strwid);
     len++;
   }
@@ -2002,7 +2002,7 @@ char *sub_fixed_double (NODE_T * p, DOUBLE_T x, int width, int after, int precis
 char *sub_fixed (NODE_T * p, REAL_T x, int width, int after)
 {
 // Better precision than the REAL only routine
-  return sub_fixed_double (p, (DOUBLE_T) x, width, after, REAL_WIDTH);
+  return sub_fixed_double (p, (DOUBLE_T) x, width, after, A68_REAL_WIDTH);
 }
 
 #else
@@ -2049,7 +2049,7 @@ char *sub_fixed (NODE_T * p, REAL_T x, int width, int after)
   char *str = stack_string (p, strwid);
   int len = 0;
   for (int j = 0; j < before; j++) {
-    char ch = (char) (len < REAL_WIDTH ? choose_dig (&y) : '0');
+    char ch = (char) (len < A68_REAL_WIDTH ? choose_dig (&y) : '0');
     (void) string_plusab_char (str, ch, strwid);
     len++;
   }
@@ -2057,7 +2057,7 @@ char *sub_fixed (NODE_T * p, REAL_T x, int width, int after)
     (void) string_plusab_char (str, POINT_CHAR, strwid);
   }
   for (int j = 0; j < after; j++) {
-    char ch = (char) (len < REAL_WIDTH ? choose_dig (&y) : '0');
+    char ch = (char) (len < A68_REAL_WIDTH ? choose_dig (&y) : '0');
     (void) string_plusab_char (str, ch, strwid);
     len++;
   }
@@ -2142,7 +2142,7 @@ char *fixed (NODE_T * p)
         }
         length += (VALUE (&after) == 0 ? 0 : VALUE (&after) + 1);
       }
-      char *s = sub_fixed_double (p, y, length, VALUE (&after), LONG_REAL_WIDTH);
+      char *s = sub_fixed_double (p, y, length, VALUE (&after), A68_LONG_REAL_WIDTH);
       if (strchr (s, ERROR_CHAR) == NO_TEXT) {
         if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == POINT_CHAR : A68_TRUE) && y < 1.0) {
           (void) plusto ('0', s);
@@ -2688,7 +2688,6 @@ void genie_float (NODE_T * p)
     genie_read_standard (p, MODE (m), z, ref_file);\
     A68_SP = pop_sp;\
   }\
-\
   void genie_put_##n (NODE_T * p)\
   {\
     int size = SIZE (MODE (m)), sizf = SIZE (M_REF_FILE);\
@@ -2700,7 +2699,6 @@ void genie_float (NODE_T * p)
     write_purge_buffer (p, ref_file, UNFORMATTED_BUFFER);\
     DECREMENT_STACK_POINTER (p, size + sizf);\
   }\
-\
   void genie_read_##n (NODE_T * p)\
   {\
     BYTE_T *z = STACK_TOP;\
@@ -2710,7 +2708,6 @@ void genie_float (NODE_T * p)
     genie_read_standard (p, MODE (m), z, A68 (stand_in));\
     A68_SP = pop_sp;\
   }\
-\
   void genie_print_##n (NODE_T * p)\
   {\
     int size = SIZE (MODE (m));\

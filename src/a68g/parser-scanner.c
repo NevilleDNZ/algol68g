@@ -28,7 +28,6 @@
 #include "a68g-prelude.h"
 #include "a68g-options.h"
 #include "a68g-environ.h"
-#include "a68g-genie.h"
 
 // Macros.
 

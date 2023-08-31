@@ -26,13 +26,13 @@
 #if ! defined (__A68G_LISTING_H__)
 #define __A68G_LISTING_H__
 
-extern void list_source_line (FILE_T, LINE_T *, BOOL_T);
-extern void print_mode_flat (FILE_T, MOID_T *);
-extern void tree_listing (FILE_T, NODE_T *, int, LINE_T *, int *, BOOL_T);
-extern void write_listing_header (void);
-extern void write_listing (void);
-extern void write_object_listing (void);
-extern void write_source_listing (void);
-extern void write_tree_listing (void);
+void list_source_line (FILE_T, LINE_T *, BOOL_T);
+void print_mode_flat (FILE_T, MOID_T *);
+void tree_listing (FILE_T, NODE_T *, int, LINE_T *, int *, BOOL_T);
+void write_listing_header (void);
+void write_listing (void);
+void write_object_listing (void);
+void write_source_listing (void);
+void write_tree_listing (void);
 
 #endif

@@ -90,6 +90,16 @@ make
 make check
 [sudo] make install
 
-Algol 68 Genie can link to the GNU Scientific Library, plotlib from
-GNU plotutils, R mathlib, GNU MPFR and libpq from PostgreSQL. 
+If you plan to use the optional plugin compiler, you need to install its
+dependencies. The default way to do this is entering 'make install'.
+Installation defaults can be changed while configuring. To view all 
+options, enter './configure --help'.
+
+The preferred C compiler to build Algol 68 Genie is gcc, however clang
+will work well. Algol 68 Genie will link libquadmath when compiled
+with gcc, enabling 128-bit LONG REAL. In the absence of gcc, LONG REAL
+is a software implementation.
+
+Algol 68 Genie can link to libcurses, the GNU Scientific Library, plotlib
+from GNU plotutils, R mathlib, GNU MPFR, libcurl and libpq from PostgreSQL. 
 Libraries not available on your platform are graciously ignored.

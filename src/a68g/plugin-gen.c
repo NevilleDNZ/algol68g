@@ -25,13 +25,9 @@
 
 #include "a68g.h"
 #include "a68g-prelude.h"
-#include "a68g-genie.h"
-#include "a68g-listing.h"
-#include "a68g-mp.h"
 #include "a68g-optimiser.h"
 #include "a68g-plugin.h"
 #include "a68g-parser.h"
-#include "a68g-transput.h"
 
 //! @brief Compile code clause.
 
@@ -516,7 +512,6 @@ char *gen_call (NODE_T * p, FILE_T out, int compose_fun)
   } else {
     static char fun[NAME_SIZE];
     char body[NAME_SIZE], pop[NAME_SIZE];
-    int size;
 // Declare.
     (void) make_name (body, FUN, "", NUMBER (proc));
     (void) make_name (pop, PUP, "", NUMBER (p));
@@ -526,7 +521,7 @@ char *gen_call (NODE_T * p, FILE_T out, int compose_fun)
       write_fun_prelude (p, out, fun);
     }
 // Compute arguments.
-    size = 0;
+    int size = 0;
     A68_OPT (root_idf) = NO_DEC;
     inline_arguments (args, out, L_DECLARE, &size);
     (void) add_declaration (&A68_OPT (root_idf), "ADDR_T", 0, pop);
@@ -583,9 +578,8 @@ char *gen_voiding_call (NODE_T * p, FILE_T out, int compose_fun)
     return NO_TEXT;
   } else {
     static char fun[NAME_SIZE];
-    char body[NAME_SIZE], pop[NAME_SIZE];
-    int size;
 // Declare.
+    char body[NAME_SIZE], pop[NAME_SIZE];
     (void) make_name (body, FUN, "", NUMBER (proc));
     (void) make_name (pop, PUP, "", NUMBER (p));
     comment_source (p, out);
@@ -594,7 +588,7 @@ char *gen_voiding_call (NODE_T * p, FILE_T out, int compose_fun)
       write_fun_prelude (p, out, fun);
     }
 // Compute arguments.
-    size = 0;
+    int size = 0;
     A68_OPT (root_idf) = NO_DEC;
     inline_arguments (args, out, L_DECLARE, &size);
     (void) add_declaration (&A68_OPT (root_idf), "ADDR_T", 0, pop);
@@ -1405,8 +1399,6 @@ char *gen_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
   static char fn[NAME_SIZE];
   char idf[NAME_SIZE], z[NAME_SIZE], pop[NAME_SIZE];
   NODE_T *q = SUB (p);
-  int units, decs;
-  BOOL_T gc, need_reinit;
 // FOR identifier.
   if (IS (q, FOR_PART)) {
     for_part = NEXT_SUB (q);
@@ -1463,10 +1455,10 @@ char *gen_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
     return NO_TEXT;
   }
 // Loop clause is compiled.
-  units = decs = 0;
+  int units = 0, decs = 0;
   NODE_T *last = NO_NODE;
   gen_serial_clause (sc, out, &last, &units, &decs, pop, A68_MAKE_OTHERS);
-  gc = (decs > 0);
+  BOOL_T gc = (decs > 0);
   comment_source (p, out);
   (void) make_name (fn, "loop", "", NUMBER (p));
   if (compose_fun == A68_MAKE_FUNCTION) {
@@ -1573,7 +1565,7 @@ char *gen_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
   units = decs = 0;
   gen_serial_clause (sc, out, &last, &units, &decs, pop, A68_MAKE_FUNCTION);
 // Re-initialise if necessary.
-  need_reinit = (BOOL_T) (AP_INCREMENT (TABLE (sc)) > 0 || need_initialise_frame (sc));
+  BOOL_T need_reinit = (BOOL_T) (AP_INCREMENT (TABLE (sc)) > 0 || need_initialise_frame (sc));
   if (need_reinit) {
     indent (out, "if (");
     if (to_part == NO_NODE && downto_part == NO_NODE) {
@@ -1616,7 +1608,7 @@ char *gen_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
 
 //! @brief Optimise units.
 
-char *gen_unit (NODE_T * p, FILE_T out, BOOL_T compose_fun)
+char *gen_unit (NODE_T * p, FILE_T out, int compose_fun)
 {
 #define COMPILE(p, out, fun, compose_fun) {\
   char * fn = (fun) (p, out, compose_fun);\

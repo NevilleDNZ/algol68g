@@ -44,41 +44,40 @@
     torrix_error_handler (txt, "", 0, _rc_);\
   }}
 
-extern A68_ROW matrix_to_row (NODE_T *, gsl_matrix *);
-extern A68_ROW vector_to_row (NODE_T *, gsl_vector *);
-extern gsl_matrix_complex *pop_matrix_complex (NODE_T *, BOOL_T);
-extern gsl_matrix *compute_pca_cv (NODE_T *, gsl_vector **, gsl_matrix *);
-extern gsl_matrix *compute_pca_svd (NODE_T *, gsl_vector **, gsl_matrix *);
-extern gsl_matrix *compute_pca_svd_pad (NODE_T *, gsl_vector **, gsl_matrix *);
-extern gsl_matrix *matrix_hcat (NODE_T *, gsl_matrix *, gsl_matrix *);
-extern gsl_matrix *matrix_vcat (NODE_T *, gsl_matrix *, gsl_matrix *);
-extern gsl_matrix *pop_matrix (NODE_T *, BOOL_T);
-extern gsl_permutation *pop_permutation (NODE_T *, BOOL_T);
-extern gsl_vector_complex *pop_vector_complex (NODE_T *, BOOL_T);
-extern gsl_vector *pop_vector (NODE_T *, BOOL_T);
-extern REAL_T matrix_norm (gsl_matrix *);
-extern void compute_pseudo_inverse (NODE_T *, gsl_matrix **, gsl_matrix *, REAL_T);
-extern void print_matrix (gsl_matrix *, unt);
-extern void print_vector (gsl_vector *, unt);
-extern void push_matrix_complex (NODE_T *, gsl_matrix_complex *);
-extern void push_matrix (NODE_T *, gsl_matrix *);
-extern void push_permutation (NODE_T *, gsl_permutation *);
-extern void push_vector_complex (NODE_T *, gsl_vector_complex *);
-extern void push_vector (NODE_T *, gsl_vector *);
-extern void torrix_error_handler (const char *, const char *, int, int);
-extern void torrix_test_error (int);
+A68_ROW matrix_to_row (NODE_T *, gsl_matrix *);
+A68_ROW vector_to_row (NODE_T *, gsl_vector *);
+gsl_matrix_complex *pop_matrix_complex (NODE_T *, BOOL_T);
+gsl_matrix *compute_pca_cv (NODE_T *, gsl_vector **, gsl_matrix *);
+gsl_matrix *compute_pca_svd (NODE_T *, gsl_vector **, gsl_matrix *);
+gsl_matrix *compute_pca_svd_pad (NODE_T *, gsl_vector **, gsl_matrix *);
+gsl_matrix *matrix_hcat (NODE_T *, gsl_matrix *, gsl_matrix *);
+gsl_matrix *matrix_vcat (NODE_T *, gsl_matrix *, gsl_matrix *);
+gsl_matrix *pop_matrix (NODE_T *, BOOL_T);
+gsl_permutation *pop_permutation (NODE_T *, BOOL_T);
+gsl_vector_complex *pop_vector_complex (NODE_T *, BOOL_T);
+gsl_vector *pop_vector (NODE_T *, BOOL_T);
+REAL_T matrix_norm (gsl_matrix *);
+void compute_pseudo_inverse (NODE_T *, gsl_matrix **, gsl_matrix *, REAL_T);
+void print_matrix (gsl_matrix *, unt);
+void print_vector (gsl_vector *, unt);
+void push_matrix_complex (NODE_T *, gsl_matrix_complex *);
+void push_matrix (NODE_T *, gsl_matrix *);
+void push_permutation (NODE_T *, gsl_permutation *);
+void push_vector_complex (NODE_T *, gsl_vector_complex *);
+void push_vector (NODE_T *, gsl_vector *);
+void torrix_error_handler (const char *, const char *, int, int);
+void torrix_test_error (int);
 
 // BLAS support
 
 #define FLIP ((CBLAS_TRANSPOSE_t) CblasTrans)
 #define SELF ((CBLAS_TRANSPOSE_t) CblasNoTrans)
 
-extern void a68_vector_free (gsl_vector *);
-extern void a68_matrix_free (gsl_matrix *);
-extern void a68_dgemm (CBLAS_TRANSPOSE_t, CBLAS_TRANSPOSE_t,
-                       double, gsl_matrix *, gsl_matrix *, double, gsl_matrix **);
-extern gsl_matrix *mat_before_ab (NODE_T *, gsl_matrix *, gsl_matrix *);
-extern gsl_matrix *mat_over_ab (NODE_T *, gsl_matrix *, gsl_matrix *);
+void a68_vector_free (gsl_vector *);
+void a68_matrix_free (gsl_matrix *);
+void a68_dgemm (CBLAS_TRANSPOSE_t, CBLAS_TRANSPOSE_t, double, gsl_matrix *, gsl_matrix *, double, gsl_matrix **);
+gsl_matrix *mat_before_ab (NODE_T *, gsl_matrix *, gsl_matrix *);
+gsl_matrix *mat_over_ab (NODE_T *, gsl_matrix *, gsl_matrix *);
 
 #endif
 

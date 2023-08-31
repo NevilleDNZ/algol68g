@@ -35,8 +35,7 @@
 
 #define DEFAULT GMP_RNDN
 
-#define MPFR_REAL_BITS (REAL_MANT_DIG)
-#define MPFR_LONG_REAL_BITS (FLT128_MANT_DIG)
+#define MANT_BITS(n) ((int) round ((n) / log10 (2.0)))
 #define MPFR_MP_BITS (MANT_BITS (mpfr_digits ()))
 
 #define NO_MPFR ((mpfr_ptr) NULL)
@@ -59,7 +58,7 @@ void mp_to_mpfr (NODE_T * p, MP_T * z, mpfr_t * x, int digits)
 // This routine looks a lot like "strtod".
   (void) p;
   mpfr_set_ui (*x, 0, DEFAULT);
-  if (MP_EXPONENT (z) * (MP_T) LOG_MP_RADIX > (MP_T) REAL_MIN_10_EXP) {
+  if (MP_EXPONENT (z) * (MP_T) LOG_MP_RADIX > (MP_T) A68_REAL_MIN_EXP) {
     BOOL_T neg = MP_DIGIT (z, 1) < 0;
     mpfr_t term, W;
     mpfr_inits2 (MPFR_MP_BITS, term, W, NO_MPFR);
@@ -288,7 +287,7 @@ void genie_mpfr_inverf_mp (NODE_T * _p_)
   mpfr_t a, b, u, y;
   mpfr_inits2 (MPFR_MP_BITS, a, b, u, y, NO_MPFR);
   mp_to_mpfr (_p_, z, &y, digits);
-  x0 = a68_inverf (mp_to_real (_p_, z, digits));
+  x0 = a68_inverf_real (mp_to_real (_p_, z, digits));
 //  a = z - 1e-9;
 //  b = z + 1e-9;
   mpfr_set_d (a, x0 - 1e-9, DEFAULT);
@@ -352,7 +351,7 @@ void genie_gamma_inc_real_mpfr (NODE_T * p)
   POP_OBJECT (p, &x, A68_REAL);
   POP_OBJECT (p, &s, A68_REAL);
   mpfr_t xx, ss;
-  mpfr_inits2 (MPFR_LONG_REAL_BITS, ss, xx, NO_MPFR);
+  mpfr_inits2 (A68_DOUBLE_MAN, ss, xx, NO_MPFR);
   mpfr_set_d (xx, VALUE (&x), DEFAULT);
   mpfr_set_d (ss, VALUE (&s), DEFAULT);
   mpfr_gamma_inc (ss, ss, xx, DEFAULT);
@@ -367,7 +366,7 @@ void genie_gamma_inc_double_mpfr (NODE_T * p)
   POP_OBJECT (p, &x, A68_LONG_REAL);
   POP_OBJECT (p, &s, A68_LONG_REAL);
   mpfr_t xx, ss;
-  mpfr_inits2 (MPFR_LONG_REAL_BITS, ss, xx, NO_MPFR);
+  mpfr_inits2 (A68_DOUBLE_MAN, ss, xx, NO_MPFR);
   mpfr_set_float128 (xx, VALUE (&x).f, DEFAULT);
   mpfr_set_float128 (ss, VALUE (&s).f, DEFAULT);
   mpfr_gamma_inc (ss, ss, xx, DEFAULT);

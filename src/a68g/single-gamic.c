@@ -80,12 +80,9 @@
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
 #include "a68g-lib.h"
-#include "a68g-double.h"
 #include "a68g-mp.h"
 
 #define ITMAX 1000000000        // Maximum allowed number of iterations
-#define DPMIN DBL_MIN           // Number near the smallest representable double-point number
-#define EPS DBL_EPSILON         // Machine epsilon
 #define NITERMAX_ROMBERG 15     // Maximum allowed number of Romberg iterations
 #define TOL_ROMBERG 0.1         // Tolerance factor used to stop the Romberg iterations
 #define TOL_DIFF 0.2            // Tolerance factor used for the approximation of I_{x,y}^{mu,p} using differences
@@ -111,8 +108,6 @@ REAL_T plim (REAL_T x)
 
 void G_cfrac_lower (REAL_T * Gcfrac, REAL_T p, REAL_T x)
 {
-  REAL_T c, d, del, f, an, bn;
-  INT_T k, n;
 // deal with special case
   if (x == 0) {
     *Gcfrac = 0;
@@ -121,30 +116,27 @@ void G_cfrac_lower (REAL_T * Gcfrac, REAL_T p, REAL_T x)
 // Evaluate the continued fraction using Modified Lentz's method. However,
 // as detailed in the paper, perform manually the first pass (n=1), of the
 // initial Modified Lentz's method.
-  an = 1;
-  bn = p;
-  f = an / bn;
-  c = an / DPMIN;
-  d = 1 / bn;
-  n = 2;
+  REAL_T an = 1, bn = p, del;
+  REAL_T f = an / bn, c = an / A68_REAL_MIN, d = 1 / bn;
+  INT_T n = 2, k;
   do {
     k = n / 2;
     an = (n & 1 ? k : -(p - 1 + k)) * x;
     bn++;
     d = an * d + bn;
     if (d == 0) {
-      d = DPMIN;
+      d = A68_REAL_MIN;
     }
     c = bn + an / c;
     if (c == 0) {
-      c = DPMIN;
+      c = A68_REAL_MIN;
     }
     d = 1 / d;
     del = d * c;
     f *= del;
     n++;
   }
-  while ((a68_abs (del - 1.0) >= EPS) && (n < ITMAX));
+  while ((a68_abs_real (del - 1.0) >= A68_REAL_EPS) && (n < ITMAX));
   *Gcfrac = f;
 }
 
@@ -157,9 +149,9 @@ void G_cfrac_lower (REAL_T * Gcfrac, REAL_T p, REAL_T x)
 
 void G_ibp (REAL_T * Gibp, REAL_T p, REAL_T x)
 {
-  REAL_T t = a68_abs (x);
+  REAL_T t = a68_abs_real (x);
   REAL_T tt = 1 / (t * t);
-  BOOL_T odd = (INT_T) a68_int (p) % 2 != 0;
+  BOOL_T odd = (INT_T) a68_int_real (p) % 2 != 0;
   REAL_T c = 1 / t;
   REAL_T d = (p - 1);
   REAL_T s = c * (t - d);
@@ -171,13 +163,13 @@ void G_ibp (REAL_T * Gibp, REAL_T p, REAL_T x)
     REAL_T del = c * (t - d);
     s += del;
     l++;
-    stop = a68_abs (del) < a68_abs (s) * EPS;
+    stop = a68_abs_real (del) < a68_abs_real (s) * A68_REAL_EPS;
   }
   while ((l < floor ((p - 2) / 2)) && !stop);
   if (odd && !stop) {
     s += d * c / t;
   }
-  *Gibp = ((odd ? -1 : 1) * a68_exp (-t + lgamma (p) - (p - 1) * a68_ln (t)) + s) / t;
+  *Gibp = ((odd ? -1 : 1) * a68_exp_real (-t + lgamma (p) - (p - 1) * a68_ln_real (t)) + s) / t;
 }
 
 //! @brief compute the G-function in the domain x > p using a
@@ -189,7 +181,7 @@ void G_ibp (REAL_T * Gibp, REAL_T p, REAL_T x)
 void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
 {
 // Special case
-  if (a68_isinf (x)) {
+  if (a68_isinf_real (x)) {
     *Gcfrac = 0;
     return;
   }
@@ -202,7 +194,7 @@ void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
   if (t) {
 // b{1} is non-zero
     f = an / bn;
-    c = an / DPMIN;
+    c = an / A68_REAL_MIN;
     d = 1 / bn;
     n = 2;
   } else {
@@ -210,7 +202,7 @@ void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
     an = -(1 - p);
     bn = x + 3 - p;
     f = an / bn;
-    c = an / DPMIN;
+    c = an / A68_REAL_MIN;
     d = 1 / bn;
     n = 3;
   }
@@ -220,11 +212,11 @@ void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
     bn += 2;
     d = an * d + bn;
     if (d == 0) {
-      d = DPMIN;
+      d = A68_REAL_MIN;
     }
     c = bn + an / c;
     if (c == 0) {
-      c = DPMIN;
+      c = A68_REAL_MIN;
     }
     d = 1 / d;
     del = d * c;
@@ -232,7 +224,7 @@ void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
     i++;
     n++;
   }
-  while ((a68_abs (del - 1.0) >= EPS) && (n < ITMAX));
+  while ((a68_abs_real (del - 1.0) >= A68_REAL_EPS) && (n < ITMAX));
   *Gcfrac = t ? f : 1 / f;
 }
 
@@ -266,7 +258,7 @@ void romberg_iterations (REAL_T * R, REAL_T sigma, INT_T n, REAL_T x, REAL_T y, 
   REAL_T sum = 0, xx;
   for (int j = 1; j <= pow2; j++) {
     xx = x + ((y - x) * (2 * j - 1)) / (2 * pow2);
-    sum += a68_exp (-mu * xx + (p - 1) * a68_ln (xx) - sigma);
+    sum += a68_exp_real (-mu * xx + (p - 1) * a68_ln_real (xx) - sigma);
   }
   R[adr0] = 0.5 * R[adr0_prev] + h * sum;
   REAL_T pow4 = 4;
@@ -284,10 +276,10 @@ void romberg_estimate (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T 
   REAL_T *R = (REAL_T *) get_heap_space (((NITERMAX_ROMBERG + 1) * (NITERMAX_ROMBERG + 2)) / 2 * sizeof (REAL_T));
   ASSERT (R != NULL);
 // Initialization (n=1)
-  *sigma = -mu * y + (p - 1) * a68_ln (y);
-  R[0] = 0.5 * (y - x) * (a68_exp (-mu * x + (p - 1) * a68_ln (x) - (*sigma)) + 1);
+  *sigma = -mu * y + (p - 1) * a68_ln_real (y);
+  R[0] = 0.5 * (y - x) * (a68_exp_real (-mu * x + (p - 1) * a68_ln_real (x) - (*sigma)) + 1);
 // Loop for n > 0
-  REAL_T relneeded = EPS / TOL_ROMBERG;
+  REAL_T relneeded = A68_REAL_EPS / TOL_ROMBERG;
   INT_T adr0 = 0, n = 1;
   REAL_T h = (y - x) / 2;       // n=1, h = (y-x)/2^n
   REAL_T pow2 = 1;              // n=1; pow2 = 2^(n-1)
@@ -298,7 +290,7 @@ void romberg_estimate (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T 
       h /= 2;
       pow2 *= 2;
       adr0 = (n * (n + 1)) / 2;
-      relerr = a68_abs ((R[adr0 + n] - R[adr0 + n - 1]) / R[adr0 + n]);
+      relerr = a68_abs_real ((R[adr0 + n] - R[adr0 + n - 1]) / R[adr0 + n]);
       n++;
     } while (n <= NITERMAX_ROMBERG && relerr > relneeded);
   }
@@ -325,26 +317,26 @@ void romberg_estimate (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T 
 void deltagammainc (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T mu, REAL_T p)
 {
 // Particular cases
-  if (a68_isinf (x) && a68_isinf (y)) {
+  if (a68_isinf_real (x) && a68_isinf_real (y)) {
     *rho = 0;
-    *sigma = a68_neginf ();
+    *sigma = a68_neginf_double_real ();
     return;
   } else if (x == y) {
     *rho = 0;
-    *sigma = a68_neginf ();
+    *sigma = a68_neginf_double_real ();
     return;
   }
-  if (x == 0 && a68_isinf (y)) {
+  if (x == 0 && a68_isinf_real (y)) {
     *rho = 1;
-    (*sigma) = lgamma (p) - p * a68_ln (mu);
+    (*sigma) = lgamma (p) - p * a68_ln_real (mu);
     return;
   }
 // Initialization
   REAL_T mA, mB, mx, my, nA, nB;
   G_func (&mx, p, mu * x);
-  REAL_T nx = (a68_isinf (x) ? a68_neginf () : -mu * x + p * a68_ln (x));
+  REAL_T nx = (a68_isinf_real (x) ? a68_neginf_double_real () : -mu * x + p * a68_ln_real (x));
   G_func (&my, p, mu * y);
-  REAL_T ny = (a68_isinf (y) ? a68_neginf () : -mu * y + p * a68_ln (y));
+  REAL_T ny = (a68_isinf_real (y) ? a68_neginf_double_real () : -mu * y + p * a68_ln_real (y));
 
 // Compute (mA,nA) and (mB,nB) such as I_{x,y}^{mu,p} can be
 // approximated by the difference A-B, where A >= B >= 0, A = mA*exp (nA) an 
@@ -365,9 +357,9 @@ void deltagammainc (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T mu,
       nB = ny;
     } else if (p < plim (mu * y)) {
       mA = 1;
-      nA = lgamma (p) - p * a68_ln (mu);
+      nA = lgamma (p) - p * a68_ln_real (mu);
       nB = fmax (nx, ny);
-      mB = mx * a68_exp (nx - nB) + my * a68_exp (ny - nB);
+      mB = mx * a68_exp_real (nx - nB) + my * a68_exp_real (ny - nB);
     } else {
       mA = my;
       nA = ny;
@@ -376,10 +368,10 @@ void deltagammainc (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T mu,
     }
   }
 // Compute (rho,sigma) such that rho*exp (sigma) = A-B
-  *rho = mA - mB * a68_exp (nB - nA);
+  *rho = mA - mB * a68_exp_real (nB - nA);
   *sigma = nA;
 // If the difference involved a significant loss of precision, compute Romberg estimate.
-  if (!a68_isinf (y) && ((*rho) / mA < TOL_DIFF)) {
+  if (!a68_isinf_real (y) && ((*rho) / mA < TOL_DIFF)) {
     romberg_estimate (rho, sigma, x, y, mu, p);
   }
 }
@@ -397,7 +389,7 @@ void genie_gamma_inc_g_real (NODE_T * n)
   POP_OBJECT (n, &p, A68_REAL);
   REAL_T rho, sigma;
   deltagammainc (&rho, &sigma, VALUE (&x), VALUE (&y), VALUE (&mu), VALUE (&p));
-  PUSH_VALUE (n, rho * a68_exp (sigma), A68_REAL);
+  PUSH_VALUE (n, rho * a68_exp_real (sigma), A68_REAL);
 }
 
 //! @brief PROC gamma inc f = (REAL p, x) REAL
@@ -408,8 +400,8 @@ void genie_gamma_inc_f_real (NODE_T * n)
   POP_OBJECT (n, &x, A68_REAL);
   POP_OBJECT (n, &p, A68_REAL);
   REAL_T rho, sigma;
-  deltagammainc (&rho, &sigma, VALUE (&x), a68_posinf (), 1, VALUE (&p));
-  PUSH_VALUE (n, rho * a68_exp (sigma), A68_REAL);
+  deltagammainc (&rho, &sigma, VALUE (&x), a68_posinf_real (), 1, VALUE (&p));
+  PUSH_VALUE (n, rho * a68_exp_real (sigma), A68_REAL);
 }
 
 //! @brief PROC gamma inc = (REAL p, x) REAL

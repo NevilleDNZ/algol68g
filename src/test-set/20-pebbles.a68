@@ -27,7 +27,7 @@ The Mathematical Centre ("Stichting Mathematisch Centrum" or SMC) was a Dutch
 non-profit institution aiming at the promotion of pure mathematics and its 
 applications. 
 
-SMC is now "Stichting Centrum voor Wiskunde en Informatica" (CWI). The test set 
+SMC is now "Stichting Centrum Wiskunde & Informatica" (CWI). The test set 
 is available as an open access publication from the CWI repository:
 
    https://ir.cwi.nl/pub/
@@ -51,9 +51,7 @@ BEGIN # 1. Sets in ALGOL 68;
         (INT pr := 1, pw := 1, pb := UPB st;
 
          PRIO EXCH = 1;
-         OP EXCH = (REF STONE a, b) VOID:
-
-         (STONE c = b; b := a; a := c);
+         OP EXCH = (REF STONE a, b) VOID: (STONE c = b; b := a; a := c);
 
          TO UPB st
          DO CASE st[pw]

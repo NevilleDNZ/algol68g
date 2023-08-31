@@ -1,4 +1,4 @@
-//! @file mp-math.c
+//! @file mp-complex.c
 //! @author J. Marcel van der Veer
 //!
 //! @section Copyright
@@ -24,9 +24,6 @@
 //! [LONG] LONG COMPLEX math functions.
 
 #include "a68g.h"
-#include "a68g-genie.h"
-#include "a68g-prelude.h"
-#include "a68g-double.h"
 #include "a68g-mp.h"
 
 //! @brief LONG COMPLEX multiplication
@@ -35,14 +32,10 @@ MP_T *cmul_mp (NODE_T * p, MP_T * a, MP_T * b, MP_T * c, MP_T * d, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *la = len_mp (p, a, digs, gdigs);
-  MP_T *lb = len_mp (p, b, digs, gdigs);
-  MP_T *lc = len_mp (p, c, digs, gdigs);
-  MP_T *ld = len_mp (p, d, digs, gdigs);
-  MP_T *ac = nil_mp (p, gdigs);
-  MP_T *bd = nil_mp (p, gdigs);
-  MP_T *ad = nil_mp (p, gdigs);
-  MP_T *bc = nil_mp (p, gdigs);
+  MP_T *la = len_mp (p, a, digs, gdigs), *lb = len_mp (p, b, digs, gdigs);
+  MP_T *lc = len_mp (p, c, digs, gdigs), *ld = len_mp (p, d, digs, gdigs);
+  MP_T *ac = nil_mp (p, gdigs), *bd = nil_mp (p, gdigs);
+  MP_T *ad = nil_mp (p, gdigs), *bc = nil_mp (p, gdigs);
   (void) mul_mp (p, ac, la, lc, gdigs);
   (void) mul_mp (p, bd, lb, ld, gdigs);
   (void) mul_mp (p, ad, la, ld, gdigs);
@@ -64,8 +57,7 @@ MP_T *cdiv_mp (NODE_T * p, MP_T * a, MP_T * b, MP_T * c, MP_T * d, int digs)
     errno = ERANGE;
     return NaN_MP;
   }
-  MP_T *q = nil_mp (p, digs);
-  MP_T *r = nil_mp (p, digs);
+  MP_T *q = nil_mp (p, digs), *r = nil_mp (p, digs);
   (void) move_mp (q, c, digs);
   (void) move_mp (r, d, digs);
   MP_DIGIT (q, 1) = ABS (MP_DIGIT (q, 1));
@@ -110,19 +102,14 @@ MP_T *csqrt_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
   if (IS_ZERO_MP (re) && IS_ZERO_MP (im)) {
     SET_MP_ZERO (re, gdigs);
     SET_MP_ZERO (im, gdigs);
   } else {
     MP_T *c1 = lit_mp (p, 1, 0, gdigs);
-    MP_T *t = nil_mp (p, gdigs);
-    MP_T *x = nil_mp (p, gdigs);
-    MP_T *y = nil_mp (p, gdigs);
-    MP_T *u = nil_mp (p, gdigs);
-    MP_T *v = nil_mp (p, gdigs);
-    MP_T *w = nil_mp (p, gdigs);
+    MP_T *t = nil_mp (p, gdigs), *x = nil_mp (p, gdigs), *y = nil_mp (p, gdigs);
+    MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs), *w = nil_mp (p, gdigs);
     SET_MP_ONE (c1, gdigs);
     (void) move_mp (x, re, gdigs);
     (void) move_mp (y, im, gdigs);
@@ -175,14 +162,17 @@ MP_T *cexp_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
-  MP_T *u = nil_mp (p, gdigs);
-  (void) exp_mp (p, u, re, gdigs);
-  (void) cos_mp (p, re, im, gdigs);
-  (void) sin_mp (p, im, im, gdigs);
-  (void) mul_mp (p, re, re, u, gdigs);
-  (void) mul_mp (p, im, im, u, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  if (IS_ZERO_MP (im)) {
+    (void) exp_mp (p, re, re, gdigs);
+  } else {
+    MP_T *u = nil_mp (p, gdigs);
+    (void) exp_mp (p, u, re, gdigs);
+    (void) cos_mp (p, re, im, gdigs);
+    (void) sin_mp (p, im, im, gdigs);
+    (void) mul_mp (p, re, re, u, gdigs);
+    (void) mul_mp (p, im, im, u, gdigs);
+  }
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
@@ -195,12 +185,9 @@ MP_T *cln_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
-  MP_T *u = nil_mp (p, gdigs);
-  MP_T *v = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *s = nil_mp (p, gdigs), *t = nil_mp (p, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
   (void) move_mp (u, re, gdigs);
   (void) move_mp (v, im, gdigs);
   (void) hypot_mp (p, s, u, v, gdigs);
@@ -221,12 +208,9 @@ MP_T *csin_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *c = nil_mp (p, gdigs);
-  MP_T *sh = nil_mp (p, gdigs);
-  MP_T *ch = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *s = nil_mp (p, gdigs), *c = nil_mp (p, gdigs);
+  MP_T *sh = nil_mp (p, gdigs), *ch = nil_mp (p, gdigs);
   if (IS_ZERO_MP (im)) {
     (void) sin_mp (p, re, re, gdigs);
     SET_MP_ZERO (im, gdigs);
@@ -249,12 +233,9 @@ MP_T *ccos_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *c = nil_mp (p, gdigs);
-  MP_T *sh = nil_mp (p, gdigs);
-  MP_T *ch = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *s = nil_mp (p, gdigs), *c = nil_mp (p, gdigs);
+  MP_T *sh = nil_mp (p, gdigs), *ch = nil_mp (p, gdigs);
   if (IS_ZERO_MP (im)) {
     (void) cos_mp (p, re, re, gdigs);
     SET_MP_ZERO (im, gdigs);
@@ -278,10 +259,8 @@ MP_T *ctan_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   errno = 0;
-  MP_T *s = nil_mp (p, digs);
-  MP_T *t = nil_mp (p, digs);
-  MP_T *u = nil_mp (p, digs);
-  MP_T *v = nil_mp (p, digs);
+  MP_T *s = nil_mp (p, digs), *t = nil_mp (p, digs);
+  MP_T *u = nil_mp (p, digs), *v = nil_mp (p, digs);
   (void) move_mp (u, r, digs);
   (void) move_mp (v, i, digs);
   (void) csin_mp (p, u, v, digs);
@@ -301,46 +280,31 @@ MP_T *ctan_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 
 MP_T *casin_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
+// asin(z) = -i log(i z + sqrt(1 - z*z))
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
   BOOL_T negim = MP_DIGIT (im, 1) < 0;
-  if (IS_ZERO_MP (im)) {
-    BOOL_T neg = MP_DIGIT (re, 1) < 0;
-    if (acos_mp (p, im, re, gdigs) == NaN_MP) {
-      errno = 0;                // Ignore the acos error
-      MP_DIGIT (re, 1) = ABS (MP_DIGIT (re, 1));
-      (void) acosh_mp (p, im, re, gdigs);
-    }
-    (void) mp_pi (p, re, MP_HALF_PI, gdigs);
-    if (neg) {
-      MP_DIGIT (re, 1) = -MP_DIGIT (re, 1);
-    }
-  } else {
-    MP_T *c1 = lit_mp (p, 1, 0, gdigs);
-    MP_T *u = nil_mp (p, gdigs);
-    MP_T *v = nil_mp (p, gdigs);
-    MP_T *a = nil_mp (p, gdigs);
-    MP_T *b = nil_mp (p, gdigs);
+  MP_T *c1 = lit_mp (p, 1, 0, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
+  MP_T *a = nil_mp (p, gdigs), *b = nil_mp (p, gdigs);
 // u=sqrt((r+1)^2+i^2), v=sqrt((r-1)^2+i^2).
-    (void) add_mp (p, a, re, c1, gdigs);
-    (void) sub_mp (p, b, re, c1, gdigs);
-    (void) hypot_mp (p, u, a, im, gdigs);
-    (void) hypot_mp (p, v, b, im, gdigs);
+  (void) add_mp (p, a, re, c1, gdigs);
+  (void) sub_mp (p, b, re, c1, gdigs);
+  (void) hypot_mp (p, u, a, im, gdigs);
+  (void) hypot_mp (p, v, b, im, gdigs);
 // a=(u+v)/2, b=(u-v)/2.
-    (void) add_mp (p, a, u, v, gdigs);
-    (void) half_mp (p, a, a, gdigs);
-    (void) sub_mp (p, b, u, v, gdigs);
-    (void) half_mp (p, b, b, gdigs);
+  (void) add_mp (p, a, u, v, gdigs);
+  (void) half_mp (p, a, a, gdigs);
+  (void) sub_mp (p, b, u, v, gdigs);
+  (void) half_mp (p, b, b, gdigs);
 // r=asin(b), i=ln(a+sqrt(a^2-1)).
-    (void) mul_mp (p, u, a, a, gdigs);
-    (void) sub_mp (p, u, u, c1, gdigs);
-    (void) sqrt_mp (p, u, u, gdigs);
-    (void) add_mp (p, u, a, u, gdigs);
-    (void) ln_mp (p, im, u, gdigs);
-    (void) asin_mp (p, re, b, gdigs);
-  }
+  (void) mul_mp (p, u, a, a, gdigs);
+  (void) sub_mp (p, u, u, c1, gdigs);
+  (void) sqrt_mp (p, u, u, gdigs);
+  (void) add_mp (p, u, a, u, gdigs);
+  (void) ln_mp (p, im, u, gdigs);
+  (void) asin_mp (p, re, b, gdigs);
   if (negim) {
     MP_DIGIT (im, 1) = -MP_DIGIT (im, 1);
   }
@@ -354,48 +318,31 @@ MP_T *casin_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 
 MP_T *cacos_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
+// acos (z) = pi/2 - asin (z)
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
   BOOL_T negim = MP_DIGIT (im, 1) < 0;
-  if (IS_ZERO_MP (im)) {
-    BOOL_T neg = MP_DIGIT (re, 1) < 0;
-    if (acos_mp (p, im, re, gdigs) == NaN_MP) {
-      errno = 0;                // Ignore the acos error
-      MP_DIGIT (re, 1) = ABS (MP_DIGIT (re, 1));
-      (void) acosh_mp (p, im, re, gdigs);
-      MP_DIGIT (im, 1) = -MP_DIGIT (im, 1);
-    }
-    if (neg) {
-      (void) mp_pi (p, re, MP_PI, gdigs);
-    } else {
-      SET_MP_ZERO (re, gdigs);
-    }
-  } else {
-    MP_T *c1 = lit_mp (p, 1, 0, gdigs);
-    MP_T *u = nil_mp (p, gdigs);
-    MP_T *v = nil_mp (p, gdigs);
-    MP_T *a = nil_mp (p, gdigs);
-    MP_T *b = nil_mp (p, gdigs);
+  MP_T *a = nil_mp (p, gdigs), *b = nil_mp (p, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
+  MP_T *c1 = lit_mp (p, 1, 0, gdigs);
 // u=sqrt((r+1)^2+i^2), v=sqrt((r-1)^2+i^2).
-    (void) add_mp (p, a, re, c1, gdigs);
-    (void) sub_mp (p, b, re, c1, gdigs);
-    (void) hypot_mp (p, u, a, im, gdigs);
-    (void) hypot_mp (p, v, b, im, gdigs);
+  (void) add_mp (p, a, re, c1, gdigs);
+  (void) sub_mp (p, b, re, c1, gdigs);
+  (void) hypot_mp (p, u, a, im, gdigs);
+  (void) hypot_mp (p, v, b, im, gdigs);
 // a=(u+v)/2, b=(u-v)/2.
-    (void) add_mp (p, a, u, v, gdigs);
-    (void) half_mp (p, a, a, gdigs);
-    (void) sub_mp (p, b, u, v, gdigs);
-    (void) half_mp (p, b, b, gdigs);
+  (void) add_mp (p, a, u, v, gdigs);
+  (void) half_mp (p, a, a, gdigs);
+  (void) sub_mp (p, b, u, v, gdigs);
+  (void) half_mp (p, b, b, gdigs);
 // r=acos(b), i=-ln(a+sqrt(a^2-1)).
-    (void) mul_mp (p, u, a, a, gdigs);
-    (void) sub_mp (p, u, u, c1, gdigs);
-    (void) sqrt_mp (p, u, u, gdigs);
-    (void) add_mp (p, u, a, u, gdigs);
-    (void) ln_mp (p, im, u, gdigs);
-    (void) acos_mp (p, re, b, gdigs);
-  }
+  (void) mul_mp (p, u, a, a, gdigs);
+  (void) sub_mp (p, u, u, c1, gdigs);
+  (void) sqrt_mp (p, u, u, gdigs);
+  (void) add_mp (p, u, a, u, gdigs);
+  (void) ln_mp (p, im, u, gdigs);
+  (void) acos_mp (p, re, b, gdigs);
   if (!negim) {
     MP_DIGIT (im, 1) = -MP_DIGIT (im, 1);
   }
@@ -409,32 +356,31 @@ MP_T *cacos_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 
 MP_T *catan_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
+// arctan (z) = -i aractanh (iz).
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *re = len_mp (p, r, digs, gdigs);
-  MP_T *im = len_mp (p, i, digs, gdigs);
-  MP_T *u = nil_mp (p, gdigs);
-  MP_T *v = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
   if (IS_ZERO_MP (im)) {
     (void) atan_mp (p, u, re, gdigs);
     SET_MP_ZERO (v, gdigs);
   } else {
     MP_T *c1 = lit_mp (p, 1, 0, gdigs);
-    MP_T *a = nil_mp (p, gdigs);
-    MP_T *b = nil_mp (p, gdigs);
-// a=sqrt(r^2+(i+1)^2), b=sqrt(r^2+(i-1)^2).
+    MP_T *a = nil_mp (p, gdigs), *b = nil_mp (p, gdigs);
+// IM = 1/4 ln ((r^2 + (i+1)^2) / (r^2 + (i-1)^2))
     (void) add_mp (p, a, im, c1, gdigs);
     (void) sub_mp (p, b, im, c1, gdigs);
     (void) hypot_mp (p, u, re, a, gdigs);
     (void) hypot_mp (p, v, re, b, gdigs);
-// im=ln(a/b).
     (void) div_mp (p, u, u, v, gdigs);
     (void) ln_mp (p, v, u, gdigs);
-// re=atan(2r/(1-r^2-i^2)).
+    (void) half_mp (p, v, v, gdigs);
+// u = 1 - r^2 - i^2
     (void) mul_mp (p, a, re, re, gdigs);
     (void) mul_mp (p, b, im, im, gdigs);
     (void) add_mp (p, a, a, b, gdigs);
     (void) sub_mp (p, u, c1, a, gdigs);
+// RE = 1/2 * arctan (2r / (1 - r^2 - i^2))
     if (IS_ZERO_MP (u)) {
       (void) mp_pi (p, u, MP_HALF_PI, gdigs);
     } else {
@@ -450,12 +396,11 @@ MP_T *catan_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
           (void) add_mp (p, u, u, a, gdigs);
         }
       }
+      (void) half_mp (p, u, u, gdigs);
     }
   }
   (void) shorten_mp (p, r, digs, u, gdigs);
   (void) shorten_mp (p, i, digs, v, gdigs);
-  (void) half_mp (p, r, r, digs);
-  (void) half_mp (p, i, i, digs);
   A68_SP = pop_sp;
   return re;
 }
@@ -466,20 +411,18 @@ MP_T *csinh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *u = len_mp (p, r, digs, gdigs);
-  MP_T *v = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
 // sinh (z) =  -i sin (iz)
-  SET_MP_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
-  (void) csin_mp (p, u, v, gdigs);
-  SET_MP_ZERO (s, gdigs);
-  SET_MP_MINUS_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
+  SET_MP_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
+  (void) csin_mp (p, re, im, gdigs);
+  SET_MP_ZERO (u, gdigs);
+  SET_MP_MINUS_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
 //
-  (void) shorten_mp (p, r, digs, u, gdigs);
-  (void) shorten_mp (p, i, digs, v, gdigs);
+  (void) shorten_mp (p, r, digs, re, gdigs);
+  (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
   return r;
 }
@@ -490,18 +433,16 @@ MP_T *ccosh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *u = len_mp (p, r, digs, gdigs);
-  MP_T *v = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
 // cosh (z) =  cos (iz)
-  SET_MP_ZERO (s, digs);
-  SET_MP_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
-  (void) ccos_mp (p, u, v, gdigs);
+  SET_MP_ZERO (u, digs);
+  SET_MP_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
+  (void) ccos_mp (p, re, im, gdigs);
 //
-  (void) shorten_mp (p, r, digs, u, gdigs);
-  (void) shorten_mp (p, i, digs, v, gdigs);
+  (void) shorten_mp (p, r, digs, re, gdigs);
+  (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
   return r;
 }
@@ -512,20 +453,18 @@ MP_T *ctanh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *u = len_mp (p, r, digs, gdigs);
-  MP_T *v = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
 // tanh (z) =  -i tan (iz)
-  SET_MP_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
-  (void) ctan_mp (p, u, v, gdigs);
-  SET_MP_ZERO (u, gdigs);
-  SET_MP_MINUS_ONE (v, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
+  SET_MP_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
+  (void) ctan_mp (p, re, im, gdigs);
+  SET_MP_ZERO (re, gdigs);
+  SET_MP_MINUS_ONE (im, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
 //
-  (void) shorten_mp (p, r, digs, u, gdigs);
-  (void) shorten_mp (p, i, digs, v, gdigs);
+  (void) shorten_mp (p, r, digs, re, gdigs);
+  (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
   return r;
 }
@@ -536,20 +475,18 @@ MP_T *casinh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *u = len_mp (p, r, digs, gdigs);
-  MP_T *v = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
 // asinh (z) =  i asin (-iz)
-  SET_MP_MINUS_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
-  (void) casin_mp (p, u, v, gdigs);
-  SET_MP_ZERO (s, gdigs);
-  SET_MP_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
+  SET_MP_MINUS_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
+  (void) casin_mp (p, re, im, gdigs);
+  SET_MP_ZERO (u, gdigs);
+  SET_MP_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
 //
-  (void) shorten_mp (p, r, digs, u, gdigs);
-  (void) shorten_mp (p, i, digs, v, gdigs);
+  (void) shorten_mp (p, r, digs, re, gdigs);
+  (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
   return r;
 }
@@ -560,18 +497,16 @@ MP_T *cacosh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *u = len_mp (p, r, digs, gdigs);
-  MP_T *v = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
 // acosh (z) =  i * acos (z)
-  (void) cacos_mp (p, u, v, gdigs);
-  SET_MP_ZERO (s, gdigs);
-  SET_MP_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
+  (void) cacos_mp (p, re, im, gdigs);
+  SET_MP_ZERO (u, gdigs);
+  SET_MP_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
 //
-  (void) shorten_mp (p, r, digs, u, gdigs);
-  (void) shorten_mp (p, i, digs, v, gdigs);
+  (void) shorten_mp (p, r, digs, re, gdigs);
+  (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
   return r;
 }
@@ -582,20 +517,18 @@ MP_T *catanh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *u = len_mp (p, r, digs, gdigs);
-  MP_T *v = len_mp (p, i, digs, gdigs);
-  MP_T *s = nil_mp (p, gdigs);
-  MP_T *t = nil_mp (p, gdigs);
+  MP_T *re = len_mp (p, r, digs, gdigs), *im = len_mp (p, i, digs, gdigs);
+  MP_T *u = nil_mp (p, gdigs), *v = nil_mp (p, gdigs);
 // atanh (z) =  i * atan (-iz)
-  SET_MP_MINUS_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
-  (void) catan_mp (p, u, v, gdigs);
-  SET_MP_ZERO (s, gdigs);
-  SET_MP_ONE (t, gdigs);
-  (void) cmul_mp (p, u, v, s, t, gdigs);
+  SET_MP_MINUS_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
+  (void) catan_mp (p, re, im, gdigs);
+  SET_MP_ZERO (u, gdigs);
+  SET_MP_ONE (v, gdigs);
+  (void) cmul_mp (p, re, im, u, v, gdigs);
 //
-  (void) shorten_mp (p, r, digs, u, gdigs);
-  (void) shorten_mp (p, i, digs, v, gdigs);
+  (void) shorten_mp (p, r, digs, re, gdigs);
+  (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
   return r;
 }

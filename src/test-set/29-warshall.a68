@@ -1,0 +1,78 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+CO
+
+@section Synopsis
+
+Warshall's algorithm for transitive closures.
+
+This code demonstrates a68g's small refinement preprocessor.
+At the University of Nijmegen a preprocessor much like this one was used
+as a front-end to FLACC in freshman programming courses in the 1980's.
+
+See: 
+
+  C.H.A. Koster, H. Meijer.
+  Systematisch programmeren in Algol 68, Deel I en II.
+  Kluwer, Deventer [1978, 1981].
+
+CO
+
+# Suppose a compiler finds four procedures that call each other
+  according below matrix.
+  Entry calls[j, k] means procedure 'j' calls 'k' directly.
+#
+
+INT n = 4;
+
+MODE RELATION = [n, n] BOOL;
+
+RELATION calls = ((FALSE, TRUE, FALSE, FALSE),
+                  (FALSE, FALSE, TRUE, FALSE),
+                  (FALSE, FALSE, FALSE, TRUE),
+                  (FALSE, FALSE, FALSE, FALSE)
+                 );
+
+# Warshall's algorithm computes the transitive closure.
+  Entry warshall[j, k] means that 'j' calls 'k', either
+  directly or indirectly.
+# 
+
+PROC warshall = (RELATION direct) RELATION:
+     (transitive closure);
+
+print relations.
+
+# The refinements follow below #
+   
+   transitive closure:
+      RELATION indirect := direct;
+      construct indirect;
+      indirect.
+   
+      construct indirect:
+         FOR m TO n
+         DO FOR s TO n
+            DO FOR t TO n
+               DO indirect[s, t] := indirect[s, t] OR (indirect[s, m] AND indirect[m, t])
+               OD
+            OD
+         OD.
+
+   print relations:         
+      printf ($"direct:"l$);
+      printf (($n(n)(g)l$, calls));
+      printf ($"indirect:"l$);
+      printf (($n(n)(g)l$, warshall (calls))).

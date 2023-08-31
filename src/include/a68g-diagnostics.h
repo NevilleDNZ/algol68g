@@ -26,12 +26,12 @@
 #if !defined (A68G_DIAGNOSTICS_H)
 #define A68G_DIAGNOSTICS_H
 
-extern char *error_specification (void);
-extern void diagnostic (STATUS_MASK_T, NODE_T *, char *, ...);
-extern void diagnostics_to_terminal (LINE_T *, int);
-extern void scan_error (LINE_T *, char *, char *);
-extern void scan_warning (LINE_T *, char *, char *);
-extern void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
+char *error_specification (void);
+void diagnostic (STATUS_MASK_T, NODE_T *, char *, ...);
+void diagnostics_to_terminal (LINE_T *, int);
+void scan_error (LINE_T *, char *, char *);
+void scan_warning (LINE_T *, char *, char *);
+void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 
 // Error codes
 

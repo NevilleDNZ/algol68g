@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! [LONG] LONG INT, REAL and COMPLEX routines.
+//! [LONG] LONG INT, REAL routines.
 
 // Multiprecision calculations are useful in these cases:
 //
@@ -88,7 +88,7 @@
 // advantageous to keep the base as high as possible. Modern computers handle
 // doubles at similar or better speed as integers, therefore this library
 // opts for storing numbers as [] words were a word is real*8 (legacy) or 
-// int*8 (on f.i. ix86 processors that have real*10), trading space for speed.
+// int*8, trading space for speed.
 // 
 // Set a base such that "base^2" can be exactly represented by a word.
 // To facilitate transput, we require a base that is a power of 10.
@@ -108,7 +108,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-double.h"
 #include "a68g-mp.h"
 
 // Internal mp constants.
@@ -431,7 +430,7 @@ MP_T *real_to_mp (NODE_T * p, MP_T * z, REAL_T x, int digs)
 // Transport digs of x to the mantissa of z.
   INT_T sum = 0, weight = (MP_RADIX / 10);
   int j = 1;
-  for (int k = 0; a != 0.0 && j <= digs && k < REAL_DIGITS; k++) {
+  for (int k = 0; a != 0.0 && j <= digs && k < A68_REAL_DIG; k++) {
     REAL_T u = a * 10;
     REAL_T v = floor (u);
     a = u - v;
@@ -460,7 +459,7 @@ REAL_T mp_to_real (NODE_T * p, MP_T * z, int digs)
 {
 // This routine looks a lot like "strtod".
   (void) p;
-  if (MP_EXPONENT (z) * (MP_T) LOG_MP_RADIX <= (MP_T) REAL_MIN_10_EXP) {
+  if (MP_EXPONENT (z) * (MP_T) LOG_MP_RADIX <= (MP_T) A68_REAL_MIN_EXP) {
     return 0;
   } else {
     REAL_T terms[1 + MP_MAX_DIGITS];
@@ -941,16 +940,13 @@ MP_T *over_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
     errno = ERANGE;
     return NaN_MP;
   }
-  int digs_g = FUN_DIGITS (digs);
   ADDR_T pop_sp = A68_SP;
-  MP_T *x_g = len_mp (p, x, digs, digs_g);
-  MP_T *y_g = len_mp (p, y, digs, digs_g);
-  MP_T *z_g = nil_mp (p, digs_g);
+  int digs_g = FUN_DIGITS (digs);
+  MP_T *x_g = len_mp (p, x, digs, digs_g), *y_g = len_mp (p, y, digs, digs_g), *z_g = nil_mp (p, digs_g);
   (void) div_mp (p, z_g, x_g, y_g, digs_g);
   trunc_mp (p, z_g, z_g, digs_g);
   (void) shorten_mp (p, z, digs, z_g, digs_g);
   MP_STATUS (z) = (MP_T) INIT_MASK;
-// Restore and exit.
   A68_SP = pop_sp;
   return z;
 }
@@ -1015,16 +1011,15 @@ MP_T *mul_mp_digit (NODE_T * p, MP_T * z, MP_T * x, MP_T y, int digs)
 
 MP_T *half_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
-  MP_T *w, z_1, x_1 = MP_DIGIT (x, 1), *u, *v;
-  int j, digs_h = 2 + digs;
   ADDR_T pop_sp = A68_SP;
+  int digs_h = 2 + digs;
+  MP_T x_1 = MP_DIGIT (x, 1);
   MP_DIGIT (x, 1) = ABS (x_1);
   MP_STATUS (z) = (MP_T) INIT_MASK;
 // Calculate x * 0.5.
-  w = lit_mp (p, 0, MP_EXPONENT (x), digs_h);
-  j = digs;
-  u = &MP_DIGIT (w, 1 + digs);
-  v = &MP_DIGIT (x, digs);
+  MP_T *w = lit_mp (p, 0, MP_EXPONENT (x), digs_h);
+  MP_T *u = &MP_DIGIT (w, 1 + digs), *v = &MP_DIGIT (x, digs);
+  int j = digs;
   while (j-- >= 1) {
     (u--)[0] += (MP_RADIX / 2) * (v--)[0];
   }
@@ -1032,7 +1027,7 @@ MP_T *half_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   round_internal_mp (z, w, digs);
 // Restore and exit.
   A68_SP = pop_sp;
-  z_1 = MP_DIGIT (z, 1);
+  MP_T z_1 = MP_DIGIT (z, 1);
   MP_DIGIT (x, 1) = x_1;
   MP_DIGIT (z, 1) = (x_1 >= 0 ? z_1 : -z_1);
   check_mp_exp (p, z);
@@ -1043,16 +1038,15 @@ MP_T *half_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 
 MP_T *tenth_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
-  MP_T *w, z_1, x_1 = MP_DIGIT (x, 1), *u, *v;
-  int j, digs_h = 2 + digs;
   ADDR_T pop_sp = A68_SP;
+  int digs_h = 2 + digs;
+  MP_T x_1 = MP_DIGIT (x, 1);
   MP_DIGIT (x, 1) = ABS (x_1);
   MP_STATUS (z) = (MP_T) INIT_MASK;
 // Calculate x * 0.1.
-  w = lit_mp (p, 0, MP_EXPONENT (x), digs_h);
-  j = digs;
-  u = &MP_DIGIT (w, 1 + digs);
-  v = &MP_DIGIT (x, digs);
+  MP_T *w = lit_mp (p, 0, MP_EXPONENT (x), digs_h);
+  MP_T *u = &MP_DIGIT (w, 1 + digs), *v = &MP_DIGIT (x, digs);
+  int j = digs;
   while (j-- >= 1) {
     (u--)[0] += (MP_RADIX / 10) * (v--)[0];
   }
@@ -1060,7 +1054,7 @@ MP_T *tenth_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   round_internal_mp (z, w, digs);
 // Restore and exit.
   A68_SP = pop_sp;
-  z_1 = MP_DIGIT (z, 1);
+  MP_T z_1 = MP_DIGIT (z, 1);
   MP_DIGIT (x, 1) = x_1;
   MP_DIGIT (z, 1) = (x_1 >= 0 ? z_1 : -z_1);
   check_mp_exp (p, z);
@@ -1131,8 +1125,7 @@ MP_T *over_mp_digit (NODE_T * p, MP_T * z, MP_T * x, MP_T y, int digs)
   }
   int digs_g = FUN_DIGITS (digs);
   ADDR_T pop_sp = A68_SP;
-  MP_T *x_g = len_mp (p, x, digs, digs_g);
-  MP_T *z_g = nil_mp (p, digs_g);
+  MP_T *x_g = len_mp (p, x, digs, digs_g), *z_g = nil_mp (p, digs_g);
   (void) div_mp_digit (p, z_g, x_g, y, digs_g);
   trunc_mp (p, z_g, z_g, digs_g);
   (void) shorten_mp (p, z, digs, z_g, digs_g);
@@ -1171,10 +1164,8 @@ MP_T *pow_mp_int (NODE_T * p, MP_T * z, MP_T * x, INT_T n, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int bit, digs_g = FUN_DIGITS (digs);
-  BOOL_T negative;
-  MP_T *x_g = len_mp (p, x, digs, digs_g);
-  MP_T *z_g = lit_mp (p, 1, 0, digs_g);
-  negative = (BOOL_T) (n < 0);
+  MP_T *x_g = len_mp (p, x, digs, digs_g), *z_g = lit_mp (p, 1, 0, digs_g);
+  BOOL_T negative = (BOOL_T) (n < 0);
   if (negative) {
     n = -n;
   }

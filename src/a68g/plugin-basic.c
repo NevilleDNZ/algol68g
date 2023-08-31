@@ -24,14 +24,8 @@
 //! Plugin compiler routines.
 
 #include "a68g.h"
-#include "a68g-prelude.h"
-#include "a68g-genie.h"
-#include "a68g-listing.h"
-#include "a68g-mp.h"
 #include "a68g-optimiser.h"
 #include "a68g-plugin.h"
-#include "a68g-parser.h"
-#include "a68g-transput.h"
 
 // Whether stuff is sufficiently "basic" to be compiled.
 

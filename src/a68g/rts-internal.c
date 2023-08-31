@@ -26,8 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-double.h"
 #include "a68g-transput.h"
 
 // These routines use A68G's RR transput routines,
@@ -57,7 +55,7 @@ static void associate (A68_FILE *f, A68_REF s)
   IDENTIFICATION (f) = nil_ref;
   TERMINATOR (f) = nil_ref;
   FORMAT (f) = nil_format;
-  FD (f) = A68_NO_FILENO;
+  FD (f) = A68_NO_FILE;
   STRING (f) = s;
   STRPOS (f) = 0;
   DEVICE_MADE (&DEVICE (f)) = A68_FALSE;
@@ -250,6 +248,7 @@ void genie_putf_text (NODE_T * p)
   }
 // Empty the format to purge insertions.
   purge_format_write (p, ref_file);
+  write_purge_buffer (p, ref_file, FORMATTED_BUFFER);
   BODY (&FORMAT (file)) = NO_NODE;
 // Forget about active formats.
   A68_FP = FRAME_POINTER (file);
@@ -352,6 +351,7 @@ void genie_stringf (NODE_T * p)
   }
 // Empty the format to purge insertions.
   purge_format_write (p, ref_file);
+  write_purge_buffer (p, ref_file, FORMATTED_BUFFER);
   BODY (&FORMAT (file)) = NO_NODE;
 // Forget about active formats.
   A68_FP = FRAME_POINTER (file);

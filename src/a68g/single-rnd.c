@@ -24,10 +24,6 @@
 //! REAL pseudo-random number generator.
 
 #include "a68g.h"
-#include "a68g-genie.h"
-#include "a68g-prelude.h"
-#include "a68g-double.h"
-#include "a68g-numbers.h"
 
 // Next part is a "stand-alone" version of GNU Scientific Library (GSL)
 // random number generator "taus113", based on GSL file "rng/taus113.c".

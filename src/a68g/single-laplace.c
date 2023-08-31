@@ -75,7 +75,7 @@ static REAL_T laplace_f (REAL_T t, void *z)
   PUSH_VALUE (P (l), t, A68_REAL);
   genie_call_procedure (P (l), MOID (&(F (l))), u, u, &(F (l)), pop_sp, pop_fp);
   A68_SP = pop_sp;
-  return VALUE (ft) * a68_exp (-(S (l)) * t);
+  return VALUE (ft) * a68_exp_real (-(S (l)) * t);
 }
 
 //! @brief PROC laplace = (PROC (REAL) REAL, REAL, REF REAL) REAL

@@ -359,7 +359,7 @@ struct A68_BITS
 struct A68_BYTES
 {
   STATUS_MASK_T status;
-  char value[BYTES_WIDTH + 1];
+  char value[A68_BYTES_WIDTH + 1];
 } ALIGNED;
 
 struct A68_CHANNEL
@@ -407,7 +407,7 @@ struct A68_FORMAT
 struct A68_LONG_BYTES
 {
   STATUS_MASK_T status;
-  char value[LONG_BYTES_WIDTH + 1];
+  char value[A68_LONG_BYTES_WIDTH + 1];
 } ALIGNED;
 
 //! @struct A68_PROCEDURE

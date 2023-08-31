@@ -138,10 +138,9 @@ void genie_pq_finish (NODE_T * p)
 void genie_pq_reset (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -158,8 +157,7 @@ void genie_pq_reset (NODE_T * p)
 
 void genie_pq_exec (NODE_T * p)
 {
-  A68_REF ref_z, query;
-  A68_REF ref_file;
+  A68_REF query, ref_file;
   POP_REF (p, &query);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
@@ -172,7 +170,7 @@ void genie_pq_exec (NODE_T * p)
   if (RESULT (file) != NO_PGRESULT) {
     PQclear (RESULT (file));
   }
-  ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, query));
+  A68_REF ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, query));
   RESULT (file) = PQexec (CONNECTION (file), a_to_c_string (p, DEREF (char, &ref_z), query));
   if ((PQresultStatus (RESULT (file)) != PGRES_TUPLES_OK)
       && (PQresultStatus (RESULT (file)) != PGRES_COMMAND_OK)) {
@@ -186,8 +184,7 @@ void genie_pq_exec (NODE_T * p)
 
 void genie_pq_parameterstatus (NODE_T * p)
 {
-  A68_REF ref_z, parameter;
-  A68_REF ref_file;
+  A68_REF parameter, ref_file;
   POP_REF (p, &parameter);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
@@ -197,7 +194,7 @@ void genie_pq_parameterstatus (NODE_T * p)
     PUSH_PRIMAL (p, -1, INT);
     return;
   }
-  ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, parameter));
+  A68_REF ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, parameter));
   if (!IS_NIL (STRING (file))) {
     *DEREF (A68_REF, &STRING (file)) = c_to_a_string (p, (char *) PQparameterStatus (CONNECTION (file), a_to_c_string (p, DEREF (char, &ref_z), parameter)), DEFAULT_WIDTH);
     PUSH_PRIMAL (p, 0, INT);
@@ -462,7 +459,7 @@ void genie_pq_getisnull (NODE_T * p)
   PUSH_PRIMAL (p, PQgetisnull (RESULT (file), VALUE (&row) - 1, VALUE (&column) - 1), INT);
 }
 
-//! @brief Edit error message sting from libpq.
+//! @brief Edit error message string from libpq.
 
 char *pq_edit (char *str)
 {

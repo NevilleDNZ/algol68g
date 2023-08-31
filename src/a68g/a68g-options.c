@@ -26,7 +26,6 @@
 #include "a68g.h"
 #include "a68g-prelude.h"
 #include "a68g-mp.h"
-#include "a68g-genie.h"
 #include "a68g-options.h"
 #include "a68g-parser.h"
 
@@ -274,7 +273,7 @@ void prune_echoes (OPTION_LIST_T * i)
           if (car != NO_TEXT) {
             io_close_tty_line ();
             ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", &car[1]) >= 0);
-            WRITE (STDOUT_FILENO, A68 (output_line));
+            WRITE (A68_STDOUT, A68 (output_line));
           } else {
             FORWARD (i);
             if (i != NO_OPTION_LIST) {
@@ -284,7 +283,7 @@ void prune_echoes (OPTION_LIST_T * i)
               if (i != NO_OPTION_LIST) {
                 io_close_tty_line ();
                 ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", STR (i)) >= 0);
-                WRITE (STDOUT_FILENO, A68 (output_line));
+                WRITE (A68_STDOUT, A68 (output_line));
               }
             }
           }
@@ -381,9 +380,163 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   }
 }
 
+//! @brief Dump technical information.
+
+static void tech_stuff (void)
+{
+  state_version (A68_STDOUT);
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REF) = %u", (unt) sizeof (A68_REF)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_PROCEDURE) = %u", (unt) sizeof (A68_PROCEDURE)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+#if (A68_LEVEL >= 3)
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_T) = %u", (unt) sizeof (DOUBLE_T)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_NUM_T) = %u", (unt) sizeof (DOUBLE_NUM_T)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+#endif
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_INT) = %u", (unt) sizeof (A68_INT)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REAL) = %u", (unt) sizeof (A68_REAL)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BOOL) = %u", (unt) sizeof (A68_BOOL)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_CHAR) = %u", (unt) sizeof (A68_CHAR)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BITS) = %u", (unt) sizeof (A68_BITS)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+#if (A68_LEVEL >= 3)
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) sizeof (A68_LONG_REAL)) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+#else
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) size_mp ()) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+#endif
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_LONG_REAL) = %u", (unt) size_long_mp ()) >= 0);
+  WRITELN (A68_STDOUT, A68 (output_line));
+  WRITELN (A68_STDOUT, "");
+  exit (EXIT_SUCCESS);
+}
+
 //! @brief Process options gathered in the option list.
 
-BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
+BOOL_T need_library (OPTION_LIST_T *i)
+{
+  char *q = strip_sign (STR (i));
+  if (eq (q, "compiler")) {
+#if defined (BUILD_A68_COMPILER)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "plugin compiler required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "curl")) {
+#if defined (HAVE_CURL)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "curl library required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "curses")) {
+#if defined (HAVE_CURSES)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "curses required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "gsl")) {
+#if defined (HAVE_GSL)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "GNU Scientific Library required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "http")) {
+#if !defined (BUILD_WWW)
+    io_close_tty_line ();
+    WRITELN (A68_STDOUT, "HTTP support required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#else
+    return (A68_TRUE);
+#endif
+  }
+  if (eq (q, "ieee")) {
+#if defined (HAVE_IEEE_754)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "IEEE required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "linux")) {
+#if defined (BUILD_LINUX)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "linux required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "mathlib")) {
+#if defined (HAVE_MATHLIB)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "R mathlib required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "mpfr")) {
+#if defined (HAVE_GNU_MPFR)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "GNU MPFR required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "plotutils")) {
+#if defined (HAVE_GNU_PLOTUTILS)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "GNU plotutils required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "postgresql")) {
+#if defined (HAVE_POSTGRESQL)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "postgresql required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  if (eq (q, "threads")) {
+#if defined (BUILD_PARALLEL_CLAUSE)
+    return (A68_TRUE);
+#else
+    io_close_tty_line ();
+    WRITE (A68_STDOUT, "POSIX threads required - exiting graciously");
+    a68_exit (EXIT_SUCCESS);
+#endif
+  }
+  return A68_FALSE;
+}
+
+//! @brief Process options gathered in the option list.
+
+BOOL_T set_options (OPTION_LIST_T *i, BOOL_T cmd_line)
 {
   BOOL_T siga = A68_TRUE, name_set = A68_FALSE, skip = A68_FALSE;
   OPTION_LIST_T *j = i;
@@ -426,38 +579,7 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
           siga = A68_FALSE;
         } else if (eq (p, "TECHnicalities")) {
 // TECH prints out some tech stuff.
-          state_version (STDOUT_FILENO);
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REF) = %u", (unt) sizeof (A68_REF)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_PROCEDURE) = %u", (unt) sizeof (A68_PROCEDURE)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-#if (A68_LEVEL >= 3)
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_T) = %u", (unt) sizeof (DOUBLE_T)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_NUM_T) = %u", (unt) sizeof (DOUBLE_NUM_T)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-#endif
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_INT) = %u", (unt) sizeof (A68_INT)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REAL) = %u", (unt) sizeof (A68_REAL)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BOOL) = %u", (unt) sizeof (A68_BOOL)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_CHAR) = %u", (unt) sizeof (A68_CHAR)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BITS) = %u", (unt) sizeof (A68_BITS)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-#if (A68_LEVEL >= 3)
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) sizeof (A68_LONG_REAL)) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-#else
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) size_mp ()) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-#endif
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_LONG_REAL) = %u", (unt) size_long_mp ()) >= 0);
-          WRITELN (STDOUT_FILENO, A68 (output_line));
-          WRITELN (STDOUT_FILENO, "");
-          exit (EXIT_SUCCESS);
+          tech_stuff ();
         }
 // EXIT stops option processing.
         else if (eq (p, "EXIT")) {
@@ -487,97 +609,19 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
 // NEED or LIBrary require the argument as environ.
         else if (eq (p, "NEED") || eq (p, "LIBrary")) {
           FORWARD (i);
-          if (i != NO_OPTION_LIST && strcmp (STR (i), "=") == 0) {
-            FORWARD (i);
-          }
           if (i == NO_OPTION_LIST) {
             option_error (start_l, start_c, "missing argument in");
           } else {
-            char *q = strip_sign (STR (i));
-            if (eq (q, "compiler")) {
-#if !defined (BUILD_A68_COMPILER)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "plugin compiler required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "curl")) {
-#if !defined (HAVE_CURL)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "curl library required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "curses")) {
-#if !defined (HAVE_CURSES)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "curses required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "gsl")) {
-#if !defined (HAVE_GSL)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "GNU Scientific Library required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "http")) {
-#if !defined (BUILD_WWW)
-              io_close_tty_line ();
-              WRITELN (STDOUT_FILENO, "HTTP support required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "ieee")) {
-#if !defined (HAVE_IEEE_754)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "IEEE required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "linux")) {
-#if !defined (BUILD_LINUX)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "linux required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "mathlib")) {
-#if !defined (HAVE_MATHLIB)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "R mathlib required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "mpfr")) {
-#if !defined (HAVE_GNU_MPFR)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "GNU MPFR required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "plotutils")) {
-#if !defined (HAVE_GNU_PLOTUTILS)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "GNU plotutils required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "postgresql")) {
-#if !defined (HAVE_POSTGRESQL)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "postgresql required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "threads")) {
-#if !defined (BUILD_PARALLEL_CLAUSE)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "POSIX threads required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
+            OPTION_LIST_T *save = i; BOOL_T good = A68_FALSE;
+            do {
+              good = need_library (i);
+              if (good) {
+                save = i;
+                FORWARD (i);
+              } else {
+                i = save;
+              }
+            } while (good && i != NO_OPTION_LIST);
           }
         }
 // SCRIPT takes next argument as filename.
@@ -616,9 +660,9 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
             FORWARD (i);
           }
           if (i != NO_OPTION_LIST) {
-            apropos (STDOUT_FILENO, NO_TEXT, STR (i));
+            apropos (A68_STDOUT, NO_TEXT, STR (i));
           } else {
-            apropos (STDOUT_FILENO, NO_TEXT, "options");
+            apropos (A68_STDOUT, NO_TEXT, "options");
           }
           a68_exit (EXIT_SUCCESS);
         }

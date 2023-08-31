@@ -31,9 +31,6 @@
 #include "a68g-genie.h"
 #include "a68g-frames.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-double.h"
-#include "a68g-parser.h"
 #include "a68g-transput.h"
 
 void genie_argument (NODE_T * p, NODE_T ** seq)
@@ -213,11 +210,11 @@ PROP_T genie_call_standenv_quick (NODE_T * p)
 
 PROP_T genie_call_quick (NODE_T * p)
 {
-  A68_PROCEDURE z;
-  NODE_T *proc = SUB (p);
   ADDR_T pop_sp = A68_SP, pop_fp = A68_FP;
 // Get procedure.
+  NODE_T *proc = SUB (p);
   GENIE_UNIT_NO_GC (proc);
+  A68_PROCEDURE z;
   POP_OBJECT (proc, &z, A68_PROCEDURE);
   genie_check_initialisation (p, (BYTE_T *) & z, MOID (proc));
 // Get arguments.
@@ -243,14 +240,14 @@ PROP_T genie_call_quick (NODE_T * p)
 
 PROP_T genie_call (NODE_T * p)
 {
-  PROP_T self;
-  A68_PROCEDURE z;
-  NODE_T *proc = SUB (p);
   ADDR_T pop_sp = A68_SP, pop_fp = A68_FP;
+  PROP_T self;
   UNIT (&self) = genie_call_quick;
   SOURCE (&self) = p;
 // Get procedure.
+  NODE_T *proc = SUB (p);
   GENIE_UNIT_NO_GC (proc);
+  A68_PROCEDURE z;
   POP_OBJECT (proc, &z, A68_PROCEDURE);
   genie_check_initialisation (p, (BYTE_T *) & z, MOID (proc));
 // Get arguments.

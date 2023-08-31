@@ -1,0 +1,74 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Translation between decimal and Roman notation.
+
+This Algol 68 version originates from the legacy "REVISED MC ALGOL 68 TEST SET":
+
+    Dick Grune, The Revised MC ALGOL 68 Test Set, IW XX/79,
+    Mathematical Centre, Amsterdam.
+
+The Mathematical Centre ("Stichting Mathematisch Centrum" or SMC) was a Dutch 
+non-profit institution aiming at the promotion of pure mathematics and its 
+applications. 
+
+SMC is now "Stichting Centrum Wiskunde & Informatica" (CWI). The test set 
+is available as an open access publication from the CWI repository:
+
+   https://ir.cwi.nl/pub/
+
+Selected (modified) "Revised MC ALGOL 68 Test Set" programs are distributed 
+with Algol 68 Genie with kind permission of Dick Grune.
+
+COMMENT
+
+
+BEGIN # Translation decimal number to Roman notation and vice versa #
+  PROC roman = (INT number) STRING:
+    BEGIN INT n:= number, STRING result,
+      [] STRUCT (INT value, STRING r) table =
+        ((1000, "M"), (900, "CM"), (500,"D"), (400,"CD"),
+         (100,"C"), (90,"XC"), (50,"L"), (40,"XL"),
+         (10,"X"), (9,"IX"), (5,"V"), (4,"IV"), (1,"I"));
+      FOR i TO UPB table
+      DO INT v = value OF table[i], STRING r = r OF table[i];
+         WHILE v LE n
+         DO (result +:= r, n -:= v)
+         OD
+      OD;
+      result
+    END,
+
+  PROC value of roman = (STRING text) INT:
+    IF text = ""
+    THEN 0
+    ELSE OP ABS = (CHAR s) INT:
+         CASE INT p; char in string (s,p, "IVXLCDM"); p
+         IN 1, 5, 10, 50, 100, 500, 1000
+         ESAC,
+         INT v, maxv := 0, maxp;
+         FOR p TO UPB text
+         DO IF (v := ABS text[p]) > maxv
+            THEN maxp := p; maxv := v
+            FI
+         OD;
+         maxv - value of roman (text[: maxp - 1]) + value of roman (text[maxp + 1:])
+    FI;
+    print ((roman (1968), new line));                          # "MCMLXVIII" #
+    print ((whole (value of roman ("MCMLXXVI"), 0), new line)) # 1976        #
+END
