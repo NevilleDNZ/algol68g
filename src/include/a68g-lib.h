@@ -23,7 +23,7 @@
 //!
 //! Internal math routines.
 
-#if !defined __A68G_LIB_H__
+#if !defined (__A68G_LIB_H__)
 #define __A68G_LIB_H__
 
 #define A68_INVALID(c)\

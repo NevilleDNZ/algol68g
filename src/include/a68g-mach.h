@@ -1,4 +1,4 @@
-//! @file a68g.h
+//! @file a68g-mach.h
 //! @author J. Marcel van der Veer
 
 //! @section Copyright

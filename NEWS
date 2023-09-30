@@ -1,3 +1,7 @@
+Version 3.4.0-1, October 2023
+* Fix Darwin configuration issue.
+* C17 compliant code.
+
 Version 3.3.1-24, August/September 2023
 * Fix configuration issue for 32-bit systems.
 * Minor fixes.

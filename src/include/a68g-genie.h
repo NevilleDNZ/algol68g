@@ -200,8 +200,8 @@
 // Tests for objects of mode REAL
 
 #if defined (HAVE_IEEE_754)
-#define CHECK_REAL(p, u) PRELUDE_ERROR (!finite (u), p, ERROR_INFINITE, M_REAL)
-#define CHECK_COMPLEX(p, u, v) PRELUDE_ERROR (!finite (u) || !finite (v), p, ERROR_INFINITE, M_COMPLEX)
+#define CHECK_REAL(p, u) PRELUDE_ERROR (!a68_finite_real (u), p, ERROR_INFINITE, M_REAL)
+#define CHECK_COMPLEX(p, u, v) PRELUDE_ERROR (!a68_finite_real (u) || !a68_finite_real (v), p, ERROR_INFINITE, M_COMPLEX)
 #else
 #define CHECK_REAL(p, u) {;}
 #define CHECK_COMPLEX(p, u, v) {;}

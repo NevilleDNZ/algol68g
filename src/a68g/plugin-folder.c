@@ -398,7 +398,7 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       push_unit (p);
       POP_OBJECT (p, &x, A68_REAL);
 // Mind overflowing or underflowing values.
-      if (!finite (VALUE (&x))) {
+      if (!a68_finite_real (VALUE (&x))) {
         A68_OPT (code_errors)++;
         VALUE (&x) = 0.0;
       }
