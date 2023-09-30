@@ -18,6 +18,4 @@ INT rc, STRING reply;
 rc := http content (reply, "www.gnu.org", "/", 0);
 print ((rc, UPB reply, new line));
 rc := https content (reply, "www.gnu.org", "/", 0);
-print ((rc, UPB reply, new line));
-rc = tcp request (reply, "www.gnu.org", "GET / HTTP/1.0", 0);
 print ((rc, UPB reply, new line))

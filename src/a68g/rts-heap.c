@@ -251,7 +251,7 @@ void colour_object (BYTE_T * item, MOID_T * m)
       }
 //    STATUS_CLEAR (REF_HANDLE (z), COOKIE_MASK);.
     }
-  } else if (IF_ROW (m)) {
+  } else if (IS_FLEXETY_ROW (m)) {
 // Claim the descriptor and the row itself.
     A68_REF *z = (A68_REF *) item;
     if (INITIALISED (z) && IS_IN_HEAP (z)) {

@@ -72,9 +72,19 @@ void plugin_driver_compile (void)
       bufcat (options, " ", BUFFER_SIZE);
       bufcat (options, HAVE_PIC, BUFFER_SIZE);
 #endif
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s -I%s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDEDIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0);
+
+// Before Apple Silicon Mac:
+//
+//    ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s -I%s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDE_DIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0);
+//    ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
+//    ASSERT (snprintf (cmd, SNPRINTF_SIZE, "ld -export-dynamic -shared -o \"%s\" \"%s\"", FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
+//    ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
+//
+// Apple Silicon Mac patches kindly provided by Neil Matthew.
+
+      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s %s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDE_DIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0); 
       ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "ld -export-dynamic -shared -o \"%s\" \"%s\"", FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
+      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "ld %s -o \"%s\" \"%s\"", EXPORT_DYNAMIC_FLAGS, FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
       ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
       a68_rm (FILE_BINARY_NAME (&A68_JOB));
     }

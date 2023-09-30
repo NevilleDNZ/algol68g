@@ -460,9 +460,9 @@ BOOL_T need_library (OPTION_LIST_T *i)
 #endif
   }
   if (eq (q, "http")) {
-#if !defined (BUILD_WWW)
+#if !defined (HAVE_CURL)
     io_close_tty_line ();
-    WRITELN (A68_STDOUT, "HTTP support required - exiting graciously");
+    WRITELN (A68_STDOUT, "curl required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #else
     return (A68_TRUE);

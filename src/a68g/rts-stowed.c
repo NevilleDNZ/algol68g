@@ -554,7 +554,7 @@ A68_REF genie_clone (NODE_T * p, MOID_T * m, A68_REF * tmp, A68_REF * old)
       MOVE (ADDRESS (&dst), ADDRESS (&src), SIZE (m_u));
     }
     return new_uni;
-  } else if (IF_ROW (m)) {
+  } else if (IS_FLEXETY_ROW (m)) {
 // REF [FLEX] [].
     MOID_T *em = SUB (IS_FLEX (m) ? SUB (m) : m);
 // Make new array.
@@ -654,7 +654,7 @@ A68_REF genie_store (NODE_T * p, MOID_T * m, A68_REF * dst, A68_REF * old)
 {
 // This complex routine is needed as arrays are not always contiguous.
 // The routine takes a REF to the value and returns a REF to the clone.
-  if (IF_ROW (m)) {
+  if (IS_FLEXETY_ROW (m)) {
 // REF [FLEX] [].
     A68_TUPLE *old_tup, *new_tup, *old_p, *new_p;
     MOID_T *em = SUB (IS_FLEX (m) ? SUB (m) : m);
@@ -683,7 +683,6 @@ A68_REF genie_store (NODE_T * p, MOID_T * m, A68_REF * dst, A68_REF * old)
         span *= ROW_SIZE (old_p);
       }
       if (span > 0) {
-        span = 1;
         for (int k = 0; k < DIM (old_arr); k++) {
           new_tup[k] = old_tup[k];
         }

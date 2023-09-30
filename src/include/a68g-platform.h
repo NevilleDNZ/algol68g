@@ -82,6 +82,39 @@
 
 // Imported libraries
 
-#undef __cplusplus
+#if defined (__cplusplus)
+#  undef __cplusplus
+#endif
+
+#if (defined (BUILD_LINUX) || defined (BUILD_BSD))
+
+// Autoconf macros may impose outdated feature test macros.
+// For instance AX_WITH CURSES may define DEFAULT_SOURCE and XOPEN_SOURCE 600.
+// Here we correct, post hoc.
+
+   // _GNU_SOURCE includes ISO C89, ISO C99, POSIX.1, POSIX.2, BSD, SVID, X/Open, LFS, and GNU extensions.
+
+#  if defined (_GNU_SOURCE)
+#    undef _GNU_SOURCE
+#  endif
+
+   // _DEFAULT_SOURCE includes most features, apart from X/Open, LFS and GNU extensions.
+
+#  if defined (_DEFAULT_SOURCE)
+#    undef _DEFAULT_SOURCE
+#  endif
+
+   // _XOPEN_SOURCE includes functionality described in the X/Open Portability Guide.
+   //   500 includes previous functionality plus the Single Unix Specification (SUS), version 2. 
+   //   600 (revision #6) includes SUS version 3 definitions.
+   //   700 (revision #7) includes SUS version 4 definitions.
+
+#  if defined (_XOPEN_SOURCE)
+#    undef _XOPEN_SOURCE
+#  endif
+
+#  define _XOPEN_SOURCE 700
+
+#endif
 
 #endif

@@ -641,12 +641,9 @@ GPROC genie_level_sema_int;
 GPROC genie_up_sema;
 #endif
 
-#if defined (BUILD_WWW)
-GPROC genie_http_content;
-GPROC genie_tcp_request;
 #if defined (HAVE_CURL)
+GPROC genie_http_content;
 GPROC genie_https_content;
-#endif
 #endif
 
 #if defined (HAVE_CURSES)
