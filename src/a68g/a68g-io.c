@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -64,7 +64,7 @@ char *read_string_from_tty (char *prompt)
   if (line != NO_TEXT && (int) strlen (line) > 0) {
     add_history (line);
   }
-  bufcpy (A68 (input_line), line, BUFFER_SIZE);
+  a68_bufcpy (A68 (input_line), line, BUFFER_SIZE);
   A68 (chars_in_tty_line) = (int) strlen (A68 (input_line));
   a68_free (line);
   return A68 (input_line);

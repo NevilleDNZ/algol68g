@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -34,9 +34,9 @@
 static void fft_error_handler (const char *reason, const char *file, int line, int gsl_errno)
 {
   if (line != 0) {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s in line %d of file %s", reason, line, file) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s in line %d of file %s", reason, line, file) >= 0);
   } else {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", reason) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", reason) >= 0);
   }
   diagnostic (A68_RUNTIME_ERROR, A68 (f_entry), ERROR_FFT, A68 (edit_line), gsl_strerror (gsl_errno));
   exit_genie (A68 (f_entry), A68_RUNTIME_ERROR);

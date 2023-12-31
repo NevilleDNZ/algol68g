@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -105,7 +105,7 @@ void print_internal_index (FILE_T f, A68_TUPLE * tup, int dim)
     A68_TUPLE *ref = &tup[k];
     BUFFER buf;
     BUFCLR (buf);
-    ASSERT (snprintf (buf, SNPRINTF_SIZE, A68_LD, K (ref)) >= 0);
+    ASSERT (a68_bufprt (buf, SNPRINTF_SIZE, A68_LD, K (ref)) >= 0);
     WRITE (f, buf);
     if (k < dim - 1) {
       WRITE (f, ", ");

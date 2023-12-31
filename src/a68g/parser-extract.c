@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -247,7 +247,7 @@ void extract_priorities (NODE_T * p)
           if (len > 1 && NSYMBOL (q)[len - 1] == '=') {
             NODE_T *y = q;
             char *sym = (char *) get_temp_heap_space ((size_t) (len + 1));
-            bufcpy (sym, NSYMBOL (q), len + 1);
+            a68_bufcpy (sym, NSYMBOL (q), len + 1);
             sym[len - 1] = NULL_CHAR;
             NSYMBOL (q) = TEXT (add_token (&A68 (top_token), sym));
             if (len > 2 && NSYMBOL (q)[len - 2] == ':' && NSYMBOL (q)[len - 3] != '=') {
@@ -322,7 +322,7 @@ void extract_operators (NODE_T * p)
             int len = (int) strlen (NSYMBOL (q));
             if (len > 1 && NSYMBOL (q)[len - 1] == '=') {
               char *sym = (char *) get_temp_heap_space ((size_t) (len + 1));
-              bufcpy (sym, NSYMBOL (q), len + 1);
+              a68_bufcpy (sym, NSYMBOL (q), len + 1);
               sym[len - 1] = NULL_CHAR;
               NSYMBOL (q) = TEXT (add_token (&A68 (top_token), sym));
               if (len > 2 && NSYMBOL (q)[len - 2] == ':' && NSYMBOL (q)[len - 3] != '=') {

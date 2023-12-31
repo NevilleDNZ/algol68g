@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -67,24 +67,24 @@ void plugin_driver_compile (void)
     if (OPTION_RERUN (&A68_JOB) == A68_FALSE) {
       announce_phase ("plugin compiler");
       errno = 0;
-      ASSERT (snprintf (options, SNPRINTF_SIZE, "%s %s", optimisation_option (), A68_GCC_OPTIONS) >= 0);
+      ASSERT (a68_bufprt (options, SNPRINTF_SIZE, "%s %s", optimisation_option (), A68_GCC_OPTIONS) >= 0);
 #if defined (HAVE_PIC)
-      bufcat (options, " ", BUFFER_SIZE);
-      bufcat (options, HAVE_PIC, BUFFER_SIZE);
+      a68_bufcat (options, " ", BUFFER_SIZE);
+      a68_bufcat (options, HAVE_PIC, BUFFER_SIZE);
 #endif
 
 // Before Apple Silicon Mac:
 //
-//    ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s -I%s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDE_DIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0);
+//    ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s -I%s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDE_DIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0);
 //    ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
-//    ASSERT (snprintf (cmd, SNPRINTF_SIZE, "ld -export-dynamic -shared -o \"%s\" \"%s\"", FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
+//    ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "ld -export-dynamic -shared -o \"%s\" \"%s\"", FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
 //    ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
 //
 // Apple Silicon Mac patches kindly provided by Neil Matthew.
 
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s %s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDE_DIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0); 
+      ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s %s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDE_DIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0); 
       ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "ld %s -o \"%s\" \"%s\"", EXPORT_DYNAMIC_FLAGS, FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
+      ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "ld %s -o \"%s\" \"%s\"", EXPORT_DYNAMIC_FLAGS, FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
       ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
       a68_rm (FILE_BINARY_NAME (&A68_JOB));
     }
@@ -107,11 +107,11 @@ void plugin_driver_genie (void)
     struct stat srcstat, objstat;
     int ret;
     announce_phase ("plugin dynamic linker");
-    ASSERT (snprintf (plugin_name, SNPRINTF_SIZE, "%s", FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
+    ASSERT (a68_bufprt (plugin_name, SNPRINTF_SIZE, "%s", FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
 // Correction when pwd is outside LD_PLUGIN_PATH.
 // The DL cannot be loaded if it is.
     if (strcmp (plugin_name, a68_basename (plugin_name)) == 0) {
-      ASSERT (snprintf (plugin_name, SNPRINTF_SIZE, "./%s", FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
+      ASSERT (a68_bufprt (plugin_name, SNPRINTF_SIZE, "./%s", FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
     }
 // Check whether we are doing something rash.
     ret = stat (FILE_SOURCE_NAME (&A68_JOB), &srcstat);

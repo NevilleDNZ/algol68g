@@ -27,14 +27,8 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #undef HAVE_ASSERT_H
 
-/* Define to 1 if you have the `basename' function. */
-#undef HAVE_BASENAME
-
 /* Define to 1 if you have the <complex.h> header file. */
 #undef HAVE_COMPLEX_H
-
-/* Define to 1 if you have the `csqrt' function. */
-#undef HAVE_CSQRT
 
 /* Define to 1 if you have the <ctype.h> header file. */
 #undef HAVE_CTYPE_H
@@ -79,9 +73,6 @@
 /* Define to 1 if you have the <execinfo.h> header file. */
 #undef HAVE_EXECINFO_H
 
-/* Define to 1 if you have the `exit' function. */
-#undef HAVE_EXIT
-
 /* Define this if EXPORT_DYNAMIC is recognised */
 #undef HAVE_EXPORT_DYNAMIC
 
@@ -99,12 +90,6 @@
 
 /* Define this if long double has a 64-bit mantissa */
 #undef HAVE_FLT80
-
-/* Define to 1 if you have the `fprintf' function. */
-#undef HAVE_FPRINTF
-
-/* Define to 1 if you have the `free' function. */
-#undef HAVE_FREE
 
 /* Define this if GNU C library is detected. */
 #undef HAVE_GNU_C_LIB
@@ -229,14 +214,8 @@
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
-/* Define to 1 if you have the `longjmp' function. */
-#undef HAVE_LONGJMP
-
 /* Define this if a good INT*8/REAL*10/REAL*16 installation was detected */
 #undef HAVE_LONG_TYPES
-
-/* Define to 1 if you have the `malloc' function. */
-#undef HAVE_MALLOC
 
 /* Define this if a good mathlib installation was detected */
 #undef HAVE_MATHLIB
@@ -246,15 +225,6 @@
 
 /* Define this if math.h includes POSIX's signgam. */
 #undef HAVE_MATH_H_SIGNGAM
-
-/* Define to 1 if you have the `memcpy' function. */
-#undef HAVE_MEMCPY
-
-/* Define to 1 if you have the `memmove' function. */
-#undef HAVE_MEMMOVE
-
-/* Define to 1 if you have the `memset' function. */
-#undef HAVE_MEMSET
 
 /* Define to 1 if you have the <mpfr.h> header file. */
 #undef HAVE_MPFR_H
@@ -295,9 +265,6 @@
 /* Define this if a good PostgreSQL installation was detected */
 #undef HAVE_POSTGRESQL
 
-/* Define to 1 if you have the `printf' function. */
-#undef HAVE_PRINTF
-
 /* Define to 1 if you have the <pthread.h> header file. */
 #undef HAVE_PTHREAD_H
 
@@ -313,23 +280,11 @@
 /* Define to 1 if you have the <Rmath.h> header file. */
 #undef HAVE_RMATH_H
 
-/* Define to 1 if you have the `setjmp' function. */
-#undef HAVE_SETJMP
-
 /* Define to 1 if you have the <setjmp.h> header file. */
 #undef HAVE_SETJMP_H
 
-/* Define to 1 if you have the `signal' function. */
-#undef HAVE_SIGNAL
-
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
-
-/* Define to 1 if you have the `snprintf' function. */
-#undef HAVE_SNPRINTF
-
-/* Define to 1 if you have the `sqrt' function. */
-#undef HAVE_SQRT
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #undef HAVE_STDARG_H
@@ -346,20 +301,11 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #undef HAVE_STDLIB_H
 
-/* Define to 1 if you have the `strcmp' function. */
-#undef HAVE_STRCMP
-
 /* Define to 1 if you have the <strings.h> header file. */
 #undef HAVE_STRINGS_H
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
-
-/* Define to 1 if you have the `strncmp' function. */
-#undef HAVE_STRNCMP
-
-/* Define to 1 if you have the `strncpy' function. */
-#undef HAVE_STRNCPY
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */

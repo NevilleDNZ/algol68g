@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -120,9 +120,9 @@ void append_source_line (char *str, LINE_T ** ref_l, int *line_num, char *filena
 void unworthy (LINE_T * u, char *v, char ch)
 {
   if (IS_PRINT (ch)) {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "*%s", ERROR_UNWORTHY_CHARACTER) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "*%s", ERROR_UNWORTHY_CHARACTER) >= 0);
   } else {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "*%s %s", ERROR_UNWORTHY_CHARACTER, ctrl_char (ch)) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "*%s %s", ERROR_UNWORTHY_CHARACTER, ctrl_char (ch)) >= 0);
   }
   scan_error (u, v, A68 (edit_line));
 }
@@ -143,8 +143,8 @@ void concatenate_lines (LINE_T * top)
       z[len - 2] = NULL_CHAR;
       len += (int) strlen (STRING (NEXT (q)));
       z = (char *) get_fixed_heap_space ((size_t) (len + 1));
-      bufcpy (z, STRING (q), len + 1);
-      bufcat (z, STRING (NEXT (q)), len + 1);
+      a68_bufcpy (z, STRING (q), len + 1);
+      a68_bufcat (z, STRING (NEXT (q)), len + 1);
       STRING (NEXT (q))[0] = NULL_CHAR;
       STRING (q) = z;
     }
@@ -468,13 +468,13 @@ void include_files (LINE_T * top)
         }
 // Do not check errno, since errno may be undefined here after a successful call.
         if (fn != NO_TEXT) {
-          bufcpy (fnb, fn, BUFFER_SIZE);
+          a68_bufcpy (fnb, fn, BUFFER_SIZE);
         } else {
           SCAN_ERROR (A68_TRUE, NO_LINE, NO_TEXT, ERROR_SOURCE_FILE_INCLUDE_OPEN);
         }
         fnwid = (int) strlen (fnb) + 1;
         fn = (char *) get_fixed_heap_space ((size_t) fnwid);
-        bufcpy (fn, fnb, fnwid);
+        a68_bufcpy (fn, fnb, fnwid);
 // Ignore the file when included more than once.
         for (t = top; t != NO_LINE; t = NEXT (t)) {
           if (strcmp (FILENAME (t), fn) == 0) {

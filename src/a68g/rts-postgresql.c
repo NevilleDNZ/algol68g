@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -526,13 +526,13 @@ void genie_pq_errormessage (NODE_T * p)
   if (!IS_NIL (STRING (file))) {
     BUFFER str;
     if (PQerrorMessage (CONNECTION (file)) != NULL) {
-      bufcpy (str, pq_edit (PQerrorMessage (CONNECTION (file))), BUFFER_SIZE);
+      a68_bufcpy (str, pq_edit (PQerrorMessage (CONNECTION (file))), BUFFER_SIZE);
       int upb = (int) strlen (str);
       if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
         str[upb - 1] = NULL_CHAR;
       }
     } else {
-      bufcpy (str, "no error message available", BUFFER_SIZE);
+      a68_bufcpy (str, "no error message available", BUFFER_SIZE);
     }
     *DEREF (A68_REF, &STRING (file)) = c_to_a_string (p, str, DEFAULT_WIDTH);
     STRPOS (file) = 0;
@@ -562,13 +562,13 @@ void genie_pq_resulterrormessage (NODE_T * p)
   if (!IS_NIL (STRING (file))) {
     BUFFER str;
     if (PQresultErrorMessage (RESULT (file)) != NULL) {
-      bufcpy (str, pq_edit (PQresultErrorMessage (RESULT (file))), BUFFER_SIZE);
+      a68_bufcpy (str, pq_edit (PQresultErrorMessage (RESULT (file))), BUFFER_SIZE);
       int upb = (int) strlen (str);
       if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
         str[upb - 1] = NULL_CHAR;
       }
     } else {
-      bufcpy (str, "no error message available", BUFFER_SIZE);
+      a68_bufcpy (str, "no error message available", BUFFER_SIZE);
     }
     *DEREF (A68_REF, &STRING (file)) = c_to_a_string (p, str, DEFAULT_WIDTH);
     STRPOS (file) = 0;

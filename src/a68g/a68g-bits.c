@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -94,25 +94,25 @@ void genie_backtrace (NODE_T *p)
 FILE *a68_fopen (char *fn, char *mode, char *new_fn)
 {
 #if defined (BUILD_WIN32) || !defined (HAVE_DIRENT_H)
-  ASSERT (snprintf (new_fn, SNPRINTF_SIZE, "%s", fn) >= 0);
+  ASSERT (a68_bufprt (new_fn, SNPRINTF_SIZE, "%s", fn) >= 0);
   return fopen (new_fn, mode);
 #else
   errno = 0;
   BUFFER dn;
-  ASSERT (snprintf (dn, SNPRINTF_SIZE, "%s/%s", getenv ("HOME"), A68_DIR) >= 0);
+  ASSERT (a68_bufprt (dn, SNPRINTF_SIZE, "%s/%s", getenv ("HOME"), A68_DIR) >= 0);
   int ret = mkdir (dn, (mode_t) (S_IRUSR | S_IWUSR | S_IXUSR));
   if (ret == 0 || (ret == -1 && errno == EEXIST)) {
     struct stat status;
     if (stat (dn, &status) == 0 && S_ISDIR (ST_MODE (&status)) != 0) {
       FILE *f;
-      ASSERT (snprintf (new_fn, SNPRINTF_SIZE, "%s/%s", dn, fn) >= 0);
+      ASSERT (a68_bufprt (new_fn, SNPRINTF_SIZE, "%s/%s", dn, fn) >= 0);
       f = fopen (new_fn, mode);
       if (f != NO_FILE) {
         return f;
       }
     }
   }
-  ASSERT (snprintf (new_fn, SNPRINTF_SIZE, "%s", fn) >= 0);
+  ASSERT (a68_bufprt (new_fn, SNPRINTF_SIZE, "%s", fn) >= 0);
   return fopen (new_fn, mode);
 #endif
 }
@@ -290,52 +290,87 @@ int a68_usleep (unsigned delay)
 
 //! @brief Safely append to buffer.
 
-void bufcat (char *dst, char *src, int len)
+void a68_bufcat (char *dst, char *src, int len)
 {
-  if (src != NO_TEXT) {
-    char *d = dst, *s = src;
-    int n = len;
+  ASSERT (dst != NO_TEXT);
+  ASSERT (src != NO_TEXT);
+  ASSERT (len >= 0);
+  char *d = dst, *s = src;
+  int n = len;
 // Find end of dst and left-adjust; do not go past end 
-    for (; n-- != 0 && d[0] != NULL_CHAR; d++) {
-      ;
-    }
-    int dlen = (int) (d - dst);
-    n = len - dlen;
-    if (n > 0) {
-      while (s[0] != NULL_CHAR) {
-        if (n != 1) {
-          (d++)[0] = s[0];
-          n--;
-        }
-        s++;
-      }
-      d[0] = NULL_CHAR;
-    }
-// Better sure than sorry 
-    dst[len - 1] = NULL_CHAR;
+  for (; n-- != 0 && d[0] != NULL_CHAR; d++) {
+    ;
   }
+  int dlen = (int) (d - dst);
+  n = len - dlen;
+  if (n > 0) {
+    while (s[0] != NULL_CHAR) {
+      if (n != 1) {
+        (d++)[0] = s[0];
+        n--;
+      }
+      s++;
+    }
+    d[0] = NULL_CHAR;
+  }
+// Better sure than sorry 
+  dst[len - 1] = NULL_CHAR;
 }
 
 //! @brief Safely copy to buffer.
 
-void bufcpy (char *dst, char *src, int len)
+void a68_bufcpy (char *dst, char *src, int len)
 {
-  if (src != NO_TEXT) {
-    char *d = dst, *s = src;
-    int n = len;
+  ASSERT (dst != NO_TEXT);
+  ASSERT (src != NO_TEXT);
+  ASSERT (len >= 0);
+  char *d = dst, *s = src;
+  int n = len;
 // Copy as many as fit 
-    if (n > 0 && --n > 0) {
-      do {
-        if (((d++)[0] = (s++)[0]) == NULL_CHAR) {
-          break;
-        }
-      } while (--n > 0);
-    }
-    if (n == 0 && len > 0) {
+  if (n > 0 && --n > 0) {
+    do {
+      if (((d++)[0] = (s++)[0]) == NULL_CHAR) {
+        break;
+      }
+    } while (--n > 0);
+  }
+  if (n == 0 && len > 0) {
 // Not enough room in dst, so terminate 
-      d[0] = NULL_CHAR;
-    }
+    d[0] = NULL_CHAR;
+  }
 // Better sure than sorry 
-    dst[len - 1] = NULL_CHAR;
+  dst[len - 1] = NULL_CHAR;
+}
+
+//! @brief Safely set buffer.
+
+void *a68_bufset (void *dst, int val, size_t len)
+{
+// Function a68_bufset can be optimized away by a compiler.
+// Therefore we have this alternative.
+  ASSERT (dst != NO_TEXT);
+  ASSERT (len >= 0);
+  char *p = (char *) dst;
+  while (len-- > 0) {
+    *(p++) = val;
+  }
+  return dst;
+}
+
+//! @brief Safely print to buffer.
+
+int a68_bufprt (char *dst, size_t size, const char *format, ...)
+{
+  ASSERT (dst != NO_TEXT);
+  ASSERT (size > 1);
+  ASSERT (format != NO_TEXT);
+  va_list ap;
+  va_start (ap, format);
+  int rc = vsnprintf (dst, size, format, ap);
+  va_end (ap);
+  if (rc >= 0 && size <= (size_t) rc) {
+    return -1;
+  } else {
+    return rc;
   }
 }

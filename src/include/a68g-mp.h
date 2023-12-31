@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -47,7 +47,7 @@
 
 static inline MP_T *set_mp (MP_T * z, MP_T x, INT_T expo, int digs)
 {
-  memset (z, 0, SIZE_MP (digs));
+  a68_bufset (z, 0, SIZE_MP (digs));
   MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_DIGIT (z, 1) = x;
   MP_EXPONENT (z) = (MP_T) expo;

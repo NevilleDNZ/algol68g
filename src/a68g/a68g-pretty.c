@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -837,7 +837,7 @@ BOOL_T indent_folder (NODE_T * p)
     push_unit (p);
     POP_OBJECT (p, &k, A68_INT);
     if (ERROR_COUNT (&A68_JOB) == 0) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, A68_LD, VALUE (&k)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, A68_LD, VALUE (&k)) >= 0);
       put_str (A68 (output_line));
       return A68_TRUE;
     } else {
@@ -857,7 +857,7 @@ BOOL_T indent_folder (NODE_T * p)
     } else if (VALUE (&x) == -A68_REAL_MAX) {
       return A68_FALSE;
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%.*g", A68_REAL_WIDTH, VALUE (&x)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%.*g", A68_REAL_WIDTH, VALUE (&x)) >= 0);
       errno = 0;
       conv = strtod (A68 (output_line), NO_VAR);
       if (errno == ERANGE && conv == 0.0) {
@@ -867,7 +867,7 @@ BOOL_T indent_folder (NODE_T * p)
         return A68_FALSE;
       } else {
         if (strchr (A68 (output_line), '.') == NO_TEXT && strchr (A68 (output_line), 'e') == NO_TEXT && strchr (A68 (output_line), 'E') == NO_TEXT) {
-          strncat (A68 (output_line), ".0", BUFFER_SIZE - 1);
+          a68_bufcat (A68 (output_line), ".0", BUFFER_SIZE);
         }
         put_str (A68 (output_line));
         return A68_TRUE;
@@ -881,7 +881,7 @@ BOOL_T indent_folder (NODE_T * p)
     if (ERROR_COUNT (&A68_JOB) != 0) {
       return A68_FALSE;
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", (VALUE (&b) ? "TRUE" : "FALSE")) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", (VALUE (&b) ? "TRUE" : "FALSE")) >= 0);
       put_str (A68 (output_line));
       return A68_TRUE;
     }
@@ -896,7 +896,7 @@ BOOL_T indent_folder (NODE_T * p)
       put_str ("\"\"\"\"");
       return A68_TRUE;
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\"%c\"", (int) VALUE (&c)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\"%c\"", (int) VALUE (&c)) >= 0);
       return A68_TRUE;
     }
   }

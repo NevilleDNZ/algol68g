@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -124,13 +124,16 @@ char *new_temp_string (char *);
 char *non_terminal_string (char *, int);
 char *read_string_from_tty (char *);
 char *standard_environ_proc_name (GPROC);
+int a68_bufprt (char *, size_t, const char *, ...);
+int a68_usleep (unsigned);
 int get_row_size (A68_TUPLE *, int);
 int moid_digits (MOID_T *);
 int moid_size (MOID_T *);
-int (snprintf) (char *, size_t, const char *, ...); // Prevent macro substitution on Darwin.
-int a68_usleep (unsigned);
 unsigned a68_alarm (unsigned);
 void *a68_alloc (size_t, const char *, int);
+void *a68_bufset (void *, int, size_t);
+void a68_bufcat (char *, char *, int);
+void a68_bufcpy (char *, char *, int);
 void a68_exit (int);
 void a68_free (void *);
 void a68_getty (int *, int *);
@@ -138,8 +141,6 @@ void a68_rm (char *);
 void abend (char *, char *, char *, int);
 void announce_phase (char *);
 void apropos (FILE_T, char *, char *);
-void bufcat (char *, char *, int);
-void bufcpy (char *, char *, int);
 void default_mem_sizes (int);
 void discard_heap (void);
 void free_file_entries (void);

@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -48,7 +48,7 @@ void a68_print_short_mode (FILE_T f, MOID_T * z)
         WRITE (f, "SHORT ");
       }
     }
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", NSYMBOL (NODE (z))) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", NSYMBOL (NODE (z))) >= 0);
     WRITE (f, A68 (output_line));
   } else if (IS_REF (z) && IS (SUB (z), STANDARD)) {
     WRITE (f, "REF ");
@@ -57,7 +57,7 @@ void a68_print_short_mode (FILE_T f, MOID_T * z)
     WRITE (f, "PROC ");
     a68_print_short_mode (f, SUB (z));
   } else {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "#%d", NUMBER (z)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "#%d", NUMBER (z)) >= 0);
     WRITE (f, A68 (output_line));
   }
 }
@@ -77,14 +77,14 @@ void a68_print_flat_mode (FILE_T f, MOID_T * z)
         WRITE (f, "SHORT ");
       }
     }
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", NSYMBOL (NODE (z))) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", NSYMBOL (NODE (z))) >= 0);
     WRITE (f, A68 (output_line));
   } else if (IS_REF (z)) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "REF ") >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "REF ") >= 0);
     WRITE (f, A68 (output_line));
     a68_print_short_mode (f, SUB (z));
   } else if (IS (z, PROC_SYMBOL) && DIM (z) == 0) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "PROC ") >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "PROC ") >= 0);
     WRITE (f, A68 (output_line));
     a68_print_short_mode (f, SUB (z));
   } else if (IS_ROW (z)) {
@@ -107,7 +107,7 @@ void a68_print_short_pack (FILE_T f, PACK_T * pack)
   if (pack != NO_PACK) {
     a68_print_short_mode (f, MOID (pack));
     if (NEXT (pack) != NO_PACK) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", ") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", ") >= 0);
       WRITE (f, A68 (output_line));
       a68_print_short_pack (f, NEXT (pack));
     }
@@ -180,47 +180,47 @@ void print_mode_flat (FILE_T f, MOID_T * m)
   if (m != NO_MOID) {
     a68_print_mode (f, m);
     if (NODE (m) != NO_NODE && NUMBER (NODE (m)) > 0) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " node %d", NUMBER (NODE (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " node %d", NUMBER (NODE (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (EQUIVALENT_MODE (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " equi #%d", NUMBER (EQUIVALENT (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " equi #%d", NUMBER (EQUIVALENT (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (SLICE (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " slice #%d", NUMBER (SLICE (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " slice #%d", NUMBER (SLICE (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (TRIM (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " trim #%d", NUMBER (TRIM (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " trim #%d", NUMBER (TRIM (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (ROWED (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " rowed #%d", NUMBER (ROWED (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " rowed #%d", NUMBER (ROWED (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (DEFLEXED (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " deflex #%d", NUMBER (DEFLEXED (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " deflex #%d", NUMBER (DEFLEXED (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (MULTIPLE (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " multiple #%d", NUMBER (MULTIPLE (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " multiple #%d", NUMBER (MULTIPLE (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (NAME (m) != NO_MOID) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " name #%d", NUMBER (NAME (m))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " name #%d", NUMBER (NAME (m))) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (USE (m)) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " used") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " used") >= 0);
       WRITE (f, A68 (output_line));
     }
     if (DERIVATE (m)) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " derivate") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " derivate") >= 0);
       WRITE (f, A68 (output_line));
     }
     if (SIZE (m) > 0) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " size %d", SIZE (m)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " size %d", SIZE (m)) >= 0);
       WRITE (f, A68 (output_line));
     }
     if (HAS_ROWS (m)) {
@@ -237,57 +237,57 @@ void xref_tags (FILE_T f, TAG_T * s, int a)
     NODE_T *where_tag = NODE (s);
     if ((where_tag != NO_NODE) && ((STATUS_TEST (where_tag, CROSS_REFERENCE_MASK)) || TAG_TABLE (s) == A68_STANDENV)) {
       WRITE (f, "\n     ");
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "tag %d ", NUMBER (s)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "tag %d ", NUMBER (s)) >= 0);
       WRITE (f, A68 (output_line));
       switch (a) {
       case IDENTIFIER: {
           a68_print_mode (f, MOID (s));
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " %s", NSYMBOL (NODE (s))) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " %s", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
       case INDICANT: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "indicant %s ", NSYMBOL (NODE (s))) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "indicant %s ", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           a68_print_mode (f, MOID (s));
           break;
         }
       case PRIO_SYMBOL: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "priority %s %d", NSYMBOL (NODE (s)), PRIO (s)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "priority %s %d", NSYMBOL (NODE (s)), PRIO (s)) >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
       case OP_SYMBOL: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "operator %s ", NSYMBOL (NODE (s))) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "operator %s ", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           a68_print_mode (f, MOID (s));
           break;
         }
       case LABEL: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "label %s", NSYMBOL (NODE (s))) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "label %s", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
       case ANONYMOUS: {
           switch (PRIO (s)) {
           case ROUTINE_TEXT: {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "routine text ") >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "routine text ") >= 0);
               break;
             }
           case FORMAT_TEXT: {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "format text ") >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "format text ") >= 0);
               break;
             }
           case FORMAT_IDENTIFIER: {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "format item ") >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "format item ") >= 0);
               break;
             }
           case COLLATERAL_CLAUSE: {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "display ") >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "display ") >= 0);
               break;
             }
           case GENERATOR: {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "generator ") >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "generator ") >= 0);
               break;
             }
           }
@@ -296,18 +296,18 @@ void xref_tags (FILE_T f, TAG_T * s, int a)
           break;
         }
       default: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "internal %d ", a) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "internal %d ", a) >= 0);
           WRITE (f, A68 (output_line));
           a68_print_mode (f, MOID (s));
           break;
         }
       }
       if (NODE (s) != NO_NODE && NUMBER (NODE (s)) > 0) {
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", node %d", NUMBER (NODE (s))) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", node %d", NUMBER (NODE (s))) >= 0);
         WRITE (f, A68 (output_line));
       }
       if (where_tag != NO_NODE && INFO (where_tag) != NO_NINFO && LINE (INFO (where_tag)) != NO_LINE) {
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", line %d", LINE_NUMBER (where_tag)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", line %d", LINE_NUMBER (where_tag)) >= 0);
         WRITE (f, A68 (output_line));
       }
     }
@@ -342,7 +342,7 @@ void xref_decs (FILE_T f, TABLE_T * t)
 
 void xref1_moid (FILE_T f, MOID_T * p)
 {
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n     #%d ", NUMBER (p)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n     #%d ", NUMBER (p)) >= 0);
   WRITE (f, A68 (output_line));
   print_mode_flat (f, p);
 }
@@ -358,11 +358,11 @@ void moid_listing (FILE_T f, MOID_T * m)
     xref1_moid (f, m);
   }
   WRITE (f, "\n");
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n     MODE STRING  #%d ", NUMBER (M_STRING)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n     MODE STRING  #%d ", NUMBER (M_STRING)) >= 0);
   WRITE (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n     MODE COMPLEX #%d ", NUMBER (M_COMPLEX)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n     MODE COMPLEX #%d ", NUMBER (M_COMPLEX)) >= 0);
   WRITE (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n     MODE SEMA    #%d ", NUMBER (M_SEMA)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n     MODE SEMA    #%d ", NUMBER (M_SEMA)) >= 0);
   WRITE (f, A68 (output_line));
 }
 
@@ -374,18 +374,18 @@ void cross_reference (FILE_T f, NODE_T * p, LINE_T * l)
     for (; p != NO_NODE; FORWARD (p)) {
       if (is_new_lexical_level (p) && l == LINE (INFO (p))) {
         TABLE_T *c = TABLE (SUB (p));
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n\n[level %d", LEVEL (c)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n\n[level %d", LEVEL (c)) >= 0);
         WRITE (f, A68 (output_line));
         if (PREVIOUS (c) == A68_STANDENV) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", in standard environ") >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", in standard environ") >= 0);
         } else {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", in level %d", LEVEL (PREVIOUS (c))) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", in level %d", LEVEL (PREVIOUS (c))) >= 0);
         }
         WRITE (f, A68 (output_line));
 #if (A68_LEVEL >= 3)
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %llu increment]", AP_INCREMENT (c)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %llu increment]", AP_INCREMENT (c)) >= 0);
 #else
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %u increment]", AP_INCREMENT (c)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %u increment]", AP_INCREMENT (c)) >= 0);
 #endif
         WRITE (f, A68 (output_line));
         if (c != NO_TABLE) {
@@ -433,24 +433,24 @@ void tree_listing (FILE_T f, NODE_T * q, int x, LINE_T * l, int *ld, BOOL_T comm
       } else {
         if (comment) {
           WRITE (f, "\n// ");
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%06d ", NUMBER (p)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%06d ", NUMBER (p)) >= 0);
           WRITE (f, A68 (output_line));
         } else {
           WRITE (f, "\n     ");
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%02d %06d p%02d ", x, NUMBER (p), PROCEDURE_LEVEL (INFO (p))) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%02d %06d p%02d ", x, NUMBER (p), PROCEDURE_LEVEL (INFO (p))) >= 0);
           WRITE (f, A68 (output_line));
           if (TABLE (p) != NO_TABLE && PREVIOUS (TABLE (p)) != NO_TABLE) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%02d-%02d-%02d ", (TABLE (p) != NO_TABLE ? LEX_LEVEL (p) : 0), (TABLE (p) != NO_TABLE ? LEVEL (PREVIOUS (TABLE (p))) : 0), (NON_LOCAL (p) != NO_TABLE ? LEVEL (NON_LOCAL (p)) : 0)
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%02d-%02d-%02d ", (TABLE (p) != NO_TABLE ? LEX_LEVEL (p) : 0), (TABLE (p) != NO_TABLE ? LEVEL (PREVIOUS (TABLE (p))) : 0), (NON_LOCAL (p) != NO_TABLE ? LEVEL (NON_LOCAL (p)) : 0)
                     ) >= 0);
           } else {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%02d-  -%02d", (TABLE (p) != NO_TABLE ? LEX_LEVEL (p) : 0), (NON_LOCAL (p) != NO_TABLE ? LEVEL (NON_LOCAL (p)) : 0)
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%02d-  -%02d", (TABLE (p) != NO_TABLE ? LEX_LEVEL (p) : 0), (NON_LOCAL (p) != NO_TABLE ? LEVEL (NON_LOCAL (p)) : 0)
                     ) >= 0);
           }
           WRITE (f, A68 (output_line));
           if (MOID (q) != NO_MOID) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "#%04d ", NUMBER (MOID (p))) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "#%04d ", NUMBER (MOID (p))) >= 0);
           } else {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "      ") >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "      ") >= 0);
           }
           WRITE (f, A68 (output_line));
         }
@@ -458,34 +458,34 @@ void tree_listing (FILE_T f, NODE_T * q, int x, LINE_T * l, int *ld, BOOL_T comm
           WRITE (f, A68 (marker)[k]);
         }
         if (MOID (p) != NO_MOID) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s ", moid_to_string (MOID (p), MOID_WIDTH, NO_NODE)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s ", moid_to_string (MOID (p), MOID_WIDTH, NO_NODE)) >= 0);
           WRITE (f, A68 (output_line));
         }
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", non_terminal_string (A68 (edit_line), ATTRIBUTE (p))) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", non_terminal_string (A68 (edit_line), ATTRIBUTE (p))) >= 0);
         WRITE (f, A68 (output_line));
         if (SUB (p) == NO_NODE) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
           WRITE (f, A68 (output_line));
         }
         if (!comment) {
           if (TAX (p) != NO_TAG) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", tag %06u", (unt) NUMBER (TAX (p))) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", tag %06u", (unt) NUMBER (TAX (p))) >= 0);
             WRITE (f, A68 (output_line));
             if (MOID (TAX (p)) != NO_MOID) {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", mode %06u", (unt) NUMBER (MOID (TAX (p)))) >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", mode %06u", (unt) NUMBER (MOID (TAX (p)))) >= 0);
               WRITE (f, A68 (output_line));
             }
           }
           if (GINFO (p) != NO_GINFO && propagator_name (UNIT (&GPROP (p))) != NO_TEXT) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %s", propagator_name (UNIT (&GPROP (p)))) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %s", propagator_name (UNIT (&GPROP (p)))) >= 0);
             WRITE (f, A68 (output_line));
           }
           if (GINFO (p) != NO_GINFO && COMPILE_NAME (GINFO (p)) != NO_TEXT) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %s", COMPILE_NAME (GINFO (p))) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %s", COMPILE_NAME (GINFO (p))) >= 0);
             WRITE (f, A68 (output_line));
           }
           if (GINFO (p) != NO_GINFO && COMPILE_NODE (GINFO (p)) > 0) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %6d", COMPILE_NODE (GINFO (p))) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %6d", COMPILE_NODE (GINFO (p))) >= 0);
             WRITE (f, A68 (output_line));
           }
         }
@@ -572,7 +572,7 @@ void write_source_listing (void)
   }
 // Warn if there was no source at all.
   if (listed == 0) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n     No lines to list") >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n     No lines to list") >= 0);
     WRITE (f, A68 (output_line));
   }
 }
@@ -599,7 +599,7 @@ void write_tree_listing (void)
   }
 // Warn if there was no source at all.
   if (listed == 0) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n     No lines to list") >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n     No lines to list") >= 0);
     WRITE (f, A68 (output_line));
   }
 }
@@ -643,19 +643,19 @@ void write_listing (void)
     WRITE (FILE_LISTING_FD (&A68_JOB), "\n---------- -------");
     WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
     while (x != NO_REFINEMENT) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n  \"%s\"", NAME (x)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n  \"%s\"", NAME (x)) >= 0);
       WRITE (f, A68 (output_line));
       if (LINE_DEFINED (x) != NO_LINE) {
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", defined in line %d", NUMBER (LINE_DEFINED (x))) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", defined in line %d", NUMBER (LINE_DEFINED (x))) >= 0);
         WRITE (f, A68 (output_line));
       }
       if (LINE_APPLIED (x) != NO_LINE) {
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", applied in line %d", NUMBER (LINE_APPLIED (x))) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", applied in line %d", NUMBER (LINE_APPLIED (x))) >= 0);
         WRITE (f, A68 (output_line));
       }
       switch (APPLICATIONS (x)) {
       case 0: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", not applied") >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", not applied") >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
@@ -663,7 +663,7 @@ void write_listing (void)
           break;
         }
       default: {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", applied more than once") >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", applied more than once") >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
@@ -678,7 +678,7 @@ void write_listing (void)
     WRITE (FILE_LISTING_FD (&A68_JOB), "\n------- -------");
     WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
     for (OPTION_LIST_T *l = OPTION_LIST (&A68_JOB); l != NO_OPTION_LIST; FORWARD (l)) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n%d: %s", k++, STR (l)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n%d: %s", k++, STR (l)) >= 0);
       WRITE (f, A68 (output_line));
     }
   }
@@ -695,7 +695,7 @@ void write_listing_header (void)
   WRITE (FILE_LISTING_FD (&A68_JOB), "\"");
   if (OPTION_STATISTICS_LISTING (&A68_JOB)) {
     if (ERROR_COUNT (&A68_JOB) + WARNING_COUNT (&A68_JOB) > 0) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nDiagnostics: %d error(s), %d warning(s)", ERROR_COUNT (&A68_JOB), WARNING_COUNT (&A68_JOB)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\nDiagnostics: %d error(s), %d warning(s)", ERROR_COUNT (&A68_JOB), WARNING_COUNT (&A68_JOB)) >= 0);
       WRITE (f, A68 (output_line));
       for (LINE_T *z = TOP_LINE (&A68_JOB); z != NO_LINE; FORWARD (z)) {
         if (DIAGNOSTICS (z) != NO_DIAGNOSTIC) {

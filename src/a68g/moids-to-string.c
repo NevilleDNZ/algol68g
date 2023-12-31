@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -36,7 +36,7 @@ void moid_to_string_2 (char *, MOID_T *, int *, NODE_T *);
 
 void add_to_moid_text (char *dst, char *str, int *w)
 {
-  bufcat (dst, str, BUFFER_SIZE);
+  a68_bufcat (dst, str, BUFFER_SIZE);
   (*w) -= (int) strlen (str);
 }
 
@@ -264,7 +264,7 @@ void moid_to_string_2 (char *b, MOID_T * n, int *w, NODE_T * idf)
     }
   } else {
     char str[SMALL_BUFFER_SIZE];
-    ASSERT (snprintf (str, (size_t) SMALL_BUFFER_SIZE, "\\%d", ATTRIBUTE (n)) >= 0);
+    ASSERT (a68_bufprt (str, (size_t) SMALL_BUFFER_SIZE, "\\%d", ATTRIBUTE (n)) >= 0);
     add_to_moid_text (b, str, w);
   }
 }
@@ -292,7 +292,7 @@ char *moid_to_string (MOID_T * n, int w, NODE_T * idf)
   if (n != NO_MOID) {
     moid_to_string_2 (a, n, &w, idf);
   } else {
-    bufcat (a, "null", BUFFER_SIZE);
+    a68_bufcat (a, "null", BUFFER_SIZE);
   }
   return a;
 #undef MAX_MTS

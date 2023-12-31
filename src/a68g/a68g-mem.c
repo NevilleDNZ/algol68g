@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -90,7 +90,7 @@ void *a68_alloc (size_t len, const char *f, int line)
 #endif
     if (p == (void *) NULL || errno != 0) {
       static BUFFER msg;
-      snprintf (msg, SNPRINTF_SIZE, "cannot allocate %lu bytes; called from function %s, line %d", (long unt) len, f, line);
+      a68_bufprt (msg, SNPRINTF_SIZE, "cannot allocate %lu bytes; called from function %s, line %d", (long unt) len, f, line);
       ABEND (A68_TRUE, ERROR_ALLOCATION, msg);
     }
     errno = save;
@@ -145,7 +145,7 @@ char *new_string (char *t, ...)
   q = t;
   va_start (vl, t);
   while (q != NO_TEXT) {
-    bufcat (z, q, len);
+    a68_bufcat (z, q, len);
     q = va_arg (vl, char *);
   }
   va_end (vl);
@@ -158,7 +158,7 @@ char *new_fixed_string (char *t)
 {
   int n = (int) (strlen (t) + 1);
   char *z = (char *) get_fixed_heap_space ((size_t) n);
-  bufcpy (z, t, n);
+  a68_bufcpy (z, t, n);
   return z;
 }
 
@@ -168,7 +168,7 @@ char *new_temp_string (char *t)
 {
   int n = (int) (strlen (t) + 1);
   char *z = (char *) get_temp_heap_space ((size_t) n);
-  bufcpy (z, t, n);
+  a68_bufcpy (z, t, n);
   return z;
 }
 

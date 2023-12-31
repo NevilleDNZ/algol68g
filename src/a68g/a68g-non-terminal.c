@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -398,7 +398,7 @@ char *non_terminal_string (char *buf, int att)
   if (att > 0 && att < WILDCARD) {
     if (attribute_names[att] != NO_TEXT) {
       char *q = buf;
-      bufcpy (q, attribute_names[att], BUFFER_SIZE);
+      a68_bufcpy (q, attribute_names[att], BUFFER_SIZE);
       while (q[0] != NULL_CHAR) {
         if (q[0] == '_') {
           q[0] = '-';

@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -40,7 +40,7 @@
   int _rc_ = (f);\
   if (_rc_ != 0) {\
     BUFFER txt;\
-    ASSERT (snprintf (txt, SNPRINTF_SIZE, "%s: %d: math error", __FILE__, __LINE__) >= 0);\
+    ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "%s: %d: math error", __FILE__, __LINE__) >= 0);\
     torrix_error_handler (txt, "", 0, _rc_);\
   }}
 
