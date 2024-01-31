@@ -78,7 +78,7 @@ BOOL_T close_device (NODE_T *, A68_FILE *);
 BOOL_T genie_int_case_unit (NODE_T *, int, int *);
 BOOL_T increment_internal_index (A68_TUPLE *, int);
 char *a_to_c_string (NODE_T *, char *, A68_REF);
-char *propagator_name (PROP_PROC * p);
+char *propagator_name (const PROP_PROC * p);
 FILE *a68_fopen (char *, char *, char *);
 GPROC get_global_level;
 GPROC initialise_frame;

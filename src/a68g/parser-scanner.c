@@ -481,7 +481,6 @@ void include_files (LINE_T * top)
             goto search_next_pragmat;
           }
         }
-        t = NO_LINE;
 // Access the file.
         errno = 0;
         fd = open (fn, O_RDONLY | O_BINARY);

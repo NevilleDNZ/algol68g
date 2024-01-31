@@ -83,7 +83,7 @@ char *char_to_str (char ch)
 
 void pretty_diag (FILE_T f, char *p)
 {
-  int line_width = (f == A68_STDOUT ? A68 (term_width) : MAX_TERM_WIDTH);
+  int line_width = (f == A68_STDERR || f == A68_STDOUT ? A68 (term_width) : MAX_TERM_WIDTH);
   int pos = 1;
   while (p[0] != NULL_CHAR) {
     char *q;
@@ -129,7 +129,7 @@ void abend (char *reason, char *info, char *file, int line)
   }
   a68_bufcat (A68 (output_line), "\n", BUFFER_SIZE);
   io_close_tty_line ();
-  pretty_diag (A68_STDOUT, A68 (output_line));
+  pretty_diag (A68_STDERR, A68 (output_line));
   a68_exit (EXIT_FAILURE);
 }
 
@@ -181,7 +181,7 @@ char *diag_pos (LINE_T * p, DIAGNOSTIC_T * d)
 
 void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
 {
-  int line_width = (f == A68_STDOUT ? A68 (term_width) : MAX_TERM_WIDTH);
+  int line_width = (f == A68_STDERR || f == A68_STDOUT ? A68 (term_width) : MAX_TERM_WIDTH);
 // Terminate properly.
   if ((STRING (p))[strlen (STRING (p)) - 1] == NEWLINE_CHAR) {
     (STRING (p))[strlen (STRING (p)) - 1] = NULL_CHAR;
@@ -190,7 +190,7 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
     }
   }
 // Print line number.
-  if (f == A68_STDOUT) {
+  if (f == A68_STDERR || f == A68_STDOUT) {
     io_close_tty_line ();
   } else {
     WRITE (f, NEWLINE_STRING);
@@ -364,7 +364,7 @@ void diagnostics_to_terminal (LINE_T * p, int sev)
         }
       }
       if (z) {
-        write_source_line (A68_STDOUT, p, NO_NODE, sev);
+        write_source_line (A68_STDERR, p, NO_NODE, sev);
       }
     }
   }
@@ -438,7 +438,7 @@ void write_diagnostic (int sev, char *b)
     ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: %s: %s.", A68 (a68_cmd_name), txt, b) >= 0);
   }
   io_close_tty_line ();
-  pretty_diag (A68_STDOUT, A68 (output_line));
+  pretty_diag (A68_STDERR, A68 (output_line));
 }
 
 //! @brief Add diagnostic to source line.
@@ -805,8 +805,8 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
     } else {
       add_diagnostic (NO_LINE, NO_TEXT, p, sev, b);
       if (sev == A68_MATH_WARNING && p != NO_NODE && LINE (INFO (p)) != NO_LINE) {
-        write_source_line (A68_STDOUT, LINE (INFO (p)), p, A68_TRUE);
-        WRITE (A68_STDOUT, NEWLINE_STRING);
+        write_source_line (A68_STDERR, LINE (INFO (p)), p, A68_TRUE);
+        WRITE (A68_STDERR, NEWLINE_STRING);
       }
     }
   }

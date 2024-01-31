@@ -81,7 +81,7 @@ REAL_T *pop_array_real (NODE_T * p, int *len)
 
 //! @brief Push REAL_T [] on the stack as [] REAL.
 
-void push_array_real (NODE_T * p, REAL_T * v, int len)
+void push_array_real (NODE_T * p, const REAL_T * v, int len)
 {
   A68_REF desc, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (desc, row, arr, tup, M_ROW_REAL, M_REAL, len);
@@ -129,7 +129,7 @@ REAL_T *pop_array_complex (NODE_T * p, int *len)
 
 //! @brief Push REAL_T [] on the stack as [] COMPLEX.
 
-void push_array_complex (NODE_T * p, REAL_T * v, int len)
+void push_array_complex (NODE_T * p, const REAL_T * v, int len)
 {
   A68_REF desc, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (desc, row, arr, tup, M_ROW_COMPLEX, M_COMPLEX, len);

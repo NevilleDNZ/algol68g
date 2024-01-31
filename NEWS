@@ -1,4 +1,7 @@
-Version 3.4.0-5, October 2023/January 2024
+Version 3.5.0, February 2024
+* Write diagnostics to stderr instead of stdout.
+
+Version 3.4.0-7, October 2023/January 2024
 * Fix Darwin configuration issue.
 * Enable plugin compiler on Apple Silicon Macs.
 * C17 compliant code.

@@ -214,9 +214,10 @@ PROP_T genie_slice (NODE_T * p)
     INT_T index = 0;
     if (SEQUENCE (p) == NO_NODE && !STATUS_TEST (p, SEQUENCE_MASK)) {
       NODE_T top_seq;
-      NODE_T *seq = &top_seq;
       GINFO_T g;
-      GINFO (&top_seq) = &g;
+      NODE_T *seq = &top_seq;
+      GINFO (seq) = &g;
+      SEQUENCE (seq) = NO_NODE;
       genie_subscript (indexer, &tup, &index, &seq);
       SEQUENCE (p) = SEQUENCE (&top_seq);
       STATUS_SET (p, SEQUENCE_MASK);

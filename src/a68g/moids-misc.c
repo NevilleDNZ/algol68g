@@ -364,7 +364,7 @@ BOOL_T is_rows_type (MOID_T * p)
 
 //! @brief Whether mode is PROC (REF FILE) VOID or FORMAT.
 
-BOOL_T is_proc_ref_file_void_or_format (MOID_T * p)
+BOOL_T is_proc_ref_file_void_or_format (const MOID_T * p)
 {
   if (p == M_PROC_REF_FILE_VOID) {
     return A68_TRUE;
@@ -611,7 +611,7 @@ BOOL_T is_firm (MOID_T * p, MOID_T * q)
 
 //! @brief Whether "p" widens to "q".
 
-MOID_T *widens_to (MOID_T * p, MOID_T * q)
+MOID_T *widens_to (const MOID_T * p, const MOID_T * q)
 {
   if (p == M_INT) {
     if (q == M_LONG_INT || q == M_LONG_LONG_INT || q == M_LONG_REAL || q == M_LONG_LONG_REAL || q == M_LONG_COMPLEX || q == M_LONG_LONG_COMPLEX) {

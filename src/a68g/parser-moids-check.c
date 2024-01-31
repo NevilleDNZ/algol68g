@@ -80,6 +80,7 @@ void mode_checker (NODE_T * p)
   if (IS (p, PARTICULAR_PROGRAM)) {
     A68 (top_soid_list) = NO_SOID;
     SOID_T x, y;
+    MOID (&y) = NO_MOID;
     make_soid (&x, STRONG, M_VOID, 0);
     mode_check_enclosed (SUB (p), &x, &y);
     MOID (p) = MOID (&y);
@@ -749,7 +750,7 @@ void mode_check_enclosed (NODE_T * p, SOID_T * x, SOID_T * y)
 
 //! @brief Search table for operator.
 
-TAG_T *search_table_for_operator (TAG_T * t, char *n, MOID_T * x, MOID_T * y)
+TAG_T *search_table_for_operator (TAG_T * t, const char *n, MOID_T * x, MOID_T * y)
 {
   if (is_mode_isnt_well (x)) {
     return A68_PARSER (error_tag);
@@ -1297,7 +1298,7 @@ void mode_check_call (NODE_T * p, MOID_T * n, SOID_T * x, SOID_T * y)
 
 void mode_check_slice (NODE_T * p, MOID_T * ori, SOID_T * x, SOID_T * y)
 {
-  MOID_T *m = depref_completely (ori), *n = ori;
+  MOID_T *n = ori;
 // WEAK coercion.
   while ((IS_REF (n) && !is_ref_row (n)) || (IS (n, PROC_SYMBOL) && PACK (n) == NO_PACK)) {
     n = depref_once (n);
@@ -1322,6 +1323,7 @@ void mode_check_slice (NODE_T * p, MOID_T * ori, SOID_T * x, SOID_T * y)
     diagnostic (A68_ERROR, p, ERROR_INDEXER_NUMBER, n);
     make_soid (y, SORT (x), M_ERROR, 0);
   } else {
+    MOID_T *m;
     if (subs > 0 && trims == 0) {
       ANNOTATION (NEXT (p)) = SLICE;
       m = n;
@@ -1539,8 +1541,8 @@ void mode_check_transpose (NODE_T * p, SOID_T * x, SOID_T * y)
     make_soid (y, SORT (x), M_ERROR, 0);
     return;
   }
-  BOOL_T is_ref; int dim;
-  if ((is_ref = is_ref_row (n)) != A68_FALSE) {
+  int dim;
+  if (is_ref_row (n) != A68_FALSE) {
     dim = DIM (DEFLEX (SUB (n)));
   } else {
     dim = DIM (DEFLEX (n));
@@ -1592,8 +1594,8 @@ void mode_check_row_column_function (NODE_T * p, SOID_T * x, SOID_T * y)
     make_soid (y, SORT (x), M_ERROR, 0);
     return;
   }
-  BOOL_T is_ref; int dim;
-  if ((is_ref = is_ref_row (n)) != A68_FALSE) {
+  int dim;
+  if (is_ref_row (n) != A68_FALSE) {
     dim = DIM (DEFLEX (SUB (n)));
   } else {
     dim = DIM (DEFLEX (n));

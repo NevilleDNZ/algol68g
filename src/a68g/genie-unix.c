@@ -246,8 +246,8 @@ void genie_pwd (NODE_T * p)
   errno = 0;
   char *buffer = NO_TEXT;
   BOOL_T cont = A68_TRUE;
+  size_t size = BUFFER_SIZE;
   while (cont) {
-    size_t size = BUFFER_SIZE;
     buffer = (char *) a68_alloc (size, __func__, __LINE__);
     if (buffer == NO_TEXT) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);

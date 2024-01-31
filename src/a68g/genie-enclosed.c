@@ -345,9 +345,10 @@ void genie_enquiry_clause (NODE_T * p)
 {
   if (SEQUENCE (p) == NO_NODE && !STATUS_TEST (p, SEQUENCE_MASK)) {
     NODE_T top_seq;
-    NODE_T *seq = &top_seq;
     GINFO_T g;
-    GINFO (&top_seq) = &g;
+    NODE_T *seq = &top_seq;
+    GINFO (seq) = &g;
+    SEQUENCE (seq) = NO_NODE;
     genie_serial_units_no_label (SUB (p), A68_SP, &seq);
     SEQUENCE (p) = SEQUENCE (&top_seq);
     STATUS_SET (p, SEQUENCE_MASK);

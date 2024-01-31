@@ -476,8 +476,8 @@ void tree_listing (FILE_T f, NODE_T * q, int x, LINE_T * l, int *ld, BOOL_T comm
               WRITE (f, A68 (output_line));
             }
           }
-          if (GINFO (p) != NO_GINFO && propagator_name (UNIT (&GPROP (p))) != NO_TEXT) {
-            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %s", propagator_name (UNIT (&GPROP (p)))) >= 0);
+          if (GINFO (p) != NO_GINFO && propagator_name ((const PROP_PROC *) UNIT (&GPROP (p))) != NO_TEXT) {
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %s", propagator_name ((const PROP_PROC *) UNIT (&GPROP (p)))) >= 0);
             WRITE (f, A68 (output_line));
           }
           if (GINFO (p) != NO_GINFO && COMPILE_NAME (GINFO (p)) != NO_TEXT) {

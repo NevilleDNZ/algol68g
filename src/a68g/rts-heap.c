@@ -500,7 +500,7 @@ A68_REF heap_generator_2 (NODE_T * p, MOID_T * mode, int len, int size)
 {
   if (len == 0 || size == 0) {
     return heap_generator (p, mode, 0);
-  } else if (len != 0 && (ABS (size) < (2 * GIGABYTE) / ABS (len))) {
+  } else if (ABS (size) < (2 * GIGABYTE) / ABS (len)) {
     return heap_generator (p, mode, len * size);
   } else {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
@@ -515,7 +515,7 @@ A68_REF heap_generator_3 (NODE_T * p, MOID_T * mode, int len1, int len2, int siz
 {
   if (len1 == 0 || len2 == 0) {
     return heap_generator (p, mode, 0);
-  } else if (len1 != 0 && (ABS (len2) < (2 * GIGABYTE) / ABS (len1))) {
+  } else if (ABS (len2) < (2 * GIGABYTE) / ABS (len1)) {
     return heap_generator_2 (p, mode, len1 * len2, size);
   } else {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);

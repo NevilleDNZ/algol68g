@@ -30,7 +30,8 @@
 
 void init_tty (void)
 {
-  A68 (chars_in_tty_line) = 0;
+  A68 (chars_in_stderr) = 0;
+  A68 (chars_in_stdout) = 0;
   A68 (halt_typing) = A68_FALSE;
   change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_FALSE);
 }
@@ -39,7 +40,12 @@ void init_tty (void)
 
 void io_close_tty_line (void)
 {
-  if (A68 (chars_in_tty_line) > 0) {
+  if (A68 (chars_in_stderr) > 0) {
+    A68 (chars_in_stderr) = 0;
+    io_write_string (A68_STDERR, NEWLINE_STRING);
+  }
+  if (A68 (chars_in_stdout) > 0) {
+    A68 (chars_in_stdout) = 0;
     io_write_string (A68_STDOUT, NEWLINE_STRING);
   }
 }
@@ -65,7 +71,7 @@ char *read_string_from_tty (char *prompt)
     add_history (line);
   }
   a68_bufcpy (A68 (input_line), line, BUFFER_SIZE);
-  A68 (chars_in_tty_line) = (int) strlen (A68 (input_line));
+  A68 (chars_in_stdout) = (int) strlen (A68 (input_line));
   a68_free (line);
   return A68 (input_line);
 #else
@@ -79,7 +85,7 @@ char *read_string_from_tty (char *prompt)
     if (ch == EOF_CHAR) {
       A68 (input_line)[0] = EOF_CHAR;
       A68 (input_line)[1] = NULL_CHAR;
-      A68 (chars_in_tty_line) = 1;
+      A68 (chars_in_stdout) = 1;
       return A68 (input_line);
     } else {
       A68 (input_line)[k++] = (char) ch;
@@ -88,7 +94,7 @@ char *read_string_from_tty (char *prompt)
   }
   A68 (input_line)[k] = NULL_CHAR;
   n = (int) strlen (A68 (input_line));
-  A68 (chars_in_tty_line) = (ch == NEWLINE_CHAR ? 0 : (n > 0 ? n : 1));
+  A68 (chars_in_stdout) = (ch == NEWLINE_CHAR ? 0 : (n > 0 ? n : 1));
   return A68 (input_line);
 #endif
 }
@@ -116,7 +122,11 @@ void io_write_string (FILE_T f, const char *z)
         int n = k - first;
         ssize_t j = io_write_conv (f, &(z[first]), (size_t) n);
         ABEND (j < 0, ERROR_ACTION, __func__);
-        A68 (chars_in_tty_line) += n;
+        if (f == A68_STDERR) {
+          A68 (chars_in_stderr) += n;
+        } else {
+          A68 (chars_in_stdout) += n;
+        }
       }
       if (z[k] == NEWLINE_CHAR) {
 // Pretty-print newline.
@@ -124,7 +134,11 @@ void io_write_string (FILE_T f, const char *z)
         first = k;
         ssize_t j = io_write_conv (f, NEWLINE_STRING, 1);
         ABEND (j < 0, ERROR_ACTION, __func__);
-        A68 (chars_in_tty_line) = 0;
+        if (f == A68_STDERR) {
+          A68 (chars_in_stderr) = 0;
+        } else {
+          A68 (chars_in_stdout) = 0;
+        }
       }
     } while (z[k] != NULL_CHAR);
   }

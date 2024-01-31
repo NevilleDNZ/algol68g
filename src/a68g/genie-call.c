@@ -220,9 +220,10 @@ PROP_T genie_call_quick (NODE_T * p)
 // Get arguments.
   if (SEQUENCE (p) == NO_NODE && !STATUS_TEST (p, SEQUENCE_MASK)) {
     NODE_T top_seq;
-    NODE_T *seq = &top_seq;
     GINFO_T g;
-    GINFO (&top_seq) = &g;
+    NODE_T *seq = &top_seq;
+    GINFO (seq) = &g;
+    SEQUENCE (seq) = NO_NODE;
     genie_argument (NEXT (proc), &seq);
     SEQUENCE (p) = SEQUENCE (&top_seq);
     STATUS_SET (p, SEQUENCE_MASK);
@@ -253,9 +254,10 @@ PROP_T genie_call (NODE_T * p)
 // Get arguments.
   if (SEQUENCE (p) == NO_NODE && !STATUS_TEST (p, SEQUENCE_MASK)) {
     NODE_T top_seq;
-    NODE_T *seq = &top_seq;
     GINFO_T g;
-    GINFO (&top_seq) = &g;
+    NODE_T *seq = &top_seq;
+    GINFO (seq) = &g;
+    SEQUENCE (seq) = NO_NODE;
     genie_argument (NEXT (proc), &seq);
     SEQUENCE (p) = SEQUENCE (&top_seq);
     STATUS_SET (p, SEQUENCE_MASK);

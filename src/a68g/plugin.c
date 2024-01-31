@@ -377,7 +377,7 @@ void sign_in (int action, int phase, char *idf, void *info, int number)
 
 //! @brief Whether identifier is signed_in.
 
-BOOK_T *signed_in (int action, int phase, char *idf)
+BOOK_T *signed_in (int action, int phase, const char *idf)
 {
   for (int k = 0; k < A68_OPT (cse_pointer); k++) {
     if (IDF (&A68_OPT (cse_book)[k]) == idf && ACTION (&A68_OPT (cse_book)[k]) == action && PHASE (&A68_OPT (cse_book)[k]) >= phase) {
@@ -664,7 +664,7 @@ void write_fun_postlude (NODE_T * p, FILE_T out, char *fn)
 
 //! @brief Code internal a68g mode.
 
-char *internal_mode (MOID_T * m)
+char *internal_mode (const MOID_T * m)
 {
   if (m == M_INT) {
     return "M_INT";

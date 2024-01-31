@@ -311,9 +311,11 @@ void reduce_branch (NODE_T * q, int expect)
     case UNION_PACK:
     case SPECIFIER: {
         declarer_pack = A68_TRUE;
+        break;
       }
     default: {
         declarer_pack = A68_FALSE;
+        break;
       }
     }
 // Sample all info needed to decide whether a bold tag is operator or indicant.
