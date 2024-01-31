@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.5.0, configure.ac
+# Algol 68 Genie 3.5.1, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.5.0], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.5.1], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 AC_MSG_NOTICE([])
@@ -573,21 +573,30 @@ AC_CHECK_FUNCS(posix_memalign)
 # Checks for functions / macros.
 #
 
+#
+# If isfinite is found, we do not search for finite.
+#
+
 AC_MSG_CHECKING([for isfinite])
 AC_COMPILE_IFELSE(
   [AC_LANG_PROGRAM([#include <math.h>], [int a = isfinite(0.0)])],
     [AC_MSG_RESULT(yes)
+     test_finite=no
      AC_DEFINE(HAVE_ISFINITE, 1, [Define if isfinite() is available])], 
-    [AC_MSG_RESULT(no)]
+    [AC_MSG_RESULT(no)
+     test_finite=yes
+    ]
 )
 
-AC_MSG_CHECKING([for finite])
-AC_COMPILE_IFELSE(
-  [AC_LANG_PROGRAM([#include <math.h>], [int a = finite(0.0)])],
-    [AC_MSG_RESULT(yes)
-     AC_DEFINE(HAVE_FINITE, 1, [Define if finite() is available])], 
-    [AC_MSG_RESULT(no)]
+if test "x$test_finite" = "xyes"; then
+  AC_MSG_CHECKING([for finite])
+  AC_COMPILE_IFELSE(
+    [AC_LANG_PROGRAM([#include <math.h>], [int a = finite(0.0)])],
+      [AC_MSG_RESULT(yes)
+       AC_DEFINE(HAVE_FINITE, 1, [Define if finite() is available])], 
+      [AC_MSG_RESULT(no)]
 )
+fi
 
 AC_MSG_CHECKING([for isinf])
 AC_COMPILE_IFELSE(
