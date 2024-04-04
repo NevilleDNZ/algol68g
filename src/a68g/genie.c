@@ -690,7 +690,7 @@ void genie_check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q)
 
 //! @brief Propagator_name.
 
-char *propagator_name (PROP_PROC * p)
+char *propagator_name (const PROP_PROC * p)
 {
   if (p == genie_and_function) {
     return "genie_and_function";

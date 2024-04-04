@@ -405,6 +405,7 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
+  (void) z;
   (void) blockalign;
   (void) byterate;
   (void) chunksize;

@@ -144,7 +144,7 @@ void top_down_diagnose (NODE_T * start, NODE_T * p, int clause, int expected)
 
 //! @brief Check for premature exhaustion of tokens.
 
-void tokens_exhausted (NODE_T * p, NODE_T * q)
+void tokens_exhausted (const NODE_T * p, NODE_T * q)
 {
   if (p == NO_NODE) {
     diagnostic (A68_SYNTAX_ERROR, q, ERROR_KEYWORD);

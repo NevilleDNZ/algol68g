@@ -288,16 +288,29 @@ int a68_usleep (unsigned delay)
 #endif
 }
 
+//! @brief Safely set buffer.
+
+void *a68_bufset (void *dst, int val, size_t len)
+{
+// Function a68_bufset can be optimized away by a compiler.
+// Therefore we have this alternative.
+  ASSERT (dst != NO_TEXT);
+  char *p = (char *) dst;
+  while (len-- > 0) {
+    *(p++) = val;
+  }
+  return dst;
+}
+
 //! @brief Safely append to buffer.
 
-void a68_bufcat (char *dst, char *src, int len)
+void a68_bufcat (char *dst, char *src, size_t len)
 {
   ASSERT (dst != NO_TEXT);
   ASSERT (src != NO_TEXT);
-  ASSERT (len >= 0);
   char *d = dst, *s = src;
   int n = len;
-// Find end of dst and left-adjust; do not go past end 
+// Find end of dst and left-adjust; do not go past end.
   for (; n-- != 0 && d[0] != NULL_CHAR; d++) {
     ;
   }
@@ -313,20 +326,19 @@ void a68_bufcat (char *dst, char *src, int len)
     }
     d[0] = NULL_CHAR;
   }
-// Better sure than sorry 
+// Better sure than sorry.
   dst[len - 1] = NULL_CHAR;
 }
 
 //! @brief Safely copy to buffer.
 
-void a68_bufcpy (char *dst, char *src, int len)
+void a68_bufcpy (char *dst, char *src, size_t len)
 {
   ASSERT (dst != NO_TEXT);
   ASSERT (src != NO_TEXT);
-  ASSERT (len >= 0);
   char *d = dst, *s = src;
   int n = len;
-// Copy as many as fit 
+// Copy as many as fit. 
   if (n > 0 && --n > 0) {
     do {
       if (((d++)[0] = (s++)[0]) == NULL_CHAR) {
@@ -335,40 +347,27 @@ void a68_bufcpy (char *dst, char *src, int len)
     } while (--n > 0);
   }
   if (n == 0 && len > 0) {
-// Not enough room in dst, so terminate 
+// Not enough room in dst, so terminate. 
     d[0] = NULL_CHAR;
   }
-// Better sure than sorry 
+// Better sure than sorry. 
   dst[len - 1] = NULL_CHAR;
-}
-
-//! @brief Safely set buffer.
-
-void *a68_bufset (void *dst, int val, size_t len)
-{
-// Function a68_bufset can be optimized away by a compiler.
-// Therefore we have this alternative.
-  ASSERT (dst != NO_TEXT);
-  ASSERT (len >= 0);
-  char *p = (char *) dst;
-  while (len-- > 0) {
-    *(p++) = val;
-  }
-  return dst;
 }
 
 //! @brief Safely print to buffer.
 
-int a68_bufprt (char *dst, size_t size, const char *format, ...)
+int a68_bufprt (char *dst, size_t len, const char *format, ...)
 {
   ASSERT (dst != NO_TEXT);
-  ASSERT (size > 1);
+  ASSERT (len > 1);
   ASSERT (format != NO_TEXT);
   va_list ap;
   va_start (ap, format);
-  int rc = vsnprintf (dst, size, format, ap);
+  int rc = vsnprintf (dst, len, format, ap);
   va_end (ap);
-  if (rc >= 0 && size <= (size_t) rc) {
+// Better sure than sorry.
+  dst[len - 1] = NULL_CHAR;
+  if (rc >= 0 && len <= (size_t) rc) {
     return -1;
   } else {
     return rc;

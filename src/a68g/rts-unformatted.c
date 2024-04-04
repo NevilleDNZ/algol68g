@@ -1608,7 +1608,7 @@ char digchar (int k)
 
 //! @brief Formatted string for HEX_NUMBER.
 
-char *bits (NODE_T * p)
+char *bits_to_string (NODE_T * p)
 {
   A68_INT width, base;
   POP_OBJECT (p, &base, A68_INT);
@@ -2633,7 +2633,7 @@ void genie_whole (NODE_T * p)
 void genie_bits (NODE_T * p)
 {
   ADDR_T pop_sp = A68_SP;
-  char *str = bits (p);
+  char *str = bits_to_string (p);
   A68_SP = pop_sp - 2 * SIZE (M_INT) - SIZE (M_HEX_NUMBER);
   A68_REF ref = tmp_to_a68_string (p, str);
   PUSH_REF (p, ref);

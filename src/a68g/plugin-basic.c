@@ -31,7 +31,7 @@
 
 //! @brief Whether primitive mode, with simple C equivalent.
 
-BOOL_T primitive_mode (MOID_T * m)
+BOOL_T primitive_mode (const MOID_T * m)
 {
   if (m == M_INT) {
     return A68_TRUE;

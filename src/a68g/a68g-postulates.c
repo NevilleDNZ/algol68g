@@ -36,7 +36,7 @@ void init_postulates (void)
 
 //! @brief Make old postulates available for new use.
 
-void free_postulate_list (POSTULATE_T * start, POSTULATE_T * stop)
+void free_postulate_list (POSTULATE_T * start, const POSTULATE_T * stop)
 {
   if (start == stop) {
     return;
@@ -69,7 +69,7 @@ void make_postulate (POSTULATE_T ** p, MOID_T * a, MOID_T * b)
 
 //! @brief Where postulates are in the list.
 
-POSTULATE_T *is_postulated_pair (POSTULATE_T * p, MOID_T * a, MOID_T * b)
+POSTULATE_T *is_postulated_pair (POSTULATE_T * p, const MOID_T * a, const MOID_T * b)
 {
   for (; p != NO_POSTULATE; FORWARD (p)) {
     if (A (p) == a && B (p) == b) {
@@ -81,7 +81,7 @@ POSTULATE_T *is_postulated_pair (POSTULATE_T * p, MOID_T * a, MOID_T * b)
 
 //! @brief Where postulate is in the list.
 
-POSTULATE_T *is_postulated (POSTULATE_T * p, MOID_T * a)
+POSTULATE_T *is_postulated (POSTULATE_T * p, const MOID_T * a)
 {
   for (; p != NO_POSTULATE; FORWARD (p)) {
     if (A (p) == a) {

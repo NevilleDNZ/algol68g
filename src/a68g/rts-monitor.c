@@ -1288,7 +1288,9 @@ void print_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
 
 void indent_crlf (FILE_T f)
 {
-  io_close_tty_line ();
+  if (f == A68_STDOUT) {
+    io_close_tty_line ();
+  }
   for (int k = 0; k < A68_MON (tabs); k++) {
     WRITE (f, "  ");
   }
@@ -2168,8 +2170,8 @@ void single_step (NODE_T * p, unt mask)
   } else if ((mask & BREAKPOINT_TRACE_MASK) != 0) {
     PROP_T *prop = &GPROP (p);
     WIS ((p));
-    if (propagator_name (UNIT (prop)) != NO_TEXT) {
-      WRITELN (A68_STDOUT, propagator_name (UNIT (prop)));
+    if (propagator_name ((const PROP_PROC *) UNIT (prop)) != NO_TEXT) {
+      WRITELN (A68_STDOUT, propagator_name ((const PROP_PROC *) UNIT (prop)));
     }
     return;
   } else {

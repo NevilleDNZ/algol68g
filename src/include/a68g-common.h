@@ -303,7 +303,7 @@ struct GLOBALS_T
   GC_GLOBALS_T gc;
   INDENT_GLOBALS_T indent;
   int argc;
-  int chars_in_tty_line;
+  int chars_in_stderr, chars_in_stdout;
   int global_level, max_lex_lvl;
   int max_simplout_size;
   int new_nodes, new_modes, new_postulates, new_node_infos, new_genie_infos;

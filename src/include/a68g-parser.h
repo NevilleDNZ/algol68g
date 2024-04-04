@@ -76,7 +76,7 @@ TABLE_T *find_level (NODE_T *, int);
 TABLE_T *new_symbol_table (TABLE_T *);
 TAG_T *add_tag (TABLE_T *, int, NODE_T *, MOID_T *, int);
 TAG_T *find_tag_global (TABLE_T *, int, char *);
-TAG_T *find_tag_local (TABLE_T *, int, char *);
+TAG_T *find_tag_local (TABLE_T *, int, const char *);
 TAG_T *new_tag (void);
 TOKEN_T *add_token (TOKEN_T **, char *);
 void a68_parser (void);

@@ -441,7 +441,7 @@ void tax_generators (NODE_T * p)
 
 //! @brief Find a firmly related operator for operands.
 
-TAG_T *find_firmly_related_op (TABLE_T * c, char *n, MOID_T * l, MOID_T * r, TAG_T * self)
+TAG_T *find_firmly_related_op (TABLE_T * c, const char *n, MOID_T * l, MOID_T * r, const TAG_T * self)
 {
   if (c != NO_TABLE) {
     TAG_T *s = OPERATORS (c);
@@ -674,7 +674,7 @@ int is_identifier_or_label_global (TABLE_T * table, char *name)
 
 //! @brief Find a tag, searching only local symbol table.
 
-TAG_T *find_tag_local (TABLE_T * table, int a, char *name)
+TAG_T *find_tag_local (TABLE_T * table, int a, const char *name)
 {
   if (table != NO_TABLE) {
     TAG_T *s = NO_TAG;
