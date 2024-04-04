@@ -1,0 +1,213 @@
+<html>
+<head>
+<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
+<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css">
+a:link    {color: blue; text-decoration: none;}
+a:visited {color: blue; text-decoration: none;}
+a:active  {color: blue; text-decoration: none;}
+a:hover   {text-decoration: underline;}
+p {font-size: 10pt; font-family: Arial,Helvetica;}
+u {font-size: 10pt; font-family: Arial,Helvetica;}
+dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h2 {font-size: 14pt; font-family: Arial,Helvetica;}
+h3 {font-size: 12pt; font-family: Arial,Helvetica;}
+h4 {font-size: 12pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
+ul {font-size: 10pt; font-family: Arial,Helvetica;}
+body {font-size: 10pt; font-family: Arial,Helvetica;}
+code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+</style>
+</head>
+<body background="bg.jpg">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=12>
+<td valign=top bgcolor="white">
+<table cellspacing=1 cellpadding=3 border=0>
+<td bgcolor="black">
+<a href="license.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
+</td>
+<td bgcolor="black">
+<a href="algol.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
+</td>
+<td bgcolor="black">
+<font href="contents.html" style="font-size: 10pt; color: gold;"><b>Table of contents</b></font>
+</td>
+<td bgcolor="black">
+<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
+</td>
+</table>
+<p>
+<h2>Manual for Algol 68 Genie Mark 4</h2>
+<p>
+<address>J. Marcel van der Veer
+<br>
+June 2004
+</address>
+</td>
+<td bgcolor=white valign=top>
+<img src="logo.jpg" align=right>
+</td>
+</table>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=12>
+<td width="80%" valign=top bgcolor="white">
+
+<p>
+<h3>Table of contents</h3>
+<ul>
+<li><a href="algol.html">Algol 68 Genie - An Algol 68 subset interpreter</a>
+<ul>
+<li><a href="algol.html#obtaining">Obtaining Algol68G</a>
+<li><a href="algol.html#contact">Author and contact information</a>
+<li><a href="algol.html#ack">Acknowledgments</a>
+<li><a href="algol.html#features">New features</a>
+</ul>
+<p>
+<li><a href="description.html">Description of Algol68G</a>
+<ul>
+<li><a href="description.html#high">About this Algol 68 implementation</a>
+<li><a href="description.html#diff">Algol68G compared to the Revised Report description</a>
+<li><a href="description.html#io">Transput implementation</a>
+<ul>
+<li><a href="description.html#genio">Transput in general</a>
+<li><a href="description.html#fmtio">Formatted transput</a>
+</ul>
+<li><a href="description.html#speed">Interpreter speed</a>
+<li><a href="description.html#bugs">Known problems</a>
+</ul>
+<p>
+<li><a href="drawing.html">Drawing using the GNU Plotting Utilities</a>
+<ul>
+<li><a href="drawing.html#drawsetup">Setting up a graphics device</a>
+<li><a href="drawing.html#drawcolour">Specifying colours</a>
+<li><a href="drawing.html#drawdraw">Drawing objects</a>
+<li><a href="drawing.html#drawtext">Drawing text</a>
+</ul>
+<p>
+<li><a href="numerical.html">Numerical procedures from the GNU Scientific Library</a>
+<ul>
+<li><a href="numerical.html#gslreal"><code>REAL</code> functions</a>
+<li><a href="numerical.html#gslairy"><code>REAL</code> Airy functions</a>
+<li><a href="numerical.html#gslbessel"><code>REAL</code> Bessel functions</a>
+<li><a href="numerical.html#gslelliptic"><code>REAL</code> Elliptic integrals</a>
+<li><a href="numerical.html#gslerror"><code>REAL</code> Error and Gamma functions</a>
+<li><a href="numerical.html#gslcomplex"><code>COMPLEX</code> functions</a>
+<li><a href="numerical.html#constants">Physical Constants</a>
+<ul>
+<li><a href="numerical.html#contants_1">Fundamental constants</a>
+<li><a href="numerical.html#constants_2">Astronomy and astrophysics</a>
+<li><a href="numerical.html#constants_3">Atomic and nuclear physics</a>
+<li><a href="numerical.html#constants_4">Time</a>
+<li><a href="numerical.html#constants_5">Imperial units</a>
+<li><a href="numerical.html#constants_6">Nautical units</a>
+<li><a href="numerical.html#constants_8">Volume</a>
+<li><a href="numerical.html#constants_9">Mass and weight</a>
+<li><a href="numerical.html#constants_10">Thermal energy and power</a>
+<li><a href="numerical.html#constants_11">Pressure</a>
+<li><a href="numerical.html#constants_12">Viscosity</a>
+<li><a href="numerical.html#constants_13">Light and illumination</a>
+<li><a href="numerical.html#constants_14">Radioactivity</a>
+<li><a href="numerical.html#constants_15">Force and energy</a>
+<li><a href="numerical.html#constants_16>Prefixes</a>
+<li><a href="numerical.html#constants_7">Printer units</a>
+</ul>
+</ul>
+<p>
+<li><a href="extensions.html">Auxilliary extensions</a>
+<ul>
+<li><a href="extensions.html#envunix">UNIX extensions</a>
+<ul>
+<li><a href="extensions.html#linmode">Modes</a>
+<li><a href="extensions.html#linproc">Procedures</a>
+</ul>
+<li><a href="extensions.html#torrix">An elementary vector library</a>
+<li><a href="extensions.html#assert">Assertions as pre- or postconditions</a>
+<li><a href="extensions.html#refine">The refinement preprocessor</a>
+</ul>
+<p>
+<li><a href="options.html">Synopsis and options</a>
+<ul>
+<li><a href="options.html#optionone">One-liners</a>
+<li><a href="options.html#optionmem">Memory size</a>
+<li><a href="options.html#optionlist">Listing options</a>
+<li><a href="options.html#optionint">Interpreter options</a>
+<li><a href="options.html#optionmisc">Miscellaneous options</a>
+</ul>
+<p>
+<li><a href="syntax.html">Algol68G syntax summary</a>
+<ul>
+<li><a href="syntax.html#basic">Basic notions</a>
+<li><a href="syntax.html#coercions">Coercions</a>
+<li><a href="syntax.html#program">Particular program</a>
+<li><a href="syntax.html#clauses">Clauses</a>
+<li><a href="syntax.html#expressions">Expressions</a>
+<ul>
+<li><a href="syntax.html#primaries">Primaries</a>
+<li><a href="syntax.html#secondaries">Secondaries</a>
+<li><a href="syntax.html#tertiaries">Tertiaries</a>
+<li><a href="syntax.html#units">Units</a>
+</ul>
+<li><a href="syntax.html#declarations">Declarations</a>
+<li><a href="syntax.html#declarers">Declarers</a>
+<li><a href="syntax.html#formats">Formats</a>
+<li><a href="syntax.html#pragments">Pragments</a>
+<li><a href="syntax.html#refinements">Refinements</a>
+</ul>
+<p>
+<li><a href="environ.html">Coercions and standard environment</a>
+<ul>
+<li><a href="environ.html#envenq">Enquiries</a>
+<li><a href="environ.html#envmath">Math constants</a>
+<li><a href="environ.html#envmathfun">Math procedures</a>
+<li><a href="environ.html#envmode">Modes</a>
+<li><a href="environ.html#envio">Transput</a>
+<li><a href="environ.html#envalt">Operator synonyms</a>
+<li><a href="environ.html#envprio">Operator priorities</a>
+<li><a href="environ.html#envmonad">Monadic operators</a>
+<li><a href="environ.html#envdyad">Dyadic operators</a>
+<li><a href="environ.html#envrng">Random number generator</a>
+<li><a href="environ.html#envmisc">Miscellaneous</a>
+<li><a href="environ.html#envwiden">Widenings</a>
+</ul>
+<p>
+<li><a href="samples.html">Sample Algol68G programs</a>
+<ul>
+<li><a href="samples.html#p0">Lucas numbers</a>
+<li><a href="samples.html#p1">Ackermann numbers</a>
+<li><a href="samples.html#p2">Quicksort</a>
+<li><a href="samples.html#p3">Determinant of Hilbert matrix</a>
+<li><a href="samples.html#p4">Fast Fourier Transform</a>
+<li><a href="samples.html#p5">Decision tree</a>
+</ul>
+<p>
+<li><a href="resources.html">Algol 68 resources</a>
+<ul>
+<li><a href="resources.html#history">History</a>
+<li><a href="resources.html#implementations">Algol 68 implementations</a>
+<li><a href="resources.html#documentation">Readily available Algol 68 documentation</a>
+<li><a href="resources.html#ref">Referenced sources</a>
+</ul>
+<p>
+<li><a href="license.html">GNU Free Documentation License</a>
+</ul>
+
+</td>
+</table>
+
+
+<p style="font-size: 8pt;">
+<font color=black>
+Copyright &copy; 2001-2004 J. Marcel van der Veer.
+<p style="font-size: 8pt;">
+<font color=black>
+Permission is granted to copy, distribute and/or modify this document under the terms of the 
+GNU Free Documentation License, Version 1.2 or any later version published by the 
+Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no 
+Back-Cover Texts. A copy of the license is included in the section entitled 
+<i>GNU Free Documentation License</i>.
+</body>
+</html>
