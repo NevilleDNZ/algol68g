@@ -69,7 +69,7 @@ void inline_arguments (NODE_T * p, FILE_T out, int phase, int *size)
   if (p == NO_NODE) {
     return;
   } else if (IS (p, UNIT) && phase == L_PUSH) {
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "EXECUTE_UNIT_TRACE (_NODE_ (%d));\n", NUMBER (p)));
+    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GENIE_UNIT_TRACE (_NODE_ (%d));\n", NUMBER (p)));
     inline_arguments (NEXT (p), out, L_PUSH, size);
   } else if (IS (p, UNIT)) {
     char arg[NAME_SIZE];
@@ -104,17 +104,17 @@ void inline_denotation (NODE_T * p, FILE_T out, int phase)
 {
   if (phase == L_YIELD) {
     if (MOID (p) == M_INT) {
-      A68_INT z;
       NODE_T *s = IS (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
       char *den = NSYMBOL (s);
+      A68_INT z;
       if (genie_string_to_value_internal (p, M_INT, den, (BYTE_T *) & z) == A68_FALSE) {
         diagnostic (A68_SYNTAX_ERROR, p, ERROR_IN_DENOTATION, M_INT);
       }
       undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, A68_LD, VALUE (&z)));
     } else if (MOID (p) == M_REAL) {
-      A68_REAL z;
       NODE_T *s = IS (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
       char *den = NSYMBOL (s);
+      A68_REAL z;
       if (genie_string_to_value_internal (p, M_REAL, den, (BYTE_T *) & z) == A68_FALSE) {
         diagnostic (A68_SYNTAX_ERROR, p, ERROR_IN_DENOTATION, M_REAL);
       }
@@ -335,7 +335,6 @@ void inline_dereference_slice (NODE_T * p, FILE_T out, int phase)
   MOID_T *mode = SUB_SUB (row_mode);
   char *symbol = NSYMBOL (SUB (prim));
   char drf[NAME_SIZE], idf[NAME_SIZE], arr[NAME_SIZE], tup[NAME_SIZE], elm[NAME_SIZE];
-  INT_T k;
   if (phase == L_DECLARE) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_DECLARE, symbol);
     if (entry == NO_BOOK) {
@@ -356,7 +355,7 @@ void inline_dereference_slice (NODE_T * p, FILE_T out, int phase)
       (void) add_declaration (&A68_OPT (root_idf), "A68_REF", 0, elm);
       (void) add_declaration (&A68_OPT (root_idf), inline_mode (mode), 1, drf);
     }
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_DECLARE, &k, NO_TEXT);
   } else if (phase == L_EXECUTE) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, symbol);
@@ -383,7 +382,7 @@ void inline_dereference_slice (NODE_T * p, FILE_T out, int phase)
       return;
     }
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_EXECUTE, &k, NO_TEXT);
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
     k = 0;
@@ -419,7 +418,6 @@ void inline_slice_ref_to_ref (NODE_T * p, FILE_T out, int phase)
   MOID_T *row_mode = DEFLEX (MOID (prim));
   char *symbol = NSYMBOL (SUB (prim));
   char idf[NAME_SIZE], arr[NAME_SIZE], tup[NAME_SIZE], elm[NAME_SIZE], drf[NAME_SIZE];
-  INT_T k;
   if (phase == L_DECLARE) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_DECLARE, symbol);
     if (entry == NO_BOOK) {
@@ -440,7 +438,7 @@ void inline_slice_ref_to_ref (NODE_T * p, FILE_T out, int phase)
       (void) add_declaration (&A68_OPT (root_idf), "A68_REF", 0, elm);
       (void) add_declaration (&A68_OPT (root_idf), inline_mode (mode), 1, drf);
     }
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_DECLARE, &k, NO_TEXT);
   } else if (phase == L_EXECUTE) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, symbol);
@@ -467,7 +465,7 @@ void inline_slice_ref_to_ref (NODE_T * p, FILE_T out, int phase)
       return;
     }
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_EXECUTE, &k, NO_TEXT);
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
     k = 0;
@@ -495,7 +493,6 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
   MOID_T *row_mode = DEFLEX (MOID (prim));
   char *symbol = NSYMBOL (SUB (prim));
   char drf[NAME_SIZE], idf[NAME_SIZE], arr[NAME_SIZE], tup[NAME_SIZE], elm[NAME_SIZE];
-  INT_T k;
   if (phase == L_DECLARE) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_DECLARE, symbol);
     if (entry == NO_BOOK) {
@@ -511,7 +508,7 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
       (void) make_name (drf, DRF, "", NUMBER (prim));
       indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_REF %s; %s * %s;\n", elm, inline_mode (mode), drf));
     }
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_DECLARE, &k, NO_TEXT);
   } else if (phase == L_EXECUTE) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, symbol);
@@ -538,7 +535,7 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
       return;
     }
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
-    k = 0;
+    INT_T k = 0;
     inline_indexer (indx, out, L_EXECUTE, &k, NO_TEXT);
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
     k = 0;
@@ -568,8 +565,7 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
 
 void inline_monadic_formula (NODE_T * p, FILE_T out, int phase)
 {
-  NODE_T *op = SUB (p);
-  NODE_T *rhs = NEXT (op);
+  NODE_T *op = SUB (p), *rhs = NEXT (op);
   if (IS (p, MONADIC_FORMULA) && MOID (p) == M_COMPLEX) {
     char acc[NAME_SIZE];
     (void) make_name (acc, TMP, "", NUMBER (p));
@@ -593,8 +589,7 @@ void inline_monadic_formula (NODE_T * p, FILE_T out, int phase)
     if (phase != L_YIELD) {
       inline_unit (rhs, out, phase);
     } else {
-      int k;
-      for (k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&monadics[k])) {
           if (IS_ALNUM ((CODE (&monadics[k]))[0])) {
             undent (out, CODE (&monadics[k]));
@@ -635,11 +630,10 @@ void inline_formula (NODE_T * p, FILE_T out, int phase)
       inline_unit (rhs, out, L_DECLARE);
     } else if (phase == L_EXECUTE) {
       char acc[NAME_SIZE];
-      int k;
       (void) make_name (acc, TMP, "", NUMBER (p));
       inline_unit (lhs, out, L_EXECUTE);
       inline_unit (rhs, out, L_EXECUTE);
-      for (k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&dyadics[k])) {
           if (MOID (p) == M_COMPLEX) {
             indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&dyadics[k]), acc));
@@ -666,8 +660,7 @@ void inline_formula (NODE_T * p, FILE_T out, int phase)
       inline_unit (lhs, out, phase);
       inline_unit (rhs, out, phase);
     } else {
-      int k;
-      for (k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&dyadics[k])) {
           if (IS_ALNUM ((CODE (&dyadics[k]))[0])) {
             undent (out, CODE (&dyadics[k]));
@@ -736,8 +729,7 @@ void inline_call (NODE_T * p, FILE_T out, int phase)
     if (phase != L_YIELD) {
       inline_single_argument (args, out, phase);
     } else {
-      int k;
-      for (k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (idf)) == PROCEDURE (&functions[k])) {
           undent (out, CODE (&functions[k]));
           undent (out, " (");

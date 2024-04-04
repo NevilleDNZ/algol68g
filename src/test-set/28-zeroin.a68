@@ -1,0 +1,137 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Zeroin is a classic root-finding algorithm.
+
+After MCA 2310 in 'ALGOL 60 Procedures in Numerical Algebra' by Th. J. Dekker.
+
+This Algol 68 version originates from the legacy "REVISED MC ALGOL 68 TEST SET":
+
+    Dick Grune, The Revised MC ALGOL 68 Test Set, IW XX/79,
+    Mathematical Centre, Amsterdam.
+
+The Mathematical Centre ("Stichting Mathematisch Centrum" or SMC) was a Dutch 
+non-profit institution aiming at the promotion of pure mathematics and its 
+applications. 
+
+SMC is now "Stichting Centrum voor Wiskunde en Informatica" (CWI). The test set 
+is avalailable as an open access publication from the CWI repository:
+
+   https://ir.cwi.nl/pub/
+
+COMMENT
+
+BEGIN MODE NUM = LONG LONG REAL;
+  
+      PROC zero in = (REF NUM x, y, PROC (NUM) NUM f, tol) BOOL:
+      BEGIN NUM a := x, b := y; NUM fa := f (a), fb := f (b);
+          NUM c := a, fc := fa;
+          WHILE
+              (ABS fc < ABS fb | 
+                 (a := b, fa := fb); (b := c, fb := fc); (c := a, fc := fa));
+              NUM tolb := tol (b), m := (c + b) * .5;
+              ABS (m - b) > tolb
+          DO NUM p := (b - a) * fb, q := fa - fb;
+              (p < 0 | (p := -p, q := -q));
+              (a := b, fa := fb);
+              fb := f (b := 
+                  IF p <= ABS q * tolb
+                  THEN (c > b | b + tolb | b - tolb)
+                  ELSE (p < (m - b) * q | p / q + b | m)
+                  FI);
+              IF ABS (SIGN fb + SIGN fc) = 2
+              THEN (c := a, fc := fa) 
+              FI
+          OD;
+          (x := b, y := c); ABS (SIGN fb + SIGN fc) < 2
+      END;
+  
+      # Pretty print NUM. #
+  
+      OP PRETTY = (NUM z) STRING:
+         IF ABS (z - ROUND z) < 10 * long long small real
+         THEN whole (z, 0)
+         ELIF ABS (z) >= 0.1 THEF ABS (z) <= 10
+         THEN STRING buf; 
+              FOR digits TO long real width
+              WHILE puts (buf, fixed (z, 0, digits));
+                    NUM y;
+                    gets (buf, y);
+                    z /= y
+              DO ~ OD;
+              buf
+         ELSE STRING buf, INT expw = 4; 
+              FOR digits TO long real width
+              WHILE puts (buf, float (z, 4 + digits + expw, digits, expw));
+                    NUM y;
+                    gets (buf, y);
+                    z /= y
+              DO ~ OD;
+              buf
+         FI;
+      
+      NUM eps = 5 * long long small real;
+  
+      PROC solve = (NUM u, v, PROC (NUM) NUM f, STRING s) VOID:
+      BEGIN print (("Expression: ", s, new line));
+            print (("[", PRETTY u, ", ", PRETTY v, "]", new line));
+            IF NUM x, y;
+               zero in (x := u, y := v, f, (NUM p) NUM : eps + eps * ABS p)
+            THEN print (("x: ", PRETTY x, new line));
+                 print (("y: ", PRETTY f(x), new line))
+            ELSE print (("zeroin cannot find a root", new line))
+            FI;
+            new line (standout)
+      END;
+  
+      solve (-1, 0, (NUM x) NUM : qexp (x) - x * x, "exp (x) - x * x");
+      solve (1, 10, (NUM x) NUM : qln (x) - x + 2, "ln (x) - x + 2");
+      solve (0,  5, (NUM x) NUM : x * x - 4, "x * x - 4");
+      solve (1,1.5, (NUM x) NUM : qsin (3 * x), "sin (3 * x)");
+      solve (-1, 1, (NUM x) NUM : x * x + 1, "x * x + 1")
+END
+
+COMMENT
+
+Output:
+
+Expression: exp (x) - x * x
+[-1, 0]
+x: -.70346742249839165204981860185990
+y: -0
+
+Expression: ln (x) - x + 2
+[1, 10]
+x: 3.14619322062058258523706102852137
+y: 0
+
+Expression: x * x - 4
+[0, 5]
+x: 2
+y: 0
+
+Expression: sin (3 * x)
+[1, 1.5]
+x: 1.04719755119659774615421446109317
+y: 0
+
+Expression: x * x + 1
+[-1, 1]
+zeroin cannot find a root
+
+COMMENT

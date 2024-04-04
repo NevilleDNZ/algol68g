@@ -48,9 +48,8 @@
 
 int serial_or_collateral (NODE_T * p)
 {
-  NODE_T *q;
   int semis = 0, commas = 0, exits = 0;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, COMMA_SYMBOL)) {
       commas++;
     } else if (IS (q, SEMI_SYMBOL)) {
@@ -142,10 +141,9 @@ void strange_separator (NODE_T * p)
 void reduce (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
 {
   va_list list;
-  int result, expect;
-  NODE_T *head = p, *tail = NO_NODE;
   va_start (list, z);
-  result = va_arg (list, int);
+  int result = va_arg (list, int), expect;
+  NODE_T *head = p, *tail = NO_NODE;
   while ((expect = va_arg (list, int)) != STOP)
   {
     BOOL_T keep_matching;
@@ -177,13 +175,12 @@ void reduce (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
   }
 // Print parser reductions.
   if (head != NO_NODE && OPTION_REDUCTIONS (&A68_JOB) && LINE_NUMBER (head) > 0) {
-    NODE_T *q;
-    int count = 0;
     A68_PARSER (reductions)++;
     WIS (head);
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nReduction %d: %s<-", A68_PARSER (reductions), non_terminal_string (A68 (edit_line), result)) >= 0);
     WRITE (STDOUT_FILENO, A68 (output_line));
-    for (q = head; q != NO_NODE && tail != NO_NODE && q != NEXT (tail); FORWARD (q), count++) {
+    int count = 0;
+    for (NODE_T *q = head; q != NO_NODE && tail != NO_NODE && q != NEXT (tail); FORWARD (q), count++) {
       int gatt = ATTRIBUTE (q);
       char *str = non_terminal_string (A68 (input_line), gatt);
       if (count > 0) {
@@ -313,10 +310,10 @@ void reduce_branch (NODE_T * q, int expect)
     case PARAMETER_PACK:
     case FORMAL_DECLARERS:
     case UNION_PACK:
-    case SPECIFIER:{
+    case SPECIFIER: {
         declarer_pack = A68_TRUE;
       }
-    default:{
+    default: {
         declarer_pack = A68_FALSE;
       }
     }
@@ -443,8 +440,7 @@ void reduce_branch (NODE_T * q, int expect)
 
 void reduce_declarers (NODE_T * p, int expect)
 {
-  NODE_T *q;
-  BOOL_T siga;
+  NODE_T *q; BOOL_T siga; // Must be in this scope.
 // Reduce lengtheties.
   for (q = p; q != NO_NODE; FORWARD (q)) {
     siga = A68_TRUE;
@@ -763,8 +759,7 @@ void reduce_right_to_left_constructs (NODE_T * p)
 
 void reduce_primary_parts (NODE_T * p, int expect)
 {
-  NODE_T *q = p;
-  for (; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (whether (q, IDENTIFIER, OF_SYMBOL, STOP)) {
       ATTRIBUTE (q) = FIELD_IDENTIFIER;
     }
@@ -796,7 +791,7 @@ void reduce_primary_parts (NODE_T * p, int expect)
       }
     }
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
 #if defined (BUILD_PARALLEL_CLAUSE)
     reduce (q, NO_NOTE, NO_TICK, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, STOP);
 #else
@@ -892,16 +887,14 @@ void ambiguous_patterns (NODE_T * p)
     case INTEGRAL_PATTERN:     // These are the potentially ambiguous patterns
     case REAL_PATTERN:
     case COMPLEX_PATTERN:
-    case BITS_PATTERN:
-      {
+    case BITS_PATTERN: {
         if (last_pat != NO_NODE) {
           diagnostic (A68_SYNTAX_ERROR, q, ERROR_COMMA_MUST_SEPARATE, ATTRIBUTE (last_pat), ATTRIBUTE (q));
         }
         last_pat = q;
         break;
       }
-    case COMMA_SYMBOL:
-      {
+    case COMMA_SYMBOL: {
         last_pat = NO_NODE;
         break;
       }
@@ -913,8 +906,7 @@ void ambiguous_patterns (NODE_T * p)
 
 void reduce_c_pattern (NODE_T * p, int pr, int let)
 {
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, pr, FORMAT_ITEM_ESCAPE, let, STOP);
     reduce (q, NO_NOTE, NO_TICK, pr, FORMAT_ITEM_ESCAPE, FORMAT_ITEM_POINT, REPLICATOR, let, STOP);
     reduce (q, NO_NOTE, NO_TICK, pr, FORMAT_ITEM_ESCAPE, REPLICATOR, let, STOP);
@@ -938,9 +930,8 @@ void reduce_c_pattern (NODE_T * p, int pr, int let)
 
 void reduce_format_texts (NODE_T * p)
 {
-  NODE_T *q;
 // Replicators.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, REPLICATOR, STATIC_REPLICATOR, STOP);
     reduce (q, NO_NOTE, NO_TICK, REPLICATOR, DYNAMIC_REPLICATOR, STOP);
   }
@@ -956,11 +947,11 @@ void reduce_format_texts (NODE_T * p)
   reduce_c_pattern (p, INTEGRAL_C_PATTERN, FORMAT_ITEM_I);
   reduce_c_pattern (p, STRING_C_PATTERN, FORMAT_ITEM_S);
 // Radix frames.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, RADIX_FRAME, REPLICATOR, FORMAT_ITEM_R, STOP);
   }
 // Insertions.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, INSERTION, FORMAT_ITEM_X, STOP);
     reduce (q, NO_NOTE, NO_TICK, INSERTION, FORMAT_ITEM_Y, STOP);
     reduce (q, NO_NOTE, NO_TICK, INSERTION, FORMAT_ITEM_L, STOP);
@@ -969,10 +960,10 @@ void reduce_format_texts (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, INSERTION, FORMAT_ITEM_K, STOP);
     reduce (q, NO_NOTE, NO_TICK, INSERTION, LITERAL, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, INSERTION, REPLICATOR, INSERTION, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga = A68_TRUE;
     while (siga) {
       siga = A68_FALSE;
@@ -980,13 +971,13 @@ void reduce_format_texts (NODE_T * p)
     }
   }
 // Replicated suppressible frames.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, FORMAT_A_FRAME, REPLICATOR, FORMAT_ITEM_S, FORMAT_ITEM_A, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_Z_FRAME, REPLICATOR, FORMAT_ITEM_S, FORMAT_ITEM_Z, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_D_FRAME, REPLICATOR, FORMAT_ITEM_S, FORMAT_ITEM_D, STOP);
   }
 // Suppressible frames.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, FORMAT_A_FRAME, FORMAT_ITEM_S, FORMAT_ITEM_A, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_Z_FRAME, FORMAT_ITEM_S, FORMAT_ITEM_Z, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_D_FRAME, FORMAT_ITEM_S, FORMAT_ITEM_D, STOP);
@@ -995,13 +986,13 @@ void reduce_format_texts (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, FORMAT_I_FRAME, FORMAT_ITEM_S, FORMAT_ITEM_I, STOP);
   }
 // Replicated frames.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, FORMAT_A_FRAME, REPLICATOR, FORMAT_ITEM_A, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_Z_FRAME, REPLICATOR, FORMAT_ITEM_Z, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_D_FRAME, REPLICATOR, FORMAT_ITEM_D, STOP);
   }
 // Frames.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, FORMAT_A_FRAME, FORMAT_ITEM_A, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_Z_FRAME, FORMAT_ITEM_Z, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_D_FRAME, FORMAT_ITEM_D, STOP);
@@ -1010,7 +1001,7 @@ void reduce_format_texts (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, FORMAT_I_FRAME, FORMAT_ITEM_I, STOP);
   }
 // Frames with an insertion.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, FORMAT_A_FRAME, INSERTION, FORMAT_A_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_Z_FRAME, INSERTION, FORMAT_Z_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMAT_D_FRAME, INSERTION, FORMAT_D_FRAME, STOP);
@@ -1019,13 +1010,13 @@ void reduce_format_texts (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, FORMAT_I_FRAME, INSERTION, FORMAT_I_FRAME, STOP);
   }
 // String patterns.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, STRING_PATTERN, REPLICATOR, FORMAT_A_FRAME, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, STRING_PATTERN, FORMAT_A_FRAME, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga = A68_TRUE;
     while (siga) {
       siga = A68_FALSE;
@@ -1034,11 +1025,11 @@ void reduce_format_texts (NODE_T * p)
     }
   }
 // Integral moulds.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, INTEGRAL_MOULD, FORMAT_Z_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, INTEGRAL_MOULD, FORMAT_D_FRAME, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga = A68_TRUE;
     while (siga) {
       siga = A68_FALSE;
@@ -1047,33 +1038,33 @@ void reduce_format_texts (NODE_T * p)
     }
   }
 // Sign moulds.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, SIGN_MOULD, INTEGRAL_MOULD, FORMAT_ITEM_PLUS, STOP);
     reduce (q, NO_NOTE, NO_TICK, SIGN_MOULD, INTEGRAL_MOULD, FORMAT_ITEM_MINUS, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, SIGN_MOULD, FORMAT_ITEM_PLUS, STOP);
     reduce (q, NO_NOTE, NO_TICK, SIGN_MOULD, FORMAT_ITEM_MINUS, STOP);
   }
 // Exponent frames.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, EXPONENT_FRAME, FORMAT_E_FRAME, SIGN_MOULD, INTEGRAL_MOULD, STOP);
     reduce (q, NO_NOTE, NO_TICK, EXPONENT_FRAME, FORMAT_E_FRAME, INTEGRAL_MOULD, STOP);
   }
 // Real patterns.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, INTEGRAL_MOULD, FORMAT_POINT_FRAME, INTEGRAL_MOULD, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, INTEGRAL_MOULD, FORMAT_POINT_FRAME, INTEGRAL_MOULD, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, INTEGRAL_MOULD, FORMAT_POINT_FRAME, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, INTEGRAL_MOULD, FORMAT_POINT_FRAME, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, FORMAT_POINT_FRAME, INTEGRAL_MOULD, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, FORMAT_POINT_FRAME, INTEGRAL_MOULD, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, FORMAT_POINT_FRAME, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, FORMAT_POINT_FRAME, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, INTEGRAL_MOULD, FORMAT_POINT_FRAME, INTEGRAL_MOULD, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, INTEGRAL_MOULD, FORMAT_POINT_FRAME, INTEGRAL_MOULD, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, INTEGRAL_MOULD, FORMAT_POINT_FRAME, EXPONENT_FRAME, STOP);
@@ -1081,35 +1072,35 @@ void reduce_format_texts (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, FORMAT_POINT_FRAME, INTEGRAL_MOULD, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, FORMAT_POINT_FRAME, INTEGRAL_MOULD, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, SIGN_MOULD, INTEGRAL_MOULD, EXPONENT_FRAME, STOP);
     reduce (q, NO_NOTE, NO_TICK, REAL_PATTERN, INTEGRAL_MOULD, EXPONENT_FRAME, STOP);
   }
 // Complex patterns.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, COMPLEX_PATTERN, REAL_PATTERN, FORMAT_I_FRAME, REAL_PATTERN, STOP);
   }
 // Bits patterns.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, BITS_PATTERN, RADIX_FRAME, INTEGRAL_MOULD, STOP);
   }
 // Integral patterns.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, INTEGRAL_PATTERN, SIGN_MOULD, INTEGRAL_MOULD, STOP);
     reduce (q, NO_NOTE, NO_TICK, INTEGRAL_PATTERN, INTEGRAL_MOULD, STOP);
   }
 // Patterns.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, BOOLEAN_PATTERN, FORMAT_ITEM_B, COLLECTION, STOP);
     reduce (q, NO_NOTE, NO_TICK, CHOICE_PATTERN, FORMAT_ITEM_C, COLLECTION, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, BOOLEAN_PATTERN, FORMAT_ITEM_B, STOP);
     reduce (q, NO_NOTE, NO_TICK, GENERAL_PATTERN, FORMAT_ITEM_G, STOP);
     reduce (q, NO_NOTE, NO_TICK, GENERAL_PATTERN, FORMAT_ITEM_H, STOP);
   }
   ambiguous_patterns (p);
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, a68_extension, NO_TICK, A68_PATTERN, BITS_C_PATTERN, STOP);
     reduce (q, a68_extension, NO_TICK, A68_PATTERN, CHAR_C_PATTERN, STOP);
     reduce (q, a68_extension, NO_TICK, A68_PATTERN, FIXED_C_PATTERN, STOP);
@@ -1128,14 +1119,14 @@ void reduce_format_texts (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, A68_PATTERN, STRING_PATTERN, STOP);
   }
 // Pictures.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, PICTURE, INSERTION, STOP);
     reduce (q, NO_NOTE, NO_TICK, PICTURE, A68_PATTERN, STOP);
     reduce (q, NO_NOTE, NO_TICK, PICTURE, COLLECTION, STOP);
     reduce (q, NO_NOTE, NO_TICK, PICTURE, REPLICATOR, COLLECTION, STOP);
   }
 // Picture lists.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, PICTURE)) {
       BOOL_T siga = A68_TRUE;
       reduce (q, NO_NOTE, NO_TICK, PICTURE_LIST, PICTURE, STOP);
@@ -1153,8 +1144,7 @@ void reduce_format_texts (NODE_T * p)
 
 void reduce_secondaries (NODE_T * p)
 {
-  NODE_T *q;
-  BOOL_T siga;
+  NODE_T *q; BOOL_T siga;
   for (q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, SECONDARY, PRIMARY, STOP);
     reduce (q, NO_NOTE, NO_TICK, GENERATOR, LOC_SYMBOL, DECLARER, STOP);
@@ -1187,7 +1177,6 @@ int operator_with_priority (NODE_T * q, int k)
 void reduce_formulae (NODE_T * p)
 {
   NODE_T *q = p;
-  int priority;
   while (q != NO_NODE) {
     if (is_one_of (q, OPERATOR, SECONDARY, STOP)) {
       q = reduce_dyadic (q, STOP);
@@ -1196,9 +1185,9 @@ void reduce_formulae (NODE_T * p)
     }
   }
 // Reduce the expression.
-  for (priority = MAX_PRIORITY; priority >= 0; priority--) {
+  for (int prio = MAX_PRIORITY; prio >= 0; prio--) {
     for (q = p; q != NO_NODE; FORWARD (q)) {
-      if (operator_with_priority (q, priority)) {
+      if (operator_with_priority (q, prio)) {
         BOOL_T siga = A68_FALSE;
         NODE_T *op = NEXT (q);
         if (IS (q, SECONDARY)) {
@@ -1210,23 +1199,23 @@ void reduce_formulae (NODE_T * p)
           reduce (q, NO_NOTE, &siga, FORMULA, MONADIC_FORMULA, OPERATOR, MONADIC_FORMULA, STOP);
           reduce (q, NO_NOTE, &siga, FORMULA, MONADIC_FORMULA, OPERATOR, FORMULA, STOP);
         }
-        if (priority == 0 && siga) {
+        if (prio == 0 && siga) {
           diagnostic (A68_SYNTAX_ERROR, op, ERROR_NO_PRIORITY);
         }
         siga = A68_TRUE;
         while (siga) {
           NODE_T *op2 = NEXT (q);
           siga = A68_FALSE;
-          if (operator_with_priority (q, priority)) {
+          if (operator_with_priority (q, prio)) {
             reduce (q, NO_NOTE, &siga, FORMULA, FORMULA, OPERATOR, SECONDARY, STOP);
           }
-          if (operator_with_priority (q, priority)) {
+          if (operator_with_priority (q, prio)) {
             reduce (q, NO_NOTE, &siga, FORMULA, FORMULA, OPERATOR, MONADIC_FORMULA, STOP);
           }
-          if (operator_with_priority (q, priority)) {
+          if (operator_with_priority (q, prio)) {
             reduce (q, NO_NOTE, &siga, FORMULA, FORMULA, OPERATOR, FORMULA, STOP);
           }
-          if (priority == 0 && siga) {
+          if (prio == 0 && siga) {
             diagnostic (A68_SYNTAX_ERROR, op2, ERROR_NO_PRIORITY);
           }
         }
@@ -1275,9 +1264,8 @@ NODE_T *reduce_dyadic (NODE_T * p, int u)
 
 void reduce_tertiaries (NODE_T * p)
 {
-  NODE_T *q;
   BOOL_T siga;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, TERTIARY, NIHIL, STOP);
     reduce (q, NO_NOTE, NO_TICK, FORMULA, MONADIC_FORMULA, STOP);
     reduce (q, NO_NOTE, NO_TICK, TERTIARY, FORMULA, STOP);
@@ -1286,7 +1274,7 @@ void reduce_tertiaries (NODE_T * p)
   siga = A68_TRUE;
   while (siga) {
     siga = A68_FALSE;
-    for (q = p; q != NO_NODE; FORWARD (q)) {
+    for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
       reduce (q, NO_NOTE, &siga, TRANSPOSE_FUNCTION, TRANSPOSE_SYMBOL, TERTIARY, STOP);
       reduce (q, NO_NOTE, &siga, DIAGONAL_FUNCTION, TERTIARY, DIAGONAL_SYMBOL, TERTIARY, STOP);
       reduce (q, NO_NOTE, &siga, DIAGONAL_FUNCTION, DIAGONAL_SYMBOL, TERTIARY, STOP);
@@ -1295,18 +1283,18 @@ void reduce_tertiaries (NODE_T * p)
       reduce (q, NO_NOTE, &siga, ROW_FUNCTION, TERTIARY, ROW_SYMBOL, TERTIARY, STOP);
       reduce (q, NO_NOTE, &siga, ROW_FUNCTION, ROW_SYMBOL, TERTIARY, STOP);
     }
-    for (q = p; q != NO_NODE; FORWARD (q)) {
+    for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
       reduce (q, a68_extension, &siga, TERTIARY, TRANSPOSE_FUNCTION, STOP);
       reduce (q, a68_extension, &siga, TERTIARY, DIAGONAL_FUNCTION, STOP);
       reduce (q, a68_extension, &siga, TERTIARY, COLUMN_FUNCTION, STOP);
       reduce (q, a68_extension, &siga, TERTIARY, ROW_FUNCTION, STOP);
     }
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, IDENTITY_RELATION, TERTIARY, IS_SYMBOL, TERTIARY, STOP);
     reduce (q, NO_NOTE, NO_TICK, IDENTITY_RELATION, TERTIARY, ISNT_SYMBOL, TERTIARY, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, AND_FUNCTION, TERTIARY, ANDF_SYMBOL, TERTIARY, STOP);
     reduce (q, NO_NOTE, NO_TICK, OR_FUNCTION, TERTIARY, ORF_SYMBOL, TERTIARY, STOP);
   }
@@ -1316,15 +1304,14 @@ void reduce_tertiaries (NODE_T * p)
 
 void reduce_units (NODE_T * p)
 {
-  NODE_T *q;
 // Stray ~ is a SKIP.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, OPERATOR) && IS_LITERALLY (q, "~")) {
       ATTRIBUTE (q) = SKIP;
     }
   }
 // Reduce units.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, UNIT, ASSIGNATION, STOP);
     reduce (q, NO_NOTE, NO_TICK, UNIT, IDENTITY_RELATION, STOP);
     reduce (q, a68_extension, NO_TICK, UNIT, AND_FUNCTION, STOP);
@@ -1342,8 +1329,7 @@ void reduce_units (NODE_T * p)
 
 void reduce_generic_arguments (NODE_T * p)
 {
-  NODE_T *q;
-  BOOL_T siga;
+  NODE_T *q; BOOL_T siga; // In this scope.
   for (q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, UNIT)) {
       reduce (q, NO_NOTE, NO_TICK, TRIMMER, UNIT, COLON_SYMBOL, UNIT, AT_SYMBOL, UNIT, STOP);
@@ -1402,8 +1388,7 @@ void reduce_generic_arguments (NODE_T * p)
 
 void reduce_bounds (NODE_T * p)
 {
-  NODE_T *q;
-  BOOL_T siga;
+  NODE_T *q; BOOL_T siga;
   for (q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, BOUND, UNIT, COLON_SYMBOL, UNIT, STOP);
     reduce (q, NO_NOTE, NO_TICK, BOUND, UNIT, DOTDOT_SYMBOL, UNIT, STOP);
@@ -1445,8 +1430,7 @@ void reduce_arguments (NODE_T * p)
 
 void reduce_basic_declarations (NODE_T * p)
 {
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, ENVIRON_NAME, ENVIRON_SYMBOL, ROW_CHAR_DENOTATION, STOP);
     reduce (q, NO_NOTE, NO_TICK, PRIORITY_DECLARATION, PRIO_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, PRIORITY, STOP);
     reduce (q, NO_NOTE, NO_TICK, MODE_DECLARATION, MODE_SYMBOL, DEFINING_INDICANT, EQUALS_SYMBOL, DECLARER, STOP);
@@ -1465,7 +1449,7 @@ void reduce_basic_declarations (NODE_T * p)
 // Errors. WILDCARD catches TERTIARY which catches IDENTIFIER.
     reduce (q, strange_tokens, NO_TICK, PROCEDURE_DECLARATION, PROC_SYMBOL, WILDCARD, ROUTINE_TEXT, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga;
     do {
       siga = A68_FALSE;
@@ -1486,15 +1470,14 @@ void reduce_basic_declarations (NODE_T * p)
 
 void reduce_declaration_lists (NODE_T * p)
 {
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, IDENTITY_DECLARATION, DECLARER, DEFINING_IDENTIFIER, EQUALS_SYMBOL, UNIT, STOP);
     reduce (q, NO_NOTE, NO_TICK, VARIABLE_DECLARATION, QUALIFIER, DECLARER, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, STOP);
     reduce (q, NO_NOTE, NO_TICK, VARIABLE_DECLARATION, QUALIFIER, DECLARER, DEFINING_IDENTIFIER, STOP);
     reduce (q, NO_NOTE, NO_TICK, VARIABLE_DECLARATION, DECLARER, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, STOP);
     reduce (q, NO_NOTE, NO_TICK, VARIABLE_DECLARATION, DECLARER, DEFINING_IDENTIFIER, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga;
     do {
       siga = A68_FALSE;
@@ -1505,17 +1488,17 @@ void reduce_declaration_lists (NODE_T * p)
       }
     } while (siga);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, OPERATOR_DECLARATION, OPERATOR_PLAN, DEFINING_OPERATOR, EQUALS_SYMBOL, UNIT, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga;
     do {
       siga = A68_FALSE;
       reduce (q, NO_NOTE, &siga, OPERATOR_DECLARATION, OPERATOR_DECLARATION, COMMA_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, UNIT, STOP);
     } while (siga);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     reduce (q, NO_NOTE, NO_TICK, DECLARATION_LIST, MODE_DECLARATION, STOP);
     reduce (q, NO_NOTE, NO_TICK, DECLARATION_LIST, PRIORITY_DECLARATION, STOP);
     reduce (q, NO_NOTE, NO_TICK, DECLARATION_LIST, BRIEF_OPERATOR_DECLARATION, STOP);
@@ -1526,7 +1509,7 @@ void reduce_declaration_lists (NODE_T * p)
     reduce (q, NO_NOTE, NO_TICK, DECLARATION_LIST, VARIABLE_DECLARATION, STOP);
     reduce (q, NO_NOTE, NO_TICK, DECLARATION_LIST, ENVIRON_NAME, STOP);
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     BOOL_T siga;
     do {
       siga = A68_FALSE;
@@ -1945,8 +1928,7 @@ void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
 void reduce_erroneous_units (NODE_T * p)
 {
 // Constructs are reduced to units in an attempt to limit spurious diagnostics.
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
 // Some implementations allow selection from a tertiary, when there is no risk
 // of ambiguity. Algol68G follows RR, so some extra attention here to guide an
 // unsuspecting user.

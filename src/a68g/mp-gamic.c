@@ -323,7 +323,7 @@ MP_T *G_ibp_mp (NODE_T *q, MP_T * Gibp, MP_T *p, MP_T *x, int digs)
 // l = 0;
   MP_T *l = nil_mp (q, digs);
 //
-  BOOL_T cont = A68_TRUE, stop;
+  BOOL_T cont = A68_TRUE, stop = A68_TRUE;
   MP_T *del = nil_mp (q, digs);
   while (cont) {
 //  c *= d * (d - 1) * tt;

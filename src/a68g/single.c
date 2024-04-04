@@ -285,10 +285,9 @@ void genie_pow_real_int (NODE_T * p)
 {
   A68_INT j;
   A68_REAL x;
-  REAL_T z;
   POP_OBJECT (p, &j, A68_INT);
   POP_OBJECT (p, &x, A68_REAL);
-  z = a68_x_up_n (VALUE (&x), VALUE (&j));
+  REAL_T z = a68_x_up_n (VALUE (&x), VALUE (&j));
   CHECK_REAL (p, z);
   PUSH_VALUE (p, z, A68_REAL);
 }
@@ -298,11 +297,10 @@ void genie_pow_real_int (NODE_T * p)
 void genie_pow_real (NODE_T * p)
 {
   A68_REAL x, y;
-  REAL_T z = 0;
   POP_OBJECT (p, &y, A68_REAL);
   POP_OBJECT (p, &x, A68_REAL);
   errno = 0;
-  z = a68_x_up_y (VALUE (&x), VALUE (&y));
+  REAL_T z = a68_x_up_y (VALUE (&x), VALUE (&y));
   MATH_RTE (p, errno != 0, M_REAL, NO_TEXT);
   PUSH_VALUE (p, z, A68_REAL);
 }
@@ -373,338 +371,6 @@ void genie_next_random (NODE_T * p)
 void genie_next_rnd (NODE_T * p)
 {
   PUSH_VALUE (p, 2 * a68_unif_rand () - 1, A68_REAL);
-}
-
-// BITS operations.
-
-// BITS max bits
-
-void genie_max_bits (NODE_T * p)
-{
-  PUSH_VALUE (p, A68_MAX_BITS, A68_BITS);
-}
-
-// OP NOT = (BITS) BITS.
-A68_MONAD (genie_not_bits, A68_BITS, ~);
-
-// OP AND = (BITS, BITS) BITS
-
-void genie_and_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  VALUE (i) = VALUE (i) & VALUE (j);
-}
-
-// OP OR = (BITS, BITS) BITS
-
-void genie_or_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  VALUE (i) = VALUE (i) | VALUE (j);
-}
-
-// OP XOR = (BITS, BITS) BITS
-
-void genie_xor_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  VALUE (i) = VALUE (i) ^ VALUE (j);
-}
-
-// OP + = (BITS, BITS) BITS
-
-void genie_add_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  CHECK_BITS_ADDITION (p, VALUE (i), VALUE (j));
-  VALUE (i) = VALUE (i) + VALUE (j);
-}
-
-// OP - = (BITS, BITS) BITS
-
-void genie_sub_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  CHECK_BITS_SUBTRACTION (p, VALUE (i), VALUE (j));
-  VALUE (i) = VALUE (i) - VALUE (j);
-}
-
-// OP * = (BITS, BITS) BITS
-
-void genie_times_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  CHECK_BITS_MULTIPLICATION (p, VALUE (i), VALUE (j));
-  VALUE (i) = VALUE (i) * VALUE (j);
-}
-
-// OP OVER = (BITS, BITS) BITS
-
-void genie_over_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  PRELUDE_ERROR (VALUE (j) == 0, p, ERROR_DIVISION_BY_ZERO, M_BITS);
-  VALUE (i) = VALUE (i) / VALUE (j);
-}
-
-// OP MOD = (BITS, BITS) BITS
-
-void genie_mod_bits (NODE_T * p)
-{
-  A68_BITS *i, *j;
-  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
-  PRELUDE_ERROR (VALUE (j) == 0, p, ERROR_DIVISION_BY_ZERO, M_BITS);
-  VALUE (i) = VALUE (i) % VALUE (j);
-}
-
-// OP = = (BITS, BITS) BOOL.
-
-#define A68_CMP_BITS(n, OP)\
-void n (NODE_T * p) {\
-  A68_BITS i, j;\
-  POP_OBJECT (p, &j, A68_BITS);\
-  POP_OBJECT (p, &i, A68_BITS);\
-  PUSH_VALUE (p, (BOOL_T) ((UNSIGNED_T) VALUE (&i) OP (UNSIGNED_T) VALUE (&j)), A68_BOOL);\
-  }
-
-A68_CMP_BITS (genie_eq_bits, ==);
-A68_CMP_BITS (genie_ne_bits, !=);
-
-// OP <= = (BITS, BITS) BOOL
-
-void genie_le_bits (NODE_T * p)
-{
-  A68_BITS i, j;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_BITS);
-  PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&j)), A68_BOOL);
-}
-
-// OP >= = (BITS, BITS) BOOL
-
-void genie_ge_bits (NODE_T * p)
-{
-  A68_BITS i, j;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_BITS);
-  PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&i)), A68_BOOL);
-}
-
-#if (A68_LEVEL >= 3)
-
-// OP < = (BITS, BITS) BOOL
-
-void genie_lt_bits (NODE_T * p)
-{
-  A68_BITS i, j;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_BITS);
-  if (VALUE (&i) == VALUE (&j)) {
-    PUSH_VALUE (p, A68_FALSE, A68_BOOL);
-  } else {
-    PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&j)), A68_BOOL);
-  }
-}
-
-// OP >= = (BITS, BITS) BOOL
-
-void genie_gt_bits (NODE_T * p)
-{
-  A68_BITS i, j;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_BITS);
-  if (VALUE (&i) == VALUE (&j)) {
-    PUSH_VALUE (p, A68_FALSE, A68_BOOL);
-  } else {
-    PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&i)), A68_BOOL);
-  }
-}
-
-#endif
-
-// OP SHL = (BITS, INT) BITS
-
-void genie_shl_bits (NODE_T * p)
-{
-  A68_BITS i;
-  A68_INT j;
-  POP_OBJECT (p, &j, A68_INT);
-  POP_OBJECT (p, &i, A68_BITS);
-  if (VALUE (&j) >= 0) {
-    int k;
-    UNSIGNED_T z = VALUE (&i);
-    for (k = 0; k < VALUE (&j); k++) {
-      PRELUDE_ERROR (!MODULAR_MATH (p) && (z & D_SIGN), p, ERROR_MATH, M_BITS);
-      z = z << 1;
-    }
-    PUSH_VALUE (p, z, A68_BITS);
-  } else {
-    PUSH_VALUE (p, VALUE (&i) >> -VALUE (&j), A68_BITS);
-  }
-}
-
-// OP SHR = (BITS, INT) BITS
-
-void genie_shr_bits (NODE_T * p)
-{
-  A68_INT *j;
-  POP_OPERAND_ADDRESS (p, j, A68_INT);
-  VALUE (j) = -VALUE (j);
-  genie_shl_bits (p);           // Conform RR
-}
-
-// OP ROL = (BITS, INT) BITS
-
-void genie_rol_bits (NODE_T * p)
-{
-  A68_BITS i;
-  A68_INT j;
-  int k, n;
-  UNSIGNED_T w;
-  POP_OBJECT (p, &j, A68_INT);
-  POP_OBJECT (p, &i, A68_BITS);
-  CHECK_INT_SHORTEN (p, VALUE (&j));
-  w = VALUE (&i);
-  n = VALUE (&j);
-  if (n >= 0) {
-    for (k = 0; k < n; k++) {
-      UNSIGNED_T carry = (w & D_SIGN ? 0x1 : 0x0);
-      w = (w << 1) | carry;
-    }
-  } else {
-    n = -n;
-    for (k = 0; k < n; k++) {
-      UNSIGNED_T carry = (w & 0x1 ? D_SIGN : 0x0);
-      w = (w >> 1) | carry;
-    }
-  }
-  PUSH_VALUE (p, w, A68_BITS);
-}
-
-// OP ROR = (BITS, INT) BITS
-
-void genie_ror_bits (NODE_T * p)
-{
-  A68_INT *j;
-  POP_OPERAND_ADDRESS (p, j, A68_INT);
-  VALUE (j) = -VALUE (j);
-  genie_rol_bits (p);
-}
-
-// OP ELEM = (INT, BITS) BOOL
-
-void genie_elem_bits (NODE_T * p)
-{
-  A68_BITS j;
-  A68_INT i;
-  int n;
-  UNSIGNED_T mask = 0x1;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  for (n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
-    mask = mask << 1;
-  }
-  PUSH_VALUE (p, (BOOL_T) ((VALUE (&j) & mask) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
-}
-
-// OP SET = (INT, BITS) BITS
-
-void genie_set_bits (NODE_T * p)
-{
-  A68_BITS j;
-  A68_INT i;
-  int n;
-  UNSIGNED_T mask = 0x1;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  for (n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
-    mask = mask << 1;
-  }
-  PUSH_VALUE (p, VALUE (&j) | mask, A68_BITS);
-}
-
-// OP CLEAR = (INT, BITS) BITS
-
-void genie_clear_bits (NODE_T * p)
-{
-  A68_BITS j;
-  A68_INT i;
-  int n;
-  UNSIGNED_T mask = 0x1;
-  POP_OBJECT (p, &j, A68_BITS);
-  POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  for (n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
-    mask = mask << 1;
-  }
-  PUSH_VALUE (p, VALUE (&j) & ~mask, A68_BITS);
-}
-
-// OP ABS = (BITS) INT
-
-void genie_abs_bits (NODE_T * p)
-{
-  A68_BITS i;
-  POP_OBJECT (p, &i, A68_BITS);
-  PUSH_VALUE (p, (INT_T) (VALUE (&i)), A68_INT);
-}
-
-// OP BIN = (INT) BITS
-
-void genie_bin_int (NODE_T * p)
-{
-  A68_INT i;
-  POP_OBJECT (p, &i, A68_INT);
-  if (!MODULAR_MATH (p) && VALUE (&i) < 0) {
-// RR does not convert negative numbers.
-    errno = EDOM;
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, M_BITS);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  PUSH_VALUE (p, (UNSIGNED_T) (VALUE (&i)), A68_BITS);
-}
-
-// @brief PROC ([] BOOL) BITS bits pack
-
-void genie_bits_pack (NODE_T * p)
-{
-  A68_REF z;
-  A68_BITS b;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  BYTE_T *base;
-  int size, k;
-  UNSIGNED_T bit;
-  POP_REF (p, &z);
-  CHECK_REF (p, z, M_ROW_BOOL);
-  GET_DESCRIPTOR (arr, tup, &z);
-  size = ROW_SIZE (tup);
-  PRELUDE_ERROR (size < 0 || size > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
-  VALUE (&b) = 0x0;
-  if (ROW_SIZE (tup) > 0) {
-    base = DEREF (BYTE_T, &ARRAY (arr));
-    bit = 0x1;
-    for (k = UPB (tup); k >= LWB (tup); k--) {
-      int addr = INDEX_1_DIM (arr, tup, k);
-      A68_BOOL *boo = (A68_BOOL *) & (base[addr]);
-      CHECK_INIT (p, INITIALISED (boo), M_BOOL);
-      if (VALUE (boo)) {
-        VALUE (&b) |= bit;
-      }
-      bit <<= 1;
-    }
-  }
-  STATUS (&b) = INIT_MASK;
-  PUSH_OBJECT (p, b, A68_BITS);
 }
 
 // @brief PROC (REAL) REAL sqrt
@@ -1073,12 +739,11 @@ void genie_beta_inc_cf_real (NODE_T * p)
 void genie_lj_e_12_6 (NODE_T * p)
 {
   A68_REAL *e, *s, *r;
-  REAL_T u, u2, u6;
   POP_3_OPERAND_ADDRESSES (p, e, s, r, A68_REAL);
   PRELUDE_ERROR (VALUE (r) == 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
-  u = (VALUE (s) / VALUE (r));
-  u2 = u * u;
-  u6 = u2 * u2 * u2;
+  REAL_T u = (VALUE (s) / VALUE (r));
+  REAL_T u2 = u * u;
+  REAL_T u6 = u2 * u2 * u2;
   VALUE (e) = 4.0 * VALUE (e) * u6 * (u6 - 1.0);
 }
 
@@ -1087,12 +752,11 @@ void genie_lj_e_12_6 (NODE_T * p)
 void genie_lj_f_12_6 (NODE_T * p)
 {
   A68_REAL *e, *s, *r;
-  REAL_T u, u2, u6;
   POP_3_OPERAND_ADDRESSES (p, e, s, r, A68_REAL);
   PRELUDE_ERROR (VALUE (r) == 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
-  u = (VALUE (s) / VALUE (r));
-  u2 = u * u;
-  u6 = u2 * u2 * u2;
+  REAL_T u = (VALUE (s) / VALUE (r));
+  REAL_T u2 = u * u;
+  REAL_T u6 = u2 * u2 * u2;
   VALUE (e) = 24.0 * VALUE (e) * u * u6 * (1.0 - 2.0 * u6);
 }
 
@@ -1209,11 +873,10 @@ void genie_sub_complex (NODE_T * p)
 void genie_mul_complex (NODE_T * p)
 {
   A68_REAL re_x, im_x, re_y, im_y;
-  REAL_T re, im;
   POP_COMPLEX (p, &re_y, &im_y);
   POP_COMPLEX (p, &re_x, &im_x);
-  re = VALUE (&re_x) * VALUE (&re_y) - VALUE (&im_x) * VALUE (&im_y);
-  im = VALUE (&im_x) * VALUE (&re_y) + VALUE (&re_x) * VALUE (&im_y);
+  REAL_T re = VALUE (&re_x) * VALUE (&re_y) - VALUE (&im_x) * VALUE (&im_y);
+  REAL_T im = VALUE (&im_x) * VALUE (&re_y) + VALUE (&re_x) * VALUE (&im_y);
   CHECK_COMPLEX (p, re, im);
   PUSH_COMPLEX (p, re, im);
 }
@@ -1246,23 +909,19 @@ void genie_div_complex (NODE_T * p)
 
 void genie_pow_complex_int (NODE_T * p)
 {
-  A68_REAL re_x, im_x;
-  REAL_T re_y, im_y, re_z, im_z, rea;
   A68_INT j;
-  INT_T expo;
-  BOOL_T negative;
   POP_OBJECT (p, &j, A68_INT);
+  A68_REAL re_x, im_x;
   POP_COMPLEX (p, &re_x, &im_x);
-  re_z = 1.0;
-  im_z = 0.0;
-  re_y = VALUE (&re_x);
-  im_y = VALUE (&im_x);
-  expo = 1;
-  negative = (BOOL_T) (VALUE (&j) < 0);
-  if (negative) {
+  REAL_T re_z = 1.0, im_z = 0.0;
+  REAL_T re_y = VALUE (&re_x), im_y = VALUE (&im_x);
+  INT_T expo = 1;
+  BOOL_T neg = (BOOL_T) (VALUE (&j) < 0);
+  if (neg) {
     VALUE (&j) = -VALUE (&j);
   }
   while ((UNSIGNED_T) expo <= (UNSIGNED_T) (VALUE (&j))) {
+    REAL_T rea;
     if (expo & VALUE (&j)) {
       rea = re_z * re_y - im_z * im_y;
       im_z = re_z * im_y + im_z * re_y;
@@ -1274,7 +933,7 @@ void genie_pow_complex_int (NODE_T * p)
     expo <<= 1;
   }
   CHECK_COMPLEX (p, re_z, im_z);
-  if (negative) {
+  if (neg) {
     PUSH_VALUE (p, 1.0, A68_REAL);
     PUSH_VALUE (p, 0.0, A68_REAL);
     PUSH_VALUE (p, re_z, A68_REAL);
@@ -1336,11 +995,10 @@ void genie_divab_complex (NODE_T * p)
 
 #define C_C_FUNCTION(p, f)\
   A68_REAL re, im;\
-  COMPLEX_T z;\
   POP_OBJECT (p, &im, A68_REAL);\
   POP_OBJECT (p, &re, A68_REAL);\
   errno = 0;\
-  z = VALUE (&re) + VALUE (&im) * _Complex_I;\
+  COMPLEX_T z = VALUE (&re) + VALUE (&im) * _Complex_I;\
   z = f (z);\
   PUSH_VALUE (p, (REAL_T) creal (z), A68_REAL);\
   PUSH_VALUE (p, (REAL_T) cimag (z), A68_REAL);\
@@ -1627,4 +1285,319 @@ void a68_div_complex (A68_REAL * z, A68_REAL * x, A68_REAL * y)
     RE (z) = (RE (x) * r + IM (x)) / den;
     IM (z) = (IM (x) * r - RE (x)) / den;
   }
+}
+
+// BITS max bits
+
+void genie_max_bits (NODE_T * p)
+{
+  PUSH_VALUE (p, A68_MAX_BITS, A68_BITS);
+}
+
+// OP NOT = (BITS) BITS.
+A68_MONAD (genie_not_bits, A68_BITS, ~);
+
+// OP AND = (BITS, BITS) BITS
+
+void genie_and_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  VALUE (i) = VALUE (i) & VALUE (j);
+}
+
+// OP OR = (BITS, BITS) BITS
+
+void genie_or_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  VALUE (i) = VALUE (i) | VALUE (j);
+}
+
+// OP XOR = (BITS, BITS) BITS
+
+void genie_xor_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  VALUE (i) = VALUE (i) ^ VALUE (j);
+}
+
+// OP + = (BITS, BITS) BITS
+
+void genie_add_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  CHECK_BITS_ADDITION (p, VALUE (i), VALUE (j));
+  VALUE (i) = VALUE (i) + VALUE (j);
+}
+
+// OP - = (BITS, BITS) BITS
+
+void genie_sub_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  CHECK_BITS_SUBTRACTION (p, VALUE (i), VALUE (j));
+  VALUE (i) = VALUE (i) - VALUE (j);
+}
+
+// OP * = (BITS, BITS) BITS
+
+void genie_times_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  CHECK_BITS_MULTIPLICATION (p, VALUE (i), VALUE (j));
+  VALUE (i) = VALUE (i) * VALUE (j);
+}
+
+// OP OVER = (BITS, BITS) BITS
+
+void genie_over_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  PRELUDE_ERROR (VALUE (j) == 0, p, ERROR_DIVISION_BY_ZERO, M_BITS);
+  VALUE (i) = VALUE (i) / VALUE (j);
+}
+
+// OP MOD = (BITS, BITS) BITS
+
+void genie_mod_bits (NODE_T * p)
+{
+  A68_BITS *i, *j;
+  POP_OPERAND_ADDRESSES (p, i, j, A68_BITS);
+  PRELUDE_ERROR (VALUE (j) == 0, p, ERROR_DIVISION_BY_ZERO, M_BITS);
+  VALUE (i) = VALUE (i) % VALUE (j);
+}
+
+// OP = = (BITS, BITS) BOOL.
+
+#define A68_CMP_BITS(n, OP)\
+void n (NODE_T * p) {\
+  A68_BITS i, j;\
+  POP_OBJECT (p, &j, A68_BITS);\
+  POP_OBJECT (p, &i, A68_BITS);\
+  PUSH_VALUE (p, (BOOL_T) ((UNSIGNED_T) VALUE (&i) OP (UNSIGNED_T) VALUE (&j)), A68_BOOL);\
+  }
+
+A68_CMP_BITS (genie_eq_bits, ==);
+A68_CMP_BITS (genie_ne_bits, !=);
+
+// OP <= = (BITS, BITS) BOOL
+
+void genie_le_bits (NODE_T * p)
+{
+  A68_BITS i, j;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_BITS);
+  PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&j)), A68_BOOL);
+}
+
+// OP >= = (BITS, BITS) BOOL
+
+void genie_ge_bits (NODE_T * p)
+{
+  A68_BITS i, j;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_BITS);
+  PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&i)), A68_BOOL);
+}
+
+#if (A68_LEVEL >= 3)
+
+// OP < = (BITS, BITS) BOOL
+
+void genie_lt_bits (NODE_T * p)
+{
+  A68_BITS i, j;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_BITS);
+  if (VALUE (&i) == VALUE (&j)) {
+    PUSH_VALUE (p, A68_FALSE, A68_BOOL);
+  } else {
+    PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&j)), A68_BOOL);
+  }
+}
+
+// OP >= = (BITS, BITS) BOOL
+
+void genie_gt_bits (NODE_T * p)
+{
+  A68_BITS i, j;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_BITS);
+  if (VALUE (&i) == VALUE (&j)) {
+    PUSH_VALUE (p, A68_FALSE, A68_BOOL);
+  } else {
+    PUSH_VALUE (p, (BOOL_T) ((VALUE (&i) | VALUE (&j)) == VALUE (&i)), A68_BOOL);
+  }
+}
+
+#endif
+
+// OP SHL = (BITS, INT) BITS
+
+void genie_shl_bits (NODE_T * p)
+{
+  A68_BITS i; A68_INT j;
+  POP_OBJECT (p, &j, A68_INT);
+  POP_OBJECT (p, &i, A68_BITS);
+  if (VALUE (&j) >= 0) {
+    UNSIGNED_T z = VALUE (&i);
+    for (int k = 0; k < VALUE (&j); k++) {
+      PRELUDE_ERROR (!MODULAR_MATH (p) && (z & D_SIGN), p, ERROR_MATH, M_BITS);
+      z = z << 1;
+    }
+    PUSH_VALUE (p, z, A68_BITS);
+  } else {
+    PUSH_VALUE (p, VALUE (&i) >> -VALUE (&j), A68_BITS);
+  }
+}
+
+// OP SHR = (BITS, INT) BITS
+
+void genie_shr_bits (NODE_T * p)
+{
+  A68_INT *j;
+  POP_OPERAND_ADDRESS (p, j, A68_INT);
+  VALUE (j) = -VALUE (j);
+  genie_shl_bits (p);           // Conform RR
+}
+
+// OP ROL = (BITS, INT) BITS
+
+void genie_rol_bits (NODE_T * p)
+{
+  A68_BITS i; A68_INT j;
+  POP_OBJECT (p, &j, A68_INT);
+  POP_OBJECT (p, &i, A68_BITS);
+  CHECK_INT_SHORTEN (p, VALUE (&j));
+  UNSIGNED_T w = VALUE (&i);
+  int n = VALUE (&j);
+  if (n >= 0) {
+    for (int k = 0; k < n; k++) {
+      UNSIGNED_T carry = (w & D_SIGN ? 0x1 : 0x0);
+      w = (w << 1) | carry;
+    }
+  } else {
+    n = -n;
+    for (int k = 0; k < n; k++) {
+      UNSIGNED_T carry = (w & 0x1 ? D_SIGN : 0x0);
+      w = (w >> 1) | carry;
+    }
+  }
+  PUSH_VALUE (p, w, A68_BITS);
+}
+
+// OP ROR = (BITS, INT) BITS
+
+void genie_ror_bits (NODE_T * p)
+{
+  A68_INT *j;
+  POP_OPERAND_ADDRESS (p, j, A68_INT);
+  VALUE (j) = -VALUE (j);
+  genie_rol_bits (p);
+}
+
+// OP ELEM = (INT, BITS) BOOL
+
+void genie_elem_bits (NODE_T * p)
+{
+  A68_BITS j; A68_INT i;
+  UNSIGNED_T mask = 0x1;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_INT);
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  for (int n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
+    mask = mask << 1;
+  }
+  PUSH_VALUE (p, (BOOL_T) ((VALUE (&j) & mask) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+}
+
+// OP SET = (INT, BITS) BITS
+
+void genie_set_bits (NODE_T * p)
+{
+  A68_BITS j; A68_INT i;
+  UNSIGNED_T mask = 0x1;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_INT);
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  for (int n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
+    mask = mask << 1;
+  }
+  PUSH_VALUE (p, VALUE (&j) | mask, A68_BITS);
+}
+
+// OP CLEAR = (INT, BITS) BITS
+
+void genie_clear_bits (NODE_T * p)
+{
+  A68_BITS j; A68_INT i;
+  UNSIGNED_T mask = 0x1;
+  POP_OBJECT (p, &j, A68_BITS);
+  POP_OBJECT (p, &i, A68_INT);
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  for (int n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
+    mask = mask << 1;
+  }
+  PUSH_VALUE (p, VALUE (&j) & ~mask, A68_BITS);
+}
+
+// OP ABS = (BITS) INT
+
+void genie_abs_bits (NODE_T * p)
+{
+  A68_BITS i;
+  POP_OBJECT (p, &i, A68_BITS);
+  PUSH_VALUE (p, (INT_T) (VALUE (&i)), A68_INT);
+}
+
+// OP BIN = (INT) BITS
+
+void genie_bin_int (NODE_T * p)
+{
+  A68_INT i;
+  POP_OBJECT (p, &i, A68_INT);
+  if (!MODULAR_MATH (p) && VALUE (&i) < 0) {
+// RR does not convert negative numbers.
+    errno = EDOM;
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, M_BITS);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  PUSH_VALUE (p, (UNSIGNED_T) (VALUE (&i)), A68_BITS);
+}
+
+// @brief PROC ([] BOOL) BITS bits pack
+
+void genie_bits_pack (NODE_T * p)
+{
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  A68_REF z;
+  POP_REF (p, &z);
+  CHECK_REF (p, z, M_ROW_BOOL);
+  GET_DESCRIPTOR (arr, tup, &z);
+  int size = ROW_SIZE (tup);
+  PRELUDE_ERROR (size < 0 || size > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
+  A68_BITS b;
+  VALUE (&b) = 0x0;
+  if (ROW_SIZE (tup) > 0) {
+    BYTE_T *base = DEREF (BYTE_T, &ARRAY (arr));
+    UNSIGNED_T bit = 0x1;
+    for (int k = UPB (tup); k >= LWB (tup); k--) {
+      int addr = INDEX_1_DIM (arr, tup, k);
+      A68_BOOL *boo = (A68_BOOL *) & (base[addr]);
+      CHECK_INIT (p, INITIALISED (boo), M_BOOL);
+      if (VALUE (boo)) {
+        VALUE (&b) |= bit;
+      }
+      bit <<= 1;
+    }
+  }
+  STATUS (&b) = INIT_MASK;
+  PUSH_OBJECT (p, b, A68_BITS);
 }

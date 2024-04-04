@@ -178,21 +178,20 @@ void try_change_thread (NODE_T * p)
 
 void save_stacks (pthread_t t)
 {
-  ADDR_T p, q, u, v;
   int k;
   GET_THREAD_INDEX (k, t);
 // Store stack pointers.
   CUR_PTR (&FRAME (&(A68_PAR (context)[k]))) = A68_FP;
   CUR_PTR (&STACK (&(A68_PAR (context)[k]))) = A68_SP;
 // Swap out evaluation stack.
-  p = A68_SP;
-  q = INI_PTR (&STACK (&(A68_PAR (context)[k])));
+  ADDR_T p = A68_SP;
+  ADDR_T q = INI_PTR (&STACK (&(A68_PAR (context)[k])));
   SAVE_STACK (&(STACK (&(A68_PAR (context)[k]))), STACK_ADDRESS (q), p - q);
 // Swap out frame stack.
   p = A68_FP;
   q = INI_PTR (&FRAME (&(A68_PAR (context)[k])));
-  u = p + FRAME_SIZE (p);
-  v = q + FRAME_SIZE (q);
+  ADDR_T u = p + FRAME_SIZE (p);
+  ADDR_T v = q + FRAME_SIZE (q);
 // Consider the embedding thread.
   SAVE_STACK (&(FRAME (&(A68_PAR (context)[k]))), FRAME_ADDRESS (v), u - v);
 }
@@ -221,8 +220,7 @@ void restore_stacks (pthread_t t)
 
 void check_parallel_units (BOOL_T * active, pthread_t parent)
 {
-  int k;
-  for (k = 0; k < A68_PAR (context_index); k++) {
+  for (int k = 0; k < A68_PAR (context_index); k++) {
     if (parent == PARENT (&(A68_PAR (context)[k]))) {
       (*active) |= ACTIVE (&(A68_PAR (context)[k]));
     }
@@ -233,18 +231,16 @@ void check_parallel_units (BOOL_T * active, pthread_t parent)
 
 void *start_unit (void *arg)
 {
-  pthread_t t;
-  int k;
   BYTE_T stack_offset;
-  NODE_T *p;
   (void) arg;
   LOCK_THREAD;
-  t = pthread_self ();
+  pthread_t t = pthread_self ();
+  int k;
   GET_THREAD_INDEX (k, t);
   THREAD_STACK_OFFSET (&(A68_PAR (context)[k])) = (BYTE_T *) (&stack_offset - stack_direction (&stack_offset) * STACK_USED (&A68_PAR (context)[k]));
   restore_stacks (t);
-  p = (NODE_T *) (UNIT (&(A68_PAR (context)[k])));
-  EXECUTE_UNIT_TRACE (p);
+  NODE_T *p = (NODE_T *) (UNIT (&(A68_PAR (context)[k])));
+  GENIE_UNIT_TRACE (p);
   genie_abend_thread ();
   return (void *) NULL;
 }
@@ -316,20 +312,18 @@ void start_parallel_units (NODE_T * p, pthread_t parent)
 
 void *start_genie_parallel (void *arg)
 {
-  pthread_t t;
-  int k;
   BYTE_T stack_offset;
-  NODE_T *p;
-  BOOL_T units_active;
   (void) arg;
   LOCK_THREAD;
-  t = pthread_self ();
+  pthread_t t = pthread_self ();
+  int k;
   GET_THREAD_INDEX (k, t);
   THREAD_STACK_OFFSET (&(A68_PAR (context)[k])) = (BYTE_T *) (&stack_offset - stack_direction (&stack_offset) * STACK_USED (&(A68_PAR (context)[k])));
   restore_stacks (t);
-  p = (NODE_T *) (UNIT (&(A68_PAR (context)[k])));
+  NODE_T *p = (NODE_T *) (UNIT (&(A68_PAR (context)[k])));
 // This is the thread spawned by the main thread, we spawn parallel units and await their completion.
   start_parallel_units (SUB (p), t);
+  BOOL_T units_active;
   do {
     units_active = A68_FALSE;
     check_parallel_units (&units_active, pthread_self ());
@@ -345,7 +339,6 @@ void *start_genie_parallel (void *arg)
 
 PROP_T genie_parallel (NODE_T * p)
 {
-  int j;
   ADDR_T stack_s = 0, frame_s = 0;
   BYTE_T *system_stack_offset_s = NO_BYTE;
   if (is_main_thread ()) {
@@ -411,7 +404,7 @@ PROP_T genie_parallel (NODE_T * p)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
 // The first spawned thread has completed, now clean up.
-    for (j = 0; j < A68_PAR (context_index); j++) {
+    for (int j = 0; j < A68_PAR (context_index); j++) {
       if (ACTIVE (&(A68_PAR (context)[j])) && OTHER_THREAD (ID (&(A68_PAR (context)[j])), A68_PAR (main_thread_id)) && OTHER_THREAD (ID (&(A68_PAR (context)[j])), A68_PAR (parent_thread_id))) {
 // If threads are zapped it is possible that some are active at this point!.
         if (pthread_join (ID (&(A68_PAR (context)[j])), NULL) != 0) {
@@ -468,9 +461,8 @@ PROP_T genie_parallel (NODE_T * p)
 void genie_level_sema_int (NODE_T * p)
 {
   A68_INT k;
-  A68_REF s;
   POP_OBJECT (p, &k, A68_INT);
-  s = heap_generator (p, M_INT, SIZE (M_INT));
+  A68_REF s = heap_generator (p, M_INT, SIZE (M_INT));
   *DEREF (A68_INT, &s) = k;
   PUSH_REF (p, s);
 }
@@ -489,11 +481,11 @@ void genie_level_int_sema (NODE_T * p)
 
 void genie_up_sema (NODE_T * p)
 {
-  A68_REF s;
   if (is_main_thread ()) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_OUTSIDE);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
+  A68_REF s;
   POP_REF (p, &s);
   CHECK_INIT (p, INITIALISED (&s), M_SEMA);
   VALUE (DEREF (A68_INT, &s))++;
@@ -503,17 +495,16 @@ void genie_up_sema (NODE_T * p)
 
 void genie_down_sema (NODE_T * p)
 {
-  A68_REF s;
-  A68_INT *k;
-  BOOL_T cont = A68_TRUE;
   if (is_main_thread ()) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_OUTSIDE);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
+  A68_REF s;
   POP_REF (p, &s);
   CHECK_INIT (p, INITIALISED (&s), M_SEMA);
+  BOOL_T cont = A68_TRUE;
   while (cont) {
-    k = DEREF (A68_INT, &s);
+    A68_INT *k = DEREF (A68_INT, &s);
     if (VALUE (k) <= 0) {
       save_stacks (pthread_self ());
       while (VALUE (k) <= 0) {

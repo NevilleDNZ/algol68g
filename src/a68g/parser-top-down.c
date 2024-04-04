@@ -35,23 +35,19 @@ void substitute_brackets (NODE_T * p)
   for (; p != NO_NODE; FORWARD (p)) {
     substitute_brackets (SUB (p));
     switch (ATTRIBUTE (p)) {
-    case ACCO_SYMBOL:
-      {
+    case ACCO_SYMBOL: {
         ATTRIBUTE (p) = OPEN_SYMBOL;
         break;
       }
-    case OCCA_SYMBOL:
-      {
+    case OCCA_SYMBOL: {
         ATTRIBUTE (p) = CLOSE_SYMBOL;
         break;
       }
-    case SUB_SYMBOL:
-      {
+    case SUB_SYMBOL: {
         ATTRIBUTE (p) = OPEN_SYMBOL;
         break;
       }
-    case BUS_SYMBOL:
-      {
+    case BUS_SYMBOL: {
         ATTRIBUTE (p) = CLOSE_SYMBOL;
         break;
       }
@@ -136,9 +132,9 @@ char *phrase_to_text (NODE_T * p, NODE_T ** w)
 
 //! @brief Give diagnose from top-down parser.
 
-void top_down_diagnose (NODE_T * start, NODE_T * posit, int clause, int expected)
+void top_down_diagnose (NODE_T * start, NODE_T * p, int clause, int expected)
 {
-  NODE_T *issue = (posit != NO_NODE ? posit : start);
+  NODE_T *issue = (p != NO_NODE ? p : start);
   if (expected != 0) {
     diagnostic (A68_SYNTAX_ERROR, issue, ERROR_EXPECTED_NEAR, expected, clause, NSYMBOL (start), LINE (INFO (start)));
   } else {
@@ -174,8 +170,8 @@ int is_loop_cast_formula (NODE_T * p)
   } else if (whether (p, UNION_SYMBOL, OPEN_SYMBOL, STOP)) {
     return 2;
   } else if (is_one_of (p, OPEN_SYMBOL, SUB_SYMBOL, STOP)) {
-    int k;
-    for (k = 0; p != NO_NODE && (is_one_of (p, OPEN_SYMBOL, SUB_SYMBOL, STOP)); FORWARD (p), k++) {
+    int k = 0;
+    for (; p != NO_NODE && (is_one_of (p, OPEN_SYMBOL, SUB_SYMBOL, STOP)); FORWARD (p), k++) {
       ;
     }
     return p != NO_NODE && (whether (p, UNION_SYMBOL, OPEN_SYMBOL, STOP) ? k : 0);
@@ -245,7 +241,7 @@ NODE_T *top_down_skip_loop_series (NODE_T * p)
 
 NODE_T *top_down_loop (NODE_T * p)
 {
-  NODE_T *start = p, *q = p, *save;
+  NODE_T *start = p, *q = p;
   if (IS (q, FOR_SYMBOL)) {
     tokens_exhausted (FORWARD (q), start);
     if (IS (q, IDENTIFIER)) {
@@ -329,7 +325,7 @@ NODE_T *top_down_loop (NODE_T * p)
     }
     make_sub (start, q, k);
   }
-  save = NEXT (start);
+  NODE_T *save = NEXT (start);
   make_sub (p, start, LOOP_CLAUSE);
   return save;
 }
@@ -645,13 +641,12 @@ NODE_T *top_down_skip_format (NODE_T * p)
 
 void top_down_formats (NODE_T * p)
 {
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (SUB (q) != NO_NODE) {
       top_down_formats (SUB (q));
     }
   }
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, FORMAT_DELIMITER_SYMBOL)) {
       NODE_T *f = NEXT (q);
       while (f != NO_NODE && !IS (f, FORMAT_DELIMITER_SYMBOL)) {

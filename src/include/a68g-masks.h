@@ -22,7 +22,12 @@
 #if !defined (__A68G_MASKS_H__)
 #define __A68G_MASKS_H__
 
-// Status Masks
+// Status macros
+#define STATUS_CLEAR(p, q) {STATUS (p) &= (~(q));}
+#define STATUS_SET(p, q) {STATUS (p) |= (q);}
+#define STATUS_TEST(p, q) ((STATUS (p) & (q)) != (unt) 0)
+
+// Status masks
 #define NULL_MASK                 ((STATUS_MASK_T) 0x00000000)
 #define IN_HEAP_MASK              ((STATUS_MASK_T) 0x00000001)
 #define IN_FRAME_MASK             ((STATUS_MASK_T) 0x00000002)

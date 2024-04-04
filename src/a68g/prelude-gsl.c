@@ -215,9 +215,8 @@ void stand_gsl_sf (void)
 
 void stand_gsl_linear_algebra (void)
 {
-  MOID_T *m;
 // Vector and matrix pretty print.
-  m = a68_proc (M_VOID, M_ROW_REAL, M_INT, NO_MOID);
+  MOID_T *m = a68_proc (M_VOID, M_ROW_REAL, M_INT, NO_MOID);
   a68_idf (A68_EXT, "printvector", m, genie_print_vector);
   m = a68_proc (M_VOID, M_ROW_ROW_REAL, M_INT, NO_MOID);
   a68_idf (A68_EXT, "printmatrix", m, genie_print_matrix);
@@ -641,9 +640,8 @@ void stand_gsl_constants (void)
 
 void stand_gsl_fft_laplace (void)
 {
-  MOID_T *m;
 // FFT.
-  m = a68_proc (M_ROW_INT, M_INT, NO_MOID);
+  MOID_T *m = a68_proc (M_ROW_INT, M_INT, NO_MOID);
   a68_idf (A68_EXT, "primefactors", m, genie_prime_factors);
   m = a68_proc (M_ROW_COMPLEX, M_ROW_COMPLEX, NO_MOID);
   a68_idf (A68_EXT, "fftcomplexforward", m, genie_fft_complex_forward);

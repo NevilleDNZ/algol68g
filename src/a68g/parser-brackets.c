@@ -39,7 +39,7 @@ void bracket_check_error (char *txt, int n, char *bra, char *ket)
     BUFCLR (buf);
     ASSERT (snprintf (buf, SNPRINTF_SIZE, "\"%s\" without matching \"%s\"", (n > 0 ? bra : ket), (n > 0 ? ket : bra)) >= 0);
     if (strlen (txt) > 0) {
-      bufcat (txt, " and ", BUFFER_SIZE);
+      bufcat (txt, " or ", BUFFER_SIZE);
     }
     bufcat (txt, buf, BUFFER_SIZE);
   }
@@ -52,38 +52,31 @@ char *bracket_check_diagnose (NODE_T * p)
   int begins = 0, opens = 0, format_delims = 0, format_opens = 0, subs = 0, ifs = 0, cases = 0, dos = 0, accos = 0;
   for (; p != NO_NODE; FORWARD (p)) {
     switch (ATTRIBUTE (p)) {
-    case BEGIN_SYMBOL:
-      {
+    case BEGIN_SYMBOL: {
         begins++;
         break;
       }
-    case END_SYMBOL:
-      {
+    case END_SYMBOL: {
         begins--;
         break;
       }
-    case OPEN_SYMBOL:
-      {
+    case OPEN_SYMBOL: {
         opens++;
         break;
       }
-    case CLOSE_SYMBOL:
-      {
+    case CLOSE_SYMBOL: {
         opens--;
         break;
       }
-    case ACCO_SYMBOL:
-      {
+    case ACCO_SYMBOL: {
         accos++;
         break;
       }
-    case OCCA_SYMBOL:
-      {
+    case OCCA_SYMBOL: {
         accos--;
         break;
       }
-    case FORMAT_DELIMITER_SYMBOL:
-      {
+    case FORMAT_DELIMITER_SYMBOL: {
         if (format_delims == 0) {
           format_delims = 1;
         } else {
@@ -91,53 +84,43 @@ char *bracket_check_diagnose (NODE_T * p)
         }
         break;
       }
-    case FORMAT_OPEN_SYMBOL:
-      {
+    case FORMAT_OPEN_SYMBOL: {
         format_opens++;
         break;
       }
-    case FORMAT_CLOSE_SYMBOL:
-      {
+    case FORMAT_CLOSE_SYMBOL: {
         format_opens--;
         break;
       }
-    case SUB_SYMBOL:
-      {
+    case SUB_SYMBOL: {
         subs++;
         break;
       }
-    case BUS_SYMBOL:
-      {
+    case BUS_SYMBOL: {
         subs--;
         break;
       }
-    case IF_SYMBOL:
-      {
+    case IF_SYMBOL: {
         ifs++;
         break;
       }
-    case FI_SYMBOL:
-      {
+    case FI_SYMBOL: {
         ifs--;
         break;
       }
-    case CASE_SYMBOL:
-      {
+    case CASE_SYMBOL: {
         cases++;
         break;
       }
-    case ESAC_SYMBOL:
-      {
+    case ESAC_SYMBOL: {
         cases--;
         break;
       }
-    case DO_SYMBOL:
-      {
+    case DO_SYMBOL: {
         dos++;
         break;
       }
-    case OD_SYMBOL:
-      {
+    case OD_SYMBOL: {
         dos--;
         break;
       }
@@ -160,56 +143,47 @@ char *bracket_check_diagnose (NODE_T * p)
 
 NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
 {
-  BOOL_T ignore_token;
   for (; p != NO_NODE; FORWARD (p)) {
     int ket = STOP;
     NODE_T *q = NO_NODE;
-    ignore_token = A68_FALSE;
+    BOOL_T ignore_token = A68_FALSE;
     switch (ATTRIBUTE (p)) {
-    case BEGIN_SYMBOL:
-      {
+    case BEGIN_SYMBOL: {
         ket = END_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case OPEN_SYMBOL:
-      {
+    case OPEN_SYMBOL: {
         ket = CLOSE_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case ACCO_SYMBOL:
-      {
+    case ACCO_SYMBOL: {
         ket = OCCA_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case FORMAT_OPEN_SYMBOL:
-      {
+    case FORMAT_OPEN_SYMBOL: {
         ket = FORMAT_CLOSE_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case SUB_SYMBOL:
-      {
+    case SUB_SYMBOL: {
         ket = BUS_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case IF_SYMBOL:
-      {
+    case IF_SYMBOL: {
         ket = FI_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case CASE_SYMBOL:
-      {
+    case CASE_SYMBOL: {
         ket = ESAC_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
       }
-    case DO_SYMBOL:
-      {
+    case DO_SYMBOL: {
         ket = OD_SYMBOL;
         q = bracket_check_parse (top, NEXT (p));
         break;
@@ -221,12 +195,10 @@ NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
     case BUS_SYMBOL:
     case FI_SYMBOL:
     case ESAC_SYMBOL:
-    case OD_SYMBOL:
-      {
+    case OD_SYMBOL: {
         return p;
       }
-    default:
-      {
+    default: {
         ignore_token = A68_TRUE;
       }
     }

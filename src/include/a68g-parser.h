@@ -30,7 +30,7 @@ extern BOOL_T is_firm (MOID_T *, MOID_T *);
 extern BOOL_T is_firm (MOID_T *, MOID_T *);
 extern BOOL_T is_formal_bounds (NODE_T *);
 extern BOOL_T is_loop_keyword (NODE_T *);
-extern BOOL_T is_modes_equivalent (MOID_T *, MOID_T *);
+extern BOOL_T are_modes_equivalent (MOID_T *, MOID_T *);
 extern BOOL_T is_new_lexical_level (NODE_T *);
 extern BOOL_T is_one_of (NODE_T * p, ...);
 extern BOOL_T is_ref_refety_flex (MOID_T *);

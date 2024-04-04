@@ -221,12 +221,10 @@ BOOL_T is_semicolon_less (NODE_T * p)
   case EDOC_SYMBOL:
   case OCCA_SYMBOL:
   case OD_SYMBOL:
-  case UNTIL_SYMBOL:
-    {
+  case UNTIL_SYMBOL: {
       return A68_TRUE;
     }
-  default:
-    {
+  default: {
       return A68_FALSE;
     }
   }
@@ -249,12 +247,10 @@ BOOL_T is_formal_bounds (NODE_T * p)
     case DOTDOT_SYMBOL:
     case INT_DENOTATION:
     case IDENTIFIER:
-    case OPERATOR:
-      {
+    case OPERATOR: {
         return (BOOL_T) (is_formal_bounds (SUB (p)) && is_formal_bounds (NEXT (p)));
       }
-    default:
-      {
+    default: {
         return A68_FALSE;
       }
     }
@@ -283,8 +279,7 @@ BOOL_T is_unit_terminator (NODE_T * p)
   case OUSE_SYMBOL:
   case ESAC_SYMBOL:
   case EDOC_SYMBOL:
-  case OCCA_SYMBOL:
-    {
+  case OCCA_SYMBOL: {
       return A68_TRUE;
     }
   }
@@ -302,8 +297,7 @@ BOOL_T is_loop_keyword (NODE_T * p)
   case TO_SYMBOL:
   case DOWNTO_SYMBOL:
   case WHILE_SYMBOL:
-  case DO_SYMBOL:
-    {
+  case DO_SYMBOL: {
       return A68_TRUE;
     }
   }
@@ -318,12 +312,10 @@ int get_good_attribute (NODE_T * p)
   case UNIT:
   case TERTIARY:
   case SECONDARY:
-  case PRIMARY:
-    {
+  case PRIMARY: {
       return get_good_attribute (SUB (p));
     }
-  default:
-    {
+  default: {
       return ATTRIBUTE (p);
     }
   }
@@ -435,8 +427,7 @@ BOOL_T dont_mark_here (NODE_T * p)
   case SERIAL_CLAUSE:
   case ENQUIRY_CLAUSE:
   case INITIALISER_SERIES:
-  case DECLARATION_LIST:
-    {
+  case DECLARATION_LIST: {
       return A68_TRUE;
     }
   }
@@ -446,7 +437,6 @@ BOOL_T dont_mark_here (NODE_T * p)
 void a68_parser (void)
 {
 // Tokeniser.
-  int renum;
   FILE_SOURCE_OPENED (&A68_JOB) = A68_TRUE;
   announce_phase ("initialiser");
   A68_PARSER (error_tag) = (TAG_T *) new_tag ();
@@ -481,7 +471,7 @@ void a68_parser (void)
     FILE_SOURCE_OPENED (&A68_JOB) = A68_FALSE;
     prune_echoes (OPTION_LIST (&A68_JOB));
     TREE_LISTING_SAFE (&A68_JOB) = A68_TRUE;
-    renum = 0;
+    int renum = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &renum);
   }
 // Now the default precision of LONG LONG modes is fixed.
@@ -515,7 +505,7 @@ void a68_parser (void)
     if (ERROR_COUNT (&A68_JOB) == 0) {
       put_refinements ();
     }
-    renum = 0;
+    int renum = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &renum);
     verbosity ();
   }
@@ -532,7 +522,7 @@ void a68_parser (void)
       LEVEL (A68_STANDENV) = 0;
       top_down_parser (TOP_NODE (&A68_JOB));
     }
-    renum = 0;
+    int renum = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &renum);
     verbosity ();
   }
@@ -549,7 +539,7 @@ void a68_parser (void)
     announce_phase ("parser phase 2");
     preliminary_symbol_table_setup (TOP_NODE (&A68_JOB));
     bottom_up_parser (TOP_NODE (&A68_JOB));
-    renum = 0;
+    int renum = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &renum);
     verbosity ();
   }
@@ -565,7 +555,7 @@ void a68_parser (void)
       set_nest (TOP_NODE (&A68_JOB), NO_NODE);
       set_proc_level (TOP_NODE (&A68_JOB), 1);
     }
-    renum = 0;
+    int renum = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &renum);
     verbosity ();
   }
@@ -604,7 +594,7 @@ void a68_parser (void)
     assign_offsets_table (A68_STANDENV);
     assign_offsets (TOP_NODE (&A68_JOB));
     assign_offsets_packs (TOP_MOID (&A68_JOB));
-    renum = 0;
+    int renum = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &renum);
     verbosity ();
   }
@@ -854,8 +844,8 @@ BOOL_T match_string (char *x, char *c, char alt)
 BOOL_T whether (NODE_T * p, ...)
 {
   va_list vl;
-  int a;
   va_start (vl, p);
+  int a;
   while ((a = va_arg (vl, int)) != STOP)
   {
     if (p != NO_NODE && a == WILDCARD) {
@@ -884,9 +874,9 @@ BOOL_T is_one_of (NODE_T * p, ...)
 {
   if (p != NO_NODE) {
     va_list vl;
-    int a;
-    BOOL_T match = A68_FALSE;
     va_start (vl, p);
+    BOOL_T match = A68_FALSE;
+    int a;
     while ((a = va_arg (vl, int)) != STOP)
     {
       match = (BOOL_T) (match | (BOOL_T) (IS (p, a)));
@@ -974,12 +964,10 @@ BOOL_T is_new_lexical_level (NODE_T * p)
   case CONFORMITY_CHOICE:
   case CONFORMITY_IN_PART:
   case CONFORMITY_OUSE_PART:
-  case WHILE_PART:
-    {
+  case WHILE_PART: {
       return A68_TRUE;
     }
-  default:
-    {
+  default: {
       return A68_FALSE;
     }
   }

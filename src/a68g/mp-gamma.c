@@ -41,7 +41,7 @@ MP_T *erf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     ADDR_T pop_sp = A68_SP;
 // Note we need double precision!
     int gdigs = FUN_DIGITS (2 * digs), sign;
-    BOOL_T go_on = A68_TRUE;
+    BOOL_T siga = A68_TRUE;
     MP_T *y_g = nil_mp (p, gdigs);
     MP_T *z_g = len_mp (p, x, digs, gdigs);
     sign = MP_SIGN (x);
@@ -61,7 +61,7 @@ MP_T *erf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
       (void) mul_mp (p, y_g, z_g, z_g, gdigs);
       SET_MP_ONE (s_g, gdigs);
       SET_MP_ONE (t_g, gdigs);
-      for (unt k = 1; go_on; k++) {
+      for (unt k = 1; siga; k++) {
         (void) mul_mp (p, t_g, y_g, t_g, gdigs);
         (void) div_mp_digit (p, t_g, t_g, (MP_T) k, gdigs);
         (void) div_mp_digit (p, u_g, t_g, (MP_T) (2 * k + 1), gdigs);
@@ -70,7 +70,7 @@ MP_T *erf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
         } else {
           (void) sub_mp (p, s_g, s_g, u_g, gdigs);
         }
-        go_on = (MP_EXPONENT (s_g) - MP_EXPONENT (u_g)) < gdigs;
+        siga = (MP_EXPONENT (s_g) - MP_EXPONENT (u_g)) < gdigs;
       }
       (void) mul_mp (p, r_g, z_g, s_g, gdigs);
       (void) mul_mp_digit (p, r_g, r_g, 2, gdigs);
@@ -101,7 +101,7 @@ MP_T *inverf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs, sign;
-  BOOL_T go_on = A68_TRUE;
+  BOOL_T siga = A68_TRUE;
 // Precision adapts to the argument, but not too much.
 // If this is not precise enough, you need more digs
 // in your entire calculation, not just in this routine.
@@ -149,7 +149,7 @@ MP_T *inverf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     (void) half_mp (p, p_g, p_g, gdigs);
 // nrdigs prevents end-less iteration
     int nrdigs;
-    for (nrdigs = 0; nrdigs < digs && go_on; nrdigs++) {
+    for (nrdigs = 0; nrdigs < digs && siga; nrdigs++) {
       (void) move_mp (y_g, z_g, gdigs);
       (void) erf_mp (p, f_g, z_g, gdigs);
       (void) sub_mp (p, f_g, f_g, x_g, gdigs);
@@ -161,9 +161,9 @@ MP_T *inverf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
       (void) sub_mp (p, z_g, z_g, f_g, gdigs);
       (void) sub_mp (p, y_g, z_g, y_g, gdigs);
       if (IS_ZERO_MP (y_g)) {
-        go_on = A68_FALSE;
+        siga = A68_FALSE;
       } else {
-        go_on = ABS (MP_EXPONENT (y_g)) < digs;
+        siga = ABS (MP_EXPONENT (y_g)) < digs;
       }
     }
     (void) shorten_mp (p, z, digs, z_g, gdigs);

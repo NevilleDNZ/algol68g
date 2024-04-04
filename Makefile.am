@@ -16,8 +16,16 @@ a68g_SOURCES = \
 ./src/a68g/double.c \
 ./src/a68g/double-gamic.c \
 ./src/a68g/double-math.c \
+./src/a68g/genie-assign.c \
 ./src/a68g/genie.c \
+./src/a68g/genie-call.c \
 ./src/a68g/genie-coerce.c \
+./src/a68g/genie-declaration.c \
+./src/a68g/genie-denotation.c \
+./src/a68g/genie-enclosed.c \
+./src/a68g/genie-formula.c \
+./src/a68g/genie-hip.c \
+./src/a68g/genie-identifier.c \
 ./src/a68g/genie-misc.c \
 ./src/a68g/genie-regex.c \
 ./src/a68g/genie-rows.c \
@@ -67,12 +75,15 @@ a68g_SOURCES = \
 ./src/a68g/rts-enquiries.c \
 ./src/a68g/rts-formatted.c \
 ./src/a68g/rts-heap.c \
+./src/a68g/rts-http.c \
+./src/a68g/rts-https.c \
+./src/a68g/rts-internal.c \
 ./src/a68g/rts-monitor.c \
 ./src/a68g/rts-parallel.c \
 ./src/a68g/rts-plotutils.c \
 ./src/a68g/rts-postgresql.c \
-./src/a68g/rts-socket.c \
 ./src/a68g/rts-sounds.c \
+./src/a68g/rts-stowed.c \
 ./src/a68g/rts-transput.c \
 ./src/a68g/rts-unformatted.c \
 ./src/a68g/single-blas.c \
@@ -177,25 +188,28 @@ TESTS=\
 	./src/test-set/04-digits.a68\
 	./src/test-set/05-end-of-time.a68\
 	./src/test-set/06-fft.a68\
-	./src/test-set/07-fibonacci-grammar.a68\
-	./src/test-set/08-formula-manipulation.a68\
-	./src/test-set/09-gammainc.a68\
-	./src/test-set/10-guldens.a68\
-	./src/test-set/11-hamming.a68\
-	./src/test-set/12-hilbert.a68\
-	./src/test-set/13-lisp.a68\
-	./src/test-set/14-mandelbrot.a68\
-	./src/test-set/15-mastermind.a68\
-	./src/test-set/16-math.a68\
-	./src/test-set/17-matrix.a68\
-	./src/test-set/18-procedures.a68\
-	./src/test-set/19-pseudo-switch.a68\
-	./src/test-set/20-queens.a68\
-	./src/test-set/21-quicksort.a68\
-	./src/test-set/22-rationals.a68\
-	./src/test-set/23-semana-santa.a68\
-	./src/test-set/24-tukey.a68\
-	./src/test-set/25-whetstones.a68
+	./src/test-set/07-fft-par.a68\
+	./src/test-set/08-fibonacci-grammar.a68\
+	./src/test-set/09-formula-manipulation.a68\
+	./src/test-set/10-gammainc.a68\
+	./src/test-set/11-guldens.a68\
+	./src/test-set/12-hamming.a68\
+	./src/test-set/13-hilbert-matrix.a68\
+	./src/test-set/14-lisp.a68\
+	./src/test-set/15-mandelbrot.a68\
+	./src/test-set/16-mastermind.a68\
+	./src/test-set/17-math.a68\
+	./src/test-set/18-matrix.a68\
+	./src/test-set/19-procedures.a68\
+	./src/test-set/20-pseudo-switch.a68\
+	./src/test-set/21-queens.a68\
+	./src/test-set/22-quicksort.a68\
+	./src/test-set/23-rationals.a68\
+	./src/test-set/24-semana-santa.a68\
+	./src/test-set/25-tukey.a68\
+	./src/test-set/26-whetstones.a68\
+	./src/test-set/27-www.a68\
+	./src/test-set/28-zeroin.a68
 if EXPORT_DYNAMIC
 a68g_LDFLAGS = -Wl,--export-dynamic
 else

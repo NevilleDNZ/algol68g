@@ -140,15 +140,15 @@ void print_info (FILE_T f, char *prompt, int k)
 
 void apropos (FILE_T f, char *prompt, char *item)
 {
-  int k, n = 0;
   io_close_tty_line ();
   if (item == NO_TEXT) {
-    for (k = 0; CAT (&info_text[k]) != NO_TEXT; k++) {
+    for (int k = 0; CAT (&info_text[k]) != NO_TEXT; k++) {
       print_info (f, prompt, k);
     }
     return;
   }
-  for (k = 0; CAT (&info_text[k]) != NO_TEXT; k++) {
+  int n = 0;
+  for (int k = 0; CAT (&info_text[k]) != NO_TEXT; k++) {
     if (grep_in_string (item, CAT (&info_text[k]), NO_INT, NO_INT) == 0) {
       print_info (f, prompt, k);
       n++;
@@ -157,10 +157,9 @@ void apropos (FILE_T f, char *prompt, char *item)
   if (n > 0) {
     return;
   }
-  for (k = 0; CAT (&info_text[k]) != NO_TEXT; k++) {
+  for (int k = 0; CAT (&info_text[k]) != NO_TEXT; k++) {
     if (grep_in_string (item, TERM (&info_text[k]), NO_INT, NO_INT) == 0 || grep_in_string (item, DEF (&info_text[k]), NO_INT, NO_INT) == 0) {
       print_info (f, prompt, k);
-      n++;
     }
   }
 }

@@ -173,15 +173,15 @@ void contract_union (MOID_T * u)
 
 PACK_T *absorb_union_pack (PACK_T * u)
 {
-  BOOL_T go_on;
+  BOOL_T siga;
   PACK_T *t, *z;
   do {
     z = NO_PACK;
-    go_on = A68_FALSE;
+    siga = A68_FALSE;
     for (t = u; t != NO_PACK; FORWARD (t)) {
       if (IS (MOID (t), UNION_SYMBOL)) {
         PACK_T *s;
-        go_on = A68_TRUE;
+        siga = A68_TRUE;
         for (s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
           (void) add_mode_to_pack (&z, MOID (s), NO_TEXT, NODE (s));
         }
@@ -190,7 +190,7 @@ PACK_T *absorb_union_pack (PACK_T * u)
       }
     }
     u = z;
-  } while (go_on);
+  } while (siga);
   return z;
 }
 

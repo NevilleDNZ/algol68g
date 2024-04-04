@@ -66,6 +66,8 @@ extern A68_REF empty_row (NODE_T *, MOID_T *);
 extern A68_REF empty_string (NODE_T *);
 extern A68_REF genie_make_row (NODE_T *, MOID_T *, int, ADDR_T);
 extern A68_REF genie_store (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
+extern A68_REF heap_generator_2 (NODE_T *, MOID_T *, int, int);
+extern A68_REF heap_generator_3 (NODE_T *, MOID_T *, int, int, int);
 extern A68_REF heap_generator (NODE_T *, MOID_T *, int);
 extern A68_REF tmp_to_a68_string (NODE_T *, char *);
 extern ADDR_T calculate_internal_index (A68_TUPLE *, int);
@@ -113,6 +115,7 @@ extern void genie_generator_stowed (NODE_T *, BYTE_T *, NODE_T **, ADDR_T *);
 extern void genie_init_rng (void);
 extern void genie_preprocess (NODE_T *, int *, void *);
 extern void genie_push_undefined (NODE_T *, MOID_T *);
+extern void genie_read_standard_format (NODE_T *, MOID_T *, BYTE_T *, A68_REF, int *);
 extern void genie_read_standard (NODE_T *, MOID_T *, BYTE_T *, A68_REF);
 extern void genie_serial_clause (NODE_T *, jmp_buf *);
 extern void genie_serial_units (NODE_T *, NODE_T **, jmp_buf *, ADDR_T);
@@ -121,14 +124,18 @@ extern void genie_subscript (NODE_T *, A68_TUPLE **, INT_T *, NODE_T **);
 extern void genie_value_to_string (NODE_T *, MOID_T *, BYTE_T *, int);
 extern void genie_variable_dec (NODE_T *, NODE_T **, ADDR_T);
 extern void genie (void *);
+extern void genie_write_standard_format (NODE_T *, MOID_T *, BYTE_T *, A68_REF, int *);
 extern void genie_write_standard (NODE_T *, MOID_T *, BYTE_T *, A68_REF);
 extern void initialise_internal_index (A68_TUPLE *, int);
 extern void io_close_tty_line (void);
 extern void io_write_string (FILE_T, const char *);
 extern void monitor_error (char *, char *);
 extern void mp_strtou (NODE_T *, MP_T *, char *, MOID_T *);
+extern void open_format_frame (NODE_T *, A68_REF, A68_FORMAT *, BOOL_T, BOOL_T);
 extern void print_internal_index (FILE_T, A68_TUPLE *, int);
 extern void print_item (NODE_T *, FILE_T, BYTE_T *, MOID_T *);
+extern void purge_format_read (NODE_T *, A68_REF);
+extern void purge_format_write (NODE_T *, A68_REF);
 extern void single_step (NODE_T *, unt);
 extern void skip_nl_ff (NODE_T *, int *, A68_REF);
 extern void stack_dump (FILE_T, ADDR_T, int, int *);
@@ -225,6 +232,7 @@ extern GPROC genie_create;
 extern GPROC genie_create_pipe;
 extern GPROC genie_csc_real;
 extern GPROC genie_curt_real;
+extern GPROC genie_d1mach;
 extern GPROC genie_debug;
 extern GPROC genie_declaration;
 extern GPROC genie_directory;
@@ -314,6 +322,8 @@ extern GPROC genie_get_possible;
 extern GPROC genie_get_real;
 extern GPROC genie_get_sound;
 extern GPROC genie_get_string;
+extern GPROC genie_get_text;
+extern GPROC genie_getf_text;
 extern GPROC genie_grep_in_string;
 extern GPROC genie_grep_in_substring;
 extern GPROC genie_gt_bytes;
@@ -322,6 +332,7 @@ extern GPROC genie_gt_int;
 extern GPROC genie_gt_long_bytes;
 extern GPROC genie_gt_real;
 extern GPROC genie_gt_string;
+extern GPROC genie_i1mach;
 extern GPROC genie_i_complex;
 extern GPROC genie_identity_dec;
 extern GPROC genie_idf;
@@ -489,6 +500,8 @@ extern GPROC genie_put_long_real;
 extern GPROC genie_put_possible;
 extern GPROC genie_put_real;
 extern GPROC genie_put_string;
+extern GPROC genie_put_text;
+extern GPROC genie_putf_text;
 extern GPROC genie_pwd;
 extern GPROC genie_read;
 extern GPROC genie_read_bin;
@@ -560,6 +573,8 @@ extern GPROC genie_stand_in_channel;
 extern GPROC genie_stand_out;
 extern GPROC genie_stand_out_channel;
 extern GPROC genie_strerror;
+extern GPROC genie_string;
+extern GPROC genie_stringf;
 extern GPROC genie_string_in_string;
 extern GPROC genie_sub_bits;
 extern GPROC genie_sub_complex;
@@ -619,9 +634,12 @@ extern GPROC genie_level_sema_int;
 extern GPROC genie_up_sema;
 #endif
 
-#if defined (BUILD_HTTP)
+#if defined (BUILD_WWW)
 extern GPROC genie_http_content;
 extern GPROC genie_tcp_request;
+#if defined (HAVE_CURL)
+extern GPROC genie_https_content;
+#endif
 #endif
 
 #if defined (HAVE_CURSES)

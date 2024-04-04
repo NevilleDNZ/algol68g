@@ -33,66 +33,58 @@
 
 void genie_monad_elems (NODE_T * p)
 {
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  POP_REF (p, &z);
-// Decrease pointer since a UNION is on the stack.
-  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE);
-  CHECK_REF (p, z, M_ROWS);
-  GET_DESCRIPTOR (x, t, &z);
-  PUSH_VALUE (p, get_row_size (t, DIM (x)), A68_INT);
+  A68_REF row;
+  POP_REF (p, &row);
+  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE); // Pop UNION.
+  CHECK_REF (p, row, M_ROWS);
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &row);
+  PUSH_VALUE (p, get_row_size (tup, DIM (arr)), A68_INT);
 }
 
 //! @brief OP LWB = (ROWS) INT
 
 void genie_monad_lwb (NODE_T * p)
 {
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  POP_REF (p, &z);
-// Decrease pointer since a UNION is on the stack.
-  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE);
-  CHECK_REF (p, z, M_ROWS);
-  GET_DESCRIPTOR (x, t, &z);
-  PUSH_VALUE (p, LWB (t), A68_INT);
+  A68_REF row;
+  POP_REF (p, &row);
+  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE); // Pop UNION.
+  CHECK_REF (p, row, M_ROWS);
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &row);
+  PUSH_VALUE (p, LWB (tup), A68_INT);
 }
 
 //! @brief OP UPB = (ROWS) INT
 
 void genie_monad_upb (NODE_T * p)
 {
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
-  POP_REF (p, &z);
-// Decrease pointer since a UNION is on the stack.
-  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE);
-  CHECK_REF (p, z, M_ROWS);
-  GET_DESCRIPTOR (x, t, &z);
-  PUSH_VALUE (p, UPB (t), A68_INT);
+  A68_REF row;
+  POP_REF (p, &row);
+  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE); // Pop UNION.
+  CHECK_REF (p, row, M_ROWS);
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &row);
+  PUSH_VALUE (p, UPB (tup), A68_INT);
 }
 
 //! @brief OP ELEMS = (INT, ROWS) INT
 
 void genie_dyad_elems (NODE_T * p)
 {
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t, *u;
+  A68_REF row;
+  POP_REF (p, &row);
+  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE); // Pop UNION.
+  CHECK_REF (p, row, M_ROWS);
   A68_INT k;
-  POP_REF (p, &z);
-// Decrease pointer since a UNION is on the stack.
-  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE);
-  CHECK_REF (p, z, M_ROWS);
   POP_OBJECT (p, &k, A68_INT);
-  GET_DESCRIPTOR (x, t, &z);
-  if (VALUE (&k) < 1 || VALUE (&k) > DIM (x)) {
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &row);
+  if (VALUE (&k) < 1 || VALUE (&k) > DIM (arr)) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) VALUE (&k));
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  u = &(t[VALUE (&k) - 1]);
+  A68_TUPLE *u = &(tup[VALUE (&k) - 1]);
   PUSH_VALUE (p, ROW_SIZE (u), A68_INT);
 }
 
@@ -100,40 +92,36 @@ void genie_dyad_elems (NODE_T * p)
 
 void genie_dyad_lwb (NODE_T * p)
 {
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
+  A68_REF row;
+  POP_REF (p, &row);
+  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE); // Pop UNION.
+  CHECK_REF (p, row, M_ROWS);
   A68_INT k;
-  POP_REF (p, &z);
-// Decrease pointer since a UNION is on the stack.
-  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE);
-  CHECK_REF (p, z, M_ROWS);
   POP_OBJECT (p, &k, A68_INT);
-  GET_DESCRIPTOR (x, t, &z);
-  if (VALUE (&k) < 1 || VALUE (&k) > DIM (x)) {
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &row);
+  if (VALUE (&k) < 1 || VALUE (&k) > DIM (arr)) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) VALUE (&k));
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  PUSH_VALUE (p, LWB (&(t[VALUE (&k) - 1])), A68_INT);
+  PUSH_VALUE (p, LWB (&(tup[VALUE (&k) - 1])), A68_INT);
 }
 
 //! @brief OP UPB = (INT, ROWS) INT
 
 void genie_dyad_upb (NODE_T * p)
 {
-  A68_REF z;
-  A68_ARRAY *x;
-  A68_TUPLE *t;
+  A68_REF row;
+  POP_REF (p, &row);
+  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE); // Pop UNION.
+  CHECK_REF (p, row, M_ROWS);
   A68_INT k;
-  POP_REF (p, &z);
-// Decrease pointer since a UNION is on the stack.
-  DECREMENT_STACK_POINTER (p, A68_UNION_SIZE);
-  CHECK_REF (p, z, M_ROWS);
   POP_OBJECT (p, &k, A68_INT);
-  GET_DESCRIPTOR (x, t, &z);
-  if (VALUE (&k) < 1 || VALUE (&k) > DIM (x)) {
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &row);
+  if (VALUE (&k) < 1 || VALUE (&k) > DIM (arr)) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) VALUE (&k));
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  PUSH_VALUE (p, UPB (&(t[VALUE (&k) - 1])), A68_INT);
+  PUSH_VALUE (p, UPB (&(tup[VALUE (&k) - 1])), A68_INT);
 }

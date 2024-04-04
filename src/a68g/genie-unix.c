@@ -43,30 +43,24 @@
 
 void genie_directory (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
     PUSH_VALUE (p, A68_MAX_INT, A68_INT);
   } else {
     char *dir_name = a_to_c_string (p, buffer, name);
-    A68_REF z, row;
-    A68_ARRAY arr;
-    A68_TUPLE tup;
-    int k, n = 0;
-    A68_REF *base;
-    DIR *dir;
-    struct dirent *entry;
-    dir = opendir (dir_name);
+    DIR *dir = opendir (dir_name);
     if (dir == NULL) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
+    int n = 0;
+    struct dirent *entry;
     do {
       entry = readdir (dir);
       if (errno != 0) {
@@ -82,9 +76,10 @@ void genie_directory (NODE_T * p)
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
+    A68_REF z, row; A68_ARRAY arr; A68_TUPLE tup;
     NEW_ROW_1D (z, row, arr, tup, M_ROW_STRING, M_STRING, n);
-    base = DEREF (A68_REF, &row);
-    for (k = 0; k < n; k++) {
+    A68_REF *base = DEREF (A68_REF, &row);
+    for (int k = 0; k < n; k++) {
       entry = readdir (dir);
       if (errno != 0) {
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
@@ -111,7 +106,6 @@ void genie_utctime (NODE_T * p)
   if (time (&dt) == (time_t) - 1) {
     (void) empty_row (p, M_ROW_INT);
   } else {
-    A68_REF row;
     ADDR_T sp = A68_SP;
     struct tm *tod = gmtime (&dt);
     PUSH_VALUE (p, TM_YEAR (tod) + 1900, A68_INT);
@@ -122,7 +116,7 @@ void genie_utctime (NODE_T * p)
     PUSH_VALUE (p, TM_SEC (tod), A68_INT);
     PUSH_VALUE (p, TM_WDAY (tod) + 1, A68_INT);
     PUSH_VALUE (p, TM_ISDST (tod), A68_INT);
-    row = genie_make_row (p, M_INT, 8, sp);
+    A68_REF row = genie_make_row (p, M_INT, 8, sp);
     A68_SP = sp;
     PUSH_REF (p, row);
   }
@@ -136,7 +130,6 @@ void genie_localtime (NODE_T * p)
   if (time (&dt) == (time_t) - 1) {
     (void) empty_row (p, M_ROW_INT);
   } else {
-    A68_REF row;
     ADDR_T sp = A68_SP;
     struct tm *tod = localtime (&dt);
     PUSH_VALUE (p, TM_YEAR (tod) + 1900, A68_INT);
@@ -147,7 +140,7 @@ void genie_localtime (NODE_T * p)
     PUSH_VALUE (p, TM_SEC (tod), A68_INT);
     PUSH_VALUE (p, TM_WDAY (tod) + 1, A68_INT);
     PUSH_VALUE (p, TM_ISDST (tod), A68_INT);
-    row = genie_make_row (p, M_INT, 8, sp);
+    A68_REF row = genie_make_row (p, M_INT, 8, sp);
     A68_SP = sp;
     PUSH_REF (p, row);
   }
@@ -181,8 +174,8 @@ void genie_argc (NODE_T * p)
 
 void genie_argv (NODE_T * p)
 {
-  A68_INT a68_index;
   errno = 0;
+  A68_INT a68_index;
   POP_OBJECT (p, &a68_index, A68_INT);
   if (VALUE (&a68_index) >= 1 && VALUE (&a68_index) <= A68 (argc)) {
     char *q = A68 (argv)[VALUE (&a68_index) - 1];
@@ -201,8 +194,7 @@ void genie_argv (NODE_T * p)
 
 int find_good_arg (void)
 {
-  int i;
-  for (i = 0; i < A68 (argc); i++) {
+  for (int i = 0; i < A68 (argc); i++) {
     char *q = A68 (argv)[i];
     if (strncmp (q, "--script", 8) == 0) {
       return i + 1;
@@ -232,11 +224,10 @@ void genie_a68_argc (NODE_T * p)
 
 void genie_a68_argv (NODE_T * p)
 {
-  A68_INT a68_index;
-  int k;
   errno = 0;
+  A68_INT a68_index;
   POP_OBJECT (p, &a68_index, A68_INT);
-  k = VALUE (&a68_index);
+  int k = VALUE (&a68_index);
   if (k > 1) {
     k += find_good_arg ();
   }
@@ -257,11 +248,11 @@ void genie_a68_argv (NODE_T * p)
 
 void genie_pwd (NODE_T * p)
 {
-  size_t size = BUFFER_SIZE;
+  errno = 0;
   char *buffer = NO_TEXT;
   BOOL_T cont = A68_TRUE;
-  errno = 0;
   while (cont) {
+    size_t size = BUFFER_SIZE;
     buffer = (char *) a68_alloc (size, __func__, __LINE__);
     if (buffer == NO_TEXT) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
@@ -287,12 +278,11 @@ void genie_pwd (NODE_T * p)
 
 void genie_cd (NODE_T * p)
 {
-  A68_REF dir;
-  char *buffer;
   errno = 0;
+  A68_REF dir;
   POP_REF (p, &dir);
   CHECK_INIT (p, INITIALISED (&dir), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, dir)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, dir)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -312,12 +302,11 @@ void genie_cd (NODE_T * p)
 
 void genie_file_mode (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -336,12 +325,11 @@ void genie_file_mode (NODE_T * p)
 
 void genie_file_is_block_device (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -360,12 +348,11 @@ void genie_file_is_block_device (NODE_T * p)
 
 void genie_file_is_char_device (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -384,12 +371,11 @@ void genie_file_is_char_device (NODE_T * p)
 
 void genie_file_is_directory (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -408,12 +394,11 @@ void genie_file_is_directory (NODE_T * p)
 
 void genie_file_is_regular (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -434,12 +419,11 @@ void genie_file_is_regular (NODE_T * p)
 
 void genie_file_is_fifo (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -462,12 +446,11 @@ void genie_file_is_fifo (NODE_T * p)
 
 void genie_file_is_link (NODE_T * p)
 {
-  A68_REF name;
-  char *buffer;
   errno = 0;
+  A68_REF name;
   POP_REF (p, &name);
   CHECK_INIT (p, INITIALISED (&name), M_STRING);
-  buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
+  char *buffer = (char *) a68_alloc ((size_t) (1 + a68_string_size (p, name)), __func__, __LINE__);
   if (buffer == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -556,9 +539,8 @@ void genie_strerror (NODE_T * p)
 
 void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL_T r_mood, BOOL_T w_mood, int pid)
 {
-  A68_FILE *f;
   *z = heap_generator (p, M_REF_FILE, SIZE (M_FILE));
-  f = FILE_DEREF (z);
+  A68_FILE *f = FILE_DEREF (z);
   STATUS (f) = (STATUS_MASK_T) ((pid < 0) ? 0 : INIT_MASK);
   IDENTIFICATION (f) = nil_ref;
   TERMINATOR (f) = nil_ref;
@@ -582,12 +564,10 @@ void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL_T r_mo
 
 void genie_mkpipe (NODE_T * p, int fd_r, int fd_w, int pid)
 {
-  A68_REF r, w;
   errno = 0;
-// Set up pipe.
+  A68_REF r, w;
   set_up_file (p, &r, fd_r, A68 (stand_in_channel), A68_TRUE, A68_FALSE, pid);
   set_up_file (p, &w, fd_w, A68 (stand_out_channel), A68_FALSE, A68_TRUE, pid);
-// push pipe.
   PUSH_REF (p, r);
   PUSH_REF (p, w);
   PUSH_VALUE (p, pid, A68_INT);
@@ -597,14 +577,13 @@ void genie_mkpipe (NODE_T * p, int fd_r, int fd_w, int pid)
 
 void genie_getenv (NODE_T * p)
 {
-  A68_REF a_env;
-  char *val, *z, *z_env;
   errno = 0;
+  A68_REF a_env;
   POP_REF (p, &a_env);
   CHECK_INIT (p, INITIALISED (&a_env), M_STRING);
-  z_env = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_env)));
-  z = a_to_c_string (p, z_env, a_env);
-  val = getenv (z);
+  char *z_env = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_env)));
+  char *z = a_to_c_string (p, z_env, a_env);
+  char *val = getenv (z);
   if (val == NO_TEXT) {
     a_env = empty_string (p);
   } else {
@@ -620,9 +599,8 @@ void genie_fork (NODE_T * p)
 #if defined (BUILD_WIN32)
   PUSH_VALUE (p, -1, A68_INT);
 #else
-  int pid;
   errno = 0;
-  pid = (int) fork ();
+  int pid = (int) fork ();
   PUSH_VALUE (p, pid, A68_INT);
 #endif
 }
@@ -631,24 +609,23 @@ void genie_fork (NODE_T * p)
 
 void genie_exec (NODE_T * p)
 {
-  int ret;
-  A68_REF a_prog, a_args, a_env;
-  char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
   errno = 0;
 // Pop parameters.
+  A68_REF a_prog, a_args, a_env;
   POP_REF (p, &a_env);
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 // Convert strings and hasta el infinito.
-  prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
+  char *prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
   ASSERT (a_to_c_string (p, prog, a_prog) != NO_TEXT);
+  char *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
   convert_string_vector (p, argv, a_args);
   convert_string_vector (p, envp, a_env);
   if (argv[0] == NO_TEXT) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  ret = execve (prog, argv, envp);
+  int ret = execve (prog, argv, envp);
 // execve only returns if it fails.
   free_vector (argv);
   free_vector (envp);
@@ -660,29 +637,27 @@ void genie_exec (NODE_T * p)
 
 void genie_exec_sub (NODE_T * p)
 {
-  int pid;
-  A68_REF a_prog, a_args, a_env;
   errno = 0;
+  A68_REF a_prog, a_args, a_env;
 // Pop parameters.
   POP_REF (p, &a_env);
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 // Now create the pipes and fork.
 #if defined (BUILD_WIN32)
-  pid = -1;
+  int pid = -1;
   (void) pid;
   PUSH_VALUE (p, -1, A68_INT);
   return;
 #else
-  pid = (int) fork ();
+  int pid = (int) fork ();
   if (pid == -1) {
     PUSH_VALUE (p, -1, A68_INT);
   } else if (pid == 0) {
 // Child process.
-    char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
-// Convert  strings.
-    prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
+    char *prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
     ASSERT (a_to_c_string (p, prog, a_prog) != NO_TEXT);
+    char *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
     convert_string_vector (p, argv, a_args);
     convert_string_vector (p, envp, a_env);
     if (argv[0] == NO_TEXT) {
@@ -712,16 +687,14 @@ void genie_exec_sub_pipeline (NODE_T * p)
 //  PARENT         CHILD
 //        <-R...W<-
 //        pipe ctop
-
-  int pid;
-  A68_REF a_prog, a_args, a_env;
+//
   errno = 0;
-// Pop parameters.
+  A68_REF a_prog, a_args, a_env;
   POP_REF (p, &a_env);
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 #if !defined (BUILD_UNIX)
-  pid = -1;
+  int pid = -1;
   (void) pid;
   genie_mkpipe (p, -1, -1, -1);
   return;
@@ -732,7 +705,7 @@ void genie_exec_sub_pipeline (NODE_T * p)
     genie_mkpipe (p, -1, -1, -1);
     return;
   }
-  pid = (int) fork ();
+  int pid = (int) fork ();
   if (pid == -1) {
 // Fork failure.
     genie_mkpipe (p, -1, -1, -1);
@@ -740,10 +713,10 @@ void genie_exec_sub_pipeline (NODE_T * p)
   }
   if (pid == 0) {
 // Child process.
-    char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
 // Convert  strings.
-    prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
+    char *prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
     ASSERT (a_to_c_string (p, prog, a_prog) != NO_TEXT);
+    char *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
     convert_string_vector (p, argv, a_args);
     convert_string_vector (p, envp, a_env);
 // Set up redirection.
@@ -781,17 +754,15 @@ void genie_exec_sub_output (NODE_T * p)
 //  PARENT         CHILD
 //        <-R...W<-
 //       pipe ctop
-
-  int pid;
-  A68_REF a_prog, a_args, a_env, dest;
+//
   errno = 0;
-// Pop parameters.
+  A68_REF a_prog, a_args, a_env, dest;
   POP_REF (p, &dest);
   POP_REF (p, &a_env);
   POP_REF (p, &a_args);
   POP_REF (p, &a_prog);
 #if !defined (BUILD_UNIX)
-  pid = -1;
+  int pid = -1;
   (void) pid;
   PUSH_VALUE (p, -1, A68_INT);
   return;
@@ -802,18 +773,16 @@ void genie_exec_sub_output (NODE_T * p)
     PUSH_VALUE (p, -1, A68_INT);
     return;
   }
-  pid = (int) fork ();
+  int pid = (int) fork ();
   if (pid == -1) {
 // Fork failure.
     PUSH_VALUE (p, -1, A68_INT);
     return;
   }
   if (pid == 0) {
-// Child process.
-    char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
-// Convert  strings.
-    prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
+    char *prog = (char *) get_heap_space ((size_t) (1 + a68_string_size (p, a_prog)));
     ASSERT (a_to_c_string (p, prog, a_prog) != NO_TEXT);
+    char *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
     convert_string_vector (p, argv, a_args);
     convert_string_vector (p, envp, a_env);
 // Set up redirection.
@@ -834,10 +803,10 @@ void genie_exec_sub_output (NODE_T * p)
   } else {
 // Parent process.
     char ch;
-    int pipe_read, ret, status;
     ASSERT (close (ptoc_fd[FD_READ]) == 0);
     ASSERT (close (ctop_fd[FD_WRITE]) == 0);
     reset_transput_buffer (INPUT_BUFFER);
+    int pipe_read, ret, status;
     do {
       pipe_read = (int) io_read_conv (ctop_fd[FD_READ], &ch, 1);
       if (pipe_read > 0) {
@@ -874,8 +843,8 @@ void genie_create_pipe (NODE_T * p)
 
 void genie_waitpid (NODE_T * p)
 {
-  A68_INT k;
   errno = 0;
+  A68_INT k;
   POP_OBJECT (p, &k, A68_INT);
 #if defined (BUILD_UNIX)
   ASSERT (waitpid ((a68_pid_t) VALUE (&k), NULL, 0) != -1);

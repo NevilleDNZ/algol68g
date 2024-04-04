@@ -34,14 +34,14 @@
 
 void absorb_series_pack (MOID_T ** p)
 {
-  BOOL_T go_on;
+  BOOL_T siga;
   do {
     PACK_T *z = NO_PACK, *t;
-    go_on = A68_FALSE;
+    siga = A68_FALSE;
     for (t = PACK (*p); t != NO_PACK; FORWARD (t)) {
       if (MOID (t) != NO_MOID && IS (MOID (t), SERIES_MODE)) {
         PACK_T *s;
-        go_on = A68_TRUE;
+        siga = A68_TRUE;
         for (s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
           add_mode_to_pack (&z, MOID (s), NO_TEXT, NODE (s));
         }
@@ -50,7 +50,7 @@ void absorb_series_pack (MOID_T ** p)
       }
     }
     PACK (*p) = z;
-  } while (go_on);
+  } while (siga);
 }
 
 //! @brief Make SERIES (u, v).
@@ -103,14 +103,14 @@ MOID_T *absorb_related_subsets (MOID_T * m)
 
 void absorb_series_union_pack (MOID_T ** p)
 {
-  BOOL_T go_on;
+  BOOL_T siga;
   do {
     PACK_T *z = NO_PACK, *t;
-    go_on = A68_FALSE;
+    siga = A68_FALSE;
     for (t = PACK (*p); t != NO_PACK; FORWARD (t)) {
       if (MOID (t) != NO_MOID && (IS (MOID (t), SERIES_MODE) || IS (MOID (t), UNION_SYMBOL))) {
         PACK_T *s;
-        go_on = A68_TRUE;
+        siga = A68_TRUE;
         for (s = PACK (MOID (t)); s != NO_PACK; FORWARD (s)) {
           add_mode_to_pack (&z, MOID (s), NO_TEXT, NODE (s));
         }
@@ -119,7 +119,7 @@ void absorb_series_union_pack (MOID_T ** p)
       }
     }
     PACK (*p) = z;
-  } while (go_on);
+  } while (siga);
 }
 
 //! @brief Make united mode, from mode that is a SERIES (..).
@@ -356,22 +356,19 @@ BOOL_T is_rows_type (MOID_T * p)
 {
   switch (ATTRIBUTE (p)) {
   case ROW_SYMBOL:
-  case FLEX_SYMBOL:
-    {
+  case FLEX_SYMBOL: {
       return A68_TRUE;
     }
-  case UNION_SYMBOL:
-    {
+  case UNION_SYMBOL: {
       PACK_T *t = PACK (p);
-      BOOL_T go_on = A68_TRUE;
-      while (t != NO_PACK && go_on) {
-        go_on &= is_rows_type (MOID (t));
+      BOOL_T siga = A68_TRUE;
+      while (t != NO_PACK && siga) {
+        siga &= is_rows_type (MOID (t));
         FORWARD (t);
       }
-      return go_on;
+      return siga;
     }
-  default:
-    {
+  default: {
       return A68_FALSE;
     }
   }
@@ -429,12 +426,12 @@ BOOL_T is_transput_mode (MOID_T * p, char rw)
   } else if (p == M_SOUND) {
     return A68_TRUE;
   } else if (IS (p, UNION_SYMBOL) || IS (p, STRUCT_SYMBOL)) {
-    PACK_T *q = PACK (p);
-    BOOL_T k = A68_TRUE;
-    for (; q != NO_PACK && k; FORWARD (q)) {
-      k = (BOOL_T) (k & (is_transput_mode (MOID (q), rw) || is_proc_ref_file_void_or_format (MOID (q))));
+    for (PACK_T *q = PACK (p); q != NO_PACK; FORWARD (q)) {
+      if (! (is_transput_mode (MOID (q), rw) || is_proc_ref_file_void_or_format (MOID (q)))) {
+        return A68_FALSE;
+      }
     }
-    return k;
+    return A68_TRUE;
   } else if (IS_FLEX (p)) {
     if (SUB (p) == M_ROW_CHAR) {
       return A68_TRUE;
@@ -465,8 +462,19 @@ BOOL_T is_readable_mode (MOID_T * p)
 {
   if (is_proc_ref_file_void_or_format (p)) {
     return A68_TRUE;
+  } else if (IS_REF (p)) {
+    return is_transput_mode (SUB (p), 'r');
+  } else if (IS_UNION (p)) { 
+    for (PACK_T *q = PACK (p); q != NO_PACK; FORWARD (q)) {
+      if (!IS_REF (MOID (q))) {
+        return A68_FALSE;
+      } else if (!is_transput_mode (SUB (MOID (q)), 'r')) {
+        return A68_FALSE;
+      }
+    }
+    return A68_TRUE;
   } else {
-    return (BOOL_T) (IS_REF (p) ? is_transput_mode (SUB (p), 'r') : A68_FALSE);
+    return A68_FALSE;
   }
 }
 
@@ -948,11 +956,11 @@ MOID_T *get_balanced_mode (MOID_T * m, int sort, BOOL_T return_depreffed, int de
   MOID_T *common_moid = NO_MOID;
   if (m != NO_MOID && !is_mode_isnt_well (m) && IS (m, UNION_SYMBOL)) {
     int depref_level;
-    BOOL_T go_on = A68_TRUE;
+    BOOL_T siga = A68_TRUE;
 // Test for increasing depreffing.
-    for (depref_level = 0; go_on; depref_level++) {
+    for (depref_level = 0; siga; depref_level++) {
       PACK_T *p;
-      go_on = A68_FALSE;
+      siga = A68_FALSE;
 // Test the whole pack.
       for (p = PACK (m); p != NO_PACK; FORWARD (p)) {
 // HIPs are not eligible of course.
@@ -968,7 +976,7 @@ MOID_T *get_balanced_mode (MOID_T * m, int sort, BOOL_T return_depreffed, int de
             PACK_T *q;
             MOID_T *to = (return_depreffed ? depref_completely (candidate) : candidate);
             BOOL_T all_coercible = A68_TRUE;
-            go_on = A68_TRUE;
+            siga = A68_TRUE;
             for (q = PACK (m); q != NO_PACK && all_coercible; FORWARD (q)) {
               MOID_T *from = MOID (q);
               if (p != q && from != to) {
@@ -1003,8 +1011,7 @@ BOOL_T clause_allows_balancing (int att)
   case CONDITIONAL_CLAUSE:
   case CASE_CLAUSE:
   case SERIAL_CLAUSE:
-  case CONFORMITY_CLAUSE:
-    {
+  case CONFORMITY_CLAUSE: {
       return A68_TRUE;
     }
   }
@@ -1156,8 +1163,7 @@ void make_void (NODE_T * p, MOID_T * q)
   case IDENTITY_RELATION:
   case GENERATOR:
   case CAST:
-  case DENOTATION:
-    {
+  case DENOTATION: {
       make_coercion (p, VOIDING, M_VOID);
       return;
     }
@@ -1169,8 +1175,7 @@ void make_void (NODE_T * p, MOID_T * q)
   case ROUTINE_TEXT:
   case FORMULA:
   case CALL:
-  case IDENTIFIER:
-    {
+  case IDENTIFIER: {
 // A nonproc moid value is eliminated directly.
       if (is_nonproc (q)) {
         make_coercion (p, VOIDING, M_VOID);

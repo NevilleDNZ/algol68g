@@ -78,8 +78,7 @@ BOOL_T basic_mode (MOID_T * m)
 //    return A68_FALSE;
 //  }
   } else if (IS (m, STRUCT_SYMBOL)) {
-    PACK_T *p = PACK (m);
-    for (; p != NO_PACK; FORWARD (p)) {
+    for (PACK_T *p = PACK (m); p != NO_PACK; FORWARD (p)) {
       if (!primitive_mode (MOID (p))) {
         return A68_FALSE;
       }
@@ -103,8 +102,7 @@ BOOL_T basic_mode_non_row (MOID_T * m)
       return basic_mode_non_row (SUB (m));
     }
   } else if (IS (m, STRUCT_SYMBOL)) {
-    PACK_T *p = PACK (m);
-    for (; p != NO_PACK; FORWARD (p)) {
+    for (PACK_T *p = PACK (m); p != NO_PACK; FORWARD (p)) {
       if (!primitive_mode (MOID (p))) {
         return A68_FALSE;
       }
@@ -212,8 +210,7 @@ BOOL_T basic_call (NODE_T * p)
     if (idf == NO_NODE) {
       return A68_FALSE;
     } else if (SUB_MOID (idf) == MOID (p)) {    // Prevent partial parametrisation
-      int k;
-      for (k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (idf)) == PROCEDURE (&functions[k])) {
           NODE_T *args = NEXT (prim);
           return basic_argument (args);
@@ -230,8 +227,7 @@ BOOL_T basic_monadic_formula (NODE_T * p)
 {
   if (IS (p, MONADIC_FORMULA)) {
     NODE_T *op = SUB (p);
-    int k;
-    for (k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
+    for (int k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
       if (PROCEDURE (TAX (op)) == PROCEDURE (&monadics[k])) {
         NODE_T *rhs = NEXT (op);
         return basic_unit (rhs);
@@ -251,8 +247,7 @@ BOOL_T basic_formula (NODE_T * p)
     if (op == NO_NODE) {
       return basic_monadic_formula (lhs);
     } else {
-      int k;
-      for (k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
+      for (int k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&dyadics[k])) {
           NODE_T *rhs = NEXT (op);
           return (BOOL_T) (basic_unit (lhs) && basic_unit (rhs));

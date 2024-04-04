@@ -75,8 +75,8 @@ BOOL_T convert_radix (NODE_T * p, UNSIGNED_T z, int radix, int width)
 void format_error (NODE_T * p, A68_REF ref_file, char *diag)
 {
   A68_FILE *f = FILE_DEREF (&ref_file);
-  A68_BOOL z;
   on_event_handler (p, FORMAT_ERROR_MENDED (f), ref_file);
+  A68_BOOL z;
   POP_OBJECT (p, &z, A68_BOOL);
   if (VALUE (&z) == A68_FALSE) {
     diagnostic (A68_RUNTIME_ERROR, p, diag);
@@ -88,10 +88,8 @@ void format_error (NODE_T * p, A68_REF ref_file, char *diag)
 
 void initialise_collitems (NODE_T * p)
 {
-
 // Every picture has a counter that says whether it has not been used OR the number
 // of times it can still be used.
-
   for (; p != NO_NODE; FORWARD (p)) {
     if (IS (p, PICTURE)) {
       A68_COLLITEM *z = (A68_COLLITEM *) FRAME_LOCAL (A68_FP, OFFSET (TAX (p)));
@@ -111,18 +109,16 @@ void open_format_frame (NODE_T * p, A68_REF ref_file, A68_FORMAT * fmt, BOOL_T e
 {
 // Open a new frame for the format text and save for return to embedding one.
   A68_FILE *file = FILE_DEREF (&ref_file);
-  NODE_T *dollar;
-  A68_FORMAT *save;
 // Integrity check.
   if ((STATUS (fmt) & SKIP_FORMAT_MASK) || (BODY (fmt) == NO_NODE)) {
     format_error (p, ref_file, ERROR_FORMAT_UNDEFINED);
   }
 // Ok, seems usable.
-  dollar = SUB (BODY (fmt));
+  NODE_T *dollar = SUB (BODY (fmt));
   OPEN_PROC_FRAME (dollar, ENVIRON (fmt));
   INIT_STATIC_FRAME (dollar);
 // Save old format.
-  save = (A68_FORMAT *) FRAME_LOCAL (A68_FP, OFFSET (TAX (dollar)));
+  A68_FORMAT *save = (A68_FORMAT *) FRAME_LOCAL (A68_FP, OFFSET (TAX (dollar)));
   *save = (embedded == EMBEDDED_FORMAT ? FORMAT (file) : nil_format);
   FORMAT (file) = *fmt;
 // Reset all collitems.
@@ -142,8 +138,8 @@ int end_of_format (NODE_T * p, A68_REF ref_file)
   A68_FORMAT *save = (A68_FORMAT *) FRAME_LOCAL (A68_FP, OFFSET (TAX (dollar)));
   if (IS_NIL_FORMAT (save)) {
 // Not embedded, outermost format: execute event routine.
-    A68_BOOL z;
     on_event_handler (p, FORMAT_END_MENDED (FILE_DEREF (&ref_file)), ref_file);
+    A68_BOOL z;
     POP_OBJECT (p, &z, A68_BOOL);
     if (VALUE (&z) == A68_FALSE) {
 // Restart format.
@@ -174,7 +170,7 @@ int get_replicator_value (NODE_T * p, BOOL_T check)
     z = VALUE (&u);
   } else if (IS (p, DYNAMIC_REPLICATOR)) {
     A68_INT u;
-    EXECUTE_UNIT (NEXT_SUB (p));
+    GENIE_UNIT (NEXT_SUB (p));
     POP_OBJECT (p, &u, A68_INT);
     z = VALUE (&u);
   } else if (IS (p, REPLICATOR)) {
@@ -215,7 +211,7 @@ NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
             NODE_T *pat;
             A68_FORMAT z;
             A68_FILE *file = FILE_DEREF (&ref_file);
-            EXECUTE_UNIT (NEXT_SUB (picture));
+            GENIE_UNIT (NEXT_SUB (picture));
             POP_OBJECT (p, &z, A68_FORMAT);
             open_format_frame (p, ref_file, &z, EMBEDDED_FORMAT, A68_TRUE);
             pat = scan_format_pattern (SUB (BODY (&FORMAT (file))), ref_file);
@@ -236,12 +232,12 @@ NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
           }
           COUNT (collitem) = 0; // This insertion is now done
         } else if (IS (picture, REPLICATOR) || IS (picture, COLLECTION)) {
-          BOOL_T go_on = A68_TRUE;
+          BOOL_T siga = A68_TRUE;
           NODE_T *a68_select = NO_NODE;
           if (COUNT (collitem) == ITEM_NOT_USED) {
             if (IS (picture, REPLICATOR)) {
               COUNT (collitem) = get_replicator_value (SUB (p), A68_TRUE);
-              go_on = (BOOL_T) (COUNT (collitem) > 0);
+              siga = (BOOL_T) (COUNT (collitem) > 0);
               FORWARD (picture);
             } else {
               COUNT (collitem) = 1;
@@ -250,7 +246,7 @@ NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
           } else if (IS (picture, REPLICATOR)) {
             FORWARD (picture);
           }
-          while (go_on) {
+          while (siga) {
 // Get format item from collection. If collection is done, but repitition is not,
 // then re-initialise the collection and repeat.
             a68_select = scan_format_pattern (NEXT_SUB (picture), ref_file);
@@ -258,8 +254,8 @@ NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
               return a68_select;
             } else {
               COUNT (collitem)--;
-              go_on = (BOOL_T) (COUNT (collitem) > 0);
-              if (go_on) {
+              siga = (BOOL_T) (COUNT (collitem) > 0);
+              if (siga) {
                 initialise_collitems (NEXT_SUB (picture));
               }
             }
@@ -456,20 +452,17 @@ void write_boolean_pattern (NODE_T * p, A68_REF ref_file, BOOL_T z)
 
 void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
 {
-  A68_REF row;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  int size;
 // Push arguments.
   unite_to_number (p, mode, item);
-  EXECUTE_UNIT (NEXT_SUB (p));
+  GENIE_UNIT (NEXT_SUB (p));
+  A68_REF row;
   POP_REF (p, &row);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &row);
-  size = ROW_SIZE (tup);
+  int size = ROW_SIZE (tup);
   if (size > 0) {
-    int i;
     BYTE_T *base_address = DEREF (BYTE_T, &ARRAY (arr));
-    for (i = LWB (tup); i <= UPB (tup); i++) {
+    for (int i = LWB (tup); i <= UPB (tup); i++) {
       int addr = INDEX_1_DIM (arr, tup, i);
       int arg = VALUE ((A68_INT *) & (base_address[addr]));
       PUSH_VALUE (p, arg, A68_INT);
@@ -478,30 +471,25 @@ void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
 // Make a string.
   if (mod == FORMAT_ITEM_G) {
     switch (size) {
-    case 1:
-      {
+    case 1: {
         genie_whole (p);
         break;
       }
-    case 2:
-      {
+    case 2: {
         genie_fixed (p);
         break;
       }
-    case 3:
-      {
+    case 3: {
         genie_float (p);
         break;
       }
-    default:
-      {
+    default: {
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_FORMAT_INTS_REQUIRED, M_INT);
         exit_genie (p, A68_RUNTIME_ERROR);
         break;
       }
     }
   } else if (mod == FORMAT_ITEM_H) {
-    int def_expo = 0, def_mult;
     A68_INT a_width, a_after, a_expo, a_mult;
     STATUS (&a_width) = INIT_MASK;
     VALUE (&a_width) = 0;
@@ -512,6 +500,7 @@ void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
     STATUS (&a_mult) = INIT_MASK;
     VALUE (&a_mult) = 0;
 // Set default values 
+    int def_expo = 0;
     if (mode == M_REAL || mode == M_INT) {
       def_expo = EXP_WIDTH + 1;
     } else if (mode == M_LONG_REAL || mode == M_LONG_INT) {
@@ -519,43 +508,38 @@ void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
     } else if (mode == M_LONG_LONG_REAL || mode == M_LONG_LONG_INT) {
       def_expo = LONG_LONG_EXP_WIDTH + 1;
     }
-    def_mult = 3;
+    int def_mult = 3;
 // Pop user values 
     switch (size) {
-    case 1:
-      {
+    case 1: {
         POP_OBJECT (p, &a_after, A68_INT);
         VALUE (&a_width) = VALUE (&a_after) + def_expo + 4;
         VALUE (&a_expo) = def_expo;
         VALUE (&a_mult) = def_mult;
         break;
       }
-    case 2:
-      {
+    case 2: {
         POP_OBJECT (p, &a_mult, A68_INT);
         POP_OBJECT (p, &a_after, A68_INT);
         VALUE (&a_width) = VALUE (&a_after) + def_expo + 4;
         VALUE (&a_expo) = def_expo;
         break;
       }
-    case 3:
-      {
+    case 3: {
         POP_OBJECT (p, &a_mult, A68_INT);
         POP_OBJECT (p, &a_after, A68_INT);
         POP_OBJECT (p, &a_width, A68_INT);
         VALUE (&a_expo) = def_expo;
         break;
       }
-    case 4:
-      {
+    case 4: {
         POP_OBJECT (p, &a_mult, A68_INT);
         POP_OBJECT (p, &a_expo, A68_INT);
         POP_OBJECT (p, &a_after, A68_INT);
         POP_OBJECT (p, &a_width, A68_INT);
         break;
       }
-    default:
-      {
+    default: {
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_FORMAT_INTS_REQUIRED, M_INT);
         exit_genie (p, A68_RUNTIME_ERROR);
         break;
@@ -574,11 +558,11 @@ void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
 
 void write_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file)
 {
+  ADDR_T pop_sp = A68_SP;
   BOOL_T right_align, sign, invalid;
   int width = 0, after = 0, letter;
-  ADDR_T pop_sp = A68_SP;
   char *str = NO_TEXT;
-  char tmp[2];
+  char tmp[2]; // In same scope as str!
   if (IS (p, CHAR_C_PATTERN)) {
     A68_CHAR *z = (A68_CHAR *) item;
     tmp[0] = (char) VALUE (z);
@@ -789,9 +773,8 @@ char read_single_char (NODE_T * p, A68_REF ref_file)
 
 void scan_n_chars (NODE_T * p, int n, MOID_T * m, A68_REF ref_file)
 {
-  int k;
   (void) m;
-  for (k = 0; k < n; k++) {
+  for (int k = 0; k < n; k++) {
     int ch = read_single_char (p, ref_file);
     plusab_transput_buffer (p, INPUT_BUFFER, (char) ch);
   }
@@ -801,9 +784,9 @@ void scan_n_chars (NODE_T * p, int n, MOID_T * m, A68_REF ref_file)
 
 void read_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file)
 {
+  ADDR_T pop_sp = A68_SP;
   BOOL_T right_align, sign;
   int width, after, letter;
-  ADDR_T pop_sp = A68_SP;
   reset_transput_buffer (INPUT_BUFFER);
   if (IS (p, CHAR_C_PATTERN)) {
     width = 0;
@@ -1336,12 +1319,11 @@ void write_real_pattern (NODE_T * p, MOID_T * mode, MOID_T * root, BYTE_T * item
 
 void write_complex_pattern (NODE_T * p, MOID_T * comp, MOID_T * root, BYTE_T * re, BYTE_T * im, A68_REF ref_file)
 {
-  NODE_T *reel, *plus_i_times, *imag;
   errno = 0;
 // Dissect pattern.
-  reel = SUB (p);
-  plus_i_times = NEXT (reel);
-  imag = NEXT (plus_i_times);
+  NODE_T *reel = SUB (p);
+  NODE_T *plus_i_times = NEXT (reel);
+  NODE_T *imag = NEXT (plus_i_times);
 // Write pattern.
   write_real_pattern (reel, comp, root, re, ref_file);
   write_pie_frame (plus_i_times, ref_file, FORMAT_I_FRAME, FORMAT_ITEM_I);
@@ -1352,10 +1334,9 @@ void write_complex_pattern (NODE_T * p, MOID_T * comp, MOID_T * root, BYTE_T * r
 
 void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file)
 {
-  MOOD_T mood;
+  ADDR_T pop_sp = A68_SP;
   int width = 0, radix;
   char *str;
-  ADDR_T pop_sp = A68_SP;
   if (mode == M_BITS) {
     A68_BITS *z = (A68_BITS *) item;
 // Establish width and radix.
@@ -1428,7 +1409,7 @@ void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_f
 #endif
   }
 // Output the edited string.
-  mood = (MOOD_T) (DIGIT_BLANK | INSERTION_NORMAL);
+  MOOD_T mood = (MOOD_T) (DIGIT_BLANK | INSERTION_NORMAL);
   str = get_transput_buffer (EDIT_BUFFER);
   write_mould (NEXT_SUB (p), ref_file, INTEGRAL_MOULD, &str, &mood);
   A68_SP = pop_sp;
@@ -1520,7 +1501,7 @@ void genie_write_long_mp_real_format (NODE_T * p, BYTE_T * item, A68_REF ref_fil
 void purge_format_write (NODE_T * p, A68_REF ref_file)
 {
 // Problem here is shutting down embedded formats.
-  BOOL_T go_on;
+  BOOL_T siga;
   do {
     A68_FILE *file;
     NODE_T *dollar, *pat;
@@ -1531,12 +1512,12 @@ void purge_format_write (NODE_T * p, A68_REF ref_file)
     file = FILE_DEREF (&ref_file);
     dollar = SUB (BODY (&FORMAT (file)));
     old_fmt = (A68_FORMAT *) FRAME_LOCAL (A68_FP, OFFSET (TAX (dollar)));
-    go_on = (BOOL_T) ! IS_NIL_FORMAT (old_fmt);
-    if (go_on) {
+    siga = (BOOL_T) ! IS_NIL_FORMAT (old_fmt);
+    if (siga) {
 // Pop embedded format and proceed.
       (void) end_of_format (p, ref_file);
     }
-  } while (go_on);
+  } while (siga);
 }
 
 //! @brief Write value to file.
@@ -1786,17 +1767,15 @@ void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_
     A68_UNION *z = (A68_UNION *) item;
     genie_write_standard_format (p, (MOID_T *) (VALUE (z)), &item[A68_UNION_SIZE], ref_file, formats);
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
       genie_check_initialisation (p, elem, MOID (q));
       genie_write_standard_format (p, MOID (q), elem, ref_file, formats);
     }
   } else if (IS_ROW (mode) || IS_FLEX (mode)) {
     MOID_T *deflexed = DEFLEX (mode);
-    A68_ARRAY *arr;
-    A68_TUPLE *tup;
     CHECK_INIT (p, INITIALISED ((A68_REF *) item), M_ROWS);
+    A68_ARRAY *arr; A68_TUPLE *tup;
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, DIM (arr)) > 0) {
       BYTE_T *base_addr = DEREF (BYTE_T, &ARRAY (arr));
@@ -1832,21 +1811,16 @@ void genie_write_format (NODE_T * p)
 
 void genie_write_file_format (NODE_T * p)
 {
-  A68_REF ref_file;
-  A68_FILE *file;
   A68_REF row;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  BYTE_T *base_address;
-  int elems, k, elem_index, formats;
-  ADDR_T pop_fp, pop_sp;
   POP_REF (p, &row);
   CHECK_REF (p, row, M_ROW_SIMPLOUT);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &row);
-  elems = ROW_SIZE (tup);
+  int elems = ROW_SIZE (tup);
+  A68_REF ref_file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (!OPENED (file)) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
@@ -1882,8 +1856,7 @@ void genie_write_file_format (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
 // Save stack state since formats have frames.
-  pop_fp = FRAME_POINTER (file);
-  pop_sp = STACK_POINTER (file);
+  ADDR_T pop_fp = FRAME_POINTER (file), pop_sp = STACK_POINTER (file);
   FRAME_POINTER (file) = A68_FP;
   STACK_POINTER (file) = A68_SP;
 // Process [] SIMPLOUT.
@@ -1893,10 +1866,9 @@ void genie_write_file_format (NODE_T * p)
   if (elems <= 0) {
     return;
   }
-  formats = 0;
-  base_address = DEREF (BYTE_T, &ARRAY (arr));
-  elem_index = 0;
-  for (k = 0; k < elems; k++) {
+  BYTE_T *base_address = DEREF (BYTE_T, &ARRAY (arr));
+  int elem_index = 0, formats = 0;
+  for (int k = 0; k < elems; k++) {
     A68_UNION *z = (A68_UNION *) & (base_address[elem_index]);
     MOID_T *mode = (MOID_T *) (VALUE (z));
     BYTE_T *item = &(base_address[elem_index + A68_UNION_SIZE]);
@@ -1933,23 +1905,23 @@ void read_insertion (NODE_T * p, A68_REF ref_file)
 {
 
 // Algol68G does not check whether the insertions are textually there. It just
-//skips them. This because we blank literals in sign moulds before the sign is
+// skips them. This because we blank literals in sign moulds before the sign is
 // put, which is non-standard Algol68, but convenient.
 
   A68_FILE *file = FILE_DEREF (&ref_file);
   for (; p != NO_NODE; FORWARD (p)) {
     read_insertion (SUB (p), ref_file);
     if (IS (p, FORMAT_ITEM_L)) {
-      BOOL_T go_on = (BOOL_T) ! END_OF_FILE (file);
-      while (go_on) {
+      BOOL_T siga = (BOOL_T) ! END_OF_FILE (file);
+      while (siga) {
         int ch = read_single_char (p, ref_file);
-        go_on = (BOOL_T) ((ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
+        siga = (BOOL_T) ((ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
       }
     } else if (IS (p, FORMAT_ITEM_P)) {
-      BOOL_T go_on = (BOOL_T) ! END_OF_FILE (file);
-      while (go_on) {
+      BOOL_T siga = (BOOL_T) ! END_OF_FILE (file);
+      while (siga) {
         int ch = read_single_char (p, ref_file);
-        go_on = (BOOL_T) ((ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
+        siga = (BOOL_T) ((ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
       }
     } else if (IS (p, FORMAT_ITEM_X) || IS (p, FORMAT_ITEM_Q)) {
       if (!END_OF_FILE (file)) {
@@ -1979,7 +1951,7 @@ void read_insertion (NODE_T * p, A68_REF ref_file)
           }
         }
       }
-      return;                   // Don't delete this!
+      return;  // From REPLICATOR, don't delete this!
     }
   }
 }
@@ -2076,9 +2048,9 @@ int read_choice_pattern (NODE_T * p, A68_REF ref_file)
 
 void read_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file)
 {
-  A68_REF row;
-  EXECUTE_UNIT (NEXT_SUB (p));
+  GENIE_UNIT (NEXT_SUB (p));
 // RR says to ignore parameters just calculated, so we will.
+  A68_REF row;
   POP_REF (p, &row);
   genie_read_standard (p, mode, item, ref_file);
 }
@@ -2104,8 +2076,7 @@ void read_sign_mould (NODE_T * p, MOID_T * m, A68_REF ref_file, int *sign)
       case FORMAT_ITEM_D:
       case FORMAT_ITEM_S:
       case FORMAT_ITEM_PLUS:
-      case FORMAT_ITEM_MINUS:
-        {
+      case FORMAT_ITEM_MINUS: {
           int ch = read_single_char (p, ref_file);
 // When a sign has been read, digits are expected.
           if (*sign != 0) {
@@ -2133,8 +2104,7 @@ void read_sign_mould (NODE_T * p, MOID_T * m, A68_REF ref_file, int *sign)
           }
           break;
         }
-      default:
-        {
+      default: {
           read_sign_mould (SUB (p), m, ref_file, sign);
           break;
         }
@@ -2283,11 +2253,10 @@ void read_real_pattern (NODE_T * p, MOID_T * m, BYTE_T * item, A68_REF ref_file)
 
 void read_complex_pattern (NODE_T * p, MOID_T * comp, MOID_T * m, BYTE_T * re, BYTE_T * im, A68_REF ref_file)
 {
-  NODE_T *reel, *plus_i_times, *imag;
 // Dissect pattern.
-  reel = SUB (p);
-  plus_i_times = NEXT (reel);
-  imag = NEXT (plus_i_times);
+  NODE_T *reel = SUB (p);
+  NODE_T *plus_i_times = NEXT (reel);
+  NODE_T *imag = NEXT (plus_i_times);
 // Read pattern.
   read_real_pattern (reel, m, re, ref_file);
   reset_transput_buffer (INPUT_BUFFER);
@@ -2300,14 +2269,12 @@ void read_complex_pattern (NODE_T * p, MOID_T * comp, MOID_T * m, BYTE_T * re, B
 
 void read_bits_pattern (NODE_T * p, MOID_T * m, BYTE_T * item, A68_REF ref_file)
 {
-  int radix;
-  char *z;
-  radix = get_replicator_value (SUB_SUB (p), A68_TRUE);
+  int radix = get_replicator_value (SUB_SUB (p), A68_TRUE);
   if (radix < 2 || radix > 16) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  z = get_transput_buffer (INPUT_BUFFER);
+  char *z = get_transput_buffer (INPUT_BUFFER);
   ASSERT (snprintf (z, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
   set_transput_buffer_index (INPUT_BUFFER, (int) strlen (z));
   read_integral_mould (NEXT_SUB (p), m, ref_file);
@@ -2335,23 +2302,21 @@ void genie_read_real_format (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF r
 
 void purge_format_read (NODE_T * p, A68_REF ref_file)
 {
-  BOOL_T go_on;
+  BOOL_T siga;
   do {
-    A68_FILE *file;
-    NODE_T *dollar, *pat;
-    A68_FORMAT *old_fmt;
+    NODE_T *pat;
     while ((pat = get_next_format_pattern (p, ref_file, SKIP_PATTERN)) != NO_NODE) {
       format_error (p, ref_file, ERROR_FORMAT_PICTURES);
     }
-    file = FILE_DEREF (&ref_file);
-    dollar = SUB (BODY (&FORMAT (file)));
-    old_fmt = (A68_FORMAT *) FRAME_LOCAL (A68_FP, OFFSET (TAX (dollar)));
-    go_on = (BOOL_T) ! IS_NIL_FORMAT (old_fmt);
-    if (go_on) {
+    A68_FILE *file = FILE_DEREF (&ref_file);
+    NODE_T *dollar = SUB (BODY (&FORMAT (file)));
+    A68_FORMAT *old_fmt = (A68_FORMAT *) FRAME_LOCAL (A68_FP, OFFSET (TAX (dollar)));
+    siga = (BOOL_T) ! IS_NIL_FORMAT (old_fmt);
+    if (siga) {
 // Pop embedded format and proceed.
       (void) end_of_format (p, ref_file);
     }
-  } while (go_on);
+  } while (siga);
 }
 
 //! @brief Read object with from file and store.
@@ -2361,9 +2326,8 @@ void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_R
   errno = 0;
   reset_transput_buffer (INPUT_BUFFER);
   if (mode == M_FORMAT) {
-    A68_FILE *file;
     CHECK_REF (p, ref_file, M_REF_FILE);
-    file = FILE_DEREF (&ref_file);
+    A68_FILE *file = FILE_DEREF (&ref_file);
 // Forget about eventual active formats and set up new one.
     if (*formats > 0) {
       purge_format_read (p, ref_file);
@@ -2538,21 +2502,16 @@ void genie_read_format (NODE_T * p)
 
 void genie_read_file_format (NODE_T * p)
 {
-  A68_REF ref_file;
-  A68_FILE *file;
   A68_REF row;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  BYTE_T *base_address;
-  int elems, k, elem_index, formats;
-  ADDR_T pop_fp, pop_sp;
   POP_REF (p, &row);
   CHECK_REF (p, row, M_ROW_SIMPLIN);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &row);
-  elems = ROW_SIZE (tup);
+  int elems = ROW_SIZE (tup);
+  A68_REF ref_file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (!OPENED (file)) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
@@ -2588,8 +2547,7 @@ void genie_read_file_format (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
 // Save stack state since formats have frames.
-  pop_fp = FRAME_POINTER (file);
-  pop_sp = STACK_POINTER (file);
+  ADDR_T pop_fp = FRAME_POINTER (file), pop_sp = STACK_POINTER (file);
   FRAME_POINTER (file) = A68_FP;
   STACK_POINTER (file) = A68_SP;
 // Process [] SIMPLIN.
@@ -2599,10 +2557,9 @@ void genie_read_file_format (NODE_T * p)
   if (elems <= 0) {
     return;
   }
-  formats = 0;
-  base_address = DEREF (BYTE_T, &ARRAY (arr));
-  elem_index = 0;
-  for (k = 0; k < elems; k++) {
+  int elem_index = 0, formats = 0;
+  BYTE_T *base_address = DEREF (BYTE_T, &ARRAY (arr));
+  for (int k = 0; k < elems; k++) {
     A68_UNION *z = (A68_UNION *) & (base_address[elem_index]);
     MOID_T *mode = (MOID_T *) (VALUE (z));
     BYTE_T *item = (BYTE_T *) & (base_address[elem_index + A68_UNION_SIZE]);

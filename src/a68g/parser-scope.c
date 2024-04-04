@@ -420,12 +420,10 @@ BOOL_T is_coercion (NODE_T * p)
     case ROWING:
     case WIDENING:
     case VOIDING:
-    case PROCEDURING:
-      {
+    case PROCEDURING: {
         return A68_TRUE;
       }
-    default:
-      {
+    default: {
         return A68_FALSE;
       }
     }
