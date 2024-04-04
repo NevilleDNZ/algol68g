@@ -286,10 +286,10 @@ void genie_not_mp (NODE_T * p)
   MOID_T *mode = LHS_MODE (p);
   int size = SIZE (mode);
   ADDR_T pop_sp = A68_SP;
-  int k, words = get_mp_bits_words (mode);
+  int words = get_mp_bits_words (mode);
   MP_T *u = (MP_T *) STACK_OFFSET (-size);
   MP_BITS_T *row = stack_mp_bits (p, u, mode);
-  for (k = 0; k < words; k++) {
+  for (int k = 0; k < words; k++) {
     row[k] = ~row[k];
   }
   (void) pack_mp_bits (p, u, row, mode);

@@ -23,6 +23,13 @@
 //!
 //! Interpreter driver.
 
+// This file contains interpreter ("genie") routines related to executing primitive
+// A68 actions.
+// 
+// The genie is self-optimising as when it traverses the tree, it stores terminals
+// it ends up in at the root where traversing for that terminal started.
+// Such piece of information is called a PROP.
+
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-frames.h"
@@ -437,13 +444,6 @@ void genie (void *compile_plugin)
   }
   A68 (in_execution) = A68_FALSE;
 }
-
-// This file contains interpreter ("genie") routines related to executing primitive
-// A68 actions.
-// 
-// The genie is self-optimising as when it traverses the tree, it stores terminals
-// it ends up in at the root where traversing for that terminal started.
-// Such piece of information is called a PROP.
 
 //! @brief Shows line where 'p' is at and draws a '-' beneath the position.
 

@@ -41,8 +41,7 @@
 
 char *standard_environ_proc_name (GPROC f)
 {
-  TAG_T *i = IDENTIFIERS (A68_STANDENV);
-  for (; i != NO_TAG; FORWARD (i)) {
+  for (TAG_T *i = IDENTIFIERS (A68_STANDENV); i != NO_TAG; FORWARD (i)) {
     if (PROCEDURE (i) == f) {
       return NSYMBOL (NODE (i));
     }

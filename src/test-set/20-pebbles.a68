@@ -1,0 +1,85 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Edsger Dijkstra's pebble problem.
+
+This program originates from the legacy "REVISED MC ALGOL 68 TEST SET":
+
+    Dick Grune, The Revised MC ALGOL 68 Test Set, IW XX/79,
+    Mathematical Centre, Amsterdam.
+
+The Mathematical Centre ("Stichting Mathematisch Centrum" or SMC) was a Dutch 
+non-profit institution aiming at the promotion of pure mathematics and its 
+applications. 
+
+SMC is now "Stichting Centrum voor Wiskunde en Informatica" (CWI). The test set 
+is available as an open access publication from the CWI repository:
+
+   https://ir.cwi.nl/pub/
+
+Selected (modified) "Revised MC ALGOL 68 Test Set" programs are distributed 
+with Algol 68 Genie with kind permission of Dick Grune.
+
+COMMENT
+
+BEGIN # 1. Sets in ALGOL 68; 
+        2. Pebble problem of E.W. Dijkstra 
+      #
+
+    MODE RED   = REF STRUCT (RED red),
+         WHITE = REF STRUCT (WHITE white),
+         BLUE  = REF STRUCT (BLUE blue);
+
+    MODE STONE = UNION (RED, WHITE, BLUE);
+
+    PROC sort = (REF [] STONE st) VOID:
+        (INT pr := 1, pw := 1, pb := UPB st;
+
+         PRIO EXCH = 1;
+         OP EXCH = (REF STONE a, b) VOID:
+
+         (STONE c = b; b := a; a := c);
+
+         TO UPB st
+         DO CASE st[pw]
+            IN (RED):   (st[pr] EXCH st[pw]; pr +:= 1; pw +:= 1),
+               (WHITE): pw +:= 1,
+               (BLUE):  (st[pw] EXCH st[pb]; pb -:= 1)
+            ESAC
+         OD
+        );
+
+    OP PRINT = (REF [] STONE st) VOID:
+       FOR i TO UPB st
+       DO print ((st[i] | (RED): "r", (WHITE): "w", (BLUE): "b"))
+       OD;
+
+    INT n = 20;
+    [1 : n] STONE stone;
+
+    FOR i TO UPB stone 
+    DO stone[i] := (ENTIER (random * 3) + 1 | RED (NIL), WHITE (NIL), BLUE (NIL))
+    OD;
+
+    PRINT stone;
+    newline (standout);
+    sort (stone);
+    PRINT stone;
+    newline (standout)
+
+END

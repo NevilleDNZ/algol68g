@@ -83,17 +83,15 @@ int find_tag_definition (TABLE_T * table, char *name)
 {
   if (table != NO_TABLE) {
     int ret = 0;
-    TAG_T *s;
-    BOOL_T found;
-    found = A68_FALSE;
-    for (s = INDICANTS (table); s != NO_TAG && !found; FORWARD (s)) {
+    BOOL_T found = A68_FALSE;
+    for (TAG_T *s = INDICANTS (table); s != NO_TAG && !found; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         ret += INDICANT;
         found = A68_TRUE;
       }
     }
     found = A68_FALSE;
-    for (s = OPERATORS (table); s != NO_TAG && !found; FORWARD (s)) {
+    for (TAG_T *s = OPERATORS (table); s != NO_TAG && !found; FORWARD (s)) {
       if (NSYMBOL (NODE (s)) == name) {
         ret += OPERATOR;
         found = A68_TRUE;
@@ -113,8 +111,7 @@ int find_tag_definition (TABLE_T * table, char *name)
 
 void elaborate_bold_tags (NODE_T * p)
 {
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, BOLD_TAG)) {
       switch (find_tag_definition (TABLE (q), NSYMBOL (q))) {
       case 0: {
@@ -207,7 +204,6 @@ void extract_priorities (NODE_T * p)
         detect_redefined_keyword (q, PRIORITY_DECLARATION);
 // An operator tag like ++ or && gives strange errors so we catch it here.
         if (whether (q, OPERATOR, OPERATOR, STOP)) {
-          int k;
           NODE_T *y = q;
           diagnostic (A68_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG);
           ATTRIBUTE (q) = DEFINING_OPERATOR;
@@ -217,17 +213,18 @@ void extract_priorities (NODE_T * p)
           FORWARD (q);
           ATTRIBUTE (q) = ALT_EQUALS_SYMBOL;
           FORWARD (q);
+          int k;
           GET_PRIORITY (q, k);
           ATTRIBUTE (q) = PRIORITY;
           ASSERT (add_tag (TABLE (p), PRIO_SYMBOL, y, NO_MOID, k) != NO_TAG);
           FORWARD (q);
         } else if (whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTATION, STOP) || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTATION, STOP)) {
-          int k;
           NODE_T *y = q;
           ATTRIBUTE (q) = DEFINING_OPERATOR;
           FORWARD (q);
           ATTRIBUTE (q) = ALT_EQUALS_SYMBOL;
           FORWARD (q);
+          int k;
           GET_PRIORITY (q, k);
           ATTRIBUTE (q) = PRIORITY;
           ASSERT (add_tag (TABLE (p), PRIO_SYMBOL, y, NO_MOID, k) != NO_TAG);
@@ -235,12 +232,12 @@ void extract_priorities (NODE_T * p)
         } else if (whether (q, BOLD_TAG, IDENTIFIER, STOP)) {
           siga = A68_FALSE;
         } else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTATION, STOP)) {
-          int k;
           NODE_T *y = q;
           ATTRIBUTE (q) = DEFINING_OPERATOR;
           FORWARD (q);
           ATTRIBUTE (q) = ALT_EQUALS_SYMBOL;
           FORWARD (q);
+          int k;
           GET_PRIORITY (q, k);
           ATTRIBUTE (q) = PRIORITY;
           ASSERT (add_tag (TABLE (p), PRIO_SYMBOL, y, NO_MOID, k) != NO_TAG);
@@ -249,7 +246,6 @@ void extract_priorities (NODE_T * p)
 // The scanner cannot separate operator and "=" sign so we do this here.
           int len = (int) strlen (NSYMBOL (q));
           if (len > 1 && NSYMBOL (q)[len - 1] == '=') {
-            int k;
             NODE_T *y = q;
             char *sym = (char *) get_temp_heap_space ((size_t) (len + 1));
             bufcpy (sym, NSYMBOL (q), len + 1);
@@ -261,6 +257,7 @@ void extract_priorities (NODE_T * p)
             ATTRIBUTE (q) = DEFINING_OPERATOR;
             insert_alt_equals (q);
             q = NEXT_NEXT (q);
+            int k;
             GET_PRIORITY (q, k);
             ATTRIBUTE (q) = PRIORITY;
             ASSERT (add_tag (TABLE (p), PRIO_SYMBOL, y, NO_MOID, k) != NO_TAG);
@@ -353,10 +350,9 @@ void extract_operators (NODE_T * p)
 
 void extract_labels (NODE_T * p, int expect)
 {
-  NODE_T *q;
 // Only handle candidate phrases as not to search indexers!.
   if (expect == SERIAL_CLAUSE || expect == ENQUIRY_CLAUSE || expect == SOME_CLAUSE) {
-    for (q = p; q != NO_NODE; FORWARD (q)) {
+    for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
       if (whether (q, IDENTIFIER, COLON_SYMBOL, STOP)) {
         TAG_T *z = add_tag (TABLE (p), LABEL, q, NO_MOID, LOCAL_LABEL);
         ATTRIBUTE (q) = DEFINING_IDENTIFIER;
@@ -495,14 +491,13 @@ void extract_proc_variables (NODE_T * p)
 
 void extract_declarations (NODE_T * p)
 {
-  NODE_T *q;
 // Get definitions so we know what is defined in this range.
   extract_identities (p);
   extract_variables (p);
   extract_proc_identities (p);
   extract_proc_variables (p);
 // By now we know whether "=" is an operator or not.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, EQUALS_SYMBOL)) {
       ATTRIBUTE (q) = OPERATOR;
     } else if (IS (q, ALT_EQUALS_SYMBOL)) {
@@ -510,7 +505,7 @@ void extract_declarations (NODE_T * p)
     }
   }
 // Get qualifiers.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (whether (q, LOC_SYMBOL, DECLARER, DEFINING_IDENTIFIER, STOP)) {
       make_sub (q, q, QUALIFIER);
     }
@@ -531,7 +526,7 @@ void extract_declarations (NODE_T * p)
     }
   }
 // Give priorities to operators.
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, OPERATOR)) {
       if (find_tag_global (TABLE (q), OP_SYMBOL, NSYMBOL (q))) {
         TAG_T *s = find_tag_global (TABLE (q), PRIO_SYMBOL, NSYMBOL (q));

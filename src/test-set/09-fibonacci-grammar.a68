@@ -29,8 +29,8 @@ COMMENT
 
 PROC grammar fib = (INT i, STRING s, CONT q) VOID:
      BEGIN terminal (i, "a", s, q);
-           terminal (i, "a", s, (INT j) VOID: grammar fib (j,  s, q));
-           terminal (i, "aa", s, (INT j) VOID: grammar fib (j,  s, q))
+           terminal (i, "a", s, (INT j) VOID: grammar fib (j, s, q));
+           terminal (i, "aa", s, (INT j) VOID: grammar fib (j, s, q))
      END;
 
 PROC terminal = (INT i, STRING a, s, CONT q) VOID: (INT u = i + UPB a; u <= UPB s | q (u));

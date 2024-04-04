@@ -278,9 +278,9 @@ REAL_T a68_chebyshev (REAL_T x, const REAL_T c[], REAL_T acc)
   if (acc < c[1]) {
     diagnostic (A68_MATH_WARNING, A68 (f_entry), WARNING_MATH_ACCURACY, NULL);
   }
-  INT_T i, N = a68_round (c[0]);
+  INT_T N = a68_round (c[0]);
   REAL_T err = 0, z = 2 * x, u = 0, v = 0, w = 0;
-  for (i = 1; i <= N; i++) {
+  for (int i = 1; i <= N; i++) {
     if (err > acc) {
       w = v;
       v = u;

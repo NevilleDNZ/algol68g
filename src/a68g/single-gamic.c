@@ -90,7 +90,7 @@
 #define TOL_ROMBERG 0.1         // Tolerance factor used to stop the Romberg iterations
 #define TOL_DIFF 0.2            // Tolerance factor used for the approximation of I_{x,y}^{mu,p} using differences
 
-// plim: compute plim (x), the limit of the partition of the domain (p,x)
+//! @brief compute plim (x), the limit of the partition of the domain (p,x)
 // detailed in the paper.
 //
 //            |      x              if   0 < x
@@ -157,20 +157,18 @@ void G_cfrac_lower (REAL_T * Gcfrac, REAL_T p, REAL_T x)
 
 void G_ibp (REAL_T * Gibp, REAL_T p, REAL_T x)
 {
-  REAL_T t, tt, c, d, s, del;
-  INT_T l;
-  BOOL_T odd, stop;
-  t = a68_abs (x);
-  tt = 1 / (t * t);
-  odd = (INT_T) a68_int (p) % 2 != 0;
-  c = 1 / t;
-  d = (p - 1);
-  s = c * (t - d);
-  l = 0;
+  REAL_T t = a68_abs (x);
+  REAL_T tt = 1 / (t * t);
+  BOOL_T odd = (INT_T) a68_int (p) % 2 != 0;
+  REAL_T c = 1 / t;
+  REAL_T d = (p - 1);
+  REAL_T s = c * (t - d);
+  INT_T l = 0;
+  BOOL_T stop;
   do {
     c *= d * (d - 1) * tt;
     d -= 2;
-    del = c * (t - d);
+    REAL_T del = c * (t - d);
     s += del;
     l++;
     stop = a68_abs (del) < a68_abs (s) * EPS;
@@ -198,10 +196,9 @@ void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
 // Evaluate the continued fraction using Modified Lentz's method. However,
 // as detailed in the paper, perform manually the first pass (n=1), of the
 // initial Modified Lentz's method.
-  REAL_T an = 1, bn = x + 1 - p;
-  REAL_T c, d, del, f;
+  REAL_T an = 1, bn = x + 1 - p, c, d, del, f;
   BOOL_T t = (bn != 0);
-  INT_T i, n;
+  INT_T n;
   if (t) {
 // b{1} is non-zero
     f = an / bn;
@@ -217,7 +214,7 @@ void G_cfrac_upper (REAL_T * Gcfrac, REAL_T p, REAL_T x)
     d = 1 / bn;
     n = 3;
   }
-  i = n - 1;
+  INT_T i = n - 1;
   do {
     an = -i * (i - p);
     bn += 2;
@@ -264,17 +261,16 @@ void G_func (REAL_T * G, REAL_T p, REAL_T x)
 
 void romberg_iterations (REAL_T * R, REAL_T sigma, INT_T n, REAL_T x, REAL_T y, REAL_T mu, REAL_T p, REAL_T h, REAL_T pow2)
 {
-  INT_T j, m;
-  REAL_T sum, xx;
   INT_T adr0_prev = ((n - 1) * n) / 2;
   INT_T adr0 = (n * (n + 1)) / 2;
-  for (sum = 0, j = 1; j <= pow2; j++) {
+  REAL_T sum = 0, xx;
+  for (int j = 1; j <= pow2; j++) {
     xx = x + ((y - x) * (2 * j - 1)) / (2 * pow2);
     sum += a68_exp (-mu * xx + (p - 1) * a68_ln (xx) - sigma);
   }
   R[adr0] = 0.5 * R[adr0_prev] + h * sum;
   REAL_T pow4 = 4;
-  for (m = 1; m <= n; m++) {
+  for (int m = 1; m <= n; m++) {
     R[adr0 + m] = (pow4 * R[adr0 + (m - 1)] - R[adr0_prev + (m - 1)]) / (pow4 - 1);
     pow4 *= 4;
   }
@@ -292,8 +288,7 @@ void romberg_estimate (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T 
   R[0] = 0.5 * (y - x) * (a68_exp (-mu * x + (p - 1) * a68_ln (x) - (*sigma)) + 1);
 // Loop for n > 0
   REAL_T relneeded = EPS / TOL_ROMBERG;
-  INT_T adr0 = 0;
-  INT_T n = 1;
+  INT_T adr0 = 0, n = 1;
   REAL_T h = (y - x) / 2;       // n=1, h = (y-x)/2^n
   REAL_T pow2 = 1;              // n=1; pow2 = 2^(n-1)
   if (NITERMAX_ROMBERG >= 1) {
@@ -345,11 +340,12 @@ void deltagammainc (REAL_T * rho, REAL_T * sigma, REAL_T x, REAL_T y, REAL_T mu,
     return;
   }
 // Initialization
-  REAL_T mA, mB, mx, my, nA, nB, nx, ny;
+  REAL_T mA, mB, mx, my, nA, nB;
   G_func (&mx, p, mu * x);
-  nx = (a68_isinf (x) ? a68_neginf () : -mu * x + p * a68_ln (x));
+  REAL_T nx = (a68_isinf (x) ? a68_neginf () : -mu * x + p * a68_ln (x));
   G_func (&my, p, mu * y);
-  ny = (a68_isinf (y) ? a68_neginf () : -mu * y + p * a68_ln (y));
+  REAL_T ny = (a68_isinf (y) ? a68_neginf () : -mu * y + p * a68_ln (y));
+
 // Compute (mA,nA) and (mB,nB) such as I_{x,y}^{mu,p} can be
 // approximated by the difference A-B, where A >= B >= 0, A = mA*exp (nA) an 
 // B = mB*exp (nB). When the difference involves more than one digit loss due to

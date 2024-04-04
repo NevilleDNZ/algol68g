@@ -284,9 +284,8 @@ void reduce_code_clause (NODE_T * p)
 {
   BOOL_T siga = A68_TRUE;
   while (siga) {
-    NODE_T *u;
     siga = A68_FALSE;
-    for (u = p; u != NO_NODE; FORWARD (u)) {
+    for (NODE_T *u = p; u != NO_NODE; FORWARD (u)) {
       reduce (u, NO_NOTE, &siga, CODE_LIST, CODE_SYMBOL, ROW_CHAR_DENOTATION, STOP);
       reduce (u, NO_NOTE, &siga, CODE_LIST, CODE_LIST, ROW_CHAR_DENOTATION, STOP);
       reduce (u, NO_NOTE, &siga, CODE_LIST, CODE_LIST, COMMA_SYMBOL, ROW_CHAR_DENOTATION, STOP);

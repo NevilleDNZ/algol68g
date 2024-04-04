@@ -368,8 +368,7 @@ BOOL_T basic_unit (NODE_T * p)
   if (A68_OPT (OPTION_CODE_LEVEL) >= 1) {
     if (IS (p, IDENTIFIER)) {
       if (A68_STANDENV_PROC (TAX (p))) {
-        int k;
-        for (k = 0; PROCEDURE (&constants[k]) != NO_GPROC; k++) {
+        for (int k = 0; PROCEDURE (&constants[k]) != NO_GPROC; k++) {
           if (PROCEDURE (TAX (p)) == PROCEDURE (&constants[k])) {
             return A68_TRUE;
           }

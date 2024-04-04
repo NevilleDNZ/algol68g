@@ -44,7 +44,7 @@
 
 #define WRITE_TXT(fn, txt) ASSERT (write ((fn), (txt), 1 + strlen (txt)) != -1)
 
-#if defined (BUILD_LINUX)
+#if defined (BUILD_LINUX) && defined (HAVE_EXECINFO_H)
 
 #include <execinfo.h>
 
@@ -79,7 +79,7 @@ void genie_backtrace (NODE_T *p)
 
 void stack_backtrace (void)
 {
-  WRITE_TXT (2, "\n++++ Stack backtrace is linux-only");
+  WRITE_TXT (2, "\n++++ Stack backtrace is not available on this platform");
 }
 
 void genie_backtrace (NODE_T *p)
@@ -100,8 +100,8 @@ FILE *a68_fopen (char *fn, char *mode, char *new_fn)
   errno = 0;
   BUFFER dn;
   ASSERT (snprintf (dn, SNPRINTF_SIZE, "%s/%s", getenv ("HOME"), A68_DIR) >= 0);
-  int rc = mkdir (dn, (mode_t) (S_IRUSR | S_IWUSR | S_IXUSR));
-  if (rc == 0 || (rc == -1 && errno == EEXIST)) {
+  int ret = mkdir (dn, (mode_t) (S_IRUSR | S_IWUSR | S_IXUSR));
+  if (ret == 0 || (ret == -1 && errno == EEXIST)) {
     struct stat status;
     if (stat (dn, &status) == 0 && S_ISDIR (ST_MODE (&status)) != 0) {
       FILE *f;

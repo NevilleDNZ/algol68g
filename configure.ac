@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.3.0, configure.ac
+# Algol 68 Genie 3.3.5, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.3.0], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.3.5], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 # Check whether compiler supports $1 as a command-line option. 
@@ -452,7 +452,7 @@ AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIOCGWINSZ
 
-AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h fcntl.h fenv.h float.h libgen.h limits.h netdb.h regex.h setjmp.h signal.h stdarg.h stddef.h stdio.h stdlib.h sys/ioctl.h sys/resource.h sys/socket.h sys/time.h termios.h time.h])
+AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h execinfo.h fcntl.h fenv.h float.h libgen.h limits.h netdb.h regex.h setjmp.h signal.h stdarg.h stddef.h stdio.h stdlib.h sys/ioctl.h sys/resource.h sys/socket.h sys/time.h termios.h time.h])
 
 #
 # Functions we expect

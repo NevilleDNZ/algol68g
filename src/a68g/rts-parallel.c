@@ -54,9 +54,7 @@ void restore_stacks (pthread_t);
   int size = (si);\
   if (size > 0) {\
     if (!((s != NULL) && (BYTES (s) > 0) && (size <= BYTES (s)))) {\
-      if (SWAP (s) != NO_BYTE) {\
-        a68_free (SWAP (s));\
-      }\
+      a68_free (SWAP (s));\
       SWAP (s) = (BYTE_T *) get_heap_space ((size_t) size);\
       ABEND (SWAP (s) == NULL, ERROR_OUT_OF_CORE, __func__);\
     }\
@@ -66,9 +64,7 @@ void restore_stacks (pthread_t);
   } else {\
     START (s) = start;\
     BYTES (s) = 0;\
-    if (SWAP (s) != NO_BYTE) {\
-      a68_free (SWAP (s));\
-    }\
+    a68_free (SWAP (s));\
     SWAP (s) = NO_BYTE;\
   }}
 
@@ -412,14 +408,8 @@ PROP_T genie_parallel (NODE_T * p)
           exit_genie (p, A68_RUNTIME_ERROR);
         }
       }
-      if (SWAP (&STACK (&(A68_PAR (context)[j]))) != NO_BYTE) {
-        a68_free (SWAP (&STACK (&(A68_PAR (context)[j]))));
-        SWAP (&STACK (&(A68_PAR (context)[j]))) = NO_BYTE;
-      }
-      if (SWAP (&STACK (&(A68_PAR (context)[j]))) != NO_BYTE) {
-        a68_free (SWAP (&STACK (&(A68_PAR (context)[j]))));
-        SWAP (&STACK (&(A68_PAR (context)[j]))) = NO_BYTE;
-      }
+      a68_free (SWAP (&STACK (&(A68_PAR (context)[j]))));
+      SWAP (&STACK (&(A68_PAR (context)[j]))) = NO_BYTE;
     }
 // Now every thread should have ended.
     A68_PAR (context_index) = 0;
@@ -513,8 +503,8 @@ void genie_down_sema (NODE_T * p)
         }
         UNLOCK_THREAD;
 // Waiting a bit relaxes overhead.
-        int rc = usleep (10);
-        ASSERT (rc == 0 || errno == EINTR);
+        int ret = usleep (10);
+        ASSERT (ret == 0 || errno == EINTR);
         LOCK_THREAD;
 // Garbage may be collected, so recalculate 'k'.
         k = DEREF (A68_INT, &s);

@@ -55,7 +55,7 @@ void genie_long_max_int (NODE_T * p)
   MP_T *z = nil_mp (p, digs);
   MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (digs - 1);
-  for (unt k = 1; k <= digs; k++) {
+  for (int k = 1; k <= digs; k++) {
     MP_DIGIT (z, k) = (MP_T) (MP_RADIX - 1);
   }
 }
@@ -68,7 +68,7 @@ void genie_long_mp_max_int (NODE_T * p)
   MP_T *z = nil_mp (p, digs);
   MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (digs - 1);
-  for (unt k = 1; k <= digs; k++) {
+  for (int k = 1; k <= digs; k++) {
     MP_DIGIT (z, k) = (MP_T) (MP_RADIX - 1);
   }
 }
@@ -81,7 +81,7 @@ void genie_long_max_real (NODE_T * p)
   MP_T *z = nil_mp (p, digs);
   MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (MAX_MP_EXPONENT - 1);
-  for (unt k = 1; k <= digs; k++) {
+  for (int k = 1; k <= digs; k++) {
     MP_DIGIT (z, k) = (MP_T) (MP_RADIX - 1);
   }
 }
@@ -94,7 +94,7 @@ void genie_long_mp_max_real (NODE_T * p)
   MP_T *z = nil_mp (p, digs);
   MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (MAX_MP_EXPONENT - 1);
-  for (unt k = 1; k <= digs; k++) {
+  for (int k = 1; k <= digs; k++) {
     MP_DIGIT (z, k) = (MP_T) (MP_RADIX - 1);
   }
 }
@@ -765,7 +765,7 @@ void genie_round_mp (NODE_T * p)
 
 #define C_CL_FUNCTION(p, f)\
   MOID_T *mode = MOID (p);\
-  int digs = DIGITSC (mode), size = SIZEC (mode);\
+  int digs = DIGITS_COMPL (mode), size = SIZE_COMPL (mode);\
   ADDR_T pop_sp = A68_SP;\
   MP_T *im = (MP_T *) STACK_OFFSET (-size);\
   MP_T *re = (MP_T *) STACK_OFFSET (-2 * size);\
@@ -970,7 +970,7 @@ void genie_im_mp_complex (NODE_T * p)
 
 void genie_minus_mp_complex (NODE_T * p)
 {
-  int size = SIZEC (SUB_MOID (p));
+  int size = SIZE_COMPL (SUB_MOID (p));
   MP_T *b = (MP_T *) STACK_OFFSET (-size);
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT (a, 1) = -MP_DIGIT (a, 1);
@@ -983,7 +983,7 @@ void genie_minus_mp_complex (NODE_T * p)
 
 void genie_conj_mp_complex (NODE_T * p)
 {
-  int size = SIZEC (SUB_MOID (p));
+  int size = SIZE_COMPL (SUB_MOID (p));
   MP_T *b = (MP_T *) STACK_OFFSET (-size);
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT (b, 1) = -MP_DIGIT (b, 1);
@@ -1034,7 +1034,7 @@ void genie_arg_mp_complex (NODE_T * p)
 void genie_add_mp_complex (NODE_T * p)
 {
   MOID_T *mode = SUB_MOID (p);
-  int digs = DIGITSC (mode), size = SIZEC (mode);
+  int digs = DIGITS_COMPL (mode), size = SIZE_COMPL (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *d = (MP_T *) STACK_OFFSET (-size);
   MP_T *c = (MP_T *) STACK_OFFSET (-2 * size);
@@ -1053,7 +1053,7 @@ void genie_add_mp_complex (NODE_T * p)
 void genie_sub_mp_complex (NODE_T * p)
 {
   MOID_T *mode = SUB_MOID (p);
-  int digs = DIGITSC (mode), size = SIZEC (mode);
+  int digs = DIGITS_COMPL (mode), size = SIZE_COMPL (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *d = (MP_T *) STACK_OFFSET (-size);
   MP_T *c = (MP_T *) STACK_OFFSET (-2 * size);
@@ -1072,7 +1072,7 @@ void genie_sub_mp_complex (NODE_T * p)
 void genie_mul_mp_complex (NODE_T * p)
 {
   MOID_T *mode = SUB_MOID (p);
-  int digs = DIGITSC (mode), size = SIZEC (mode);
+  int digs = DIGITS_COMPL (mode), size = SIZE_COMPL (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *d = (MP_T *) STACK_OFFSET (-size);
   MP_T *c = (MP_T *) STACK_OFFSET (-2 * size);
@@ -1090,7 +1090,7 @@ void genie_mul_mp_complex (NODE_T * p)
 void genie_div_mp_complex (NODE_T * p)
 {
   MOID_T *mode = SUB_MOID (p);
-  int digs = DIGITSC (mode), size = SIZEC (mode);
+  int digs = DIGITS_COMPL (mode), size = SIZE_COMPL (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *d = (MP_T *) STACK_OFFSET (-size);
   MP_T *c = (MP_T *) STACK_OFFSET (-2 * size);
@@ -1108,7 +1108,7 @@ void genie_div_mp_complex (NODE_T * p)
 void genie_pow_mp_complex_int (NODE_T * p)
 {
   MOID_T *mode = SUB_MOID (p);
-  int digs = DIGITSC (mode), size = SIZEC (mode);
+  int digs = DIGITS_COMPL (mode), size = SIZE_COMPL (mode);
   A68_INT j;
   POP_OBJECT (p, &j, A68_INT);
   ADDR_T pop_sp = A68_SP;
@@ -1164,7 +1164,7 @@ void genie_pow_mp_complex_int (NODE_T * p)
 
 void genie_eq_mp_complex (NODE_T * p)
 {
-  int digs = DIGITSC (LHS_MODE (p)), size = SIZEC (LHS_MODE (p));
+  int digs = DIGITS_COMPL (LHS_MODE (p)), size = SIZE_COMPL (LHS_MODE (p));
   ADDR_T pop_sp = A68_SP;
   MP_T *d = (MP_T *) STACK_OFFSET (-size);
   MP_T *c = (MP_T *) STACK_OFFSET (-2 * size);
@@ -1181,7 +1181,7 @@ void genie_eq_mp_complex (NODE_T * p)
 
 void genie_ne_mp_complex (NODE_T * p)
 {
-  int digs = DIGITSC (LHS_MODE (p)), size = SIZEC (LHS_MODE (p));
+  int digs = DIGITS_COMPL (LHS_MODE (p)), size = SIZE_COMPL (LHS_MODE (p));
   ADDR_T pop_sp = A68_SP;
   MP_T *d = (MP_T *) STACK_OFFSET (-size);
   MP_T *c = (MP_T *) STACK_OFFSET (-2 * size);

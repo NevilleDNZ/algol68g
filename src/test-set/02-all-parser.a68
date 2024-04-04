@@ -1,0 +1,73 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Non-left-recursive context-free grammar parser.
+
+This program originates from the legacy "REVISED MC ALGOL 68 TEST SET":
+
+    Dick Grune, The Revised MC ALGOL 68 Test Set, IW XX/79,
+    Mathematical Centre, Amsterdam.
+
+The Mathematical Centre ("Stichting Mathematisch Centrum" or SMC) was a Dutch 
+non-profit institution aiming at the promotion of pure mathematics and its 
+applications. 
+
+SMC is now "Stichting Centrum voor Wiskunde en Informatica" (CWI). The test set 
+is available as an open access publication from the CWI repository:
+
+   https://ir.cwi.nl/pub/
+
+Selected (modified) "Revised MC ALGOL 68 Test Set" programs are distributed 
+with Algol 68 Genie with kind permission of Dick Grune.
+
+COMMENT
+
+BEGIN # All-parser, Dick Grune, 20-11-74.
+        The following is an example of a technique that will give a
+        parser for any non-left-recursive context-free grammar.
+        The parser gives all possible parsings.
+      #
+
+  MODE ACT = VOID, TAIL = PROC ACT, RULE = PROC (TAIL) ACT;
+
+  #         R u l e                      G r a m m a r #
+
+  RULE t = (TAIL q) ACT: s (ACT: b (q)); # t: s, b.    #
+
+  RULE s = (TAIL q) ACT:                 # s:          #
+    (a (ACT: s(ACT: s(q)));              #    a, s, s; #
+     a (q)                               #    a.       #
+    );
+
+  RULE a = (TAIL q) ACT:
+    (n +:= 1; IF inp[n] = "a" THEN q FI; # a: "a".     #
+     n -:= 1);
+
+  RULE b = (TAIL q) ACT:
+    (n +:= 1; IF inp[n] = "b" THEN q FI; # b: "b".     #
+     n -:= 1);
+
+  INT max = 10; STRING inp, INT n := 0;
+
+  FOR i FROM 0 TO max
+  DO inp := i * "a" + "b"; INT count:= 0;
+     t(ACT: count+:=1);
+     print(("The sentence """, inp, """ has ", whole (count, 0), " parsings", newline))
+  OD
+
+END

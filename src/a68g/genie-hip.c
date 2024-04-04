@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for jumps and SKIP.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -90,12 +90,12 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     genie_next_random_double (p);
     genie_next_random_double (p);
 #else
-    (void) nil_mp (p, DIGITSC (u));
-    (void) nil_mp (p, DIGITSC (u));
+    (void) nil_mp (p, DIGITS_COMPL (u));
+    (void) nil_mp (p, DIGITS_COMPL (u));
 #endif
   } else if (u == M_LONG_LONG_COMPLEX) {
-    (void) nil_mp (p, DIGITSC (u));
-    (void) nil_mp (p, DIGITSC (u));
+    (void) nil_mp (p, DIGITS_COMPL (u));
+    (void) nil_mp (p, DIGITS_COMPL (u));
   } else if (IS_REF (u)) {
 // All REFs are NIL.
     PUSH_REF (p, nil_ref);
@@ -106,16 +106,15 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     PUSH_REF (p, er);
   } else if (IS_STRUCT (u)) {
 // STRUCT.
-    PACK_T *v;
-    for (v = PACK (u); v != NO_PACK; FORWARD (v)) {
+    for (PACK_T *v = PACK (u); v != NO_PACK; FORWARD (v)) {
       genie_push_undefined (p, MOID (v));
     }
   } else if (IS_UNION (u)) {
 // UNION.
-    ADDR_T sp = A68_SP;
+    ADDR_T pop_sp = A68_SP;
     PUSH_UNION (p, MOID (PACK (u)));
     genie_push_undefined (p, MOID (PACK (u)));
-    A68_SP = sp + SIZE (u);
+    A68_SP = pop_sp + SIZE (u);
   } else if (IS (u, PROC_SYMBOL)) {
 // PROC.
     A68_PROCEDURE z;
@@ -133,15 +132,15 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     ENVIRON (&z) = 0;
     PUSH_FORMAT (p, z);
   } else if (u == M_SIMPLOUT) {
-    ADDR_T sp = A68_SP;
+    ADDR_T pop_sp = A68_SP;
     PUSH_UNION (p, M_STRING);
     PUSH_REF (p, c_to_a_string (p, "SKIP", DEFAULT_WIDTH));
-    A68_SP = sp + SIZE (u);
+    A68_SP = pop_sp + SIZE (u);
   } else if (u == M_SIMPLIN) {
-    ADDR_T sp = A68_SP;
+    ADDR_T pop_sp = A68_SP;
     PUSH_UNION (p, M_REF_STRING);
     genie_push_undefined (p, M_REF_STRING);
-    A68_SP = sp + SIZE (u);
+    A68_SP = pop_sp + SIZE (u);
   } else if (u == M_REF_FILE) {
     PUSH_REF (p, A68 (skip_file));
   } else if (u == M_FILE) {
@@ -164,10 +163,10 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     FILL (z, 0, size);
     STATUS (z) = INIT_MASK;
   } else {
-    BYTE_T *_sp_ = STACK_TOP;
+    BYTE_T *tos = STACK_TOP;
     int size = SIZE_ALIGNED (u);
     INCREMENT_STACK_POINTER (p, size);
-    FILL (_sp_, 0, size);
+    FILL (tos, 0, size);
   }
 }
 

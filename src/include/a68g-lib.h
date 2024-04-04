@@ -19,6 +19,10 @@
 //! more details. You should have received a copy of the GNU General Public 
 //! License along with this program. If not, see [http://www.gnu.org/licenses/].
 
+//! @section Synopsis
+//!
+//! Internal math routines.
+
 #if !defined __A68G_LIB_H__
 #define __A68G_LIB_H__
 

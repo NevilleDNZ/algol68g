@@ -501,8 +501,7 @@ void search_identifier (FILE_T f, NODE_T * p, ADDR_T a68_link, char *sym)
       NODE_T *u = FRAME_TREE (a68_link);
       if (u != NO_NODE) {
         TABLE_T *q = TABLE (u);
-        TAG_T *i = IDENTIFIERS (q);
-        for (; i != NO_TAG; FORWARD (i)) {
+        for (TAG_T *i = IDENTIFIERS (q); i != NO_TAG; FORWARD (i)) {
           if (strcmp (NSYMBOL (NODE (i)), sym) == 0) {
             ADDR_T posit = a68_link + FRAME_INFO_SIZE + OFFSET (i);
             MOID_T *m = MOID (i);
@@ -709,8 +708,8 @@ void slice (FILE_T f, NODE_T * p, int depth)
     monitor_error ("invalid slice index count", NO_TEXT);
   }
   QUIT_ON_ERROR;
-  int k = 0, index = 0;
-  for (; k < dim; k++, A68_MON (_m_sp)--) {
+  int index = 0;
+  for (int k = 0; k < dim; k++, A68_MON (_m_sp)--) {
     A68_TUPLE *t = &(tup[dim - k - 1]);
     deref (p, A68_MON (_m_sp) - 1, MEEK);
     if (TOP_MODE != M_INT) {
@@ -1290,9 +1289,8 @@ void print_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
 
 void indent_crlf (FILE_T f)
 {
-  int k;
   io_close_tty_line ();
-  for (k = 0; k < A68_MON (tabs); k++) {
+  for (int k = 0; k < A68_MON (tabs); k++) {
     WRITE (f, "  ");
   }
 }
@@ -1541,15 +1539,13 @@ void list (FILE_T f, NODE_T * p, int n, int m)
   if (p != NO_NODE) {
     if (m == 0) {
       LINE_T *r = LINE (INFO (p));
-      LINE_T *l = TOP_LINE (&A68_JOB);
-      for (; l != NO_LINE; FORWARD (l)) {
+      for (LINE_T *l = TOP_LINE (&A68_JOB); l != NO_LINE; FORWARD (l)) {
         if (NUMBER (l) > 0 && abs (NUMBER (r) - NUMBER (l)) <= n) {
           write_source_line (f, l, NO_NODE, A68_TRUE);
         }
       }
     } else {
-      LINE_T *l = TOP_LINE (&A68_JOB);
-      for (; l != NO_LINE; FORWARD (l)) {
+      for (LINE_T *l = TOP_LINE (&A68_JOB); l != NO_LINE; FORWARD (l)) {
         if (NUMBER (l) > 0 && NUMBER (l) >= n && NUMBER (l) <= m) {
           write_source_line (f, l, NO_NODE, A68_TRUE);
         }
@@ -1676,33 +1672,25 @@ void change_breakpoints (NODE_T * p, unt set, int num, BOOL_T * is_set, char *lo
     if (set == BREAKPOINT_MASK) {
       if (LINE_NUMBER (p) == num && (STATUS_TEST (p, INTERRUPTIBLE_MASK)) && num != 0) {
         STATUS_SET (p, BREAKPOINT_MASK);
-        if (EXPR (INFO (p)) != NO_TEXT) {
-          a68_free (EXPR (INFO (p)));
-        }
+        a68_free (EXPR (INFO (p)));
         EXPR (INFO (p)) = loc_expr;
         *is_set = A68_TRUE;
       }
     } else if (set == BREAKPOINT_TEMPORARY_MASK) {
       if (LINE_NUMBER (p) == num && (STATUS_TEST (p, INTERRUPTIBLE_MASK)) && num != 0) {
         STATUS_SET (p, BREAKPOINT_TEMPORARY_MASK);
-        if (EXPR (INFO (p)) != NO_TEXT) {
-          a68_free (EXPR (INFO (p)));
-        }
+        a68_free (EXPR (INFO (p)));
         EXPR (INFO (p)) = loc_expr;
         *is_set = A68_TRUE;
       }
     } else if (set == NULL_MASK) {
       if (LINE_NUMBER (p) != num) {
         STATUS_CLEAR (p, (BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK));
-        if (EXPR (INFO (p)) == NO_TEXT) {
-          a68_free (EXPR (INFO (p)));
-        }
+        a68_free (EXPR (INFO (p)));
         EXPR (INFO (p)) = NO_TEXT;
       } else if (num == 0) {
         STATUS_CLEAR (p, (BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK));
-        if (EXPR (INFO (p)) != NO_TEXT) {
-          a68_free (EXPR (INFO (p)));
-        }
+        a68_free (EXPR (INFO (p)));
         EXPR (INFO (p)) = NO_TEXT;
       }
     }
@@ -1903,10 +1891,8 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
     } else if (match_string (sym, "Watch", BLANK_CHAR)) {
       char *cexpr = sym;
       SKIP_ONE_SYMBOL (cexpr);
-      if (A68_MON (watchpoint_expression) != NO_TEXT) {
-        a68_free (A68_MON (watchpoint_expression));
-        A68_MON (watchpoint_expression) = NO_TEXT;
-      }
+      a68_free (A68_MON (watchpoint_expression));
+      A68_MON (watchpoint_expression) = NO_TEXT;
       A68_MON (watchpoint_expression) = new_string (cexpr, NO_TEXT);
       change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_WATCH_MASK, A68_TRUE);
     } else if (match_string (sym, "Clear", BLANK_CHAR)) {
@@ -1914,25 +1900,19 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
       SKIP_ONE_SYMBOL (mod);
       if (mod[0] == NULL_CHAR) {
         change_breakpoints (TOP_NODE (&A68_JOB), NULL_MASK, 0, NULL, NULL);
-        if (A68_MON (watchpoint_expression) != NO_TEXT) {
-          a68_free (A68_MON (watchpoint_expression));
-          A68_MON (watchpoint_expression) = NO_TEXT;
-        }
+        a68_free (A68_MON (watchpoint_expression));
+        A68_MON (watchpoint_expression) = NO_TEXT;
         change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_WATCH_MASK, A68_FALSE);
       } else if (match_string (mod, "ALL", NULL_CHAR)) {
         change_breakpoints (TOP_NODE (&A68_JOB), NULL_MASK, 0, NULL, NULL);
-        if (A68_MON (watchpoint_expression) != NO_TEXT) {
-          a68_free (A68_MON (watchpoint_expression));
-          A68_MON (watchpoint_expression) = NO_TEXT;
-        }
+        a68_free (A68_MON (watchpoint_expression));
+        A68_MON (watchpoint_expression) = NO_TEXT;
         change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_WATCH_MASK, A68_FALSE);
       } else if (match_string (mod, "Breakpoints", NULL_CHAR)) {
         change_breakpoints (TOP_NODE (&A68_JOB), NULL_MASK, 0, NULL, NULL);
       } else if (match_string (mod, "Watchpoint", NULL_CHAR)) {
-        if (A68_MON (watchpoint_expression) != NO_TEXT) {
-          a68_free (A68_MON (watchpoint_expression));
-          A68_MON (watchpoint_expression) = NO_TEXT;
-        }
+        a68_free (A68_MON (watchpoint_expression));
+        A68_MON (watchpoint_expression) = NO_TEXT;
         change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_WATCH_MASK, A68_FALSE);
       } else {
         monitor_error ("invalid breakpoint command", NO_TEXT);
@@ -1976,10 +1956,8 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
   } else if (match_string (cmd, "RESET", NULL_CHAR)) {
     if (confirm_exit ()) {
       change_breakpoints (TOP_NODE (&A68_JOB), NULL_MASK, 0, NULL, NULL);
-      if (A68_MON (watchpoint_expression) != NO_TEXT) {
-        a68_free (A68_MON (watchpoint_expression));
-        A68_MON (watchpoint_expression) = NO_TEXT;
-      }
+      a68_free (A68_MON (watchpoint_expression));
+      A68_MON (watchpoint_expression) = NO_TEXT;
       change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_WATCH_MASK, A68_FALSE);
       exit_genie (p, A68_RERUN);
     }
@@ -2084,9 +2062,7 @@ BOOL_T evaluate_breakpoint_expression (NODE_T * p)
     if (A68_MON (_m_sp) != 1 || A68_MON (mon_errors) != 0) {
       A68_MON (mon_errors) = 0;
       monitor_error ("deleted invalid breakpoint expression", NO_TEXT);
-      if (EXPR (INFO (p)) != NO_TEXT) {
-        a68_free (EXPR (INFO (p)));
-      }
+      a68_free (EXPR (INFO (p)));
       EXPR (INFO (p)) = A68_MON (expr);
       res = A68_TRUE;
     } else if (TOP_MODE == M_BOOL) {
@@ -2095,9 +2071,7 @@ BOOL_T evaluate_breakpoint_expression (NODE_T * p)
       res = (BOOL_T) (STATUS (&z) == INIT_MASK && VALUE (&z) == A68_TRUE);
     } else {
       monitor_error ("deleted invalid breakpoint expression yielding mode", moid_to_string (TOP_MODE, MOID_WIDTH, NO_NODE));
-      if (EXPR (INFO (p)) != NO_TEXT) {
-        a68_free (EXPR (INFO (p)));
-      }
+      a68_free (EXPR (INFO (p)));
       EXPR (INFO (p)) = A68_MON (expr);
       res = A68_TRUE;
     }
@@ -2118,10 +2092,8 @@ BOOL_T evaluate_watchpoint_expression (NODE_T * p)
     if (A68_MON (_m_sp) != 1 || A68_MON (mon_errors) != 0) {
       A68_MON (mon_errors) = 0;
       monitor_error ("deleted invalid watchpoint expression", NO_TEXT);
-      if (A68_MON (watchpoint_expression) != NO_TEXT) {
-        a68_free (A68_MON (watchpoint_expression));
-        A68_MON (watchpoint_expression) = NO_TEXT;
-      }
+      a68_free (A68_MON (watchpoint_expression));
+      A68_MON (watchpoint_expression) = NO_TEXT;
       res = A68_TRUE;
     }
     if (TOP_MODE == M_BOOL) {
@@ -2130,10 +2102,8 @@ BOOL_T evaluate_watchpoint_expression (NODE_T * p)
       res = (BOOL_T) (STATUS (&z) == INIT_MASK && VALUE (&z) == A68_TRUE);
     } else {
       monitor_error ("deleted invalid watchpoint expression yielding mode", moid_to_string (TOP_MODE, MOID_WIDTH, NO_NODE));
-      if (A68_MON (watchpoint_expression) != NO_TEXT) {
-        a68_free (A68_MON (watchpoint_expression));
-        A68_MON (watchpoint_expression) = NO_TEXT;
-      }
+      a68_free (A68_MON (watchpoint_expression));
+      A68_MON (watchpoint_expression) = NO_TEXT;
       res = A68_TRUE;
     }
   }

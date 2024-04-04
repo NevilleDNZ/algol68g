@@ -424,7 +424,7 @@ void tree_listing (FILE_T f, NODE_T * q, int x, LINE_T * l, int *ld, BOOL_T comm
 {
   for (; q != NO_NODE; FORWARD (q)) {
     NODE_T *p = q;
-    int k, dist;
+    int dist;
     if (((STATUS_TEST (p, TREE_MASK)) || comment) && l == LINE (INFO (p))) {
       if (*ld < 0) {
         *ld = x;
@@ -456,7 +456,7 @@ void tree_listing (FILE_T f, NODE_T * q, int x, LINE_T * l, int *ld, BOOL_T comm
           }
           WRITE (f, A68 (output_line));
         }
-        for (k = 0; k < (x - *ld); k++) {
+        for (int k = 0; k < (x - *ld); k++) {
           WRITE (f, A68 (marker)[k]);
         }
         if (MOID (p) != NO_MOID) {
@@ -556,7 +556,6 @@ void list_source_line (FILE_T f, LINE_T * line, BOOL_T tree)
 
 void write_source_listing (void)
 {
-  LINE_T *line = TOP_LINE (&A68_JOB);
   FILE_T f = FILE_LISTING_FD (&A68_JOB);
   int listed = 0;
   WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
@@ -567,7 +566,7 @@ void write_source_listing (void)
     diagnostic (A68_ERROR, NO_NODE, ERROR_CANNOT_WRITE_LISTING, NO_LINE, 0);
     return;
   }
-  for (; line != NO_LINE; FORWARD (line)) {
+  for (LINE_T *line = TOP_LINE (&A68_JOB); line != NO_LINE; FORWARD (line)) {
     if (NUMBER (line) > 0 && LIST (line)) {
       listed++;
     }
@@ -584,9 +583,6 @@ void write_source_listing (void)
 
 void write_tree_listing (void)
 {
-  LINE_T *line = TOP_LINE (&A68_JOB);
-  FILE_T f = FILE_LISTING_FD (&A68_JOB);
-  int listed = 0;
   WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
   WRITE (FILE_LISTING_FD (&A68_JOB), "\nSyntax tree listing");
   WRITE (FILE_LISTING_FD (&A68_JOB), "\n------ ---- -------");
@@ -595,7 +591,9 @@ void write_tree_listing (void)
     diagnostic (A68_ERROR, NO_NODE, ERROR_CANNOT_WRITE_LISTING, NO_LINE, 0);
     return;
   }
-  for (; line != NO_LINE; FORWARD (line)) {
+  FILE_T f = FILE_LISTING_FD (&A68_JOB);
+  int listed = 0;
+  for (LINE_T *line = TOP_LINE (&A68_JOB); line != NO_LINE; FORWARD (line)) {
     if (NUMBER (line) > 0 && LIST (line)) {
       listed++;
     }

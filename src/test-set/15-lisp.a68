@@ -18,6 +18,18 @@ COMMENT
 
 PR quiet regression PR
 
+# Commands for this miniature LISP interpreter
+1 2 3 4
+append ( 1 2 ) ( 3 4 )
++ 1 ( * 2 3 )
+quit
+
+@section Synopsis
+
+Miniature LISP interpreter in Algol 68.
+
+#
+
 # Data structure to represent a list #
    
    MODE NUMBER = LONG INT,
@@ -34,7 +46,7 @@ PR quiet regression PR
 
    PROC is nil = (VALUE v) BOOL: (v | (LIST l): l :=: nil | FALSE);
    
-   PROC value to number = (VALUE v) NUMBER:
+   PROC number = (VALUE v) NUMBER:
         CASE v
         IN (ATOM a): BEGIN NUMBER sum := 0, weight := 1;
                            FOR i FROM UPB a BY -1 TO LWB a
@@ -43,13 +55,12 @@ PR quiet regression PR
                            OD;
                            sum
                      END,
-           (LIST l): (is nil (l) | error ("numeral of nil"); 0 | value to number (CAR l))
+           (LIST l): (is nil (l) | error ("numeral of nil"); 0 | number (CAR l))
         ESAC;
    
-   PROC number to atom = (NUMBER n) ATOM: whole (n, 0);
+   PROC atom = (NUMBER n) ATOM: whole (n, 0);
    
-   OP CONS = (VALUE v, w) VALUE: HEAP NODE := (v, w);
-   PRIO CONS = 9;
+   OP CONS = (VALUE v, w) VALUE: HEAP NODE := (v, w), PRIO CONS = 9;
    
    OP + = (VALUE v, w) VALUE:
       CASE v
@@ -93,89 +104,90 @@ PR quiet regression PR
            (LIST l): (is nil (l) | print ("nil") | (print ("("); print list (l); print (")")))
         ESAC;
    
-   PROC interpreter = (ATOM cmd, VALUE args) VALUE:
+   PROC interpret = (ATOM cmd, VALUE args) VALUE:
         IF cmd = "'"
         THEN CAR args
         ELIF cmd = "+"
-        THEN number to atom (value to number (evaluate (CAR args)) + value to number (evaluate (CDR args)))
+        THEN atom (number (eval (CAR args)) + number (eval (CDR args)))
         ELIF cmd = "-"
-        THEN number to atom (value to number (evaluate (CAR args)) - value to number (evaluate (CDR args)))
+        THEN atom (number (eval (CAR args)) - number (eval (CDR args)))
         ELIF cmd = "*"
-        THEN number to atom (value to number (evaluate (CAR args)) * value to number (evaluate (CDR args)))
+        THEN atom (number (eval (CAR args)) * number (eval (CDR args)))
         ELIF cmd = "/"
-        THEN number to atom (value to number (evaluate (CAR args)) OVER value to number (evaluate (CDR args)))
+        THEN atom (number (eval (CAR args)) OVER number (eval (CDR args)))
         ELIF cmd = "append"
         THEN CAR args + CDR args
-        ELIF cmd = "evaluate"
-        THEN evaluate (args)
+        ELIF cmd = "eval"
+        THEN eval (args)
         ELIF cmd = "quit"
         THEN stop
         ELSE cmd CONS args
         FI;
    
-   PROC evaluate = (VALUE v) VALUE:
+   PROC eval = (VALUE v) VALUE:
         CASE v
         IN (ATOM a): a,
            (LIST k): IF is nil (k)
                      THEN nil
                      ELSE CASE CAR k
-                          IN (ATOM a): interpreter (a, CDR k),
-                             (LIST l): evaluate (CAR k) CONS evaluate (CDR k)
+                          IN (ATOM a): interpret (a, CDR k),
+                             (LIST l): eval (CAR k) CONS eval (CDR k)
                           ESAC
                      FI
         ESAC;
    
-# Construct a list #
+# Construct a value from a string of LISP symbols #
    
-   MODE STACK = STRUCT (STRING elem, REF STACK next);
-   REF STACK stack := NIL;
+   PROC parse = (STRING s) VALUE:
+        BEGIN MODE STACK = STRUCT (STRING elem, REF STACK next);
+              REF STACK stack := NIL;
    
-   PROC pop = VOID: stack := next OF stack;
-   PROC push = (STRING s) VOID: stack := HEAP STACK := (s, stack);
-   PROC top = STRING: elem OF stack;
-   
-   PROC parse stack = VALUE:
-        IF stack :=: REF STACK (NIL)
-        THEN nil
-        ELIF top = "("
-        THEN pop;
-             VALUE left value := parse stack;
-             left value CONS parse stack
-        ELIF top = ")"
-        THEN pop;
-             nil
-        ELSE VALUE left value := HEAP ATOM := top;
-             pop;
-             left value CONS parse stack
-        FI;
-   
-# In this case we parse from a string #
-   
-   PROC parse string = (STRING s) VALUE:
-        BEGIN stack := NIL;
+              PROC pop = VOID: 
+                   stack := next OF stack;
+
+              PROC push = (STRING s) VOID: 
+                   stack := HEAP STACK := (s, stack);
+
+              PROC top = STRING: 
+                   elem OF stack;
+
               INT i := UPB s;
               WHILE i > LWB s
               DO WHILE i > LWB s ANDF s[i] = " " DO i -:= 1 OD;
                  INT j = i;
-                 WHILE i > LWB s ANDF s[i] ~= " " DO i -:= 1 OD;
+                 WHILE i >= LWB s ANDF s[i] ~= " " DO i -:= 1 OD;
                  IF i + 1 <= j
                  THEN push (s[i + 1 .. j])
                  FI
               OD;
-              parse stack
+
+              PROC make value = VALUE:
+                   IF stack :=: REF STACK (NIL)
+                   THEN nil
+                   ELIF top = "("
+                   THEN pop;
+                        VALUE left value := make value;
+                        left value CONS make value
+                   ELIF top = ")"
+                   THEN pop;
+                        nil
+                   ELSE VALUE left value := HEAP ATOM := top;
+                        pop;
+                        left value CONS make value
+                   FI;
+
+              make value
         END;
-   
-# A test program #
    
    FILE f;
    VOID (open (f, program idf, standin channel));
    get (f, new line);
    DO STRING s;
       get (f, (s, new line));
-      VALUE l := parse string (blank + s);
+      VALUE l := parse (s);
       print (">");
       print value (l);
       new line (stand out);
-      print value (evaluate (l));
+      print value (eval (l));
       new line (stand out)
    OD

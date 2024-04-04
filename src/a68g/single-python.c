@@ -42,15 +42,15 @@ void print_vector (gsl_vector *A, unt w)
   unt N = SIZE (A);
   fprintf (stdout, "[%d]\n", N);
   if (w <= 0 || N <= 2 * w) {
-    for (unt i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
       fprintf (stdout, FMT, gsl_vector_get (A, i));
     }
   } else {
-    for (unt i = 0; i < w; i++) {
+    for (int i = 0; i < w; i++) {
       fprintf (stdout, FMT, gsl_vector_get (A, i));
     }
     fprintf (stdout, " ... ");
-    for (unt i = N - w; i < N; i++) {
+    for (int i = N - w; i < N; i++) {
       fprintf (stdout, FMT, gsl_vector_get (A, i));
     }
   }
@@ -61,15 +61,15 @@ void print_row (gsl_matrix *A, unt m, unt w)
 {
   unt N = SIZE2 (A);
   if (w <= 0 || N <= 2 * w) {
-    for (unt i = 0; i < N; i++) {
+    for (int i = 0; i < N; i++) {
       fprintf (stdout, FMT, gsl_matrix_get (A, m, i));
     }
   } else {
-    for (unt i = 0; i < w; i++) {
+    for (int i = 0; i < w; i++) {
       fprintf (stdout, FMT, gsl_matrix_get (A, m, i));
     }
     fprintf (stdout, " ... ");
-    for (unt i = N - w; i < N; i++) {
+    for (int i = N - w; i < N; i++) {
       fprintf (stdout, FMT, gsl_matrix_get (A, m, i));
     }
   }
@@ -81,15 +81,15 @@ void print_matrix (gsl_matrix *A, unt w)
   unt M = SIZE1 (A), N = SIZE2 (A);
   fprintf (stdout, "[%d, %d]\n", M, N);
   if (w <= 0 || M <= 2 * w) {
-    for (unt i = 0; i < M; i++) {
+    for (int i = 0; i < M; i++) {
       print_row (A, i, w);
     }
   } else {
-    for (unt i = 0; i < w; i++) {
+    for (int i = 0; i < w; i++) {
       print_row (A, i, w);
     }
     fprintf (stdout, " ...\n");
-    for (unt i = M - w; i < M; i++) {
+    for (int i = M - w; i < M; i++) {
       print_row (A, i, w);
     }
   }
@@ -128,7 +128,7 @@ A68_ROW vector_to_row (NODE_T * p, gsl_vector * v)
   BYTE_T *base = DEREF (BYTE_T, &ARRAY (&arr));
   int idx = VECTOR_OFFSET (&arr, &tup);
   unt inc = SPAN (&tup) * ELEM_SIZE (&arr);
-  for (unt k = 0; k < len; k++, idx += inc) {
+  for (int k = 0; k < len; k++, idx += inc) {
     A68_REAL *x = (A68_REAL *) (base + idx);
     STATUS (x) = INIT_MASK;
     VALUE (x) = gsl_vector_get (v, (size_t) k);
@@ -176,8 +176,8 @@ REAL_T matrix_norm (gsl_matrix *a)
 #if (A68_LEVEL >= 3)
   DOUBLE_T sum = 0.0;
   unt M = SIZE1 (a), N = SIZE2 (a);
-  for (unt i = 0; i < M; i++) {
-    for (unt j = 0; j < N; j++) {
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < N; j++) {
       DOUBLE_T z = gsl_matrix_get (a, i, j);
       sum += z * z;
     }
@@ -186,8 +186,8 @@ REAL_T matrix_norm (gsl_matrix *a)
 #else
   REAL_T sum = 0.0;
   unt M = SIZE1 (a), N = SIZE2 (a);
-  for (unt i = 0; i < M; i++) {
-    for (unt j = 0; j < N; j++) {
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < N; j++) {
       REAL_T z = gsl_matrix_get (a, i, j);
       sum += z * z;
     }
@@ -222,12 +222,12 @@ gsl_matrix *matrix_hcat (NODE_T *p, gsl_matrix *u, gsl_matrix *v)
     MATH_RTE (p, Mu != Mv, M_INT, "number of rows does not match");
   }
   gsl_matrix *w = gsl_matrix_calloc (Mu, Nu + Nv);
-  for (unt i = 0; i < Mu; i++) {
+  for (int i = 0; i < Mu; i++) {
     unt k = 0;
-    for (unt j = 0; j < Nu; j++) {
+    for (int j = 0; j < Nu; j++) {
       gsl_matrix_set (w, i, k++, gsl_matrix_get (u, i, j));
     }
-    for (unt j = 0; j < Nv; j++) {
+    for (int j = 0; j < Nv; j++) {
       gsl_matrix_set (w, i, k++, gsl_matrix_get (v, i, j));
     }
   }
@@ -265,12 +265,12 @@ gsl_matrix *matrix_vcat (NODE_T *p, gsl_matrix *u, gsl_matrix *v)
     MATH_RTE (p, Nu != Nv, M_INT, "number of columns does not match");
   }
   gsl_matrix *w = gsl_matrix_calloc (Mu + Mv, Nu);
-  for (unt j = 0; j < Nu; j++) {
+  for (int j = 0; j < Nu; j++) {
     unt k = 0;
-    for (unt i = 0; i < Mu; i++) {
+    for (int i = 0; i < Mu; i++) {
       gsl_matrix_set (w, k++, j, gsl_matrix_get (u, i, j));
     }
-    for (unt i = 0; i < Mv; i++) {
+    for (int i = 0; i < Mv; i++) {
       gsl_matrix_set (w, k++, j, gsl_matrix_get (v, i, j));
     }
   }

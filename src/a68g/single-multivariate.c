@@ -47,13 +47,13 @@ gsl_matrix *column_mean (gsl_matrix *DATA)
 // A is MxN; M samples x N features.
   unt M = SIZE1 (DATA), N = SIZE2 (DATA);
   gsl_matrix *C = gsl_matrix_calloc (M, N);
-  for (unt i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++) {
     DOUBLE_T sum = 0;
-    for (unt j = 0; j < M; j++) {
+    for (int j = 0; j < M; j++) {
       sum += gsl_matrix_get (DATA, j, i);
     }
     REAL_T mean = sum / M;
-    for (unt j = 0; j < M; j++) {
+    for (int j = 0; j < M; j++) {
       gsl_matrix_set (C, j, i, gsl_matrix_get (DATA, j, i) - mean);
     }
   }
@@ -70,8 +70,8 @@ static gsl_matrix *left_columns (NODE_T *p, gsl_matrix *X, int cols)
     cols = N;
   }
   gsl_matrix *Y = gsl_matrix_calloc (M, cols);
-  for (unt i = 0; i < M; i++) {
-    for (unt j = 0; j < cols; j++) {
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < cols; j++) {
       gsl_matrix_set (Y, i, j, gsl_matrix_get (X, i, j));
     }
   }
@@ -114,7 +114,7 @@ void compute_pseudo_inverse (NODE_T *p, gsl_matrix **mpinv, gsl_matrix *X, REAL_
   MATH_RTE (p, x0 == 0, M_ROW_ROW_REAL, "zero eigenvalue or singular value");
   gsl_matrix *S_inv = gsl_matrix_calloc (N, M);
   gsl_matrix_set (S_inv, 0, 0, 1 / x0);
-  for (unt i = 1; i < N; i++) {
+  for (int i = 1; i < N; i++) {
     REAL_T x = gsl_vector_get (Sv, i);
     if ((x / x0) > lim) {
       gsl_matrix_set (S_inv, i, i, 1 / x);
@@ -125,8 +125,8 @@ void compute_pseudo_inverse (NODE_T *p, gsl_matrix **mpinv, gsl_matrix *X, REAL_
   a68_vector_free (Sv);
 // GSL SVD yields thin SVD - pad with zeros.
   gsl_matrix *Uf = gsl_matrix_calloc (M, M);
-  for (unt i = 0; i < M; i++) {
-    for (unt j = 0; j < N; j++) {
+  for (int i = 0; i < M; i++) {
+    for (int j = 0; j < N; j++) {
       gsl_matrix_set (Uf, i, j, gsl_matrix_get (U, i, j));
     }
   }
@@ -225,13 +225,13 @@ void genie_matrix_column_mean (NODE_T *p)
   gsl_matrix *Z = pop_matrix (p, A68_TRUE); 
   unt M = SIZE1 (Z), N = SIZE2 (Z);
   gsl_matrix *A = gsl_matrix_calloc (M, N);
-  for (unt i = 0; i < N; i++) {
+  for (int i = 0; i < N; i++) {
     DOUBLE_T sum = 0;
-    for (unt j = 0; j < M; j++) {
+    for (int j = 0; j < M; j++) {
       sum += gsl_matrix_get (Z, j, i);
     }
     DOUBLE_T mean = sum / M;
-    for (unt j = 0; j < M; j++) {
+    for (int j = 0; j < M; j++) {
       gsl_matrix_set (A, j, i, mean);
     }
   }
@@ -370,7 +370,7 @@ void genie_matrix_pcr (NODE_T * p)
   }
 // Too short eigenvectors wreak havoc.
   REAL_T Sv0 = gsl_vector_get (Sv, 0);
-  for (unt k = 1; k < SIZE (Sv); k++) {
+  for (int k = 1; k < SIZE (Sv); k++) {
     if (gsl_vector_get (Sv, k) / Sv0 < VALUE (&lim)) {
       if (k + 1 < Nk) {
         Nk = k + 1;
@@ -524,7 +524,7 @@ void genie_matrix_pls1 (NODE_T *p)
 // Yield results.
   if (!IS_NIL (singulars)) {
     gsl_vector *Svl = gsl_vector_calloc (Nk);
-    for (unt k = 0; k < Nk; k++) {
+    for (int k = 0; k < Nk; k++) {
       gsl_vector_set (Svl, k, gsl_vector_get (Sv, k));
     }
     *DEREF (A68_REF, &singulars) = vector_to_row (p, Svl);
@@ -669,7 +669,7 @@ void genie_matrix_pls2 (NODE_T *p)
 // Yield results.
   if (!IS_NIL (singulars)) {
     gsl_vector *Svl = gsl_vector_calloc (Nk);
-    for (unt k = 0; k < Nk; k++) {
+    for (int k = 0; k < Nk; k++) {
       gsl_vector_set (Svl, k, gsl_vector_get (Sv, k));
     }
     *DEREF (A68_REF, &singulars) = vector_to_row (p, Svl);

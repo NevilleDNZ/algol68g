@@ -30,9 +30,12 @@ non-profit institution aiming at the promotion of pure mathematics and its
 applications. 
 
 SMC is now "Stichting Centrum voor Wiskunde en Informatica" (CWI). The test set 
-is avalailable as an open access publication from the CWI repository:
+is available as an open access publication from the CWI repository:
 
    https://ir.cwi.nl/pub/
+
+Selected (modified) "Revised MC ALGOL 68 Test Set" programs are distributed 
+with Algol 68 Genie with kind permission of Dick Grune.
 
 COMMENT
 
@@ -88,22 +91,28 @@ BEGIN MODE NUM = LONG LONG REAL;
       NUM eps = 5 * long long small real;
   
       PROC solve = (NUM u, v, PROC (NUM) NUM f, STRING s) VOID:
-      BEGIN print (("Expression: ", s, new line));
-            print (("[", PRETTY u, ", ", PRETTY v, "]", new line));
-            IF NUM x, y;
-               zero in (x := u, y := v, f, (NUM p) NUM : eps + eps * ABS p)
-            THEN print (("x: ", PRETTY x, new line));
-                 print (("y: ", PRETTY f(x), new line))
-            ELSE print (("zeroin cannot find a root", new line))
-            FI;
-            new line (standout)
-      END;
+           IF u >= v
+           THEN error
+           ELSE print (("Expression: ", s, new line));
+                print (("[", PRETTY u, ", ", PRETTY v, "]", new line));
+                IF NUM x, y;
+                   zero in (x := u, y := v, f, (NUM p) NUM : eps + eps * ABS p)
+                THEN print (("x: ", PRETTY x, new line));
+                     print (("y: ", PRETTY f(x), new line))
+                ELSE print (("zeroin cannot find a root", new line))
+                FI;
+                new line (standout)
+           FI;
   
       solve (-1, 0, (NUM x) NUM : qexp (x) - x * x, "exp (x) - x * x");
       solve (1, 10, (NUM x) NUM : qln (x) - x + 2, "ln (x) - x + 2");
       solve (0,  5, (NUM x) NUM : x * x - 4, "x * x - 4");
       solve (1,1.5, (NUM x) NUM : qsin (3 * x), "sin (3 * x)");
-      solve (-1, 1, (NUM x) NUM : x * x + 1, "x * x + 1")
+      solve (-1, 1, (NUM x) NUM : x * x + 1, "x * x + 1") 
+
+      EXIT
+
+      error: print (("Error detected", new line))
 END
 
 COMMENT
