@@ -28,7 +28,6 @@
 #if defined (HAVE_GSL)
 
 #include "a68g-torrix.h"
-#include "a68g-prelude-gsl.h"
 
 void a68_vector_free (gsl_vector *V)
 {

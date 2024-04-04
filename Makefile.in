@@ -169,6 +169,7 @@ am_a68g_OBJECTS = ./src/a68g/a68g-a68g-apropos.$(OBJEXT) \
 	./src/a68g/a68g-parser-victal.$(OBJEXT) \
 	./src/a68g/a68g-plugin-basic.$(OBJEXT) \
 	./src/a68g/a68g-plugin.$(OBJEXT) \
+	./src/a68g/a68g-plugin-driver.$(OBJEXT) \
 	./src/a68g/a68g-plugin-folder.$(OBJEXT) \
 	./src/a68g/a68g-plugin-gen.$(OBJEXT) \
 	./src/a68g/a68g-plugin-inline.$(OBJEXT) \
@@ -186,7 +187,9 @@ am_a68g_OBJECTS = ./src/a68g/a68g-a68g-apropos.$(OBJEXT) \
 	./src/a68g/a68g-rts-heap.$(OBJEXT) \
 	./src/a68g/a68g-rts-http.$(OBJEXT) \
 	./src/a68g/a68g-rts-https.$(OBJEXT) \
+	./src/a68g/a68g-rts-int128.$(OBJEXT) \
 	./src/a68g/a68g-rts-internal.$(OBJEXT) \
+	./src/a68g/a68g-rts-mach.$(OBJEXT) \
 	./src/a68g/a68g-rts-monitor.$(OBJEXT) \
 	./src/a68g/a68g-rts-parallel.$(OBJEXT) \
 	./src/a68g/a68g-rts-plotutils.$(OBJEXT) \
@@ -290,6 +293,7 @@ am__depfiles_remade = ./src/a68g/$(DEPDIR)/a68g-a68g-apropos.Po \
 	./src/a68g/$(DEPDIR)/a68g-parser-victal.Po \
 	./src/a68g/$(DEPDIR)/a68g-parser.Po \
 	./src/a68g/$(DEPDIR)/a68g-plugin-basic.Po \
+	./src/a68g/$(DEPDIR)/a68g-plugin-driver.Po \
 	./src/a68g/$(DEPDIR)/a68g-plugin-folder.Po \
 	./src/a68g/$(DEPDIR)/a68g-plugin-gen.Po \
 	./src/a68g/$(DEPDIR)/a68g-plugin-inline.Po \
@@ -308,7 +312,9 @@ am__depfiles_remade = ./src/a68g/$(DEPDIR)/a68g-a68g-apropos.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-heap.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-http.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-https.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-int128.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-internal.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-mach.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po \
@@ -508,7 +514,6 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
-a68g_exists = @a68g_exists@
 abs_builddir = @abs_builddir@
 abs_srcdir = @abs_srcdir@
 abs_top_builddir = @abs_top_builddir@
@@ -628,6 +633,7 @@ a68g_SOURCES = \
 ./src/a68g/parser-victal.c \
 ./src/a68g/plugin-basic.c \
 ./src/a68g/plugin.c \
+./src/a68g/plugin-driver.c \
 ./src/a68g/plugin-folder.c \
 ./src/a68g/plugin-gen.c \
 ./src/a68g/plugin-inline.c \
@@ -645,7 +651,9 @@ a68g_SOURCES = \
 ./src/a68g/rts-heap.c \
 ./src/a68g/rts-http.c \
 ./src/a68g/rts-https.c \
+./src/a68g/rts-int128.c \
 ./src/a68g/rts-internal.c \
+./src/a68g/rts-mach.c \
 ./src/a68g/rts-monitor.c \
 ./src/a68g/rts-parallel.c \
 ./src/a68g/rts-plotutils.c \
@@ -685,6 +693,7 @@ a68g_SOURCES = \
 ./src/include/a68g-level-3.h \
 ./src/include/a68g-lib.h \
 ./src/include/a68g-listing.h \
+./src/include/a68g-mach.h \
 ./src/include/a68g-masks.h \
 ./src/include/a68g-math.h \
 ./src/include/a68g-moids.h \
@@ -724,6 +733,7 @@ pkginclude_HEADERS = \
 ./src/include/a68g-level-3.h \
 ./src/include/a68g-lib.h \
 ./src/include/a68g-listing.h \
+./src/include/a68g-mach.h \
 ./src/include/a68g-masks.h \
 ./src/include/a68g-math.h \
 ./src/include/a68g-moids.h \
@@ -776,11 +786,13 @@ TESTS = \
 	./src/test-set/23-queens.a68\
 	./src/test-set/24-quicksort.a68\
 	./src/test-set/25-rationals.a68\
-	./src/test-set/26-semana-santa.a68\
-	./src/test-set/27-tukey.a68\
-	./src/test-set/28-whetstones.a68\
-	./src/test-set/29-www.a68\
-	./src/test-set/30-zeroin.a68
+	./src/test-set/26-roman-decimal.a68\
+	./src/test-set/27-semana-santa.a68\
+	./src/test-set/28-tukey.a68\
+	./src/test-set/29-warshall.a68\
+	./src/test-set/30-whetstones.a68\
+	./src/test-set/31-www.a68\
+	./src/test-set/32-zeroin.a68
 
 @EXPORT_DYNAMIC_FALSE@a68g_LDFLAGS = 
 @EXPORT_DYNAMIC_TRUE@a68g_LDFLAGS = -Wl,--export-dynamic
@@ -1012,6 +1024,8 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-plugin.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-plugin-driver.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-plugin-folder.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-plugin-gen.$(OBJEXT): src/a68g/$(am__dirstamp) \
@@ -1046,7 +1060,11 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-https.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-int128.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-internal.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-mach.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-monitor.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
@@ -1168,6 +1186,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-parser-victal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-parser.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-plugin-basic.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-plugin-driver.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-plugin-folder.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-plugin-gen.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-plugin-inline.Po@am__quote@ # am--include-marker
@@ -1186,7 +1205,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-heap.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-http.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-https.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-int128.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-internal.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-mach.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po@am__quote@ # am--include-marker
@@ -2088,6 +2109,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-plugin.obj `if test -f './src/a68g/plugin.c'; then $(CYGPATH_W) './src/a68g/plugin.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/plugin.c'; fi`
 
+./src/a68g/a68g-plugin-driver.o: ./src/a68g/plugin-driver.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-plugin-driver.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Tpo -c -o ./src/a68g/a68g-plugin-driver.o `test -f './src/a68g/plugin-driver.c' || echo '$(srcdir)/'`./src/a68g/plugin-driver.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Tpo ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/plugin-driver.c' object='./src/a68g/a68g-plugin-driver.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-plugin-driver.o `test -f './src/a68g/plugin-driver.c' || echo '$(srcdir)/'`./src/a68g/plugin-driver.c
+
+./src/a68g/a68g-plugin-driver.obj: ./src/a68g/plugin-driver.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-plugin-driver.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Tpo -c -o ./src/a68g/a68g-plugin-driver.obj `if test -f './src/a68g/plugin-driver.c'; then $(CYGPATH_W) './src/a68g/plugin-driver.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/plugin-driver.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Tpo ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/plugin-driver.c' object='./src/a68g/a68g-plugin-driver.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-plugin-driver.obj `if test -f './src/a68g/plugin-driver.c'; then $(CYGPATH_W) './src/a68g/plugin-driver.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/plugin-driver.c'; fi`
+
 ./src/a68g/a68g-plugin-folder.o: ./src/a68g/plugin-folder.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-plugin-folder.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-plugin-folder.Tpo -c -o ./src/a68g/a68g-plugin-folder.o `test -f './src/a68g/plugin-folder.c' || echo '$(srcdir)/'`./src/a68g/plugin-folder.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-plugin-folder.Tpo ./src/a68g/$(DEPDIR)/a68g-plugin-folder.Po
@@ -2326,6 +2361,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-https.obj `if test -f './src/a68g/rts-https.c'; then $(CYGPATH_W) './src/a68g/rts-https.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-https.c'; fi`
 
+./src/a68g/a68g-rts-int128.o: ./src/a68g/rts-int128.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-int128.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-int128.Tpo -c -o ./src/a68g/a68g-rts-int128.o `test -f './src/a68g/rts-int128.c' || echo '$(srcdir)/'`./src/a68g/rts-int128.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-int128.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-int128.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-int128.c' object='./src/a68g/a68g-rts-int128.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-int128.o `test -f './src/a68g/rts-int128.c' || echo '$(srcdir)/'`./src/a68g/rts-int128.c
+
+./src/a68g/a68g-rts-int128.obj: ./src/a68g/rts-int128.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-int128.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-int128.Tpo -c -o ./src/a68g/a68g-rts-int128.obj `if test -f './src/a68g/rts-int128.c'; then $(CYGPATH_W) './src/a68g/rts-int128.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-int128.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-int128.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-int128.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-int128.c' object='./src/a68g/a68g-rts-int128.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-int128.obj `if test -f './src/a68g/rts-int128.c'; then $(CYGPATH_W) './src/a68g/rts-int128.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-int128.c'; fi`
+
 ./src/a68g/a68g-rts-internal.o: ./src/a68g/rts-internal.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-internal.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-internal.Tpo -c -o ./src/a68g/a68g-rts-internal.o `test -f './src/a68g/rts-internal.c' || echo '$(srcdir)/'`./src/a68g/rts-internal.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-internal.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
@@ -2339,6 +2388,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-internal.c' object='./src/a68g/a68g-rts-internal.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-internal.obj `if test -f './src/a68g/rts-internal.c'; then $(CYGPATH_W) './src/a68g/rts-internal.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-internal.c'; fi`
+
+./src/a68g/a68g-rts-mach.o: ./src/a68g/rts-mach.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-mach.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-mach.Tpo -c -o ./src/a68g/a68g-rts-mach.o `test -f './src/a68g/rts-mach.c' || echo '$(srcdir)/'`./src/a68g/rts-mach.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-mach.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-mach.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-mach.c' object='./src/a68g/a68g-rts-mach.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-mach.o `test -f './src/a68g/rts-mach.c' || echo '$(srcdir)/'`./src/a68g/rts-mach.c
+
+./src/a68g/a68g-rts-mach.obj: ./src/a68g/rts-mach.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-mach.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-mach.Tpo -c -o ./src/a68g/a68g-rts-mach.obj `if test -f './src/a68g/rts-mach.c'; then $(CYGPATH_W) './src/a68g/rts-mach.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-mach.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-mach.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-mach.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-mach.c' object='./src/a68g/a68g-rts-mach.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-mach.obj `if test -f './src/a68g/rts-mach.c'; then $(CYGPATH_W) './src/a68g/rts-mach.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-mach.c'; fi`
 
 ./src/a68g/a68g-rts-monitor.o: ./src/a68g/rts-monitor.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-monitor.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Tpo -c -o ./src/a68g/a68g-rts-monitor.o `test -f './src/a68g/rts-monitor.c' || echo '$(srcdir)/'`./src/a68g/rts-monitor.c
@@ -3190,6 +3253,7 @@ distclean: distclean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-parser-victal.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-parser.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-basic.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-folder.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-gen.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-inline.Po
@@ -3208,7 +3272,9 @@ distclean: distclean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-heap.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-int128.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-mach.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po
@@ -3340,6 +3406,7 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-parser-victal.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-parser.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-basic.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-driver.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-folder.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-gen.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-plugin-inline.Po
@@ -3358,7 +3425,9 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-heap.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-int128.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-mach.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-monitor.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-parallel.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-plotutils.Po

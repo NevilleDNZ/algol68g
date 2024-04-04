@@ -316,14 +316,14 @@
 #define PUSH_BYTES(p, k) {\
   A68_BYTES *_z_ = (A68_BYTES *) STACK_TOP;\
   STATUS (_z_) = INIT_MASK;\
-  a68_memmove (VALUE (_z_), k, BYTES_WIDTH);\
+  MOVE (VALUE (_z_), k, A68_BYTES_WIDTH);\
   INCREMENT_STACK_POINTER((p), SIZE_ALIGNED (A68_BYTES));\
   }
 
 #define PUSH_LONG_BYTES(p, k) {\
   A68_LONG_BYTES *_z_ = (A68_LONG_BYTES *) STACK_TOP;\
   STATUS (_z_) = INIT_MASK;\
-  a68_memmove (VALUE (_z_), k, LONG_BYTES_WIDTH);\
+  MOVE (VALUE (_z_), k, A68_LONG_BYTES_WIDTH);\
   INCREMENT_STACK_POINTER((p), SIZE_ALIGNED (A68_LONG_BYTES));\
   }
 
@@ -391,76 +391,76 @@
 
 // Genie routines.
 
-extern PROP_T genie_column_function (NODE_T *);
-extern PROP_T genie_diagonal_function (NODE_T *);
-extern PROP_T genie_row_function (NODE_T *);
-extern PROP_T genie_transpose_function (NODE_T *);
+PROP_T genie_column_function (NODE_T *);
+PROP_T genie_diagonal_function (NODE_T *);
+PROP_T genie_row_function (NODE_T *);
+PROP_T genie_transpose_function (NODE_T *);
+PROP_T genie_and_function (NODE_T *);
+PROP_T genie_assertion (NODE_T *);
+PROP_T genie_assignation_constant (NODE_T *);
+PROP_T genie_assignation (NODE_T *);
+PROP_T genie_assignation_quick (NODE_T * p);
+PROP_T genie_call (NODE_T *);
+PROP_T genie_cast (NODE_T *);
+PROP_T genie_closed (volatile NODE_T *);
+PROP_T genie_coercion (NODE_T *);
+PROP_T genie_collateral (NODE_T *);
+PROP_T genie_conditional (volatile NODE_T *);
+PROP_T genie_constant (NODE_T *);
+PROP_T genie_denotation (NODE_T *);
+PROP_T genie_deproceduring (NODE_T *);
+PROP_T genie_dereference_frame_identifier (NODE_T *);
+PROP_T genie_dereference_generic_identifier (NODE_T *);
+PROP_T genie_dereference_selection_name_quick (NODE_T *);
+PROP_T genie_dereference_slice_name_quick (NODE_T *);
+PROP_T genie_dereferencing (NODE_T *);
+PROP_T genie_dereferencing_quick (NODE_T *);
+PROP_T genie_dyadic (NODE_T *);
+PROP_T genie_dyadic_quick (NODE_T *);
+PROP_T genie_enclosed (volatile NODE_T *);
+PROP_T genie_field_selection (NODE_T *);
+PROP_T genie_format_text (NODE_T *);
+PROP_T genie_formula (NODE_T *);
+PROP_T genie_frame_identifier (NODE_T *);
+PROP_T genie_identifier (NODE_T *);
+PROP_T genie_identifier_standenv (NODE_T *);
+PROP_T genie_identifier_standenv_proc (NODE_T *);
+PROP_T genie_identity_relation (NODE_T *);
+PROP_T genie_int_case (volatile NODE_T *);
+PROP_T genie_loop (volatile NODE_T *);
+PROP_T genie_loop (volatile NODE_T *);
+PROP_T genie_monadic (NODE_T *);
+PROP_T genie_nihil (NODE_T *);
+PROP_T genie_or_function (NODE_T *);
+PROP_T genie_routine_text (NODE_T *);
+PROP_T genie_rowing (NODE_T *);
+PROP_T genie_rowing_ref_row_of_row (NODE_T *);
+PROP_T genie_rowing_ref_row_row (NODE_T *);
+PROP_T genie_rowing_row_of_row (NODE_T *);
+PROP_T genie_rowing_row_row (NODE_T *);
+PROP_T genie_selection_name_quick (NODE_T *);
+PROP_T genie_selection (NODE_T *);
+PROP_T genie_selection_value_quick (NODE_T *);
+PROP_T genie_skip (NODE_T *);
+PROP_T genie_slice_name_quick (NODE_T *);
+PROP_T genie_slice (NODE_T *);
+PROP_T genie_united_case (volatile NODE_T *);
+PROP_T genie_uniting (NODE_T *);
+PROP_T genie_unit (NODE_T *);
+PROP_T genie_voiding_assignation_constant (NODE_T *);
+PROP_T genie_voiding_assignation (NODE_T *);
+PROP_T genie_voiding (NODE_T *);
+PROP_T genie_widen_int_to_real (NODE_T *);
+PROP_T genie_widen (NODE_T *);
 
-extern PROP_T genie_and_function (NODE_T *);
-extern PROP_T genie_assertion (NODE_T *);
-extern PROP_T genie_assignation_constant (NODE_T *);
-extern PROP_T genie_assignation (NODE_T *);
-extern PROP_T genie_assignation_quick (NODE_T * p);
-extern PROP_T genie_call (NODE_T *);
-extern PROP_T genie_cast (NODE_T *);
-extern PROP_T genie_closed (volatile NODE_T *);
-extern PROP_T genie_coercion (NODE_T *);
-extern PROP_T genie_collateral (NODE_T *);
-extern PROP_T genie_conditional (volatile NODE_T *);
-extern PROP_T genie_constant (NODE_T *);
-extern PROP_T genie_denotation (NODE_T *);
-extern PROP_T genie_deproceduring (NODE_T *);
-extern PROP_T genie_dereference_frame_identifier (NODE_T *);
-extern PROP_T genie_dereference_generic_identifier (NODE_T *);
-extern PROP_T genie_dereference_selection_name_quick (NODE_T *);
-extern PROP_T genie_dereference_slice_name_quick (NODE_T *);
-extern PROP_T genie_dereferencing (NODE_T *);
-extern PROP_T genie_dereferencing_quick (NODE_T *);
-extern PROP_T genie_dyadic (NODE_T *);
-extern PROP_T genie_dyadic_quick (NODE_T *);
-extern PROP_T genie_enclosed (volatile NODE_T *);
-extern PROP_T genie_field_selection (NODE_T *);
-extern PROP_T genie_format_text (NODE_T *);
-extern PROP_T genie_formula (NODE_T *);
-extern PROP_T genie_frame_identifier (NODE_T *);
-extern PROP_T genie_identifier (NODE_T *);
-extern PROP_T genie_identifier_standenv (NODE_T *);
-extern PROP_T genie_identifier_standenv_proc (NODE_T *);
-extern PROP_T genie_identity_relation (NODE_T *);
-extern PROP_T genie_int_case (volatile NODE_T *);
-extern PROP_T genie_loop (volatile NODE_T *);
-extern PROP_T genie_loop (volatile NODE_T *);
-extern PROP_T genie_monadic (NODE_T *);
-extern PROP_T genie_nihil (NODE_T *);
-extern PROP_T genie_or_function (NODE_T *);
-extern PROP_T genie_routine_text (NODE_T *);
-extern PROP_T genie_rowing (NODE_T *);
-extern PROP_T genie_rowing_ref_row_of_row (NODE_T *);
-extern PROP_T genie_rowing_ref_row_row (NODE_T *);
-extern PROP_T genie_rowing_row_of_row (NODE_T *);
-extern PROP_T genie_rowing_row_row (NODE_T *);
-extern PROP_T genie_selection_name_quick (NODE_T *);
-extern PROP_T genie_selection (NODE_T *);
-extern PROP_T genie_selection_value_quick (NODE_T *);
-extern PROP_T genie_skip (NODE_T *);
-extern PROP_T genie_slice_name_quick (NODE_T *);
-extern PROP_T genie_slice (NODE_T *);
-extern PROP_T genie_united_case (volatile NODE_T *);
-extern PROP_T genie_uniting (NODE_T *);
-extern PROP_T genie_unit (NODE_T *);
-extern PROP_T genie_voiding_assignation_constant (NODE_T *);
-extern PROP_T genie_voiding_assignation (NODE_T *);
-extern PROP_T genie_voiding (NODE_T *);
-extern PROP_T genie_widen_int_to_real (NODE_T *);
-extern PROP_T genie_widen (NODE_T *);
+A68_REF genie_clone (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
+A68_REF genie_make_ref_row_of_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
+A68_REF genie_make_ref_row_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
+A68_REF genie_make_rowrow (NODE_T *, MOID_T *, int, ADDR_T);
 
-extern A68_REF genie_clone (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
-extern A68_REF genie_make_ref_row_of_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
-extern A68_REF genie_make_ref_row_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
-extern A68_REF genie_make_rowrow (NODE_T *, MOID_T *, int, ADDR_T);
-
-extern void genie_clone_stack (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
-extern void genie_serial_units_no_label (NODE_T *, ADDR_T, NODE_T **);
-extern void genie_jump (NODE_T *);
+void genie (void *);
+void genie_clone_stack (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
+void genie_serial_units_no_label (NODE_T *, ADDR_T, NODE_T **);
+void genie_jump (NODE_T *);
 
 #endif

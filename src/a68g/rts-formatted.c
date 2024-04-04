@@ -502,11 +502,11 @@ void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
 // Set default values 
     int def_expo = 0;
     if (mode == M_REAL || mode == M_INT) {
-      def_expo = EXP_WIDTH + 1;
+      def_expo = A68_EXP_WIDTH + 1;
     } else if (mode == M_LONG_REAL || mode == M_LONG_INT) {
-      def_expo = LONG_EXP_WIDTH + 1;
+      def_expo = A68_LONG_EXP_WIDTH + 1;
     } else if (mode == M_LONG_LONG_REAL || mode == M_LONG_LONG_INT) {
-      def_expo = LONG_LONG_EXP_WIDTH + 1;
+      def_expo = A68_LONG_LONG_EXP_WIDTH + 1;
     }
     int def_mult = 3;
 // Pop user values 
@@ -585,17 +585,17 @@ void write_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file
     if (att == FLOAT_C_PATTERN || att == GENERAL_C_PATTERN) {
       int digits = 0;
       if (mode == M_REAL || mode == M_INT) {
-        width = REAL_WIDTH + EXP_WIDTH + 4;
-        after = REAL_WIDTH - 1;
-        expo = EXP_WIDTH + 1;
+        width = A68_REAL_WIDTH + A68_EXP_WIDTH + 4;
+        after = A68_REAL_WIDTH - 1;
+        expo = A68_EXP_WIDTH + 1;
       } else if (mode == M_LONG_REAL || mode == M_LONG_INT) {
-        width = LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4;
-        after = LONG_REAL_WIDTH - 1;
-        expo = LONG_EXP_WIDTH + 1;
+        width = A68_LONG_REAL_WIDTH + A68_LONG_EXP_WIDTH + 4;
+        after = A68_LONG_REAL_WIDTH - 1;
+        expo = A68_LONG_EXP_WIDTH + 1;
       } else if (mode == M_LONG_LONG_REAL || mode == M_LONG_LONG_INT) {
-        width = LONG_LONG_REAL_WIDTH + LONG_LONG_EXP_WIDTH + 4;
-        after = LONG_LONG_REAL_WIDTH - 1;
-        expo = LONG_LONG_EXP_WIDTH + 1;
+        width = A68_LONG_LONG_REAL_WIDTH + A68_LONG_LONG_EXP_WIDTH + 4;
+        after = A68_LONG_LONG_REAL_WIDTH - 1;
+        expo = A68_LONG_LONG_EXP_WIDTH + 1;
       }
       scan_c_pattern (SUB (p), &right_align, &sign, &digits, &after, &letter);
       if (digits == 0 && after > 0) {
@@ -620,14 +620,14 @@ void write_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file
     if ((att == FIXED_C_PATTERN) || (att == GENERAL_C_PATTERN && (expval > -4 && expval <= after))) {
       int digits = 0;
       if (mode == M_REAL || mode == M_INT) {
-        width = REAL_WIDTH + 2;
-        after = REAL_WIDTH - 1;
+        width = A68_REAL_WIDTH + 2;
+        after = A68_REAL_WIDTH - 1;
       } else if (mode == M_LONG_REAL || mode == M_LONG_INT) {
-        width = LONG_REAL_WIDTH + 2;
-        after = LONG_REAL_WIDTH - 1;
+        width = A68_LONG_REAL_WIDTH + 2;
+        after = A68_LONG_REAL_WIDTH - 1;
       } else if (mode == M_LONG_LONG_REAL || mode == M_LONG_LONG_INT) {
-        width = LONG_LONG_REAL_WIDTH + 2;
-        after = LONG_LONG_REAL_WIDTH - 1;
+        width = A68_LONG_LONG_REAL_WIDTH + 2;
+        after = A68_LONG_LONG_REAL_WIDTH - 1;
       }
       scan_c_pattern (SUB (p), &right_align, &sign, &digits, &after, &letter);
       if (digits == 0 && after > 0) {
@@ -657,12 +657,12 @@ void write_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file
     }
     if (width == 0) {
       if (mode == M_BITS) {
-        width = (int) ceil ((REAL_T) BITS_WIDTH / (REAL_T) nibble);
+        width = (int) ceil ((REAL_T) A68_BITS_WIDTH / (REAL_T) nibble);
       } else if (mode == M_LONG_BITS || mode == M_LONG_LONG_BITS) {
 #if (A68_LEVEL <= 2)
         width = (int) ceil ((REAL_T) get_mp_bits_width (mode) / (REAL_T) nibble);
 #else
-        width = (int) ceil ((REAL_T) LONG_BITS_WIDTH / (REAL_T) nibble);
+        width = (int) ceil ((REAL_T) A68_LONG_BITS_WIDTH / (REAL_T) nibble);
 #endif
       }
     }
@@ -1216,7 +1216,7 @@ void write_real_pattern (NODE_T * p, MOID_T * mode, MOID_T * root, BYTE_T * item
       if (expo_mould != NO_NODE) {
         standardise_double (&(x.f), stag_digits, frac_digits, &exp_value);
       }
-      str = sub_fixed_double (p, x.f, mant_length, frac_digits, LONG_REAL_WIDTH);
+      str = sub_fixed_double (p, x.f, mant_length, frac_digits, A68_LONG_REAL_WIDTH);
 #else
       ADDR_T pop_sp2 = A68_SP;
       int digits = DIGITS (mode);
@@ -1840,7 +1840,7 @@ void genie_write_file_format (NODE_T * p)
   }
   if (!READ_MOOD (file) && !WRITE_MOOD (file)) {
     if (IS_NIL (STRING (file))) {
-      if ((FD (file) = open_physical_file (p, ref_file, A68_WRITE_ACCESS, A68_PROTECTION)) == A68_NO_FILENO) {
+      if ((FD (file) = open_physical_file (p, ref_file, A68_WRITE_ACCESS, A68_PROTECTION)) == A68_NO_FILE) {
         open_error (p, ref_file, "putting");
       }
     } else {
@@ -2530,7 +2530,7 @@ void genie_read_file_format (NODE_T * p)
   }
   if (!READ_MOOD (file) && !WRITE_MOOD (file)) {
     if (IS_NIL (STRING (file))) {
-      if ((FD (file) = open_physical_file (p, ref_file, A68_READ_ACCESS, 0)) == A68_NO_FILENO) {
+      if ((FD (file) = open_physical_file (p, ref_file, A68_READ_ACCESS, 0)) == A68_NO_FILE) {
         open_error (p, ref_file, "getting");
       }
     } else {

@@ -25,9 +25,6 @@
 /* Define to 1 if you have the `aligned_alloc' function. */
 #define HAVE_ALIGNED_ALLOC 1
 
-/* Define to 1 if you have the <arpa/inet.h> header file. */
-/* #undef HAVE_ARPA_INET_H */
-
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
 
@@ -100,6 +97,9 @@
 
 /* Define to 1 if you have the <float.h> header file. */
 #define HAVE_FLOAT_H 1
+
+/* Define this if long double has a 64-bit mantissa */
+#define HAVE_FLT80 1
 
 /* Define to 1 if you have the `fprintf' function. */
 #define HAVE_FPRINTF 1
@@ -440,7 +440,7 @@
 #define PACKAGE_NAME "algol68g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "algol68g 3.3.5"
+#define PACKAGE_STRING "algol68g 3.3.16"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "algol68g"
@@ -449,7 +449,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.3.5"
+#define PACKAGE_VERSION "3.3.16"
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -457,7 +457,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.3.5"
+#define VERSION "3.3.16"
 
 /* Define to 1 if type `char' is unsigned and your compiler does not
    predefine this macro.  */

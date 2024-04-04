@@ -82,16 +82,51 @@
 
 #include "a68g-double.h"
 #include "a68g-genie.h"
-#include "a68g-lib.h"
 #include "a68g-mp.h"
-#include "a68g-prelude.h"
 
-#define DPMIN FLT128_MIN        // Number near the smallest representable double-point number
-#define EPS FLT128_EPSILON      // Machine epsilon
 #define ITMAX 1000000000        // Maximum allowed number of iterations
 #define NITERMAX_ROMBERG 15     // Maximum allowed number of Romberg iterations
 #define TOL_DIFF 0.2q           // Tolerance factor used for the approximation of I_{x,y}^{mu,p} using differences
 #define TOL_ROMBERG 0.1q        // Tolerance factor used to stop the Romberg iterations
+
+//! @brief compute G(p,x) in the domain x <= p using a continued fraction
+//
+// p >= 0
+// x <= p
+
+void double_G_cfrac_lower (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
+{
+// deal with special case
+  if (x == 0.0q) {
+    *Gcfrac = 0.0q;
+    return;
+  }
+// Evaluate the continued fraction using Modified Lentz's method. However,
+// as detailed in the paper, perform manually the first pass (n=1), of the
+// initial Modified Lentz's method.
+  DOUBLE_T an = 1.0q, bn = p, del;
+  DOUBLE_T f = an / bn, c = an / A68_DOUBLE_MIN, d = 1.0q / bn;
+  INT_T n = 2;
+  do {
+    INT_T k = n / 2;
+    an = (n & 1 ? k : -(p - 1.0q + k)) * x;
+    bn++;
+    d = an * d + bn;
+    if (d == 0.0q) {
+      d = A68_DOUBLE_MIN;
+    }
+    c = bn + an / c;
+    if (c == 0.0q) {
+      c = A68_DOUBLE_MIN;
+    }
+    d = 1.0q / d;
+    del = d * c;
+    f *= del;
+    n++;
+  }
+  while ((fabs_double (del - 1.0q) >= A68_DOUBLE_EPS) && (n < ITMAX));
+  *Gcfrac = f;
+}
 
 //! @brief compute the G-function in the domain x < 0 and |x| < max (1,p-1)
 // using a recursive integration by parts relation.
@@ -114,7 +149,7 @@ void double_G_ibp (DOUBLE_T * Gibp, DOUBLE_T p, DOUBLE_T x)
     del = c * (t - d);
     s += del;
     l++;
-    stop = fabs_double (del) < fabs_double (s) * EPS;
+    stop = fabs_double (del) < fabs_double (s) * A68_DOUBLE_EPS;
   }
   while ((l < floor_double ((p - 2.0q) / 2.0q)) && !stop);
   if (odd && !stop) {
@@ -135,45 +170,6 @@ void double_G_ibp (DOUBLE_T * Gibp, DOUBLE_T p, DOUBLE_T x)
 DOUBLE_T double_plim (DOUBLE_T x)
 {
   return (x >= 0.0q) ? x : ((x >= -9.0q) ? 0.0q : 5.0q * sqrt (-x) - 5.0q);
-}
-
-//! @brief compute G(p,x) in the domain x <= p using a continued fraction
-//
-// p >= 0
-// x <= p
-
-void double_G_cfrac_lower (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
-{
-// deal with special case
-  if (x == 0.0q) {
-    *Gcfrac = 0.0q;
-    return;
-  }
-// Evaluate the continued fraction using Modified Lentz's method. However,
-// as detailed in the paper, perform manually the first pass (n=1), of the
-// initial Modified Lentz's method.
-  DOUBLE_T an = 1.0q, bn = p, del;
-  DOUBLE_T f = an / bn, c = an / DPMIN, d = 1.0q / bn;
-  INT_T n = 2;
-  do {
-    INT_T k = n / 2;
-    an = (n & 1 ? k : -(p - 1.0q + k)) * x;
-    bn++;
-    d = an * d + bn;
-    if (d == 0.0q) {
-      d = DPMIN;
-    }
-    c = bn + an / c;
-    if (c == 0.0q) {
-      c = DPMIN;
-    }
-    d = 1.0q / d;
-    del = d * c;
-    f *= del;
-    n++;
-  }
-  while ((fabs_double (del - 1.0q) >= EPS) && (n < ITMAX));
-  *Gcfrac = f;
 }
 
 //! @brief compute the G-function in the domain x > p using a
@@ -198,7 +194,7 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
   if (t) {
 // b{1} is non-zero
     f = an / bn;
-    c = an / DPMIN;
+    c = an / A68_DOUBLE_MIN;
     d = 1.0q / bn;
     n = 2;
   } else {
@@ -206,7 +202,7 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
     an = -(1.0q - p);
     bn = x + 3.0q - p;
     f = an / bn;
-    c = an / DPMIN;
+    c = an / A68_DOUBLE_MIN;
     d = 1.0q / bn;
     n = 3;
   }
@@ -216,11 +212,11 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
     bn += 2.0q;
     d = an * d + bn;
     if (d == 0.0q) {
-      d = DPMIN;
+      d = A68_DOUBLE_MIN;
     }
     c = bn + an / c;
     if (c == 0.0q) {
-      c = DPMIN;
+      c = A68_DOUBLE_MIN;
     }
     d = 1.0q / d;
     del = d * c;
@@ -228,7 +224,7 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
     i++;
     n++;
   }
-  while ((fabs_double (del - 1.0q) >= EPS) && (n < ITMAX));
+  while ((fabs_double (del - 1.0q) >= A68_DOUBLE_EPS) && (n < ITMAX));
   *Gcfrac = t ? f : 1.0q / f;
 }
 
@@ -282,7 +278,7 @@ void double_romberg_estimate (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUB
   *sigma = -mu * y + (p - 1.0q) * log_double (y);
   R[0] = 0.5q * (y - x) * (exp_double (-mu * x + (p - 1.0q) * log_double (x) - (*sigma)) + 1.0q);
 // Loop for n > 0
-  DOUBLE_T relneeded = EPS / TOL_ROMBERG;
+  DOUBLE_T relneeded = A68_DOUBLE_EPS / TOL_ROMBERG;
   INT_T adr0 = 0;
   INT_T n = 1;
   DOUBLE_T h = (y - x) / 2.0q;       // n=1, h = (y-x)/2^n
@@ -323,11 +319,11 @@ void deltagammainc_double (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUBLE_
 // Particular cases
   if (isinf_double (x) && isinf_double (y)) {
     *rho = 0.0q;
-    *sigma = a68_dneginf ();
+    *sigma = a68_neginf_double ();
     return;
   } else if (x == y) {
     *rho = 0.0q;
-    *sigma = a68_dneginf ();
+    *sigma = a68_neginf_double ();
     return;
   }
   if (x == 0.0q && isinf_double (y)) {
@@ -339,9 +335,9 @@ void deltagammainc_double (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUBLE_
   DOUBLE_T mA, mB, mx, my, nA, nB;
 
   double_G_func (&mx, p, mu * x);
-  DOUBLE_T nx = (isinf_double (x) ? a68_dneginf () : -mu * x + p * log_double (x));
+  DOUBLE_T nx = (isinf_double (x) ? a68_neginf_double () : -mu * x + p * log_double (x));
   double_G_func (&my, p, mu * y);
-  DOUBLE_T ny = (isinf_double (y) ? a68_dneginf () : -mu * y + p * log_double (y));
+  DOUBLE_T ny = (isinf_double (y) ? a68_neginf_double () : -mu * y + p * log_double (y));
 
 // Compute (mA,nA) and (mB,nB) such as I_{x,y}^{mu,p} can be
 // approximated by the difference A-B, where A >= B >= 0, A = mA*exp (nA) an 
@@ -405,7 +401,7 @@ void genie_gamma_inc_f_double (NODE_T * n)
   POP_OBJECT (n, &x, A68_LONG_REAL);
   POP_OBJECT (n, &p, A68_LONG_REAL);
   DOUBLE_T rho, sigma;
-  deltagammainc_double (&rho, &sigma, VALUE (&x).f, a68_dposinf (), 1.0q, VALUE (&p).f);
+  deltagammainc_double (&rho, &sigma, VALUE (&x).f, a68_posinf_double (), 1.0q, VALUE (&p).f);
   PUSH_VALUE (n, dble (rho * exp_double (sigma)), A68_LONG_REAL);
 }
 

@@ -26,11 +26,8 @@
 #include "a68g.h"
 #include "a68g-prelude.h"
 #include "a68g-genie.h"
-#include "a68g-listing.h"
-#include "a68g-mp.h"
 #include "a68g-optimiser.h"
 #include "a68g-plugin.h"
-#include "a68g-parser.h"
 #include "a68g-transput.h"
 
 // Constant folder                                                .
@@ -377,8 +374,8 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       POP_OBJECT (p, &im, A68_REAL);
       POP_OBJECT (p, &re, A68_REAL);
       indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_COMPLEX %s = {", acc));
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "{INIT_MASK, %.*g}", REAL_WIDTH + 2, VALUE (&re)));
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", {INIT_MASK, %.*g}", REAL_WIDTH + 2, VALUE (&im)));
+      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "{INIT_MASK, %.*g}", A68_REAL_WIDTH + 2, VALUE (&re)));
+      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", {INIT_MASK, %.*g}", A68_REAL_WIDTH + 2, VALUE (&im)));
       undent (out, "};\n");
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
     }
@@ -405,12 +402,12 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
         A68_OPT (code_errors)++;
         VALUE (&x) = 0.0;
       }
-      if (VALUE (&x) == REAL_MAX) {
-        undent (out, "REAL_MAX");
-      } else if (VALUE (&x) == -REAL_MAX) {
-        undent (out, "(-REAL_MAX)");
+      if (VALUE (&x) == A68_REAL_MAX) {
+        undent (out, "A68_REAL_MAX");
+      } else if (VALUE (&x) == -A68_REAL_MAX) {
+        undent (out, "(-A68_REAL_MAX)");
       } else {
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%.*g", REAL_WIDTH + 2, VALUE (&x)) >= 0);
+        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%.*g", A68_REAL_WIDTH + 2, VALUE (&x)) >= 0);
         undent (out, A68 (edit_line));
       }
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);

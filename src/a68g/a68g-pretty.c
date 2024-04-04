@@ -29,8 +29,8 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-parser.h"
-#include "a68g-prelude.h"
 #include "a68g-optimiser.h"
+#include "a68g-prelude.h"
 
 #define MAX_INDENT 60
 
@@ -852,12 +852,12 @@ BOOL_T indent_folder (NODE_T * p)
 // Mind overflowing or underflowing values.
     if (ERROR_COUNT (&A68_JOB) != 0) {
       return A68_FALSE;
-    } else if (VALUE (&x) == REAL_MAX) {
+    } else if (VALUE (&x) == A68_REAL_MAX) {
       return A68_FALSE;
-    } else if (VALUE (&x) == -REAL_MAX) {
+    } else if (VALUE (&x) == -A68_REAL_MAX) {
       return A68_FALSE;
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%.*g", REAL_WIDTH, VALUE (&x)) >= 0);
+      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%.*g", A68_REAL_WIDTH, VALUE (&x)) >= 0);
       errno = 0;
       conv = strtod (A68 (output_line), NO_VAR);
       if (errno == ERANGE && conv == 0.0) {

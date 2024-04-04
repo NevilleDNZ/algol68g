@@ -80,7 +80,7 @@
 
 #define A68_DIR ".a68g"
 #define A68_HISTORY_FILE ".a68g.edit.hist"
-#define A68_NO_FILENO ((FILE_T) -1)
+#define A68_NO_FILE ((FILE_T) -1)
 #define A68_PROTECTION (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)  // -rw-r--r--
 #define A68_READ_ACCESS (O_RDONLY)
 #define A68_WRITE_ACCESS (O_WRONLY | O_CREAT | O_TRUNC)
@@ -110,10 +110,6 @@
 #define SNPRINTF_SIZE ((size_t) (BUFFER_SIZE - 1))
 #define TRANSPUT_BUFFER_SIZE BUFFER_SIZE
 #define WANT_PATTERN A68_TRUE
-
-#define MANT_DIGS(n) ((int) round ((n) * log10 (2.0)))
-#define MANT_BITS(n) ((int) round ((n) / log10 (2.0)))
-#define REAL_DIGITS MANT_DIGS (REAL_MANT_DIG)
 
 // Macros
 
@@ -219,21 +215,12 @@
 #define IN_PRELUDE(p) (LINE_NUMBER (p) <= 0)
 #define EOL(c) ((c) == NEWLINE_CHAR || (c) == NULL_CHAR)
 
-#define SIZE_ALIGNED(p) ((int) A68_ALIGN (sizeof (p)))
-#define A68_REF_SIZE (SIZE_ALIGNED (A68_REF))
-#define A68_UNION_SIZE (SIZE_ALIGNED (A68_UNION))
-
-#define A68_SOUND_BYTES(s) ((int) (BITS_PER_SAMPLE (s)) / 8 + (int) (BITS_PER_SAMPLE (s) % 8 == 0 ? 0 : 1))
-#define A68_SOUND_DATA_SIZE(s) ((int) (NUM_SAMPLES (s)) * (int) (NUM_CHANNELS (s)) * (int) (A68_SOUND_BYTES (s)))
 #define BACKWARD(p) (p = PREVIOUS (p))
-#define BITS_WIDTH ((int) (1 + ceil (log ((REAL_T) A68_MAX_INT) / log ((REAL_T) 2))))
 #define DEFLEX(p) (DEFLEXED (p) != NO_MOID ? DEFLEXED(p) : (p))
 #define FORWARD(p) ((p) = NEXT (p))
-#define INT_WIDTH ((int) (1 + floor (log ((REAL_T) A68_MAX_INT) / log ((REAL_T) 10))))
-#define LONG_INT_WIDTH (1 + LONG_WIDTH)
 #define PM(m) (moid_to_string (m, 132, NO_NODE))
 #define SIGN(n) ((n) == 0 ? 0 : ((n) > 0 ? 1 : -1))
-#define WIS(p) where_in_source (STDOUT_FILENO, (p))
+#define WIS(p) where_in_source (A68_STDOUT, (p))
 #define WRITE(f, s) io_write_string ((f), (s));
 #define WRITELN(f, s) {WRITE ((f), "\n"); WRITE ((f), (s));}
 

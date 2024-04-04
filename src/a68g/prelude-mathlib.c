@@ -24,14 +24,8 @@
 //! Standard prelude definitions from GNU R math library.
 
 #include "a68g.h"
-#include "a68g-optimiser.h"
 #include "a68g-prelude.h"
 #include "a68g-prelude-mathlib.h"
-#include "a68g-transput.h"
-#include "a68g-mp.h"
-#include "a68g-parser.h"
-#include "a68g-physics.h"
-#include "a68g-double.h"
 
 #if defined (HAVE_MATHLIB)
 

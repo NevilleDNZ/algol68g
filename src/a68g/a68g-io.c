@@ -40,7 +40,7 @@ void init_tty (void)
 void io_close_tty_line (void)
 {
   if (A68 (chars_in_tty_line) > 0) {
-    io_write_string (STDOUT_FILENO, NEWLINE_STRING);
+    io_write_string (A68_STDOUT, NEWLINE_STRING);
   }
 }
 
@@ -50,7 +50,7 @@ char get_stdin_char (void)
 {
   char ch[4];
   errno = 0;
-  ssize_t j = io_read_conv (STDIN_FILENO, &(ch[0]), 1);
+  ssize_t j = io_read_conv (A68_STDIN, &(ch[0]), 1);
   ABEND (j < 0, ERROR_ACTION, __func__);
   return (char) (j == 1 ? ch[0] : EOF_CHAR);
 }
@@ -72,7 +72,7 @@ char *read_string_from_tty (char *prompt)
   int ch, k = 0, n;
   if (prompt != NO_TEXT) {
     io_close_tty_line ();
-    io_write_string (STDOUT_FILENO, prompt);
+    io_write_string (A68_STDOUT, prompt);
   }
   ch = get_stdin_char ();
   while (ch != NEWLINE_CHAR && k < BUFFER_SIZE - 1) {
@@ -98,7 +98,7 @@ char *read_string_from_tty (char *prompt)
 void io_write_string (FILE_T f, const char *z)
 {
   errno = 0;
-  if (f != STDOUT_FILENO && f != STDERR_FILENO) {
+  if (f != A68_STDOUT && f != A68_STDERR) {
 // Writing to file.
     ssize_t j = io_write_conv (f, z, strlen (z));
     ABEND (j < 0, ERROR_ACTION, __func__);

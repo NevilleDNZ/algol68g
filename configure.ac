@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.3.5, configure.ac
+# Algol 68 Genie 3.3.16, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.3.5], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.3.16], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 # Check whether compiler supports $1 as a command-line option. 
@@ -136,7 +136,6 @@ AC_ARG_ENABLE(stable, [AS_HELP_STRING([--enable-stable], [conservative build wit
 AC_ARG_ENABLE(standard-types, [AS_HELP_STRING([--enable-standard-types], [enable int*4 and real*8 modes (default is "yes")])], , enable_standard_types=yes) 
 AC_ARG_ENABLE(www, [AS_HELP_STRING([--enable-www], [enable fetching web page contents (default is "yes")])], , enable_www="yes") 
 
-AC_CHECK_PROG(a68g_exists, a68g, "yes", "no")
 AC_CHECK_PROG(sed_exists, sed, "yes", "no")
 AC_CHECK_PROG(tar_exists, tar, "yes", "no")
 
@@ -531,18 +530,24 @@ if test "x$enable_standard_types" = "xyes"; then
     [AC_MSG_RESULT(no)
      enable_long_types=no],
   [])
-  AC_MSG_CHECKING([double is 64 bit])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([], [return sizeof (double) != 8;])],
-    [AC_MSG_RESULT(yes)],
-    [AC_MSG_RESULT(no)
-     enable_long_types=no],
-  [])
   AC_MSG_CHECKING([uint64_t is 64 bit])
   AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <stdint.h>], [return sizeof (uint64_t) != 8;])],
     [AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)
      enable_standard_types=no
      enable_long_types=no],
+  [])
+  AC_MSG_CHECKING([double is 64 bit])
+  AC_RUN_IFELSE([AC_LANG_PROGRAM([], [return sizeof (double) != 8;])],
+    [AC_MSG_RESULT(yes)],
+    [AC_MSG_RESULT(no)
+     enable_long_types=no],
+  [])
+  AC_MSG_CHECKING([long double has 64-bit mantissa])
+  AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <float.h>], [return LDBL_MANT_DIG != 64;])],
+    [AC_MSG_RESULT(yes)
+     AC_DEFINE(HAVE_FLT80, 1, [Define this if long double has a 64-bit mantissa])],
+    [AC_MSG_RESULT(no)],
   [])
 fi
 
@@ -559,24 +564,6 @@ if test "x$enable_long_types" = "xyes"; then
   [])
   AC_MSG_CHECKING([64-bit long long unsigned is available])
   AC_RUN_IFELSE([AC_LANG_PROGRAM([], [return sizeof (long long unsigned) != 8;])],
-    [AC_MSG_RESULT(yes)],
-    [AC_MSG_RESULT(no)
-     enable_long_types=no],
-  [])
-  AC_MSG_CHECKING([80-bit long double is available])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([], [return sizeof (long double) != 16;])],
-    [AC_MSG_RESULT(yes)],
-    [AC_MSG_RESULT(no)
-     enable_long_types=no],
-  [])
-  AC_MSG_CHECKING([80-bit long double has 64-bit mantissa])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <float.h>], [return LDBL_MANT_DIG != 64;])],
-    [AC_MSG_RESULT(yes)],
-    [AC_MSG_RESULT(no)
-     enable_long_types=no],
-  [])
-  AC_MSG_CHECKING([long double complex is available])
-  AC_RUN_IFELSE([AC_LANG_PROGRAM([typedef _Complex float __attribute__((mode(XC))) __complex80;], [return sizeof (__complex80) != 32;])],
     [AC_MSG_RESULT(yes)],
     [AC_MSG_RESULT(no)
      enable_long_types=no],
@@ -711,7 +698,6 @@ if test "x$enable_www" = "xyes"; then
   AC_CHECK_HEADERS([sys/select.h], [], [enable_www=no], [])
   AC_CHECK_HEADERS([sys/socket.h], [], [enable_www=no], [])
   AC_CHECK_HEADERS([sys/types.h], [], [enable_www=no], [])
-  AC_CHECK_HEADERS([arpa/inet.h], [], [enable_www=no], [])
   AC_CHECK_HEADERS([netinet/in.h], [], [enable_www=no], [])
   if test "x$enable_www" = "xyes"; then
     AC_DEFINE(BUILD_WWW, 1, [Define this if a good WWW installation was detected]) 
@@ -796,7 +782,6 @@ else
   AC_MSG_NOTICE([building interpreter-only])
 fi
 AC_MSG_NOTICE([])
-AC_MSG_NOTICE([now type 'make' optionally followed by 'make check' or 'make install'])
-if test "x$a68g_exists" = "xyes"; then
-  AC_MSG_NOTICE([since a68g is already installed, 'make install' is recommended])
-fi
+AC_MSG_NOTICE([Now enter 'make', optionally followed by 'make check'.])
+AC_MSG_NOTICE([Enter 'make install' to install a68g for all users.])
+AC_MSG_NOTICE([Consult the README file for more information.])

@@ -28,7 +28,6 @@
 #include "a68g-prelude.h"
 #include "a68g-double.h"
 #include "a68g-mp.h"
-#include "a68g-lib.h"
 
 //! @brief PROC (LONG REAL) LONG REAL erf
 
@@ -120,7 +119,7 @@ MP_T *inverf_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 #else
   REAL_T y = ABS (mp_to_real (p, x, digs));
   if (y < erf (4.0)) {
-    y = a68_inverf (y);
+    y = a68_inverf_real (y);
     gdigs = FUN_DIGITS (digs);
   } else {
     y = 4.0;

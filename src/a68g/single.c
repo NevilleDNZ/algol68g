@@ -287,7 +287,7 @@ void genie_pow_real_int (NODE_T * p)
   A68_REAL x;
   POP_OBJECT (p, &j, A68_INT);
   POP_OBJECT (p, &x, A68_REAL);
-  REAL_T z = a68_x_up_n (VALUE (&x), VALUE (&j));
+  REAL_T z = a68_x_up_n_real (VALUE (&x), VALUE (&j));
   CHECK_REAL (p, z);
   PUSH_VALUE (p, z, A68_REAL);
 }
@@ -393,14 +393,8 @@ void genie_exp_real (NODE_T * p)
 {
   A68_REAL *x;
   POP_OPERAND_ADDRESS (p, x, A68_REAL);
-  if (VALUE (x) > LOG_DBL_MAX) {
-    errno = EDOM;
-  } else if (VALUE (x) < LOG_DBL_MIN) {
-    errno = EDOM;
-  } else {
-    errno = 0;
-    VALUE (x) = exp (VALUE (x));
-  }
+  errno = 0;
+  VALUE (x) = exp (VALUE (x));
   MATH_RTE (p, errno != 0, M_REAL, NO_TEXT);
 }
 
@@ -408,14 +402,14 @@ void genie_exp_real (NODE_T * p)
 
 void genie_ln_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_ln);
+  C_FUNCTION (p, a68_ln_real);
 }
 
 // @brief PROC (REAL) REAL ln1p
 
 void genie_ln1p_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_ln1p);
+  C_FUNCTION (p, a68_ln1p_real);
 }
 
 // @brief PROC (REAL) REAL log
@@ -437,6 +431,13 @@ void genie_sin_real (NODE_T * p)
 void genie_asin_real (NODE_T * p)
 {
   C_FUNCTION (p, asin);
+}
+
+// @brief PROC (REAL) REAL cas
+
+void genie_cas_real (NODE_T * p)
+{
+  C_FUNCTION (p, a68_cas_real);
 }
 
 // @brief PROC (REAL) REAL cos
@@ -464,42 +465,42 @@ void genie_tan_real (NODE_T * p)
 
 void genie_csc_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_csc);
+  C_FUNCTION (p, a68_csc_real);
 }
 
 // @brief PROC (REAL) REAL acsc
 
 void genie_acsc_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_acsc);
+  C_FUNCTION (p, a68_acsc_real);
 }
 
 // @brief PROC (REAL) REAL sec 
 
 void genie_sec_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_sec);
+  C_FUNCTION (p, a68_sec_real);
 }
 
 // @brief PROC (REAL) REAL asec
 
 void genie_asec_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_asec);
+  C_FUNCTION (p, a68_asec_real);
 }
 
 // @brief PROC (REAL) REAL cot 
 
 void genie_cot_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_cot);
+  C_FUNCTION (p, a68_cot_real);
 }
 
 // @brief PROC (REAL) REAL acot
 
 void genie_acot_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_acot);
+  C_FUNCTION (p, a68_acot_real);
 }
 
 // @brief PROC (REAL) REAL arctan
@@ -517,7 +518,7 @@ void genie_atan2_real (NODE_T * p)
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
   errno = 0;
   PRELUDE_ERROR (VALUE (x) == 0.0 && VALUE (y) == 0.0, p, ERROR_INVALID_ARGUMENT, M_LONG_REAL);
-  VALUE (x) = a68_atan2 (VALUE (y), VALUE (x));
+  VALUE (x) = a68_atan2_real (VALUE (y), VALUE (x));
   PRELUDE_ERROR (errno != 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
 }
 
@@ -525,56 +526,84 @@ void genie_atan2_real (NODE_T * p)
 
 void genie_sindg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_sindg);
+  C_FUNCTION (p, a68_sindg_real);
 }
 
 // @brief PROC (REAL) REAL arcsindg
 
 void genie_asindg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_asindg);
+  C_FUNCTION (p, a68_asindg_real);
 }
 
 // @brief PROC (REAL) REAL cosdg
 
 void genie_cosdg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_cosdg);
+  C_FUNCTION (p, a68_cosdg_real);
 }
 
 // @brief PROC (REAL) REAL arccosdg
 
 void genie_acosdg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_acosdg);
+  C_FUNCTION (p, a68_acosdg_real);
 }
 
 // @brief PROC (REAL) REAL tandg
 
 void genie_tandg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_tandg);
+  C_FUNCTION (p, a68_tandg_real);
 }
 
 // @brief PROC (REAL) REAL arctandg
 
 void genie_atandg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_atandg);
+  C_FUNCTION (p, a68_atandg_real);
+}
+
+// @brief PROC (REAL) REAL cscdg
+
+void genie_cscdg_real (NODE_T * p)
+{
+  C_FUNCTION (p, a68_cscdg_real);
+}
+
+// @brief PROC (REAL) REAL acscdg
+
+void genie_acscdg_real (NODE_T * p)
+{
+  C_FUNCTION (p, a68_acscdg_real);
+}
+
+// @brief PROC (REAL) REAL secdg 
+
+void genie_secdg_real (NODE_T * p)
+{
+  C_FUNCTION (p, a68_secdg_real);
+}
+
+// @brief PROC (REAL) REAL asecdg
+
+void genie_asecdg_real (NODE_T * p)
+{
+  C_FUNCTION (p, a68_asecdg_real);
 }
 
 // @brief PROC (REAL) REAL cotdg 
 
 void genie_cotdg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_cotdg);
+  C_FUNCTION (p, a68_cot_realdg_real);
 }
 
 // @brief PROC (REAL) REAL acotdg
 
 void genie_acotdg_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_acotdg);
+  C_FUNCTION (p, a68_acotdg_real);
 }
 
 // @brief PROC (REAL, REAL) REAL arctan2dg
@@ -585,7 +614,7 @@ void genie_atan2dg_real (NODE_T * p)
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
   errno = 0;
   PRELUDE_ERROR (VALUE (x) == 0.0 && VALUE (y) == 0.0, p, ERROR_INVALID_ARGUMENT, M_LONG_REAL);
-  VALUE (x) = CONST_180_OVER_PI * a68_atan2 (VALUE (y), VALUE (x));
+  VALUE (x) = CONST_180_OVER_PI * a68_atan2_real (VALUE (y), VALUE (x));
   PRELUDE_ERROR (errno != 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
 }
 
@@ -593,28 +622,28 @@ void genie_atan2dg_real (NODE_T * p)
 
 void genie_sinpi_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_sinpi);
+  C_FUNCTION (p, a68_sinpi_real);
 }
 
 // @brief PROC (REAL) REAL cospi
 
 void genie_cospi_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_cospi);
+  C_FUNCTION (p, a68_cospi_real);
 }
 
 // @brief PROC (REAL) REAL tanpi
 
 void genie_tanpi_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_tanpi);
+  C_FUNCTION (p, a68_tanpi_real);
 }
 
 // @brief PROC (REAL) REAL cotpi 
 
 void genie_cotpi_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_cotpi);
+  C_FUNCTION (p, a68_cot_realpi);
 }
 
 // @brief PROC (REAL) REAL sinh
@@ -642,21 +671,21 @@ void genie_tanh_real (NODE_T * p)
 
 void genie_asinh_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_asinh);
+  C_FUNCTION (p, a68_asinh_real);
 }
 
 // @brief PROC (REAL) REAL acosh
 
 void genie_acosh_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_acosh);
+  C_FUNCTION (p, a68_acosh_real);
 }
 
 // @brief PROC (REAL) REAL atanh
 
 void genie_atanh_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_atanh);
+  C_FUNCTION (p, a68_atanh_real);
 }
 
 // @brief PROC (REAL) REAL erf
@@ -670,7 +699,7 @@ void genie_erf_real (NODE_T * p)
 
 void genie_inverf_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_inverf);
+  C_FUNCTION (p, a68_inverf_real);
 }
 
 // @brief PROC (REAL) REAL erfc
@@ -684,7 +713,7 @@ void genie_erfc_real (NODE_T * p)
 
 void genie_inverfc_real (NODE_T * p)
 {
-  C_FUNCTION (p, a68_inverfc);
+  C_FUNCTION (p, a68_inverfc_real);
 }
 
 // @brief PROC (REAL) REAL gamma
@@ -708,7 +737,7 @@ void genie_beta_real (NODE_T * p)
   A68_REAL *x, *y;
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
   errno = 0;
-  VALUE (x) = a68_beta (VALUE (x), VALUE (y));
+  VALUE (x) = a68_beta_real (VALUE (x), VALUE (y));
   PRELUDE_ERROR (errno != 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
 }
 
@@ -719,7 +748,7 @@ void genie_ln_beta_real (NODE_T * p)
   A68_REAL *x, *y;
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
   errno = 0;
-  VALUE (x) = a68_ln_beta (VALUE (x), VALUE (y));
+  VALUE (x) = a68_ln_beta_real (VALUE (x), VALUE (y));
   PRELUDE_ERROR (errno != 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
 }
 
@@ -730,7 +759,7 @@ void genie_beta_inc_cf_real (NODE_T * p)
   A68_REAL *s, *t, *x;
   POP_3_OPERAND_ADDRESSES (p, s, t, x, A68_REAL);
   errno = 0;
-  VALUE (s) = a68_beta_inc (VALUE (s), VALUE (t), VALUE (x));
+  VALUE (s) = a68_beta_inc_real (VALUE (s), VALUE (t), VALUE (x));
   PRELUDE_ERROR (errno != 0, p, ERROR_MATH_EXCEPTION, NO_TEXT);
 }
 
@@ -820,7 +849,7 @@ void genie_abs_complex (NODE_T * p)
 {
   A68_REAL re_x, im_x;
   POP_COMPLEX (p, &re_x, &im_x);
-  PUSH_VALUE (p, a68_hypot (VALUE (&re_x), VALUE (&im_x)), A68_REAL);
+  PUSH_VALUE (p, a68_hypot_real (VALUE (&re_x), VALUE (&im_x)), A68_REAL);
 }
 
 // OP ARG = (COMPLEX) REAL
@@ -1126,7 +1155,7 @@ void a68_sqrt_complex (A68_REAL * z, A68_REAL * x)
 
 //! @brief PROC (COMPLEX) COMPLEX cexp
 
-void a68_exp_complex (A68_REAL * z, A68_REAL * x)
+void a68_exp_real_complex (A68_REAL * z, A68_REAL * x)
 {
   C_C_INLINE (z, x, cexp);
 }
@@ -1203,21 +1232,21 @@ void a68_tanh_complex (A68_REAL * z, A68_REAL * x)
 
 //! @brief PROC (COMPLEX) COMPLEX casinh
 
-void a68_asinh_complex (A68_REAL * z, A68_REAL * x)
+void a68_asinh_real_complex (A68_REAL * z, A68_REAL * x)
 {
   C_C_INLINE (z, x, casinh);
 }
 
 //! @brief PROC (COMPLEX) COMPLEX cacosh
 
-void a68_acosh_complex (A68_REAL * z, A68_REAL * x)
+void a68_acosh_real_complex (A68_REAL * z, A68_REAL * x)
 {
   C_C_INLINE (z, x, cacosh);
 }
 
 //! @brief PROC (COMPLEX) COMPLEX catanh
 
-void a68_atanh_complex (A68_REAL * z, A68_REAL * x)
+void a68_atanh_real_complex (A68_REAL * z, A68_REAL * x)
 {
   C_C_INLINE (z, x, catanh);
 }
@@ -1229,7 +1258,7 @@ void genie_fact_real (NODE_T * p)
   A68_INT n;
   POP_OBJECT (p, &n, A68_INT);
   errno = 0;
-  PUSH_VALUE (p, a68_fact (VALUE (&n)), A68_REAL);
+  PUSH_VALUE (p, a68_fact_real (VALUE (&n)), A68_REAL);
   MATH_RTE (p, errno != 0, M_INT, NO_TEXT);
 }
 
@@ -1240,7 +1269,7 @@ void genie_ln_fact_real (NODE_T * p)
   A68_INT n;
   POP_OBJECT (p, &n, A68_INT);
   errno = 0;
-  PUSH_VALUE (p, a68_ln_fact (VALUE (&n)), A68_REAL);
+  PUSH_VALUE (p, a68_ln_fact_real (VALUE (&n)), A68_REAL);
   MATH_RTE (p, errno != 0, M_INT, NO_TEXT);
 }
 
@@ -1250,7 +1279,7 @@ void genie_choose_real (NODE_T * p)
   POP_OBJECT (p, &m, A68_INT);
   POP_OBJECT (p, &n, A68_INT);
   errno = 0;
-  PUSH_VALUE (p, a68_choose (VALUE (&n), VALUE (&m)), A68_REAL);
+  PUSH_VALUE (p, a68_choose_real (VALUE (&n), VALUE (&m)), A68_REAL);
   MATH_RTE (p, errno != 0, M_INT, NO_TEXT);
 }
 
@@ -1262,7 +1291,7 @@ void genie_ln_choose_real (NODE_T * p)
   POP_OBJECT (p, &m, A68_INT);
   POP_OBJECT (p, &n, A68_INT);
   errno = 0;
-  PUSH_VALUE (p, a68_ln_choose (VALUE (&n), VALUE (&m)), A68_REAL);
+  PUSH_VALUE (p, a68_ln_choose_real (VALUE (&n), VALUE (&m)), A68_REAL);
   MATH_RTE (p, errno != 0, M_INT, NO_TEXT);
 }
 
@@ -1511,8 +1540,8 @@ void genie_elem_bits (NODE_T * p)
   UNSIGNED_T mask = 0x1;
   POP_OBJECT (p, &j, A68_BITS);
   POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  for (int n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > A68_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
     mask = mask << 1;
   }
   PUSH_VALUE (p, (BOOL_T) ((VALUE (&j) & mask) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
@@ -1526,8 +1555,8 @@ void genie_set_bits (NODE_T * p)
   UNSIGNED_T mask = 0x1;
   POP_OBJECT (p, &j, A68_BITS);
   POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  for (int n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > A68_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
     mask = mask << 1;
   }
   PUSH_VALUE (p, VALUE (&j) | mask, A68_BITS);
@@ -1541,8 +1570,8 @@ void genie_clear_bits (NODE_T * p)
   UNSIGNED_T mask = 0x1;
   POP_OBJECT (p, &j, A68_BITS);
   POP_OBJECT (p, &i, A68_INT);
-  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  for (int n = 0; n < (BITS_WIDTH - VALUE (&i)); n++) {
+  PRELUDE_ERROR (VALUE (&i) < 1 || VALUE (&i) > A68_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
+  for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
     mask = mask << 1;
   }
   PUSH_VALUE (p, VALUE (&j) & ~mask, A68_BITS);
@@ -1582,7 +1611,7 @@ void genie_bits_pack (NODE_T * p)
   CHECK_REF (p, z, M_ROW_BOOL);
   GET_DESCRIPTOR (arr, tup, &z);
   int size = ROW_SIZE (tup);
-  PRELUDE_ERROR (size < 0 || size > BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
+  PRELUDE_ERROR (size < 0 || size > A68_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
   A68_BITS b;
   VALUE (&b) = 0x0;
   if (ROW_SIZE (tup) > 0) {

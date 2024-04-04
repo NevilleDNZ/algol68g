@@ -25,23 +25,60 @@
 
 // References:
 //
-//   Milton Abramowitz and Irene Stegun, Handbook of Mathematical Functions,
-//   Dover Publications, New York [1970]
-//   https://en.wikipedia.org/wiki/Abramowitz_and_Stegun
+// M. Abramowitz and I. Stegun, Handbook of Mathematical Functions,
+// Dover Publications, New York [1970]
+// https://en.wikipedia.org/wiki/Abramowitz_and_Stegun
 
 #include "a68g.h"
-#include "a68g-genie.h"
-#include "a68g-prelude.h"
 #include "a68g-double.h"
 #include "a68g-numbers.h"
-#include "a68g-math.h"
 
 #if (A68_LEVEL >= 3)
 
+// Infinity.
+
+DOUBLE_T a68_div_double (DOUBLE_T x, DOUBLE_T y)
+{
+  return x / y;
+}
+
+DOUBLE_T a68_posinf_double (void)
+{
+  return a68_div_double (+1.0, 0.0);
+}
+
+DOUBLE_T a68_neginf_double (void)
+{
+  return a68_div_double (-1.0, 0.0);
+}
+
+//! @brief PROC (LONG REAL, LONG REAL) LONG REAL long hypot
+
+DOUBLE_T a68_hypot_double (DOUBLE_T x, DOUBLE_T y)
+{
+// Sqrt (x^2 + y^2) that does not needlessly overflow.
+  DOUBLE_T xabs = ABSQ (x), yabs = ABSQ (y), min, max;
+  if (xabs < yabs) {
+    min = xabs;
+    max = yabs;
+  } else {
+    min = yabs;
+    max = xabs;
+  }
+  if (min == 0.0q) {
+    return max;
+  } else {
+    DOUBLE_T u = min / max;
+    return max * sqrt_double (1.0q + u * u);
+  }
+}
+
+//! @brief PROC (LONG REAL, LONG REAL, LONG REAL) LONG REAL long beta inc
+
 DOUBLE_T a68_beta_inc_double (DOUBLE_T s, DOUBLE_T t, DOUBLE_T x)
 {
-// Incomplete beta function I{x}(s, t).
-// Continued fraction, see dlmf.nist.gov/8.17; Lentz's algorithm.
+// Incomplete beta function I{x}(s, t) by continued fraction,
+// see dlmf.nist.gov/8.17; Lentz's algorithm.
   if (x < 0.0q || x > 1.0q) {
     errno = ERANGE;
     return -1.0q;
@@ -82,119 +119,160 @@ DOUBLE_T a68_beta_inc_double (DOUBLE_T s, DOUBLE_T t, DOUBLE_T x)
   }
 }
 
-//! @brief PROC (LONG REAL) LONG REAL csc
+//! @brief PROC (LONG REAL) LONG REAL long csc
 
-DOUBLE_T csc_double (DOUBLE_T x)
+DOUBLE_T a68_csc_double (DOUBLE_T x)
 {
   DOUBLE_T z = sin_double (x);
   A68_OVERFLOW (z == 0.0q);
   return 1.0q / z;
 }
 
-//! @brief PROC (LONG REAL) LONG REAL acsc
+//! @brief PROC (LONG REAL) LONG REAL long acsc
 
-DOUBLE_T acsc_double (DOUBLE_T x)
+DOUBLE_T a68_acsc_double (DOUBLE_T x)
 {
   A68_OVERFLOW (x == 0.0q);
   return asin_double (1.0q / x);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL sec
+//! @brief PROC (LONG REAL) LONG REAL long sec
 
-DOUBLE_T sec_double (DOUBLE_T x)
+DOUBLE_T a68_sec_double (DOUBLE_T x)
 {
   DOUBLE_T z = cos_double (x);
   A68_OVERFLOW (z == 0.0q);
   return 1.0q / z;
 }
 
-//! @brief PROC (LONG REAL) LONG REAL asec
+//! @brief PROC (LONG REAL) LONG REAL long asec
 
-DOUBLE_T asec_double (DOUBLE_T x)
+DOUBLE_T a68_asec_double (DOUBLE_T x)
 {
   A68_OVERFLOW (x == 0.0q);
   return acos_double (1.0q / x);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL cot
+//! @brief PROC (LONG REAL) LONG REAL long cot
 
-DOUBLE_T cot_double (DOUBLE_T x)
+DOUBLE_T a68_cot_double (DOUBLE_T x)
 {
   DOUBLE_T z = sin_double (x);
   A68_OVERFLOW (z == 0.0q);
   return cos_double (x) / z;
 }
 
-//! @brief PROC (LONG REAL) LONG REAL acot
+//! @brief PROC (LONG REAL) LONG REAL long acot
 
-DOUBLE_T acot_double (DOUBLE_T x)
+DOUBLE_T a68_acot_double (DOUBLE_T x)
 {
   A68_OVERFLOW (x == 0.0q);
   return atan_double (1 / x);
 }
 
-//! brief PROC (LONG REAL) LONG REAL sindg
+//! brief PROC (LONG REAL) LONG REAL long cas
 
-DOUBLE_T sindg_double (DOUBLE_T x)
+DOUBLE_T a68_cas_double (DOUBLE_T x)
+{
+// Hartley kernel, which Hartley named cas (cosine and sine).
+  return cos_double (x) + sin_double (x);
+}
+
+//! brief PROC (LONG REAL) LONG REAL long sindg
+
+DOUBLE_T a68_sindg_double (DOUBLE_T x)
 {
   return sin_double (x * CONST_PI_OVER_180_Q);
 }
 
-//! brief PROC (LONG REAL) LONG REAL cosdg
+//! brief PROC (LONG REAL) LONG REAL long cosdg
 
-DOUBLE_T cosdg_double (DOUBLE_T x)
+DOUBLE_T a68_cosdg_double (DOUBLE_T x)
 {
   return cos_double (x * CONST_PI_OVER_180_Q);
 }
 
-//! brief PROC (LONG REAL) LONG REAL tandg
+//! brief PROC (LONG REAL) LONG REAL long tandg
 
-DOUBLE_T tandg_double (DOUBLE_T x)
+DOUBLE_T a68_tandg_double (DOUBLE_T x)
 {
   return tan_double (x * CONST_PI_OVER_180_Q);
 }
 
-//! brief PROC (LONG REAL) LONG REAL asindg
+//! brief PROC (LONG REAL) LONG REAL long asindg
 
-DOUBLE_T asindg_double (DOUBLE_T x)
+DOUBLE_T a68_asindg_double (DOUBLE_T x)
 {
   return asin_double (x) * CONST_180_OVER_PI_Q;
 }
 
-//! brief PROC (LONG REAL) LONG REAL acosdg
+//! brief PROC (LONG REAL) LONG REAL long acosdg
 
-DOUBLE_T acosdg_double (DOUBLE_T x)
+DOUBLE_T a68_acosdg_double (DOUBLE_T x)
 {
   return acos_double (x) * CONST_180_OVER_PI_Q;
 }
 
-//! brief PROC (LONG REAL) LONG REAL atandg
+//! brief PROC (LONG REAL) LONG REAL long atandg
 
-DOUBLE_T atandg_double (DOUBLE_T x)
+DOUBLE_T a68_atandg_double (DOUBLE_T x)
 {
   return atan_double (x) * CONST_180_OVER_PI_Q;
 }
+//! @brief PROC (LONG REAL) LONG REAL long cscdg
 
-// PROC (LONG REAL) LONG REAL cotdg
-
-DOUBLE_T cotdg_double (DOUBLE_T x)
+DOUBLE_T a68_cscdg_double (DOUBLE_T x)
 {
-  DOUBLE_T z = a68_sindg (x);
-  A68_OVERFLOW (z == 0);
-  return a68_cosdg (x) / z;
+  DOUBLE_T z = a68_sindg_double (x);
+  A68_OVERFLOW (z == 0.0q);
+  return 1.0q / z;
 }
 
-// PROC (LONG REAL) LONG REAL acotdg
+//! @brief PROC (LONG REAL) LONG REAL long acscdg
 
-DOUBLE_T acotdg_double (DOUBLE_T z)
+DOUBLE_T a68_acscdg_double (DOUBLE_T x)
 {
-  A68_OVERFLOW (z == 0);
-  return a68_atandg (1 / z);
+  A68_OVERFLOW (x == 0.0q);
+  return a68_asindg_double (1.0q / x);
 }
 
-// @brief PROC (LONG REAL) LONG REAL sinpi
+//! @brief PROC (LONG REAL) LONG REAL long secdg
 
-DOUBLE_T sinpi_double (DOUBLE_T x)
+DOUBLE_T a68_secdg_double (DOUBLE_T x)
+{
+  DOUBLE_T z = a68_cosdg_double (x);
+  A68_OVERFLOW (z == 0.0q);
+  return 1.0q / z;
+}
+
+//! @brief PROC (LONG REAL) LONG REAL long asecdg
+
+DOUBLE_T a68_asecdg_double (DOUBLE_T x)
+{
+  A68_OVERFLOW (x == 0.0q);
+  return a68_acosdg_double (1.0q / x);
+}
+
+// PROC (LONG REAL) LONG REAL long cotdg
+
+DOUBLE_T a68_cotdg_double (DOUBLE_T x)
+{
+  DOUBLE_T z = a68_sindg_double (x);
+  A68_OVERFLOW (z == 0);
+  return a68_cosdg_double (x) / z;
+}
+
+// PROC (LONG REAL) LONG REAL long acotdg
+
+DOUBLE_T a68_acotdg_double (DOUBLE_T z)
+{
+  A68_OVERFLOW (z == 0);
+  return a68_atandg_double (1 / z);
+}
+
+// @brief PROC (LONG REAL) LONG REAL long sinpi
+
+DOUBLE_T a68_sinpi_double (DOUBLE_T x)
 {
   x = fmod_double (x, 2.0q);
   if (x <= -1.0q) {
@@ -215,9 +293,9 @@ DOUBLE_T sinpi_double (DOUBLE_T x)
   }
 }
 
-// @brief PROC (LONG REAL) LONG REAL cospi
+// @brief PROC (LONG REAL) LONG REAL long cospi
 
-DOUBLE_T cospi_double (DOUBLE_T x)
+DOUBLE_T a68_cospi_double (DOUBLE_T x)
 {
   x = fmod_double (fabs_double (x), 2.0q);
 // x in [0, 2>.
@@ -232,9 +310,9 @@ DOUBLE_T cospi_double (DOUBLE_T x)
   }
 }
 
-// @brief PROC (LONG REAL) LONG REAL tanpi
+// @brief PROC (LONG REAL) LONG REAL long tanpi
 
-DOUBLE_T tanpi_double (DOUBLE_T x)
+DOUBLE_T a68_tanpi_double (DOUBLE_T x)
 {
   x = fmod_double (x, 1.0q);
   if (x <= -0.5q) {
@@ -251,13 +329,13 @@ DOUBLE_T tanpi_double (DOUBLE_T x)
   } else if (x == 0.25q) {
     return 1.0q;
   } else {
-    return sinpi_double (x) / cospi_double (x);
+    return a68_sinpi_double (x) / a68_cospi_double (x);
   }
 }
 
-// @brief PROC (LONG REAL) LONG REAL cotpi
+// @brief PROC (LONG REAL) LONG REAL long cotpi
 
-DOUBLE_T cotpi_double (DOUBLE_T x)
+DOUBLE_T a68_cotpi_double (DOUBLE_T x)
 {
   x = fmod_double (x, 1.0q);
   if (x <= -0.5q) {
@@ -274,7 +352,7 @@ DOUBLE_T cotpi_double (DOUBLE_T x)
   } else if (x == 0.5q) {
     return 0.0q;
   } else {
-    return cospi_double (x) / sinpi_double (x);
+    return a68_cospi_double (x) / a68_sinpi_double (x);
   }
 }
 

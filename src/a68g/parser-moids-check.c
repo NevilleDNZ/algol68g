@@ -71,7 +71,6 @@
 
 #include "a68g.h"
 #include "a68g-parser.h"
-#include "a68g-prelude.h"
 #include "a68g-moids.h"
 
 //! @brief Driver for mode checker.

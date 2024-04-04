@@ -27,13 +27,46 @@
 #include "a68g-parser.h"
 
 // This code implements a small refinement preprocessor for A68G.
+// It is included for educational purposes only.
 //
-// At the University of Nijmegen a preprocessor much like this one was used
-// as a front-end to FLACC in elementary computer science courses.
+// At the University of Nijmegen a preprocessor much like this one
+// was used as a front-end to FLACC in freshman programming courses.
+//
 // See: 
 //
-// C.H.A. Koster et al., 
-// Systematisch programmeren in Algol 68, Deel I en II.
+//   C.H.A. Koster et al., 
+//   Systematisch programmeren in Algol 68, Deel I en II.
+//   Kluwer, Deventer [1978, 1981]
+//
+// The superimposed 'refinement grammar' is trivial:
+//
+//   refined-program-option:
+//     refined-algol-68-source-code;
+//     point-symbol;
+//     refinement-definition-sequence-option.
+//
+//   refinement-definition:
+//     defining-identifier;
+//     colon-symbol;
+//     refined-Algol-68-source-code;
+//     point-symbol.
+//
+//   refined-algol-68-source-code:
+//     # valid source code,
+//       with applied-refinements,
+//       without refinement-definitions #.
+//
+//   applied-refinement:
+//     identifier.
+//
+// An applied-refinement is textually substituted for its definition.
+//
+// Note that refinement-definitions cannot be nested.
+// Nested refinement-definitions would allow conflict with Algol 68 labels.
+// The naive approach (no nesting) was chosen here to keep matters simple.
+//
+// Wirth had another approach to refinements in Pascal: procedures.
+// That works for Algol 68 as well, of course.
 
 //! @brief Whether refinement terminator.
 
@@ -67,12 +100,12 @@ void get_refinements (void)
   if (p == NO_NODE || IN_PRELUDE (p)) {
     return;
   }
-// Apparently this is code with refinements.
   FORWARD (p);
   if (p == NO_NODE || IN_PRELUDE (p)) {
 // A program without refinements.
     return;
   }
+// Apparently this is code with refinements.
   while (p != NO_NODE && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, STOP)) {
     REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space ((size_t) SIZE_ALIGNED (REFINEMENT_T));
     NEXT (new_one) = NO_REFINEMENT;

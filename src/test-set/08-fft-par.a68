@@ -12,7 +12,7 @@ COMMENT
 
 PR quiet regression PR
 
-PR need threads need linux PR
+PR need threads, linux PR
 
 PROC fft = (REF () LONG COMPLEX f, INT dir) VOID:
 

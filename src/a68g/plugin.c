@@ -60,10 +60,8 @@
 #include "a68g-prelude.h"
 #include "a68g-genie.h"
 #include "a68g-listing.h"
-#include "a68g-mp.h"
 #include "a68g-optimiser.h"
 #include "a68g-plugin.h"
-#include "a68g-parser.h"
 #include "a68g-transput.h"
 
 //! @brief Compiler optimisation option string
@@ -92,10 +90,9 @@ char *optimisation_option (void)
   }
 }
 
+//! @brief Emit code for the plugin-compiler.
 
-//! @brief Compiler driver.
-
-void compiler (FILE_T out)
+void plugin_driver_emit (FILE_T out)
 {
   ADDR_T pop_temp_heap_pointer = A68 (temp_heap_pointer);
   if (OPTION_OPT_LEVEL (&A68_JOB) == NO_OPTIMISE) {
@@ -141,7 +138,7 @@ void compiler (FILE_T out)
   if (OPTION_VERBOSE (&A68_JOB)) {
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: A68_OPT (procedures)=%d unique-names=%d", A68 (a68_cmd_name), A68_OPT (procedures), A68_OPT (unic_pointer)) >= 0);
     io_close_tty_line ();
-    WRITE (STDOUT_FILENO, A68 (output_line));
+    WRITE (A68_STDOUT, A68 (output_line));
   }
 //
   for (int k = 0; k < A68_OPT (unic_pointer); k++) {
@@ -704,9 +701,9 @@ char *compile_denotation (NODE_T * p, FILE_T out)
       PUSH_UNION (p, M_REAL);
       push_unit (p);
       INCREMENT_STACK_POINTER (p, SIZE (M_NUMBER) - (A68_UNION_SIZE + SIZE (M_REAL)));
-      PUSH_VALUE (p, REAL_WIDTH + EXP_WIDTH + 5, A68_INT);
-      PUSH_VALUE (p, REAL_WIDTH, A68_INT);
-      PUSH_VALUE (p, EXP_WIDTH + 1, A68_INT);
+      PUSH_VALUE (p, A68_REAL_WIDTH + A68_EXP_WIDTH + 5, A68_INT);
+      PUSH_VALUE (p, A68_REAL_WIDTH, A68_INT);
+      PUSH_VALUE (p, A68_EXP_WIDTH + 1, A68_INT);
       PUSH_VALUE (p, 3, A68_INT);
       char *V = real (p);
       char W[NAME_SIZE];

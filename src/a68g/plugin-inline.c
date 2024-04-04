@@ -24,13 +24,8 @@
 //! Plugin compiler inlining routines.
 
 #include "a68g.h"
-#include "a68g-prelude.h"
-#include "a68g-genie.h"
-#include "a68g-listing.h"
-#include "a68g-mp.h"
 #include "a68g-optimiser.h"
 #include "a68g-plugin.h"
-#include "a68g-parser.h"
 #include "a68g-transput.h"
 
 //! @brief Code an A68 mode.
