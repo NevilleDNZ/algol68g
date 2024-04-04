@@ -242,7 +242,6 @@ void genie_putf_text (NODE_T * p)
       genie_write_standard_format (p, mode, item, ref_file, &formats);
       elem_index += SIZE (M_SIMPLOUT);
     }
-    * DEREF (A68_REF, &ref_string) = c_to_a_string (p, get_transput_buffer (FORMATTED_BUFFER), DEFAULT_WIDTH);
   }
 // Empty the format to purge insertions.
   purge_format_write (p, ref_file);
@@ -344,7 +343,6 @@ void genie_stringf (NODE_T * p)
       genie_write_standard_format (p, mode, item, ref_file, &formats);
       elem_index += SIZE (M_SIMPLOUT);
     }
-    * DEREF (A68_REF, &ref_string) = c_to_a_string (p, get_transput_buffer (FORMATTED_BUFFER), DEFAULT_WIDTH);
   }
 // Empty the format to purge insertions.
   purge_format_write (p, ref_file);

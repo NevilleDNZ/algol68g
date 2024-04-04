@@ -411,7 +411,7 @@ void genie (void *compile_plugin)
     A68 (in_execution) = A68_TRUE;
     A68 (f_entry) = TOP_NODE (&A68_JOB);
 #if defined (BUILD_UNIX)
-    (void) alarm (1);
+    (void) a68_alarm (INTERRUPT_INTERVAL);
 #endif
     if (OPTION_TRACE (&A68_JOB)) {
       WIS (TOP_NODE (&A68_JOB));

@@ -89,6 +89,7 @@
 #define EMBEDDED_FORMAT A68_TRUE
 #define EVEN(k) ((k) % 2 == 0)
 #define HIDDEN_TEMP_FILE_NAME ".a68g.tmp"
+#define INTERRUPT_INTERVAL 5
 #define ITEM_NOT_USED (-1)
 #define MAX_ERRORS 5
 #define MAX_PRIORITY 9
@@ -354,7 +355,8 @@
 #define HAS_ROWS(p) ((p)->has_rows)
 #define HEAP(p) ((p)->heap)
 #define HEAP_POINTER(p) ((p)->heap_pointer)
-#define H_ADDR(p) ((p)->h_addr)
+// #define H_ADDR(p) ((p)->h_addr) only available with __USE_MISC allowing ancient features (4.3BSD and SysV). 
+#define H_ADDR(p) ((p)->h_addr_list[0]) 
 #define H_LENGTH(p) ((p)->h_length)
 #define ID(p) ((p)->id)
 #define IDENTIFICATION(p) ((p)->identification)
@@ -634,7 +636,7 @@
 #define VALUE_ERROR_MENDED(p) ((p)->value_error_mended)
 #define WARNING_COUNT(p) ((p)->warning_count)
 #define WHERE(p) ((p)->where)
-#define IF_ROW(m) (IS_FLEX (m) || IS_ROW (m) || m == M_STRING)
+#define IS_FLEXETY_ROW(m) (IS_FLEX (m) || IS_ROW (m) || m == M_STRING)
 #define IS_COERCION(p) ((p)->is_coercion)
 #define IS_FLEX(m) IS ((m), FLEX_SYMBOL)
 #define IS_LITERALLY(p, s) (strcmp (NSYMBOL (p), s) == 0)
