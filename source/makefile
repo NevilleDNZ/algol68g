@@ -1,6 +1,6 @@
-# ./source/makefile generated on Fri Feb 29 00:55:36 CET 2008 by marcel.
+# ./source/makefile generated on Mon May  5 08:56:18 EST 2008 by ndempsey.
 SHELL=/bin/sh
-USR_BIN=/home/marcel/a68g/algol68g-mk11.1
+USR_BIN=/home/ndempsey/prj/a68/algol68g-mk12
 USR_LIB=/usr/local/lib
 USR_INC=/usr/local/include
 CC=gcc
@@ -15,14 +15,14 @@ CURSES_FLAG=-DENABLE_CURSES
 TERMINFO_FLAG=-DENABLE_TERMINFO
 HTTP_FLAG=-DENABLE_HTTP
 REGEX_FLAG=-DENABLE_REGEX
-SQL_DIR=/usr/local/pgsql
+SQL_DIR=/usr
 SQL_LIBS=-lpq
 SQL_FLAG=-DENABLE_POSTGRESQL
 IEEE_754_FLAG=-DENABLE_IEEE_754
-STD_CFLAGS=-I$(USR_INC) -I/usr/local/pgsql/include -w -O3
-STD_LD_FLAGS=-L$(USR_LIB) -L$(SQL_DIR)/lib 
-HS=algol68g.h config.h diagnostics.h environ.h genie.h gsl.h mp.h transput.h version.h
-CS=acronym.o algol68g.o coercion.o complex.o diagnostics.o engine.o extensions.o fft.o generator.o genie.o gsl.o http.o io.o listing.o moids.o monitor.o mp.o names.o options.o parallel.o parser.o plotutils.o prelude.o regex.o scanner.o scope.o signal.o sound.o standard.o stowed.o support.o taxes.o torrix.o transput.o
+STD_CFLAGS=-I$(USR_INC) -w 
+STD_LD_FLAGS=-L$(USR_LIB) 
+HS=algol68g.h config.h diagnostics.h environ.h genie.h gsl.h inline.h mp.h transput.h version.h
+CS=acronym.o algol68g.o coercion.o diagnostics.o engine.o generator.o genie.o io.o listing.o math.o moids.o monitor.o mp.o names.o optimised.o options.o parallel.o parser.o plotutils.o prelude.o scanner.o scope.o signal.o sound.o standard.o stowed.o support.o taxes.o transput.o unix.o
 FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(CFLAGS)
 all:    a68g
 a68g:   $(CS)

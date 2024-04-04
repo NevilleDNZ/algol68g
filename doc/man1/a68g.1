@@ -42,7 +42,7 @@ a68g
 .Ar filename
 .
 .Sh DESCRIPTION
-Algol 68 Genie (a68g) is an Algol 68 interpreter. The interpreter offers many runtime checks and is pedantic rather than fast.
+Algol 68 Genie (Algol68G) is an Algol 68 interpreter. It can be used for executing Algol 68 programs or scripts. Algol 68 is a rather lean orthogonal general-purpose language that is a beautiful means for denoting algorithms. Algol 68 was designed as a general-purpose programming language by IFIP Working Group 2.1 (Algorithmic Languages and Calculi) that has continuing responsibility for Algol 60 and Algol 68. 
 .
 .Sh OPTIONS
 Options are passed to a68g either from the file .a68g.rc in the working directory, the environment variable A68G_OPTIONS, the command-line or from pragmats. 
@@ -59,7 +59,7 @@ means
 .Pp
     a68g -precision 200 -timelimit 60 ...
 .Pp
-Where numeric arguments are required, suffix 'k', 'M' or 'G' is allowed for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
+Where numeric arguments are required, suffices 'k', 'M' or 'G' are allowed for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
 .Bl -tag -width Ds
 .
 .It Fl Assertions | Fl NOAssertions
@@ -75,7 +75,7 @@ Consider [ .. ] and { .. } as being equivalent to ( .. ). Traditional Algol 68 s
 Check syntax only, the interpreter does not start.
 .
 .It Fl DEBUG | Fl MONitor
-Invoke the monitor in case a runtime-error occurs. The program will pause in the monitor on the line that contains the error.
+Start in the monitor. Invoke the monitor in case a runtime-error occurs; the program will pause in the monitor on the line that contains the error.
 .
 .It Fl ECHO Ar string
 Echo `string' to standout.

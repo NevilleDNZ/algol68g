@@ -1,7 +1,7 @@
 <!-- RRHeader -->
 <html>
 <head>
-<title>Algol 68 Genie</title>
+<title>Algol 68 Genie - Revised Report on the Algorithmic Language Algol 68</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -265,9 +265,9 @@ p) INT max abs char = <b>C</b> the largest integral equivalent {<a href="report_
 <a name=A21q></a>
 q) CHAR null character = <b>C</b>  some character <b>C</b>; 
 <a name=A21r></a>
-r) CHAR flip = <b>C</b> the character used to represent 'true' during transput {<a href="#A331a">10.3.3.1.a</a>, <a href="#A332a">10.3.3.2.a</a>}  <b>C</b>; 
+r) CHAR flip = <b>C</b> the character used to represent '<tt>true</tt>' during transput {<a href="#A331a">10.3.3.1.a</a>, <a href="#A332a">10.3.3.2.a</a>}  <b>C</b>; 
 <a name=A21s></a>
-s) CHAR flop = <b>C</b> the character used to represent 'false' during transput <b>C</b>; 
+s) CHAR flop = <b>C</b> the character used to represent '<tt>false</tt>' during transput <b>C</b>; 
 <a name=A21t></a>
 t) CHAR errorchar = <b>C</b> the character used to represent unconvertible arithmetic values {<a href="#A321b">10.3.2.1.b</a>, c, d, e, f} during transput <b>C</b>; 
 <a name=A21u></a>
@@ -384,8 +384,8 @@ f) OP ABS = (BOOL a) INT: (a | 1 | 0) ;
 
 <a name=A233a></a>
 <pre>
-a) OP &laquo;&lt;, LT&raquo; = (<b><i>L</i></b> INT a, b) BOOL: <b>C</b> true if the value of 'a' is smaller than 
-      {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' and false otherwise <b>C</b>; 
+a) OP &laquo;&lt;, LT&raquo; = (<b><i>L</i></b> INT a, b) BOOL: <b>C</b> <tt>true</tt> if the value of 'a' is smaller than 
+      {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' and <tt>false</tt> otherwise <b>C</b>; 
 <a name=A233b></a>
 b) OP &laquo;&le;, <=, LE&raquo; = (<b><i>L</i></b> INT a, b) BOOL: NOT (b < a) ;
 <a name=A233c></a>
@@ -449,8 +449,8 @@ u) OP &laquo;+&times;, +*, I&raquo; = (<b><i>L</i></b> INT a, b)  <b><i>L</i></b
  
 <a name=A234a></a>
 <pre>
-a) OP &laquo;&lt;, LT&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: <b>C</b> true if the value of 'a' is smaller 
-      than {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' and false otherwise <b>C</b>; 
+a) OP &laquo;&lt;, LT&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: <b>C</b> <tt>true</tt> if the value of 'a' is smaller 
+      than {<a href="report_1.html#2131e">2.1.3.1.e</a>}  that of 'b' and <tt>false</tt> otherwise <b>C</b>; 
 <a name=A234b></a>
 b) OP &laquo;&le;, <=, LE&raquo; = (<b><i>L</i></b>  REAL a, b) BOOL: NOT (b < a) ;
 <a name=A234c></a>
@@ -986,7 +986,7 @@ h) SEMA ? bfileprotect = (SEMA s; <b>F</b> OF s := PRIM INT := 1; s) ;
 results of which are collected by the computer) , or to a filestore maintained by the operating system. A channel is a structured value whose fields are routines returning truth values which determine the available methods of access to a book linked via that channel, Since the methods of access to a book may well depend on the book as well as on the channel (e.g., a certain book may have been trapped so that it may be read, but not written to) , most of these properties depend on both the channel and the book. These properties may be examined by use of the environment enquiries provided for files {<a href="#A313ff">10.3.1.3.ff</a>}. Two environment enquiries are provided for channels. These are:  
 
 <p>
-&bull; <tt>estab possible</tt>, which returns true if another file may be  "established" {<a href="#A314cc">10.3.1.4.cc</a>} on the channel;  
+&bull; <tt>estab possible</tt>, which returns <tt>true</tt> if another file may be  "established" {<a href="#A314cc">10.3.1.4.cc</a>} on the channel;  
 
 <p>
 &bull; <tt>standconv</tt>, which may be used to obtain the default "conversion key" {bb} for the channel, 
@@ -1011,16 +1011,16 @@ c) PROC estab possible = (CHANNEL chan) BOOL: estab OF chan;
 d) PROC standconv = (CHANNEL chan) PROC (REF BOOK) CONV: standconv OF chan; 
 <a name=A312e></a>
 e) CHANNEL stand in channel = <b>C</b> a channel value whose field selected by 
-      'get' is a routine which always returns true, and whose other
+      'get' is a routine which always returns <tt>true</tt>, and whose other
       fields are some suitable values <b>C</b>;
 <a name=A312f></a>
 f) CHANNEL stand out channel = <b>C</b> a channel value whose field selected by 
-      'put' is a routine which always returns true, and whose other
+      'put' is a routine which always returns <tt>true</tt>, and whose other
       fields are some suitable values <b>C</b>;
 <a name=A312g></a>
 g) CHANNEL stand back channel = <b>C</b> a channel value whose fields selected by 
       'set', 'reset', 'get', 'put' and 'bin' are routines which always
-      return true, and whose other fields are some suitable values <b>C</b>;
+      return <tt>true</tt>, and whose other fields are some suitable values <b>C</b>;
 </pre>
 
 <h3>
@@ -1032,15 +1032,15 @@ g) CHANNEL stand back channel = <b>C</b> a channel value whose fields selected b
 
 <ul>
 <a name=A313bb></a>bb) The "state" of a file is determined by five fields:  
-<li><tt>read mood</tt>, which is true if the file is being used for input:  
-<li><tt>write mood</tt>, which is true if the file is being used for output:  
-<li><tt>char mood</tt>, which is true if the file is being used for character transput;  
-<li><tt>bin mood</tt>, which is true if the file is being used for binary transput:  
-<li><tt>opened</tt>, which is true if the file has been linked to a book. 
+<li><tt>read mood</tt>, which is <tt>true</tt> if the file is being used for input:  
+<li><tt>write mood</tt>, which is <tt>true</tt> if the file is being used for output:  
+<li><tt>char mood</tt>, which is <tt>true</tt> if the file is being used for character transput;  
+<li><tt>bin mood</tt>, which is <tt>true</tt> if the file is being used for binary transput:  
+<li><tt>opened</tt>, which is <tt>true</tt> if the file has been linked to a book. 
 </ul>
 
 <p>
-<a name=A313cc></a>cc) A file includes some "event routines", which are called when certain conditions arise during transput. After opening a file, the event routines provided by default return false when called, but the programmer may provide other event routines. Since the fields of a file are not directly accessible to the user, the event routines may be changed by use of the "on routines" (l,m,n,o,p,q,r) . The event routines are always given a reference to the file as a parameter. If the elaboration of an event routine is terminated, then the transput routine which called it can take no further action: otherwise, if it returns true, then it is assumed that the condition has been mended in some way, and, if possible, transput continues, but if it returns false, then the system continues with its default action. The on routines are:  
+<a name=A313cc></a>cc) A file includes some "event routines", which are called when certain conditions arise during transput. After opening a file, the event routines provided by default return <tt>false</tt> when called, but the programmer may provide other event routines. Since the fields of a file are not directly accessible to the user, the event routines may be changed by use of the "on routines" (l,m,n,o,p,q,r) . The event routines are always given a reference to the file as a parameter. If the elaboration of an event routine is terminated, then the transput routine which called it can take no further action: otherwise, if it returns <tt>true</tt>, then it is assumed that the condition has been mended in some way, and, if possible, transput continues, but if it returns <tt>false</tt>, then the system continues with its default action. The on routines are:  
 
 <p>
 &bull; <tt>on logical file end</tt>. The corresponding event routine is called when, during input from a book or as a result of calling <tt>set</tt>, the logical end of the book is reached (see <a href="#A316dd">10.3.1.6.dd</a>) .  
@@ -1082,7 +1082,7 @@ on page end (f, (REF FILE file) BOOL:
 </pre>
 
 <p>
-&bull; <tt>on char error</tt>. The corresponding event routine is called when a character conversion was unsuccessful or when, during input, a character is read which was not "expected" {<a href="#A3411ll">10.3.4.1.ll</a>}. The event routine is called with a reference to a character suggested as a replacement. The event routine provided by the programmer may assign some character other than the suggested one. If the event routine returns true, then that suggested character as possibly modified is used,  
+&bull; <tt>on char error</tt>. The corresponding event routine is called when a character conversion was unsuccessful or when, during input, a character is read which was not "expected" {<a href="#A3411ll">10.3.4.1.ll</a>}. The event routine is called with a reference to a character suggested as a replacement. The event routine provided by the programmer may assign some character other than the suggested one. If the event routine returns <tt>true</tt>, then that suggested character as possibly modified is used,  
 
 <p>
 Example: The programmer wishes to read sums of money punched as <tt>"$123.45"</tt>, <tt>" $23.45"</tt>, <tt>"  $3.45"</tt>, etc.:
@@ -1099,13 +1099,13 @@ INT cents; readf (($3z"."dd$, cents))
 <p>
 &bull; <tt>on value error</tt>. The corresponding event routine is called when:   
 <ol type=i>
-<li> during formatted transput an attempt is made to transput a value under the control of a "picture" with which it is incompatible, or when the number of    "frames" is insufficient. If the routine returns true, then the current value and picture are skipped and transput continues; if the routine returns false,    then first, on output, the value is output by put, and next <tt>undefined</tt>    is called; 
+<li> during formatted transput an attempt is made to transput a value under the control of a "picture" with which it is incompatible, or when the number of    "frames" is insufficient. If the routine returns <tt>true</tt>, then the current value and picture are skipped and transput continues; if the routine returns <tt>false</tt>,    then first, on output, the value is output by put, and next <tt>undefined</tt>    is called; 
 
 <li> during input it is impossible to convert a string to a value of some given mode (this would occur if, for example, an attempt were made to read an integer larger than <tt>max int</tt> (<a href="report_5.html#A21c">10.2.1.c</a>)) . 
 </ol>
 
 <p>
-&bull; <tt>on format end</tt>. The corresponding event routine is called when, during formatted transput, the format is exhausted while some value still remains to be transput. If the routine returns true, then <tt>undefined</tt> is called if a new format has not been provided for the file by the routine; otherwise, the current format is repeated.  
+&bull; <tt>on format end</tt>. The corresponding event routine is called when, during formatted transput, the format is exhausted while some value still remains to be transput. If the routine returns <tt>true</tt>, then <tt>undefined</tt> is called if a new format has not been provided for the file by the routine; otherwise, the current format is repeated.  
 
 <p>
 <a name=A313dd></a>dd) The <tt>conv</tt> field of a file is its current conversion key (<a href="#A312bb">10.3.1.2.bb</a>) . After opening a file, a default conversion key is provided. Some other conversion key may be provided by the programmer by means of a call of <tt>make conv</tt> {j}. Note that such a key must have been provided in the <b>library-prelude</b>. 
@@ -1116,19 +1116,19 @@ INT cents; readf (($3z"."dd$, cents))
 <p>
 <a name=A313ff></a>ff) The available methods of access to a book which has been opened on a file may be discovered by calls of the following routines (note that the yield of such a call may be a function of both the book and the channel, and of other environmental factors not defined by this Report):  
 <br>
-&bull; <tt>get possible</tt>, which returns true if the file may be used for input;  
+&bull; <tt>get possible</tt>, which returns <tt>true</tt> if the file may be used for input;  
 <br>
-&bull; <tt>put possible</tt>, which returns true if the file may be used for output;  
+&bull; <tt>put possible</tt>, which returns <tt>true</tt> if the file may be used for output;  
 <br>
-&bull; <tt>bin possible</tt>, which returns true if the file may be used for binary transput;  
+&bull; <tt>bin possible</tt>, which returns <tt>true</tt> if the file may be used for binary transput;  
 <br>
-&bull; <tt>compressible</tt>, which returns true if lines and pages will be compressed {<a href="#A316aa">10.3.1.6.aa</a>} during output, in which case the book is said to be "compressible";  
+&bull; <tt>compressible</tt>, which returns <tt>true</tt> if lines and pages will be compressed {<a href="#A316aa">10.3.1.6.aa</a>} during output, in which case the book is said to be "compressible";  
 <br>
-&bull; <tt>reset possible</tt>, which returns true if the file may be reset, i.e., its current position set to (1, 1, 1) ;  
+&bull; <tt>reset possible</tt>, which returns <tt>true</tt> if the file may be reset, i.e., its current position set to (1, 1, 1) ;  
 <br>
-&bull; <tt>set possible</tt>, which returns true if the file may be set, i.e., the current position changed to some specified value; the book is then said to be a  "random access" book and, otherwise, a "sequential access" book:  
+&bull; <tt>set possible</tt>, which returns <tt>true</tt> if the file may be set, i.e., the current position changed to some specified value; the book is then said to be a  "random access" book and, otherwise, a "sequential access" book:  
 <br>
-&bull; <tt>reidf possible</tt>, which returns true if the <tt>idf</tt> field of the book may be changed:  
+&bull; <tt>reidf possible</tt>, which returns <tt>true</tt> if the <tt>idf</tt> field of the book may be changed:  
 <br>
 &bull; <tt>chan</tt>, which returns the channel on which the file has been opened {this may be used, for example, by a routine assigned by <tt>on physical file end</tt>, in order to open another file on the same channel}. 
 
@@ -1242,10 +1242,10 @@ s) PROC reidf = (REF FILE f, STRING idf) VOID:
 <a name=A314bb></a>bb) A book is "linked" with a file by means of <tt>establish</tt> (b) , <tt>create</tt> (c) or <tt>open</tt> (d) . The linkage may be terminated by means of <tt>close</tt> (n), <tt>lock</tt> (o) or <tt>scratch</tt> (p) .  
 
 <p>
-<a name=A314cc></a>cc) When a file is "established" on a channel, then a book is generated {<a href="report_2.html#523">5.2.3</a>}  with a <tt>text</tt> of the given size, the given identification string, with <tt>putting</tt> set to true, and the logical end of the book at (1, 1, 1) . An implementation may require (g) that the characters forming the identification string should be taken from a limited set and that the string should be limited in length, it may also prevent two books from having the same string. If the establishing is completed successfully, then the value 0 is returned; otherwise, some nonzero integer is returned (the value of this integer might indicate why the file was not established successfully). When a file is "created" on a channel, then a file is established with a book whose <tt>text</tt> has the default size for the channel and whose identification string is undefined.  
+<a name=A314cc></a>cc) When a file is "established" on a channel, then a book is generated {<a href="report_2.html#523">5.2.3</a>}  with a <tt>text</tt> of the given size, the given identification string, with <tt>putting</tt> set to <tt>true</tt>, and the logical end of the book at (1, 1, 1) . An implementation may require (g) that the characters forming the identification string should be taken from a limited set and that the string should be limited in length, it may also prevent two books from having the same string. If the establishing is completed successfully, then the value 0 is returned; otherwise, some nonzero integer is returned (the value of this integer might indicate why the file was not established successfully). When a file is "created" on a channel, then a file is established with a book whose <tt>text</tt> has the default size for the channel and whose identification string is undefined.  
 
 <p>
-<a name=A314dd></a>dd) When a file is "opened", then the chain of backfiles is searched for the first book which is such that <tt>match</tt> (h) returns true. (The precise method of matching is not defined by this Report and will, in general, be implementation dependent. For example, the string supplied as parameter to open may include a password of some form.) If the end of the chain of backfiles is reached or if a book has been selected, but <tt>putting</tt> of the book yields true, or if putting to the book via the channel is possible and the book is already open, then the further elaboration is undefined. If the file is already open, an <tt>UP gremlins</tt> provides an opportunity for an appropriate system action on the book previously linked (in case no other copy of the file remains to preserve that linkage) .  
+<a name=A314dd></a>dd) When a file is "opened", then the chain of backfiles is searched for the first book which is such that <tt>match</tt> (h) returns <tt>true</tt>. (The precise method of matching is not defined by this Report and will, in general, be implementation dependent. For example, the string supplied as parameter to open may include a password of some form.) If the end of the chain of backfiles is reached or if a book has been selected, but <tt>putting</tt> of the book yields <tt>true</tt>, or if putting to the book via the channel is possible and the book is already open, then the further elaboration is undefined. If the file is already open, an <tt>UP gremlins</tt> provides an opportunity for an appropriate system action on the book previously linked (in case no other copy of the file remains to preserve that linkage) .  
 
 <p>
 <a name=A314ee></a>ee) The routine <tt>associate</tt> may be used to associate a file with a value of the mode specified by either <tt>REF [ ]  CHAR</tt>, <tt>REF [ ] [ ] CHAR</tt> or <tt>REF [ ] [ ] [ ] CHAR</tt>, thus enabling such variables to be used as the book of a file,  
@@ -1285,7 +1285,7 @@ b) PROC establish =
                 &cent; state: &cent; HEAP BOOL := FALSE, HEAP BOOL := TRUE,
                 HEAP BOOL := FALSE, HEAP BOOL := FALSE, HEAP BOOL := TRUE,
                 HEAP POS := (1, 1, 1) , "", (standconv OF chan) (book) ,
-                &cent; event routines: &cent; false, false, false, false, false, false,  
+                &cent; event routines: &cent; <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>,  
                 (REF FILE f, REF CHAR a) BOOL: FALSE) ;
             (NOT bin possible (file) | set char mood (file)) ;
             0
@@ -1330,8 +1330,8 @@ d) PROC open = (REF FILE file, STRING idf, CHANNEL chan) INT:
                       HEAP BOOL := FALSE, HEAP BOOL := FALSE,
                       HEAP BOOL := TRUE,
                       HEAP POS := (1, 1, 1) , "", (standconv OF chan) (book) ,
-                      &cent; event routines: &cent; false, false, false, false, false,
-                      false, (REF FILE f, REF CHAR a) BOOL: FALSE) ;
+                      &cent; event routines: &cent; <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>,
+                      <tt>false</tt>, (REF FILE f, REF CHAR a) BOOL: FALSE) ;
                    (NOT bin possible (file) | set char mood (file)) ;
                    (NOT get possible (file) | set write mood (file)) ;
                    (NOT put possible (file) | set read mood (file)) ;
@@ -1359,25 +1359,25 @@ e) PROC associate =
              &cent; state: &cent; HEAP BOOL := FALSE, HEAP BOOL := FALSE,
              HEAP BOOL := TRUE, HEAP BOOL := FALSE, HEAP BOOL := TRUE,
              HEAP POS := (1, 1, 1) , "", SKIP,
-             &cent; event routines: &cent; false, false, false, false, false, false,
+             &cent; event routines: &cent; <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>, <tt>false</tt>,
              (REF FILE f, REF CHAR a) BOOL: FALSE) 
       ELSE undefined
       FI;
 <a name=A314f></a>
 f) PROC ? file available = (CHANNEL chan) BOOL: 
-      <b>C</b> true if another file, at this instant of time, may be opened on 
-         'chan' and false otherwise <b>C</b>;
+      <b>C</b> <tt>true</tt> if another file, at this instant of time, may be opened on 
+         'chan' and <tt>false</tt> otherwise <b>C</b>;
 <a name=A314g></a>
 g) PROC ? idf ok = (STRING idf) BOOL: 
-      <b>C</b> true if 'idf' is acceptable to the implementation as the 
-         identification of a new book and false otherwise <b>C</b>;
+      <b>C</b> <tt>true</tt> if 'idf' is acceptable to the implementation as the 
+         identification of a new book and <tt>false</tt> otherwise <b>C</b>;
 <a name=A314h></a>
 h) PROC ? match = (STRING idf, CHANNEL chan, REF BOOK book name) BOOL: 
-      <b>C</b> true if the book referred to by 'book name' may be identified by
+      <b>C</b> <tt>true</tt> if the book referred to by 'book name' may be identified by
          'idf', and if the book may legitimately be accessed through
-         'chan', and false otherwise <b>C</b>;
+         'chan', and <tt>false</tt> otherwise <b>C</b>;
 <a name=A314i></a>
-i) PROC ? false = (REF FILE file) BOOL: FALSE
+i) PROC ? <tt>false</tt> = (REF FILE file) BOOL: FALSE
       &cent; this is included for brevity in 'establish', 'open' and 'associate' &cent;;  
 <a name=A314j></a>
 j) PROC ? set write mood = (REF FILE f) VOID:
@@ -1527,7 +1527,7 @@ A call of <tt>set</tt> which attempts to leave the current position
 beyond the logical end results in a call of <tt>undefined</tt> (a sensible system action might then be to advance the logical end to the current position, or even to the physical end of the book) . There is thus no defined way in which the current position can be made to be beyond the logical end, nor in which any character within the logical file can remain in its initial undefined state.  
 
 <p>
-<a name=A316dd></a>dd) A reading or writing operation, or a call of <tt>space</tt>, <tt>newline</tt>, <tt>newpage</tt>, <tt>set</tt> or <tt>set char number</tt>, may bring the current position outside the physical or logical file (<a href="#A315cc">10.3.1.5.cc, dd</a>), but this does not have any immediate consequence. However, before any further transput is attempted, or a further call of <tt>space</tt>,  <tt>newline</tt> or <tt>newpage</tt> (but not of <tt>set</tt> or <tt>set char number</tt>) is made, the current position must be brought to a "good" position. The file is "good" if, on writing (reading) , the current position is not outside the physical (logical) file (<a href="#A315cc">10.3.1.5.cc, dd</a>). The page (line) is "good" if the line number (character number) has not overflowed. The event routine (<a href="#A313cc">10.3.1.3.cc</a>) corresponding to <tt>on logical file end</tt>, <tt>on physical file end</tt>,  <tt>on page end</tt> or <tt>on line end</tt> is therefore called as appropriate. Except in the case of formatted transput (which uses <tt>check pos</tt>, <a href="#A332c">10.3.3.2.c</a>) , the default action, if the event routine returns false, is to call, respectively, <tt>undefined</tt>, <tt>undefined</tt>, <tt>newpage</tt> or <tt>newline</tt>. After this (or if true is returned) , if the position is still not good, an event routine (not necessarily the same one) is called again.  
+<a name=A316dd></a>dd) A reading or writing operation, or a call of <tt>space</tt>, <tt>newline</tt>, <tt>newpage</tt>, <tt>set</tt> or <tt>set char number</tt>, may bring the current position outside the physical or logical file (<a href="#A315cc">10.3.1.5.cc, dd</a>), but this does not have any immediate consequence. However, before any further transput is attempted, or a further call of <tt>space</tt>,  <tt>newline</tt> or <tt>newpage</tt> (but not of <tt>set</tt> or <tt>set char number</tt>) is made, the current position must be brought to a "good" position. The file is "good" if, on writing (reading) , the current position is not outside the physical (logical) file (<a href="#A315cc">10.3.1.5.cc, dd</a>). The page (line) is "good" if the line number (character number) has not overflowed. The event routine (<a href="#A313cc">10.3.1.3.cc</a>) corresponding to <tt>on logical file end</tt>, <tt>on physical file end</tt>,  <tt>on page end</tt> or <tt>on line end</tt> is therefore called as appropriate. Except in the case of formatted transput (which uses <tt>check pos</tt>, <a href="#A332c">10.3.3.2.c</a>) , the default action, if the event routine returns <tt>false</tt>, is to call, respectively, <tt>undefined</tt>, <tt>undefined</tt>, <tt>newpage</tt> or <tt>newline</tt>. After this (or if <tt>true</tt> is returned) , if the position is still not good, an event routine (not necessarily the same one) is called again.  
 
 <p>
 <a name=A316ee></a>ee) The state of the file (<a href="#A313bb">10.3.1.3.bb</a>) controls some effects of the layout routines. If the read/write mood is reading, the effect of <tt>space</tt>, <tt>newline</tt> and <tt>newpage</tt>, upon attempting to pass the logical end, is to call the event routine corresponding to <tt>on logical file end</tt> with default action <tt>undefined</tt>; if it is writing, the effect is to output spaces (or, in bin mood, to write some undefined character) or to compress the current line or page (see cc) . If the read/write mood is not determined on entry to a layout routine,  <tt>undefined</tt> is called. On exit, the read/write mood present on entry is restored.)  
@@ -1605,7 +1605,7 @@ d) PROC newpage = (REF FILE f) VOID:
 </pre>  
 
 <p>
-{Each of the following 3 routines either returns true, in which case the line, page or file is good (<a href="#A316dd">dd</a>), or it returns false, in which case the current position may be outside the logical file or the page number may have overflowed, or it loops until the matter is resolved, or it is terminated by a <b>jump</b>. On exit, the read/write mood is as determined by its <tt>reading</tt> parameter.}  
+{Each of the following 3 routines either returns <tt>true</tt>, in which case the line, page or file is good (<a href="#A316dd">dd</a>), or it returns <tt>false</tt>, in which case the current position may be outside the logical file or the page number may have overflowed, or it loops until the matter is resolved, or it is terminated by a <b>jump</b>. On exit, the read/write mood is as determined by its <tt>reading</tt> parameter.}  
 
 <a name=A316e></a>
 <pre>
@@ -1821,7 +1821,7 @@ g) PROC ? <i>L</i> standardize = (REF <b><i>L</i></b>  REAL y, INT before, after
 h) PROC ? dig char = (INT x) CHAR: "0123456789abcdef"[x  + 1];
 <a name=A321i></a>
 i) PROC ? string to <i>L</i> int = (STRING s, INT radix, REF <b><i>L</i></b> INT i) BOOL:
-         &cent; returns true if the absolute value of the result is &le; <i>L</i> max int &cent;
+         &cent; returns <tt>true</tt> if the absolute value of the result is &le; <i>L</i> max int &cent;
       BEGIN 
          <b><i>L</i></b> INT lr = <b>K</b> radix; BOOL safe := TRUE; 
          <b><i>L</i></b> INT n := <i>L</i> 0, <b><i>L</i></b> INT m = <i>L</i> max int &divide; lr;
@@ -1834,7 +1834,7 @@ i) PROC ? string to <i>L</i> int = (STRING s, INT radix, REF <b><i>L</i></b> INT
       END;
 <a name=A321j></a>
 j) PROC ? string to <i>L</i> real = (STRING s, REF <b><i>L</i></b>  REAL r) BOOL: 
-         &cent; returns true if the absolute value of the result is &le; max real &cent;
+         &cent; returns <tt>true</tt> if the absolute value of the result is &le; max real &cent;
       BEGIN
          INT e := UPB s + 1; 
          char in string ("<sub>10</sub>", e, s) ;
@@ -1978,7 +1978,7 @@ otherwise,
 {In formatless transput, the elements of a "data list" are transput, one after the other, via a specified file. Each element of the data list is either a layout routine of the mode specified by <tt>PROC (REF FILE) VOID</tt> (<a href="#A316">10.3.1.6</a>) or a value of the mode specified by <tt>OUTTYPE</tt> (on output) or <tt>INTYPE</tt> (on input) . On encountering a layout routine in the data list, that routine is called with the specified file as parameter. Other values in the data list are first straightened (<a href="#A323">10.3.2.3</a>) and the resulting values are then transput via the given file one after the other.  
 
 <p>
-Transput normally takes place at the current position but, if there is no room on the current line (on output) or if a readable value is not present there (on input) , then first, the event routine corresponding to <tt>on line end</tt>  (or, where appropriate, to <tt>on page end</tt>, <tt>on physical file end</tt>  or <tt>on logical file end</tt>) is called, and next, if this returns <b>false</b>, the next "good" character position of the book is found, viz., the first character position of the next nonempty line.}
+Transput normally takes place at the current position but, if there is no room on the current line (on output) or if a readable value is not present there (on input) , then first, the event routine corresponding to <tt>on line end</tt>  (or, where appropriate, to <tt>on page end</tt>, <tt>on physical file end</tt>  or <tt>on logical file end</tt>) is called, and next, if this returns <b><tt>false</tt></b>, the next "good" character position of the book is found, viz., the first character position of the next nonempty line.}
 
 <h3>
 <a name=A331></a>10.3.3.1. Formatless output
@@ -2001,7 +2001,7 @@ Transput normally takes place at the current position but, if there is no room o
 <tt>+d.n (<i>L</i> real width - 1) den (<i>L</i> exp width - 1) z+d" "i+d.n (<i>L</i> real width  - 1) den (<i>L</i> exp width - 1) z+d .</tt>  
 
 <p>
-<a name=A331dd></a>dd) If the mode of <i>V</i> is specified by <tt>BOOL</tt>, then first, if the current line is full, a good position is found on a subsequent line: next, if <i>V</i> is true (false) , the character yielded by <tt>flip</tt> (<tt>flop</tt>) is output (with no intervening space) .  
+<a name=A331dd></a>dd) If the mode of <i>V</i> is specified by <tt>BOOL</tt>, then first, if the current line is full, a good position is found on a subsequent line: next, if <i>V</i> is <tt>true</tt> (<tt>false</tt>) , the character yielded by <tt>flip</tt> (<tt>flop</tt>) is output (with no intervening space) .  
 
 <p>
 <a name=A331ee></a>ee) If the mode of <i>V</i> is specified by <tt><b><i>L</i></b> BITS </tt>, then the elements of the only field of <i>V</i> are output (as in dd) one after the other (with no intervening spaces, and with new lines being taken as required) ,  
@@ -2123,7 +2123,7 @@ c) PROC ? next pos = (REF FILE f) VOID:
 <a name=A332cc></a>cc) If the mode of <i>N</i> is specified by <tt>REF <b><i>L</i></b> COMPL</tt> , then first, a real number is input (as in bb) and assigned to the first subname of <i>N</i>; next, the book is searched for the first character that is not a space; next, a character is input and, if it is not <tt>"I"</tt>  or <tt>"i"</tt>, then the event routine corresponding to <tt>on char error</tt>  (<a href="#A313cc">10.3.1.3.cc</a>) is called, the suggestion being <tt>"I"</tt>; finally, a real number is input and assigned to the second subname of <i>N</i>.  
 
 <p>
-<a name=A332dd></a>dd) If the mode of <i>N</i> is specified by <tt>REF BOOL</tt>, then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary) ; next, a character is read: if this character is the same as that yielded by <tt>flip</tt> (<tt>flop</tt>) , then true (false) is assigned to <i>N</i>;  otherwise, the event routine corresponding to <tt>on char error</tt> is called, the suggestion being <tt>flop</tt>.  
+<a name=A332dd></a>dd) If the mode of <i>N</i> is specified by <tt>REF BOOL</tt>, then first, the book is searched for the first character that is not a space (finding good positions on subsequent lines as necessary) ; next, a character is read: if this character is the same as that yielded by <tt>flip</tt> (<tt>flop</tt>) , then <tt>true</tt> (<tt>false</tt>) is assigned to <i>N</i>;  otherwise, the event routine corresponding to <tt>on char error</tt> is called, the suggestion being <tt>flop</tt>.  
 
 <p>
 <a name=A332ee></a>ee) If the mode of <i>N</i> is specified by <tt>REF <i>L</i>  BITS</tt> , then input takes place (as in dd) to the subnames of <i>N</i> one after the other (with new lines being taken as required) .  
@@ -2152,9 +2152,9 @@ a) PROC get = (REF FILE f, [ ] UNION (INTYPE, PROC (REF FILE) VOID) x) VOID:
          (INTYPE it) :
          BEGIN
             [ ] SIMPLIN y = STRAIGHTIN it; CHAR k; BOOL k empty;
-            OP ? = (STRING s) BOOL: &cent; true if the next character, if any, in the current line
+            OP ? = (STRING s) BOOL: &cent; <tt>true</tt> if the next character, if any, in the current line
                                     is contained in 's' (the character is assigned to 'k') 
-                                    and false otherwise &cent;
+                                    and <tt>false</tt> otherwise &cent;
                IF k empty AND (line ended (f) OR  logical file ended (f)) 
                THEN FALSE
                ELSE (k empty | get char (f, k)) ;
@@ -2280,7 +2280,7 @@ c) PROC ? check pos = (REF FILE f) VOID:
 </pre>  
 
 <p>
-{The routine <tt>check pos</tt> is used in formatted transput before each call of <tt>put char</tt> or <tt>get char</tt>. If the position is not good (<a href="#A316dd">10.3.1.6.dd</a>), it calls the appropriate event routine, and may call further event routines if true is returned. If the event routine corresponding to <tt>on page end</tt>  returns false, <tt>newpage</tt> is called but, if any other event routine returns false, no default action is taken and no more event routines are called. On exit, the read/write mood is as on entry, but the current position may not be good, in which case <tt>undefined</tt> will be called in the following <tt>put char</tt> or <tt>get char</tt>. However, <tt>check pos</tt> is also called when getting strings (<a href="#A332hh">hh</a>), in which case the string is then terminated if the current position is not good.}  
+{The routine <tt>check pos</tt> is used in formatted transput before each call of <tt>put char</tt> or <tt>get char</tt>. If the position is not good (<a href="#A316dd">10.3.1.6.dd</a>), it calls the appropriate event routine, and may call further event routines if <tt>true</tt> is returned. If the event routine corresponding to <tt>on page end</tt>  returns <tt>false</tt>, <tt>newpage</tt> is called but, if any other event routine returns <tt>false</tt>, no default action is taken and no more event routines are called. On exit, the read/write mood is as on entry, but the current position may not be good, in which case <tt>undefined</tt> will be called in the following <tt>put char</tt> or <tt>get char</tt>. However, <tt>check pos</tt> is also called when getting strings (<a href="#A332hh">hh</a>), in which case the string is then terminated if the current position is not good.}  
 
 <h3>
 <a name=A34></a>10.3.4. Format texts
@@ -2462,7 +2462,7 @@ When a <b>picture</b> is "staticized", all of its replicators and other routines
 A format may also invoke other formats by means of <b>'format'</b> patterns {<a href="#A3491">10.3.4.9.1</a>}.  
 
 <p>
-When a format has been exhausted, the event routine corresponding to <tt>on format end</tt> is called; if this returns false, the format is repeated;  otherwise, if the event routine has failed to provide a new format,  <tt>undefined</tt> is called.  
+When a format has been exhausted, the event routine corresponding to <tt>on format end</tt> is called; if this returns <tt>false</tt>, the format is repeated;  otherwise, if the event routine has failed to provide a new format,  <tt>undefined</tt> is called.  
 
 <p>
 <a name=A3411hh></a>hh) A value <i>V</i> is output, using a picture <i>P</i>, as follows:  
@@ -2487,7 +2487,7 @@ then
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;        
 <br>
-&bull; if this returns false, <i>V</i> is output using <tt>put</tt> and <tt>undefined</tt> is called; 
+&bull; if this returns <tt>false</tt>, <i>V</i> is output using <tt>put</tt> and <tt>undefined</tt> is called; 
 </ul>
 otherwise, the string is "edited" (<a href="#A3411jj">jj</a>) using <i>Q</i>:
 <li>the insertion of <i>P</i> is performed. </li></ul>
@@ -2519,7 +2519,7 @@ then
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;        
 <br>
-&bull; if this returns false, <tt>undefined</tt> is called;
+&bull; if this returns <tt>false</tt>, <tt>undefined</tt> is called;
 </ul>
 <li>the insertion of <i>P</i> is performed. 
 </ul> 
@@ -2621,7 +2621,7 @@ then that character is supplied;
 <br>
 otherwise, 
 <ul>
-the event routine corresponding to <tt>on char error</tt> is called, with <i>C</i> as suggestion; if this returns true and <i>C</i>, as possibly replaced, is one of the expected characters, then that character is supplied; otherwise, <tt>undefined</tt> is called. }  
+the event routine corresponding to <tt>on char error</tt> is called, with <i>C</i> as suggestion; if this returns <tt>true</tt> and <i>C</i>, as possibly replaced, is one of the expected characters, then that character is supplied; otherwise, <tt>undefined</tt> is called. }  
 </ul>
 
 <h3>
@@ -2744,7 +2744,7 @@ bits-pattern</b><i> P</i>  {<a href="#A3421a">10.3.4.2.1.a</a>  , <a href="#A343
 <br>
 &bull; {<i>rep</i>} the yield of its <b>replicator</b> {c}, if any, and, otherwise, the yield of an invisible <b>replicator</b>:  
 <br>
-&bull; {<i>supp</i>} true if its first <b>UNSUPPRESSETY-suppression</b> contains a <b>letter-s-symbol</b> and, otherwise, false:  
+&bull; {<i>supp</i>} <tt>true</tt> if its first <b>UNSUPPRESSETY-suppression</b> contains a <b>letter-s-symbol</b> and, otherwise, <tt>false</tt>:  
 <br>
 &bull; {<i>marker</i>} (the character which is the intrinsic value {<a href="report_4.html#8142b">8.1.4.2.b</a>} of a <b>symbol</b> <i>S</i> determined as follows:  
 <br>
@@ -2909,12 +2909,12 @@ a) 14x b }
 <p>
 <a name=A3441bb></a>bb) A value <i>V</i> is converted to a string using a <b>'boolean'</b> pattern as follows:  
 <br>
-&bull; if <i>V</i> is true (false) , then the string is that yielded by <tt>flip</tt> (<tt>flop</tt>) .  
+&bull; if <i>V</i> is <tt>true</tt> (<tt>false</tt>) , then the string is that yielded by <tt>flip</tt> (<tt>flop</tt>) .  
 
 <p>
 <a name=A3441cc></a>cc) A string <i>S</i> is converted to a boolean value, using a <b>'boolean'</b> pattern, as follows:  
 <br>
-&bull; if <i>S</i> is the same as the string yielded by <tt>flip</tt>  (<tt>flop</tt>) , then the required value is true (false) .}   
+&bull; if <i>S</i> is the same as the string yielded by <tt>flip</tt>  (<tt>flop</tt>) , then the required value is <tt>true</tt> (<tt>false</tt>) .}   
 
 <h3>
 <a name=A345></a>10.3.4.5. Complex patterns
@@ -3094,7 +3094,7 @@ otherwise,
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;     
 <br>
-&bull; if this returns false, <i>V</i> is output using <tt>put</tt> and <tt>undefined</tt> is called;
+&bull; if this returns <tt>false</tt>, <i>V</i> is output using <tt>put</tt> and <tt>undefined</tt> is called;
 </ul>
 &bull; the <b>insertion</b> of <i>P</i> is staticized and performed.  
 
@@ -3113,7 +3113,7 @@ otherwise,
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;     
 <br>
-&bull; if this returns false, <tt>undefined</tt> is called;
+&bull; if this returns <tt>false</tt>, <tt>undefined</tt> is called;
 </ul>
 &bull; the <b>insertion</b> of <i>P</i> is staticized and performed.  
 
@@ -3129,13 +3129,13 @@ If the mode of <i>V</i> is specified by <tt>BOOL</tt>,
 <br>
 then    
 <br>
-&bull; if <i>V</i> is true (false) , the literal yielded by the first (second) constituent <b>literal</b> of <i>C</i> is staticized and performed:    
+&bull; if <i>V</i> is <tt>true</tt> (<tt>false</tt>) , the literal yielded by the first (second) constituent <b>literal</b> of <i>C</i> is staticized and performed:    
 <br>
 otherwise,    
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;     
 <br>
-&bull; if this returns false, <i>V</i> is output using <tt>put</tt> and <tt>undefined</tt> is called;
+&bull; if this returns <tt>false</tt>, <i>V</i> is output using <tt>put</tt> and <tt>undefined</tt> is called;
 </ul>
 &bull; the insertion of <i>P</i> is staticized and performed.  
 
@@ -3148,13 +3148,13 @@ otherwise,
 <br>
 If the mode of <i>N</i> is specified by <tt>REF BOOL</tt>, and the first second) insertion is present,    
 <br>
-then true (false) is assigned to <i>N</i>:    
+then <tt>true</tt> (<tt>false</tt>) is assigned to <i>N</i>:    
 <br>
 otherwise,    
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;     
 <br>
-&bull; if this returns false, <tt>undefined</tt> is called;
+&bull; if this returns <tt>false</tt>, <tt>undefined</tt> is called;
 </ul>
 &bull; the insertion of <i>P</i> is staticized and performed.}
 </ul>
@@ -3261,7 +3261,7 @@ otherwise,
 <ul>
 &bull; the event routine corresponding to <tt>on value error</tt> is called;     
 <br>
-&bull; if this returns false, <i>V</i> is output using <tt>put</tt>, and <tt>undefined</tt> is called;
+&bull; if this returns <tt>false</tt>, <i>V</i> is output using <tt>put</tt>, and <tt>undefined</tt> is called;
 </ul>
 &bull; the insertion of <i>P</i> is performed.  
 </ul>
@@ -3310,7 +3310,7 @@ a) MODE FORMAT = STRUCT (FLEX [1: 0] PIECE <b>F</b>) ;
       FLEX [1: 0] FRAME frames) ,
    MODE ? FRAME = STRUCT (INSERTION i,   
       PROC INT rep &cent; replicator &cent;,
-      BOOL supp &cent; true if suppressed &cent;,
+      BOOL supp &cent; <tt>true</tt> if suppressed &cent;,
       CHAR marker) ;
    MODE ? CPATTERN = STRUCT (INSERTION i,
       INT type &cent; boolean or integral &cent;,
@@ -3531,8 +3531,8 @@ a) PROC putf = (REF FILE f, [ ] UNION (OUTTYPE, FORMAT) x) VOID:
                   STRING s;
                   
                   OP ? = (STRING s) BOOL:
-                     &cent; true if the next marker is one of the elements of 
-                        's' and false otherwise &cent;
+                     &cent; <tt>true</tt> if the next marker is one of the elements of 
+                        's' and <tt>false</tt> otherwise &cent;
                      IF sfp &gt; UPB sframes
                      THEN FALSE
                      ELSE SFRAME sf = sframes[sfp];
@@ -3975,7 +3975,7 @@ b) PROC ? indit string = (REF FILE f, REF STRING s, [ ] SFRAME sf, INT radix) VO
 {In binary transput, the values obtained by straightening the elements of a data list (cf. <a href="#A33">10.3.3</a>) are transput, via the specified file, one after the other. The manner in which such a value is stored in the book is defined only to the extent that a value of mode <i>M</i> (being some mode from which that specified by <tt>SIMPLOUT</tt> is united) output at a given position may subsequently be re-input from that same position to a name of mode <b>'reference to <i>M</i>'</b>. Note that, during input to the name referring to a multiple value, the number of elements read will be the existing number of elements referred to by that name.  
 
 <p>
-The current position is advanced after each value by a suitable amount and, at the end of each line or page, the appropriate event routine is called, and next, if this returns false, the next good character position of the book is found (cf. <a href="#A33">10.3.3</a>) .  
+The current position is advanced after each value by a suitable amount and, at the end of each line or page, the appropriate event routine is called, and next, if this returns <tt>false</tt>, the next good character position of the book is found (cf. <a href="#A33">10.3.3</a>) .  
 
 <p>
 For binary output, <tt>put bin</tt> (<a href="#A361a">10.3.6.1.a</a>) and <tt>write bin</tt> (<a href="#A51h">10.5.1.h</a>) may be used and, for binary input, <tt>get bin</tt> (<a href="#A362a">10.3.6.2.a</a>) and <tt>read bin</tt> (<a href="#A51i">10.5.1.i</a>).}  
@@ -4672,7 +4672,7 @@ not a part of the Algol 68 Revised Report, and is distributed with
 Algol 68 Genie with kind permission of C.H. Lindsey.
 <p style="font-size: 8pt; font-color: black;">
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11.1 (March 2008)
+Algol 68 Genie Mark 12 (May 2008)
 </td>
 </tr>
 </table>

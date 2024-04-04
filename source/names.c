@@ -140,7 +140,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "FORMAT_ITEM_A",
   "FORMAT_ITEM_B",
   "FORMAT_ITEM_C",
-  "FORMAT_ITEM_CLOSE",
+  "FORMAT_CLOSE_SYMBOL",
   "FORMAT_ITEM_D",
   "FORMAT_ITEM_E",
   "FORMAT_ITEM_ESCAPE",
@@ -155,7 +155,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "FORMAT_ITEM_MINUS",
   "FORMAT_ITEM_N",
   "FORMAT_ITEM_O",
-  "FORMAT_ITEM_OPEN",
+  "FORMAT_OPEN_SYMBOL",
   "FORMAT_ITEM_P",
   "FORMAT_ITEM_PLUS",
   "FORMAT_ITEM_POINT",
@@ -208,6 +208,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "ISNT_SYMBOL",
   "IS_SYMBOL",
   "JUMP",
+  "KEYWORD",
   "LABEL",
   "LABELED_UNIT",
   "LABEL_IDENTIFIER",
@@ -397,13 +398,16 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_assignation) {
     return ("genie_assignation");
   }
+  if (p == genie_assignation_constant) {
+    return ("genie_assignation_constant");
+  }
   if (p == genie_call) {
     return ("genie_call");
   }
   if (p == genie_cast) {
     return ("genie_cast");
   }
-  if (p == (PROPAGATOR_PROCEDURE *) genie_closed) {
+  if (p == genie_closed) {
     return ("genie_closed");
   }
   if (p == genie_coercion) {
@@ -415,7 +419,7 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_column_function) {
     return ("genie_column_function");
   }
-  if (p == (PROPAGATOR_PROCEDURE *) genie_conditional) {
+  if (p == genie_conditional) {
     return ("genie_conditional");
   }
   if (p == genie_constant) {
@@ -429,6 +433,9 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   }
   if (p == genie_dereference_loc_identifier) {
     return ("genie_dereference_loc_identifier");
+  }
+  if (p == genie_dereference_selection_name_quick) {
+    return ("genie_dereference_selection_name_quick");
   }
   if (p == genie_dereference_slice_name_quick) {
     return ("genie_dereference_slice_name_quick");
@@ -448,7 +455,7 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_dyadic_quick) {
     return ("genie_dyadic_quick");
   }
-  if (p == (PROPAGATOR_PROCEDURE *) genie_enclosed) {
+  if (p == genie_enclosed) {
     return ("genie_enclosed");
   }
   if (p == genie_format_text) {
@@ -456,6 +463,72 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   }
   if (p == genie_formula) {
     return ("genie_formula");
+  }
+  if (p == genie_formula_div_real) {
+    return ("genie_formula_div_real");
+  }
+  if (p == genie_formula_eq_int) {
+    return ("genie_formula_eq_int");
+  }
+  if (p == genie_formula_eq_real) {
+    return ("genie_formula_eq_real");
+  }
+  if (p == genie_formula_ge_int) {
+    return ("genie_formula_ge_int");
+  }
+  if (p == genie_formula_ge_real) {
+    return ("genie_formula_ge_real");
+  }
+  if (p == genie_formula_gt_int) {
+    return ("genie_formula_gt_int");
+  }
+  if (p == genie_formula_gt_real) {
+    return ("genie_formula_gt_real");
+  }
+  if (p == genie_formula_le_int) {
+    return ("genie_formula_le_int");
+  }
+  if (p == genie_formula_le_real) {
+    return ("genie_formula_le_real");
+  }
+  if (p == genie_formula_lt_int) {
+    return ("genie_formula_lt_int");
+  }
+  if (p == genie_formula_lt_real) {
+    return ("genie_formula_lt_real");
+  }
+  if (p == genie_formula_minus_int) {
+    return ("genie_formula_minus_int");
+  }
+  if (p == genie_formula_minus_int_constant) {
+    return ("genie_formula_minus_int_constant");
+  }
+  if (p == genie_formula_minus_real) {
+    return ("genie_formula_minus_real");
+  }
+  if (p == genie_formula_ne_int) {
+    return ("genie_formula_ne_int");
+  }
+  if (p == genie_formula_ne_real) {
+    return ("genie_formula_ne_real");
+  }
+  if (p == genie_formula_over_int) {
+    return ("genie_formula_over_int");
+  }
+  if (p == genie_formula_plus_int) {
+    return ("genie_formula_plus_int");
+  }
+  if (p == genie_formula_plus_int_constant) {
+    return ("genie_formula_plus_int_constant");
+  }
+  if (p == genie_formula_plus_real) {
+    return ("genie_formula_plus_real");
+  }
+  if (p == genie_formula_times_int) {
+    return ("genie_formula_times_int");
+  }
+  if (p == genie_formula_times_real) {
+    return ("genie_formula_times_real");
   }
   if (p == genie_generator) {
     return ("genie_generator");
@@ -472,13 +545,19 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_identity_relation) {
     return ("genie_identity_relation");
   }
-  if (p == (PROPAGATOR_PROCEDURE *) genie_int_case) {
+  if (p == genie_identity_relation_is_nil) {
+    return ("genie_identity_relation_is_nil");
+  }
+  if (p == genie_identity_relation_isnt_nil) {
+    return ("genie_identity_relation_isnt_nil");
+  }
+  if (p == genie_int_case) {
     return ("genie_int_case");
   }
   if (p == genie_loc_identifier) {
     return ("genie_loc_identifier");
   }
-  if (p == (PROPAGATOR_PROCEDURE *) genie_loop) {
+  if (p == genie_loop) {
     return ("genie_loop");
   }
   if (p == genie_monadic) {
@@ -490,9 +569,11 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_or_function) {
     return ("genie_or_function");
   }
+#if defined ENABLE_PAR_CLAUSE
   if (p == genie_parallel) {
     return ("genie_parallel");
   }
+#endif
   if (p == genie_routine_text) {
     return ("genie_routine_text");
   }
@@ -514,47 +595,50 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_rowing_row_row) {
     return ("genie_rowing_row_row");
   }
-  if (p == genie_selection_name) {
-    return ("genie_selection_name");
-  }
   if (p == genie_selection) {
     return ("genie_selection");
   }
-  if (p == genie_selection_value) {
-    return ("genie_selection_value");
+  if (p == genie_selection_name_quick) {
+    return ("genie_selection_name_quick");
+  }
+  if (p == genie_selection_value_quick) {
+    return ("genie_selection_value_quick");
   }
   if (p == genie_skip) {
     return ("genie_skip");
   }
-  if (p == genie_slice_name_quick) {
-    return ("genie_slice_name_quick");
-  }
   if (p == genie_slice) {
     return ("genie_slice");
+  }
+  if (p == genie_slice_name_quick) {
+    return ("genie_slice_name_quick");
   }
   if (p == genie_transpose_function) {
     return ("genie_transpose_function");
   }
-  if (p == (PROPAGATOR_PROCEDURE *) genie_united_case) {
+  if (p == genie_unit) {
+    return ("genie_unit");
+  }
+  if (p == genie_united_case) {
     return ("genie_united_case");
   }
   if (p == genie_uniting) {
     return ("genie_uniting");
   }
-  if (p == genie_unit) {
-    return ("genie_unit");
+  if (p == genie_voiding) {
+    return ("genie_voiding");
   }
   if (p == genie_voiding_assignation) {
     return ("genie_voiding_assignation");
   }
-  if (p == genie_voiding) {
-    return ("genie_voiding");
-  }
-  if (p == genie_widening_int_to_real) {
-    return ("genie_widening_int_to_real");
+  if (p == genie_voiding_assignation_constant) {
+    return ("genie_voiding_assignation_constant");
   }
   if (p == genie_widening) {
     return ("genie_widening");
   }
-  return (NULL);
+  if (p == genie_widening_int_to_real) {
+    return ("genie_widening_int_to_real");
+  }
+  return ("unknown propagator");
 }

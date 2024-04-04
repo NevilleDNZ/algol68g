@@ -31,7 +31,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define WANT_PATTERN    	A68_TRUE
 #define SKIP_PATTERN    	A68_FALSE
 
-#define IS_NIL_FORMAT(f) ((f)->body == NULL && (f)->environ == 0)
+#define IS_NIL_FORMAT(f) (BODY (f) == NULL && ENVIRON (f) == 0)
 #define NON_TERM(p) (find_non_terminal (top_non_terminal, ATTRIBUTE (p)))
 
 #undef DEBUG

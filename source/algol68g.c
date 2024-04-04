@@ -51,7 +51,7 @@ int term_width;
 BOOL_T tree_listing_safe, cross_reference_safe, moid_listing_safe;
 BYTE_T *system_stack_offset;
 MODES_T a68_modes;
-MODULE_T a68_prog, *current_module;
+MODULE_T a68_prog;
 int source_scan;
 int stack_size;
 int symbol_table_count, mode_count;
@@ -69,17 +69,16 @@ void state_license (FILE_T f)
 {
 #define P(s)\
   snprintf (output_line, BUFFER_SIZE, "%s\n", (s));\
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
   }
   snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, copyright 2001-%s J. Marcel van der Veer.\n", REVISION, RELEASE_YEAR);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   P ("Algol 68 Genie is free software covered by the GNU General Public License.");
   P ("There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.");
   P ("See the GNU General Public License for more details.");
-  P ("");
 #undef P
 }
 
@@ -95,45 +94,47 @@ void state_version (FILE_T f)
   }
   state_license (f);
   snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, %s\n", REVISION, RELEASE_DATE);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 #if ! defined ENABLE_WIN32
-  snprintf (output_line, BUFFER_SIZE, "Image \"%s\" built by %s on %s", A68G_NAME, USERID, __DATE__);
-  io_write_string (f, output_line);
-  snprintf (output_line, BUFFER_SIZE, "\nCompiled on %s", OS_NAME);
-  io_write_string (f, output_line);
 #if defined __GNUC__ && defined GCC_VERSION
-  snprintf (output_line, BUFFER_SIZE, " with gcc %s\n", GCC_VERSION);
-  io_write_string (f, output_line);
+  snprintf (output_line, BUFFER_SIZE, "Compiled on %s with gcc %s\n", OS_NAME, GCC_VERSION);
+  WRITE (f, output_line);
 #else
-  snprintf (output_line, BUFFER_SIZE, "\n", GCC_VERSION);
-  io_write_string (f, output_line);
+  snprintf (output_line, BUFFER_SIZE, "Compiled on %s\n", OS_NAME);
+  WRITE (f, output_line);
 #endif
+#endif
+#if ! defined ENABLE_WIN32
+  snprintf (output_line, BUFFER_SIZE, "Configured on %s with options \"%s\"\n", CONFIGURE_DATE, CONFIGURE_OPTIONS);
+  WRITE (f, output_line);
 #endif
 #if defined ENABLE_GRAPHICS && defined A68_LIBPLOT_VERSION
   snprintf (output_line, BUFFER_SIZE, "GNU libplot %s\n", A68_LIBPLOT_VERSION);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 #endif
 #if defined ENABLE_NUMERICAL && defined A68_GSL_VERSION
   snprintf (output_line, BUFFER_SIZE, "GNU Scientific Library %s\n", A68_GSL_VERSION);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 #endif
 #if defined ENABLE_POSTGRESQL && defined A68_PG_VERSION
   snprintf (output_line, BUFFER_SIZE, "PostgreSQL libpq %s\n", A68_PG_VERSION);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 #endif
   snprintf (output_line, BUFFER_SIZE, "Alignment %d bytes\n", A68_ALIGNMENT);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   default_mem_sizes ();
   snprintf (output_line, BUFFER_SIZE, "Default frame stack size: %ld kB\n", frame_stack_size / KILOBYTE);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   snprintf (output_line, BUFFER_SIZE, "Default expression stack size: %ld kB\n", expr_stack_size / KILOBYTE);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   snprintf (output_line, BUFFER_SIZE, "Default heap size: %ld kB\n", heap_size / KILOBYTE);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   snprintf (output_line, BUFFER_SIZE, "Default handle pool size: %ld kB\n", handle_pool_size / KILOBYTE);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   snprintf (output_line, BUFFER_SIZE, "Default stack overhead: %ld kB\n", storage_overhead / KILOBYTE);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
+  snprintf (output_line, BUFFER_SIZE, "Effective system stack size: %ld kB\n", stack_size / KILOBYTE);
+  WRITE (f, output_line);
 }
 
 /*!
@@ -145,14 +146,14 @@ void online_help (FILE_T f)
 {
 #define P(s)\
   snprintf (output_line, BUFFER_SIZE, "%s\n", (s));\
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
   }
   state_license (f);
   snprintf (output_line, BUFFER_SIZE, "Usage: %s [options | filename]\n", A68G_NAME);
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
   P ("");
   P ("Options that execute Algol 68 code from the command line:");
   P ("");
@@ -175,6 +176,7 @@ void online_help (FILE_T f)
   P ("");
   P ("   -assertions, -noassertions  Switch elaboration of assertions on or off");
   P ("   -backtrace, -nobacktrace    Switch stack backtracing in case of a runtime error");
+  P ("   -debug, -monitor            Start execution in the debugger and return there in case of runtime error");
   P ("   -precision number           Set precision for LONG LONG modes to \"number\" significant digits");
   P ("   -timelimit number           Interrupt the interpreter after \"number\" seconds");
   P ("   -trace, -notrace            Switch tracing of a running program on or off");
@@ -223,6 +225,7 @@ int main (int argc, char *argv[])
 {
   BYTE_T stack_offset;
   int argcc;
+  get_fixed_heap_allowed = A68_TRUE;
 #if defined ENABLE_TERMINFO
   term_type = getenv ("TERM");
   if (term_type == NULL) {
@@ -248,11 +251,11 @@ int main (int argc, char *argv[])
     source_scan = 1;
     default_options (&a68_prog);
     default_mem_sizes ();
-/* Inititialise core. */
-    frame_segment = NULL;
+/* Initialise core. */
     stack_segment = NULL;
     heap_segment = NULL;
     handle_segment = NULL;
+    get_stack_size ();
 /* Well, let's start. */
     a68_prog.top_refinement = NULL;
     a68_prog.files.generic_name = NULL;
@@ -280,7 +283,6 @@ int main (int argc, char *argv[])
     if (a68_prog.files.generic_name == NULL || strlen (a68_prog.files.generic_name) == 0) {
       SCAN_ERROR (!a68_prog.options.version, NULL, NULL, ERROR_NO_INPUT_FILE);
     } else {
-      get_stack_size ();
       compiler_interpreter ();
     }
     a68g_exit (error_count == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
@@ -485,8 +487,12 @@ Accept various silent extensions.
         finalise_symbol_table_setup (a68_prog.top_node, 2);
         SYMBOL_TABLE (a68_prog.top_node)->nest = symbol_table_count = 3;
         reset_symbol_table_nest_count (a68_prog.top_node);
+        fill_symbol_table_outer (a68_prog.top_node, SYMBOL_TABLE (a68_prog.top_node));
+#if defined ENABLE_PAR_CLAUSE
         set_par_level (a68_prog.top_node, 0);
-        set_nests (a68_prog.top_node, NULL);
+#endif
+        set_nest (a68_prog.top_node, NULL);
+        set_proc_level (a68_prog.top_node, 1);
       }
       num = 0;
       renumber_nodes (a68_prog.top_node, &num);
@@ -540,6 +546,7 @@ Accept various silent extensions.
       mark_auxilliary (a68_prog.top_node);
       jumps_from_procs (a68_prog.top_node);
       warn_for_unused_tags (a68_prog.top_node);
+      warn_tags_threads (a68_prog.top_node);
     }
 /* Scope checker. */
     if (error_count == 0) {
@@ -572,7 +579,18 @@ Accept various silent extensions.
     announce_phase ("genie");
     num = 0;
     renumber_nodes (a68_prog.top_node, &num);
+    if (a68_prog.options.debug) {
+      state_license (STDOUT_FILENO);
+    }
     genie (&a68_prog);
+/* Free heap allocated by genie. */
+    free_genie_heap (a68_prog.top_node);
+/* Normal end of program. */
+    diagnostics_to_terminal (a68_prog.top_line, A68_RUNTIME_ERROR);
+    if (a68_prog.options.debug || a68_prog.options.trace) {
+      snprintf (output_line, BUFFER_SIZE, "\n++++ Genie finished in %.2f seconds\n", seconds () - cputime_0);
+      WRITE (STDOUT_FILENO, output_line);
+    }
   }
 /* Setting up listing file. */
   if (a68_prog.options.moid_listing || a68_prog.options.tree_listing || a68_prog.options.source_listing || a68_prog.options.statistics_listing) {
@@ -625,6 +643,6 @@ static void announce_phase (char *t)
   if (a68_prog.options.verbose) {
     snprintf (output_line, BUFFER_SIZE, "%s: %s", A68G_NAME, t);
     io_close_tty_line ();
-    io_write_string (STDOUT_FILENO, output_line);
+    WRITE (STDOUT_FILENO, output_line);
   }
 }

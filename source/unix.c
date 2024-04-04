@@ -1,6 +1,6 @@
 /*!
-\file extensions.c
-\brief extensions to A68 except partial parametrization
+\file unix.c
+\brief extensions to A68G
 */
 
 /*
@@ -28,6 +28,7 @@ Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>.
 
 #include "algol68g.h"
 #include "genie.h"
+#include "inline.h"
 #include "transput.h"
 
 #if ! defined ENABLE_WIN32
@@ -44,7 +45,7 @@ extern A68_CHANNEL stand_in_channel, stand_out_channel, stand_draw_channel, stan
 
 /*!
 \brief PROC [] INT utc time
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_utctime (NODE_T * p)
@@ -72,7 +73,7 @@ void genie_utctime (NODE_T * p)
 
 /*!
 \brief PROC [] INT local time
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_localtime (NODE_T * p)
@@ -100,7 +101,7 @@ void genie_localtime (NODE_T * p)
 
 /*!
 \brief PROC INT argc
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_argc (NODE_T * p)
@@ -111,7 +112,7 @@ void genie_argc (NODE_T * p)
 
 /*!
 \brief PROC (INT) STRING argv
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_argv (NODE_T * p)
@@ -119,8 +120,8 @@ void genie_argv (NODE_T * p)
   A68_INT index;
   RESET_ERRNO;
   POP_OBJECT (p, &index, A68_INT);
-  if (index.value >= 1 && index.value <= global_argc) {
-    PUSH_REF (p, c_to_a_string (p, global_argv[index.value - 1]));
+  if (VALUE (&index) >= 1 && VALUE (&index) <= global_argc) {
+    PUSH_REF (p, c_to_a_string (p, global_argv[VALUE (&index) - 1]));
   } else {
     PUSH_REF (p, empty_string (p));
   }
@@ -128,7 +129,7 @@ void genie_argv (NODE_T * p)
 
 /*!
 \brief convert [] STRING row to char *vec[]
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param row
 **/
 
@@ -138,12 +139,12 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
   A68_ARRAY *arr = (A68_ARRAY *) & z[0];
   A68_TUPLE *tup = (A68_TUPLE *) & z[ALIGNED_SIZEOF (A68_ARRAY)];
   int k = 0;
-  if (get_row_size (tup, arr->dimensions) != 0) {
-    BYTE_T *base_addr = ADDRESS (&arr->array);
+  if (get_row_size (tup, DIM (arr)) != 0) {
+    BYTE_T *base_addr = ADDRESS (&ARRAY (arr));
     BOOL_T done = A68_FALSE;
-    initialise_internal_index (tup, arr->dimensions);
+    initialise_internal_index (tup, DIM (arr));
     while (!done) {
-      ADDR_T index = calculate_internal_index (tup, arr->dimensions);
+      ADDR_T index = calculate_internal_index (tup, DIM (arr));
       ADDR_T elem_addr = (index + arr->slice_offset) * arr->elem_size + arr->field_offset;
       BYTE_T *elem = &base_addr[elem_addr];
       int size = a68_string_size (p, *(A68_REF *) elem);
@@ -157,7 +158,7 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
       if (strlen (vec[k]) > 0) {
         k++;
       }
-      done = increment_internal_index (tup, arr->dimensions);
+      done = increment_internal_index (tup, DIM (arr));
     }
   }
   vec[k] = NULL;
@@ -178,7 +179,7 @@ static void free_vector (char *vec[])
 
 /*!
 \brief reset error number
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_reset_errno (NODE_T * p)
@@ -189,7 +190,7 @@ void genie_reset_errno (NODE_T * p)
 
 /*!
 \brief error number
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_errno (NODE_T * p)
@@ -199,25 +200,25 @@ void genie_errno (NODE_T * p)
 
 /*!
 \brief PROC strerror = (INT) STRING
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_strerror (NODE_T * p)
 {
   A68_INT i;
   POP_OBJECT (p, &i, A68_INT);
-  PUSH_REF (p, c_to_a_string (p, strerror (i.value)));
+  PUSH_REF (p, c_to_a_string (p, strerror (VALUE (&i))));
 }
 
 /*!
 \brief set up file for usage in pipe
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param fd
 \param chan
 \param r_mood
 \param w_mood
-\param p position in syntax tree, should not be NULLid
+\param p position in treeid
 **/
 
 static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL_T r_mood, BOOL_T w_mood, int pid)
@@ -225,7 +226,7 @@ static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL
   A68_FILE *f;
   *z = heap_generator (p, MODE (REF_FILE), ALIGNED_SIZEOF (A68_FILE));
   f = (A68_FILE *) ADDRESS (z);
-  f->status = (pid < 0) ? 0 : INITIALISED_MASK;
+  STATUS (f) = (pid < 0) ? 0 : INITIALISED_MASK;
   f->identification = nil_ref;
   f->terminator = nil_ref;
   f->channel = chan;
@@ -237,18 +238,19 @@ static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL
   f->write_mood = w_mood;
   f->char_mood = A68_TRUE;
   f->draw_mood = A68_FALSE;
-  f->format = nil_format;
+  FORMAT (f) = nil_format;
   f->transput_buffer = get_unblocked_transput_buffer (p);
+  f->string = nil_ref;
   reset_transput_buffer (f->transput_buffer);
   set_default_mended_procedures (f);
 }
 
 /*!
 \brief create and push a pipe
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param fd_r
 \param fd_w
-\param p position in syntax tree, should not be NULLid
+\param p position in treeid
 **/
 
 static void genie_mkpipe (NODE_T * p, int fd_r, int fd_w, int pid)
@@ -266,7 +268,7 @@ static void genie_mkpipe (NODE_T * p, int fd_r, int fd_w, int pid)
 
 /*!
 \brief push an environment string
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_getenv (NODE_T * p)
@@ -289,7 +291,7 @@ void genie_getenv (NODE_T * p)
 
 /*!
 \brief PROC fork = INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_fork (NODE_T * p)
@@ -304,7 +306,7 @@ void genie_fork (NODE_T * p)
 
 /*!
 \brief PROC execve = (STRING, [] STRING, [] STRING) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -337,7 +339,7 @@ void genie_execve (NODE_T * p)
 
 /*!
 \brief PROC execve child = (STRING, [] STRING, [] STRING) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_execve_child (NODE_T * p)
@@ -381,7 +383,7 @@ void genie_execve_child (NODE_T * p)
 
 /*!
 \brief PROC execve child pipe = (STRING, [] STRING, [] STRING) PIPE
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_execve_child_pipe (NODE_T * p)
@@ -451,7 +453,7 @@ Return a PIPE that contains the descriptors for the parent.
 
 /*!
 \brief PROC execve_output = (STRING, [] STRING, [] STRING, REF_STRING) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_execve_output (NODE_T * p)
@@ -541,7 +543,7 @@ Child redirects STDIN and STDOUT.
 
 /*!
 \brief PROC create pipe = PIPE
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_create_pipe (NODE_T * p)
@@ -554,7 +556,7 @@ void genie_create_pipe (NODE_T * p)
 
 /*!
 \brief PROC wait pid = (INT) VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_waitpid (NODE_T * p)
@@ -563,7 +565,7 @@ void genie_waitpid (NODE_T * p)
   RESET_ERRNO;
   POP_OBJECT (p, &k, A68_INT);
 #if ! defined ENABLE_WIN32
-  waitpid (k.value, NULL, 0);
+  waitpid (VALUE (&k), NULL, 0);
 #endif
 }
 
@@ -643,7 +645,7 @@ int rgetchar (void)
 
 /*!
 \brief PROC curses start = VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_start (NODE_T * p)
@@ -654,7 +656,7 @@ void genie_curses_start (NODE_T * p)
 
 /*!
 \brief PROC curses end = VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_end (NODE_T * p)
@@ -665,7 +667,7 @@ void genie_curses_end (NODE_T * p)
 
 /*!
 \brief PROC curses clear = VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_clear (NODE_T * p)
@@ -679,7 +681,7 @@ void genie_curses_clear (NODE_T * p)
 
 /*!
 \brief PROC curses refresh = VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_refresh (NODE_T * p)
@@ -693,7 +695,7 @@ void genie_curses_refresh (NODE_T * p)
 
 /*!
 \brief PROC curses lines = INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_lines (NODE_T * p)
@@ -706,7 +708,7 @@ void genie_curses_lines (NODE_T * p)
 
 /*!
 \brief PROC curses columns = INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_columns (NODE_T * p)
@@ -719,7 +721,7 @@ void genie_curses_columns (NODE_T * p)
 
 /*!
 \brief PROC curses getchar = CHAR
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_getchar (NODE_T * p)
@@ -732,7 +734,7 @@ void genie_curses_getchar (NODE_T * p)
 
 /*!
 \brief PROC curses putchar = (CHAR) VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_putchar (NODE_T * p)
@@ -742,12 +744,12 @@ void genie_curses_putchar (NODE_T * p)
     init_curses ();
   }
   POP_OBJECT (p, &ch, A68_CHAR);
-  addch (ch.value);
+  addch (VALUE (&ch));
 }
 
 /*!
 \brief PROC curses move = (INT, INT) VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_curses_move (NODE_T * p)
@@ -758,7 +760,7 @@ void genie_curses_move (NODE_T * p)
   }
   POP_OBJECT (p, &j, A68_INT);
   POP_OBJECT (p, &i, A68_INT);
-  move (i.value, j.value);
+  move (VALUE (&i), VALUE (&j));
 }
 
 #endif /* ENABLE_CURSES */
@@ -783,7 +785,7 @@ Error codes:
 
 /*!
 \brief PROC pg connect db (REF FILE, STRING, REF STRING) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_connectdb (NODE_T * p)
@@ -791,10 +793,10 @@ void genie_pq_connectdb (NODE_T * p)
   A68_REF ref_string, ref_file, ref_z, conninfo;
   A68_FILE *file;
   POP_REF (p, &ref_string);
-  CHECK_NIL (p, ref_string, MODE (REF_STRING));
+  CHECK_REF (p, ref_string, MODE (REF_STRING));
   POP_REF (p, &conninfo);
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   if (IS_IN_HEAP (&ref_file) && !IS_IN_HEAP (&ref_string)) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -810,7 +812,7 @@ void genie_pq_connectdb (NODE_T * p)
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ALREADY_OPEN);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  file->status = INITIALISED_MASK;
+  STATUS (file) = INITIALISED_MASK;
   file->channel = associate_channel;
   file->opened = A68_TRUE;
   file->open_exclusive = A68_FALSE;
@@ -824,7 +826,7 @@ void genie_pq_connectdb (NODE_T * p)
   }
   file->identification = nil_ref;
   file->terminator = nil_ref;
-  file->format = nil_format;
+  FORMAT (file) = nil_format;
   file->fd = -1;
   if (INITIALISED (&(file->string)) && !IS_NIL (file->string)) {
     UNPROTECT_SWEEP_HANDLE (&(file->string));
@@ -851,7 +853,7 @@ void genie_pq_connectdb (NODE_T * p)
 
 /*!
 \brief PROC pq finish (REF FILE) VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_finish (NODE_T * p)
@@ -859,7 +861,7 @@ void genie_pq_finish (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -877,7 +879,7 @@ void genie_pq_finish (NODE_T * p)
 
 /*!
 \brief PROC pq reset (REF FILE) VOID
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_reset (NODE_T * p)
@@ -885,7 +887,7 @@ void genie_pq_reset (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -901,7 +903,7 @@ void genie_pq_reset (NODE_T * p)
 
 /*!
 \brief PROC pq exec = (REF FILE, STRING) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_exec (NODE_T * p)
@@ -911,7 +913,7 @@ void genie_pq_exec (NODE_T * p)
   A68_FILE *file;
   POP_REF (p, &query);
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -923,7 +925,8 @@ void genie_pq_exec (NODE_T * p)
   }
   ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, query));
   file->result = PQexec (file->connection, a_to_c_string (p, (char *) ADDRESS (&ref_z), query));
-  if ((PQresultStatus (file->result) != PGRES_TUPLES_OK) && (PQresultStatus (file->result) != PGRES_COMMAND_OK)) {
+  if ((PQresultStatus (file->result) != PGRES_TUPLES_OK)
+      && (PQresultStatus (file->result) != PGRES_COMMAND_OK)) {
     PUSH_PRIMITIVE (p, -3, A68_INT);
   } else {
     PUSH_PRIMITIVE (p, 0, A68_INT);
@@ -932,7 +935,7 @@ void genie_pq_exec (NODE_T * p)
 
 /*!
 \brief PROC pq parameterstatus (REF FILE) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_parameterstatus (NODE_T * p)
@@ -942,7 +945,7 @@ void genie_pq_parameterstatus (NODE_T * p)
   A68_FILE *file;
   POP_REF (p, &parameter);
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -951,7 +954,8 @@ void genie_pq_parameterstatus (NODE_T * p)
   }
   ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, parameter));
   if (!IS_NIL (file->string)) {
-    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, (char *) PQparameterStatus (file->connection, a_to_c_string (p, (char *) ADDRESS (&ref_z), parameter)));
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, (char *) PQparameterStatus (file->connection, a_to_c_string (p, (char *)
+                                                                                                                          ADDRESS (&ref_z), parameter)));
     PUSH_PRIMITIVE (p, 0, A68_INT);
   } else {
     PUSH_PRIMITIVE (p, -3, A68_INT);
@@ -960,7 +964,7 @@ void genie_pq_parameterstatus (NODE_T * p)
 
 /*!
 \brief PROC pq cmdstatus (REF FILE) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_cmdstatus (NODE_T * p)
@@ -968,7 +972,7 @@ void genie_pq_cmdstatus (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -990,7 +994,7 @@ void genie_pq_cmdstatus (NODE_T * p)
 
 /*!
 \brief PROC pq cmdtuples (REF FILE) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_cmdtuples (NODE_T * p)
@@ -998,7 +1002,7 @@ void genie_pq_cmdtuples (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1020,7 +1024,7 @@ void genie_pq_cmdtuples (NODE_T * p)
 
 /*!
 \brief PROC pq ntuples (REF FILE) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_ntuples (NODE_T * p)
@@ -1028,7 +1032,7 @@ void genie_pq_ntuples (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1044,7 +1048,7 @@ void genie_pq_ntuples (NODE_T * p)
 
 /*!
 \brief PROC pq nfields (REF FILE) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_nfields (NODE_T * p)
@@ -1052,7 +1056,7 @@ void genie_pq_nfields (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1068,7 +1072,7 @@ void genie_pq_nfields (NODE_T * p)
 
 /*!
 \brief PROC pq fname (REF FILE, INT) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_fname (NODE_T * p)
@@ -1080,7 +1084,7 @@ void genie_pq_fname (NODE_T * p)
   POP_OBJECT (p, &index, A68_INT);
   CHECK_INIT (p, INITIALISED (&index), MODE (INT));
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1092,12 +1096,12 @@ void genie_pq_fname (NODE_T * p)
     return;
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
-  if (index.value < 1 || index.value > upb) {
+  if (VALUE (&index) < 1 || VALUE (&index) > upb) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!IS_NIL (file->string)) {
-    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQfname (file->result, index.value - 1));
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQfname (file->result, VALUE (&index) - 1));
     file->strpos = 1;
   }
   PUSH_PRIMITIVE (p, 0, A68_INT);
@@ -1105,7 +1109,7 @@ void genie_pq_fname (NODE_T * p)
 
 /*!
 \brief PROC pq fnumber = (REF FILE, STRING) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_fnumber (NODE_T * p)
@@ -1116,7 +1120,7 @@ void genie_pq_fnumber (NODE_T * p)
   int k;
   POP_REF (p, &name);
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1138,7 +1142,7 @@ void genie_pq_fnumber (NODE_T * p)
 
 /*!
 \brief PROC pq fformat (REF FILE, INT) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_fformat (NODE_T * p)
@@ -1150,7 +1154,7 @@ void genie_pq_fformat (NODE_T * p)
   POP_OBJECT (p, &index, A68_INT);
   CHECK_INIT (p, INITIALISED (&index), MODE (INT));
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1162,16 +1166,16 @@ void genie_pq_fformat (NODE_T * p)
     return;
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
-  if (index.value < 1 || index.value > upb) {
+  if (VALUE (&index) < 1 || VALUE (&index) > upb) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  PUSH_PRIMITIVE (p, PQfformat (file->result, index.value - 1), A68_INT);
+  PUSH_PRIMITIVE (p, PQfformat (file->result, VALUE (&index) - 1), A68_INT);
 }
 
 /*!
 \brief PROC pq getvalue (REF FILE, INT, INT) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_getvalue (NODE_T * p)
@@ -1186,7 +1190,7 @@ void genie_pq_getvalue (NODE_T * p)
   POP_OBJECT (p, &row, A68_INT);
   CHECK_INIT (p, INITIALISED (&row), MODE (INT));
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1198,16 +1202,16 @@ void genie_pq_getvalue (NODE_T * p)
     return;
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
-  if (column.value < 1 || column.value > upb) {
+  if (VALUE (&column) < 1 || VALUE (&column) > upb) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQntuples (file->result) : 0);
-  if (row.value < 1 || row.value > upb) {
+  if (VALUE (&row) < 1 || VALUE (&row) > upb) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  str = PQgetvalue (file->result, row.value - 1, column.value - 1);
+  str = PQgetvalue (file->result, VALUE (&row) - 1, VALUE (&column) - 1);
   if (str == NULL) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_NO_QUERY_RESULT);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -1223,7 +1227,7 @@ void genie_pq_getvalue (NODE_T * p)
 
 /*!
 \brief PROC pq getisnull (REF FILE, INT, INT) INT
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_getisnull (NODE_T * p)
@@ -1237,7 +1241,7 @@ void genie_pq_getisnull (NODE_T * p)
   POP_OBJECT (p, &row, A68_INT);
   CHECK_INIT (p, INITIALISED (&row), MODE (INT));
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1249,21 +1253,21 @@ void genie_pq_getisnull (NODE_T * p)
     return;
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
-  if (column.value < 1 || column.value > upb) {
+  if (VALUE (&column) < 1 || VALUE (&column) > upb) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQntuples (file->result) : 0);
-  if (row.value < 1 || row.value > upb) {
+  if (VALUE (&row) < 1 || VALUE (&row) > upb) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  PUSH_PRIMITIVE (p, PQgetisnull (file->result, row.value - 1, column.value - 1), A68_INT);
+  PUSH_PRIMITIVE (p, PQgetisnull (file->result, VALUE (&row) - 1, VALUE (&column) - 1), A68_INT);
 }
 
 /*!
 \brief edit error message sting from libpq
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static char *pq_edit (char *str)
@@ -1318,7 +1322,7 @@ static char *pq_edit (char *str)
 
 /*!
 \brief PROC pq errormessage (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_errormessage (NODE_T * p)
@@ -1326,7 +1330,7 @@ void genie_pq_errormessage (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1355,7 +1359,7 @@ void genie_pq_errormessage (NODE_T * p)
 
 /*!
 \brief PROC pq resulterrormessage (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_resulterrormessage (NODE_T * p)
@@ -1363,7 +1367,7 @@ void genie_pq_resulterrormessage (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1396,7 +1400,7 @@ void genie_pq_resulterrormessage (NODE_T * p)
 
 /*!
 \brief PROC pq db (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_db (NODE_T * p)
@@ -1404,7 +1408,7 @@ void genie_pq_db (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1422,7 +1426,7 @@ void genie_pq_db (NODE_T * p)
 
 /*!
 \brief PROC pq user (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_user (NODE_T * p)
@@ -1430,7 +1434,7 @@ void genie_pq_user (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1448,7 +1452,7 @@ void genie_pq_user (NODE_T * p)
 
 /*!
 \brief PROC pq pass (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_pass (NODE_T * p)
@@ -1456,7 +1460,7 @@ void genie_pq_pass (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1474,7 +1478,7 @@ void genie_pq_pass (NODE_T * p)
 
 /*!
 \brief PROC pq host (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_host (NODE_T * p)
@@ -1482,7 +1486,7 @@ void genie_pq_host (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1500,7 +1504,7 @@ void genie_pq_host (NODE_T * p)
 
 /*!
 \brief PROC pq port (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_port (NODE_T * p)
@@ -1508,7 +1512,7 @@ void genie_pq_port (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1526,7 +1530,7 @@ void genie_pq_port (NODE_T * p)
 
 /*!
 \brief PROC pq tty (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_tty (NODE_T * p)
@@ -1534,7 +1538,7 @@ void genie_pq_tty (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1552,7 +1556,7 @@ void genie_pq_tty (NODE_T * p)
 
 /*!
 \brief PROC pq options (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_options (NODE_T * p)
@@ -1560,7 +1564,7 @@ void genie_pq_options (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1578,7 +1582,7 @@ void genie_pq_options (NODE_T * p)
 
 /*!
 \brief PROC pq protocol version (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_protocolversion (NODE_T * p)
@@ -1586,7 +1590,7 @@ void genie_pq_protocolversion (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1602,7 +1606,7 @@ void genie_pq_protocolversion (NODE_T * p)
 
 /*!
 \brief PROC pq server version (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_serverversion (NODE_T * p)
@@ -1610,7 +1614,7 @@ void genie_pq_serverversion (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1626,7 +1630,7 @@ void genie_pq_serverversion (NODE_T * p)
 
 /*!
 \brief PROC pq socket (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_socket (NODE_T * p)
@@ -1634,7 +1638,7 @@ void genie_pq_socket (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1650,7 +1654,7 @@ void genie_pq_socket (NODE_T * p)
 
 /*!
 \brief PROC pq backend pid (REF FILE) INT 
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_pq_backendpid (NODE_T * p)
@@ -1658,7 +1662,7 @@ void genie_pq_backendpid (NODE_T * p)
   A68_REF ref_file;
   A68_FILE *file;
   POP_REF (p, &ref_file);
-  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (file->connection == NULL) {
@@ -1673,3 +1677,452 @@ void genie_pq_backendpid (NODE_T * p)
 }
 
 #endif /* ENABLE_POSTGRESQL */
+
+#if defined ENABLE_HTTP
+
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+
+#define PROTOCOL "tcp"
+#define SERVICE "http"
+
+#define CONTENT_BUFFER_SIZE (4 * KILOBYTE)
+#define TIMEOUT_INTERVAL 15
+
+/*!
+\brief send GET request to server and yield answer (TCP/HTTP only)
+\param p position in tree
+**/
+
+void genie_http_content (NODE_T * p)
+{
+  A68_REF path_string, domain_string, content_string;
+  A68_INT port_number;
+  int socket_id, conn, k;
+  fd_set set;
+  struct timeval timeout;
+  struct servent *service_address;
+  struct hostent *host_address;
+  struct protoent *protocol;
+  struct sockaddr_in socket_address;
+  char buffer[CONTENT_BUFFER_SIZE];
+  RESET_ERRNO;
+/* Pop arguments. */
+  POP_OBJECT (p, &port_number, A68_INT);
+  CHECK_INIT (p, INITIALISED (&port_number), MODE (INT));
+  POP_REF (p, &path_string);
+  CHECK_INIT (p, INITIALISED (&path_string), MODE (STRING));
+  POP_REF (p, &domain_string);
+  CHECK_INIT (p, INITIALISED (&domain_string), MODE (STRING));
+  POP_REF (p, &content_string);
+  CHECK_REF (p, content_string, MODE (REF_STRING));
+  *(A68_REF *) ADDRESS (&content_string) = empty_string (p);
+/* Reset buffers. */
+  reset_transput_buffer (DOMAIN_BUFFER);
+  reset_transput_buffer (PATH_BUFFER);
+  reset_transput_buffer (REQUEST_BUFFER);
+  reset_transput_buffer (CONTENT_BUFFER);
+  add_a_string_transput_buffer (p, DOMAIN_BUFFER, (BYTE_T *) & domain_string);
+  add_a_string_transput_buffer (p, PATH_BUFFER, (BYTE_T *) & path_string);
+/* Make request. */
+  add_string_transput_buffer (p, REQUEST_BUFFER, "GET ");
+  add_string_transput_buffer (p, REQUEST_BUFFER, get_transput_buffer (PATH_BUFFER));
+  add_string_transput_buffer (p, REQUEST_BUFFER, " HTTP/1.0\n\n");
+/* Connect to host. */
+  FILL (&socket_address, 0, sizeof (socket_address));
+  socket_address.sin_family = AF_INET;
+  service_address = getservbyname (SERVICE, PROTOCOL);
+  if (service_address == NULL) {
+    PUSH_PRIMITIVE (p, 1, A68_INT);
+    return;
+  };
+  if (VALUE (&port_number) == 0) {
+    socket_address.sin_port = service_address->s_port;
+  } else {
+    socket_address.sin_port = htons ((unsigned short) VALUE (&port_number));
+    if (socket_address.sin_port == 0) {
+      PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+      return;
+    };
+  }
+  host_address = gethostbyname (get_transput_buffer (DOMAIN_BUFFER));
+  if (host_address == NULL) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    return;
+  };
+  COPY (&socket_address.sin_addr, host_address->h_addr, host_address->h_length);
+  protocol = getprotobyname (PROTOCOL);
+  if (protocol == NULL) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    return;
+  };
+  socket_id = socket (PF_INET, SOCK_STREAM, protocol->p_proto);
+  if (socket_id < 0) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    return;
+  };
+  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZEOF (socket_address));
+  if (conn < 0) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    close (socket_id);
+    return;
+  };
+/* Read from host. */
+  WRITE (socket_id, get_transput_buffer (REQUEST_BUFFER));
+  if (errno != 0) {
+    PUSH_PRIMITIVE (p, errno, A68_INT);
+    close (socket_id);
+    return;
+  };
+/* Initialise file descriptor set. */
+  FD_ZERO (&set);
+  FD_SET (socket_id, &set);
+/* Initialise the timeout data structure. */
+  timeout.tv_sec = TIMEOUT_INTERVAL;
+  timeout.tv_usec = 0;
+/* Block until server replies or timeout blows up. */
+  switch (select (FD_SETSIZE, &set, NULL, NULL, &timeout)) {
+  case 0:
+    {
+      errno = ETIMEDOUT;
+      PUSH_PRIMITIVE (p, errno, A68_INT);
+      close (socket_id);
+      return;
+    }
+  case -1:
+    {
+      PUSH_PRIMITIVE (p, errno, A68_INT);
+      close (socket_id);
+      return;
+    }
+  case 1:
+    {
+      break;
+    }
+  default:
+    {
+      ABNORMAL_END (A68_TRUE, "unexpected result from select", NULL);
+    }
+  }
+  while ((k = io_read (socket_id, &buffer, (CONTENT_BUFFER_SIZE - 1))) > 0) {
+    buffer[k] = NULL_CHAR;
+    add_string_transput_buffer (p, CONTENT_BUFFER, buffer);
+  }
+  if (k < 0 || errno != 0) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    close (socket_id);
+    return;
+  };
+/* Convert string. */
+  *(A68_REF *) ADDRESS (&content_string) = c_to_a_string (p, get_transput_buffer (CONTENT_BUFFER));
+  close (socket_id);
+  PUSH_PRIMITIVE (p, errno, A68_INT);
+}
+
+/*!
+\brief send request to server and yield answer (TCP only)
+\param p position in tree
+**/
+
+void genie_tcp_request (NODE_T * p)
+{
+  A68_REF path_string, domain_string, content_string;
+  A68_INT port_number;
+  int socket_id, conn, k;
+  fd_set set;
+  struct timeval timeout;
+  struct servent *service_address;
+  struct hostent *host_address;
+  struct protoent *protocol;
+  struct sockaddr_in socket_address;
+  char buffer[CONTENT_BUFFER_SIZE];
+  RESET_ERRNO;
+/* Pop arguments. */
+  POP_OBJECT (p, &port_number, A68_INT);
+  CHECK_INIT (p, INITIALISED (&port_number), MODE (INT));
+  POP_REF (p, &path_string);
+  CHECK_INIT (p, INITIALISED (&path_string), MODE (STRING));
+  POP_REF (p, &domain_string);
+  CHECK_INIT (p, INITIALISED (&domain_string), MODE (STRING));
+  POP_REF (p, &content_string);
+  CHECK_REF (p, content_string, MODE (REF_STRING));
+  *(A68_REF *) ADDRESS (&content_string) = empty_string (p);
+/* Reset buffers. */
+  reset_transput_buffer (DOMAIN_BUFFER);
+  reset_transput_buffer (PATH_BUFFER);
+  reset_transput_buffer (REQUEST_BUFFER);
+  reset_transput_buffer (CONTENT_BUFFER);
+  add_a_string_transput_buffer (p, DOMAIN_BUFFER, (BYTE_T *) & domain_string);
+  add_a_string_transput_buffer (p, PATH_BUFFER, (BYTE_T *) & path_string);
+/* Make request. */
+  add_string_transput_buffer (p, REQUEST_BUFFER, get_transput_buffer (PATH_BUFFER));
+/* Connect to host. */
+  FILL (&socket_address, 0, sizeof (socket_address));
+  socket_address.sin_family = AF_INET;
+  service_address = getservbyname (SERVICE, PROTOCOL);
+  if (service_address == NULL) {
+    PUSH_PRIMITIVE (p, 1, A68_INT);
+    return;
+  };
+  if (VALUE (&port_number) == 0) {
+    socket_address.sin_port = service_address->s_port;
+  } else {
+    socket_address.sin_port = htons ((unsigned short) VALUE (&port_number));
+    if (socket_address.sin_port == 0) {
+      PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+      return;
+    };
+  }
+  host_address = gethostbyname (get_transput_buffer (DOMAIN_BUFFER));
+  if (host_address == NULL) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    return;
+  };
+  COPY (&socket_address.sin_addr, host_address->h_addr, host_address->h_length);
+  protocol = getprotobyname (PROTOCOL);
+  if (protocol == NULL) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    return;
+  };
+  socket_id = socket (PF_INET, SOCK_STREAM, protocol->p_proto);
+  if (socket_id < 0) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    return;
+  };
+  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZEOF (socket_address));
+  if (conn < 0) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    close (socket_id);
+    return;
+  };
+/* Read from host. */
+  WRITE (socket_id, get_transput_buffer (REQUEST_BUFFER));
+  if (errno != 0) {
+    PUSH_PRIMITIVE (p, errno, A68_INT);
+    close (socket_id);
+    return;
+  };
+/* Initialise file descriptor set. */
+  FD_ZERO (&set);
+  FD_SET (socket_id, &set);
+/* Initialise the timeout data structure. */
+  timeout.tv_sec = TIMEOUT_INTERVAL;
+  timeout.tv_usec = 0;
+/* Block until server replies or timeout blows up. */
+  switch (select (FD_SETSIZE, &set, NULL, NULL, &timeout)) {
+  case 0:
+    {
+      errno = ETIMEDOUT;
+      PUSH_PRIMITIVE (p, errno, A68_INT);
+      close (socket_id);
+      return;
+    }
+  case -1:
+    {
+      PUSH_PRIMITIVE (p, errno, A68_INT);
+      close (socket_id);
+      return;
+    }
+  case 1:
+    {
+      break;
+    }
+  default:
+    {
+      ABNORMAL_END (A68_TRUE, "unexpected result from select", NULL);
+    }
+  }
+  while ((k = io_read (socket_id, &buffer, (CONTENT_BUFFER_SIZE - 1))) > 0) {
+    buffer[k] = NULL_CHAR;
+    add_string_transput_buffer (p, CONTENT_BUFFER, buffer);
+  }
+  if (k < 0 || errno != 0) {
+    PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
+    close (socket_id);
+    return;
+  };
+/* Convert string. */
+  *(A68_REF *) ADDRESS (&content_string) = c_to_a_string (p, get_transput_buffer (CONTENT_BUFFER));
+  close (socket_id);
+  PUSH_PRIMITIVE (p, errno, A68_INT);
+}
+
+#endif /* ENABLE_HTTP */
+
+#if defined ENABLE_REGEX
+
+#include <regex.h>
+
+/*!
+\brief return code for regex interface
+\param rc return code from regex routine
+\return 0: match, 1: no match, 2: no core, 3: other error
+**/
+
+void push_grep_rc (NODE_T * p, int rc)
+{
+  switch (rc) {
+  case 0:
+    {
+      PUSH_PRIMITIVE (p, 0, A68_INT);
+      return;
+    }
+  case REG_NOMATCH:
+    {
+      PUSH_PRIMITIVE (p, 1, A68_INT);
+      return;
+    }
+  case REG_ESPACE:
+    {
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      return;
+    }
+  default:
+    {
+      PUSH_PRIMITIVE (p, 2, A68_INT);
+      return;
+    }
+  }
+}
+
+/*!
+\brief PROC grep in string = (STRING, STRING, REF INT, REF INT) INT
+\param p position in tree
+\return 0: match, 1: no match, 2: no core, 3: other error
+**/
+
+void genie_grep_in_string (NODE_T * p)
+{
+  A68_REF ref_pat, ref_beg, ref_end, ref_str;
+  int rc, nmatch, k, max_k, widest;
+  regex_t compiled;
+  regmatch_t *matches;
+  POP_REF (p, &ref_end);
+  POP_REF (p, &ref_beg);
+  POP_REF (p, &ref_str);
+  POP_REF (p, &ref_pat);
+  reset_transput_buffer (PATTERN_BUFFER);
+  reset_transput_buffer (STRING_BUFFER);
+  add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
+  add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) & ref_str);
+  rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  if (rc != 0) {
+    push_grep_rc (p, rc);
+    regfree (&compiled);
+    return;
+  }
+  nmatch = compiled.re_nsub;
+  if (nmatch == 0) {
+    nmatch = 1;
+  }
+  matches = malloc (nmatch * ALIGNED_SIZEOF (regmatch_t));
+  if (nmatch > 0 && matches == NULL) {
+    PUSH_PRIMITIVE (p, rc, A68_INT);
+    regfree (&compiled);
+    return;
+  }
+  rc = regexec (&compiled, get_transput_buffer (STRING_BUFFER), nmatch, matches, 0);
+  if (rc != 0) {
+    push_grep_rc (p, rc);
+    regfree (&compiled);
+    return;
+  }
+/* Find widest match. Do not assume it is the first one. */
+  widest = 0;
+  max_k = 0;
+  for (k = 0; k < nmatch; k++) {
+    int dif = matches[k].rm_eo - (int) matches[k].rm_so;
+    if (dif > widest) {
+      widest = dif;
+      max_k = k;
+    }
+  }
+  if (!IS_NIL (ref_beg)) {
+    A68_INT *i = (A68_INT *) ADDRESS (&ref_beg);
+    STATUS (i) = INITIALISED_MASK;
+    VALUE (i) = matches[max_k].rm_so + 1;
+  }
+  if (!IS_NIL (ref_end)) {
+    A68_INT *i = (A68_INT *) ADDRESS (&ref_end);
+    STATUS (i) = INITIALISED_MASK;
+    VALUE (i) = matches[max_k].rm_eo;
+  }
+  free (matches);
+  push_grep_rc (p, 0);
+}
+
+/*!
+\brief PROC sub in string = (STRING, STRING, REF STRING) INT
+\param p position in tree
+\return 0: match, 1: no match, 2: no core, 3: other error
+**/
+
+void genie_sub_in_string (NODE_T * p)
+{
+  A68_REF ref_pat, ref_rep, ref_str;
+  int rc, nmatch, k, max_k, widest, begin, end;
+  char *txt;
+  regex_t compiled;
+  regmatch_t *matches;
+  POP_REF (p, &ref_str);
+  POP_REF (p, &ref_rep);
+  POP_REF (p, &ref_pat);
+  if (IS_NIL (ref_str)) {
+    PUSH_PRIMITIVE (p, 3, A68_INT);
+    return;
+  }
+  reset_transput_buffer (STRING_BUFFER);
+  reset_transput_buffer (REPLACE_BUFFER);
+  reset_transput_buffer (PATTERN_BUFFER);
+  add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
+  add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) (A68_REF *) ADDRESS (&ref_str));
+  rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  if (rc != 0) {
+    push_grep_rc (p, rc);
+    regfree (&compiled);
+    return;
+  }
+  nmatch = compiled.re_nsub;
+  if (nmatch == 0) {
+    nmatch = 1;
+  }
+  matches = malloc (nmatch * ALIGNED_SIZEOF (regmatch_t));
+  if (nmatch > 0 && matches == NULL) {
+    PUSH_PRIMITIVE (p, rc, A68_INT);
+    regfree (&compiled);
+    return;
+  }
+  rc = regexec (&compiled, get_transput_buffer (STRING_BUFFER), nmatch, matches, 0);
+  if (rc != 0) {
+    push_grep_rc (p, rc);
+    regfree (&compiled);
+    return;
+  }
+/* Find widest match. Do not assume it is the first one. */
+  widest = 0;
+  max_k = 0;
+  for (k = 0; k < nmatch; k++) {
+    int dif = matches[k].rm_eo - (int) matches[k].rm_so;
+    if (dif > widest) {
+      widest = dif;
+      max_k = k;
+    }
+  }
+  begin = matches[max_k].rm_so + 1;
+  end = matches[max_k].rm_eo;
+/* Substitute text. */
+  txt = get_transput_buffer (STRING_BUFFER);
+  for (k = 0; k < begin - 1; k++) {
+    add_char_transput_buffer (p, REPLACE_BUFFER, txt[k]);
+  }
+  add_a_string_transput_buffer (p, REPLACE_BUFFER, (BYTE_T *) & ref_rep);
+  for (k = end; k < get_transput_buffer_size (STRING_BUFFER); k++) {
+    add_char_transput_buffer (p, REPLACE_BUFFER, txt[k]);
+  }
+  *(A68_REF *) ADDRESS (&ref_str) = c_to_a_string (p, get_transput_buffer (REPLACE_BUFFER));
+  free (matches);
+  push_grep_rc (p, 0);
+}
+#endif /* ENABLE_REGEX */

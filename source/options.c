@@ -143,7 +143,7 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
           if (car != NULL) {
             io_close_tty_line ();
             snprintf (output_line, BUFFER_SIZE, "%s", &car[1]);
-            io_write_string (STDOUT_FILENO, output_line);
+            WRITE (STDOUT_FILENO, output_line);
           } else {
             FORWARD (i);
             if (i != NULL) {
@@ -153,7 +153,7 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
               if (i != NULL) {
                 io_close_tty_line ();
                 snprintf (output_line, BUFFER_SIZE, "%s", i->str);
-                io_write_string (STDOUT_FILENO, output_line);
+                WRITE (STDOUT_FILENO, output_line);
               }
             }
           }
@@ -369,7 +369,9 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         }
       }
 /* HEAP, HANDLES, STACK, FRAME and OVERHEAD  set core allocation. */
-      else if (eq (module, p, "HEAP") || eq (module, p, "HANDLES") || eq (module, p, "STACK") || eq (module, p, "FRAME") || eq (module, p, "OVERHEAD")) {
+      else if (eq (module, p, "HEAP") || eq (module, p, "HANDLES")
+               || eq (module, p, "STACK") || eq (module, p, "FRAME")
+               || eq (module, p, "OVERHEAD")) {
         BOOL_T error = A68_FALSE;
         int k = fetch_integral (p, &i, &error);
 /* Adjust size. */
@@ -448,7 +450,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
       else if (eq (module, p, "REGRESSION")) {
         module->options.regression_test = A68_TRUE;
         gnu_diags = A68_FALSE;
-        module->options.time_limit = 30;
+        module->options.time_limit = 60;
         term_width = MAX_LINE_WIDTH;
       }
 /* NOWARNINGS switches warnings off. */
@@ -590,9 +592,9 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 /* TRACE and NOTRACE switch on/off tracing of the running program. */
       else if (eq (module, p, "TRace")) {
         module->options.trace = A68_TRUE;
-        module->options.nodemask |= TRACE_MASK;
+        module->options.nodemask |= BREAKPOINT_TRACE_MASK;
       } else if (eq (module, p, "NOTRace")) {
-        module->options.nodemask &= ~TRACE_MASK;
+        module->options.nodemask &= ~BREAKPOINT_TRACE_MASK;
       }
 /* TIMELIMIT lets the interpreter stop after so-many seconds. */
       else if (eq (module, p, "TImelimit")) {
@@ -628,9 +630,9 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 
 void default_mem_sizes (void)
 {
-  frame_stack_size = 2 * MEGABYTE;
+  frame_stack_size = 3 * MEGABYTE;
   expr_stack_size = MEGABYTE;
-  heap_size = 25 * MEGABYTE;
+  heap_size = 24 * MEGABYTE;
   handle_pool_size = 4 * MEGABYTE;
   storage_overhead = 512 * KILOBYTE;
 }
@@ -727,7 +729,8 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 /* 'q' points at first significant char in item .*/
   while (p[0] != NULL_CHAR) {
 /* Skip white space ... */
-    while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',') && p[0] != NULL_CHAR) {
+    while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',')
+           && p[0] != NULL_CHAR) {
       p++;
     }
 /* ... then tokenise an item. */

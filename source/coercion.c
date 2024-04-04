@@ -157,7 +157,8 @@ static char *mode_error_text (MOID_T * p, MOID_T * q, int context, int deflex, i
       }
     }
     snprintf (TAIL (txt), BUFFER_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (q), MOID_ERROR_WIDTH));
-  } else if (WHETHER (p, STOWED_MODE) && (WHETHER (q, PROC_SYMBOL) || WHETHER (q, STRUCT_SYMBOL))) {
+  } else if (WHETHER (p, STOWED_MODE)
+             && (WHETHER (q, PROC_SYMBOL) || WHETHER (q, STRUCT_SYMBOL))) {
     PACK_T *u, *v;
     for (u = PACK (p), v = PACK (q); u != NULL && v != NULL; FORWARD (u), FORWARD (v)) {
       if (!whether_coercible (MOID (u), MOID (v), context, deflex)) {
@@ -207,7 +208,7 @@ static void cannot_coerce (NODE_T * p, MOID_T * from, MOID_T * to, int context, 
 
 /*!
 \brief driver for mode checker
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void mode_checker (NODE_T * p)
@@ -222,7 +223,7 @@ void mode_checker (NODE_T * p)
 
 /*!
 \brief driver for coercion inserions
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void coercion_inserter (NODE_T * p)
@@ -296,7 +297,7 @@ static void add_to_soid_list (SOID_LIST_T ** root, NODE_T * where, SOID_T * soid
 
 /*!
 \brief absorb nested series modes recursively
-\param p mode, should not be NULL
+\param p mode
 **/
 
 static void absorb_series_pack (MOID_T ** p)
@@ -334,9 +335,9 @@ static MOID_T *make_series_from_moids (MOID_T * u, MOID_T * v)
   add_mode_to_pack (&(PACK (x)), u, NULL, NODE (u));
   add_mode_to_pack (&(PACK (x)), v, NULL, NODE (v));
   absorb_series_pack (&x);
-  DIMENSION (x) = count_pack_members (PACK (x));
+  DIM (x) = count_pack_members (PACK (x));
   add_single_moid_to_list (&top_moid_list, x, NULL);
-  if (DIMENSION (x) == 1) {
+  if (DIM (x) == 1) {
     return (MOID (PACK (x)));
   } else {
     return (x);
@@ -361,7 +362,8 @@ which is used in balancing conformity clauses.
     mods = 0;
     for (v = PACK (m); v != NULL; FORWARD (v)) {
       MOID_T *n = depref_completely (MOID (v));
-      if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, SAFE_DEFLEXING)) {
+      if (WHETHER (n, UNION_SYMBOL)
+          && whether_subset (n, m, SAFE_DEFLEXING)) {
 /* Unpack it. */
         PACK_T *w;
         for (w = PACK (n); w != NULL; FORWARD (w)) {
@@ -409,7 +411,7 @@ static MOID_T *register_extra_mode (MOID_T * u)
 
 /*!
 \brief make united mode, from mode that is a SERIES (..)
-\param m mode, should not be NULL
+\param m mode
 \return united mode
 **/
 
@@ -437,12 +439,12 @@ static MOID_T *make_united_mode (MOID_T * m)
 /* Absorb and contract the new UNION. */
   do {
     mods = 0;
-    u->dimensions = count_pack_members (PACK (u));
+    DIM (u) = count_pack_members (PACK (u));
     PACK (u) = absorb_union_pack (PACK (u), &mods);
     contract_union (u, &mods);
   } while (mods != 0);
 /* A UNION of one mode is that mode itself. */
-  if (DIMENSION (u) == 1) {
+  if (DIM (u) == 1) {
     return (MOID (PACK (u)));
   } else {
     return (register_extra_mode (u));
@@ -463,7 +465,7 @@ static MOID_T *pack_soids_in_moid (SOID_LIST_T * top_sl, int attribute)
   x = new_moid ();
   NUMBER (x) = mode_count++;
   ATTRIBUTE (x) = attribute;
-  DIMENSION (x) = 0;
+  DIM (x) = 0;
   SUB (x) = NULL;
   EQUIVALENT (x) = NULL;
   SLICE (x) = NULL;
@@ -478,7 +480,7 @@ static MOID_T *pack_soids_in_moid (SOID_LIST_T * top_sl, int attribute)
     t->text = NULL;
     NODE (t) = top_sl->where;
     NEXT (t) = NULL;
-    x->dimensions++;
+    DIM (x)++;
     *p = t;
     p = &NEXT (t);
   }
@@ -488,7 +490,7 @@ static MOID_T *pack_soids_in_moid (SOID_LIST_T * top_sl, int attribute)
 
 /*!
 \brief whether mode is deprefable
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -503,7 +505,7 @@ BOOL_T whether_deprefable (MOID_T * p)
 
 /*!
 \brief depref mode once
-\param p mode, should not be NULL
+\param p mode
 \return single-depreffed mode
 **/
 
@@ -520,7 +522,7 @@ static MOID_T *depref_once (MOID_T * p)
 
 /*!
 \brief depref mode completely
-\param p mode, should not be NULL
+\param p mode
 \return completely depreffed mode
 **/
 
@@ -534,7 +536,7 @@ MOID_T *depref_completely (MOID_T * p)
 
 /*!
 \brief deproc_completely
-\param p mode, should not be NULL
+\param p mode
 \return completely deprocedured mode
 **/
 
@@ -548,8 +550,8 @@ static MOID_T *deproc_completely (MOID_T * p)
 
 /*!
 \brief depref rows
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \return
 **/
 
@@ -567,7 +569,7 @@ static MOID_T *depref_rows (MOID_T * p, MOID_T * q)
 
 /*!
 \brief derow mode, strip FLEX and BOUNDS
-\param p mode, should not be NULL
+\param p mode
 \return
 **/
 
@@ -582,7 +584,7 @@ static MOID_T *derow (MOID_T * p)
 
 /*!
 \brief whether rows type
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -613,7 +615,7 @@ static BOOL_T whether_rows_type (MOID_T * p)
 
 /*!
 \brief whether mode is PROC (REF FILE) VOID or FORMAT
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -630,7 +632,7 @@ static BOOL_T whether_proc_ref_file_void_or_format (MOID_T * p)
 
 /*!
 \brief whether mode can be transput
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -674,11 +676,13 @@ static BOOL_T whether_transput_mode (MOID_T * p)
     PACK_T *q = PACK (p);
     BOOL_T k = A68_TRUE;
     for (; q != NULL && k; FORWARD (q)) {
-      k &= (whether_transput_mode (MOID (q)) || whether_proc_ref_file_void_or_format (MOID (q)));
+      k &= (whether_transput_mode (MOID (q))
+            || whether_proc_ref_file_void_or_format (MOID (q)));
     }
     return (k);
   } else if (WHETHER (p, ROW_SYMBOL)) {
-    return (whether_transput_mode (SUB (p)) || whether_proc_ref_file_void_or_format (SUB (p)));
+    return (whether_transput_mode (SUB (p))
+            || whether_proc_ref_file_void_or_format (SUB (p)));
   } else {
     return (A68_FALSE);
   }
@@ -686,7 +690,7 @@ static BOOL_T whether_transput_mode (MOID_T * p)
 
 /*!
 \brief whether mode is printable
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -701,7 +705,7 @@ static BOOL_T whether_printable_mode (MOID_T * p)
 
 /*!
 \brief whether mode is readable
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -716,7 +720,7 @@ static BOOL_T whether_readable_mode (MOID_T * p)
 
 /*!
 \brief whether name struct
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -816,8 +820,8 @@ static BOOL_T whether_moid_in_pack (MOID_T * u, PACK_T * v, int deflex)
 
 /*!
 \brief whether "p" is a subset of "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -834,8 +838,8 @@ BOOL_T whether_subset (MOID_T * p, MOID_T * q, int deflex)
 
 /*!
 \brief whether "p" can be united to UNION "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -879,8 +883,8 @@ static void investigate_firm_relations (PACK_T * u, PACK_T * v, BOOL_T * all, BO
 
 /*!
 \brief whether there is a soft path from "p" to "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -898,8 +902,8 @@ static BOOL_T whether_softly_coercible (MOID_T * p, MOID_T * q, int deflex)
 
 /*!
 \brief whether there is a weak path from "p" to "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -917,8 +921,8 @@ static BOOL_T whether_weakly_coercible (MOID_T * p, MOID_T * q, int deflex)
 
 /*!
 \brief whether there is a meek path from "p" to "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -936,8 +940,8 @@ static BOOL_T whether_meekly_coercible (MOID_T * p, MOID_T * q, int deflex)
 
 /*!
 \brief whether there is a firm path from "p" to "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -959,15 +963,17 @@ static BOOL_T whether_firmly_coercible (MOID_T * p, MOID_T * q, int deflex)
 
 /*!
 \brief whether "p" widens to "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \return TRUE or FALSE
 **/
 
 static MOID_T *widens_to (MOID_T * p, MOID_T * q)
 {
   if (p == MODE (INT)) {
-    if (q == MODE (LONG_INT) || q == MODE (LONGLONG_INT) || q == MODE (LONG_REAL) || q == MODE (LONGLONG_REAL) || q == MODE (LONG_COMPLEX) || q == MODE (LONGLONG_COMPLEX)) {
+    if (q == MODE (LONG_INT) || q == MODE (LONGLONG_INT)
+        || q == MODE (LONG_REAL) || q == MODE (LONGLONG_REAL)
+        || q == MODE (LONG_COMPLEX) || q == MODE (LONGLONG_COMPLEX)) {
       return (MODE (LONG_INT));
     } else if (q == MODE (REAL) || q == MODE (COMPLEX)) {
       return (MODE (REAL));
@@ -977,7 +983,8 @@ static MOID_T *widens_to (MOID_T * p, MOID_T * q)
   } else if (p == MODE (LONG_INT)) {
     if (q == MODE (LONGLONG_INT)) {
       return (MODE (LONGLONG_INT));
-    } else if (q == MODE (LONG_REAL) || q == MODE (LONGLONG_REAL) || q == MODE (LONG_COMPLEX) || q == MODE (LONGLONG_COMPLEX)) {
+    } else if (q == MODE (LONG_REAL) || q == MODE (LONGLONG_REAL)
+               || q == MODE (LONG_COMPLEX) || q == MODE (LONGLONG_COMPLEX)) {
       return (MODE (LONG_REAL));
     } else {
       return (NULL);
@@ -989,7 +996,8 @@ static MOID_T *widens_to (MOID_T * p, MOID_T * q)
       return (NULL);
     }
   } else if (p == MODE (REAL)) {
-    if (q == MODE (LONG_REAL) || q == MODE (LONGLONG_REAL) || q == MODE (LONG_COMPLEX) || q == MODE (LONGLONG_COMPLEX)) {
+    if (q == MODE (LONG_REAL) || q == MODE (LONGLONG_REAL)
+        || q == MODE (LONG_COMPLEX) || q == MODE (LONGLONG_COMPLEX)) {
       return (MODE (LONG_REAL));
     } else if (q == MODE (COMPLEX)) {
       return (MODE (COMPLEX));
@@ -1055,8 +1063,8 @@ static MOID_T *widens_to (MOID_T * p, MOID_T * q)
 
 /*!
 \brief whether "p" widens to "q"
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \return TRUE or FALSE
 **/
 
@@ -1072,7 +1080,7 @@ static BOOL_T whether_widenable (MOID_T * p, MOID_T * q)
 
 /*!
 \brief whether "p" is a REF ROW
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -1083,8 +1091,8 @@ static BOOL_T whether_ref_row (MOID_T * p)
 
 /*!
 \brief whether strong name
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \return TRUE or FALSE
 **/
 
@@ -1101,8 +1109,8 @@ static BOOL_T whether_strong_name (MOID_T * p, MOID_T * q)
 
 /*!
 \brief whether strong slice
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \return TRUE or FALSE
 **/
 
@@ -1123,8 +1131,8 @@ static BOOL_T whether_strong_slice (MOID_T * p, MOID_T * q)
 
 /*!
 \brief whether strongly coercible
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param context
 \return TRUE or FALSE
 **/
@@ -1136,7 +1144,8 @@ static BOOL_T whether_strongly_coercible (MOID_T * p, MOID_T * q, int deflex)
     return (A68_TRUE);
   } else if (q == MODE (VOID)) {
     return (A68_TRUE);
-  } else if ((q == MODE (SIMPLIN) || q == MODE (ROW_SIMPLIN)) && whether_readable_mode (p)) {
+  } else if ((q == MODE (SIMPLIN) || q == MODE (ROW_SIMPLIN))
+             && whether_readable_mode (p)) {
     return (A68_TRUE);
   } else if (q == MODE (ROWS) && whether_rows_type (p)) {
     return (A68_TRUE);
@@ -1161,20 +1170,21 @@ static BOOL_T whether_strongly_coercible (MOID_T * p, MOID_T * q, int deflex)
 
 /*!
 \brief whether firm
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \return TRUE or FALSE
 **/
 
 BOOL_T whether_firm (MOID_T * p, MOID_T * q)
 {
-  return (whether_firmly_coercible (p, q, SAFE_DEFLEXING) || whether_firmly_coercible (q, p, SAFE_DEFLEXING));
+  return (whether_firmly_coercible (p, q, SAFE_DEFLEXING)
+          || whether_firmly_coercible (q, p, SAFE_DEFLEXING));
 }
 
 /*!
 \brief whether coercible stowed
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param c
 \param context
 \return TRUE or FALSE
@@ -1201,7 +1211,7 @@ static BOOL_T whether_coercible_stowed (MOID_T * p, MOID_T * q, int c, int defle
       return (j);
     } else if (WHETHER (q, PROC_SYMBOL) || WHETHER (q, STRUCT_SYMBOL)) {
       PACK_T *u = PACK (p), *v = PACK (q);
-      if (p->dimensions != q->dimensions) {
+      if (DIM (p) != DIM (q)) {
         return (A68_FALSE);
       } else {
         BOOL_T j = A68_TRUE;
@@ -1222,8 +1232,8 @@ static BOOL_T whether_coercible_stowed (MOID_T * p, MOID_T * q, int c, int defle
 
 /*!
 \brief whether coercible series
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param c
 \param context
 \return TRUE or FALSE
@@ -1247,8 +1257,8 @@ static BOOL_T whether_coercible_series (MOID_T * p, MOID_T * q, int c, int defle
 
 /*!
 \brief basic coercions
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param c
 \param context
 \return TRUE or FALSE
@@ -1277,8 +1287,8 @@ static BOOL_T basic_coercions (MOID_T * p, MOID_T * q, int c, int deflex)
 
 /*!
 \brief whether "p" can be coerced to "q" in a "c" context
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param p mode
+\param q mode
 \param c
 \param context
 \return TRUE or FALSE
@@ -1343,7 +1353,7 @@ static BOOL_T whether_coercible_in_context (SOID_T * p, SOID_T * q, int deflex)
 
 /*!
 \brief whether list "y" is balanced
-\param n position in syntax tree, should not be NULL
+\param n position in tree
 \param y
 \param sort
 \return TRUE or FALSE
@@ -1413,7 +1423,8 @@ MOID_T *get_balanced_mode (MOID_T * m, int sort, BOOL_T return_depreffed, int de
               MOID_T *mark = (return_depreffed ? MOID (p) : candidate);
               if (common == NULL) {
                 common = mark;
-              } else if (WHETHER (candidate, FLEX_SYMBOL) && DEFLEX (candidate) == common) {
+              } else if (WHETHER (candidate, FLEX_SYMBOL)
+                         && DEFLEX (candidate) == common) {
 /* We prefer FLEX. */
                 common = mark;
               }
@@ -1477,7 +1488,7 @@ static MOID_T *determine_unique_mode (SOID_T * z, int deflex)
 
 /*!
 \brief give a warning when a value is silently discarded
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param y
 \param c
@@ -1487,7 +1498,8 @@ static void warn_for_voiding (NODE_T * p, SOID_T * x, SOID_T * y, int c)
 {
   (void) c;
   if (x->cast == A68_FALSE) {
-    if (MOID (x) == MODE (VOID) && !(MOID (y) == MODE (VOID) || !whether_nonproc (MOID (y)))) {
+    if (MOID (x) == MODE (VOID)
+        && !(MOID (y) == MODE (VOID) || !whether_nonproc (MOID (y)))) {
       if (WHETHER (p, FORMULA)) {
         diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_VOIDED, MOID (y));
       } else {
@@ -1499,7 +1511,7 @@ static void warn_for_voiding (NODE_T * p, SOID_T * x, SOID_T * y, int c)
 
 /*!
 \brief warn for things that are likely unintended
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param m
 \param c
 \param u
@@ -1514,7 +1526,8 @@ semantic_pitfall: warn for things that are likely unintended, for instance
 */
   if (WHETHER (p, u)) {
     diagnostic_node (A68_WARNING, p, WARNING_UNINTENDED, MOID (p), u, m, c);
-  } else if (WHETHER (p, UNIT) || WHETHER (p, TERTIARY) || WHETHER (p, SECONDARY) || WHETHER (p, PRIMARY)) {
+  } else if (WHETHER (p, UNIT) || WHETHER (p, TERTIARY)
+             || WHETHER (p, SECONDARY) || WHETHER (p, PRIMARY)) {
     semantic_pitfall (SUB (p), m, c, u);
   }
 }
@@ -1534,9 +1547,9 @@ static void make_coercion (NODE_T * l, int a, MOID_T * m)
 
 /*!
 \brief make widening coercion
-\param n position in syntax tree, should not be NULL
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param n position in tree
+\param p mode
+\param q mode
 **/
 
 static void make_widening_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
@@ -1550,9 +1563,9 @@ static void make_widening_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
 
 /*!
 \brief make ref rowing coercion
-\param n position in syntax tree, should not be NULL
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param n position in tree
+\param p mode
+\param q mode
 **/
 
 static void make_ref_rowing_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
@@ -1569,9 +1582,9 @@ static void make_ref_rowing_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
 
 /*!
 \brief make rowing coercion
-\param n position in syntax tree, should not be NULL
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param n position in tree
+\param p mode
+\param q mode
 **/
 
 static void make_rowing_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
@@ -1592,8 +1605,8 @@ static void make_rowing_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
 
 /*!
 \brief make uniting coercion
-\param n position in syntax tree, should not be NULL
-\param q mode, should not be NULL
+\param n position in tree
+\param q mode
 **/
 
 static void make_uniting_coercion (NODE_T * n, MOID_T * q)
@@ -1606,9 +1619,9 @@ static void make_uniting_coercion (NODE_T * n, MOID_T * q)
 
 /*!
 \brief make depreffing coercion
-\param n position in syntax tree, should not be NULL
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param n position in tree
+\param p mode
+\param q mode
 **/
 
 static void make_depreffing_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
@@ -1653,7 +1666,7 @@ static void make_depreffing_coercion (NODE_T * n, MOID_T * p, MOID_T * q)
 
 /*!
 \brief whether p is a nonproc mode (that is voided directly)
-\param p mode, should not be NULL
+\param p mode
 \return TRUE or FALSE
 **/
 
@@ -1670,8 +1683,8 @@ static BOOL_T whether_nonproc (MOID_T * p)
 
 /*!
 \brief make_void: voiden in an appropriate way
-\param p position in syntax tree, should not be NULL
-\param q mode, should not be NULL
+\param p position in tree
+\param q mode
 **/
 
 static void make_void (NODE_T * p, MOID_T * q)
@@ -1725,9 +1738,9 @@ static void make_void (NODE_T * p, MOID_T * q)
 
 /*!
 \brief make strong coercion
-\param n position in syntax tree, should not be NULL
-\param p mode, should not be NULL
-\param q mode, should not be NULL
+\param n position in tree
+\param p mode
+\param q mode
 **/
 
 static void make_strong (NODE_T * n, MOID_T * p, MOID_T * q)
@@ -1741,7 +1754,7 @@ static void make_strong (NODE_T * n, MOID_T * p, MOID_T * q)
 
 /*!
 \brief mode check on bounds
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_bounds (NODE_T * p)
@@ -1764,7 +1777,7 @@ static void mode_check_bounds (NODE_T * p)
 
 /*!
 \brief mode check declarer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_declarer (NODE_T * p)
@@ -1782,7 +1795,7 @@ static void mode_check_declarer (NODE_T * p)
 
 /*!
 \brief mode check identity declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_identity_declaration (NODE_T * p)
@@ -1820,7 +1833,7 @@ static void mode_check_identity_declaration (NODE_T * p)
 
 /*!
 \brief mode check variable declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_variable_declaration (NODE_T * p)
@@ -1860,8 +1873,8 @@ static void mode_check_variable_declaration (NODE_T * p)
 
 /*!
 \brief mode check routine text
-\param p position in syntax tree, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param y resulting soid
 **/
 
 static void mode_check_routine_text (NODE_T * p, SOID_T * y)
@@ -1881,7 +1894,7 @@ static void mode_check_routine_text (NODE_T * p, SOID_T * y)
 
 /*!
 \brief mode check proc declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_proc_declaration (NODE_T * p)
@@ -1900,7 +1913,7 @@ static void mode_check_proc_declaration (NODE_T * p)
 
 /*!
 \brief mode check brief op declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_brief_op_declaration (NODE_T * p)
@@ -1924,7 +1937,7 @@ static void mode_check_brief_op_declaration (NODE_T * p)
 
 /*!
 \brief mode check op declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_op_declaration (NODE_T * p)
@@ -1946,7 +1959,7 @@ static void mode_check_op_declaration (NODE_T * p)
 
 /*!
 \brief mode check declaration list
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -1998,8 +2011,8 @@ static void mode_check_declaration_list (NODE_T * p)
 /*!
 \brief mode check serial clause
 \param r resulting soids
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
+\param p position in tree
+\param x expected soid
 \param k
 **/
 
@@ -2012,11 +2025,14 @@ static void mode_check_serial (SOID_LIST_T ** r, NODE_T * p, SOID_T * x, BOOL_T 
     mode_check_serial (r, NEXT (p), x, k);
   } else if (WHETHER (p, DECLARATION_LIST)) {
     mode_check_declaration_list (SUB (p));
-  } else if (WHETHER (p, LABEL) || WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL)) {
+  } else if (WHETHER (p, LABEL) || WHETHER (p, SEMI_SYMBOL)
+             || WHETHER (p, EXIT_SYMBOL)) {
     mode_check_serial (r, NEXT (p), x, k);
   } else if (WHETHER (p, SERIAL_CLAUSE) || WHETHER (p, ENQUIRY_CLAUSE)) {
     if (NEXT (p) != NULL) {
-      if (WHETHER (NEXT (p), EXIT_SYMBOL) || WHETHER (NEXT (p), END_SYMBOL) || WHETHER (NEXT (p), CLOSE_SYMBOL)) {
+      if (WHETHER (NEXT (p), EXIT_SYMBOL)
+          || WHETHER (NEXT (p), END_SYMBOL)
+          || WHETHER (NEXT (p), CLOSE_SYMBOL)) {
         mode_check_serial (r, SUB (p), x, A68_TRUE);
       } else {
         mode_check_serial (r, SUB (p), x, A68_FALSE);
@@ -2048,9 +2064,9 @@ static void mode_check_serial (SOID_LIST_T ** r, NODE_T * p, SOID_T * x, BOOL_T 
 
 /*!
 \brief mode check serial clause units
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 \param att
 **/
 
@@ -2070,8 +2086,8 @@ static void mode_check_serial_units (NODE_T * p, SOID_T * x, SOID_T * y, int att
 /*!
 \brief mode check unit list
 \param r resulting soids
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
+\param p position in tree
+\param x expected soid
 **/
 
 static void mode_check_unit_list (SOID_LIST_T ** r, NODE_T * p, SOID_T * x)
@@ -2094,7 +2110,7 @@ static void mode_check_unit_list (SOID_LIST_T ** r, NODE_T * p, SOID_T * x)
 /*!
 \brief mode check struct display
 \param r resulting soids
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param fields
 **/
 
@@ -2123,7 +2139,7 @@ static void mode_check_struct_display (SOID_LIST_T ** r, NODE_T * p, PACK_T ** f
 
 /*!
 \brief mode check get specified moids
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 **/
 
@@ -2142,8 +2158,8 @@ static void mode_check_get_specified_moids (NODE_T * p, MOID_T * u)
 /*!
 \brief mode check specified unit list
 \param r resulting soids
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
+\param p position in tree
+\param x expected soid
 \param u
 **/
 
@@ -2168,8 +2184,8 @@ static void mode_check_specified_unit_list (SOID_LIST_T ** r, NODE_T * p, SOID_T
 /*!
 \brief mode check united case parts
 \param ry resulting soids
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
+\param p position in tree
+\param x expected soid
 **/
 
 static void mode_check_united_case_parts (SOID_LIST_T ** ry, NODE_T * p, SOID_T * x)
@@ -2220,7 +2236,8 @@ get a coercion-error later. */
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, OUT_PART) || WHETHER (p, CHOICE)) {
       mode_check_serial (ry, NEXT_SUB (p), x, A68_TRUE);
-    } else if (WHETHER (p, UNITED_OUSE_PART) || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
+    } else if (WHETHER (p, UNITED_OUSE_PART)
+               || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
       mode_check_united_case_parts (ry, SUB (p), x);
     }
   }
@@ -2228,9 +2245,9 @@ get a coercion-error later. */
 
 /*!
 \brief mode check united case
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_united_case (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2253,9 +2270,9 @@ static void mode_check_united_case (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check unit list 2
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_unit_list_2 (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2284,9 +2301,9 @@ static void mode_check_unit_list_2 (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check closed
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_closed (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2303,16 +2320,17 @@ static void mode_check_closed (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check collateral
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_collateral (NODE_T * p, SOID_T * x, SOID_T * y)
 {
   if (p == NULL) {
     return;
-  } else if (whether (p, BEGIN_SYMBOL, END_SYMBOL, 0) || whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0)) {
+  } else if (whether (p, BEGIN_SYMBOL, END_SYMBOL, 0)
+             || whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0)) {
     if (SORT (x) == STRONG) {
       make_soid (y, STRONG, MODE (VACUUM), 0);
     } else {
@@ -2331,8 +2349,8 @@ static void mode_check_collateral (NODE_T * p, SOID_T * x, SOID_T * y)
 /*!
 \brief mode check conditional 2
 \param ry resulting soids
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
+\param p position in tree
+\param x expected soid
 **/
 
 static void mode_check_conditional_2 (SOID_LIST_T ** ry, NODE_T * p, SOID_T * x)
@@ -2356,9 +2374,9 @@ static void mode_check_conditional_2 (SOID_LIST_T ** ry, NODE_T * p, SOID_T * x)
 
 /*!
 \brief mode check conditional
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_conditional (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2381,8 +2399,8 @@ static void mode_check_conditional (NODE_T * p, SOID_T * x, SOID_T * y)
 /*!
 \brief mode check int case 2
 \param ry resulting soids
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
+\param p position in tree
+\param x expected soid
 **/
 
 static void mode_check_int_case_2 (SOID_LIST_T ** ry, NODE_T * p, SOID_T * x)
@@ -2398,7 +2416,8 @@ static void mode_check_int_case_2 (SOID_LIST_T ** ry, NODE_T * p, SOID_T * x)
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, OUT_PART) || WHETHER (p, CHOICE)) {
       mode_check_serial (ry, NEXT_SUB (p), x, A68_TRUE);
-    } else if (WHETHER (p, INTEGER_OUT_PART) || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
+    } else if (WHETHER (p, INTEGER_OUT_PART)
+               || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
       mode_check_int_case_2 (ry, SUB (p), x);
     }
   }
@@ -2406,9 +2425,9 @@ static void mode_check_int_case_2 (SOID_LIST_T ** ry, NODE_T * p, SOID_T * x)
 
 /*!
 \brief mode check int case
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_int_case (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2430,8 +2449,8 @@ static void mode_check_int_case (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check loop 2
-\param p position in syntax tree, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param y resulting soid
 **/
 
 static void mode_check_loop_2 (NODE_T * p, SOID_T * y)
@@ -2440,7 +2459,8 @@ static void mode_check_loop_2 (NODE_T * p, SOID_T * y)
     return;
   } else if (WHETHER (p, FOR_PART)) {
     mode_check_loop_2 (NEXT (p), y);
-  } else if (WHETHER (p, FROM_PART) || WHETHER (p, BY_PART) || WHETHER (p, TO_PART)) {
+  } else if (WHETHER (p, FROM_PART) || WHETHER (p, BY_PART)
+             || WHETHER (p, TO_PART)) {
     SOID_T ix, iy;
     make_soid (&ix, STRONG, MODE (INT), 0);
     mode_check_unit (NEXT_SUB (p), &ix, &iy);
@@ -2480,8 +2500,8 @@ static void mode_check_loop_2 (NODE_T * p, SOID_T * y)
 
 /*!
 \brief mode check loop
-\param p position in syntax tree, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param y resulting soid
 **/
 
 static void mode_check_loop (NODE_T * p, SOID_T * y)
@@ -2493,9 +2513,9 @@ static void mode_check_loop (NODE_T * p, SOID_T * y)
 
 /*!
 \brief mode check enclosed
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 void mode_check_enclosed (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2621,7 +2641,10 @@ static TAG_T *find_operator (SYMBOL_TABLE_T * s, char *n, MOID_T * x, MOID_T * y
 /* (D) Vector and matrix "strong coercions" in standard environ. */
   u = depref_completely (x);
   v = depref_completely (y);
-  if ((u == MODE (ROW_REAL) || u == MODE (ROWROW_REAL)) || (v == MODE (ROW_REAL) || v == MODE (ROWROW_REAL)) || (u == MODE (ROW_COMPLEX) || u == MODE (ROWROW_COMPLEX)) || (v == MODE (ROW_COMPLEX) || v == MODE (ROWROW_COMPLEX))) {
+  if ((u == MODE (ROW_REAL) || u == MODE (ROWROW_REAL))
+      || (v == MODE (ROW_REAL) || v == MODE (ROWROW_REAL))
+      || (u == MODE (ROW_COMPLEX) || u == MODE (ROWROW_COMPLEX))
+      || (v == MODE (ROW_COMPLEX) || v == MODE (ROWROW_COMPLEX))) {
     if (u == MODE (INT)) {
       z = search_table_for_operator (stand_env->operators, n, MODE (REAL), y, ALIAS_DEFLEXING);
       if (z != NULL) {
@@ -2707,9 +2730,9 @@ static TAG_T *find_operator (SYMBOL_TABLE_T * s, char *n, MOID_T * x, MOID_T * y
 
 /*!
 \brief mode check monadic operator
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_monadic_operator (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2752,9 +2775,9 @@ static void mode_check_monadic_operator (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check monadic formula
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_monadic_formula (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2768,9 +2791,9 @@ static void mode_check_monadic_formula (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check formula
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_formula (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2833,9 +2856,9 @@ static void mode_check_formula (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check assignation
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_assignation (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2871,9 +2894,9 @@ static void mode_check_assignation (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check identity relation
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_identity_relation (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2889,11 +2912,13 @@ static void mode_check_identity_relation (NODE_T * p, SOID_T * x, SOID_T * y)
   orir = determine_unique_mode (&r, SAFE_DEFLEXING);
   lhs = deproc_completely (oril);
   rhs = deproc_completely (orir);
-  if (WHETHER_MODE_IS_WELL (lhs) && lhs != MODE (HIP) && ATTRIBUTE (lhs) != REF_SYMBOL) {
+  if (WHETHER_MODE_IS_WELL (lhs) && lhs != MODE (HIP)
+      && ATTRIBUTE (lhs) != REF_SYMBOL) {
     diagnostic_node (A68_ERROR, ln, ERROR_NO_NAME, oril, ATTRIBUTE (SUB (ln)));
     lhs = MODE (ERROR);
   }
-  if (WHETHER_MODE_IS_WELL (rhs) && rhs != MODE (HIP) && ATTRIBUTE (rhs) != REF_SYMBOL) {
+  if (WHETHER_MODE_IS_WELL (rhs) && rhs != MODE (HIP)
+      && ATTRIBUTE (rhs) != REF_SYMBOL) {
     diagnostic_node (A68_ERROR, rn, ERROR_NO_NAME, orir, ATTRIBUTE (SUB (rn)));
     rhs = MODE (ERROR);
   }
@@ -2915,9 +2940,9 @@ static void mode_check_identity_relation (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check bool functions ANDF and ORF
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_bool_function (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2940,9 +2965,9 @@ static void mode_check_bool_function (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check cast
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_cast (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -2960,7 +2985,7 @@ static void mode_check_cast (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check assertion
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_assertion (NODE_T * p)
@@ -2977,7 +3002,7 @@ static void mode_check_assertion (NODE_T * p)
 /*!
 \brief mode check argument list
 \param r resulting soids
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param v
 \param w
@@ -3019,7 +3044,7 @@ static void mode_check_argument_list (SOID_LIST_T ** r, NODE_T * p, PACK_T ** x,
         make_soid (&z, STRONG, NULL, 0);
       }
       add_to_soid_list (r, p, &z);
-    } else if (WHETHER (p, SUB_SYMBOL) && !p->info->module->options.brackets) {
+    } else if (WHETHER (p, SUB_SYMBOL) && !MODULE (INFO (p))->options.brackets) {
       diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_SYNTAX, CALL);
     }
   }
@@ -3027,7 +3052,7 @@ static void mode_check_argument_list (SOID_LIST_T ** r, NODE_T * p, PACK_T ** x,
 
 /*!
 \brief mode check argument list 2
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param y
 \param v
@@ -3043,7 +3068,7 @@ static void mode_check_argument_list_2 (NODE_T * p, PACK_T * x, SOID_T * y, PACK
 
 /*!
 \brief mode check meek int
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_meek_int (NODE_T * p)
@@ -3058,7 +3083,7 @@ static void mode_check_meek_int (NODE_T * p)
 
 /*!
 \brief mode check trimmer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -3078,7 +3103,7 @@ static void mode_check_trimmer (NODE_T * p)
 
 /*!
 \brief mode check indexer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param subs
 \param trims
 \return
@@ -3102,10 +3127,10 @@ static void mode_check_indexer (NODE_T * p, int *subs, int *trims)
 
 /*!
 \brief mode check call 2
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param n
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_call_2 (NODE_T * p, MOID_T * n, SOID_T * x, SOID_T * y)
@@ -3124,21 +3149,20 @@ static void mode_check_call_2 (NODE_T * p, MOID_T * n, SOID_T * x, SOID_T * y)
   SUB (p->partial_proc) = SUB (n);
 /* Check arguments and construct modes. */
   mode_check_argument_list_2 (NEXT (p), PACK (n), &d, &PACK (p->partial_locale), &PACK (p->partial_proc));
-  DIMENSION (p->partial_proc) = count_pack_members (PACK (p->partial_proc));
-  DIMENSION (p->partial_locale) = count_pack_members (PACK (p->partial_locale));
+  DIM (p->partial_proc) = count_pack_members (PACK (p->partial_proc));
+  DIM (p->partial_locale) = count_pack_members (PACK (p->partial_locale));
   p->partial_proc = register_extra_mode (p->partial_proc);
   p->partial_locale = register_extra_mode (p->partial_locale);
-  if (DIMENSION (MOID (&d)) != DIMENSION (n)) {
+  if (DIM (MOID (&d)) != DIM (n)) {
     diagnostic_node (A68_ERROR, p, ERROR_ARGUMENT_NUMBER, n);
     make_soid (y, SORT (x), MODE (ERROR), 0);
   } else {
     if (!whether_coercible (MOID (&d), n, STRONG, ALIAS_DEFLEXING)) {
       cannot_coerce (p, MOID (&d), n, STRONG, ALIAS_DEFLEXING, ARGUMENT);
     }
-    if (DIMENSION (p->partial_proc) == 0) {
+    if (DIM (p->partial_proc) == 0) {
       make_soid (y, SORT (x), SUB (n), 0);
     } else {
-      MASK (p) |= PARTIAL_CALL_MASK;
       make_soid (y, SORT (x), p->partial_proc, 0);
     }
   }
@@ -3146,9 +3170,9 @@ static void mode_check_call_2 (NODE_T * p, MOID_T * n, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check call
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_call (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -3174,9 +3198,9 @@ static void mode_check_call (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check slice
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 \return whether construct is a CALL or a SLICE
 **/
 
@@ -3198,7 +3222,8 @@ static int mode_check_slice (NODE_T * p, SOID_T * x, SOID_T * y)
     int rowdim, subs, trims;
 /* WEAK coercion. */
     MOID_T *n = ori;
-    while ((WHETHER (n, REF_SYMBOL) && !whether_ref_row (n)) || (WHETHER (n, PROC_SYMBOL) && PACK (n) == NULL)) {
+    while ((WHETHER (n, REF_SYMBOL) && !whether_ref_row (n))
+           || (WHETHER (n, PROC_SYMBOL) && PACK (n) == NULL)) {
       n = depref_once (n);
     }
     if (n == NULL || !(SLICE (DEFLEX (n)) != NULL || whether_ref_row (n))) {
@@ -3212,9 +3237,9 @@ static int mode_check_slice (NODE_T * p, SOID_T * x, SOID_T * y)
     subs = trims = 0;
     mode_check_indexer (SUB (NEXT (p)), &subs, &trims);
     if ((whether_ref = whether_ref_row (n)) != 0) {
-      rowdim = DEFLEX (SUB (n))->dimensions;
+      rowdim = DIM (DEFLEX (SUB (n)));
     } else {
-      rowdim = DEFLEX (n)->dimensions;
+      rowdim = DIM (DEFLEX (n));
     }
     if ((subs + trims) != rowdim) {
       diagnostic_node (A68_ERROR, p, ERROR_INDEXER_NUMBER, n);
@@ -3251,9 +3276,9 @@ static int mode_check_slice (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check selection
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_selection (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -3272,10 +3297,14 @@ static void mode_check_selection (NODE_T * p, SOID_T * x, SOID_T * y)
     if (WHETHER (n, STRUCT_SYMBOL)) {
       coerce = A68_FALSE;
       t = PACK (n);
-    } else if (WHETHER (n, REF_SYMBOL) && (WHETHER (SUB (n), ROW_SYMBOL) || WHETHER (SUB (n), FLEX_SYMBOL)) && n->multiple_mode != NULL) {
+    } else if (WHETHER (n, REF_SYMBOL)
+               && (WHETHER (SUB (n), ROW_SYMBOL)
+                   || WHETHER (SUB (n), FLEX_SYMBOL))
+               && n->multiple_mode != NULL) {
       coerce = A68_FALSE;
       t = PACK (n->multiple_mode);
-    } else if ((WHETHER (n, ROW_SYMBOL) || WHETHER (n, FLEX_SYMBOL)) && n->multiple_mode != NULL) {
+    } else if ((WHETHER (n, ROW_SYMBOL) || WHETHER (n, FLEX_SYMBOL))
+               && n->multiple_mode != NULL) {
       coerce = A68_FALSE;
       t = PACK (n->multiple_mode);
     } else if (WHETHER (n, REF_SYMBOL) && whether_name_struct (n)) {
@@ -3327,9 +3356,9 @@ static void mode_check_selection (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check diagonal
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_diagonal (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -3355,7 +3384,8 @@ static void mode_check_diagonal (NODE_T * p, SOID_T * x, SOID_T * y)
   while (WHETHER (n, REF_SYMBOL) && !whether_ref_row (n)) {
     n = depref_once (n);
   }
-  if (n != NULL && (WHETHER (n, FLEX_SYMBOL) || (WHETHER (n, REF_SYMBOL) && WHETHER (SUB (n), FLEX_SYMBOL)))) {
+  if (n != NULL && (WHETHER (n, FLEX_SYMBOL)
+                    || (WHETHER (n, REF_SYMBOL) && WHETHER (SUB (n), FLEX_SYMBOL)))) {
     if (WHETHER_MODE_IS_WELL (n)) {
       diagnostic_node (A68_ERROR, p, ERROR_NO_FLEX_ARGUMENT, ori, TERTIARY);
     }
@@ -3370,9 +3400,9 @@ static void mode_check_diagonal (NODE_T * p, SOID_T * x, SOID_T * y)
     return;
   }
   if ((whether_ref = whether_ref_row (n)) != A68_FALSE) {
-    rowdim = DEFLEX (SUB (n))->dimensions;
+    rowdim = DIM (DEFLEX (SUB (n)));
   } else {
-    rowdim = DEFLEX (n)->dimensions;
+    rowdim = DIM (DEFLEX (n));
   }
   if (rowdim != 2) {
     diagnostic_node (A68_ERROR, p, ERROR_NO_MATRIX, ori, TERTIARY);
@@ -3391,9 +3421,9 @@ static void mode_check_diagonal (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check transpose
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_transpose (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -3409,7 +3439,8 @@ static void mode_check_transpose (NODE_T * p, SOID_T * x, SOID_T * y)
   while (WHETHER (n, REF_SYMBOL) && !whether_ref_row (n)) {
     n = depref_once (n);
   }
-  if (n != NULL && (WHETHER (n, FLEX_SYMBOL) || (WHETHER (n, REF_SYMBOL) && WHETHER (SUB (n), FLEX_SYMBOL)))) {
+  if (n != NULL && (WHETHER (n, FLEX_SYMBOL)
+                    || (WHETHER (n, REF_SYMBOL) && WHETHER (SUB (n), FLEX_SYMBOL)))) {
     if (WHETHER_MODE_IS_WELL (n)) {
       diagnostic_node (A68_ERROR, p, ERROR_NO_FLEX_ARGUMENT, ori, TERTIARY);
     }
@@ -3424,9 +3455,9 @@ static void mode_check_transpose (NODE_T * p, SOID_T * x, SOID_T * y)
     return;
   }
   if ((whether_ref = whether_ref_row (n)) != A68_FALSE) {
-    rowdim = DEFLEX (SUB (n))->dimensions;
+    rowdim = DIM (DEFLEX (SUB (n)));
   } else {
-    rowdim = DEFLEX (n)->dimensions;
+    rowdim = DIM (DEFLEX (n));
   }
   if (rowdim != 2) {
     diagnostic_node (A68_ERROR, p, ERROR_NO_MATRIX, ori, TERTIARY);
@@ -3440,9 +3471,9 @@ static void mode_check_transpose (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check row or column function
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_row_column_function (NODE_T * p, SOID_T * x, SOID_T * y)
@@ -3468,7 +3499,8 @@ static void mode_check_row_column_function (NODE_T * p, SOID_T * x, SOID_T * y)
   while (WHETHER (n, REF_SYMBOL) && !whether_ref_row (n)) {
     n = depref_once (n);
   }
-  if (n != NULL && (WHETHER (n, FLEX_SYMBOL) || (WHETHER (n, REF_SYMBOL) && WHETHER (SUB (n), FLEX_SYMBOL)))) {
+  if (n != NULL && (WHETHER (n, FLEX_SYMBOL)
+                    || (WHETHER (n, REF_SYMBOL) && WHETHER (SUB (n), FLEX_SYMBOL)))) {
     if (WHETHER_MODE_IS_WELL (n)) {
       diagnostic_node (A68_ERROR, p, ERROR_NO_FLEX_ARGUMENT, ori, TERTIARY);
     }
@@ -3483,9 +3515,9 @@ static void mode_check_row_column_function (NODE_T * p, SOID_T * x, SOID_T * y)
     return;
   }
   if ((whether_ref = whether_ref_row (n)) != A68_FALSE) {
-    rowdim = DEFLEX (SUB (n))->dimensions;
+    rowdim = DIM (DEFLEX (SUB (n)));
   } else {
-    rowdim = DEFLEX (n)->dimensions;
+    rowdim = DIM (DEFLEX (n));
   }
   if (rowdim != 1) {
     diagnostic_node (A68_ERROR, p, ERROR_NO_VECTOR, ori, TERTIARY);
@@ -3499,7 +3531,7 @@ static void mode_check_row_column_function (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief mode check format text
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void mode_check_format_text (NODE_T * p)
@@ -3533,16 +3565,17 @@ static void mode_check_format_text (NODE_T * p)
 
 /*!
 \brief mode check unit
-\param p position in syntax tree, should not be NULL
-\param x expected soid, should not be NULL
-\param y resulting soid, should not be NULL
+\param p position in tree
+\param x expected soid
+\param y resulting soid
 **/
 
 static void mode_check_unit (NODE_T * p, SOID_T * x, SOID_T * y)
 {
   if (p == NULL) {
     return;
-  } else if (WHETHER (p, UNIT) || WHETHER (p, TERTIARY) || WHETHER (p, SECONDARY) || WHETHER (p, PRIMARY)) {
+  } else if (WHETHER (p, UNIT) || WHETHER (p, TERTIARY)
+             || WHETHER (p, SECONDARY) || WHETHER (p, PRIMARY)) {
     mode_check_unit (SUB (p), x, y);
 /* Ex primary. */
   } else if (WHETHER (p, CALL)) {
@@ -3621,7 +3654,7 @@ static void mode_check_unit (NODE_T * p, SOID_T * x, SOID_T * y)
 
 /*!
 \brief coerce bounds
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_bounds (NODE_T * p)
@@ -3639,7 +3672,7 @@ static void coerce_bounds (NODE_T * p)
 
 /*!
 \brief coerce declarer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_declarer (NODE_T * p)
@@ -3655,7 +3688,7 @@ static void coerce_declarer (NODE_T * p)
 
 /*!
 \brief coerce identity declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_identity_declaration (NODE_T * p)
@@ -3687,7 +3720,7 @@ static void coerce_identity_declaration (NODE_T * p)
 
 /*!
 \brief coerce variable declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_variable_declaration (NODE_T * p)
@@ -3721,7 +3754,7 @@ static void coerce_variable_declaration (NODE_T * p)
 
 /*!
 \brief coerce routine text
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_routine_text (NODE_T * p)
@@ -3736,7 +3769,7 @@ static void coerce_routine_text (NODE_T * p)
 
 /*!
 \brief coerce proc declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_proc_declaration (NODE_T * p)
@@ -3753,7 +3786,7 @@ static void coerce_proc_declaration (NODE_T * p)
 
 /*!
 \brief coerce_op_declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \return
 **/
 
@@ -3773,7 +3806,7 @@ static void coerce_op_declaration (NODE_T * p)
 
 /*!
 \brief coerce brief op declaration
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_brief_op_declaration (NODE_T * p)
@@ -3790,7 +3823,7 @@ static void coerce_brief_op_declaration (NODE_T * p)
 
 /*!
 \brief coerce declaration list
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_declaration_list (NODE_T * p)
@@ -3840,7 +3873,7 @@ static void coerce_declaration_list (NODE_T * p)
 
 /*!
 \brief coerce serial
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 \param k
 **/
@@ -3854,12 +3887,14 @@ static void coerce_serial (NODE_T * p, SOID_T * q, int k)
     coerce_serial (NEXT (p), q, k);
   } else if (WHETHER (p, DECLARATION_LIST)) {
     coerce_declaration_list (SUB (p));
-  } else if (WHETHER (p, LABEL) || WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL)) {
+  } else if (WHETHER (p, LABEL) || WHETHER (p, SEMI_SYMBOL)
+             || WHETHER (p, EXIT_SYMBOL)) {
     coerce_serial (NEXT (p), q, k);
   } else if (WHETHER (p, SERIAL_CLAUSE) || WHETHER (p, ENQUIRY_CLAUSE)) {
     NODE_T *z = NEXT (p);
     if (z != NULL) {
-      if (WHETHER (z, EXIT_SYMBOL) || WHETHER (z, END_SYMBOL) || WHETHER (z, CLOSE_SYMBOL) || WHETHER (z, OCCA_SYMBOL)) {
+      if (WHETHER (z, EXIT_SYMBOL) || WHETHER (z, END_SYMBOL)
+          || WHETHER (z, CLOSE_SYMBOL) || WHETHER (z, OCCA_SYMBOL)) {
         coerce_serial (SUB (p), q, 1);
       } else {
         coerce_serial (SUB (p), q, 0);
@@ -3883,7 +3918,7 @@ static void coerce_serial (NODE_T * p, SOID_T * q, int k)
 
 /*!
 \brief coerce closed
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -3898,7 +3933,7 @@ static void coerce_closed (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce conditional
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -3920,7 +3955,7 @@ static void coerce_conditional (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce unit list
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -3931,7 +3966,8 @@ static void coerce_unit_list (NODE_T * p, SOID_T * q)
   } else if (WHETHER (p, UNIT_LIST)) {
     coerce_unit_list (SUB (p), q);
     coerce_unit_list (NEXT (p), q);
-  } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, BEGIN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+  } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, BEGIN_SYMBOL)
+             || WHETHER (p, COMMA_SYMBOL)) {
     coerce_unit_list (NEXT (p), q);
   } else if (WHETHER (p, UNIT)) {
     coerce_unit (p, q);
@@ -3941,7 +3977,7 @@ static void coerce_unit_list (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce int case
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -3955,7 +3991,8 @@ static void coerce_int_case (NODE_T * p, SOID_T * q)
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, OUT_PART) || WHETHER (p, CHOICE)) {
       coerce_serial (NEXT_SUB (p), q, 1);
-    } else if (WHETHER (p, INTEGER_OUT_PART) || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
+    } else if (WHETHER (p, INTEGER_OUT_PART)
+               || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
       coerce_int_case (SUB (p), q);
     }
   }
@@ -3963,7 +4000,7 @@ static void coerce_int_case (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce spec unit list
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -3980,7 +4017,7 @@ static void coerce_spec_unit_list (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce united case
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -3994,7 +4031,8 @@ static void coerce_united_case (NODE_T * p, SOID_T * q)
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, OUT_PART) || WHETHER (p, CHOICE)) {
       coerce_serial (NEXT_SUB (p), q, 1);
-    } else if (WHETHER (p, UNITED_OUSE_PART) || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
+    } else if (WHETHER (p, UNITED_OUSE_PART)
+               || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
       coerce_united_case (SUB (p), q);
     }
   }
@@ -4002,14 +4040,15 @@ static void coerce_united_case (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce loop
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_loop (NODE_T * p)
 {
   if (WHETHER (p, FOR_PART)) {
     coerce_loop (NEXT (p));
-  } else if (WHETHER (p, FROM_PART) || WHETHER (p, BY_PART) || WHETHER (p, TO_PART)) {
+  } else if (WHETHER (p, FROM_PART) || WHETHER (p, BY_PART)
+             || WHETHER (p, TO_PART)) {
     SOID_T w;
     make_soid (&w, MEEK, MODE (INT), 0);
     coerce_unit (NEXT_SUB (p), &w);
@@ -4040,7 +4079,7 @@ static void coerce_loop (NODE_T * p)
 /*!
 \brief coerce struct display
 \param r
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_struct_display (PACK_T ** r, NODE_T * p)
@@ -4050,7 +4089,8 @@ static void coerce_struct_display (PACK_T ** r, NODE_T * p)
   } else if (WHETHER (p, UNIT_LIST)) {
     coerce_struct_display (r, SUB (p));
     coerce_struct_display (r, NEXT (p));
-  } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, BEGIN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+  } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, BEGIN_SYMBOL)
+             || WHETHER (p, COMMA_SYMBOL)) {
     coerce_struct_display (r, NEXT (p));
   } else if (WHETHER (p, UNIT)) {
     SOID_T s;
@@ -4063,13 +4103,14 @@ static void coerce_struct_display (PACK_T ** r, NODE_T * p)
 
 /*!
 \brief coerce collateral
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
 static void coerce_collateral (NODE_T * p, SOID_T * q)
 {
-  if (!(whether (p, BEGIN_SYMBOL, END_SYMBOL, 0) || whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0))) {
+  if (!(whether (p, BEGIN_SYMBOL, END_SYMBOL, 0)
+        || whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0))) {
     if (WHETHER (MOID (q), STRUCT_SYMBOL)) {
       PACK_T *t = PACK (MOID (q));
       coerce_struct_display (&t, p);
@@ -4090,7 +4131,7 @@ static void coerce_collateral (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce_enclosed
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -4118,7 +4159,7 @@ void coerce_enclosed (NODE_T * p, SOID_T * q)
 
 /*!
 \brief get monad moid
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static MOID_T *get_monad_moid (NODE_T * p)
@@ -4133,7 +4174,7 @@ static MOID_T *get_monad_moid (NODE_T * p)
 
 /*!
 \brief coerce monad oper
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -4148,7 +4189,7 @@ static void coerce_monad_oper (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce monad formula
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_monad_formula (NODE_T * p)
@@ -4161,7 +4202,7 @@ static void coerce_monad_formula (NODE_T * p)
 
 /*!
 \brief coerce operand
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -4187,7 +4228,7 @@ static void coerce_operand (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce formula
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -4212,7 +4253,7 @@ static void coerce_formula (NODE_T * p, SOID_T * q)
 
 /*!
 \brief coerce assignation
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_assignation (NODE_T * p)
@@ -4226,7 +4267,7 @@ static void coerce_assignation (NODE_T * p)
 
 /*!
 \brief coerce relation
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_relation (NODE_T * p)
@@ -4240,7 +4281,7 @@ static void coerce_relation (NODE_T * p)
 
 /*!
 \brief coerce bool function
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_bool_function (NODE_T * p)
@@ -4253,7 +4294,7 @@ static void coerce_bool_function (NODE_T * p)
 
 /*!
 \brief coerce assertion
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_assertion (NODE_T * p)
@@ -4265,7 +4306,7 @@ static void coerce_assertion (NODE_T * p)
 
 /*!
 \brief coerce selection
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_selection (NODE_T * p)
@@ -4277,7 +4318,7 @@ static void coerce_selection (NODE_T * p)
 
 /*!
 \brief coerce cast
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_cast (NODE_T * p)
@@ -4291,7 +4332,7 @@ static void coerce_cast (NODE_T * p)
 /*!
 \brief coerce argument list
 \param r
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_argument_list (PACK_T ** r, NODE_T * p)
@@ -4312,7 +4353,7 @@ static void coerce_argument_list (PACK_T ** r, NODE_T * p)
 
 /*!
 \brief coerce call
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_call (NODE_T * p)
@@ -4329,7 +4370,7 @@ static void coerce_call (NODE_T * p)
 
 /*!
 \brief coerce meek int
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_meek_int (NODE_T * p)
@@ -4341,7 +4382,7 @@ static void coerce_meek_int (NODE_T * p)
 
 /*!
 \brief coerce trimmer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_trimmer (NODE_T * p)
@@ -4358,7 +4399,7 @@ static void coerce_trimmer (NODE_T * p)
 
 /*!
 \brief coerce indexer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_indexer (NODE_T * p)
@@ -4377,7 +4418,7 @@ static void coerce_indexer (NODE_T * p)
 
 /*!
 \brief coerce_slice
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_slice (NODE_T * p)
@@ -4392,7 +4433,7 @@ static void coerce_slice (NODE_T * p)
 
 /*!
 \brief mode coerce diagonal
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_diagonal (NODE_T * p)
@@ -4409,7 +4450,7 @@ static void coerce_diagonal (NODE_T * p)
 
 /*!
 \brief mode coerce transpose
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_transpose (NODE_T * p)
@@ -4421,7 +4462,7 @@ static void coerce_transpose (NODE_T * p)
 
 /*!
 \brief mode coerce row or column function
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_row_column_function (NODE_T * p)
@@ -4438,7 +4479,7 @@ static void coerce_row_column_function (NODE_T * p)
 
 /*!
 \brief coerce format text
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void coerce_format_text (NODE_T * p)
@@ -4463,7 +4504,7 @@ static void coerce_format_text (NODE_T * p)
 
 /*!
 \brief coerce unit
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param q
 **/
 
@@ -4471,7 +4512,8 @@ static void coerce_unit (NODE_T * p, SOID_T * q)
 {
   if (p == NULL) {
     return;
-  } else if (WHETHER (p, UNIT) || WHETHER (p, TERTIARY) || WHETHER (p, SECONDARY) || WHETHER (p, PRIMARY)) {
+  } else if (WHETHER (p, UNIT) || WHETHER (p, TERTIARY)
+             || WHETHER (p, SECONDARY) || WHETHER (p, PRIMARY)) {
     coerce_unit (SUB (p), q);
     MOID (p) = MOID (SUB (p));
 /* Ex primary. */
@@ -4548,23 +4590,14 @@ static void coerce_unit (NODE_T * p, SOID_T * q)
 
 /*!
 \brief portability check for implicit denoter widening
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param in
 \param out
 **/
 
-static void portcheck_widening (NODE_T * p, MOID_T * in, MOID_T * out)
-{
-  if (p->info->module->options.portcheck) {
-    if (in != out) {
-      diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_WIDENING_NOT_PORTABLE, in, out);
-    }
-  }
-}
-
 /*!
 \brief widen_denoter
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void widen_denoter (NODE_T * p)
@@ -4603,7 +4636,11 @@ void widen_denoter (NODE_T * p)
           widen = A68_TRUE;
         }
         if (widen) {
-          portcheck_widening (q, m, lm);
+          if (MODULE (INFO (p))->options.portcheck) {
+            if (m != lm) {
+              diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_WIDENING_NOT_PORTABLE, m, lm);
+            }
+          }
           *q = *(SUB (q));
           ATTRIBUTE (q) = DENOTER;
           MOID (q) = lm;

@@ -23,6 +23,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "algol68g.h"
 #include "genie.h"
+#include "inline.h"
 #include "mp.h"
 
 /*
@@ -72,7 +73,7 @@ static MP_DIGIT_T garbage_freed[LONG_MP_DIGITS + 2];
 
 /*!
 \brief PROC VOID sweep heap
-\param p
+\param p position in tree
 **/
 
 void genie_sweep_heap (NODE_T * p)
@@ -82,7 +83,7 @@ void genie_sweep_heap (NODE_T * p)
 
 /*!
 \brief PROC VOID preemptive sweep heap
-\param p
+\param p position in tree
 **/
 
 void genie_preemptive_sweep_heap (NODE_T * p)
@@ -92,7 +93,7 @@ void genie_preemptive_sweep_heap (NODE_T * p)
 
 /*!
 \brief INT collections
-\param p
+\param p position in tree
 **/
 
 void genie_garbage_collections (NODE_T * p)
@@ -102,7 +103,7 @@ void genie_garbage_collections (NODE_T * p)
 
 /*!
 \brief LONG INT garbage
-\param p
+\param p position in tree
 **/
 
 void genie_garbage_freed (NODE_T * p)
@@ -112,7 +113,7 @@ void genie_garbage_freed (NODE_T * p)
 
 /*!
 \brief REAL collect seconds
-\param p
+\param p position in tree
 **/
 
 void genie_garbage_seconds (NODE_T * p)
@@ -133,7 +134,7 @@ int heap_available ()
 
 /*!
 \brief initialise heap management
-\param p
+\param p position in tree
 \param module
 **/
 
@@ -156,6 +157,7 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
   garbage_collects = 0;
   ABNORMAL_END (fixed_heap_pointer >= heap_size, ERROR_OUT_OF_CORE, NULL);
   heap_pointer = fixed_heap_pointer;
+  get_fixed_heap_allowed = A68_FALSE;
 /* Assign handle space. */
   z = (A68_HANDLE *) handle_segment;
   free_handles = z;
@@ -164,9 +166,9 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
   free_handle_count = max;
   max_handle_count = max;
   for (k = 0; k < max; k++) {
-    z[k].status = NULL_MASK;
-    z[k].offset = 0;
-    z[k].size = 0;
+    STATUS (&(z[k])) = NULL_MASK;
+    POINTER (&(z[k])) = NULL;
+    SIZE (&(z[k])) = 0;
     NEXT (&z[k]) = (k == max - 1 ? NULL : &z[k + 1]);
     PREVIOUS (&z[k]) = (k == 0 ? NULL : &z[k - 1]);
   }
@@ -208,16 +210,16 @@ static void colour_row_elements (A68_REF * z, MOID_T * m)
   A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, z);
 /* Empty rows are trivial since we don't recognise ghost elements. */
-  if (get_row_size (tup, arr->dimensions) > 0) {
+  if (get_row_size (tup, DIM (arr)) > 0) {
 /* The multi-dimensional sweeper. */
-    BYTE_T *elem = ADDRESS (&arr->array);
+    BYTE_T *elem = ADDRESS (&ARRAY (arr));
     BOOL_T done = A68_FALSE;
-    initialise_internal_index (tup, arr->dimensions);
+    initialise_internal_index (tup, DIM (arr));
     while (!done) {
-      ADDR_T index = calculate_internal_index (tup, arr->dimensions);
+      ADDR_T index = calculate_internal_index (tup, DIM (arr));
       ADDR_T addr = ROW_ELEMENT (arr, index);
       colour_object (&elem[addr], SUB (m));
-      done = increment_internal_index (tup, arr->dimensions);
+      done = increment_internal_index (tup, DIM (arr));
     }
   }
 }
@@ -239,39 +241,40 @@ void colour_object (BYTE_T * item, MOID_T * m)
 /* REF AMODE colour pointer and object to which it refers. */
     A68_REF *z = (A68_REF *) item;
     if (INITIALISED (z) && IS_IN_HEAP (z)) {
-      if (REF_HANDLE (z)->status & COOKIE_MASK) {
+      if (STATUS (REF_HANDLE (z)) & COOKIE_MASK) {
 /* Circular list. */
         return;
       }
-      REF_HANDLE (z)->status |= (COOKIE_MASK | COLOUR_MASK);
+      STATUS (REF_HANDLE (z)) |= (COOKIE_MASK | COLOUR_MASK);
       if (!IS_NIL (*z)) {
         colour_object (ADDRESS (z), SUB (m));
       }
-      REF_HANDLE (z)->status &= ~COOKIE_MASK;
+      STATUS (REF_HANDLE (z)) &= ~COOKIE_MASK;
     }
-  } else if (WHETHER (m, FLEX_SYMBOL) || WHETHER (m, ROW_SYMBOL) || m == MODE (STRING)) {
+  } else if (WHETHER (m, FLEX_SYMBOL) || WHETHER (m, ROW_SYMBOL)
+             || m == MODE (STRING)) {
 /* [] AMODE - colour all elements. */
     A68_REF *z = (A68_REF *) item;
 /* Claim the descriptor and the row itself. */
     if (INITIALISED (z) && IS_IN_HEAP (z)) {
       A68_ARRAY *arr;
       A68_TUPLE *tup;
-      if (REF_HANDLE (z)->status & COOKIE_MASK) {
+      if (STATUS (REF_HANDLE (z)) & COOKIE_MASK) {
 /* Circular list. */
         return;
       }
 /* An array is ALWAYS in the heap. */
-      REF_HANDLE (z)->status |= (COOKIE_MASK | COLOUR_MASK);
+      STATUS (REF_HANDLE (z)) |= (COOKIE_MASK | COLOUR_MASK);
       GET_DESCRIPTOR (arr, tup, z);
-      if (REF_HANDLE (&(arr->array)) != NULL) {
+      if (REF_HANDLE (&(ARRAY (arr))) != NULL) {
 /* Assume its initialisation. */
         MOID_T *n = DEFLEX (m);
-        REF_HANDLE (&(arr->array))->status |= COLOUR_MASK;
+        REF_HANDLE (&(ARRAY (arr)))->status |= COLOUR_MASK;
         if (moid_needs_colouring (SUB (n))) {
           colour_row_elements (z, n);
         }
       }
-      REF_HANDLE (z)->status &= ~COOKIE_MASK;
+      STATUS (REF_HANDLE (z)) &= ~COOKIE_MASK;
     }
   } else if (WHETHER (m, STRUCT_SYMBOL)) {
 /* STRUCTures - colour fields. */
@@ -283,24 +286,24 @@ void colour_object (BYTE_T * item, MOID_T * m)
 /* UNIONs - a united object may contain a value that needs colouring. */
     A68_UNION *z = (A68_UNION *) item;
     if (INITIALISED (z)) {
-      MOID_T *united_moid = (MOID_T *) z->value;
+      MOID_T *united_moid = (MOID_T *) VALUE (z);
       colour_object (&item[ALIGNED_SIZEOF (A68_UNION)], united_moid);
     }
   } else if (WHETHER (m, PROC_SYMBOL)) {
 /* PROCs - save a locale and the objects it points to. */
     A68_PROCEDURE *z = (A68_PROCEDURE *) item;
-    if (z->locale != NULL && !(z->locale->status & COOKIE_MASK)) {
-      BYTE_T *u = HEAP_ADDRESS (REF_OFFSET (z->locale));
-      PACK_T *s = PACK (z->proc_mode);
-      z->locale->status |= COOKIE_MASK;
+    if (LOCALE (z) != NULL && !(STATUS (LOCALE (z)) & COOKIE_MASK)) {
+      BYTE_T *u = POINTER (LOCALE (z));
+      PACK_T *s = PACK (MOID (z));
+      STATUS (LOCALE (z)) |= COOKIE_MASK;
       for (; s != NULL; FORWARD (s)) {
-        if (((A68_BOOL *) & u[0])->value == A68_TRUE) {
+        if (VALUE ((A68_BOOL *) & u[0]) == A68_TRUE) {
           colour_object (&u[ALIGNED_SIZEOF (A68_BOOL)], MOID (s));
         }
         u = &(u[ALIGNED_SIZEOF (A68_BOOL) + MOID_SIZE (MOID (s))]);
       }
-      z->locale->status |= COLOUR_MASK;
-      z->locale->status &= ~COOKIE_MASK;
+      STATUS (LOCALE (z)) |= COLOUR_MASK;
+      STATUS (LOCALE (z)) &= ~COOKIE_MASK;
     }
   } else if (m == MODE (SOUND)) {
 /* Claim the data of a SOUND object, that is in the heap. */
@@ -346,7 +349,7 @@ static void defragment_heap ()
 /* Free handles. */
   z = busy_handles;
   while (z != NULL) {
-    if (!(z->status & COLOUR_MASK) && !(z->status & NO_SWEEP_MASK)) {
+    if (!(STATUS (z) & COLOUR_MASK) && !(STATUS (z) & NO_SWEEP_MASK)) {
       A68_HANDLE *y = NEXT (z);
       if (PREVIOUS (z) == NULL) {
         busy_handles = NEXT (z);
@@ -362,7 +365,7 @@ static void defragment_heap ()
         PREVIOUS (NEXT (z)) = z;
       }
       free_handles = z;
-      z->status &= ~ALLOCATED_MASK;
+      STATUS (z) &= ~ALLOCATED_MASK;
       garbage_bytes_freed += z->size;
       free_handle_count++;
       z = y;
@@ -372,11 +375,7 @@ static void defragment_heap ()
   }
 /* There can be no uncoloured allocated handle. */
   for (z = busy_handles; z != NULL; z = NEXT (z)) {
-    ABNORMAL_END ((z->status & COLOUR_MASK) == 0 && (z->status & NO_SWEEP_MASK) == 0, "bad GC consistency", NULL);
-  }
-/* Order in the heap must be preserved. */
-  for (z = busy_handles; z != NULL; z = NEXT (z)) {
-    ABNORMAL_END (NEXT (z) != NULL && z->offset < NEXT (z)->offset, "bad GC order", NULL);
+    ABNORMAL_END ((STATUS (z) & COLOUR_MASK) == 0 && (STATUS (z) & NO_SWEEP_MASK) == 0, "bad GC consistency", NULL);
   }
 /* Defragment the heap. */
   heap_pointer = fixed_heap_pointer;
@@ -384,9 +383,10 @@ static void defragment_heap ()
     ;
   }
   for (; z != NULL; z = PREVIOUS (z)) {
-    MOVE (HEAP_ADDRESS (heap_pointer), HEAP_ADDRESS (z->offset), (unsigned) z->size);
-    z->status &= ~COLOUR_MASK;
-    z->offset = heap_pointer;
+    BYTE_T *dst = HEAP_ADDRESS (heap_pointer);
+    MOVE (dst, POINTER (z), (unsigned) z->size);
+    STATUS (z) &= ~COLOUR_MASK;
+    POINTER (z) = dst;
     heap_pointer += (z->size);
     ABNORMAL_END (heap_pointer % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   }
@@ -394,7 +394,7 @@ static void defragment_heap ()
 
 /*!
 \brief clean up garbage and defragment the heap
-\param p
+\param p position in tree
 \param fp
 **/
 
@@ -409,7 +409,7 @@ void sweep_heap (NODE_T * p, ADDR_T fp)
   t0 = seconds ();
 /* Unfree handles are subject to inspection. */
   for (z = busy_handles; z != NULL; z = NEXT (z)) {
-    z->status &= ~(COLOUR_MASK | COOKIE_MASK);
+    STATUS (z) &= ~(COLOUR_MASK | COOKIE_MASK);
   }
 /* Pour paint into the heap to reveal active objects. */
   colour_heap (fp);
@@ -433,7 +433,7 @@ void sweep_heap (NODE_T * p, ADDR_T fp)
 
 /*!
 \brief yield a handle that will point to a block in the heap
-\param p
+\param p position in tree
 \param a68m
 \return
 **/
@@ -446,9 +446,9 @@ static A68_HANDLE *give_handle (NODE_T * p, MOID_T * a68m)
     if (free_handles != NULL) {
       PREVIOUS (free_handles) = NULL;
     }
-    x->status = ALLOCATED_MASK;
-    x->offset = 0;
-    x->size = 0;
+    STATUS (x) = ALLOCATED_MASK;
+    POINTER (x) = NULL;
+    SIZE (x) = 0;
     MOID (x) = a68m;
     NEXT (x) = busy_handles;
     PREVIOUS (x) = NULL;
@@ -472,7 +472,7 @@ static A68_HANDLE *give_handle (NODE_T * p, MOID_T * a68m)
 
 /*!
 \brief give a block of heap for an object of indicated mode
-\param p
+\param p position in tree
 \param mode
 \param size
 \return
@@ -488,17 +488,16 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
     A68_HANDLE *x;
     A68_REF z;
     PREEMPTIVE_SWEEP;
+    STATUS (&z) = (INITIALISED_MASK | IN_HEAP_MASK);
+    OFFSET (&z) = 0;
     x = give_handle (p, mode);
-    x->size = size;
-    x->offset = heap_pointer;
-/* Set all values to uninitialised. */
-    FILL (&heap_segment[heap_pointer], 0, (unsigned) size);
-    heap_pointer += size;
-    z.status = INITIALISED_MASK | IN_HEAP_MASK;
-    z.offset = 0;
+    SIZE (x) = size;
+    POINTER (x) = HEAP_ADDRESS (heap_pointer);
+    FILL (x->pointer, 0, (unsigned) size);
     SET_REF_SCOPE (&z, PRIMAL_SCOPE);
     REF_HANDLE (&z) = x;
     ABNORMAL_END (((long) ADDRESS (&z)) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
+    heap_pointer += size;
     return (z);
   } else {
 /* No heap space. First sweep the heap. */
@@ -564,7 +563,7 @@ static BOOL_T needs_allocation (MOID_T * m)
 
 /*!
 \brief prepare bounds
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 static void genie_prepare_bounds (NODE_T * p)
@@ -575,7 +574,8 @@ static void genie_prepare_bounds (NODE_T * p)
     } else if (WHETHER (p, BOUND)) {
       genie_prepare_bounds (SUB (p));
     } else if (WHETHER (p, UNIT)) {
-      if (NEXT (p) != NULL && (WHETHER (NEXT (p), COLON_SYMBOL) || WHETHER (NEXT (p), DOTDOT_SYMBOL))) {
+      if (NEXT (p) != NULL && (WHETHER (NEXT (p), COLON_SYMBOL)
+                               || WHETHER (NEXT (p), DOTDOT_SYMBOL))) {
         EXECUTE_UNIT (p);
         p = NEXT (NEXT (p));
       } else {
@@ -589,7 +589,7 @@ static void genie_prepare_bounds (NODE_T * p)
 
 /*!
 \brief prepare bounds for a row
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 **/
 
 void genie_generator_bounds (NODE_T * p)
@@ -605,7 +605,8 @@ void genie_generator_bounds (NODE_T * p)
          */
         genie_generator_bounds (DEF (p));
       }
-    } else if (WHETHER (p, DECLARER) && needs_allocation (MOID (p)) == A68_FALSE) {
+    } else if (WHETHER (p, DECLARER)
+               && needs_allocation (MOID (p)) == A68_FALSE) {
       return;
     } else {
       genie_generator_bounds (SUB (p));
@@ -615,7 +616,7 @@ void genie_generator_bounds (NODE_T * p)
 
 /*!
 \brief allocate a structure
-\param p declarer in the syntax tree, should not be NULL
+\param p declarer in the syntax tree
 **/
 
 void genie_generator_stowed (NODE_T *, BYTE_T *, NODE_T **, ADDR_T *, ADDR_T *);
@@ -644,7 +645,7 @@ void genie_generator_field (NODE_T * p, BYTE_T ** q, NODE_T ** declarer, ADDR_T 
 
 /*!
 \brief allocate a structure
-\param p declarer in the syntax tree, should not be NULL
+\param p declarer in the syntax tree
 **/
 
 void genie_generator_struct (NODE_T * p, BYTE_T ** q, ADDR_T * sp, ADDR_T * max_sp)
@@ -664,7 +665,7 @@ void genie_generator_struct (NODE_T * p, BYTE_T ** q, ADDR_T * sp, ADDR_T * max_
 
 /*!
 \brief allocate a stowed object
-\param p declarer in the syntax tree, should not be NULL
+\param p declarer in the syntax tree
 **/
 
 void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T * sp, ADDR_T * max_sp)
@@ -700,12 +701,12 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
     A68_ARRAY *arr;
     A68_TUPLE *tup;
     BYTE_T *bounds = STACK_ADDRESS (*sp);
-    int k, dimensions = DIMENSION (DEFLEX (MOID (p)));
+    int k, dim = DIM (DEFLEX (MOID (p)));
     int elem_size = MOID_SIZE (slice_mode), row_size = 1;
     UP_SWEEP_SEMA;
-    desc = heap_generator (p, MOID (p), dimensions * ALIGNED_SIZEOF (A68_TUPLE) + ALIGNED_SIZEOF (A68_ARRAY));
+    desc = heap_generator (p, MOID (p), dim * ALIGNED_SIZEOF (A68_TUPLE) + ALIGNED_SIZEOF (A68_ARRAY));
     GET_DESCRIPTOR (arr, tup, &desc);
-    for (k = 0; k < dimensions; k++) {
+    for (k = 0; k < dim; k++) {
       tup[k].lower_bound = VALUE ((A68_INT *) bounds);
       bounds += ALIGNED_SIZEOF (A68_INT);
       tup[k].upper_bound = VALUE ((A68_INT *) bounds);
@@ -714,16 +715,16 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
       tup[k].shift = tup[k].lower_bound * tup[k].span;
       row_size *= ROW_SIZE (&tup[k]);
     }
-    arr->dimensions = dimensions;
-    arr->type = slice_mode;
+    DIM (arr) = dim;
+    MOID (arr) = slice_mode;
     arr->elem_size = elem_size;
     arr->slice_offset = 0;
     arr->field_offset = 0;
-    arr->array = heap_generator (p, MOID (p), row_size * elem_size);
-    (*sp) += (dimensions * 2 * ALIGNED_SIZEOF (A68_INT));
+    ARRAY (arr) = heap_generator (p, MOID (p), row_size * elem_size);
+    (*sp) += (dim * 2 * ALIGNED_SIZEOF (A68_INT));
     MAX (bla, *sp);
     if (slice_mode->has_rows && needs_allocation (slice_mode)) {
-      BYTE_T *elem = ADDRESS (&(arr->array));
+      BYTE_T *elem = ADDRESS (&(ARRAY (arr)));
       for (k = 0; k < row_size; k++) {
         ADDR_T pop_sp = *sp;
         bla = *max_sp;
@@ -741,7 +742,7 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
 
 /*!
 \brief generate space and push a REF
-\param p declarer in the syntax tree, should not be NULL
+\param p declarer in the syntax tree
 \param ref_mode REF mode to be generated
 \param tag associated internal LOC for this generator
 \param leap where to generate space
@@ -755,7 +756,7 @@ void genie_generator_internal (NODE_T * p, MOID_T * ref_mode, TAG_T * tag, LEAP_
   UP_SWEEP_SEMA;
 /* Set up a REF MODE object, either in the stack or in the heap. */
   if (leap == LOC_SYMBOL) {
-    name.status = INITIALISED_MASK | IN_FRAME_MASK;
+    STATUS (&name) = INITIALISED_MASK | IN_FRAME_MASK;
     REF_HANDLE (&name) = &nil_handle;
     name.offset = frame_pointer + FRAME_INFO_SIZE + tag->offset;
     SET_REF_SCOPE (&name, frame_pointer);
@@ -773,7 +774,7 @@ void genie_generator_internal (NODE_T * p, MOID_T * ref_mode, TAG_T * tag, LEAP_
 
 /*!
 \brief push a name refering to allocated space
-\param p position in the syntax tree, should not be NULL
+\param p position in tree
 \return a propagator for this action
 **/
 
@@ -783,8 +784,6 @@ PROPAGATOR_T genie_generator (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   A68_REF z;
   A68_TRACE ("enter genie_generator", p);
-  self.unit = genie_generator;
-  self.source = p;
   genie_generator_bounds (NEXT (SUB (p)));
   genie_generator_internal (NEXT (SUB (p)), MOID (p), TAX (p), ATTRIBUTE (SUB (p)), pop_sp);
   POP_REF (p, &z);
@@ -792,5 +791,7 @@ PROPAGATOR_T genie_generator (NODE_T * p)
   PUSH_REF (p, z);
   PROTECT_FROM_SWEEP_STACK (p);
   A68_TRACE ("exit genie_generator", p);
+  self.unit = genie_generator;
+  self.source = p;
   return (self);
 }

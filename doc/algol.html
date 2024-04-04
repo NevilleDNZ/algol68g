@@ -1,7 +1,7 @@
 <!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie</title>
+<title>Algol 68 Genie - An Algol 68 Interpreter</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -30,7 +30,7 @@ pre {font-size: 10pt; font-family: "courier new", monospace;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-<b>Documentation for Algol 68 Genie Mark 11.1</b>
+<b>Documentation for Algol 68 Genie Mark 12</b>
 </small>
 </td>
 </table>
@@ -39,7 +39,7 @@ pre {font-size: 10pt; font-family: "courier new", monospace;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 11.1</h2>
+<h2>Algol 68 Genie Mark 12</h2>
 <h3>An Algol 68 interpreter</h3>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
 &middot;&nbsp;<a href="#obtaining">Obtaining Algol 68 Genie</a><br>
@@ -97,8 +97,6 @@ For programmers, the world has of course moved on, but the reactions on Algol 68
 <p>
 The observations mentioned here are believed to be sufficient ground to preserve Algol 68, both by making available its defining document as well as an implementation as to enable those interested in the language to both study it, and use it.
 
-<p>
-The current version of Algol 68 Genie is Mark 11.1, released in March 2008. You can download it from this page. Algol 68 Genie (Algol68G) is free software, distributed under GNU General Public License. Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for details. The distribution of Algol 68 Genie Mark 11.1 contains revision 1.0 of the HTML translation of the Algol 68 Revised Report.
 </p>
 </td>
 <td width=10%>
@@ -110,20 +108,23 @@ The current version of Algol 68 Genie is Mark 11.1, released in March 2008. You 
 </table>
 
 <h3><a name="obtaining"></a>Obtaining Algol 68 Genie</h3>
+<p>
+The current version of Algol 68 Genie is Mark 12, released in May 2008. You can download it from this page. Algol 68 Genie (Algol68G) is free software, distributed under GNU General Public License. Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for details. The distribution of Algol 68 Genie Mark 12 contains revision 1.1 of the HTML translation of the Algol 68 Revised Report.
+<p>
 <table border=0 cellspacing=6 cellpadding=6>
 <tr>
 <td width=25% valign=top style="border: 1px solid red">
 <center>
 <img valign=top src="download.png">
 <p>
-Download <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk11.1.tar.gz">Algol68G Mark 11.1</a>, a gzipped tar archive containing C source code, a Win32 executable, documentation and revision 1.0 of the HTML translation of the Algol 68 Revised Report.
+Download <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk12.tar.gz">Algol68G Mark 12</a>, a gzipped tar archive containing C source code, a Win32 executable, documentation and revision 1.1 of the HTML translation of the Algol 68 Revised Report.
 </center>
 </td>
 <td width=25% valign=top style="border: 1px solid red">
 <center>
 <img valign=top src="documents.png">
 <p>
-Read the <a href="contents.html">documentation for Algol68G Mark 11.1</a>.
+Read the <a href="contents.html">documentation for Algol68G Mark 12</a>.
 </center>
 </td>
 <td width=25% valign=top style="border: 1px solid red">
@@ -218,6 +219,21 @@ Details on implemented features are on <a href="description.html">this page</a>.
 </td>
 <td valign=top>
 <b>Changes</b>
+</td>
+</tr>
+<tr bgcolor="#e0e0e0">
+<td valign=top>
+12
+</td>
+<td valign=top>
+May 2008
+</td>
+<td valign=top>
+Improves code for the parallel clause<br>
+Improves interpreter efficiency<br>
+Improves <a href="synopsis.html#monitor">breakpoint</a> commands in the monitor<br>
+Adds options UNTIL, FINISH and OUT to the <a href="synopsis.html#monitor">monitor</a><br>
+Adds Revised Report (HTML translation 1.1) to the documentation
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -342,7 +358,7 @@ November 2005
 Adds procedure <code>sub in string</code> for substituting regular expressions in a string (UNIX)<br>
 Adds option <code>PORTCHECK</code> cf. <a href="resources.html#documentation">standard hardware representation</a><br>
 Adds option <code>PEDANTIC</code><br>
-Fixes bug in partial parametrisation
+Fixes bug in partial parametrization
 </td>
 </tr>
 <tr bgcolor="#e0e0e0">
@@ -372,7 +388,7 @@ Makes ~ a <code>SKIP</code> when used as a unit (cf. RR)
 May 2005
 </td>
 <td valign=top>
-Adds <a href="description.html#params">partial parametrisation</a> following C. H. Lindsey's proposal<br>
+Adds <a href="description.html#params">partial parametrization</a> following C. H. Lindsey's proposal<br>
 Adds elementary and trigonometric functions for complex numbers, independent of GSL
 </td>
 </tr>
@@ -501,7 +517,7 @@ From November 2001 onward
 <td>
 <small>
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11.1 (March 2008)
+Algol 68 Genie Mark 12 (May 2008)
 </small>
 </td>
 </tr>
