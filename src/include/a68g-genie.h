@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -362,7 +362,7 @@
 #define CHECK_DNS2(p, scope, limit, mode)\
   if (scope > limit) {\
     BUFFER txt;\
-    ASSERT (snprintf (txt, SNPRINTF_SIZE, ERROR_SCOPE_DYNAMIC_1) >= 0);\
+    ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, ERROR_SCOPE_DYNAMIC_1) >= 0);\
     diagnostic (A68_RUNTIME_ERROR, p, txt, mode);\
     exit_genie (p, A68_RUNTIME_ERROR);\
   }

@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -40,7 +40,7 @@ char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, int defl
     PACK_T *u = PACK (p);
     int N = 0;
     if (u == NO_PACK) {
-      ASSERT (snprintf (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
+      ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
       N++;
     } else {
       for (; u != NO_PACK; FORWARD (u)) {
@@ -50,14 +50,14 @@ char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, int defl
           } else if (!is_coercible (MOID (u), q, context, deflex)) {
             int len = (int) strlen (txt);
             if (len > BUFFER_SIZE / 2) {
-              ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
+              ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
               N++;
             } else {
               if (strlen (txt) > 0) {
-                ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
+                ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
                 N++;
               }
-              ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, "%s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n)) >= 0);
+              ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, "%s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n)) >= 0);
               N++;
             }
           }
@@ -66,65 +66,65 @@ char *mode_error_text (NODE_T * n, MOID_T * p, MOID_T * q, int context, int defl
     }
     if (depth == 1) {
       if (N == 0) {
-        ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, "mode") >= 0);
+        ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, "mode") >= 0);
       }
-      ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " cannot be coerced to %s", moid_to_string (q, MOID_ERROR_WIDTH, n)) >= 0);
+      ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " cannot be coerced to %s", moid_to_string (q, MOID_ERROR_WIDTH, n)) >= 0);
     }
   } else if (IS (p, STOWED_MODE) && IS_FLEX (q)) {
     PACK_T *u = PACK (p);
     if (u == NO_PACK) {
-      ASSERT (snprintf (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
+      ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
     } else {
       for (; u != NO_PACK; FORWARD (u)) {
         if (!is_coercible (MOID (u), SLICE (SUB (q)), context, deflex)) {
           int len = (int) strlen (txt);
           if (len > BUFFER_SIZE / 2) {
-            ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
+            ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
           } else {
             if (strlen (txt) > 0) {
-              ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
+              ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
             }
-            ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, "%s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n)) >= 0);
+            ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, "%s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n)) >= 0);
           }
         }
       }
-      ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (SUB (q)), MOID_ERROR_WIDTH, n)) >= 0);
+      ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (SUB (q)), MOID_ERROR_WIDTH, n)) >= 0);
     }
   } else if (IS (p, STOWED_MODE) && IS (q, ROW_SYMBOL)) {
     PACK_T *u = PACK (p);
     if (u == NO_PACK) {
-      ASSERT (snprintf (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
+      ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
     } else {
       for (; u != NO_PACK; FORWARD (u)) {
         if (!is_coercible (MOID (u), SLICE (q), context, deflex)) {
           int len = (int) strlen (txt);
           if (len > BUFFER_SIZE / 2) {
-            ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
+            ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
           } else {
             if (strlen (txt) > 0) {
-              ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
+              ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
             }
-            ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, "%s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n)) >= 0);
+            ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, "%s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n)) >= 0);
           }
         }
       }
-      ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (q), MOID_ERROR_WIDTH, n)) >= 0);
+      ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " cannot be coerced to %s", moid_to_string (SLICE (q), MOID_ERROR_WIDTH, n)) >= 0);
     }
   } else if (IS (p, STOWED_MODE) && (IS (q, PROC_SYMBOL) || IS (q, STRUCT_SYMBOL))) {
     PACK_T *u = PACK (p), *v = PACK (q);
     if (u == NO_PACK) {
-      ASSERT (snprintf (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
+      ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "empty mode-list") >= 0);
     } else {
       for (; u != NO_PACK && v != NO_PACK; FORWARD (u), FORWARD (v)) {
         if (!is_coercible (MOID (u), MOID (v), context, deflex)) {
           int len = (int) strlen (txt);
           if (len > BUFFER_SIZE / 2) {
-            ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
+            ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " etcetera") >= 0);
           } else {
             if (strlen (txt) > 0) {
-              ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
+              ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, " and ") >= 0);
             }
-            ASSERT (snprintf (TAIL (txt), SNPRINTF_SIZE, "%s cannot be coerced to %s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n), moid_to_string (MOID (v), MOID_ERROR_WIDTH, n)) >= 0);
+            ASSERT (a68_bufprt (TAIL (txt), SNPRINTF_SIZE, "%s cannot be coerced to %s", moid_to_string (MOID (u), MOID_ERROR_WIDTH, n), moid_to_string (MOID (v), MOID_ERROR_WIDTH, n)) >= 0);
           }
         }
       }

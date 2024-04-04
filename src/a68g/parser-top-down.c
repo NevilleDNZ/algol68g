@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -78,50 +78,50 @@ char *phrase_to_text (NODE_T * p, NODE_T ** w)
 // Add initiation.
       if (count == 0) {
         if (w != NO_VAR) {
-          bufcat (buffer, "construct beginning with", BUFFER_SIZE);
+          a68_bufcat (buffer, "construct beginning with", BUFFER_SIZE);
         }
       } else if (count == 1) {
-        bufcat (buffer, " followed by", BUFFER_SIZE);
+        a68_bufcat (buffer, " followed by", BUFFER_SIZE);
       } else if (count == 2) {
-        bufcat (buffer, " and then", BUFFER_SIZE);
+        a68_bufcat (buffer, " and then", BUFFER_SIZE);
       } else if (count >= 3) {
-        bufcat (buffer, " and", BUFFER_SIZE);
+        a68_bufcat (buffer, " and", BUFFER_SIZE);
       }
 // Attribute or symbol.
       if (z != NO_TEXT && SUB (p) != NO_NODE) {
         if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTATION) {
-          ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
-          bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
+          ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
+          a68_bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
         } else {
           if (strchr ("aeio", z[0]) != NO_TEXT) {
-            bufcat (buffer, " an", BUFFER_SIZE);
+            a68_bufcat (buffer, " an", BUFFER_SIZE);
           } else {
-            bufcat (buffer, " a", BUFFER_SIZE);
+            a68_bufcat (buffer, " a", BUFFER_SIZE);
           }
-          ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, " %s", z) >= 0);
-          bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
+          ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, " %s", z) >= 0);
+          a68_bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
         }
       } else if (z != NO_TEXT && SUB (p) == NO_NODE) {
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
-        bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
+        ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
+        a68_bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
       } else if (NSYMBOL (p) != NO_TEXT) {
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
-        bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
+        ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (p)) >= 0);
+        a68_bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
       }
 // Add "starting in line nn".
       if (z != NO_TEXT && line != LINE_NUMBER (p)) {
         line = LINE_NUMBER (p);
         if (gatt == SERIAL_CLAUSE || gatt == ENQUIRY_CLAUSE || gatt == INITIALISER_SERIES) {
-          bufcat (buffer, " starting", BUFFER_SIZE);
+          a68_bufcat (buffer, " starting", BUFFER_SIZE);
         }
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, " in line %d", line) >= 0);
-        bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
+        ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, " in line %d", line) >= 0);
+        a68_bufcat (buffer, A68 (edit_line), BUFFER_SIZE);
       }
       count++;
     }
   }
   if (p != NO_NODE && count == MAX_TERMINALS) {
-    bufcat (buffer, " etcetera", BUFFER_SIZE);
+    a68_bufcat (buffer, " etcetera", BUFFER_SIZE);
   }
   return buffer;
 }

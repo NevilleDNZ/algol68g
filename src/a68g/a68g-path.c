@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -40,8 +40,8 @@ char *a68_dirname (char *src)
   char *dst = (char *) get_fixed_heap_space (len + 1);
   ABEND (cpy == NO_TEXT, ERROR_OUT_OF_CORE, __func__);
   ABEND (dst == NO_TEXT, ERROR_OUT_OF_CORE, __func__);
-  bufcpy (cpy, src, len);
-  bufcpy (dst, dirname (cpy), len);
+  a68_bufcpy (cpy, src, len);
+  a68_bufcpy (dst, dirname (cpy), len);
   return dst;
 }
 
@@ -54,8 +54,8 @@ char *a68_basename (char *src)
   char *dst = (char *) get_fixed_heap_space (len + 1);
   ABEND (cpy == NO_TEXT, ERROR_OUT_OF_CORE, __func__);
   ABEND (dst == NO_TEXT, ERROR_OUT_OF_CORE, __func__);
-  bufcpy (cpy, src, len);
-  bufcpy (dst, basename (cpy), len);
+  a68_bufcpy (cpy, src, len);
+  a68_bufcpy (dst, basename (cpy), len);
   return dst;
 }
 
@@ -110,11 +110,11 @@ static char *win32_realpath (char *name, char *resolved)
 char *a68_relpath (char *p1, char *p2, char *fn)
 {
   char q[PATH_MAX + 1];
-  bufcpy (q, p1, PATH_MAX);
-  bufcat (q, "/", PATH_MAX);
-  bufcat (q, p2, PATH_MAX);
-  bufcat (q, "/", PATH_MAX);
-  bufcat (q, fn, PATH_MAX);
+  a68_bufcpy (q, p1, PATH_MAX);
+  a68_bufcat (q, "/", PATH_MAX);
+  a68_bufcat (q, p2, PATH_MAX);
+  a68_bufcat (q, "/", PATH_MAX);
+  a68_bufcat (q, fn, PATH_MAX);
 // Home directory shortcut ~ is a shell extension.
   if (strchr (q, '~') != NO_TEXT) {
     return NO_TEXT;

@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -373,9 +373,9 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       push_unit (p);
       POP_OBJECT (p, &im, A68_REAL);
       POP_OBJECT (p, &re, A68_REAL);
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_COMPLEX %s = {", acc));
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "{INIT_MASK, %.*g}", A68_REAL_WIDTH + 2, VALUE (&re)));
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", {INIT_MASK, %.*g}", A68_REAL_WIDTH + 2, VALUE (&im)));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "A68_COMPLEX %s = {", acc));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "{INIT_MASK, %.*g}", A68_REAL_WIDTH + 2, VALUE (&re)));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ", {INIT_MASK, %.*g}", A68_REAL_WIDTH + 2, VALUE (&im)));
       undent (out, "};\n");
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
     }
@@ -389,7 +389,7 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       A68_SP = 0;
       push_unit (p);
       POP_OBJECT (p, &k, A68_INT);
-      ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, A68_LD, VALUE (&k)) >= 0);
+      ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, A68_LD, VALUE (&k)) >= 0);
       undent (out, A68 (edit_line));
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
     } else if (MOID (p) == M_REAL) {
@@ -407,7 +407,7 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       } else if (VALUE (&x) == -A68_REAL_MAX) {
         undent (out, "(-A68_REAL_MAX)");
       } else {
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%.*g", A68_REAL_WIDTH + 2, VALUE (&x)) >= 0);
+        ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%.*g", A68_REAL_WIDTH + 2, VALUE (&x)) >= 0);
         undent (out, A68 (edit_line));
       }
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
@@ -416,7 +416,7 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       A68_SP = 0;
       push_unit (p);
       POP_OBJECT (p, &b, A68_BOOL);
-      ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", (VALUE (&b) ? "A68_TRUE" : "A68_FALSE")) >= 0);
+      ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", (VALUE (&b) ? "A68_TRUE" : "A68_FALSE")) >= 0);
       undent (out, A68 (edit_line));
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
     } else if (MOID (p) == M_CHAR) {
@@ -425,15 +425,15 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       push_unit (p);
       POP_OBJECT (p, &c, A68_CHAR);
       if (VALUE (&c) == '\'') {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "'\\\''"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "'\\\''"));
       } else if (VALUE (&c) == '\\') {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "'\\\\'"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "'\\\\'"));
       } else if (VALUE (&c) == NULL_CHAR) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "NULL_CHAR"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "NULL_CHAR"));
       } else if (IS_PRINT (VALUE (&c))) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "'%c'", (CHAR_T) VALUE (&c)));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "'%c'", (CHAR_T) VALUE (&c)));
       } else {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(CHAR_T) %d", VALUE (&c)));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(CHAR_T) %d", VALUE (&c)));
       }
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
     } else if (MOID (p) == M_BITS) {
@@ -441,13 +441,13 @@ void constant_folder (NODE_T * p, FILE_T out, int phase)
       A68_SP = 0;
       push_unit (p);
       POP_OBJECT (p, &b, A68_BITS);
-      ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "(UNSIGNED_T) 0x" A68_LX, VALUE (&b)) >= 0);
+      ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(UNSIGNED_T) 0x" A68_LX, VALUE (&b)) >= 0);
       undent (out, A68 (edit_line));
       ABEND (A68_SP > 0, ERROR_INTERNAL_CONSISTENCY, __func__);
     } else if (MOID (p) == M_COMPLEX) {
       char acc[NAME_SIZE];
       (void) make_name (acc, CON, "", NUMBER (p));
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) %s", acc));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) %s", acc));
     }
   }
 }

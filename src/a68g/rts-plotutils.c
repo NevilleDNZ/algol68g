@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -202,7 +202,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    ASSERT (a68_bufprt (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "VANISH_ON_DELETE", (void *) "no");
@@ -264,7 +264,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    ASSERT (a68_bufprt (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "GIF_ANIMATION", (void *) "no");
@@ -318,7 +318,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       DRAW_MOOD (f) = A68_TRUE;
     }
 // Set up plotter.
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    ASSERT (a68_bufprt (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
     PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
     if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
@@ -386,7 +386,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    ASSERT (a68_bufprt (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
     (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "GIF_ANIMATION", (void *) "no");

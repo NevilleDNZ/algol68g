@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -481,7 +481,7 @@ void a68_parser (void)
 // Final initialisations.
   if (ERROR_COUNT (&A68_JOB) == 0) {
     if (OPTION_REGRESSION_TEST (&A68_JOB)) {
-      bufcpy (A68 (a68_cmd_name), "a68g", BUFFER_SIZE);
+      a68_bufcpy (A68 (a68_cmd_name), "a68g", BUFFER_SIZE);
       io_close_tty_line ();
       WRITE (A68_STDERR, "[");
       WRITE (A68_STDERR, FILE_INITIAL_NAME (&A68_JOB));

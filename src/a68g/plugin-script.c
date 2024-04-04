@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -42,27 +42,27 @@ void build_script (void)
   announce_phase ("script builder");
   ABEND (OPTION_OPT_LEVEL (&A68_JOB) == 0, ERROR_ACTION, __func__);
 // Flatten the source file.
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SOURCE_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SOURCE_NAME (&A68_JOB)) >= 0);
   FILE_T source = open (cmd, O_WRONLY | O_CREAT | O_TRUNC, A68_PROTECTION);
   ABEND (source == -1, ERROR_ACTION, cmd);
   for (LINE_T *sl = TOP_LINE (&A68_JOB); sl != NO_LINE; FORWARD (sl)) {
     if (strlen (STRING (sl)) == 0 || (STRING (sl))[strlen (STRING (sl)) - 1] != NEWLINE_CHAR) {
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s\n%d\n%s\n", FILENAME (sl), NUMBER (sl), STRING (sl)) >= 0);
+      ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s\n%d\n%s\n", FILENAME (sl), NUMBER (sl), STRING (sl)) >= 0);
     } else {
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s\n%d\n%s", FILENAME (sl), NUMBER (sl), STRING (sl)) >= 0);
+      ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s\n%d\n%s", FILENAME (sl), NUMBER (sl), STRING (sl)) >= 0);
     }
     WRITE (source, cmd);
   }
   ASSERT (close (source) == 0);
 // Compress source and dynamic library.
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "cp %s %s.%s", FILE_PLUGIN_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "cp %s %s.%s", FILE_PLUGIN_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
   int ret = system (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "tar czf %s.%s.tgz %s.%s %s.%s", HIDDEN_TEMP_FILE_NAME, FILE_GENERIC_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_SOURCE_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "tar czf %s.%s.tgz %s.%s %s.%s", HIDDEN_TEMP_FILE_NAME, FILE_GENERIC_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_SOURCE_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
   ret = system (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
 // Compose script.
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
   FILE_T script = open (cmd, O_WRONLY | O_CREAT | O_TRUNC, A68_PROTECTION);
   ABEND (script == -1, ERROR_ACTION, cmd);
   char *strop = "";
@@ -71,29 +71,29 @@ void build_script (void)
   } else {
     strop = "--run-script";
   }
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "#! %s/a68g %s\n", BINDIR, strop) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "#! %s/a68g %s\n", BINDIR, strop) >= 0);
   WRITE (script, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s\n%s --verify \"%s\"\n", FILE_GENERIC_NAME (&A68_JOB), optimisation_option (), PACKAGE_STRING) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s\n%s --verify \"%s\"\n", FILE_GENERIC_NAME (&A68_JOB), optimisation_option (), PACKAGE_STRING) >= 0);
   WRITE (script, A68 (output_line));
   ASSERT (close (script) == 0);
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "cat %s.%s %s.%s.tgz > %s", HIDDEN_TEMP_FILE_NAME, FILE_SCRIPT_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_GENERIC_NAME (&A68_JOB), FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "cat %s.%s %s.%s.tgz > %s", HIDDEN_TEMP_FILE_NAME, FILE_SCRIPT_NAME (&A68_JOB), HIDDEN_TEMP_FILE_NAME, FILE_GENERIC_NAME (&A68_JOB), FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
   ret = system (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s", FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s", FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
   ret = chmod (cmd, (__mode_t) (S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH));  // -rwx-r-xr-x
   ABEND (ret != 0, ERROR_ACTION, cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
 // Clean up.
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s.tgz", HIDDEN_TEMP_FILE_NAME, FILE_GENERIC_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s.tgz", HIDDEN_TEMP_FILE_NAME, FILE_GENERIC_NAME (&A68_JOB)) >= 0);
   ret = remove (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SOURCE_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SOURCE_NAME (&A68_JOB)) >= 0);
   ret = remove (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
   ret = remove (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, FILE_SCRIPT_NAME (&A68_JOB)) >= 0);
   ret = remove (cmd);
   ABEND (ret != 0, ERROR_ACTION, cmd);
 }
@@ -109,7 +109,7 @@ void load_script (void)
   BUFCLR (cmd);
   announce_phase ("script loader");
 // Decompress the archive.
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "sed '1,3d' < %s | tar xzf -", FILE_INITIAL_NAME (&A68_JOB)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "sed '1,3d' < %s | tar xzf -", FILE_INITIAL_NAME (&A68_JOB)) >= 0);
   ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
 // Reread the header.
   FILE_T script = open (FILE_INITIAL_NAME (&A68_JOB), O_RDONLY);
@@ -128,7 +128,7 @@ void load_script (void)
     ASSERT (io_read (script, &ch, 1) == 1);
   }
   A68 (input_line)[k] = NULL_CHAR;
-  ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, A68 (input_line)) >= 0);
+  ASSERT (a68_bufprt (cmd, SNPRINTF_SIZE, "%s.%s", HIDDEN_TEMP_FILE_NAME, A68 (input_line)) >= 0);
   FILE_INITIAL_NAME (&A68_JOB) = new_string (cmd, NO_TEXT);
 // Read options.
   A68 (input_line)[0] = NULL_CHAR;

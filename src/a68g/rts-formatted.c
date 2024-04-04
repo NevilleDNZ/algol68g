@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -856,7 +856,7 @@ void read_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file)
       if (width == 0) {
         A68_FILE *file = FILE_DEREF (&ref_file);
         int ch;
-        ASSERT (snprintf (str, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
+        ASSERT (a68_bufprt (str, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
         set_transput_buffer_index (INPUT_BUFFER, (int) strlen (str));
         ch = char_scanner (file);
         while (ch != EOF_CHAR && (IS_SPACE (ch) || IS_NL_FF (ch))) {
@@ -872,7 +872,7 @@ void read_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file)
         }
         unchar_scanner (p, file, (char) ch);
       } else {
-        ASSERT (snprintf (str, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
+        ASSERT (a68_bufprt (str, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
         set_transput_buffer_index (INPUT_BUFFER, (int) strlen (str));
         scan_n_chars (p, width, mode, ref_file);
       }
@@ -2275,7 +2275,7 @@ void read_bits_pattern (NODE_T * p, MOID_T * m, BYTE_T * item, A68_REF ref_file)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   char *z = get_transput_buffer (INPUT_BUFFER);
-  ASSERT (snprintf (z, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
+  ASSERT (a68_bufprt (z, (size_t) TRANSPUT_BUFFER_SIZE, "%dr", radix) >= 0);
   set_transput_buffer_index (INPUT_BUFFER, (int) strlen (z));
   read_integral_mould (NEXT_SUB (p), m, ref_file);
   genie_string_to_value (p, m, item, ref_file);

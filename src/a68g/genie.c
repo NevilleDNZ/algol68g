@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -370,7 +370,7 @@ void genie (void *compile_plugin)
   }
   io_close_tty_line ();
   if (OPTION_TRACE (&A68_JOB)) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", A68 (frame_stack_size) / KILOBYTE, A68 (expr_stack_size) / KILOBYTE, A68 (heap_size) / KILOBYTE, A68 (handle_pool_size) / KILOBYTE) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", A68 (frame_stack_size) / KILOBYTE, A68 (expr_stack_size) / KILOBYTE, A68 (heap_size) / KILOBYTE, A68 (handle_pool_size) / KILOBYTE) >= 0);
     WRITE (A68_STDOUT, A68 (output_line));
   }
   install_signal_handlers ();
@@ -428,14 +428,14 @@ void genie (void *compile_plugin)
     } else if (A68 (ret_code) == A68_RUNTIME_ERROR) {
       if (OPTION_BACKTRACE (&A68_JOB)) {
         int printed = 0;
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nStack backtrace") >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\nStack backtrace") >= 0);
         WRITE (A68_STDOUT, A68 (output_line));
         stack_dump (A68_STDOUT, A68_FP, 16, &printed);
         WRITE (A68_STDOUT, NEWLINE_STRING);
       }
       if (FILE_LISTING_OPENED (&A68_JOB)) {
         int printed = 0;
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nStack backtrace") >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\nStack backtrace") >= 0);
         WRITE (FILE_LISTING_FD (&A68_JOB), A68 (output_line));
         stack_dump (FILE_LISTING_FD (&A68_JOB), A68_FP, 32, &printed);
       }

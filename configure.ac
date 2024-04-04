@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.4.4, configure.ac
+# Algol 68 Genie 3.4.5, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.4.4], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.4.5], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 AC_MSG_NOTICE([])
@@ -567,25 +567,7 @@ AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h execinfo.h fcntl.h
 
 AC_MSG_NOTICE([check standard functions...])
 AC_CHECK_FUNCS(aligned_alloc)
-AC_CHECK_FUNCS(basename)
-AC_CHECK_FUNCS(csqrt)
-AC_CHECK_FUNCS(exit)
-AC_CHECK_FUNCS(fprintf)
-AC_CHECK_FUNCS(free)
-AC_CHECK_FUNCS(longjmp)
-AC_CHECK_FUNCS(malloc)
-AC_CHECK_FUNCS(memcpy)
-AC_CHECK_FUNCS(memmove)
-AC_CHECK_FUNCS(memset)
 AC_CHECK_FUNCS(posix_memalign)
-AC_CHECK_FUNCS(printf)
-AC_CHECK_FUNCS(setjmp)
-AC_CHECK_FUNCS(signal)
-AC_CHECK_FUNCS(snprintf)
-AC_CHECK_FUNCS(sqrt)
-AC_CHECK_FUNCS(strcmp)
-AC_CHECK_FUNCS(strncmp)
-AC_CHECK_FUNCS(strncpy)
 
 #
 # Checks for functions / macros.

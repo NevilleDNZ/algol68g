@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -233,7 +233,7 @@ BOOL_T a68_mkstemp (char *fn, int flags, mode_t permissions)
   char *prefix[] = { "/tmp/a68_", "./a68_", NO_TEXT };
   for (int i = 0; prefix[i] != NO_TEXT; i++) {
     for (int k = 0; k < TRIALS && good_file == A68_FALSE; k++) {
-      bufcpy (tfilename, prefix[i], BUFFER_SIZE);
+      a68_bufcpy (tfilename, prefix[i], BUFFER_SIZE);
       for (int j = 0; j < TMP_SIZE; j++) {
         int cindex;
         do {
@@ -242,9 +242,9 @@ BOOL_T a68_mkstemp (char *fn, int flags, mode_t permissions)
         char chars[2];
         chars[0] = letters[cindex];
         chars[1] = NULL_CHAR;
-        bufcat (tfilename, chars, BUFFER_SIZE);
+        a68_bufcat (tfilename, chars, BUFFER_SIZE);
       }
-      bufcat (tfilename, ".tmp", BUFFER_SIZE);
+      a68_bufcat (tfilename, ".tmp", BUFFER_SIZE);
       errno = 0;
       FILE_T fd = open (tfilename, flags | O_EXCL, permissions);
       good_file = (BOOL_T) (fd != A68_NO_FILE && errno == 0);
@@ -254,7 +254,7 @@ BOOL_T a68_mkstemp (char *fn, int flags, mode_t permissions)
     }
   }
   if (good_file) {
-    bufcpy (fn, tfilename, BUFFER_SIZE);
+    a68_bufcpy (fn, tfilename, BUFFER_SIZE);
     return A68_TRUE;
   } else {
     return A68_FALSE;
@@ -302,7 +302,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int flags, mode_t permi
       len = 1 + (int) strlen (tfilename);
       IDENTIFICATION (file) = heap_generator (p, M_C_STRING, len);
       BLOCK_GC_HANDLE (&(IDENTIFICATION (file)));
-      bufcpy (DEREF (char, &IDENTIFICATION (file)), tfilename, len);
+      a68_bufcpy (DEREF (char, &IDENTIFICATION (file)), tfilename, len);
       TRANSPUT_BUFFER (file) = get_unblocked_transput_buffer (p);
       reset_transput_buffer (TRANSPUT_BUFFER (file));
       END_OF_FILE (file) = A68_FALSE;
@@ -1579,7 +1579,7 @@ char *string_plusab_char (char *str, char c, int strwid)
   char z[2];
   z[0] = c;
   z[1] = NULL_CHAR;
-  bufcat (str, z, strwid);
+  a68_bufcat (str, z, strwid);
   return str;
 }
 
@@ -1760,7 +1760,7 @@ char *whole (NODE_T * p)
     size += length;
     size = 8 + (size > VALUE (&width) ? size : VALUE (&width));
     char *s = stack_string (p, size);
-    bufcpy (s, sub_whole (p, n, length), size);
+    a68_bufcpy (s, sub_whole (p, n, length), size);
     if (length == 0 || strchr (s, ERROR_CHAR) != NO_TEXT) {
       (void) error_chars (s, VALUE (&width));
     } else {
@@ -1792,7 +1792,7 @@ char *whole (NODE_T * p)
     size += length;
     size = 8 + (size > VALUE (&width) ? size : VALUE (&width));
     char *s = stack_string (p, size);
-    bufcpy (s, long_sub_whole_double (p, n, length), size);
+    a68_bufcpy (s, long_sub_whole_double (p, n, length), size);
     if (length == 0 || strchr (s, ERROR_CHAR) != NO_TEXT) {
       (void) error_chars (s, VALUE (&width));
     } else {
@@ -1834,7 +1834,7 @@ char *whole (NODE_T * p)
     size += length;
     size = 8 + (size > VALUE (&width) ? size : VALUE (&width));
     char *s = stack_string (p, size);
-    bufcpy (s, long_sub_whole (p, n, digits, length), size);
+    a68_bufcpy (s, long_sub_whole (p, n, digits, length), size);
     if (length == 0 || strchr (s, ERROR_CHAR) != NO_TEXT) {
       (void) error_chars (s, VALUE (&width));
     } else {
@@ -2420,9 +2420,9 @@ char *real (NODE_T * p)
       char *t2 = whole (p);
       int strwid = 8 + (int) strlen (t1) + 1 + (int) strlen (t2);
       char *s = stack_string (p, strwid);
-      bufcpy (s, t1, strwid);
+      a68_bufcpy (s, t1, strwid);
       (void) string_plusab_char (s, EXPONENT_CHAR, strwid);
-      bufcat (s, t2, strwid);
+      a68_bufcat (s, t2, strwid);
       if (VALUE (&expo) == 0 || strchr (s, ERROR_CHAR) != NO_TEXT) {
         A68_SP = arg_sp;
         PUSH_VALUE (p, VALUE (&width), A68_INT);
@@ -2490,9 +2490,9 @@ char *real (NODE_T * p)
       char *t2 = whole (p);
       int strwid = 8 + (int) strlen (t1) + 1 + (int) strlen (t2);
       char *s = stack_string (p, strwid);
-      bufcpy (s, t1, strwid);
+      a68_bufcpy (s, t1, strwid);
       (void) string_plusab_char (s, EXPONENT_CHAR, strwid);
-      bufcat (s, t2, strwid);
+      a68_bufcat (s, t2, strwid);
       if (VALUE (&expo) == 0 || strchr (s, ERROR_CHAR) != NO_TEXT) {
         A68_SP = arg_sp;
         PUSH_VALUE (p, VALUE (&width), A68_INT);
@@ -2572,9 +2572,9 @@ char *real (NODE_T * p)
       char *t2 = whole (p);
       int strwid = 8 + (int) strlen (t1) + 1 + (int) strlen (t2);
       char *s = stack_string (p, strwid);
-      bufcpy (s, t1, strwid);
+      a68_bufcpy (s, t1, strwid);
       (void) string_plusab_char (s, EXPONENT_CHAR, strwid);
-      bufcat (s, t2, strwid);
+      a68_bufcat (s, t2, strwid);
       if (VALUE (&expo) == 0 || strchr (s, ERROR_CHAR) != NO_TEXT) {
         A68_SP = arg_sp;
         PUSH_VALUE (p, VALUE (&width), A68_INT);

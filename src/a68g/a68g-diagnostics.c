@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -38,9 +38,9 @@ char *error_specification (void)
 {
   static BUFFER txt;
   if (errno == 0) {
-    ASSERT (snprintf (txt, SNPRINTF_SIZE, "no information") >= 0);
+    ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "no information") >= 0);
   } else {
-    ASSERT (snprintf (txt, SNPRINTF_SIZE, "%s", strerror (errno)) >= 0);
+    ASSERT (a68_bufprt (txt, SNPRINTF_SIZE, "%s", strerror (errno)) >= 0);
   }
   if (strlen (txt) > 0) {
     txt[0] = TO_LOWER (txt[0]);
@@ -62,9 +62,9 @@ char *ctrl_char (int ch)
   static char txt[SMALL_BUFFER_SIZE];
   ch = TO_UCHAR (ch);
   if (IS_CNTRL (ch) && IS_LOWER (ch + 96)) {
-    ASSERT (snprintf (txt, (size_t) SMALL_BUFFER_SIZE, "\\^%c", ch + 96) >= 0);
+    ASSERT (a68_bufprt (txt, (size_t) SMALL_BUFFER_SIZE, "\\^%c", ch + 96) >= 0);
   } else {
-    ASSERT (snprintf (txt, (size_t) SMALL_BUFFER_SIZE, "\\%02x", (unt) ch) >= 0);
+    ASSERT (a68_bufprt (txt, (size_t) SMALL_BUFFER_SIZE, "\\%02x", (unt) ch) >= 0);
   }
   return txt;
 }
@@ -117,17 +117,17 @@ void pretty_diag (FILE_T f, char *p)
 
 void abend (char *reason, char *info, char *file, int line)
 {
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: exiting: %s: %d: %s", A68 (a68_cmd_name), file, line, reason) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: exiting: %s: %d: %s", A68 (a68_cmd_name), file, line, reason) >= 0);
   if (info != NO_TEXT) {
-    bufcat (A68 (output_line), ", ", BUFFER_SIZE);
-    bufcat (A68 (output_line), info, BUFFER_SIZE);
+    a68_bufcat (A68 (output_line), ", ", BUFFER_SIZE);
+    a68_bufcat (A68 (output_line), info, BUFFER_SIZE);
   }
   if (errno != 0) {
-    bufcat (A68 (output_line), " (", BUFFER_SIZE);
-    bufcat (A68 (output_line), error_specification (), BUFFER_SIZE);
-    bufcat (A68 (output_line), ")", BUFFER_SIZE);
+    a68_bufcat (A68 (output_line), " (", BUFFER_SIZE);
+    a68_bufcat (A68 (output_line), error_specification (), BUFFER_SIZE);
+    a68_bufcat (A68 (output_line), ")", BUFFER_SIZE);
   }
-  bufcat (A68 (output_line), "\n", BUFFER_SIZE);
+  a68_bufcat (A68 (output_line), "\n", BUFFER_SIZE);
   io_close_tty_line ();
   pretty_diag (A68_STDOUT, A68 (output_line));
   a68_exit (EXIT_FAILURE);
@@ -196,9 +196,9 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
     WRITE (f, NEWLINE_STRING);
   }
   if (NUMBER (p) == 0) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "      ") >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "      ") >= 0);
   } else {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%-5d ", NUMBER (p) % 100000) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%-5d ", NUMBER (p) % 100000) >= 0);
   }
   WRITE (f, A68 (output_line));
 // Pretty print line.
@@ -211,17 +211,17 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
     int len = 0;
     char *new_pos = NO_TEXT;
     if (c[0] == NULL_CHAR) {
-      bufcpy (A68 (output_line), "", BUFFER_SIZE);
+      a68_bufcpy (A68 (output_line), "", BUFFER_SIZE);
       line_ended = A68_TRUE;
     } else {
       if (IS_GRAPH (c[0])) {
         char *c1;
-        bufcpy (A68 (output_line), "", BUFFER_SIZE);
+        a68_bufcpy (A68 (output_line), "", BUFFER_SIZE);
         for (c1 = c; IS_GRAPH (c1[0]) && len <= line_width - 5; c1++, len++) {
-          bufcat (A68 (output_line), char_to_str (c1[0]), BUFFER_SIZE);
+          a68_bufcat (A68 (output_line), char_to_str (c1[0]), BUFFER_SIZE);
         }
         if (len > line_width - 5) {
-          bufcpy (A68 (output_line), char_to_str (c[0]), BUFFER_SIZE);
+          a68_bufcpy (A68 (output_line), char_to_str (c[0]), BUFFER_SIZE);
           len = 1;
         }
         new_pos = &c[len];
@@ -230,18 +230,18 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
         int n = TABULATE (col);
         len = n;
         col += n;
-        bufcpy (A68 (output_line), "", BUFFER_SIZE);
+        a68_bufcpy (A68 (output_line), "", BUFFER_SIZE);
         while (n--) {
-          bufcat (A68 (output_line), " ", BUFFER_SIZE);
+          a68_bufcat (A68 (output_line), " ", BUFFER_SIZE);
         }
         new_pos = &c[1];
       } else if (unprintable (c[0])) {
-        bufcpy (A68 (output_line), ctrl_char ((int) c[0]), BUFFER_SIZE);
+        a68_bufcpy (A68 (output_line), ctrl_char ((int) c[0]), BUFFER_SIZE);
         len = (int) strlen (A68 (output_line));
         new_pos = &c[1];
         col++;
       } else {
-        bufcpy (A68 (output_line), char_to_str (c[0]), BUFFER_SIZE);
+        a68_bufcpy (A68 (output_line), char_to_str (c[0]), BUFFER_SIZE);
         len = 1;
         new_pos = &c[1];
         col++;
@@ -282,32 +282,32 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
             }
           }
           if (y == A68_TRUE && c1 == where_pos (p, nwhere)) {
-            bufcpy (A68 (output_line), "-", BUFFER_SIZE);
+            a68_bufcpy (A68 (output_line), "-", BUFFER_SIZE);
           } else if (diags_at_this_pos != 0) {
             if (mask == A68_NO_DIAGNOSTICS) {
-              bufcpy (A68 (output_line), " ", BUFFER_SIZE);
+              a68_bufcpy (A68 (output_line), " ", BUFFER_SIZE);
             } else if (diags_at_this_pos == 1) {
-              ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%c", digchar (k)) >= 0);
+              ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%c", digchar (k)) >= 0);
             } else {
-              bufcpy (A68 (output_line), "*", BUFFER_SIZE);
+              a68_bufcpy (A68 (output_line), "*", BUFFER_SIZE);
             }
           } else {
             if (unprintable (c1[0])) {
               int n = (int) strlen (ctrl_char (c1[0]));
               col_2 += 1;
-              bufcpy (A68 (output_line), "", BUFFER_SIZE);
+              a68_bufcpy (A68 (output_line), "", BUFFER_SIZE);
               while (n--) {
-                bufcat (A68 (output_line), " ", BUFFER_SIZE);
+                a68_bufcat (A68 (output_line), " ", BUFFER_SIZE);
               }
             } else if (c1[0] == TAB_CHAR) {
               int n = TABULATE (col_2);
               col_2 += n;
-              bufcpy (A68 (output_line), "", BUFFER_SIZE);
+              a68_bufcpy (A68 (output_line), "", BUFFER_SIZE);
               while (n--) {
-                bufcat (A68 (output_line), " ", BUFFER_SIZE);
+                a68_bufcat (A68 (output_line), " ", BUFFER_SIZE);
               }
             } else {
-              bufcpy (A68 (output_line), " ", BUFFER_SIZE);
+              a68_bufcpy (A68 (output_line), " ", BUFFER_SIZE);
               col_2++;
             }
           }
@@ -317,7 +317,7 @@ void write_source_line (FILE_T f, LINE_T * p, NODE_T * nwhere, int mask)
 // Resume pretty printing of line.
       if (!line_ended) {
         continuations++;
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n.%1d   ", continuations) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\n.%1d   ", continuations) >= 0);
         WRITE (f, A68 (output_line));
         if (continuations >= 9) {
           WRITE (f, "...");
@@ -432,10 +432,10 @@ void write_diagnostic (int sev, char *b)
   char txt[SMALL_BUFFER_SIZE];
   char *severity = get_severity (sev);
   if (severity == NO_TEXT) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s.", A68 (a68_cmd_name), b) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: %s.", A68 (a68_cmd_name), b) >= 0);
   } else {
-    bufcpy (txt, get_severity (sev), SMALL_BUFFER_SIZE);
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s: %s.", A68 (a68_cmd_name), txt, b) >= 0);
+    a68_bufcpy (txt, get_severity (sev), SMALL_BUFFER_SIZE);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: %s: %s.", A68 (a68_cmd_name), txt, b) >= 0);
   }
   io_close_tty_line ();
   pretty_diag (A68_STDOUT, A68 (output_line));
@@ -480,19 +480,19 @@ void add_diagnostic (LINE_T * line, char *pos, NODE_T * p, int sev, char *b)
       char *nt = non_terminal_string (A68 (edit_line), ATTRIBUTE (n));
       if (nt != NO_TEXT) {
         if (LINE_NUMBER (n) == 0) {
-          ASSERT (snprintf (nst, SNPRINTF_SIZE, ", in %s", nt) >= 0);
+          ASSERT (a68_bufprt (nst, SNPRINTF_SIZE, ", in %s", nt) >= 0);
         } else {
           if (MOID (n) != NO_MOID) {
             if (LINE_NUMBER (n) == NUMBER (line)) {
-              ASSERT (snprintf (nst, SNPRINTF_SIZE, ", in %s %s starting at \"%.64s\" in this line", moid_to_string (MOID (n), MOID_ERROR_WIDTH, p), nt, NSYMBOL (n)) >= 0);
+              ASSERT (a68_bufprt (nst, SNPRINTF_SIZE, ", in %s %s starting at \"%.64s\" in this line", moid_to_string (MOID (n), MOID_ERROR_WIDTH, p), nt, NSYMBOL (n)) >= 0);
             } else {
-              ASSERT (snprintf (nst, SNPRINTF_SIZE, ", in %s %s starting at \"%.64s\" in line %d", moid_to_string (MOID (n), MOID_ERROR_WIDTH, p), nt, NSYMBOL (n), LINE_NUMBER (n)) >= 0);
+              ASSERT (a68_bufprt (nst, SNPRINTF_SIZE, ", in %s %s starting at \"%.64s\" in line %d", moid_to_string (MOID (n), MOID_ERROR_WIDTH, p), nt, NSYMBOL (n), LINE_NUMBER (n)) >= 0);
             }
           } else {
             if (LINE_NUMBER (n) == NUMBER (line)) {
-              ASSERT (snprintf (nst, SNPRINTF_SIZE, ", in %s starting at \"%.64s\" in this line", nt, NSYMBOL (n)) >= 0);
+              ASSERT (a68_bufprt (nst, SNPRINTF_SIZE, ", in %s starting at \"%.64s\" in this line", nt, NSYMBOL (n)) >= 0);
             } else {
-              ASSERT (snprintf (nst, SNPRINTF_SIZE, ", in %s starting at \"%.64s\" in line %d", nt, NSYMBOL (n), LINE_NUMBER (n)) >= 0);
+              ASSERT (a68_bufprt (nst, SNPRINTF_SIZE, ", in %s starting at \"%.64s\" in line %d", nt, NSYMBOL (n), LINE_NUMBER (n)) >= 0);
             }
           }
         }
@@ -501,29 +501,29 @@ void add_diagnostic (LINE_T * line, char *pos, NODE_T * p, int sev, char *b)
   }
   if (severity == NO_TEXT) {
     if (FILENAME (line) != NO_TEXT && strcmp (FILE_SOURCE_NAME (&A68_JOB), FILENAME (line)) == 0) {
-      ASSERT (snprintf (a, SNPRINTF_SIZE, "%s: %x: %s", A68 (a68_cmd_name), (unt) k, b) >= 0);
+      ASSERT (a68_bufprt (a, SNPRINTF_SIZE, "%s: %x: %s", A68 (a68_cmd_name), (unt) k, b) >= 0);
     } else if (FILENAME (line) != NO_TEXT) {
-      ASSERT (snprintf (a, SNPRINTF_SIZE, "%s: %s: %x: %s", A68 (a68_cmd_name), FILENAME (line), (unt) k, b) >= 0);
+      ASSERT (a68_bufprt (a, SNPRINTF_SIZE, "%s: %s: %x: %s", A68 (a68_cmd_name), FILENAME (line), (unt) k, b) >= 0);
     } else {
-      ASSERT (snprintf (a, SNPRINTF_SIZE, "%s: %x: %s", A68 (a68_cmd_name), (unt) k, b) >= 0);
+      ASSERT (a68_bufprt (a, SNPRINTF_SIZE, "%s: %x: %s", A68 (a68_cmd_name), (unt) k, b) >= 0);
     }
   } else {
-    bufcpy (st, get_severity (sev), SMALL_BUFFER_SIZE);
+    a68_bufcpy (st, get_severity (sev), SMALL_BUFFER_SIZE);
     if (FILENAME (line) != NO_TEXT && strcmp (FILE_SOURCE_NAME (&A68_JOB), FILENAME (line)) == 0) {
-      ASSERT (snprintf (a, SNPRINTF_SIZE, "%s: %s: %x: %s", A68 (a68_cmd_name), st, (unt) k, b) >= 0);
+      ASSERT (a68_bufprt (a, SNPRINTF_SIZE, "%s: %s: %x: %s", A68 (a68_cmd_name), st, (unt) k, b) >= 0);
     } else if (FILENAME (line) != NO_TEXT) {
-      ASSERT (snprintf (a, SNPRINTF_SIZE, "%s: %s: %s: %x: %s", A68 (a68_cmd_name), FILENAME (line), st, (unt) k, b) >= 0);
+      ASSERT (a68_bufprt (a, SNPRINTF_SIZE, "%s: %s: %s: %x: %s", A68 (a68_cmd_name), FILENAME (line), st, (unt) k, b) >= 0);
     } else {
-      ASSERT (snprintf (a, SNPRINTF_SIZE, "%s: %s: %x: %s", A68 (a68_cmd_name), st, (unt) k, b) >= 0);
+      ASSERT (a68_bufprt (a, SNPRINTF_SIZE, "%s: %s: %x: %s", A68 (a68_cmd_name), st, (unt) k, b) >= 0);
     }
   }
 // cppcheck might complain here but this memory is not returned, for obvious reasons.
   *ref_msg = msg;
   ATTRIBUTE (msg) = sev;
   if (nst[0] != NULL_CHAR) {
-    bufcat (a, nst, BUFFER_SIZE);
+    a68_bufcat (a, nst, BUFFER_SIZE);
   }
-  bufcat (a, ".", BUFFER_SIZE);
+  a68_bufcat (a, ".", BUFFER_SIZE);
   TEXT (msg) = new_string (a, NO_TEXT);
   WHERE (msg) = p;
   LINE (msg) = line;
@@ -539,9 +539,8 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
   va_list args;
   MOID_T *moid = NO_MOID;
   char *t = loc_str, b[BUFFER_SIZE];
-  BOOL_T force, extra_syntax = A68_TRUE, compose = A68_TRUE, issue = A68_TRUE;
+  BOOL_T force, compose = A68_TRUE, issue = A68_TRUE;
   va_start (args, loc_str);
-  (void) extra_syntax;
   b[0] = NULL_CHAR;
   force = (BOOL_T) ((sev & A68_FORCE_DIAGNOSTICS) != 0);
   sev &= ~A68_FORCE_DIAGNOSTICS;
@@ -572,7 +571,7 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
 // Suppressed?.
   if (sev == A68_ERROR || sev == A68_SYNTAX_ERROR) {
     if (ERROR_COUNT (&A68_JOB) == MAX_ERRORS) {
-      bufcpy (b, "further diagnostics suppressed", BUFFER_SIZE);
+      a68_bufcpy (b, "further diagnostics suppressed", BUFFER_SIZE);
       compose = A68_FALSE;
       sev = A68_ERROR;
     } else if (ERROR_COUNT (&A68_JOB) > MAX_ERRORS) {
@@ -581,7 +580,7 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
     }
   } else if (sev == A68_WARNING || sev == A68_MATH_WARNING) {
     if (WARNING_COUNT (&A68_JOB) == MAX_ERRORS) {
-      bufcpy (b, "further diagnostics suppressed", BUFFER_SIZE);
+      a68_bufcpy (b, "further diagnostics suppressed", BUFFER_SIZE);
       compose = A68_FALSE;
     } else if (WARNING_COUNT (&A68_JOB) > MAX_ERRORS) {
       WARNING_COUNT (&A68_JOB)++;
@@ -592,7 +591,7 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
 // Synthesize diagnostic message.
     if ((sev & A68_NO_SYNTHESIS) != NULL_MASK) {
       sev &= ~A68_NO_SYNTHESIS;
-      bufcat (b, t, BUFFER_SIZE);
+      a68_bufcat (b, t, BUFFER_SIZE);
     } else {
 // Legend for special symbols:
 // * as first character, copy rest of string literally
@@ -613,78 +612,82 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
 // Y string literal. 
 // Z quoted string literal. 
       if (t[0] == '*') {
-        bufcat (b, &t[1], BUFFER_SIZE);
+        a68_bufcat (b, &t[1], BUFFER_SIZE);
       } else
         while (t[0] != NULL_CHAR) {
           if (t[0] == '#') {
-            extra_syntax = A68_FALSE;
+            ;
           } else if (t[0] == '@') {
-            char *nt = non_terminal_string (A68 (edit_line), ATTRIBUTE (p));
-            if (t != NO_TEXT) {
-              bufcat (b, nt, BUFFER_SIZE);
+            if (p == NO_NODE) {
+              a68_bufcat (b, "construct", BUFFER_SIZE);
             } else {
-              bufcat (b, "construct", BUFFER_SIZE);
+              char *nt = non_terminal_string (A68 (edit_line), ATTRIBUTE (p));
+              if (t != NO_TEXT) {
+                a68_bufcat (b, nt, BUFFER_SIZE);
+              } else {
+                a68_bufcat (b, "construct", BUFFER_SIZE);
+              }
             }
           } else if (t[0] == 'A') {
             int att = va_arg (args, int);
             char *nt = non_terminal_string (A68 (edit_line), att);
             if (nt != NO_TEXT) {
-              bufcat (b, nt, BUFFER_SIZE);
+              a68_bufcat (b, nt, BUFFER_SIZE);
             } else {
-              bufcat (b, "construct", BUFFER_SIZE);
+              a68_bufcat (b, "construct", BUFFER_SIZE);
             }
           } else if (t[0] == 'B') {
             int att = va_arg (args, int);
             KEYWORD_T *nt = find_keyword_from_attribute (A68 (top_keyword), att);
             if (nt != NO_KEYWORD) {
-              bufcat (b, "\"", BUFFER_SIZE);
-              bufcat (b, TEXT (nt), BUFFER_SIZE);
-              bufcat (b, "\"", BUFFER_SIZE);
+              a68_bufcat (b, "\"", BUFFER_SIZE);
+              a68_bufcat (b, TEXT (nt), BUFFER_SIZE);
+              a68_bufcat (b, "\"", BUFFER_SIZE);
             } else {
-              bufcat (b, "keyword", BUFFER_SIZE);
+              a68_bufcat (b, "keyword", BUFFER_SIZE);
             }
           } else if (t[0] == 'C') {
             int att = va_arg (args, int);
             if (att == NO_SORT) {
-              bufcat (b, "this", BUFFER_SIZE);
+              a68_bufcat (b, "this", BUFFER_SIZE);
             }
             if (att == SOFT) {
-              bufcat (b, "a soft", BUFFER_SIZE);
+              a68_bufcat (b, "a soft", BUFFER_SIZE);
             } else if (att == WEAK) {
-              bufcat (b, "a weak", BUFFER_SIZE);
+              a68_bufcat (b, "a weak", BUFFER_SIZE);
             } else if (att == MEEK) {
-              bufcat (b, "a meek", BUFFER_SIZE);
+              a68_bufcat (b, "a meek", BUFFER_SIZE);
             } else if (att == FIRM) {
-              bufcat (b, "a firm", BUFFER_SIZE);
+              a68_bufcat (b, "a firm", BUFFER_SIZE);
             } else if (att == STRONG) {
-              bufcat (b, "a strong", BUFFER_SIZE);
+              a68_bufcat (b, "a strong", BUFFER_SIZE);
             }
           } else if (t[0] == 'D') {
             int a = va_arg (args, int);
             BUFFER d;
             BUFCLR (d);
-            ASSERT (snprintf (d, SNPRINTF_SIZE, "%d", a) >= 0);
-            bufcat (b, d, BUFFER_SIZE);
+            ASSERT (a68_bufprt (d, SNPRINTF_SIZE, "%d", a) >= 0);
+            a68_bufcat (b, d, BUFFER_SIZE);
           } else if (t[0] == 'H') {
             char *a = va_arg (args, char *);
             char d[SMALL_BUFFER_SIZE];
-            ASSERT (snprintf (d, (size_t) SMALL_BUFFER_SIZE, "\"%c\"", a[0]) >= 0);
-            bufcat (b, d, BUFFER_SIZE);
+            ASSERT (a68_bufprt (d, (size_t) SMALL_BUFFER_SIZE, "\"%c\"", a[0]) >= 0);
+            a68_bufcat (b, d, BUFFER_SIZE);
           } else if (t[0] == 'K') {
-            bufcat (b, "LONG", BUFFER_SIZE);
+            a68_bufcat (b, "LONG", BUFFER_SIZE);
           } else if (t[0] == 'L') {
             LINE_T *a = va_arg (args, LINE_T *);
             char d[SMALL_BUFFER_SIZE];
             ABEND (a == NO_LINE, ERROR_INTERNAL_CONSISTENCY, __func__);
             if (NUMBER (a) == 0) {
-              bufcat (b, "in standard environment", BUFFER_SIZE);
+              a68_bufcat (b, "in standard environment", BUFFER_SIZE);
             } else {
               if (p != NO_NODE && NUMBER (a) == LINE_NUMBER (p)) {
-                ASSERT (snprintf (d, (size_t) SMALL_BUFFER_SIZE, "in this line") >= 0);
+                ASSERT (a68_bufprt (d, (size_t) SMALL_BUFFER_SIZE, "in this line") >= 0);
               } else {
-                ASSERT (snprintf (d, (size_t) SMALL_BUFFER_SIZE, "in line %d", NUMBER (a)) >= 0);
+                ASSERT (a68_bufprt (d, (size_t) SMALL_BUFFER_SIZE, "in line %d", NUMBER (a)) >= 0);
               }
-              bufcat (b, d, BUFFER_SIZE);
+              a68_bufcat (b, d, BUFFER_SIZE);
             }
           } else if (t[0] == 'M') {
             moid = va_arg (args, MOID_T *);
@@ -693,18 +696,18 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
             }
             if (IS (moid, SERIES_MODE)) {
               if (PACK (moid) != NO_PACK && NEXT (PACK (moid)) == NO_PACK) {
-                bufcat (b, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+                a68_bufcat (b, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH, p), BUFFER_SIZE);
               } else {
-                bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+                a68_bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
               }
             } else {
-              bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+              a68_bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
             }
           } else if (t[0] == 'N') {
-            bufcat (b, "NIL name of mode ", BUFFER_SIZE);
+            a68_bufcat (b, "NIL name of mode ", BUFFER_SIZE);
             moid = va_arg (args, MOID_T *);
             if (moid != NO_MOID) {
-              bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+              a68_bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
             }
           } else if (t[0] == 'O') {
             moid = va_arg (args, MOID_T *);
@@ -712,31 +715,31 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
               moid = M_UNDEFINED;
             }
             if (moid == M_VOID) {
-              bufcat (b, "UNION (VOID, ..)", BUFFER_SIZE);
+              a68_bufcat (b, "UNION (VOID, ..)", BUFFER_SIZE);
             } else if (IS (moid, SERIES_MODE)) {
               if (PACK (moid) != NO_PACK && NEXT (PACK (moid)) == NO_PACK) {
-                bufcat (b, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+                a68_bufcat (b, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH, p), BUFFER_SIZE);
               } else {
-                bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+                a68_bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
               }
             } else {
-              bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
+              a68_bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH, p), BUFFER_SIZE);
             }
           } else if (t[0] == 'S') {
             if (p != NO_NODE && NSYMBOL (p) != NO_TEXT) {
               char *txt = NSYMBOL (p);
               char *sym = NCHAR_IN_LINE (p);
               int n = 0, size = (int) strlen (txt);
-              bufcat (b, "\"", BUFFER_SIZE);
+              a68_bufcat (b, "\"", BUFFER_SIZE);
               if (txt[0] != sym[0] || (int) strlen (sym) < size) {
-                bufcat (b, txt, BUFFER_SIZE);
+                a68_bufcat (b, txt, BUFFER_SIZE);
               } else {
                 while (n < size) {
                   if (IS_PRINT (sym[0])) {
                     char str[2];
                     str[0] = sym[0];
                     str[1] = NULL_CHAR;
-                    bufcat (b, str, BUFFER_SIZE);
+                    a68_bufcat (b, str, BUFFER_SIZE);
                   }
                   if (TO_LOWER (txt[0]) == TO_LOWER (sym[0])) {
                     txt++;
@@ -745,30 +748,30 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
                   sym++;
                 }
               }
-              bufcat (b, "\"", BUFFER_SIZE);
+              a68_bufcat (b, "\"", BUFFER_SIZE);
             } else {
-              bufcat (b, "symbol", BUFFER_SIZE);
+              a68_bufcat (b, "symbol", BUFFER_SIZE);
             }
           } else if (t[0] == 'V') {
-            bufcat (b, PACKAGE_STRING, BUFFER_SIZE);
+            a68_bufcat (b, PACKAGE_STRING, BUFFER_SIZE);
           } else if (t[0] == 'X') {
             int att = va_arg (args, int);
             BUFFER z;
             (void) non_terminal_string (z, att);
-            bufcat (b, new_string (z, NO_TEXT), BUFFER_SIZE);
+            a68_bufcat (b, new_string (z, NO_TEXT), BUFFER_SIZE);
           } else if (t[0] == 'Y') {
             char *loc_string = va_arg (args, char *);
-            bufcat (b, loc_string, BUFFER_SIZE);
+            a68_bufcat (b, loc_string, BUFFER_SIZE);
           } else if (t[0] == 'Z') {
             char *loc_string = va_arg (args, char *);
-            bufcat (b, "\"", BUFFER_SIZE);
-            bufcat (b, loc_string, BUFFER_SIZE);
-            bufcat (b, "\"", BUFFER_SIZE);
+            a68_bufcat (b, "\"", BUFFER_SIZE);
+            a68_bufcat (b, loc_string, BUFFER_SIZE);
+            a68_bufcat (b, "\"", BUFFER_SIZE);
           } else {
             char q[2];
             q[0] = t[0];
             q[1] = NULL_CHAR;
-            bufcat (b, q, BUFFER_SIZE);
+            a68_bufcat (b, q, BUFFER_SIZE);
           }
           t++;
         }
@@ -777,11 +780,11 @@ void diagnostic (STATUS_MASK_T sev, NODE_T * p, char *loc_str, ...)
         char *loc_str2 = new_string (error_specification (), NO_TEXT);
         if (loc_str2 != NO_TEXT) {
           char *stu;
-          bufcat (b, ", ", BUFFER_SIZE);
+          a68_bufcat (b, ", ", BUFFER_SIZE);
           for (stu = loc_str2; stu[0] != NULL_CHAR; stu++) {
             stu[0] = (char) TO_LOWER (stu[0]);
           }
-          bufcat (b, loc_str2, BUFFER_SIZE);
+          a68_bufcat (b, loc_str2, BUFFER_SIZE);
         }
       }
     }

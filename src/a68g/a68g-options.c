@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -66,7 +66,7 @@ void read_rc_options (void)
   BUFFER name, new_name;
   BUFCLR (name);
   BUFCLR (new_name);
-  ASSERT (snprintf (name, SNPRINTF_SIZE, ".%src", A68 (a68_cmd_name)) >= 0);
+  ASSERT (a68_bufprt (name, SNPRINTF_SIZE, ".%src", A68 (a68_cmd_name)) >= 0);
   FILE *f = a68_fopen (name, "r", new_name);
   if (f != NO_FILE) {
     while (!feof (f)) {
@@ -99,7 +99,7 @@ void read_env_options (void)
 
 void isolate_options (char *p, LINE_T * line)
 {
-  while (p[0] != NULL_CHAR) {
+  while (p != NO_TEXT && p[0] != NULL_CHAR) {
 // Skip white space etc.
     while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',' || p[0] == NEWLINE_CHAR) && p[0] != NULL_CHAR) {
       p++;
@@ -193,11 +193,11 @@ void default_options (MODULE_T * p)
 
 void option_error (LINE_T * l, char *option, char *info)
 {
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", option) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", option) >= 0);
   if (info != NO_TEXT) {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "*error: %s option \"%s\"", info, A68 (output_line)) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "*error: %s option \"%s\"", info, A68 (output_line)) >= 0);
   } else {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "*error: in option \"%s\"", A68 (output_line)) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "*error: in option \"%s\"", A68 (output_line)) >= 0);
   }
   scan_error (l, NO_TEXT, A68 (edit_line));
 }
@@ -272,7 +272,7 @@ void prune_echoes (OPTION_LIST_T * i)
           char *car = strchr (p, '=');
           if (car != NO_TEXT) {
             io_close_tty_line ();
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", &car[1]) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", &car[1]) >= 0);
             WRITE (A68_STDOUT, A68 (output_line));
           } else {
             FORWARD (i);
@@ -282,7 +282,7 @@ void prune_echoes (OPTION_LIST_T * i)
               }
               if (i != NO_OPTION_LIST) {
                 io_close_tty_line ();
-                ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s", STR (i)) >= 0);
+                ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s", STR (i)) >= 0);
                 WRITE (A68_STDOUT, A68 (output_line));
               }
             }
@@ -310,7 +310,7 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   if (car == NO_TEXT) {
     FORWARD (*i);
     *error = (BOOL_T) (*i == NO_OPTION_LIST);
-    if (!error && strcmp (STR (*i), "=") == 0) {
+    if (!*error && strcmp (STR (*i), "=") == 0) {
       FORWARD (*i);
       *error = (BOOL_T) (*i == NO_OPTION_LIST);
     }
@@ -385,34 +385,34 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 static void tech_stuff (void)
 {
   state_version (A68_STDOUT);
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REF) = %u", (unt) sizeof (A68_REF)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REF) = %u", (unt) sizeof (A68_REF)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_PROCEDURE) = %u", (unt) sizeof (A68_PROCEDURE)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_PROCEDURE) = %u", (unt) sizeof (A68_PROCEDURE)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
 #if (A68_LEVEL >= 3)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_T) = %u", (unt) sizeof (DOUBLE_T)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_T) = %u", (unt) sizeof (DOUBLE_T)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_NUM_T) = %u", (unt) sizeof (DOUBLE_NUM_T)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (DOUBLE_NUM_T) = %u", (unt) sizeof (DOUBLE_NUM_T)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
 #endif
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_INT) = %u", (unt) sizeof (A68_INT)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_INT) = %u", (unt) sizeof (A68_INT)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REAL) = %u", (unt) sizeof (A68_REAL)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_REAL) = %u", (unt) sizeof (A68_REAL)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BOOL) = %u", (unt) sizeof (A68_BOOL)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BOOL) = %u", (unt) sizeof (A68_BOOL)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_CHAR) = %u", (unt) sizeof (A68_CHAR)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_CHAR) = %u", (unt) sizeof (A68_CHAR)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BITS) = %u", (unt) sizeof (A68_BITS)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_BITS) = %u", (unt) sizeof (A68_BITS)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
 #if (A68_LEVEL >= 3)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) sizeof (A68_LONG_REAL)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) sizeof (A68_LONG_REAL)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
 #else
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) size_mp ()) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_REAL) = %u", (unt) size_mp ()) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
 #endif
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_LONG_REAL) = %u", (unt) size_long_mp ()) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "sizeof (A68_LONG_LONG_REAL) = %u", (unt) size_long_mp ()) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
   WRITELN (A68_STDOUT, "");
   exit (EXIT_SUCCESS);
@@ -647,7 +647,7 @@ BOOL_T set_options (OPTION_LIST_T *i, BOOL_T cmd_line)
             FORWARD (i);
           }
           if (i != NO_OPTION_LIST) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s verification \"%s\" does not match script verification \"%s\"", A68 (a68_cmd_name), PACKAGE_STRING, STR (i)) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s verification \"%s\" does not match script verification \"%s\"", A68 (a68_cmd_name), PACKAGE_STRING, STR (i)) >= 0);
             ABEND (strcmp (PACKAGE_STRING, STR (i)) != 0, new_string (A68 (output_line), __func__), "outdated script");
           } else {
             option_error (start_l, start_c, "missing argument in");
@@ -689,8 +689,8 @@ BOOL_T set_options (OPTION_LIST_T *i, BOOL_T cmd_line)
             if (!error) {
               BUFFER name, new_name;
               int s_errno = errno;
-              bufcpy (name, HIDDEN_TEMP_FILE_NAME, BUFFER_SIZE);
-              bufcat (name, ".a68", BUFFER_SIZE);
+              a68_bufcpy (name, HIDDEN_TEMP_FILE_NAME, BUFFER_SIZE);
+              a68_bufcat (name, ".a68", BUFFER_SIZE);
               FILE *f = a68_fopen (name, "w", new_name);
               ABEND (f == NO_FILE, ERROR_ACTION, __func__);
               errno = s_errno;

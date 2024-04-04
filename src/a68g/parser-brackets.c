@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -37,11 +37,11 @@ void bracket_check_error (char *txt, int n, char *bra, char *ket)
   if (n != 0) {
     BUFFER buf;
     BUFCLR (buf);
-    ASSERT (snprintf (buf, SNPRINTF_SIZE, "\"%s\" without matching \"%s\"", (n > 0 ? bra : ket), (n > 0 ? ket : bra)) >= 0);
+    ASSERT (a68_bufprt (buf, SNPRINTF_SIZE, "\"%s\" without matching \"%s\"", (n > 0 ? bra : ket), (n > 0 ? ket : bra)) >= 0);
     if (strlen (txt) > 0) {
-      bufcat (txt, " or ", BUFFER_SIZE);
+      a68_bufcat (txt, " or ", BUFFER_SIZE);
     }
-    bufcat (txt, buf, BUFFER_SIZE);
+    a68_bufcat (txt, buf, BUFFER_SIZE);
   }
 }
 

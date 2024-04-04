@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -64,7 +64,7 @@ void inline_arguments (NODE_T * p, FILE_T out, int phase, int *size)
   if (p == NO_NODE) {
     return;
   } else if (IS (p, UNIT) && phase == L_PUSH) {
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GENIE_UNIT_TRACE (_NODE_ (%d));\n", NUMBER (p)));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GENIE_UNIT_TRACE (_NODE_ (%d));\n", NUMBER (p)));
     inline_arguments (NEXT (p), out, L_PUSH, size);
   } else if (IS (p, UNIT)) {
     char arg[NAME_SIZE];
@@ -75,17 +75,17 @@ void inline_arguments (NODE_T * p, FILE_T out, int phase, int *size)
     } else if (phase == L_INITIALISE) {
       inline_unit (p, out, L_EXECUTE);
     } else if (phase == L_EXECUTE) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) FRAME_OBJECT (%d);\n", arg, inline_mode (MOID (p)), *size));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) FRAME_OBJECT (%d);\n", arg, inline_mode (MOID (p)), *size));
       (*size) += SIZE (MOID (p));
     } else if (phase == L_YIELD && primitive_mode (MOID (p))) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_STATUS_ (%s) = INIT_MASK;\n", arg));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s) = ", arg));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_STATUS_ (%s) = INIT_MASK;\n", arg));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s) = ", arg));
       inline_unit (p, out, L_YIELD);
       undent (out, ";\n");
     } else if (phase == L_YIELD && basic_mode (MOID (p))) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "MOVE ((void *) %s, (void *) ", arg));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "MOVE ((void *) %s, (void *) ", arg));
       inline_unit (p, out, L_YIELD);
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", %d);\n", SIZE (MOID (p))));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ", %d);\n", SIZE (MOID (p))));
     }
   } else {
     inline_arguments (SUB (p), out, phase, size);
@@ -105,7 +105,7 @@ void inline_denotation (NODE_T * p, FILE_T out, int phase)
       if (genie_string_to_value_internal (p, M_INT, den, (BYTE_T *) & z) == A68_FALSE) {
         diagnostic (A68_SYNTAX_ERROR, p, ERROR_IN_DENOTATION, M_INT);
       }
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, A68_LD, VALUE (&z)));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, A68_LD, VALUE (&z)));
     } else if (MOID (p) == M_REAL) {
       NODE_T *s = IS (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
       char *den = NSYMBOL (s);
@@ -114,22 +114,22 @@ void inline_denotation (NODE_T * p, FILE_T out, int phase)
         diagnostic (A68_SYNTAX_ERROR, p, ERROR_IN_DENOTATION, M_REAL);
       }
       if (strchr (den, '.') == NO_TEXT && strchr (den, 'e') == NO_TEXT && strchr (den, 'E') == NO_TEXT) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(REAL_T) %s", den));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(REAL_T) %s", den));
       } else {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", den));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", den));
       }
     } else if (MOID (p) == M_BOOL) {
       undent (out, "(BOOL_T) A68_");
       undent (out, NSYMBOL (p));
     } else if (MOID (p) == M_CHAR) {
       if (NSYMBOL (p)[0] == '\'') {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "'\\''"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "'\\''"));
       } else if (NSYMBOL (p)[0] == NULL_CHAR) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "NULL_CHAR"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "NULL_CHAR"));
       } else if (NSYMBOL (p)[0] == '\\') {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "'\\\\'"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "'\\\\'"));
       } else {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "'%c'", (NSYMBOL (p))[0]));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "'%c'", (NSYMBOL (p))[0]));
       }
     } else if (MOID (p) == M_BITS) {
       A68_BITS z;
@@ -137,7 +137,7 @@ void inline_denotation (NODE_T * p, FILE_T out, int phase)
       if (genie_string_to_value_internal (p, M_BITS, NSYMBOL (s), (BYTE_T *) & z) == A68_FALSE) {
         diagnostic (A68_SYNTAX_ERROR, p, ERROR_IN_DENOTATION, M_BITS);
       }
-      ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "(UNSIGNED_T) 0x" A68_LX, VALUE (&z)) >= 0);
+      ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(UNSIGNED_T) 0x" A68_LX, VALUE (&z)) >= 0);
       undent (out, A68 (edit_line));
     }
   }
@@ -165,14 +165,14 @@ void inline_widening (NODE_T * p, FILE_T out, int phase)
       inline_unit (SUB (p), out, L_DECLARE);
     } else if (phase == L_EXECUTE) {
       inline_unit (SUB (p), out, L_EXECUTE);
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "STATUS_RE (%s) = INIT_MASK;\n", acc));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "STATUS_IM (%s) = INIT_MASK;\n", acc));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "RE (%s) = (REAL_T) (", acc));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "STATUS_RE (%s) = INIT_MASK;\n", acc));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "STATUS_IM (%s) = INIT_MASK;\n", acc));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "RE (%s) = (REAL_T) (", acc));
       inline_unit (SUB (p), out, L_YIELD);
       undent (out, ");\n");
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "IM (%s) = 0.0;\n", acc));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "IM (%s) = 0.0;\n", acc));
     } else if (phase == L_YIELD) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) %s", acc));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) %s", acc));
     }
   }
 }
@@ -201,12 +201,12 @@ void inline_dereference_identifier (NODE_T * p, FILE_T out, int phase)
       (void) make_name (idf, NSYMBOL (q), "", NUMBER (p));
       inline_unit (SUB (p), out, L_EXECUTE);
       if (BODY (TAX (q)) != NO_TAG) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) LOCAL_ADDRESS (", idf, inline_mode (MOID (p))));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) LOCAL_ADDRESS (", idf, inline_mode (MOID (p))));
         sign_in (BOOK_DEREF, L_EXECUTE, NSYMBOL (p), NULL, NUMBER (p));
         inline_unit (SUB (p), out, L_YIELD);
         undent (out, ");\n");
       } else {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, ", idf, inline_mode (MOID (p))));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, ", idf, inline_mode (MOID (p))));
         sign_in (BOOK_DEREF, L_EXECUTE, NSYMBOL (p), NULL, NUMBER (p));
         inline_unit (SUB (p), out, L_YIELD);
         undent (out, ");\n");
@@ -221,9 +221,9 @@ void inline_dereference_identifier (NODE_T * p, FILE_T out, int phase)
       (void) make_name (idf, NSYMBOL (q), "", NUMBER (p));
     }
     if (primitive_mode (MOID (p))) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", idf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", idf));
     } else if (MOID (p) == M_COMPLEX) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", idf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", idf));
     } else if (basic_mode (MOID (p))) {
       undent (out, idf);
     }
@@ -284,9 +284,9 @@ void inline_identifier (NODE_T * p, FILE_T out, int phase)
         (void) make_name (idf, NSYMBOL (p), "", NUMBER (p));
       }
       if (primitive_mode (MOID (p))) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", idf));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", idf));
       } else if (MOID (p) == M_COMPLEX) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", idf));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", idf));
       } else if (basic_mode (MOID (p))) {
         undent (out, idf);
       }
@@ -305,12 +305,12 @@ void inline_indexer (NODE_T * p, FILE_T out, int phase, INT_T * k, char *tup)
       inline_unit (p, out, phase);
     } else {
       if ((*k) == 0) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(SPAN (&%s[" A68_LD "]) * (", tup, (*k)));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(SPAN (&%s[" A68_LD "]) * (", tup, (*k)));
       } else {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, " + (SPAN (&%s[" A68_LD "]) * (", tup, (*k)));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, " + (SPAN (&%s[" A68_LD "]) * (", tup, (*k)));
       }
       inline_unit (p, out, L_YIELD);
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ") - SHIFT (&%s[" A68_LD "]))", tup, (*k)));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ") - SHIFT (&%s[" A68_LD "]))", tup, (*k)));
     }
     (*k)++;
   } else {
@@ -362,7 +362,7 @@ void inline_dereference_slice (NODE_T * p, FILE_T out, int phase)
       (void) make_name (drf, DRF, "", NUMBER (prim));
       get_stack (pidf, out, idf, "A68_REF");
       if (IS (row_mode, REF_SYMBOL) && IS (SUB (row_mode), ROW_SYMBOL)) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, DEREF (A68_ROW, %s));\n", arr, tup, idf));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, DEREF (A68_ROW, %s));\n", arr, tup, idf));
       } else {
         ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
       }
@@ -375,14 +375,14 @@ void inline_dereference_slice (NODE_T * p, FILE_T out, int phase)
     } else {
       return;
     }
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
     INT_T k = 0;
     inline_indexer (indx, out, L_EXECUTE, &k, NO_TEXT);
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
     k = 0;
     inline_indexer (indx, out, L_YIELD, &k, tup);
-    undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, & %s);\n", drf, inline_mode (mode), elm));
+    undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, & %s);\n", drf, inline_mode (mode), elm));
   } else if (phase == L_YIELD) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, symbol);
     if (entry != NO_BOOK && same_tree (indx, (NODE_T *) (INFO (entry))) == A68_TRUE) {
@@ -391,9 +391,9 @@ void inline_dereference_slice (NODE_T * p, FILE_T out, int phase)
       (void) make_name (drf, DRF, "", NUMBER (prim));
     }
     if (primitive_mode (mode)) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", drf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", drf));
     } else if (mode == M_COMPLEX) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", drf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", drf));
     } else if (basic_mode (mode)) {
       undent (out, drf);
     } else {
@@ -445,7 +445,7 @@ void inline_slice_ref_to_ref (NODE_T * p, FILE_T out, int phase)
       (void) make_name (drf, DRF, "", NUMBER (prim));
       get_stack (pidf, out, idf, "A68_REF");
       if (IS (row_mode, REF_SYMBOL) && IS (SUB (row_mode), ROW_SYMBOL)) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, DEREF (A68_ROW, %s));\n", arr, tup, idf));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, DEREF (A68_ROW, %s));\n", arr, tup, idf));
       } else {
         ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
       }
@@ -458,14 +458,14 @@ void inline_slice_ref_to_ref (NODE_T * p, FILE_T out, int phase)
     } else {
       return;
     }
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
     INT_T k = 0;
     inline_indexer (indx, out, L_EXECUTE, &k, NO_TEXT);
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
     k = 0;
     inline_indexer (indx, out, L_YIELD, &k, tup);
-    undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, & %s);\n", drf, inline_mode (mode), elm));
+    undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, & %s);\n", drf, inline_mode (mode), elm));
   } else if (phase == L_YIELD) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, symbol);
     if (entry != NO_BOOK && same_tree (indx, (NODE_T *) (INFO (entry))) == A68_TRUE) {
@@ -473,7 +473,7 @@ void inline_slice_ref_to_ref (NODE_T * p, FILE_T out, int phase)
     } else {
       (void) make_name (elm, ELM, "", NUMBER (prim));
     }
-    undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(&%s)", elm));
+    undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(&%s)", elm));
   }
 }
 
@@ -495,12 +495,12 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
       (void) make_name (tup, TUP, "", NUMBER (prim));
       (void) make_name (elm, ELM, "", NUMBER (prim));
       (void) make_name (drf, DRF, "", NUMBER (prim));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_REF * %s, %s; %s * %s; A68_ARRAY * %s; A68_TUPLE * %s;\n", idf, elm, inline_mode (mode), drf, arr, tup));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "A68_REF * %s, %s; %s * %s; A68_ARRAY * %s; A68_TUPLE * %s;\n", idf, elm, inline_mode (mode), drf, arr, tup));
       sign_in (BOOK_DECL, L_DECLARE, symbol, (void *) indx, NUMBER (prim));
     } else if (same_tree (indx, (NODE_T *) (INFO (entry))) == A68_FALSE) {
       (void) make_name (elm, ELM, "", NUMBER (prim));
       (void) make_name (drf, DRF, "", NUMBER (prim));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_REF %s; %s * %s;\n", elm, inline_mode (mode), drf));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "A68_REF %s; %s * %s;\n", elm, inline_mode (mode), drf));
     }
     INT_T k = 0;
     inline_indexer (indx, out, L_DECLARE, &k, NO_TEXT);
@@ -515,9 +515,9 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
       (void) make_name (drf, DRF, "", NUMBER (prim));
       get_stack (pidf, out, idf, "A68_REF");
       if (IS (row_mode, REF_SYMBOL)) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, DEREF (A68_ROW, %s));\n", arr, tup, idf));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, DEREF (A68_ROW, %s));\n", arr, tup, idf));
       } else {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, (A68_ROW *) %s);\n", arr, tup, idf));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_DESCRIPTOR (%s, %s, (A68_ROW *) %s);\n", arr, tup, idf));
       }
       sign_in (BOOK_DECL, L_EXECUTE, NSYMBOL (p), (void *) indx, NUMBER (prim));
     } else if (same_tree (indx, (NODE_T *) (INFO (entry))) == A68_FALSE) {
@@ -528,14 +528,14 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
     } else {
       return;
     }
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = ARRAY (%s);\n", elm, arr));
     INT_T k = 0;
     inline_indexer (indx, out, L_EXECUTE, &k, NO_TEXT);
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (& %s) += ROW_ELEMENT (%s, ", elm, arr));
     k = 0;
     inline_indexer (indx, out, L_YIELD, &k, tup);
-    undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, & %s);\n", drf, inline_mode (mode), elm));
+    undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = DEREF (%s, & %s);\n", drf, inline_mode (mode), elm));
   } else if (phase == L_YIELD) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, symbol);
     if (entry != NO_BOOK && same_tree (indx, (NODE_T *) (INFO (entry))) == A68_TRUE) {
@@ -544,11 +544,11 @@ void inline_slice (NODE_T * p, FILE_T out, int phase)
       (void) make_name (drf, DRF, "", NUMBER (prim));
     }
     if (primitive_mode (mode)) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", drf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", drf));
     } else if (mode == M_COMPLEX) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", drf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", drf));
     } else if (basic_mode (mode)) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", drf));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", drf));
     } else {
       ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
     }
@@ -570,13 +570,13 @@ void inline_monadic_formula (NODE_T * p, FILE_T out, int phase)
       inline_unit (rhs, out, L_EXECUTE);
       for (int k = 0; PROCEDURE (&monadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&monadics[k])) {
-          indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&monadics[k]), acc));
+          indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&monadics[k]), acc));
           inline_unit (rhs, out, L_YIELD);
-          undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
+          undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
         }
       }
     } else if (phase == L_YIELD) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", acc));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", acc));
     }
   } else if (IS (p, MONADIC_FORMULA) && basic_mode (MOID (p))) {
     if (phase != L_YIELD) {
@@ -629,23 +629,23 @@ void inline_formula (NODE_T * p, FILE_T out, int phase)
       for (int k = 0; PROCEDURE (&dyadics[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (op)) == PROCEDURE (&dyadics[k])) {
           if (MOID (p) == M_COMPLEX) {
-            indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&dyadics[k]), acc));
+            indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&dyadics[k]), acc));
           } else {
-            indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (& %s, ", CODE (&dyadics[k]), acc));
+            indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s (& %s, ", CODE (&dyadics[k]), acc));
           }
           inline_unit (lhs, out, L_YIELD);
-          undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", "));
+          undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ", "));
           inline_unit (rhs, out, L_YIELD);
-          undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
+          undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
         }
       }
     } else if (phase == L_YIELD) {
       char acc[NAME_SIZE];
       (void) make_name (acc, TMP, "", NUMBER (p));
       if (MOID (p) == M_COMPLEX) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", acc));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", acc));
       } else {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (& %s)", acc));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (& %s)", acc));
       }
     }
   } else if (IS (p, FORMULA) && basic_mode (MOID (p))) {
@@ -709,13 +709,13 @@ void inline_call (NODE_T * p, FILE_T out, int phase)
       inline_single_argument (args, out, L_EXECUTE);
       for (int k = 0; PROCEDURE (&functions[k]) != NO_GPROC; k++) {
         if (PROCEDURE (TAX (idf)) == PROCEDURE (&functions[k])) {
-          indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&functions[k]), acc));
+          indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s (%s, ", CODE (&functions[k]), acc));
           inline_single_argument (args, out, L_YIELD);
-          undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
+          undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ");\n"));
         }
       }
     } else if (phase == L_YIELD) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", acc));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", acc));
     }
   } else if (basic_mode (MOID (p))) {
     if (phase != L_YIELD) {
@@ -745,9 +745,9 @@ void inline_collateral_units (NODE_T * p, FILE_T out, int phase)
     } else if (phase == L_EXECUTE) {
       inline_unit (SUB (p), out, L_EXECUTE);
     } else if (phase == L_YIELD) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "PUSH_VALUE (p, "));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "PUSH_VALUE (p, "));
       inline_unit (SUB (p), out, L_YIELD);
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", %s);\n", inline_mode (MOID (p))));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ", %s);\n", inline_mode (MOID (p))));
     }
   } else {
     inline_collateral_units (SUB (p), out, phase);
@@ -772,14 +772,14 @@ void inline_collateral (NODE_T * p, FILE_T out, int phase)
     inline_collateral_units (NEXT_SUB (p), out, L_DECLARE);
   } else if (phase == L_EXECUTE) {
     if (MOID (p) == M_COMPLEX) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) STACK_TOP;\n", dsp, inline_mode (M_REAL)));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) STACK_TOP;\n", dsp, inline_mode (M_REAL)));
     } else {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) STACK_TOP;\n", dsp, inline_mode (MOID (p))));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) STACK_TOP;\n", dsp, inline_mode (MOID (p))));
     }
     inline_collateral_units (NEXT_SUB (p), out, L_EXECUTE);
     inline_collateral_units (NEXT_SUB (p), out, L_YIELD);
   } else if (phase == L_YIELD) {
-    undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s", dsp));
+    undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", dsp));
   }
 }
 
@@ -879,12 +879,12 @@ void inline_dereference_selection (NODE_T * p, FILE_T out, int phase)
     if (entry == NO_BOOK) {
       (void) make_name (ref, NSYMBOL (idf), "", NUMBER (field));
       (void) make_name (sel, SEL, "", NUMBER (field));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (ADDRESS (%s)[" A68_LU "]);\n", sel, inline_mode (SUB_MOID (field)), ref, OFFSET_OFF (field)));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (ADDRESS (%s)[" A68_LU "]);\n", sel, inline_mode (SUB_MOID (field)), ref, OFFSET_OFF (field)));
       sign_in (BOOK_DECL, L_EXECUTE, NSYMBOL (idf), (void *) field_idf, NUMBER (field));
     } else if (field_idf != (char *) (INFO (entry))) {
       (void) make_name (ref, NSYMBOL (idf), "", NUMBER (entry));
       (void) make_name (sel, SEL, "", NUMBER (field));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (ADDRESS (%s)[" A68_LU "]);\n", sel, inline_mode (SUB_MOID (field)), ref, OFFSET_OFF (field)));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (ADDRESS (%s)[" A68_LU "]);\n", sel, inline_mode (SUB_MOID (field)), ref, OFFSET_OFF (field)));
       sign_in (BOOK_DECL, L_EXECUTE, NSYMBOL (idf), (void *) field_idf, NUMBER (field));
     }
     inline_unit (sec, out, L_EXECUTE);
@@ -896,9 +896,9 @@ void inline_dereference_selection (NODE_T * p, FILE_T out, int phase)
       (void) make_name (sel, SEL, "", NUMBER (field));
     }
     if (primitive_mode (SUB_MOID (p))) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", sel));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", sel));
     } else if (SUB_MOID (p) == M_COMPLEX) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", sel));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(A68_REAL *) (%s)", sel));
     } else if (basic_mode (SUB_MOID (p))) {
       undent (out, sel);
     } else {
@@ -935,12 +935,12 @@ void inline_selection (NODE_T * p, FILE_T out, int phase)
       (void) make_name (ref, NSYMBOL (idf), "", NUMBER (field));
       get_stack (idf, out, ref, "BYTE_T");
       (void) make_name (sel, SEL, "", NUMBER (field));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (%s[" A68_LU "]);\n", sel, inline_mode (MOID (field)), ref, OFFSET_OFF (field)));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (%s[" A68_LU "]);\n", sel, inline_mode (MOID (field)), ref, OFFSET_OFF (field)));
       sign_in (BOOK_DECL, L_EXECUTE, NSYMBOL (idf), (void *) field_idf, NUMBER (field));
     } else if (field_idf != (char *) (INFO (entry))) {
       (void) make_name (ref, NSYMBOL (idf), "", NUMBER (entry));
       (void) make_name (sel, SEL, "", NUMBER (field));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (%s[" A68_LU "]);\n", sel, inline_mode (MOID (field)), ref, OFFSET_OFF (field)));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = (%s *) & (%s[" A68_LU "]);\n", sel, inline_mode (MOID (field)), ref, OFFSET_OFF (field)));
       sign_in (BOOK_DECL, L_EXECUTE, NSYMBOL (idf), (void *) field_idf, NUMBER (field));
     }
     inline_unit (sec, out, L_EXECUTE);
@@ -952,7 +952,7 @@ void inline_selection (NODE_T * p, FILE_T out, int phase)
       (void) make_name (sel, SEL, "", NUMBER (field));
     }
     if (primitive_mode (MOID (p))) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", sel));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "_VALUE_ (%s)", sel));
     } else {
       ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
     }
@@ -993,8 +993,8 @@ void inline_selection_ref_to_ref (NODE_T * p, FILE_T out, int phase)
       (void) make_name (sel, SEL, "", NUMBER (field));
       sign_in (BOOK_DECL, L_EXECUTE_2, NSYMBOL (idf), (void *) field_idf, NUMBER (field));
     }
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = *%s;\n", sel, ref));
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (&%s) += " A68_LU ";\n", sel, OFFSET_OFF (field)));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = *%s;\n", sel, ref));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "OFFSET (&%s) += " A68_LU ";\n", sel, OFFSET_OFF (field)));
     inline_unit (sec, out, L_EXECUTE);
   } else if (phase == L_YIELD) {
     BOOK_T *entry = signed_in (BOOK_DECL, L_EXECUTE, NSYMBOL (idf));
@@ -1004,7 +1004,7 @@ void inline_selection_ref_to_ref (NODE_T * p, FILE_T out, int phase)
       (void) make_name (sel, SEL, "", NUMBER (field));
     }
     if (primitive_mode (SUB_MOID (p))) {
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "(&%s)", sel));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "(&%s)", sel));
     } else {
       ABEND (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, __func__);
     }
@@ -1069,17 +1069,17 @@ void inline_identity_relation (NODE_T * p, FILE_T out, int phase)
       NODE_T *lidf = stems_from (lhs, IDENTIFIER);
       NODE_T *ridf = stems_from (rhs, IDENTIFIER);
       if (IS (op, IS_SYMBOL)) {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "ADDRESS ("));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "ADDRESS ("));
         inline_ref_identifier (lidf, out, L_YIELD);
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ") == ADDRESS ("));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ") == ADDRESS ("));
         inline_ref_identifier (ridf, out, L_YIELD);
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ")"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ")"));
       } else {
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "ADDRESS ("));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "ADDRESS ("));
         inline_ref_identifier (lidf, out, L_YIELD);
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ") != ADDRESS ("));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ") != ADDRESS ("));
         inline_ref_identifier (ridf, out, L_YIELD);
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ")"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ")"));
       }
     }
   } else if (GOOD (lhs) && stems_from (rhs, NIHIL) != NO_NODE) {
@@ -1092,13 +1092,13 @@ void inline_identity_relation (NODE_T * p, FILE_T out, int phase)
     } else if (phase == L_YIELD) {
       NODE_T *lidf = stems_from (lhs, IDENTIFIER);
       if (IS (op, IS_SYMBOL)) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "IS_NIL (*"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "IS_NIL (*"));
         inline_ref_identifier (lidf, out, L_YIELD);
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ")"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ")"));
       } else {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "!IS_NIL (*"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "!IS_NIL (*"));
         inline_ref_identifier (lidf, out, L_YIELD);
-        undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ")"));
+        undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ")"));
       }
     }
   }
