@@ -1,0 +1,229 @@
+<html>
+<head>
+<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
+<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
+<meta http-equiv="Content-Style-Type" content="text/css">
+<style type="text/css">
+a:link    {color: blue; text-decoration: none;}
+a:visited {color: blue; text-decoration: none;}
+a:active  {color: blue; text-decoration: none;}
+a:hover   {text-decoration: underline;}
+p {font-size: 10pt; font-family: Arial,Helvetica;}
+u {font-size: 10pt; font-family: Arial,Helvetica;}
+dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h2 {font-size: 14pt; font-family: Arial,Helvetica;}
+h3 {font-size: 12pt; font-family: Arial,Helvetica;}
+h4 {font-size: 12pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
+ul {font-size: 10pt; font-family: Arial,Helvetica;}
+body {font-size: 10pt; font-family: Arial,Helvetica;}
+code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+</style>
+</head>
+<body background="bg.jpg">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=12>
+<td valign=top bgcolor="white">
+<table cellspacing=1 cellpadding=3 border=0>
+<td bgcolor="black">
+<a href="numerical.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
+</td>
+<td bgcolor="black">
+<a href="options.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
+</td>
+<td bgcolor="black">
+<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
+</td>
+<td bgcolor="black">
+<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
+</td>
+</table>
+<h2>Auxilliary extensions</h2>
+
+<ul>
+<li><a href="#envunix">UNIX extensions</a>
+<ul>
+<li><a href="#linmode">Modes</a>
+<li><a href="#linproc">Procedures</a>
+</ul>
+<li><a href="#torrix">An elementary vector library</a>
+<li><a href="#assert">Assertions as pre- or postconditions</a>
+<li><a href="#refine">The refinement preprocessor</a>
+</ul>
+</td>
+<td bgcolor=white valign=top>
+<img src="logo.jpg" align=right>
+</td>
+</table>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=12>
+<td width="80%" valign=top bgcolor="white">
+
+<h3><a name="envunix">UNIX extensions</a></h3>
+
+<h4><a name="linmode">Modes</a></h4>
+<dl>
+<dt><code>MODE PIPE = STRUCT (REF FILE read, write, INT pid)</code>
+<dd>Used to set up communication between processes. See for instance <code>execve child pipe</code>.
+</dl>
+
+<h4><a name="linproc">Procedures</a></h4>
+<dl>
+<dt><code>PROC argc = INT</code>
+<dd>Returns the number of command-line arguments.
+<br>
+<br>
+<dt><code>PROC argv = (INT k) STRING</code>
+<dd>Returns command-line argument <var>k</var> or an empty string when <var>k</var> is not valid.
+<br>
+<br>
+<dt><code>PROC errno = INT</code>
+<dd>Returns the global error variable <var>errno</var>.
+<br>
+<br>
+<dt><code>PROC strerror = (INT errno) STRING</code>
+<dd>Returns a string describing the error code passed as <var>errno</var>.
+<br>
+<br>
+<dt><code>PROC get env = (STRING var) STRING</code>
+<dd>Returns the value of environment variable <var>var</var>.
+<br>
+<br>
+<dt><code>PROC fork = INT</code>
+<dd>Creates a child process that differs from the parent process only in its <code>PID</code> and <code>PPID</code>, and in the fact that resource utilisations are set to 0. File locks and pending signals are not inherited. Under Linux, fork is implemented using copy-on-write pages, so the only penalty incurred by fork is the time and memory required to duplicate the parent's page tables, and to create a unique task structure for the child. On success, the <code>PID</code> of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and <var>errno</var> will be set appropriately.
+<br>
+<br>
+<dt><code>PROC wait pid = (INT pid) VOID</code>
+<dd>Wait until child process <var>pid</var> ends. 
+<br>
+<br>
+<dt><code>PROC execve = (STRING filename, [] STRING argv, [] STRING envp) INT</code>
+<dd>Executes <var>filename</var> that must be either a binary executable, or a script starting with a line of the form <code>#! interpreter [argv]</code>. In the latter case, the interpreter must be a valid path-name for an executable which is not itself a script, which will be invoked as <code>interpreter [arg] filename</code>. Argument <var>argv</var> is a row of argument strings that is passed to the new program. Argument <var>envp</var> is a row of strings, with elements conventionally of the form <code>KEY=VALUE</code>, which are passed as environment to the new program. The argument vector and environment can be accessed by the called program's main function, when it is defined as 
+<code>int main(int argc, char *argv[], char *envp[])</code>. 
+The procedure does not return on success, and the text, data, bss, and stack of the calling process are overwritten by that of the program loaded. The program invoked inherits the calling process's <code>PID</code>, and any open file descriptors that are not set to close on exec. Signals pending on the calling process are cleared. Any signals set to be caught by the calling process are reset to their default behaviour. The <code>SIGCHLD</code> signal (when set to <code>SIG_IGN</code>) may or may not be reset to <code>SIG_DFL</code>.
+<br>
+<br>
+<dt><code>PROC execve child pipe = (STRING filename, [] STRING argv, [] STRING envp) PIPE</code>
+<dd>Executes a command in a child process. 
+The child process redirects standard input and standard output to the pipe that is delivered to the parent process.
+Therefore, the parent can write to the <code>write</code> field of the pipe, and this data can be read by the child from standard input.
+The child can write to standard output, and this data can be read by the parent process from the <code>read</code> field of the pipe.
+The files in the pipe are opened.
+The channels assigned to the read - and write end of the pipe are <code>standin channel</code> and <code>standout channel</code>, respectively.
+This procedure calls <code>execve</code> in the child process, for a description of the arguments refer to that procedure.
+<br>
+Example:
+<br>
+<pre>
+  PIPE p = execve child pipe ("/bin/cat", ("/bin/cat", program idf), "");
+
+  IF pid OF p < 0
+  THEN put (stand error, ("pipe not valid", new line));
+       stop
+  FI;
+
+  PROC eop handler = (REF FILE f) BOOL:
+       BEGIN put (stand error, ("end of pipe", new line));
+             GO TO end
+       END;
+
+  on logical file end (read OF p, eop handler);
+
+  DO STRING line;
+     get (read OF p, (line, newline));
+     put (stand out, ("From pipe: """, line, """", newline))
+  OD;
+
+  end: 
+  close (read OF p);
+  close (write OF p)
+</pre>
+</dl>
+
+<br>
+<h3><a name="torrix">An elementary vector library</a></h3>
+<p>Algol68G implements a small vector library that relaxes the limitation that the interpreter poses on speed in arithmetic operations. Using these elementary procedures, more complex operations can be programmed. Consider for instance multiplication of a matrix <var>m</var> times a vector <var>b</var>:
+<ul><code>FOR n TO UPB a DO a[n] := vector inner product(m[n, ], b) OD;</code></ul>
+</p>
+<p>The procedures in the vector library are optimised for speed, although they still perform runtime checks on vector length, initialisation, assignment to <code>NIL</code> and division by zero. Please note that the procedures strictly process vector elements sequentially as in<code>
+PROC vector add = ([] REAL a, b, c) VOID:<br>
+<ul>
+FOR n TO UPB a DO a[n] := b[n] + c[n] OD;
+</ul>
+</code>
+</ul>
+<p>
+Therefore, take care when passing overlapping slices as arguments.
+</p>
+<p>Following is a list of available procedures.
+<dl>
+<dt><code>PROC vector set = (REF [] REAL a, REAL b) VOID</code>
+<dd>Sets all elements of vector <var>a</var> to real value <var>b</var>.
+<br>
+<br>
+<dt><code>PROC vector move = (REF [] REAL a, [] REAL b) VOID</code>
+<dd>Copies vector <var>b</var> to vector <var>a</var>. Both vectors are required to have equal number of elements.
+<br>
+<br>
+<dt><code>PROC vector times scalar = (REF [] REAL a, [] REAL b, REAL c) VOID</code>
+<dd>Multiplies, element by element, vector <var>b</var> by scalar <var>c</var> and puts the result in vector <var>a</var>. All vectors are required to have equal number of elements.
+<br>
+<br>
+<dt><code>PROC vector plus = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
+<dd>Adds vector <var>b</var> to vector <var>c</var> and puts the result in vector <var>a</var>. All vectors are required to have equal number of elements.
+<br>
+<br>
+<dt><code>PROC vector minus = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
+<dd>Subtracts vector <var>c</var> from vector <var>b</var> and puts the result in vector <var>a</var>. All vectors are required to have equal number of elements.
+<br>
+<br>
+<dt><code>PROC vector times = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
+<dd>Multiplies, element by element, vector <var>b</var> by vector <var>c</var> and puts the result in vector <var>a</var>. All vectors are required to have equal number of elements.
+<br>
+<br>
+<dt><code>PROC vector div = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
+<dd>Divides, element by element, vector <var>b</var> by vector <var>c</var> and puts the result in vector <var>a</var>. All vectors are required to have equal number of elements.
+<br>
+<br>
+<dt><code>PROC vector inner product = ([] REAL a, [] REAL b) REAL</code>
+<dt><code>PROC vector inproduct = ([] REAL a, [] REAL b) REAL</code>
+<dd>Yields the inner product of vector <var>a</var> and vector <var>b</var>. Both vectors are required to have equal number of elements. Summation is done at <code>LONG REAL</code> precision.
+</dl>
+</p>
+
+<br>
+<h3><a name="assert">Assertions as pre- or postconditions</a></h3>
+<p>Algol68G supports an extension called assertions. Assertions can be viewed in two ways. First, they provide a notation for invariants that can be used to code a proof of correctness together with an algorithm. Hardly anyone does this, but assertions make for debugging statements. The syntax for assertions reads
+<p>
+Assertion syntax can be found in the <a href="syntax.html#assertions">syntax summary</a>.
+<p>Under control of the 'assertions' and 'noassertions' pragmat items, the tertiary of an assertion is elaborated at runtime. If the tertiary yields <code>FALSE</code>, a runtime error is produced. Example:
+<pre>
+  OP FACULTY = (INT n) INT:
+     IF ASSERT (n >= 0); n > 0 THEN n * FACULTY (n - 1) ELSE 1 FI;
+</pre>
+will produce an error when <code>FACULTY</code> is called with a negative argument.
+</p>
+
+<br>
+<h3><a name="refine">The refinement preprocessor</a></h3>
+<p>Algol68G is equipped with a refinement preprocessor, which allows programming through stepwise refinement as taught in <a href="algol.html#programmeren">[Koster 1978, 1981]</a>.
+The idea is to facilitate program construction by elaborating the description of the solution to a problem as ever more detailed steps until the description of the solution is complete. (See also <a href="http://www.acm.org/classics/dec95">Wirth's well known lecture</a>). 
+<p>
+Refinement syntax can be found in the <a href="syntax.html#refinements">syntax summary</a>.
+<p>Refinements cannot be recursive, nor can their definitions be nested. Also, refinement definitions must be unique, and a refinement can only be applied once (refinements are not procedures).
+<p>In the section <i>Sample Algol68G programs</i> is <a href="samples.html#p0">an example</a> of a program constructed through step-wise refinement.
+<p>Algol68G will check whether a program looks like a stepwise refined program. The refinement preprocessor is transparent to programs that are not stepwise refined.
+</p>
+
+</td>
+</table>
+
+<p style="font-size: 8pt;">
+<font color="black">
+Copyright &copy; 2001-2004 J. Marcel van der Veer.
+</font>
+</p>
+</body>
+</html>

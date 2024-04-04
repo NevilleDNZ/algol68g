@@ -1,0 +1,456 @@
+#!/bin/sh
+#
+# This file is part of Algol 68 Genie - an Algol 68 interpreter.
+# Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+#
+# This program is free software; you can redistribute it and/or modify it under
+# the terms of the GNU General Public License as published by the Free Software
+# Foundation; either version 2 of the License, or (at your option) any later
+# version.
+#
+# This program is distributed in the hope that it will be useful,but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# this program; if not, write to the Free Software Foundation, Inc.,
+# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+# configure: configuring script for Algol 68 Genie.
+#
+MAKEFILE=makefile
+PACKAGE='Algol 68 Genie'
+VERSION='Mark 4'
+# Where does the system store things
+SYS_INC=/usr/include
+SYS_LIB=/usr/lib
+SYS_BIN=/usr/bin
+chk_dir="./regression-mk4"
+src_dir="./source"
+BUILD_FILE="$src_dir/$MAKEFILE"
+TEST_FILE="$chk_dir/regression"
+#
+userid=`whoami`
+#
+# Option processing
+#
+prev_arg=
+build=no
+for arg in "$@"
+do
+# Handle option = value
+ 	if [	-n "$prev_arg"	]
+	then
+		eval "$prev_arg=\$arg"
+		ac_prev=
+		continue
+	fi
+# Process accepted formats
+	case "$arg"
+	in
+		-*=*)
+			val_arg=`echo "$arg" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+		*)	
+			val_arg= ;;
+	esac
+# Process current option
+	case "$arg"
+	in
+	-b | --build)
+		build=yes ;;
+	-cc | --cc)
+		prev_arg=cc ;;
+	-cc=* | --cc=*)
+		cc=$val_arg ;;
+	-incdir | --incdir)
+		prev_arg=inc_dir ;;
+	-incdir=* | --incdir=*)
+		inc_dir=$val_arg ;;
+	-libdir | --libdir)
+		prev_arg=lib_dir ;;
+	-libdir=* | --libdir=*)
+		lib_dir=$val_arg ;;
+	-bindir | --bindir)
+		prev_arg=bin_dir ;;
+	-bindir=* | --bindir=*)
+		bin_dir=$val_arg ;;
+	-mandir | --mandir)
+		prev_arg=man_dir ;;
+	-mandir=* | --mandir=*)
+		man_dir=$val_arg ;;
+	-O0)
+		opt=-O0 ;;
+	-O)
+		opt=-O ;;
+	-O2)
+		opt=-O2 ;;
+	-O3)
+		opt=-O3 ;;
+	-version | --version | -v | --v)
+		echo "$PACKAGE $VERSION"
+		exit ;;
+	-help | --help | -? | ?)
+		echo "Usage: $name [options]"
+		cat << \_HELP
+--incdir[=]DIR		set include-directory for compilation to DIR
+--libdir[=]DIR		set library-directory for compilation to DIR
+--bindir[=]DIR		set target directory for executable to DIR
+--mandir[=]DIR		set target directory for manual page to DIR
+
+--cc[=]CC		set C compiler to CC
+-O0			set optimisation level for compilation to -O0
+-O			set optimisation level for compilation to -O
+-O2			set optimisation level for compilation to -O2
+-O3			set optimisation level for compilation to -O3
+
+--build			build target after configuring
+--help			print help and exit
+--version		print version and exit
+_HELP
+		exit 1 ;;
+	*)
+		echo "exiting: no such option: $arg"
+		exit 1 ;;
+	esac
+done
+# Check whether options emptied
+if [	-n "$prev_arg" ]
+then
+	echo "exiting: missing argument to $prev_arg"
+	exit 1
+fi
+#
+# Can we write to the current dir?
+#
+if ! [	-w `pwd`	]
+then
+	echo "exiting: $userid cannot write to `pwd`"
+	exit 1
+fi
+#
+# Find a C compiler, first gcc and than cc; otherwise fail
+#
+if [	-z $cc	]
+then
+	echo -n "searching for C compiler in $SYS_BIN: "
+	if [ 	-f $SYS_BIN/gcc	]
+	then
+		cc=gcc
+	elif [ 	-f $SYS_BIN/cc	]
+	then
+		cc=cc
+	else
+		echo " exiting: cannot find a C compiler"
+		rm -f $MAKEFILE
+		exit 1
+	fi
+	echo $cc
+fi
+# Now check the compiler
+echo "checking that $cc works: "
+$cc -v
+case $?
+in
+	0)
+		echo "ok" ;;
+	*)
+		echo "exiting: $?"
+		rm -f $SYS_FILE.c $SYS_FILE
+		exit 1 ;;
+esac
+#
+# Find default directories
+#
+# Find default inc_dir if none was given
+if [	-z $inc_dir	]
+then
+	echo -n "include directory: "
+	if [	-d /usr/local/include	]
+	then
+		inc_dir=/usr/local/include
+	else
+		inc_dir=$SYS_INC
+	fi
+	echo $inc_dir
+fi
+# Find default lib_dir if none was given
+if [	-z $lib_dir	]
+then
+	echo -n "library directory: "
+	if [	-d /usr/local/lib	]
+	then
+		lib_dir=/usr/local/lib
+	else
+		lib_dir=$SYS_LIB
+	fi
+	echo $lib_dir
+fi
+# Find default bin_dir if none was given
+if [	-z $bin_dir	]
+then
+	echo -n "target binary directory: "
+	if [	-d /usr/local/bin	]
+	then
+		bin_dir=/usr/local/bin
+	elif [	-d /usr/share/bin	]
+	then
+		bin_dir=/usr/share/bin
+	elif [	-w $SYS_BIN	]
+	then
+		bin_dir=$SYS_BIN
+	else
+		bin_dir=`pwd`
+	fi
+	echo $bin_dir
+elif ! [	-d $bin_dir	]
+then
+	echo "exiting: $bin_dir is not a valid directory"
+	exit 1
+fi
+if ! [	-w $bin_dir	]
+then
+	echo "$userid cannot write to $bin_dir, set to `pwd`"
+	bin_dir=`pwd`
+fi
+# Find default man_dir if none was given
+if [	-z $man_dir	]
+then
+	echo -n "target man directory: "
+	if [	-d /usr/local/man	]
+	then
+		man_dir="/usr/local/man"
+	elif [	-d /usr/share/man	]
+	then
+		man_dir="/usr/share/man"
+	elif [	-w /usr/man	]; then
+		man_dir="/usr/man"
+	else
+		man_dir=`pwd`
+	fi
+	echo $man_dir
+elif ! [	-d $man_dir	]
+then
+	echo "exiting: $man_dir is not a valid directory"
+	exit 1
+fi
+if ! [	-w $man_dir	]
+then
+	echo "$userid cannot write to $man_dir, set to `pwd`"
+	man_dir=`pwd`
+fi
+#
+# Are the necessary includes all there?
+#
+err=no
+for inc in assert.h ctype.h errno.h fcntl.h limits.h math.h setjmp.h signal.h stdio.h stdlib.h string.h sys/resource.h sys/stat.h sys/time.h sys/times.h sys/types.h sys/wait.h time.h unistd.h
+do
+	echo -n "searching $inc: "
+	if [	-f $SYS_INC/$inc	]
+	then
+		echo "found"
+	else
+		echo "not found"
+		err=yes
+	fi
+done
+if [	$err = yes	]
+then
+	echo "exiting: not all include files found"
+	exit 1
+fi
+#
+# Generate top level makefile
+#
+echo "# $MAKEFILE generated on `date` for $userid." 1>$MAKEFILE
+echo "SHELL=/bin/sh" 1>>$MAKEFILE
+echo "bin_dir=$bin_dir" 1>>$BUILD_FILE
+echo "src_dir=./source" 1>>$MAKEFILE
+echo "chk_dir=$chk_dir" 1>>$MAKEFILE
+echo "man_dir=$man_dir" 1>>$MAKEFILE
+cat >>$MAKEFILE <<\_MAKE_EOF
+all a68g::
+	cd $(src_dir); $(MAKE) CPP_FLAGS="$(CPP_FLAGS)" CFLAGS="$(CFLAGS)" LD_FLAGS="$(LD_FLAGS)"; mv a68g ..; cd ..
+# For OS/2 uncomment next lines
+# a68g.exe:	a68g
+#	emxbind -b $(src_dir)/a68g
+install:	all
+	mv a68g $(bin_dir)/a68g
+	cp doc/man1/a68g.1 $(man_dir)/man1/
+uninstall:
+	if [ -f $(bin_dir)/a68g ]; then rm -f $(bin_dir)/a68g; fi
+	if [ -f $(man_dir)/a68g.1 ]; then rm -f $(man_dir)/man1/a68g.1; fi
+depend:
+	cd $(src_dir); $(MAKE) depend; cd ..
+regression:  all
+	cd $(chk_dir); regression; cd ..
+clean:
+	cd $(src_dir); $(MAKE) clean; cd ..
+	for f in `find . -name "core" -print`; do rm -f $$f; done
+distclean mostlyclean maintainer-clean: clean
+	for f in `find . -name "makefile" -print`; do rm -f $$f; done
+	if [ -f a68g ]; then rm -f a68g; fi
+	if [ -f .a68g.log ]; then rm -f .a68g.log; fi
+	if [ -f .a68g.tmp ]; then rm -f .a68g.tmp; fi
+	if [ -f .a68g.x ]; then rm -f .a68g.x; fi
+	if [ -f .a68g.x.l ]; then rm -f .a68g.x.l; fi
+dist:   distclean
+	cd ..;tar -czf algol68g-mk4.tar.gz algol68g-mk4
+indent:
+	cd $(src_dir); $(MAKE) indent; cd ..
+TAGS info dvi:
+	@echo "target not implemented"
+_MAKE_EOF
+echo "generated $MAKEFILE"
+#
+# Generate source level makefile
+#
+echo "# $BUILD_FILE generated on `date` for $userid." 1>$BUILD_FILE
+echo "SHELL=/bin/sh" 1>>$BUILD_FILE
+echo "lib_dir=$lib_dir" 1>>$BUILD_FILE
+echo "inc_dir=$inc_dir" 1>>$BUILD_FILE
+echo "CC=$cc" 1>>$BUILD_FILE
+# Find GNU Plotutils
+echo -n "searching for GNU Plotutils in $lib_dir and $inc_dir: "
+if [ 	-f $lib_dir/libplot.so -a -f $inc_dir/plot.h ]
+then
+	echo "found"
+	echo "PLOTUTILS_LIBS=-L/usr/X11R6/lib -lXaw -lXmu -lXt -lSM -lICE -lXext -lX11 -L$lib_dir -lplot" 1>>$BUILD_FILE
+	echo "PLOTUTILS_FLAG=-DHAVE_PLOTUTILS" 1>>$BUILD_FILE
+else
+	echo "not found"
+fi
+# Find GSL
+echo -n "searching for GNU Scientific Library in $lib_dir: "
+if [ 	-f $lib_dir/libgsl.so -a -f $lib_dir/libgslcblas.so ]
+then
+	echo "found"
+	echo "GSL_LIBS=-lgsl -lgslcblas" 1>>$BUILD_FILE
+	echo "GSL_FLAG=-DHAVE_GSL" 1>>$BUILD_FILE
+else
+	echo "not found"
+fi
+# Find curses
+echo -n "searching for curses in $SYS_LIB: "
+if [ 	-f $SYS_LIB/libcurses.so ]
+then
+	echo "found"
+	echo "CURSES_LIBS=-lncurses" 1>>$BUILD_FILE
+	echo "CURSES_FLAG=-DHAVE_CURSES" 1>>$BUILD_FILE
+else
+	echo "not found"
+fi
+# Find IEEE-754 compatibility
+echo -n "searching for IEEE 754 floating point support in $SYS_INC: "
+if [ 	-f $SYS_INC/ieee754.h -o -f $SYS_INC/ieeefp.h -o -f $SYS_INC/machine/ieeefp.h	]
+then
+	echo "found"
+	echo "IEEE_754_FLAG=-DHAVE_IEEE_754" 1>>$BUILD_FILE
+else
+	echo "not found: if `uname -m` supports IEEE 754 then configure manually"
+fi
+# Since we are executing a shell script, assume we are on UNIX or compatible.
+echo "OS_FLAG=-DHAVE_UNIX" 1>>$BUILD_FILE
+# Finish Makefile
+if [	$cc = gcc	]
+then
+	if [	-z $opt	]
+	then
+		echo "STD_CFLAGS=-W -Wall -I\$(inc_dir) -O" 1>>$BUILD_FILE
+	else	
+		echo "STD_CFLAGS=-W -Wall -I\$(inc_dir) $opt" 1>>$BUILD_FILE
+	fi
+else
+	echo "STD_CFLAGS=-I\$(inc_dir)" 1>>$BUILD_FILE
+fi
+cat >>$BUILD_FILE <<\_BUILD_EOF
+STD_LD_FLAGS=-L$(lib_dir)
+FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(OS_FLAG) $(IEEE_754_FLAG) $(CFLAGS)
+HS=a68g_config.h algol68g.h environ.h genie.h gsl.h mp.h transput.h
+OBJ=algol68g.o atoms.o coercion.o curses.o diagnostics.o format.o frames.o garbage.o genie.o gsl.o io.o listing.o moids.o monitor.o mp.o names.o options.o parser.o plotutils.o prelude.o scanner.o scope.o signal.o standard.o stowed.o support.o taxes.o unformat.o unix.o vector.o volatile.o
+all:	a68g
+a68g:	$(OBJ)
+	$(CC) $(OBJ) $(CFLAGS) $(STD_LD_FLAGS) $(PLOTUTILS_LIBS) $(GSL_LIBS) $(CURSES_LIBS) -lm $(LD_FLAGS) -o a68g
+$(OBJ):	$(HS)
+# volatile.c MUST be compiled without optimiser.
+volatile.o:     volatile.c
+	$(CC) -c $(FLAGS) -O0 volatile.c -o volatile.o
+# Other sources can be optimised.
+.c.o:
+	$(CC) -c $(FLAGS) $<
+clean:
+	rm -f $(OBJ)
+depend:
+	touch $(HS)
+indent:	clean
+	indent -l509 *.h *.c
+	rm -f *.h~
+	rm -f *.c~
+_BUILD_EOF
+echo "generated $BUILD_FILE"
+#
+# Make regression script
+#
+if [	-d $chk_dir -a -w $chk_dir	]
+then
+	cat >$TEST_FILE <<\_REGRESSION_EOF
+#!/bin/sh
+if [	-f './a68g' ]
+then
+	A68='./a68g'
+elif [	-f '../a68g' ]
+then
+	A68='../a68g'
+else
+	A68='a68g'
+fi
+#
+uname -a
+$A68 -version
+case $?
+in
+	0) ;;
+	*) echo "where is $A68?"; exit $? ;;
+esac
+#
+for f in `find . -name "*.a68" -print | grep -v quote-stropping | sort`
+do
+	echo "$k $f"
+	$A68 -regression $f
+done
+for f in `find . -name "*.a68" -print | grep quote-stropping | sort`
+do
+	echo "$k $f"
+	$A68 -regression -quotestrop $f
+done
+_REGRESSION_EOF
+chmod +x $TEST_FILE
+echo "generated $TEST_FILE"
+fi
+#
+# Build target if required
+#
+if [	$build = yes	]
+then
+	echo "building $PACKAGE"
+	make a68g
+	case $?
+	in
+		0)
+			;;
+		*)
+			echo "exiting: $?"
+			exit 1 ;;
+	esac
+	echo "checking whether $PACKAGE works: "
+	a68g -version
+	case $?
+	in
+		0)
+			echo "ok" ;;
+		*)
+			echo "exiting: $?"
+			exit 1 ;;
+	esac
+fi
+# We're set
+exit
