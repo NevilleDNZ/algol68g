@@ -25,6 +25,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
+#define MAX_RESTART 256
+
 BOOL_T halt_typing, sys_request_flag;
 static int chars_in_tty_line;
 
@@ -164,8 +166,7 @@ void io_write_string (FILE_T f, const char *z)
         ABNORMAL_END (j < 0, "cannot write", NULL);
         chars_in_tty_line = 0;
       }
-    }
-    while (z[k] != NULL_CHAR);
+    } while (z[k] != NULL_CHAR);
   }
 }
 
@@ -183,7 +184,7 @@ ssize_t io_read (FILE_T fd, void *buf, size_t n)
   int restarts = 0;
   char *z = (char *) buf;
   while (to_do > 0) {
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
     int bytes_read;
 #else
     ssize_t bytes_read;
@@ -194,7 +195,7 @@ ssize_t io_read (FILE_T fd, void *buf, size_t n)
       if (errno == EINTR) {
 /* interrupt, retry. */
         bytes_read = 0;
-        if (restarts++ > 3) {
+        if (restarts++ > MAX_RESTART) {
           return (-1);
         }
       } else {
@@ -231,7 +232,7 @@ ssize_t io_write (FILE_T fd, const void *buf, size_t n)
       if (errno == EINTR) {
 /* interrupt, retry. */
         bytes_written = 0;
-        if (restarts++ > 3) {
+        if (restarts++ > MAX_RESTART) {
           return (-1);
         }
       } else {
@@ -259,7 +260,7 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
   int restarts = 0;
   char *z = (char *) buf;
   while (to_do > 0) {
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
     int bytes_read;
 #else
     ssize_t bytes_read;
@@ -270,7 +271,7 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
       if (errno == EINTR) {
 /* interrupt, retry. */
         bytes_read = 0;
-        if (restarts++ > 3) {
+        if (restarts++ > MAX_RESTART) {
           return (-1);
         }
       } else {
@@ -307,7 +308,7 @@ ssize_t io_write_conv (FILE_T fd, const void *buf, size_t n)
       if (errno == EINTR) {
 /* interrupt, retry. */
         bytes_written = 0;
-        if (restarts++ > 3) {
+        if (restarts++ > MAX_RESTART) {
           return (-1);
         }
       } else {

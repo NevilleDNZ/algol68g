@@ -25,8 +25,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "genie.h"
 #include "mp.h"
 
-#include <sys/time.h>
-
 /*
 Here are the generator and the garbage collector.
 
@@ -286,7 +284,7 @@ void colour_object (BYTE_T * item, MOID_T * m)
     A68_UNION *z = (A68_UNION *) item;
     if (INITIALISED (z)) {
       MOID_T *united_moid = (MOID_T *) z->value;
-      colour_object (&item[SIZE_OF (A68_UNION)], united_moid);
+      colour_object (&item[ALIGNED_SIZEOF (A68_UNION)], united_moid);
     }
   } else if (WHETHER (m, PROC_SYMBOL)) {
 /* PROCs - save a locale and the objects it points to. */
@@ -297,12 +295,18 @@ void colour_object (BYTE_T * item, MOID_T * m)
       z->locale->status |= COOKIE_MASK;
       for (; s != NULL; FORWARD (s)) {
         if (((A68_BOOL *) & u[0])->value == A68_TRUE) {
-          colour_object (&u[SIZE_OF (A68_BOOL)], MOID (s));
+          colour_object (&u[ALIGNED_SIZEOF (A68_BOOL)], MOID (s));
         }
-        u = &(u[SIZE_OF (A68_BOOL) + MOID_SIZE (MOID (s))]);
+        u = &(u[ALIGNED_SIZEOF (A68_BOOL) + MOID_SIZE (MOID (s))]);
       }
       z->locale->status |= COLOUR_MASK;
       z->locale->status &= ~COOKIE_MASK;
+    }
+  } else if (m == MODE (SOUND)) {
+/* Claim the data of a SOUND object, that is in the heap. */
+    A68_SOUND *w = (A68_SOUND *) item;
+    if (INITIALISED (w)) {
+      REF_HANDLE (&(w->data))->status |= (COOKIE_MASK | COLOUR_MASK);
     }
   }
 }
@@ -590,6 +594,7 @@ static void genie_prepare_bounds (NODE_T * p)
 
 void genie_generator_bounds (NODE_T * p)
 {
+  LOW_STACK_ALERT (p);
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, BOUNDS)) {
       genie_prepare_bounds (SUB (p));
@@ -698,15 +703,15 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
     int k, dimensions = DIMENSION (DEFLEX (MOID (p)));
     int elem_size = MOID_SIZE (slice_mode), row_size = 1;
     UP_SWEEP_SEMA;
-    desc = heap_generator (p, MOID (p), dimensions * SIZE_OF (A68_TUPLE) + SIZE_OF (A68_ARRAY));
+    desc = heap_generator (p, MOID (p), dimensions * ALIGNED_SIZEOF (A68_TUPLE) + ALIGNED_SIZEOF (A68_ARRAY));
     GET_DESCRIPTOR (arr, tup, &desc);
     for (k = 0; k < dimensions; k++) {
       tup[k].lower_bound = VALUE ((A68_INT *) bounds);
-      bounds += SIZE_OF (A68_INT);
+      bounds += ALIGNED_SIZEOF (A68_INT);
       tup[k].upper_bound = VALUE ((A68_INT *) bounds);
-      bounds += SIZE_OF (A68_INT);
+      bounds += ALIGNED_SIZEOF (A68_INT);
       tup[k].span = row_size;
-      tup[k].shift = tup[k].lower_bound;
+      tup[k].shift = tup[k].lower_bound * tup[k].span;
       row_size *= ROW_SIZE (&tup[k]);
     }
     arr->dimensions = dimensions;
@@ -715,7 +720,7 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
     arr->slice_offset = 0;
     arr->field_offset = 0;
     arr->array = heap_generator (p, MOID (p), row_size * elem_size);
-    (*sp) += (dimensions * 2 * SIZE_OF (A68_INT));
+    (*sp) += (dimensions * 2 * ALIGNED_SIZEOF (A68_INT));
     MAX (bla, *sp);
     if (slice_mode->has_rows && needs_allocation (slice_mode)) {
       BYTE_T *elem = ADDRESS (&(arr->array));

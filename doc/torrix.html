@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 10.2
+Documentation for Algol 68 Genie Mark 11
 </small>
 </td>
 </table>
@@ -38,7 +38,8 @@ Documentation for Algol 68 Genie Mark 10.2
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Linear algebra using the GNU Scientific Library</h2>
+<h2>Linear algebra and Fourier transforms</h2>
+&middot;&nbsp;<a href="#extensions">Language extensions</a><br>
 &middot;&nbsp;<a href="#elementary">Elementary operations on vectors and matrices</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="#monad">Monadic operators</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="#dyad">Dyadic operators</a><br>
@@ -47,6 +48,7 @@ Documentation for Algol 68 Genie Mark 10.2
 &nbsp;&nbsp;&middot;&nbsp;<a href="#svd">Singular value decomposition</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="#qr">QR decomposition</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="#ch">Cholesky decomposition</a><br>
+&middot;&nbsp;<a href="#fft">Fourier transforms</a><br>
 </td>
 
 <td width="30%" bgcolor="white" valign=top align=center>
@@ -59,7 +61,9 @@ Documentation for Algol 68 Genie Mark 10.2
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.2</b>
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
 &nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -67,15 +71,7 @@ Documentation for Algol 68 Genie Mark 10.2
 &nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
-<p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
@@ -86,9 +82,42 @@ Documentation for Algol 68 Genie Mark 10.2
 </td>
 </table>
 
+<h3><a name="extensions"></a>Language extensions</h3>
 <p>
-Algol68G extends the standard environ as described by the Revised Report with a number of procedures for linear algebra. These procedures require the 
-<a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a> (GSL, version 1.8 or compatible).  This library is optional; if it is not present on your system, Algol68G will build without support for linear algebra. Older releases of Algol 68 Genie had a number of native routines for elementary vector operations, but these have been decomitted as of Mark 10 as GSL is well accessible.
+Algol68G implements pseudo-operators <code>TRNSP</code>, <code>DIAG</code>, <code>COL</code> and <code>ROW</code> as described by [Torrix 1977]. 
+Torrix implements these symbols as operators, A68G's pseudo-operator implementation is more general as it works on rows or rowrows of any mode. 
+The syntactic position of these pseudo-operator expressions is a tertiary, the same level as a formula.
+Note that row(row) arguments cannot be flexible as a new descriptor is created that refers to the same data as the original; 
+if flexibility were allowed, one descriptor could be changed leaving others referring to the same data invalid.
+<p>
+Next list compiles the definitions of these pseudo-operators, where the meek-integral-tertiary yields value <var>k</var>, the weak-rowrow-tertiary yields value <var>a</var> and the weak-row-tertiary yields value <var>u</var>.
+The pseudo-operator expressions yield a row(row) in case <var>a</var> is a rowrow or <var>u</var> is a row.
+The pseudo-operator expressions yield a reference-to-row(row) in case <var>a</var> is a reference-to-rowrow or <var>u</var> is a reference-to-row.
+<p>
+<dl>
+<dt><code>TRNSP weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>a[i, j] = (TRNSP a)[j, i]</code> for valid <var>i</var> and <var>j</var>. 
+<br>It is guaranteed that <code>a[i, j] IS (TRNSP a)[j, i]</code> in case <var>a</var> is a reference-to-rowrow.
+<dt><code>meek-integral-tertiary DIAG weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>a[i, i + k] = (k DIAG a)[i]</code> for valid <var>i</var> and <var>k</var>.
+<br>It is guaranteed that <code>a[i, i + k] IS (k DIAG a)[i]</code> in case <var>a</var> is a reference-to-rowrow.
+<dt><code>DIAG weak-tertiary</code>
+<dd>Equivalent to <code>0 DIAG weak-tertiary</code>.
+<dt><code>meek-integral-tertiary COL weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>u[i] = (k COL u)[i, k]</code> for valid <var>i</var>.
+<br>It is guaranteed that <code>u[i] IS (k COL u)[i, k]</code> in case <var>u</var> is a reference-to-row.
+<dt><code>COL weak-tertiary</code>
+<dd>Equivalent to <code>1 COL weak-tertiary</code>.
+<dt><code>meek-integral-tertiary ROW weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>u[i] = (k ROW u)[k, i]</code> for valid <var>i</var>.
+<br>It is guaranteed that <code>u[i] IS (k COL u)[k, i]</code> in case <var>u</var> is a reference-to-row.
+<dt><code>ROW weak-tertiary</code>
+<dd>Equivalent to <code>1 ROW weak-tertiary</code>.
+</dl>
+
+<p>
+Algol68G extends the standard environ as described by the Revised Report with a number of procedures for linear algebra and Fourier transforms. These procedures require the 
+<a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a> (GSL, version 1.8 or compatible). This library is optional; if it is not present on your system, Algol68G will build without support for linear algebra. 
 
 <p>
 The routines described in this chapter provide a simple vector and
@@ -137,6 +166,9 @@ Routines in this chapter convert Algol 68 rows to objects compatible with vector
 <dt><code>OP T = ([, ] REAL u) [, ] REAL</code>
 <dt><code>OP T = ([, ] COMPLEX u) [, ] COMPLEX</code>
 <dd>Evaluates the transpose of matrix <code>u</code>.
+<br> 
+Note that operator <code>T</code> yields a copy of the transpose of its argument, 
+whereas pseudo-operator <code>TRNSP</code> yields a descriptor without copying its argument. 
 </dl>
 
 <dl>
@@ -321,10 +353,10 @@ Singular value decomposition has many practical applications. The ratio of the l
 
 <dl>
 <dt><code>PROC sv decomp = ([, ] REAL a, REF [, ] REAL v, REF [] REAL s) [, ] REAL</code>
-<dd>This routine factorizes a M * N matrix <code>A</code> into the singular value decomposition A = U * S * V<sup>T</sup> for M >= N. The routine yields U. The diagonal elements of singular value matrix S are stored in vector <code>s</code>. The singular values are non-negative and form a non-increasing sequence from s<sub>1</sub> to s<sub>N</sub>. Matrix <code>v</code> contains on completion the elements of V in untransposed form. To form the product U * S * V<sup>T</sup> it is necessary to take the transpose of <code>V</code>. This routine uses the Golub-Reinsch SVD algorithm. 
+<dd>This routine factorises a M * N matrix <code>A</code> into the singular value decomposition A = U * S * V<sup>T</sup> for M >= N. The routine yields U. The diagonal elements of singular value matrix S are stored in vector <code>s</code>. The singular values are non-negative and form a non-increasing sequence from s<sub>1</sub> to s<sub>N</sub>. Matrix <code>v</code> contains on completion the elements of V in untransposed form. To form the product U * S * V<sup>T</sup> it is necessary to take the transpose of <code>V</code>. This routine uses the Golub-Reinsch SVD algorithm. 
 
-<dt><code>PROC svd solve ([, ] REAL u, v, [] REAL s, [] REAL b) [] REAL</code>
-<dd>This routine solves the system A * x = b using the singular value decomposition (<code>u</code>, <code>s</code>, <code>v</code>) of A computed by <code>svd decomp</code>. Only non-zero singular values are used in calculating the solution. The parts of the solution corresponding to singular values of zero are ignored. Other singular values can be edited out by setting them to zero before calling this routine. In the overdetermined case where A has more rows than columns the routine returns solution <code>x</code> which minimizes ||A * x - b||<sup>2</sup>. 
+<dt><code>PROC svd solve = ([, ] REAL u, v, [] REAL s, [] REAL b) [] REAL</code>
+<dd>This routine solves the system A * x = b using the singular value decomposition (<code>u</code>, <code>s</code>, <code>v</code>) of A computed by <code>svd decomp</code>. Only non-zero singular values are used in calculating the solution. The parts of the solution corresponding to singular values of zero are ignored. Other singular values can be edited out by setting them to zero before calling this routine. In the overdetermined case where A has more rows than columns the routine returns solution <code>x</code> which minimises ||A * x - b||<sup>2</sup>. 
 </dl>
 
 <h4><a name="qr"></a>QR decomposition</h4>
@@ -335,13 +367,13 @@ A M * N matrix A has a decomposition into the product of an orthogonal M * M sqa
 QR decomposition can be used to determine an orthonormal basis for a set of vectors since the first N colums of Q form an orthonormal basis for the range of A.
 <dl>
 <dt><code>PROC qr decomp = ([, ] REAL a, REF [] REAL t) [, ] REAL</code>
-<dd>This routine factorizes the M * N matrix <code>a</code> into the QR decomposition A = Q * R. The diagonal and upper triangular part of the returned matrix contain matrix R. The vector <code>t</code> and the columns of the lower triangular part of matrix <code>a</code> contain the Householder coefficients and Householder vectors which encode the orthogonal matrix Q. Vector <code>t</code> must have length min(M, N). Matrix Q is related to these components by Q = q<sub>k</sub> ... q<sub>2</sub>q<sub>1</sub> where q<sub>i</sub> = I - t<sub>i</sub> v<sub>i</sub> v<sub>i</sub><sup>T</sup> and v<sub>i</sub> is the Householder vector v<sub>i</sub> = (0, ..., 1, A(i + 1, i), A(i + 2, i), ..., A(m, i)) (this is the same scheme as used by LAPACK). The algorithm used to perform the decomposition is Householder QR (Golub and Van Loan, <i>Matrix Computations</i>, Algorithm 5.2.1). 
+<dd>This routine factorises the M * N matrix <code>a</code> into the QR decomposition A = Q * R. The diagonal and upper triangular part of the returned matrix contain matrix R. The vector <code>t</code> and the columns of the lower triangular part of matrix <code>a</code> contain the Householder coefficients and Householder vectors which encode the orthogonal matrix Q. Vector <code>t</code> must have length min(M, N). Matrix Q is related to these components by Q = q<sub>k</sub> ... q<sub>2</sub>q<sub>1</sub> where q<sub>i</sub> = I - t<sub>i</sub> v<sub>i</sub> v<sub>i</sub><sup>T</sup> and v<sub>i</sub> is the Householder vector v<sub>i</sub> = (0, ..., 1, A(i + 1, i), A(i + 2, i), ..., A(m, i)) (this is the same scheme as used by LAPACK). The algorithm used to perform the decomposition is Householder QR (Golub and Van Loan, <i>Matrix Computations</i>, Algorithm 5.2.1). 
 
 <dt><code>PROC qr solve ([, ] REAL a, [] REAL t, [] REAL b) [] REAL</code>
 <dd>This routine solves the square system A * x = b using the QR decomposition of A into (<code>a</code>, <code>t</code>) computed by <code>qr decomp</code>. The least-squares solution for rectangular equations can be found using <code>qr ls solve</code>. 
 
 <dt><code>PROC qr ls solve ([, ] REAL a, [] REAL t, [] REAL b) [] REAL</code>
-<dd>This routine finds the least squares solution to the overdetermined system A * x = b where M * N matrix <code>A</code> has more rows than columns, id est M > N. The least squares solution minimizes the Euclidean norm of the residual ||A * x - b||<sup>2</sup>. The routine uses the QR decomposition of A into (<code>a</code>, <code>t</code>) computed by <code>qr decomp</code>.
+<dd>This routine finds the least squares solution to the overdetermined system A * x = b where M * N matrix <code>A</code> has more rows than columns, id est M > N. The least squares solution minimises the Euclidean norm of the residual ||A * x - b||<sup>2</sup>. The routine uses the QR decomposition of A into (<code>a</code>, <code>t</code>) computed by <code>qr decomp</code>.
 </dl>
 
 <h4><a name="ch"></a>Cholesky decomposition</h4>
@@ -350,21 +382,73 @@ QR decomposition can be used to determine an orthonormal basis for a set of vect
 
 <dl>
 <dt><code>PROC cholesky decomp = ([, ] REAL a) [, ] REAL</code>
-<dd>This routine factorizes the positive-definite symmetric square matrix <code>a</code> into the Cholesky decomposition A = L * L<sup>T</sup>. The diagonal and lower triangular part of the returned matrix contain matrix L. The upper triangular part of the input matrix contains L<sup>T</sup>, the diagonal terms being identical for both L and L<sup>T</sup>. If the matrix is not positive-definite then the decomposition will fail.
+<dd>This routine factorises the positive-definite symmetric square matrix <code>a</code> into the Cholesky decomposition A = L * L<sup>T</sup>. The diagonal and lower triangular part of the returned matrix contain matrix L. The upper triangular part of the input matrix contains L<sup>T</sup>, the diagonal terms being identical for both L and L<sup>T</sup>. If the matrix is not positive-definite then the decomposition will fail.
 
-<dt><code>PROC cholesky solve ([, ] REAL a, [] REAL b) [] REAL</code>
+<dt><code>PROC cholesky solve = ([, ] REAL a, [] REAL b) [] REAL</code>
 <dd>This routine solves the system A * x = b using the Cholesky decomposition of A into matrix <code>a</code> computed by <code>cholesky decomp</code>. 
 </dl>
 
+<h2><a name="fft"></a>Fourier transforms</h2>
+
+<p>
+This section describes mixed-radix fast Fourier transform (FFT) algorithms for complex data. The mixed-radix procedures work for FFTs of any length. They are a reimplementation of Paul Swarztrauber's <code>FFTPACK</code> library. 
+
+<p>
+The mixed-radix algorithm is based on sub-transform modules - highly optimised small length FFTs which are combined to create larger FFTs. There are efficient modules for factors of 2, 3, 4, 5, 6 and 7. The modules for the composite factors of 4 and 6 are faster than combining the modules for 2*2 and 2*3.
+
+<p>
+For factors which are not implemented as modules there is a general module which uses Singleton's method. Lengths which use the general module will still be factorised as much as possible. For example, a length of 143 will be factorised into 11*13. Large prime factors, e.g. 99991, should be avoided because of the <i>O(n^2)</i> complexity of the general module. The procedure <code>prime factors</code> can be used to detect inefficiencies in computing a FFT.
+
+<p>
+For physical applications it is important to note that the index appearing in the discrete Fourier transform (DFT) does not correspond directly to a physical frequency. If the time-step of the DFT reads <i>dt</i> then the frequency-domain includes both positive and negative frequencies, ranging from
+<i>-1/(2dt)</i> to <i>+1/(2dt)</i>. 
+The positive frequencies are stored from the beginning of the row up to the middle, and the negative frequencies are stored backwards from the end of the row.
+
+<p>
+When N is even:
+<p>
+<table border=0 cellpadding=0 cellspacing=6>
+<tr><td bgcolor=#e0e0e0>Index</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>Time</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>Frequency</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>1</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>0</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>0</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>2</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>dt</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>1/(N dt)</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>...</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>...</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>...</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>N/2</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>(N/2-1) dt</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>(N/2-1)/(N dt)</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>N/2+1</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>(N/2) dt</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>-1/(2 dt), 1/(2 dt)</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>N/2+2</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>(N/2+1) dt</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>-(N/2-1)/(N dt)</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>...</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>...</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>...</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>N-1</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>(N-2) dt</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>-2/(N dt)</td bgcolor=#e0e0e0></tr>
+<tr><td bgcolor=#e0e0e0>N</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>(N-1) dt</td bgcolor=#e0e0e0><td bgcolor=#e0e0e0>-1/(N dt)</td bgcolor=#e0e0e0></tr>
+</table>
+
+<p>
+When the length <i>N</i> of the row is even, the location <i>N/2+1</i> contains the most positive and negative frequencies
+<i>-1/(2dt)</i> and <i>+1/(2dt)</i>
+that are equivalent. If <i>N</i> is odd, this central value does not appear, but the general structure of above table still applies.
+
+<dl>
+<dt><code>PROC prime factors = (INT n) [] INT</code>
+<dd>Factorises argument <var>n</var> and yields the factors as a row of integral values. This routine can be used to determine whether the Fourier transform of a row of length <var>n</var> can be calculated in an efficient way.
+</dl>
+
+<dl>
+<dt><code>PROC fft complex forward = ([] COMPLEX) [] COMPLEX</code>
+<dt><code>PROC fft complex backward = ([] COMPLEX) [] COMPLEX</code>
+<dt><code>PROC fft complex inverse = ([] COMPLEX) [] COMPLEX</code>
+<dt><code>PROC fft forward = ([] REAL) [] COMPLEX</code>
+<dt><code>PROC fft backward = ([] COMPLEX) [] REAL</code>
+<dt><code>PROC fft inverse = ([] COMPLEX) [] REAL</code>
+<dd>These procedures compute forward, backward (i.e., an unscaled inverse) and inverse FFTs, using a mixed radix decimation-in-frequency algorithm. There is no restriction on the length of the argument rows. Efficient modules are provided for subtransforms of length 2, 3, 4, 5, 6 and 7. Any remaining factors are computed with a slow, <i>O(N^2)</i>, module. 
+</dl>
+
 <!-- Footer -->
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.2 (April 2007)
+Algol 68 Genie Mark 11 (November 2007)
 </small>
 </p>
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 
 </body>
 </html>

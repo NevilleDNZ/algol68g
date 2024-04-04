@@ -121,7 +121,7 @@ void genie_string_in_string (NODE_T * p)
   }
 }
 
-#if defined HAVE_REGEX
+#if defined ENABLE_REGEX
 
 #include <regex.h>
 
@@ -187,7 +187,7 @@ void genie_grep_in_string (NODE_T * p)
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = malloc (nmatch * SIZE_OF (regmatch_t));
+  matches = malloc (nmatch * ALIGNED_SIZEOF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
     PUSH_PRIMITIVE (p, rc, A68_INT);
     regfree (&compiled);
@@ -258,7 +258,7 @@ void genie_sub_in_string (NODE_T * p)
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = malloc (nmatch * SIZE_OF (regmatch_t));
+  matches = malloc (nmatch * ALIGNED_SIZEOF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
     PUSH_PRIMITIVE (p, rc, A68_INT);
     regfree (&compiled);

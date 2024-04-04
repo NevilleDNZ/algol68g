@@ -35,7 +35,7 @@ Some routines are based on
 #include "genie.h"
 #include "mp.h"
 
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
 
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
@@ -47,8 +47,8 @@ Some routines are based on
 #define GSL_COMPLEX_FUNCTION(f)\
   gsl_complex x, z;\
   A68_REAL *rex, *imx;\
-  imx = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));\
-  rex = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));\
+  imx = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));\
+  rex = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));\
   GSL_SET_COMPLEX (&x, rex->value, imx->value);\
   (void) gsl_set_error_handler_off ();\
   RESET_ERRNO;\
@@ -90,7 +90,7 @@ void genie_iint_complex (NODE_T * p)
 
 void genie_re_complex (NODE_T * p)
 {
-  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_REAL));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_REAL));
 }
 
 /*!
@@ -102,7 +102,7 @@ void genie_im_complex (NODE_T * p)
 {
   A68_REAL im;
   POP_OBJECT (p, &im, A68_REAL);
-  *(A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL))) = im;
+  *(A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL))) = im;
 }
 
 /*!
@@ -113,8 +113,8 @@ void genie_im_complex (NODE_T * p)
 void genie_minus_complex (NODE_T * p)
 {
   A68_REAL *re_x, *im_x;
-  im_x = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re_x = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im_x = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re_x = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   im_x->value = -im_x->value;
   re_x->value = -re_x->value;
   (void) p;
@@ -170,8 +170,8 @@ void genie_add_complex (NODE_T * p)
 {
   A68_REAL *re_x, *im_x, re_y, im_y;
   POP_COMPLEX (p, &re_y, &im_y);
-  im_x = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re_x = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im_x = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re_x = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   im_x->value += im_y.value;
   re_x->value += re_y.value;
   TEST_COMPLEX_REPRESENTATION (p, re_x->value, im_x->value);
@@ -186,8 +186,8 @@ void genie_sub_complex (NODE_T * p)
 {
   A68_REAL *re_x, *im_x, re_y, im_y;
   POP_COMPLEX (p, &re_y, &im_y);
-  im_x = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re_x = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im_x = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re_x = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   im_x->value -= im_y.value;
   re_x->value -= re_y.value;
   TEST_COMPLEX_REPRESENTATION (p, re_x->value, im_x->value);
@@ -221,7 +221,7 @@ void genie_div_complex (NODE_T * p)
   double re = 0.0, im = 0.0;
   POP_COMPLEX (p, &re_y, &im_y);
   POP_COMPLEX (p, &re_x, &im_x);
-#if ! defined HAVE_IEEE_754
+#if ! defined ENABLE_IEEE_754
   if (re_y.value == 0.0 && im_y.value == 0.0) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (COMPLEX));
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -773,8 +773,8 @@ void genie_divab_long_complex (NODE_T * p)
 void genie_sqrt_complex (NODE_T * p)
 {
   A68_REAL *re, *im;
-  im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   if (re->value == 0.0 && im->value == 0.0) {
     re->value = 0.0;
@@ -830,8 +830,8 @@ void genie_exp_complex (NODE_T * p)
 {
   A68_REAL *re, *im;
   double r;
-  im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   r = exp (re->value);
   re->value = r * cos (im->value);
@@ -866,8 +866,8 @@ void genie_exp_long_complex (NODE_T * p)
 void genie_ln_complex (NODE_T * p)
 {
   A68_REAL *re, *im, r, th;
-  im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   PUSH_COMPLEX (p, re->value, im->value);
   genie_abs_complex (p);
@@ -907,8 +907,8 @@ void genie_ln_long_complex (NODE_T * p)
 void genie_sin_complex (NODE_T * p)
 {
   A68_REAL *re, *im;
-  im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   if (im->value == 0.0) {
     re->value = sin (re->value);
@@ -948,8 +948,8 @@ void genie_sin_long_complex (NODE_T * p)
 void genie_cos_complex (NODE_T * p)
 {
   A68_REAL *re, *im;
-  im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   if (im->value == 0.0) {
     re->value = cos (re->value);
@@ -988,8 +988,8 @@ void genie_cos_long_complex (NODE_T * p)
 
 void genie_tan_complex (NODE_T * p)
 {
-  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
+  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
   double r, i;
   A68_REAL u, v;
   RESET_ERRNO;
@@ -1036,8 +1036,8 @@ void genie_tan_long_complex (NODE_T * p)
 
 void genie_arcsin_complex (NODE_T * p)
 {
-  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
-  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
+  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
+  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   if (im == 0) {
     re->value = asin (re->value);
@@ -1078,8 +1078,8 @@ void genie_asin_long_complex (NODE_T * p)
 
 void genie_arccos_complex (NODE_T * p)
 {
-  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
-  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
+  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
+  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   if (im == 0) {
     re->value = acos (re->value);
@@ -1120,8 +1120,8 @@ void genie_acos_long_complex (NODE_T * p)
 
 void genie_arctan_complex (NODE_T * p)
 {
-  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
-  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
+  A68_REAL *re = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));
+  A68_REAL *im = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));
   RESET_ERRNO;
   if (im == 0) {
     re->value = atan (re->value);
@@ -1154,7 +1154,7 @@ void genie_atan_long_complex (NODE_T * p)
   math_rte (p, errno != 0, mode, NULL);
 }
 
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
 
 /*!
 \brief PROC csinh = (COMPLEX) COMPLEX

@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 10.2
+Documentation for Algol 68 Genie Mark 11
 </small>
 </td>
 </table>
@@ -69,7 +69,9 @@ Documentation for Algol 68 Genie Mark 10.2
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.2</b>
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
 &nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -77,15 +79,7 @@ Documentation for Algol 68 Genie Mark 10.2
 &nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
-<p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
@@ -108,8 +102,8 @@ The two-level Algol 68 syntax is described in the Revised Report.
 <p>This paragraph introduces notions and notation used in this reference text.
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
-<tr><td bgcolor="#f0f0f0"><b>Notion, notation</b></td><td bgcolor="#f0f0f0"><b>Meaning</b></td></tr>
-<tr><td  bgcolor="#f0f0f0">a <i>value</i></td><td  bgcolor="#f0f0f0"> 
+<tr><td bgcolor="#e0e0e0"><b>Notion, notation</b></td><td bgcolor="#e0e0e0"><b>Meaning</b></td></tr>
+<tr><td  bgcolor="#e0e0e0">a <i>value</i></td><td  bgcolor="#e0e0e0"> 
 <li>integer number or real number
 <li>truth value (<code>TRUE</code> or <code>FALSE</code>)
 <li>character
@@ -122,96 +116,100 @@ The two-level Algol 68 syntax is described in the Revised Report.
 <br>
 (note that there is neither a united value nor a flexible value, id est there is no value with mode UNION or FLEX) 
 </td></tr>
-<tr><td  bgcolor="#f0f0f0">a <i>name</i></td><td  bgcolor="#f0f0f0">a <i>name</i> is a value that refers to another value, or which can be NIL (that refers to no value)</td></tr>
-<tr><td  bgcolor="#f0f0f0">( )</td><td  bgcolor="#f0f0f0">used to group notions</td></tr>
-<tr><td  bgcolor="#f0f0f0">[SOME]</td><td  bgcolor="#f0f0f0">means "optional SOME"</td></tr>
-<tr><td  bgcolor="#f0f0f0"><b>a</b>: b.</td><td  bgcolor="#f0f0f0">means "definition of a is b"</td></tr>
-<tr><td  bgcolor="#f0f0f0">a, b</td><td  bgcolor="#f0f0f0">means "a or b"</td></tr>
-<tr><td  bgcolor="#f0f0f0">`SOME'</td><td  bgcolor="#f0f0f0">means literal symbol SOME</td></tr>
-<tr><td  bgcolor="#f0f0f0">SOME-list</td><td  bgcolor="#f0f0f0">SOME [`,' SOME-list]</td></tr>
-<tr><td  bgcolor="#f0f0f0">SOME-sequence</td><td  bgcolor="#f0f0f0">SOME [SOME-sequence]</td></tr>
+<tr><td  bgcolor="#e0e0e0">a <i>name</i></td><td  bgcolor="#e0e0e0">a <i>name</i> is a value that refers to another value, or which can be NIL (that refers to no value)</td></tr>
+<tr><td  bgcolor="#e0e0e0">( )</td><td  bgcolor="#e0e0e0">used to group notions</td></tr>
+<tr><td  bgcolor="#e0e0e0">[SOME]</td><td  bgcolor="#e0e0e0">means "optional SOME"</td></tr>
+<tr><td  bgcolor="#e0e0e0"><b>a</b>: b.</td><td  bgcolor="#e0e0e0">means "definition of a is b"</td></tr>
+<tr><td  bgcolor="#e0e0e0">a, b</td><td  bgcolor="#e0e0e0">means "a or b"</td></tr>
+<tr><td  bgcolor="#e0e0e0">`SOME'</td><td  bgcolor="#e0e0e0">means literal symbol SOME</td></tr>
+<tr><td  bgcolor="#e0e0e0">SOME-list</td><td  bgcolor="#e0e0e0">SOME [`,' SOME-list]</td></tr>
+<tr><td  bgcolor="#e0e0e0">SOME-sequence</td><td  bgcolor="#e0e0e0">SOME [SOME-sequence]</td></tr>
 </table>
 
 <h3><a name="reserved"></a>Reserved symbols</h3>
 <p>
-Next symbols are reserved in Algol 68 Genie Mark 10.2:
+Next symbols are reserved in Algol 68 Genie Mark 11:
 <p>
 <code>
-  ANDF,
-  ANDTH,
-  ASSERT,
-  AT,
-  BEGIN,
-  BITS,
-  BOOL,
-  BY,
-  BYTES,
-  CASE,
-  CHANNEL,
-  CHAR,
-  CO,
-  CODE,
-  COMMENT,
-  COMPL,
-  COMPLEX,
-  DO,
-  DOWNTO,
-  EDOC,
-  ELIF,
-  ELSE,
-  ELSF,
-  EMPTY,
-  END,
-  ENVIRON,
-  ESAC,
-  EXIT,
-  FALSE,
-  FI,
-  FILE,
-  FLEX,
-  FOR,
-  FORMAT,
-  FROM,
-  GO,
-  GOTO,
-  HEAP,
-  IF,
-  IN,
-  INT,
-  IS,
-  ISNT,
-  LOC,
-  LONG,
-  MODE,
-  NIL,
-  OD,
-  OF,
-  OP,
-  OREL,
-  ORF,
-  OUSE,
-  OUT,
-  PAR,
-  PIPE,
-  PR,
-  PRAGMAT,
-  PRIO,
-  PROC,
-  REAL,
-  REF,
-  SEMA,
-  SHORT,
-  SKIP,
-  STRING,
-  STRUCT,
-  THEF,
-  THEN,
-  TO,
-  TRUE,
-  UNION,
-  UNTIL,
-  VOID,
-  WHILE
+ANDF,
+ANDTH,
+ASSERT,
+ASSIGN,
+AT,
+BEGIN,
+BITS,
+COMMENT,
+PRAGMAT,
+BOOL,
+BY,
+BYTES,
+CASE,
+CHANNEL,
+CHAR,
+CODE,
+COL,
+COMPLEX,
+COMPL,
+DIAG,
+DO,
+DOWNTO,
+EDOC,
+ELIF,
+ELSE,
+ELSF,
+EMPTY,
+END,
+ENVIRON,
+ESAC,
+EXIT,
+FALSE,
+FILE,
+FI,
+FLEX,
+FORMAT,
+FOR,
+FROM,
+GO,
+GOTO,
+HEAP,
+IF,
+IN,
+INT,
+ISNT,
+IS,
+LOC,
+LONG,
+MODE,
+NIL,
+OD,
+OF,
+OP,
+OREL,
+ORF,
+OUSE,
+OUT,
+PAR,
+PIPE,
+PRIO,
+PROC,
+REAL,
+REF,
+ROW,
+SEMA,
+SHORT,
+SKIP,
+SOUND,
+STRING,
+STRUCT,
+THEF,
+THEN,
+TO,
+TRNSP,
+TRUE,
+UNION,
+UNTIL,
+VOID,
+WHILE
 </code>
 
 <br>
@@ -220,28 +218,28 @@ Next symbols are reserved in Algol 68 Genie Mark 10.2:
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="#f0f0f0"><b>Context strength</b></td>
-<td bgcolor="#f0f0f0"><b>Allowed coercions</b></td>
+<td bgcolor="#e0e0e0"><b>Context strength</b></td>
+<td bgcolor="#e0e0e0"><b>Allowed coercions</b></td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">soft</td>
-<td bgcolor="#f0f0f0">deproceduring</td>
+<td bgcolor="#e0e0e0">soft</td>
+<td bgcolor="#e0e0e0">deproceduring</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">weak</td>
-<td bgcolor="#f0f0f0">dereferencing or deproceduring, yielding a name</td>
+<td bgcolor="#e0e0e0">weak</td>
+<td bgcolor="#e0e0e0">dereferencing or deproceduring, yielding a name</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">meek</td>
-<td bgcolor="#f0f0f0">dereferencing or deproceduring</td>
+<td bgcolor="#e0e0e0">meek</td>
+<td bgcolor="#e0e0e0">dereferencing or deproceduring</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">firm</td>
-<td bgcolor="#f0f0f0">meek, followed by uniting</td>
+<td bgcolor="#e0e0e0">firm</td>
+<td bgcolor="#e0e0e0">meek, followed by uniting</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">strong</td>
-<td bgcolor="#f0f0f0">firm, followed by widening, rowing or voiding</td>
+<td bgcolor="#e0e0e0">strong</td>
+<td bgcolor="#e0e0e0">firm, followed by widening, rowing or voiding</td>
 </tr>
 </table>
 
@@ -250,57 +248,57 @@ In a strong context, Algol68G implements next widenings:
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
 <tr>
-<td bgcolor="#f0f0f0"><b>From</b></td></td><td bgcolor="#f0f0f0"><b>To</b></td>
+<td bgcolor="#e0e0e0"><b>From</b></td></td><td bgcolor="#e0e0e0"><b>To</b></td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">INT</td>
-<td bgcolor="#f0f0f0">REAL<br>LONG INT</td>
+<td bgcolor="#e0e0e0">INT</td>
+<td bgcolor="#e0e0e0">REAL<br>LONG INT</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">LONG INT</td>
-<td bgcolor="#f0f0f0">LONG LONG INT<br>LONG LONG REAL</td>
+<td bgcolor="#e0e0e0">LONG INT</td>
+<td bgcolor="#e0e0e0">LONG LONG INT<br>LONG LONG REAL</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">LONG LONG INT</td>
-<td bgcolor="#f0f0f0">LONG LONG REAL</td>
+<td bgcolor="#e0e0e0">LONG LONG INT</td>
+<td bgcolor="#e0e0e0">LONG LONG REAL</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">REAL</td>
-<td bgcolor="#f0f0f0">COMPLEX<br>LONG REAL</td>
+<td bgcolor="#e0e0e0">REAL</td>
+<td bgcolor="#e0e0e0">COMPLEX<br>LONG REAL</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">LONG REAL</td>
-<td bgcolor="#f0f0f0"> LONG LONG REAL<br>LONG COMPLEX
+<td bgcolor="#e0e0e0">LONG REAL</td>
+<td bgcolor="#e0e0e0"> LONG LONG REAL<br>LONG COMPLEX
 </td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">LONG LONG REAL</td>
-<td bgcolor="#f0f0f0">LONG LONG COMPLEX</td>
+<td bgcolor="#e0e0e0">LONG LONG REAL</td>
+<td bgcolor="#e0e0e0">LONG LONG COMPLEX</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">COMPLEX</td>
-<td bgcolor="#f0f0f0">LONG COMPLEX</td>
+<td bgcolor="#e0e0e0">COMPLEX</td>
+<td bgcolor="#e0e0e0">LONG COMPLEX</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">LONG COMPLEX</td>
-<td bgcolor="#f0f0f0">LONG LONG COMPLEX</td>
+<td bgcolor="#e0e0e0">LONG COMPLEX</td>
+<td bgcolor="#e0e0e0">LONG LONG COMPLEX</td>
 </tr>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">BITS</td>
-<td bgcolor="#f0f0f0">LONG BITS</td>
+<td bgcolor="#e0e0e0">BITS</td>
+<td bgcolor="#e0e0e0">LONG BITS</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">LONG BITS</td>
-<td bgcolor="#f0f0f0">LONG LONG BITS</td>
+<td bgcolor="#e0e0e0">LONG BITS</td>
+<td bgcolor="#e0e0e0">LONG LONG BITS</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">BITS<br>LONG BITS<br>LONG LONG BITS</td>
-<td bgcolor="#f0f0f0">[ ] BOOL</td>
+<td bgcolor="#e0e0e0">BITS<br>LONG BITS<br>LONG LONG BITS</td>
+<td bgcolor="#e0e0e0">[ ] BOOL</td>
 </tr>
 <tr>
-<td bgcolor="#f0f0f0">BYTES<br>LONG BYTES</td>
-<td bgcolor="#f0f0f0">[ ] CHAR</td>
+<td bgcolor="#e0e0e0">BYTES<br>LONG BYTES</td>
+<td bgcolor="#e0e0e0">[ ] CHAR</td>
 </tr>
 </table>
 
@@ -419,7 +417,7 @@ Enclosed clauses provide structure for a particular program.
 Short-hand notations for enclosed clauses:<br> 
 <ul>
 <li>`(' .. `)' for `BEGIN' .. `END'<br>
-<li>`(' .. `|' .. `|:' .. `|' .. `)' for `IF' .. `THEN' .. `ELIF' .. `THEN' .. `FI'<br>
+<li>`(' .. `|' .. `|:' .. `|' .. `)' for `IF' .. `THEN' .. (`ELIF', `ELSF') .. `THEN' .. `FI'<br>
 <li>`(' .. `|' .. `|:' .. `|' .. `)' for `CASE' .. `IN' .. `OUSE' .. `OUT' .. `ESAC'<br>
 </ul>
 </ul>
@@ -450,7 +448,7 @@ In a parallel-clause the elaboration of units can be synchronised using semaphor
 
 <ul>
 <b>conditional-clause</b>: `IF' meek-boolean-enquiry-clause `THEN' serial-clause
-                    [(`ELIF' meek-boolean-enquiry-clause `THEN' serial-clause)-sequence] 
+                    [((`ELIF', `ELSF') meek-boolean-enquiry-clause `THEN' serial-clause)-sequence] 
                     [`ELSE' serial-clause]
                     `FI'
 <ul><code>
@@ -647,7 +645,8 @@ HEAP allocates in the heap and LOC allocates in the stack.
 <ul>
 <b>tertiary</b>: secondary,
           nihil,
-          formula.<br>
+          formula,
+          stowed-function.<br>
 </ul>
 
 <ul>
@@ -664,6 +663,15 @@ Formulas apply operators to operands.
 <li>- 1
 <li>- SIGN z * ARG z # means (- (SIGN z)) * (ARG z)
 <li>- x ** 2 # means (- x) ** 2, not - (x ** 2) ! #
+</code></ul>
+</ul>
+
+<ul>
+<b>stowed-function</b>: (`DIAG', `TRNSP', `ROW', `COL') weak-tertiary,
+meek-integral-tertiary (`DIAG', `ROW', `COL') weak-tertiary.<br>
+(Algol68G extension) A stowed function yields a descriptor that refers to the same data as its argument.
+<ul><code>
+<li>[3, 3] BOOL z; DIAG z := (TRUE, TRUE, TRUE) # same as z[1, 1] := z[2, 2] := z[3, 3] := TRUE #
 </code></ul>
 </ul>
 
@@ -721,10 +729,11 @@ Skip has no action but yield an undefined value of the required mode.
 </ul>
 
 <ul>
-<b>conditional-function</b>: meek-boolean-tertiary (`ANDF', `ANDTH', `ORF', `OREL') meek-boolean-tertiary.<br>
+<b>conditional-function</b>: meek-boolean-tertiary (`ANDF', `ANDTH', `THEF', `ORF', `OREL') meek-boolean-tertiary.<br>
 (Algol68G extension) A conditional function does not evaluate its second operand if the result can be deduced after evaluating the first.
 <ul><code>
 <li>(z ISNT NIL) ANDF freq OF z > 0 # avoid dereferencing NIL #  
+<li>IF a = b THEF b = c THEN print ("a = b = c") FI
 </code></ul>
 </ul>
 
@@ -850,7 +859,7 @@ Algol 68 employs structural equivalence for modes. Note that field identifiers i
 </ul>
 
 <ul>
-<b>primitive-declarer</b>: `INT', `REAL', `COMPL', `COMPLEX', `BOOL', `CHAR', `STRING', `BITS', `BYTES', `FORMAT', `FILE', `PIPE', `CHANNEL', `SEMA'.<br>
+<b>primitive-declarer</b>: `INT', `REAL', `COMPL', `COMPLEX', `BOOL', `CHAR', `STRING', `BITS', `BYTES', `FORMAT', `FILE', `PIPE', `CHANNEL', `SEMA', 'SOUND'.<br>
 Primitive-declarers are the standard provided modes.
 </ul>
  
@@ -1042,14 +1051,14 @@ The <a href="extensions.html#refine">refinement preprocessor</a> is a low-level 
 </ul>
 
 <!-- Footer -->
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.2 (April 2007)
+Algol 68 Genie Mark 11 (November 2007)
 </small>
 </p>
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 
 </body>
 </html>

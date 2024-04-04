@@ -38,16 +38,10 @@ detailed description of Algol68G.
 #include "genie.h"
 #include "mp.h"
 
-#if defined HAVE_WIN32
-#include <sys/time.h>
-#else
-#include <sys/times.h>
-#endif
-
 int global_argc;                /* Keep argc and argv for reference from A68. */
 char **global_argv;
 
-#if defined HAVE_TERMINFO
+#if defined ENABLE_TERMINFO
 #include <term.h>
 char term_buffer[2 * KILOBYTE];
 char *term_type;
@@ -80,7 +74,7 @@ void state_license (FILE_T f)
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
   }
-  snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, copyright 2006 J. Marcel van der Veer.\n", REVISION);
+  snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, copyright %s J. Marcel van der Veer.\n", RELEASE_YEAR, REVISION);
   io_write_string (f, output_line);
   P ("Algol 68 Genie is free software covered by the GNU General Public License.");
   P ("There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.");
@@ -102,8 +96,10 @@ void state_version (FILE_T f)
   state_license (f);
   snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, %s\n", REVISION, RELEASE_DATE);
   io_write_string (f, output_line);
-#if ! defined HAVE_WIN32
-  snprintf (output_line, BUFFER_SIZE, "Image \"%s\" compiled by %s on %s %s", A68G_NAME, USERID, __DATE__, __TIME__);
+#if ! defined ENABLE_WIN32
+  snprintf (output_line, BUFFER_SIZE, "Image \"%s\" built by %s on %s", A68G_NAME, USERID, __DATE__);
+  io_write_string (f, output_line);
+  snprintf (output_line, BUFFER_SIZE, "\nCompiled on %s", OS_NAME);
   io_write_string (f, output_line);
 #if defined __GNUC__ && defined GCC_VERSION
   snprintf (output_line, BUFFER_SIZE, " with gcc %s\n", GCC_VERSION);
@@ -113,15 +109,15 @@ void state_version (FILE_T f)
   io_write_string (f, output_line);
 #endif
 #endif
-#if defined HAVE_PLOTUTILS && defined A68_LIBPLOT_VERSION
+#if defined ENABLE_GRAPHICS && defined A68_LIBPLOT_VERSION
   snprintf (output_line, BUFFER_SIZE, "GNU libplot %s\n", A68_LIBPLOT_VERSION);
   io_write_string (f, output_line);
 #endif
-#if defined HAVE_GSL && defined A68_GSL_VERSION
+#if defined ENABLE_NUMERICAL && defined A68_GSL_VERSION
   snprintf (output_line, BUFFER_SIZE, "GNU Scientific Library %s\n", A68_GSL_VERSION);
   io_write_string (f, output_line);
 #endif
-#if defined HAVE_POSTGRESQL && defined A68_PG_VERSION
+#if defined ENABLE_POSTGRESQL && defined A68_PG_VERSION
   snprintf (output_line, BUFFER_SIZE, "PostgreSQL libpq %s\n", A68_PG_VERSION);
   io_write_string (f, output_line);
 #endif
@@ -227,7 +223,7 @@ int main (int argc, char *argv[])
 {
   BYTE_T stack_offset;
   int argcc;
-#if defined HAVE_TERMINFO
+#if defined ENABLE_TERMINFO
   term_type = getenv ("TERM");
   if (term_type == NULL) {
     term_width = MAX_LINE_WIDTH;
@@ -239,7 +235,7 @@ int main (int argc, char *argv[])
 #else
   term_width = MAX_LINE_WIDTH;
 #endif
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   main_thread_id = pthread_self ();
 #endif
   global_argc = argc;
@@ -339,7 +335,7 @@ static void init_before_tokeniser (void)
 
 static void compiler_interpreter (void)
 {
-  int k, len;
+  int k, len, num;
   BOOL_T path_set = A68_FALSE;
   tree_listing_safe = A68_FALSE;
   cross_reference_safe = A68_FALSE;
@@ -374,7 +370,7 @@ Accept various silent extensions.
   a68_prog.files.path = new_string (a68_prog.files.generic_name);
   path_set = A68_FALSE;
   for (k = strlen (a68_prog.files.path); k >= 0 && path_set == A68_FALSE; k--) {
-#if defined HAVE_WIN32
+#if defined ENABLE_WIN32
     char delim = '\\';
 #else
     char delim = '/';
@@ -424,6 +420,8 @@ Accept various silent extensions.
       a68_prog.files.source.opened = A68_FALSE;
       prune_echoes (&a68_prog, a68_prog.options.list);
       tree_listing_safe = A68_TRUE;
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
 /* Final initialisations. */
     if (error_count == 0) {
@@ -437,6 +435,7 @@ Accept various silent extensions.
       make_special_mode (&MODE (VACUUM), mode_count++);
       make_special_mode (&MODE (C_STRING), mode_count++);
       make_special_mode (&MODE (COLLITEM), mode_count++);
+      make_special_mode (&MODE (SOUND_DATA), mode_count++);
     }
 /* Refinement preprocessor. */
     if (error_count == 0) {
@@ -445,6 +444,8 @@ Accept various silent extensions.
       if (error_count == 0) {
         put_refinements (&a68_prog);
       }
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
 /* Top-down parser. */
     if (error_count == 0) {
@@ -459,6 +460,8 @@ Accept various silent extensions.
         stand_env->level = 0;
         top_down_parser (a68_prog.top_node);
       }
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
 /* Standard environment builder. */
     if (error_count == 0) {
@@ -471,6 +474,8 @@ Accept various silent extensions.
       announce_phase ("parser phase 2");
       preliminary_symbol_table_setup (a68_prog.top_node);
       bottom_up_parser (a68_prog.top_node);
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
     if (error_count == 0) {
       announce_phase ("parser phase 3");
@@ -483,6 +488,8 @@ Accept various silent extensions.
         set_par_level (a68_prog.top_node, 0);
         set_nests (a68_prog.top_node, NULL);
       }
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
 /* Mode table builder. */
     if (error_count == 0) {
@@ -499,6 +506,8 @@ Accept various silent extensions.
     if (error_count == 0) {
       announce_phase ("parser phase 4");
       rearrange_goto_less_jumps (a68_prog.top_node);
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
 /* Mode checker. */
     if (error_count == 0) {
@@ -512,7 +521,6 @@ Accept various silent extensions.
       announce_phase ("coercion enforcer");
       coercion_inserter (a68_prog.top_node);
       widen_denoter (a68_prog.top_node);
-      widen_denoter (a68_prog.top_node);
       protect_from_sweep (a68_prog.top_node);
       reset_max_simplout_size ();
       get_max_simplout_size (a68_prog.top_node);
@@ -522,6 +530,8 @@ Accept various silent extensions.
       assign_offsets_table (stand_env);
       assign_offsets (a68_prog.top_node);
       assign_offsets_packs (top_moid_list);
+      num = 0;
+      renumber_nodes (a68_prog.top_node, &num);
     }
 /* Application checker. */
     if (error_count == 0) {
@@ -546,15 +556,22 @@ Accept various silent extensions.
       portcheck (a68_prog.top_node);
     }
   }
-  /*
-   * if (!setjmp (exit_compilation)) 
-   */
-  /*
-   * Interpreter. 
-   */
+/* Optimisation, on ongoing project. */
+  if (error_count == 0 && a68_prog.options.optimise) {
+    announce_phase ("optimiser");
+    num = 0;
+    renumber_nodes (a68_prog.top_node, &num);
+    SYMBOL_TABLE (a68_prog.top_node)->nest = symbol_table_count = 3;
+    reset_symbol_table_nest_count (a68_prog.top_node);
+    num = 0;
+    renumber_nodes (a68_prog.top_node, &num);
+  }
+/* Interpreter. */
   diagnostics_to_terminal (a68_prog.top_line, A68_ALL_DIAGNOSTICS);
   if (error_count == 0 && (a68_prog.options.check_only ? a68_prog.options.run : A68_TRUE)) {
     announce_phase ("genie");
+    num = 0;
+    renumber_nodes (a68_prog.top_node, &num);
     genie (&a68_prog);
   }
 /* Setting up listing file. */
@@ -588,7 +605,7 @@ void a68g_exit (int code)
   bufcat (name, ".x", BUFFER_SIZE);
   remove (name);
   io_close_tty_line ();
-#if defined HAVE_CURSES
+#if defined ENABLE_CURSES
 /* "curses" might still be open if it was not closed from A68, or the program
    was interrupted, or a runtime error occured. That wreaks havoc on your
    terminal. */

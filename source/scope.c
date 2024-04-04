@@ -32,12 +32,14 @@ Static scope checker.
 typedef struct TUPLE_T TUPLE_T;
 typedef struct SCOPE_T SCOPE_T;
 
-struct TUPLE_T {
+struct TUPLE_T
+{
   int level;
   BOOL_T transient;
 };
 
-struct SCOPE_T {
+struct SCOPE_T
+{
   NODE_T *where;
   TUPLE_T tuple;
   SCOPE_T *next;
@@ -77,7 +79,7 @@ static TUPLE_T scope_make_tuple (int e, int t)
 static void scope_add (SCOPE_T ** sl, NODE_T * p, TUPLE_T tup)
 {
   if (sl != NULL) {
-    SCOPE_T *ns = (SCOPE_T *) get_temp_heap_space ((unsigned) SIZE_OF (SCOPE_T));
+    SCOPE_T *ns = (SCOPE_T *) get_temp_heap_space ((unsigned) ALIGNED_SIZEOF (SCOPE_T));
     ns->where = p;
     ns->tuple = tup;
     NEXT (ns) = *sl;
@@ -728,6 +730,48 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
       scope_add (s, p, scope_make_tuple (PRIMAL_SCOPE, NOT_TRANSIENT));
     }
     scope_declarer (SUB (NEXT_SUB (p)));
+  } else if (WHETHER (p, DIAGONAL_FUNCTION)) {
+    NODE_T *q = SUB (p);
+    SCOPE_T *ns = NULL;
+    if (WHETHER (q, TERTIARY)) {
+      scope_statement (SUB (q), &ns);
+      scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+      ns = NULL;
+      FORWARD (q);
+    }
+    scope_statement (SUB_NEXT (q), &ns);
+    scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+    scope_add (s, p, scope_find_youngest (ns));
+  } else if (WHETHER (p, TRANSPOSE_FUNCTION)) {
+    NODE_T *q = SUB (p);
+    SCOPE_T *ns = NULL;
+    scope_statement (SUB_NEXT (q), &ns);
+    scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+    scope_add (s, p, scope_find_youngest (ns));
+  } else if (WHETHER (p, ROW_FUNCTION)) {
+    NODE_T *q = SUB (p);
+    SCOPE_T *ns = NULL;
+    if (WHETHER (q, TERTIARY)) {
+      scope_statement (SUB (q), &ns);
+      scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+      ns = NULL;
+      FORWARD (q);
+    }
+    scope_statement (SUB_NEXT (q), &ns);
+    scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+    scope_add (s, p, scope_find_youngest (ns));
+  } else if (WHETHER (p, COLUMN_FUNCTION)) {
+    NODE_T *q = SUB (p);
+    SCOPE_T *ns = NULL;
+    if (WHETHER (q, TERTIARY)) {
+      scope_statement (SUB (q), &ns);
+      scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+      ns = NULL;
+      FORWARD (q);
+    }
+    scope_statement (SUB_NEXT (q), &ns);
+    scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (q));
+    scope_add (s, p, scope_find_youngest (ns));
   } else if (WHETHER (p, FORMULA)) {
     scope_formula (p, s);
   } else if (WHETHER (p, ASSIGNATION)) {

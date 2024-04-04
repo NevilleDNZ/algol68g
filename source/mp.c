@@ -738,7 +738,7 @@ unsigned *stack_mp_bits (NODE_T * p, MP_DIGIT_T * z, MOID_T * m)
   unsigned *row, mask;
   MP_DIGIT_T *u, *v, *w;
   row = (unsigned *) STACK_ADDRESS (stack_pointer);
-  INCREMENT_STACK_POINTER (p, words * SIZE_OF (unsigned));
+  INCREMENT_STACK_POINTER (p, words * ALIGNED_SIZEOF (unsigned));
   STACK_MP (u, p, digits);
   STACK_MP (v, p, digits);
   STACK_MP (w, p, digits);
@@ -1855,8 +1855,7 @@ MP_DIGIT_T *sqrt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
       div_mp (p, tmp, x_g, z_g, digits_h);
       add_mp (p, tmp, z_g, tmp, digits_h);
       half_mp (p, z_g, tmp, digits_h);
-    }
-    while (decimals < 2 * digits_g * LOG_MP_BASE);
+    } while (decimals < 2 * digits_g * LOG_MP_BASE);
   }
   if (reciprocal) {
     rec_mp (p, z_g, z_g, digits);
@@ -1918,8 +1917,7 @@ MP_DIGIT_T *curt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
       add_mp (p, tmp, z_g, tmp, digits_h);
       add_mp (p, tmp, z_g, tmp, digits_h);
       div_mp_digit (p, z_g, tmp, (MP_DIGIT_T) 3, digits_h);
-    }
-    while (decimals < digits_g * LOG_MP_BASE);
+    } while (decimals < digits_g * LOG_MP_BASE);
   }
   if (reciprocal) {
     rec_mp (p, z_g, z_g, digits);
@@ -2283,8 +2281,7 @@ MP_DIGIT_T *ln_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
       div_mp (p, tmp, x_g, tmp, digits_h);
       sub_mp (p, z_g, z_g, one, digits_h);
       add_mp (p, z_g, z_g, tmp, digits_h);
-    }
-    while (decimals < digits_g * LOG_MP_BASE);
+    } while (decimals < digits_g * LOG_MP_BASE);
   }
 /* Inverse scaling. */
   if (scale) {
@@ -3004,8 +3001,7 @@ MP_DIGIT_T *atan_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
       sub_mp (p, tmp, sns, tmp, digits_h);
       mul_mp (p, tmp, tmp, cns, digits_h);
       sub_mp (p, z_g, z_g, tmp, digits_h);
-    }
-    while (decimals < digits_g * LOG_MP_BASE);
+    } while (decimals < digits_g * LOG_MP_BASE);
   }
   if (flip) {
     MP_DIGIT_T *hpi;

@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+Documentation for Algol 68 Genie Mark 10.3
 </small>
 </td>
 </table>
@@ -38,7 +38,7 @@ Documentation for Algol 68 Genie Mark 11
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Example: dining persons problem</h2>
+<h2>Example: Towers of Hanoi</h2>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="algol68.gif">
@@ -50,7 +50,7 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
+<b>Algol68G Mark 10.3</b>
 <p>
 &nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
@@ -72,77 +72,43 @@ Documentation for Algol 68 Genie Mark 11
 </table>
 
 <pre>
-# 
-Dining persons problem, analogous to the "dining philosophers problem".
+# After MC Algol 68 Test Set decl03 #
 
-`N' persons sit at a round table with a bowl of spaghetti. 
-There are `N' forks, one between each pair of persons.
-To eat spaghetti, a person needs two forks, so not everybody can eat at
-the same time. This program synchronises their actions.
-#
+BEGIN # P.G. Hibbard, Proc. Int. Conf. A68 III, Winnipeg, June, 1974:
+        applied occurrence of mode-indication in actual-bounds
+        of its actual-declarer #
 
-MODE PERSON = INT;
+      INT n := 4, CHAR a := "a", b := "b", c := "c";
 
-INT persons = 10, idle = 0, try = 1, eat = 2, meal tickets = 2;
+      PROC swap = (REF CHAR c1, c2) VOID: (CHAR d = c1; c1 := c2; c2 := d);
 
-[persons] INT action, [persons] SEMA person;
+      MODE HANOI =
+         (IF n > 0
+          THEN n -:= 1; 
+	       swap (b, c); 
+	       HANOI h1; 
+	       swap (b, c);
+               print ((newline, "move ", whole(LWB h1 + 1, -1), " from ", a, " to ", c, "."));
+               swap (a, b);
+	       VOID (LOC HANOI);
+	       swap (a, b);
+	       n +:= 1
+          ELSE 0
+          FI .. 1) INT;
 
-FOR i TO persons
-DO action[i] := idle;
-   person[i] := LEVEL 0
-OD;
-
-SEMA mutex = LEVEL 1; # to synchronise access to `action' #
-
-PROC put at table = (PERSON i) VOID:
-     IF i > 0
-     THEN PAR BEGIN put at table (i - 1),
-                    (PROC do eat  = (PERSON i) VOID: print ((i, " eats")),
-                          do idle = (PERSON i) VOID: print ((i, " is not eating"));
-                     TO meal tickets
-                     DO OP LEFT  = (PERSON i) PERSON: 1 + (i - 1) %* persons,
-                           RIGHT = (PERSON i) PERSON: 1 + (i + 1) %* persons;
-
-                        PROC try eat = (PERSON i) VOID:
-                             IF action[i] = try ANDF 
-                                (action[LEFT i] ~= eat ANDF action[RIGHT i] ~= eat)
-                             THEN action[i] := eat;
-                                  UP person[i]
-                             FI;
-
-                        do idle (i);
-                        # Try to eat #
-                        DOWN mutex;
-                        action[i] := try;
-                        try eat (i);
-                        UP mutex;
-                        # Eat when we can #
-                        DOWN person [i];
-                        do eat (i);
-                        # Stop eating #
-                        DOWN mutex;
-                        action[i] := idle;
-                        try eat (LEFT i);
-                        try eat (RIGHT i);
-                        UP mutex
-                     OD;
-                     do idle (i)
-                    )
-              END
-     FI;
-
-put at table (persons)
+      VOID (LOC HANOI)
+END
 </pre>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
+<hr color=#f0f0f0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Algol 68 Genie Mark 10.3 (April 2007)
 </small>
 </p>
-<hr color=#e0e0e0>
+<hr color=#f0f0f0>
 
 </body>
 </html>
