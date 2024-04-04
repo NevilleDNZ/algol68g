@@ -204,8 +204,8 @@ void print_mode_flat (FILE_T f, MOID_T * m)
 static void xref_tags (FILE_T f, TAG_T * s, int a)
 {
   for (; s != NULL; FORWARD (s)) {
-    NODE_T *where = NODE (s);
-    if (where != NULL && ((MASK (where) & CROSS_REFERENCE_MASK))) {
+    NODE_T *where_tag = NODE (s);
+    if (where_tag != NULL && ((MASK (where_tag) & CROSS_REFERENCE_MASK))) {
       WRITE (f, "\n     ");
       switch (a) {
       case IDENTIFIER:
@@ -293,8 +293,8 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
       }
       snprintf (output_line, BUFFER_SIZE, " #%04x", NUMBER (s));
       WRITE (f, output_line);
-      if (where != NULL && where->info != NULL && where->info->line != NULL) {
-        snprintf (output_line, BUFFER_SIZE, " line %d", LINE_NUMBER (where));
+      if (where_tag != NULL && where_tag->info != NULL && where_tag->info->line != NULL) {
+        snprintf (output_line, BUFFER_SIZE, " line %d", LINE_NUMBER (where_tag));
         WRITE (f, output_line);
       }
     }
@@ -382,7 +382,7 @@ static void moid_listing (FILE_T f, MOID_LIST_T * m)
 
 static void cross_reference (FILE_T f, NODE_T * p, SOURCE_LINE_T * l)
 {
-  if (MODULE (INFO (p))->cross_reference_safe) {
+  if (p != NULL && MODULE (INFO (p))->cross_reference_safe) {
     for (; p != NULL; FORWARD (p)) {
       if (whether_new_lexical_level (p) && l == LINE (p)) {
         SYMBOL_TABLE_T *c = SYMBOL_TABLE (SUB (p));
@@ -454,7 +454,7 @@ static void tree_listing (FILE_T f, NODE_T * q, int x, SOURCE_LINE_T * l, BOOL_T
       }
 /* Indent. */
       WRITE (f, "\n     ");
-      snprintf (output_line, BUFFER_SIZE, "%08x %02x %02x %02x", NUMBER (p), x, (SYMBOL_TABLE (p) != NULL ? LEX_LEVEL (p) : -1), INFO (p)->PROCEDURE_LEVEL);
+      snprintf (output_line, BUFFER_SIZE, "%8x %02x %02x %02x", NUMBER (p), x, (SYMBOL_TABLE (p) != NULL ? LEX_LEVEL (p) : -1), INFO (p)->PROCEDURE_LEVEL);
       WRITE (f, output_line);
       for (k = 0; k < (x - *ld); k++) {
         WRITE (f, bar[k]);
@@ -542,7 +542,7 @@ static int leaves_to_print (NODE_T * p, SOURCE_LINE_T * l, BOOL_T quick_form)
 
 void list_source_line (FILE_T f, MODULE_T * module, SOURCE_LINE_T * line, BOOL_T quick_form)
 {
-  int k = strlen (line->string) - 1;
+  int k = (int) strlen (line->string) - 1;
   if (NUMBER (line) <= 0) {
 /* Mask the prelude and postlude. */
     return;
@@ -559,10 +559,10 @@ void list_source_line (FILE_T f, MODULE_T * module, SOURCE_LINE_T * line, BOOL_T
 /* Syntax tree listing connected with this line. */
   if (module->options.tree_listing || quick_form) {
     if (module->tree_listing_safe && leaves_to_print (module->top_node, line, quick_form)) {
-      int ld = -1, k;
+      int ld = -1, k2;
       WRITE (f, "\nSyntax tree");
-      for (k = 0; k < BUFFER_SIZE; k++) {
-        bar[k] = " ";
+      for (k2 = 0; k2 < BUFFER_SIZE; k2++) {
+        bar[k2] = " ";
       }
       tree_listing (f, module->top_node, 1, line, quick_form, &ld);
     }

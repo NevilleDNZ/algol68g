@@ -98,8 +98,8 @@ enum
   }}
 
 #define CHECK_MP_EXPONENT(p, z) {\
-  MP_DIGIT_T expo = fabs (MP_EXPONENT (z));\
-  if (expo > MAX_MP_EXPONENT || (expo == MAX_MP_EXPONENT && ABS (MP_DIGIT (z, 1)) > 1.0)) {\
+  MP_DIGIT_T _expo_ = fabs (MP_EXPONENT (z));\
+  if (_expo_ > MAX_MP_EXPONENT || (_expo_ == MAX_MP_EXPONENT && ABS (MP_DIGIT (z, 1)) > 1.0)) {\
       errno = ERANGE;\
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_MP_OUT_OF_BOUNDS, NULL);\
       exit_genie (p, A68_RUNTIME_ERROR);\

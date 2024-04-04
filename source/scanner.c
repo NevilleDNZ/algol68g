@@ -118,11 +118,11 @@ static void concatenate_lines (SOURCE_LINE_T * top)
   }
   for (; q != NULL; q = PREVIOUS (q)) {
     char *z = q->string;
-    int len = strlen (z);
+    int len = (int) strlen (z);
     if (len >= 2 && z[len - 2] == ESCAPE_CHAR && z[len - 1] == NEWLINE_CHAR && NEXT (q) != NULL && NEXT (q)->string != NULL) {
       z[len - 2] = NULL_CHAR;
-      len += strlen (NEXT (q)->string);
-      z = (char *) get_fixed_heap_space (len + 1);
+      len += (int) strlen (NEXT (q)->string);
+      z = (char *) get_fixed_heap_space ((size_t) (len + 1));
       bufcpy (z, q->string, len + 1);
       bufcat (z, NEXT (q)->string, len + 1);
       NEXT (q)->string[0] = NULL_CHAR;
@@ -141,15 +141,15 @@ static void concatenate_lines (SOURCE_LINE_T * top)
 
 static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
 {
-  int len = strlen (v);
+  unsigned len = strlen (v);
   if (MODULE (z)->options.stropping == QUOTE_STROPPING) {
     if (u[0] == '\'') {
-      return (strncmp (++u, v, len) == 0 && u[len] == '\'');
+      return ((BOOL_T) (strncmp (++u, v, len) == 0 && u[len] == '\''));
     } else {
       return (A68_FALSE);
     }
   } else {
-    return (strncmp (u, v, len) == 0 && !IS_UPPER (u[len]));
+    return ((BOOL_T) (strncmp (u, v, len) == 0 && !IS_UPPER (u[len])));
   }
 }
 
@@ -486,8 +486,8 @@ been included will not be included a second time - it will be ignored.
         SCAN_ERROR (!skip_pragmat (&u, &v, pr_lim, A68_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 /* Filename valid? */
         SCAN_ERROR (n == 0, start_l, start_c, ERROR_INCORRECT_FILENAME);
-        fnwid = strlen (MODULE (u)->files.path) + strlen (fnb) + 1;
-        fn = (char *) get_fixed_heap_space (fnwid);
+        fnwid = (int) strlen (MODULE (u)->files.path) + (int) strlen (fnb) + 1;
+        fn = (char *) get_fixed_heap_space ((size_t) fnwid);
         bufcpy (fn, MODULE (u)->files.path, fnwid);
         bufcat (fn, fnb, fnwid);
 /* Recursive include? Then *ignore* the file. */
@@ -509,7 +509,7 @@ been included will not be included a second time - it will be ignored.
         lseek (fd, 0, SEEK_SET);
         SCAN_ERROR (errno != 0, start_l, start_c, ERROR_FILE_READ);
         RESET_ERRNO;
-        bytes_read = io_read (fd, fbuf, fsize);
+        bytes_read = io_read (fd, fbuf, (size_t) fsize);
         SCAN_ERROR (errno != 0 || bytes_read != fsize, start_l, start_c, ERROR_FILE_READ);
 /* Buffer still usable? */
         if (fsize > max_scan_buf_length) {
@@ -663,7 +663,7 @@ static BOOL_T read_source_file (MODULE_T * module)
   lseek (f, 0, SEEK_SET);
   ABNORMAL_END (errno != 0, "error while reading source file", NULL);
   RESET_ERRNO;
-  bytes_read = io_read (f, buffer, source_file_size);
+  bytes_read = io_read (f, buffer, (size_t) source_file_size);
   ABNORMAL_END (errno != 0 || bytes_read != source_file_size, "error while reading source file", NULL);
 /* Link all lines into the list. */
   k = 0;
@@ -714,7 +714,7 @@ static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s, 
   if (*ref_l == NULL) {
     return (STOP_CHAR);
   } else {
-    (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A68_TRUE : A68_FALSE);
+    (*ref_l)->list = (BOOL_T) (module->options.nodemask & SOURCE_MASK ? A68_TRUE : A68_FALSE);
 /* Take new line? */
     if ((*ref_s)[0] == NEWLINE_CHAR || (*ref_s)[0] == NULL_CHAR) {
       *ref_l = NEXT (*ref_l);
@@ -745,7 +745,7 @@ static void get_good_char (MODULE_T * module, char *ref_c, SOURCE_LINE_T ** ref_
 {
   while (*ref_c != STOP_CHAR && (IS_SPACE (*ref_c) || (*ref_c == NULL_CHAR))) {
     if (*ref_l != NULL) {
-      (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A68_TRUE : A68_FALSE);
+      (*ref_l)->list = (BOOL_T) (module->options.nodemask & SOURCE_MASK ? A68_TRUE : A68_FALSE);
     }
     *ref_c = next_char (module, ref_l, ref_s, A68_FALSE);
   }
@@ -793,7 +793,7 @@ static void pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, char 
       term_s = "'PRAGMAT'";
     }
   }
-  term_s_length = strlen (term_s);
+  term_s_length = (int) strlen (term_s);
 /* Scan for terminator, and process pragmat items. */
   INIT_BUFFER;
   get_good_char (module, &c, ref_l, ref_c);
@@ -838,7 +838,7 @@ static void pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, char 
     }
     if (chars_in_buf >= term_s_length) {
 /* Check whether we encountered the terminator. */
-      stop = (strcmp (term_s, &(scan_buf[chars_in_buf - term_s_length])) == 0);
+      stop = (BOOL_T) (strcmp (term_s, &(scan_buf[chars_in_buf - term_s_length])) == 0);
     }
     c = next_char (module, ref_l, ref_c, A68_FALSE);
   }
@@ -1017,17 +1017,17 @@ static BOOL_T whether_exp_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **ref
   char exp_syms[3];
   if (m->options.stropping == UPPER_STROPPING) {
     exp_syms[0] = EXPONENT_CHAR;
-    exp_syms[1] = TO_UPPER (EXPONENT_CHAR);
+    exp_syms[1] = (char) TO_UPPER (EXPONENT_CHAR);
     exp_syms[2] = NULL_CHAR;
   } else {
-    exp_syms[0] = TO_UPPER (EXPONENT_CHAR);
+    exp_syms[0] = (char) TO_UPPER (EXPONENT_CHAR);
     exp_syms[1] = ESCAPE_CHAR;
     exp_syms[2] = NULL_CHAR;
   }
   save_state (m, *ref_l, *ref_s, *ch);
   if (strchr (exp_syms, *ch) != NULL) {
     *ch = next_char (m, ref_l, ref_s, A68_TRUE);
-    res = (strchr ("+-0123456789", *ch) != NULL);
+    res = (BOOL_T) (strchr ("+-0123456789", *ch) != NULL);
   }
   restore_state (m, ref_l, ref_s, ch);
   return (res);
@@ -1048,12 +1048,12 @@ static BOOL_T whether_radix_char (MODULE_T * m, SOURCE_LINE_T ** ref_l, char **r
   if (m->options.stropping == QUOTE_STROPPING) {
     if (*ch == TO_UPPER (RADIX_CHAR)) {
       *ch = next_char (m, ref_l, ref_s, A68_TRUE);
-      res = (strchr ("0123456789ABCDEF", *ch) != NULL);
+      res = (BOOL_T) (strchr ("0123456789ABCDEF", *ch) != NULL);
     }
   } else {
     if (*ch == RADIX_CHAR) {
       *ch = next_char (m, ref_l, ref_s, A68_TRUE);
-      res = (strchr ("0123456789abcdef", *ch) != NULL);
+      res = (BOOL_T) (strchr ("0123456789abcdef", *ch) != NULL);
     }
   }
   restore_state (m, ref_l, ref_s, ch);
@@ -1076,19 +1076,19 @@ static BOOL_T whether_decimal_point (MODULE_T * m, SOURCE_LINE_T ** ref_l, char 
     char exp_syms[3];
     if (m->options.stropping == UPPER_STROPPING) {
       exp_syms[0] = EXPONENT_CHAR;
-      exp_syms[1] = TO_UPPER (EXPONENT_CHAR);
+      exp_syms[1] = (char) TO_UPPER (EXPONENT_CHAR);
       exp_syms[2] = NULL_CHAR;
     } else {
-      exp_syms[0] = TO_UPPER (EXPONENT_CHAR);
+      exp_syms[0] = (char) TO_UPPER (EXPONENT_CHAR);
       exp_syms[1] = ESCAPE_CHAR;
       exp_syms[2] = NULL_CHAR;
     }
     *ch = next_char (m, ref_l, ref_s, A68_TRUE);
     if (strchr (exp_syms, *ch) != NULL) {
       *ch = next_char (m, ref_l, ref_s, A68_TRUE);
-      res = (strchr ("+-0123456789", *ch) != NULL);
+      res = (BOOL_T) (strchr ("+-0123456789", *ch) != NULL);
     } else {
-      res = (strchr ("0123456789", *ch) != NULL);
+      res = (BOOL_T) (strchr ("0123456789", *ch) != NULL);
     }
   }
   restore_state (m, ref_l, ref_s, ch);
@@ -1468,7 +1468,7 @@ static BOOL_T close_embedded_clause (int att)
 static void make_lower_case (char *p)
 {
   for (; p != NULL && p[0] != NULL_CHAR; p++) {
-    p[0] = TO_LOWER (p[0]);
+    p[0] = (char) TO_LOWER (p[0]);
   }
 }
 
@@ -1612,8 +1612,8 @@ BOOL_T lexical_analyzer (MODULE_T * module)
   if (max_scan_buf_length == 0) {
     return (A68_FALSE);
   }
-  max_scan_buf_length += strlen (bold_prelude_start) + strlen (bold_postlude);
-  max_scan_buf_length += strlen (quote_prelude_start) + strlen (quote_postlude);
+  max_scan_buf_length += (int) strlen (bold_prelude_start) + (int) strlen (bold_postlude);
+  max_scan_buf_length += (int) strlen (quote_prelude_start) + (int) strlen (quote_postlude);
 /* Allocate a scan buffer with 8 bytes extra space. */
   scan_buf = (char *) get_temp_heap_space ((unsigned) (8 + max_scan_buf_length));
 /* Errors in file? */

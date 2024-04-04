@@ -28,8 +28,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 SYMBOL_TABLE_T *stand_env;
 
-static MOID_T *m, *proc_int, *proc_real, *proc_real_real, *proc_real_real_real, *proc_real_real_real_real, *proc_complex_complex, *proc_bool, *proc_char, *proc_void;
-static PACK_T *z;
+static MOID_T *proc_int, *proc_real, *proc_real_real, *proc_real_real_real, *proc_real_real_real_real, *proc_complex_complex, *proc_bool, *proc_char, *proc_void;
 
 /*!
 \brief enter tag in standenv symbol table
@@ -54,7 +53,7 @@ static void add_stand_env (BOOL_T portable, int a, NODE_T * n, char *c, MOID_T *
   VALUE (new_one) = (c != NULL ? add_token (&top_token, c)->text : NULL);
   PRIO (new_one) = p;
   new_one->procedure = q;
-  new_one->stand_env_proc = q != NULL;
+  new_one->stand_env_proc = (BOOL_T) (q != NULL);
   new_one->unit = NULL;
   new_one->portable = portable;
   MOID (new_one) = m;
@@ -156,6 +155,7 @@ static void a68_op (BOOL_T portable, char *n, MOID_T * m, GENIE_PROCEDURE * q)
 
 static void stand_moids (void)
 {
+  PACK_T *z;
 /* Primitive A68 moids. */
   a68_mode (0, "VOID", &MODE (VOID));
 /* Standard precision. */
@@ -441,6 +441,7 @@ static void stand_moids (void)
 
 static void stand_prelude (void)
 {
+  MOID_T *m;
 /* Identifiers. */
   a68_idf (A68_TRUE, "intlengths", MODE (INT), genie_int_lengths);
   a68_idf (A68_TRUE, "intshorths", MODE (INT), genie_int_shorths);
@@ -1573,6 +1574,7 @@ static void stand_prelude (void)
 
 static void stand_transput (void)
 {
+  MOID_T *m;
   a68_idf (A68_TRUE, "errorchar", MODE (CHAR), genie_error_char);
   a68_idf (A68_TRUE, "expchar", MODE (CHAR), genie_exp_char);
   a68_idf (A68_TRUE, "flip", MODE (CHAR), genie_flip_char);
@@ -1756,6 +1758,8 @@ static void stand_transput (void)
 
 static void stand_extensions (void)
 {
+  MOID_T *m = NULL;
+  (void) m;                     /* To fool cc in case we have none of the libraries */
 #if defined ENABLE_GRAPHICS
 /* Drawing. */
   m = a68_proc (MODE (BOOL), MODE (REF_FILE), MODE (STRING), MODE (STRING), NULL);

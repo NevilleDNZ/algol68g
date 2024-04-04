@@ -132,7 +132,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #define RADIX_CHAR      'r'
 #define TAB_CHAR	'\t'
 
-#define A68G_PI 	3.1415926535897932384626433832795029L	/* pi*/
+#define A68G_PI 	3.1415926535897932384626433832795029	/* pi*/
 
 #define MONADS  	"%^&+-~!?"
 #define NOMADS  	"></=*"
@@ -205,9 +205,10 @@ char on various systems. PDP-11s and IBM 370s are still haunting us with this.
 
 typedef struct A68_ARRAY A68_ARRAY;
 typedef struct A68_BITS A68_BITS;
+typedef struct A68_BOOL A68_BOOL;
 typedef struct A68_BYTES A68_BYTES;
 typedef struct A68_CHANNEL A68_CHANNEL;
-typedef struct A68_CHAR A68_CHAR, A68_BOOL;
+typedef struct A68_CHAR A68_CHAR;
 typedef struct A68_COLLITEM A68_COLLITEM;
 typedef struct A68_FILE A68_FILE;
 typedef struct A68_FORMAT A68_FORMAT;
@@ -258,7 +259,7 @@ typedef void GENIE_PROCEDURE (NODE_T *);
 #define IS_IN_FRAME(z) (STATUS (z) & IN_FRAME_MASK)
 #define IS_IN_STACK(z) (STATUS (z) & IN_STACK_MASK)
 #define IS_IN_HANDLE(z) (STATUS (z) & IN_HANDLE_MASK)
-#define IS_NIL(p) ((STATUS (&(p)) & NIL_MASK) != 0)
+#define IS_NIL(p) ((BOOL_T) ((STATUS (&(p)) & NIL_MASK) != 0))
 #define GET_REF_SCOPE(z) (IS_IN_HEAP (z) ? PRIMAL_SCOPE : REF_SCOPE (z))
 #define SET_REF_SCOPE(z, s) { if (!IS_IN_HEAP (z)) { REF_SCOPE (z) = (s);}}
 
@@ -327,6 +328,12 @@ struct A68_CHANNEL
 {
   STATUS_MASK status;
   BOOL_T reset, set, get, put, bin, draw, compress;
+};
+
+struct A68_BOOL
+{
+  BYTE_T status;
+  BOOL_T value;
 };
 
 struct A68_CHAR
@@ -1055,8 +1062,8 @@ enum
 
 /* Miscellaneous macros. */
 
-#define A68_SOUND_BYTES(s) ((s)->bits_per_sample / 8 + ((s)->bits_per_sample % 8 == 0 ? 0 : 1))
-#define A68_SOUND_DATA_SIZE(s) ((s)->num_samples * (s)->num_channels * A68_SOUND_BYTES (s))
+#define A68_SOUND_BYTES(s) ((int) ((s)->bits_per_sample) / 8 + (int) ((s)->bits_per_sample % 8 == 0 ? 0 : 1))
+#define A68_SOUND_DATA_SIZE(s) ((int) ((s)->num_samples) * (int) ((s)->num_channels) *(int) ( A68_SOUND_BYTES (s)))
 #define ARRAY(p) ((p)->array)
 #define ANNOTATION(p) ((p)->annotation)
 #define ATTRIBUTE(p) ((p)->attribute)
@@ -1195,7 +1202,7 @@ extern double ten_up (int);
 extern int count_pack_members (PACK_T *);
 extern int get_row_size (A68_TUPLE *, int);
 extern int grep_in_string (char *, char *, int *, int *);
-extern int heap_available ();
+extern int heap_available (void);
 extern int moid_size (MOID_T *);
 extern int whether_identifier_or_label_global (SYMBOL_TABLE_T *, char *);
 extern KEYWORD_T *find_keyword_from_attribute (KEYWORD_T *, int);
@@ -1249,13 +1256,13 @@ extern void check_parenthesis (NODE_T *);
 extern void coercion_inserter (NODE_T *);
 extern void collect_taxes (NODE_T *);
 extern void contract_union (MOID_T *, int *);
-extern void default_mem_sizes ();
+extern void default_mem_sizes (void);
 extern void default_options (MODULE_T *);
 extern void diagnostic_line (int, SOURCE_LINE_T *, char *, char *, ...);
 extern void diagnostic_node (int, NODE_T *, char *, ...);
 extern void diagnostics_to_terminal (SOURCE_LINE_T *, int);
 extern void discard_heap (void);
-extern void dump_heap ();
+extern void dump_heap (void);
 extern void dump_stowed (NODE_T *, FILE_T, void *, MOID_T *, int);
 extern void fill_symbol_table_outer (NODE_T *, SYMBOL_TABLE_T *);
 extern void finalise_symbol_table_setup (NODE_T *, int);
@@ -1270,7 +1277,7 @@ extern void get_stack_size (void);
 extern void init_curses (void);
 extern void init_heap (void);
 extern void initialise_internal_index (A68_TUPLE *, int);
-extern void init_moid_list ();
+extern void init_moid_list (void);
 extern void init_options (MODULE_T *);
 extern void init_postulates (void);
 extern void init_tty (void);
@@ -1287,10 +1294,8 @@ extern void make_standard_environ (void);
 extern void make_sub (NODE_T *, NODE_T *, int);
 extern void mark_auxilliary (NODE_T *);
 extern void mark_moids (NODE_T *);
-extern void math_rte (NODE_T *, BOOL_T, MOID_T *, const char *);
 extern void mode_checker (NODE_T *);
 extern void monitor_error (char *, char *);
-extern void msg (int, int, NODE_T *, SOID_T *, SOID_T *, char *);
 extern void online_help (FILE_T);
 extern void optimise_tree (NODE_T *);
 extern void portcheck (NODE_T *);
@@ -1309,7 +1314,7 @@ extern void remove_empty_symbol_tables (NODE_T *);
 extern void remove_file_type (char *);
 extern void renumber_nodes (NODE_T *, int *);
 extern void reset_max_simplout_size (void);
-extern void reset_moid_list ();
+extern void reset_moid_list (void);
 extern void reset_postulates (void);
 extern void reset_symbol_table_nest_count (NODE_T *);
 extern void scan_error (SOURCE_LINE_T *, char *, char *);
@@ -1319,7 +1324,7 @@ extern void set_nest (NODE_T *, NODE_T *);
 extern void set_par_level (NODE_T *, int);
 extern void set_proc_level (NODE_T *, int);
 extern void set_up_mode_table (NODE_T *);
-extern void set_up_tables ();
+extern void set_up_tables (void);
 extern void source_listing (MODULE_T *);
 extern void state_license (FILE_T);
 extern void state_version (FILE_T);

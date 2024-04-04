@@ -30,7 +30,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 #define WANT_PATTERN    	A68_TRUE
 #define SKIP_PATTERN    	A68_FALSE
 
-#define IS_NIL_FORMAT(f) (BODY (f) == NULL && ENVIRON (f) == 0)
+#define IS_NIL_FORMAT(f) ((BOOL_T) (BODY (f) == NULL && ENVIRON (f) == 0))
 #define NON_TERM(p) (find_non_terminal (top_non_terminal, ATTRIBUTE (p)))
 
 #undef DEBUG

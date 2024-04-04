@@ -358,7 +358,7 @@ char *non_terminal_string (char *buf, int att)
         if (q[0] == '_') {
           q[0] = '-';
         } else {
-          q[0] = TO_LOWER (q[0]);
+          q[0] = (char) TO_LOWER (q[0]);
         }
         q++;
       }

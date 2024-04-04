@@ -84,13 +84,13 @@ void initialise_internal_index (A68_TUPLE * tup, int dim)
 
 ADDR_T calculate_internal_index (A68_TUPLE * tup, int dim)
 {
-  ADDR_T index = 0;
+  ADDR_T iindex = 0;
   int k;
   for (k = 0; k < dim; k++) {
     A68_TUPLE *ref = &tup[k];
-    index += (ref->span * ref->k - ref->shift);
+    iindex += (ref->span * ref->k - ref->shift);
   }
-  return (index);
+  return (iindex);
 }
 
 /*!
@@ -151,7 +151,7 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
   A68_TUPLE tup;
   BYTE_T *base;
   int str_size, k;
-  str_size = strlen (str);
+  str_size = (int) strlen (str);
   z = heap_generator (p, MODE (ROW_CHAR), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&z);
   row = heap_generator (p, MODE (ROW_CHAR), width * ALIGNED_SIZE_OF (A68_CHAR));
@@ -191,7 +191,7 @@ A68_REF c_to_a_string (NODE_T * p, char *str)
   if (str == NULL) {
     return (empty_string (p));
   } else {
-    return (c_string_to_row_char (p, str, strlen (str)));
+    return (c_string_to_row_char (p, str, (int) strlen (str)));
   }
 }
 
@@ -1117,15 +1117,15 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
         A68_REF elem = ARRAY (arr);
         BYTE_T *elem_p;
         MOID_T *elem_mode = SUB (m);
-        ADDR_T index = calculate_internal_index (tup, DIM (arr));
-        ADDR_T addr = ROW_ELEMENT (arr, index);
+        ADDR_T iindex = calculate_internal_index (tup, DIM (arr));
+        ADDR_T addr = ROW_ELEMENT (arr, iindex);
         elem.offset += addr;
         elem_p = ADDRESS (&elem);
         if (elem_mode->has_rows) {
           dump_stowed (p, f, elem_p, elem_mode, level + 3);
         } else {
           INDENT (level);
-          snprintf (buf, BUFFER_SIZE, "%s [%d] at %p", moid_to_string (elem_mode, 80, NULL), index, elem_p);
+          snprintf (buf, BUFFER_SIZE, "%s [%d] at %p", moid_to_string (elem_mode, 80, NULL), iindex, elem_p);
           WRITE (f, buf);
           print_item (p, f, elem_p, elem_mode);
         }
@@ -1280,7 +1280,7 @@ PROPAGATOR_T genie_diagonal_function (NODE_T * p)
   PROPAGATOR_T self;
   A68_ROW row, new_row;
   int k = 0;
-  BOOL_T name = WHETHER (MOID (p), REF_SYMBOL);
+  BOOL_T name = (BOOL_T) (WHETHER (MOID (p), REF_SYMBOL));
   A68_ARRAY *arr, new_arr;
   A68_TUPLE *tup1, *tup2, new_tup;
   MOID_T *m;
@@ -1355,7 +1355,7 @@ PROPAGATOR_T genie_transpose_function (NODE_T * p)
   ADDR_T scope = PRIMAL_SCOPE;
   PROPAGATOR_T self;
   A68_ROW row, new_row;
-  BOOL_T name = WHETHER (MOID (p), REF_SYMBOL);
+  BOOL_T name = (BOOL_T) (WHETHER (MOID (p), REF_SYMBOL));
   A68_ARRAY *arr, new_arr;
   A68_TUPLE *tup1, *tup2, new_tup1, new_tup2;
   MOID_T *m;
@@ -1408,7 +1408,7 @@ PROPAGATOR_T genie_row_function (NODE_T * p)
   PROPAGATOR_T self;
   A68_ROW row, new_row;
   int k = 1;
-  BOOL_T name = WHETHER (MOID (p), REF_SYMBOL);
+  BOOL_T name = (BOOL_T) (WHETHER (MOID (p), REF_SYMBOL));
   A68_ARRAY *arr, new_arr;
   A68_TUPLE tup1, tup2, *tup;
   MOID_T *m;
@@ -1483,7 +1483,7 @@ PROPAGATOR_T genie_column_function (NODE_T * p)
   PROPAGATOR_T self;
   A68_ROW row, new_row;
   int k = 1;
-  BOOL_T name = WHETHER (MOID (p), REF_SYMBOL);
+  BOOL_T name = (BOOL_T) (WHETHER (MOID (p), REF_SYMBOL));
   A68_ARRAY *arr, new_arr;
   A68_TUPLE tup1, tup2, *tup;
   MOID_T *m;
@@ -1575,7 +1575,7 @@ void genie_sort_row_string (NODE_T * p)
     A68_TUPLE tupn;
     int j, k;
     BYTE_T *base = ADDRESS (&ARRAY (arr));
-    char **ptrs = (char **) malloc (size * sizeof (char *));
+    char **ptrs = (char **) malloc ((size_t) (size * (int) sizeof (char *)));
     if (ptrs == NULL) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
       exit_genie (p, A68_RUNTIME_ERROR);
@@ -1595,7 +1595,7 @@ void genie_sort_row_string (NODE_T * p)
       a_to_c_string (p, (char *) STACK_TOP, ref);
       INCREMENT_STACK_POINTER (p, len);
     }
-    qsort (ptrs, size, sizeof (char *), qstrcmp);
+    qsort (ptrs, (size_t) size, sizeof (char *), qstrcmp);
 /* Construct an array of sorted strings. */
     z = heap_generator (p, MODE (ROW_STRING), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
     PROTECT_SWEEP_HANDLE (&z);
