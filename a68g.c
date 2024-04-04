@@ -254,7 +254,7 @@ void state_version (FILE_T f)
   ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Parallel-clause is not supported.\n") >= 0);
 #endif
   WRITE (f, output_line);
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
   ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Curses is supported.\n") >= 0);
 #else
   ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Curses is not supported.\n") >= 0);
@@ -434,12 +434,12 @@ int main (int argc, char *argv[])
 /* Start the UI */
     init_before_tokeniser ();
     if (OPTION_EDIT (&program)) {
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
       ASSERT (snprintf (output_line, SNPRINTF_SIZE, "Algol 68 Genie %s\n", PACKAGE_VERSION) >= 0);
       edit (output_line);
 #else 
       errno = ENOTSUP;
-      SCAN_ERROR (A68_TRUE, NO_LINE, NO_TEXT, "EDIT requires the ncurses library");
+      SCAN_ERROR (A68_TRUE, NO_LINE, NO_TEXT, "editor requires the ncurses library");
 #endif
     }
 /* Running a script */
@@ -1068,7 +1068,7 @@ void a68g_exit (int code)
   free_file_entries ();
 /* Close the terminal */
   io_close_tty_line ();
-#if (defined HAVE_CURSES_H && defined HAVE_LIBNCURSES)
+#if defined HAVE_CURSES
 /* 
 "curses" might still be open if it was not closed from A68, or the program
 was interrupted, or a runtime error occured. That wreaks havoc on your

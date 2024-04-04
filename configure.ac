@@ -1,4 +1,4 @@
-AC_INIT([algol68g], [2.3.8], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [2.3.9], [Marcel van der Veer <algol68g@xs4all.nl>])
 #
 # Algol 68 Genie "configure.ac" from "a68g-tools".
 #
