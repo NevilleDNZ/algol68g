@@ -17,8 +17,8 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
@@ -55,7 +55,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -98,7 +98,7 @@ The PostgreSQL server can handle multiple concurrent connections from clients. F
 <p>
 The routines in this section enable basic client interactions from Algol 68 with a PostgreSQL backend server. These routines allow client programs to pass queries to a PostgreSQL backend server and to receive the results of these queries.
 <p>
-Algol 68 Genie uses <code><code>libpq</code></code>, the C application programmer's interface to PostgreSQL (version 8.1.2 or compatible). The <code><code>libpq</code></code> library is also used in other PostgreSQL application interfaces, including those for C++, Perl, Python, Tcl and ECPG.
+Algol 68 Genie uses <code><code>libpq</code></code>, the C application programmer's interface to PostgreSQL (version 8.1.4 or compatible). The <code><code>libpq</code></code> library is also used in other PostgreSQL application interfaces, including those for C++, Perl, Python, Tcl and ECPG.
 <p>
 Connection to a database server is established through a <code>REF FILE</code> variable. String results are communicated through a <code>REF STRING</code> buffer that is associated with the <code>REF FILE</code> variable upon establishing a connection with a PostgreSQL server. This allows for easy mode conversion of text-formatted data from tables using <code>get</code>. Currently, Algol 68 Genie does not support retrieving data in binary format.
 </p>
@@ -543,7 +543,7 @@ THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, B
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>

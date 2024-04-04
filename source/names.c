@@ -346,14 +346,14 @@ char *non_terminal_string (char *buf, int att)
   if (att > 0 && att < WILDCARD) {
     if (attribute_names[att] != NULL) {
       char *q = buf;
-      strcpy (q, attribute_names[att]);
+      bufcpy (q, attribute_names[att], BUFFER_SIZE);
       while (q[0] != NULL_CHAR) {
-	if (q[0] == '_') {
-	  q[0] = '-';
-	} else {
-	  q[0] = TO_LOWER (q[0]);
-	}
-	q++;
+        if (q[0] == '_') {
+          q[0] = '-';
+        } else {
+          q[0] = TO_LOWER (q[0]);
+        }
+        q++;
       }
       return (buf);
     } else {
@@ -377,4 +377,5 @@ char *standard_environ_proc_name (GENIE_PROCEDURE f)
       return (SYMBOL (NODE (i)));
     }
   }
+  return (NULL);
 }

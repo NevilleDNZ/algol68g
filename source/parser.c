@@ -293,22 +293,22 @@ static char *phrase_to_text (NODE_T * p, NODE_T * q)
   static char buffer[BUFFER_SIZE];
   buffer[0] = NULL_CHAR;
   for (; p != NULL && (q != NULL ? p != NEXT (q) : count < MAX_TERMINALS)
-       && length < BUFFER_SIZE / 2; FORWARD (p)) {
+      && length < BUFFER_SIZE / 2; FORWARD (p)) {
     char *z = non_terminal_string (edit_line, get_good_attribute (p));
     if (strlen (buffer) > 1) {
-      strcat (buffer, ", ");
+      bufcat (buffer, ", ", BUFFER_SIZE);
     }
     if (z != NULL) {
-      strcat (buffer, z);
+      bufcat (buffer, z, BUFFER_SIZE);
     } else if (SYMBOL (p) != NULL) {
-      sprintf (edit_line, "\"%s\"", SYMBOL (p));
-      strcat (buffer, edit_line);
+      snprintf (edit_line, BUFFER_SIZE, "\"%s\"", SYMBOL (p));
+      bufcat (buffer, edit_line, BUFFER_SIZE);
     }
     count++;
     length = strlen (buffer);
   }
   if (p != NULL && (q == NULL ? A_FALSE : count == MAX_TERMINALS)) {
-    strcat (buffer, " ..");
+    bufcat (buffer, " ..", BUFFER_SIZE);
   }
   return (buffer);
 }
@@ -334,11 +334,11 @@ static void bracket_check_error (char *txt, int n, char *bra, char *ket)
 {
   if (n != 0) {
     char b[BUFFER_SIZE];
-    sprintf (b, "\"%s\" without matching \"%s\"", (n > 0 ? bra : ket), (n > 0 ? ket : bra));
+    snprintf (b, BUFFER_SIZE, "\"%s\" without matching \"%s\"", (n > 0 ? bra : ket), (n > 0 ? ket : bra));
     if (strlen (txt) > 0) {
-      strcat (txt, " and ");
+      bufcat (txt, " and ", BUFFER_SIZE);
     }
-    strcat (txt, b);
+    bufcat (txt, b, BUFFER_SIZE);
   }
 }
 
@@ -355,83 +355,83 @@ static char *bracket_check_diagnose (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case BEGIN_SYMBOL:
       {
-	begins++;
-	break;
+        begins++;
+        break;
       }
     case END_SYMBOL:
       {
-	begins--;
-	break;
+        begins--;
+        break;
       }
     case OPEN_SYMBOL:
       {
-	opens++;
-	break;
+        opens++;
+        break;
       }
     case CLOSE_SYMBOL:
       {
-	opens--;
-	break;
+        opens--;
+        break;
       }
     case ACCO_SYMBOL:
       {
-	accos++;
-	break;
+        accos++;
+        break;
       }
     case OCCA_SYMBOL:
       {
-	accos--;
-	break;
+        accos--;
+        break;
       }
     case FORMAT_ITEM_OPEN:
       {
-	format_opens++;
-	break;
+        format_opens++;
+        break;
       }
     case FORMAT_ITEM_CLOSE:
       {
-	format_opens--;
-	break;
+        format_opens--;
+        break;
       }
     case SUB_SYMBOL:
       {
-	subs++;
-	break;
+        subs++;
+        break;
       }
     case BUS_SYMBOL:
       {
-	subs--;
-	break;
+        subs--;
+        break;
       }
     case IF_SYMBOL:
       {
-	ifs++;
-	break;
+        ifs++;
+        break;
       }
     case FI_SYMBOL:
       {
-	ifs--;
-	break;
+        ifs--;
+        break;
       }
     case CASE_SYMBOL:
       {
-	cases++;
-	break;
+        cases++;
+        break;
       }
     case ESAC_SYMBOL:
       {
-	cases--;
-	break;
+        cases--;
+        break;
       }
     case DO_SYMBOL:
       {
-	dos++;
-	break;
+        dos++;
+        break;
       }
     case OD_SYMBOL:
       {
-	dos--;
-	break;
+        dos--;
+        break;
       }
     }
   }
@@ -462,51 +462,51 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case BEGIN_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = END_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = END_SYMBOL;
+        break;
       }
     case OPEN_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = CLOSE_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = CLOSE_SYMBOL;
+        break;
       }
     case ACCO_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = OCCA_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = OCCA_SYMBOL;
+        break;
       }
     case FORMAT_ITEM_OPEN:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = FORMAT_ITEM_CLOSE;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = FORMAT_ITEM_CLOSE;
+        break;
       }
     case SUB_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = BUS_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = BUS_SYMBOL;
+        break;
       }
     case IF_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = FI_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = FI_SYMBOL;
+        break;
       }
     case CASE_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = ESAC_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = ESAC_SYMBOL;
+        break;
       }
     case DO_SYMBOL:
       {
-	q = bracket_check_parse (top, NEXT (p));
-	ket = OD_SYMBOL;
-	break;
+        q = bracket_check_parse (top, NEXT (p));
+        ket = OD_SYMBOL;
+        break;
       }
     case END_SYMBOL:
     case OCCA_SYMBOL:
@@ -517,11 +517,11 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
     case ESAC_SYMBOL:
     case OD_SYMBOL:
       {
-	return (p);
+        return (p);
       }
     default:
       {
-	goto next;
+        goto next;
       }
     }
     if (q == NULL || WHETHER_NOT (q, ket)) {
@@ -639,15 +639,15 @@ static NODE_T *top_down_skip_loop_unit (NODE_T * p)
     if (k != 0) {
 /* operator-cast series ... */
       while (p != NULL && k != 0) {
-	while (k != 0) {
-	  FORWARD (p);
-	  k--;
-	}
-	k = whether_loop_cast_formula (p);
+        while (k != 0) {
+          FORWARD (p);
+          k--;
+        }
+        k = whether_loop_cast_formula (p);
       }
 /* ... may be followed by a loop clause. */
       if (whether_loop_keyword (p)) {
-	p = top_down_loop (p);
+        p = top_down_loop (p);
       }
     } else if (whether_loop_keyword (p) || WHETHER (p, OD_SYMBOL)) {
 /* new loop or end-of-loop. */
@@ -656,7 +656,7 @@ static NODE_T *top_down_skip_loop_unit (NODE_T * p)
       FORWARD (p);
 /* skip routine header: loop clause. */
       if (p != NULL && whether_loop_keyword (p)) {
-	p = top_down_loop (p);
+        p = top_down_loop (p);
       }
     } else if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, COMMA_SYMBOL) || WHETHER (p, EXIT_SYMBOL)) {
 /* Statement separators. */
@@ -826,7 +826,7 @@ static void top_down_untils (NODE_T * p)
     if (WHETHER (q, UNTIL_SYMBOL)) {
       NODE_T *u = q;
       while (NEXT (u) != NULL) {
-	FORWARD (u);
+        FORWARD (u);
       }
       make_sub (q, PREVIOUS (u), UNTIL_SYMBOL);
       return;
@@ -852,8 +852,8 @@ static NODE_T *top_down_series (NODE_T * p)
     p = top_down_skip_unit (p);
     if (p != NULL) {
       if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
-	z = A_TRUE;
-	FORWARD (p);
+        z = A_TRUE;
+        FORWARD (p);
       }
     }
   }
@@ -1160,17 +1160,17 @@ static void top_down_formats (NODE_T * p)
     if (WHETHER (q, FORMAT_DELIMITER_SYMBOL)) {
       NODE_T *f = NEXT (q);
       while (f != NULL && WHETHER_NOT (f, FORMAT_DELIMITER_SYMBOL)) {
-	if (WHETHER (f, FORMAT_ITEM_OPEN)) {
-	  f = top_down_format_open (f);
-	} else {
-	  f = NEXT (f);
-	}
+        if (WHETHER (f, FORMAT_ITEM_OPEN)) {
+          f = top_down_format_open (f);
+        } else {
+          f = NEXT (f);
+        }
       }
       if (f == NULL) {
-	top_down_diagnose (p, f, FORMAT_TEXT, FORMAT_DELIMITER_SYMBOL);
-	longjmp (top_down_crash_exit, 1);
+        top_down_diagnose (p, f, FORMAT_TEXT, FORMAT_DELIMITER_SYMBOL);
+        longjmp (top_down_crash_exit, 1);
       } else {
-	make_sub (q, f, FORMAT_DELIMITER_SYMBOL);
+        make_sub (q, f, FORMAT_DELIMITER_SYMBOL);
       }
     }
   }
@@ -1352,8 +1352,7 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
   NODE_T *head = p, *tail = NULL;
   va_start (list, z);
   result = va_arg (list, int);
-  while ((arg = va_arg (list, int)) != 0)
-  {
+  while ((arg = va_arg (list, int)) != 0) {
 /* WILDCARD matches any Algol68G non terminal, but no keyword. */
     if (p != NULL && (arg == WILDCARD ? non_terminal_string (edit_line, ATTRIBUTE (p)) != NULL : arg == ATTRIBUTE (p))) {
       tail = p;
@@ -1365,10 +1364,10 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
   }
   if (head != NULL && head->info->module->options.reductions) {
     where (STDOUT_FILENO, head);
-    strcpy (output_line, "");
-    strcat (output_line, non_terminal_string (edit_line, result));
-    strcat (output_line, "<-");
-    strcat (output_line, phrase_to_text (head, tail));
+    bufcpy (output_line, "", BUFFER_SIZE);
+    bufcat (output_line, non_terminal_string (edit_line, result), BUFFER_SIZE);
+    bufcat (output_line, "<-", BUFFER_SIZE);
+    bufcat (output_line, phrase_to_text (head, tail), BUFFER_SIZE);
     io_write_string (STDOUT_FILENO, output_line);
   }
 /* Execute procedure in case reduction succeeds. */
@@ -1464,7 +1463,7 @@ as the parser can repair some faults. This gives less spurious diagnostics.
       BOOL_T no_error = reduce_phrase (SUB (p), expect);
       ATTRIBUTE (p) = ATTRIBUTE (SUB (p));
       if (no_error) {
-	SUB (p) = SUB (SUB (p));
+        SUB (p) = SUB (SUB (p));
       }
     }
   }
@@ -1544,13 +1543,13 @@ static void reduce_declarers (NODE_T * p, int expect)
     NODE_T *q;
     for (q = p; q != NULL; FORWARD (q)) {
       if (whether (q, OPEN_SYMBOL, COLON_SYMBOL, 0) && !(expect == GENERIC_ARGUMENT || expect == BOUNDS)) {
-	reduce_subordinate (q, SPECIFIER);
+        reduce_subordinate (q, SPECIFIER);
       }
       if (whether (q, OPEN_SYMBOL, DECLARER, COLON_SYMBOL, 0)) {
-	reduce_subordinate (q, PARAMETER_PACK);
+        reduce_subordinate (q, PARAMETER_PACK);
       }
       if (whether (q, OPEN_SYMBOL, VOID_SYMBOL, COLON_SYMBOL, 0)) {
-	reduce_subordinate (q, PARAMETER_PACK);
+        reduce_subordinate (q, PARAMETER_PACK);
       }
     }
   }
@@ -1640,25 +1639,25 @@ history. Meanwhile we use this routine.
 /* Routine texts without parameter pack. */
     else if (WHETHER (p, DECLARER)) {
       if (!(PREVIOUS (p) != NULL && WHETHER (PREVIOUS (p), PARAMETER_PACK))) {
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, ASSIGNATION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, IDENTITY_RELATION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, AND_FUNCTION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, OR_FUNCTION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, JUMP, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, SKIP, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, TERTIARY, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, ROUTINE_TEXT, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, ASSIGNATION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, IDENTITY_RELATION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, AND_FUNCTION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, OR_FUNCTION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, JUMP, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, SKIP, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, TERTIARY, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, DECLARER, COLON_SYMBOL, ROUTINE_TEXT, 0);
       }
     } else if (WHETHER (p, VOID_SYMBOL)) {
       if (!(PREVIOUS (p) != NULL && WHETHER (PREVIOUS (p), PARAMETER_PACK))) {
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, ASSIGNATION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, IDENTITY_RELATION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, AND_FUNCTION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, OR_FUNCTION, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, JUMP, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, SKIP, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, TERTIARY, 0);
-	f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, ROUTINE_TEXT, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, ASSIGNATION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, IDENTITY_RELATION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, AND_FUNCTION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, OR_FUNCTION, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, JUMP, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, SKIP, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, TERTIARY, 0);
+        f (p, NULL, NULL, ROUTINE_TEXT, VOID_SYMBOL, COLON_SYMBOL, ROUTINE_TEXT, 0);
       }
     }
   }
@@ -1685,7 +1684,7 @@ for instance "FI; OD". These provoke only a warning.
     } else if (WHETHER (p, SEMI_SYMBOL) && whether_semicolon_less (NEXT (p))) {
       diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_SKIPPED_SUPERFLUOUS, ATTRIBUTE (p));
       if (PREVIOUS (p) != NULL) {
-	NEXT (PREVIOUS (p)) = NEXT (p);
+        NEXT (PREVIOUS (p)) = NEXT (p);
       }
       PREVIOUS (NEXT (p)) = PREVIOUS (p);
     }
@@ -1711,19 +1710,19 @@ static void reduce_constructs (NODE_T * p, int expect)
     } else {
       reduce_declaration_lists (p);
       if (expect != DECLARATION_LIST) {
-	reduce_labels (p);
-	if (expect == SOME_CLAUSE) {
-	  expect = serial_or_collateral (p);
-	}
-	if (expect == SERIAL_CLAUSE) {
-	  reduce_serial_clauses (p);
-	} else if (expect == ENQUIRY_CLAUSE) {
-	  reduce_enquiry_clauses (p);
-	} else if (expect == COLLATERAL_CLAUSE) {
-	  reduce_collateral_clauses (p);
-	} else if (expect == ARGUMENT) {
-	  reduce_arguments (p);
-	}
+        reduce_labels (p);
+        if (expect == SOME_CLAUSE) {
+          expect = serial_or_collateral (p);
+        }
+        if (expect == SERIAL_CLAUSE) {
+          reduce_serial_clauses (p);
+        } else if (expect == ENQUIRY_CLAUSE) {
+          reduce_enquiry_clauses (p);
+        } else if (expect == COLLATERAL_CLAUSE) {
+          reduce_collateral_clauses (p);
+        } else if (expect == ARGUMENT) {
+          reduce_arguments (p);
+        }
       }
     }
   }
@@ -1799,30 +1798,30 @@ static void reduce_small_declarers (NODE_T * p)
     if (whether (q, LONGETY, INDICANT, 0)) {
       int a;
       if (SUB (NEXT (q)) == NULL) {
-	diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
-	f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
+        diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
+        f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
       } else {
-	a = ATTRIBUTE (SUB (NEXT (q)));
-	if (a == INT_SYMBOL || a == REAL_SYMBOL || a == BITS_SYMBOL || a == BYTES_SYMBOL || a == COMPLEX_SYMBOL || a == COMPL_SYMBOL) {
-	  f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
-	} else {
-	  diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
-	  f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
-	}
+        a = ATTRIBUTE (SUB (NEXT (q)));
+        if (a == INT_SYMBOL || a == REAL_SYMBOL || a == BITS_SYMBOL || a == BYTES_SYMBOL || a == COMPLEX_SYMBOL || a == COMPL_SYMBOL) {
+          f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
+        } else {
+          diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
+          f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
+        }
       }
     } else if (whether (q, SHORTETY, INDICANT, 0)) {
       int a;
       if (SUB (NEXT (q)) == NULL) {
-	diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
-	f (q, NULL, NULL, DECLARER, SHORTETY, INDICANT, 0);
+        diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
+        f (q, NULL, NULL, DECLARER, SHORTETY, INDICANT, 0);
       } else {
-	a = ATTRIBUTE (SUB (NEXT (q)));
-	if (a == INT_SYMBOL || a == REAL_SYMBOL || a == BITS_SYMBOL || a == BYTES_SYMBOL || a == COMPLEX_SYMBOL || a == COMPL_SYMBOL) {
-	  f (q, NULL, NULL, DECLARER, SHORTETY, INDICANT, 0);
-	} else {
-	  diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
-	  f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
-	}
+        a = ATTRIBUTE (SUB (NEXT (q)));
+        if (a == INT_SYMBOL || a == REAL_SYMBOL || a == BITS_SYMBOL || a == BYTES_SYMBOL || a == COMPLEX_SYMBOL || a == COMPL_SYMBOL) {
+          f (q, NULL, NULL, DECLARER, SHORTETY, INDICANT, 0);
+        } else {
+          diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
+          f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
+        }
       }
     }
   }
@@ -1854,7 +1853,7 @@ static BOOL_T whether_formal_bounds (NODE_T * p)
     case IDENTIFIER:
     case OPERATOR:
       return (whether_formal_bounds (SUB (p))
-	      && whether_formal_bounds (NEXT (p)));
+          && whether_formal_bounds (NEXT (p)));
     default:
       return (A_FALSE);
     }
@@ -1872,23 +1871,23 @@ static void reduce_declarer_lists (NODE_T * p)
   for (q = p; q != NULL; FORWARD (q)) {
     if (NEXT (q) != NULL && SUB (NEXT (q)) != NULL) {
       if (WHETHER (q, STRUCT_SYMBOL)) {
-	reduce_subordinate (NEXT (q), STRUCTURE_PACK);
-	f (q, NULL, NULL, DECLARER, STRUCT_SYMBOL, STRUCTURE_PACK, 0);
+        reduce_subordinate (NEXT (q), STRUCTURE_PACK);
+        f (q, NULL, NULL, DECLARER, STRUCT_SYMBOL, STRUCTURE_PACK, 0);
       } else if (WHETHER (q, UNION_SYMBOL)) {
-	reduce_subordinate (NEXT (q), UNION_PACK);
-	f (q, NULL, NULL, DECLARER, UNION_SYMBOL, UNION_PACK, 0);
+        reduce_subordinate (NEXT (q), UNION_PACK);
+        f (q, NULL, NULL, DECLARER, UNION_SYMBOL, UNION_PACK, 0);
       } else if (WHETHER (q, PROC_SYMBOL)) {
-	if (whether (q, PROC_SYMBOL, OPEN_SYMBOL, 0)) {
-	  if (!whether_formal_bounds (SUB_NEXT (q))) {
-	    reduce_subordinate (NEXT (q), FORMAL_DECLARERS);
-	  }
-	}
+        if (whether (q, PROC_SYMBOL, OPEN_SYMBOL, 0)) {
+          if (!whether_formal_bounds (SUB_NEXT (q))) {
+            reduce_subordinate (NEXT (q), FORMAL_DECLARERS);
+          }
+        }
       } else if (WHETHER (q, OP_SYMBOL)) {
-	if (whether (q, OP_SYMBOL, OPEN_SYMBOL, 0)) {
-	  if (!whether_formal_bounds (SUB_NEXT (q))) {
-	    reduce_subordinate (NEXT (q), FORMAL_DECLARERS);
-	  }
-	}
+        if (whether (q, OP_SYMBOL, OPEN_SYMBOL, 0)) {
+          if (!whether_formal_bounds (SUB_NEXT (q))) {
+            reduce_subordinate (NEXT (q), FORMAL_DECLARERS);
+          }
+        }
       }
     }
   }
@@ -1908,59 +1907,59 @@ static void reduce_row_proc_op_declarers (NODE_T * p)
     for (q = p; q != NULL; FORWARD (q)) {
 /* FLEX DECL. */
       if (whether (q, FLEX_SYMBOL, DECLARER, 0)) {
-	f (q, NULL, &z, DECLARER, FLEX_SYMBOL, DECLARER, 0);
+        f (q, NULL, &z, DECLARER, FLEX_SYMBOL, DECLARER, 0);
       }
 /* FLEX [] DECL. */
       if (whether (q, FLEX_SYMBOL, SUB_SYMBOL, DECLARER, 0)
-	  && SUB (NEXT (q)) != NULL) {
-	reduce_subordinate (NEXT (q), BOUNDS);
-	f (q, NULL, &z, DECLARER, FLEX_SYMBOL, BOUNDS, DECLARER, 0);
-	f (q, NULL, &z, DECLARER, FLEX_SYMBOL, FORMAL_BOUNDS, DECLARER, 0);
+          && SUB (NEXT (q)) != NULL) {
+        reduce_subordinate (NEXT (q), BOUNDS);
+        f (q, NULL, &z, DECLARER, FLEX_SYMBOL, BOUNDS, DECLARER, 0);
+        f (q, NULL, &z, DECLARER, FLEX_SYMBOL, FORMAL_BOUNDS, DECLARER, 0);
       }
 /* FLEX () DECL. */
       if (whether (q, FLEX_SYMBOL, OPEN_SYMBOL, DECLARER, 0)
-	  && SUB (NEXT (q)) != NULL) {
-	if (!whether (q, FLEX_SYMBOL, OPEN_SYMBOL, DECLARER, COLON_SYMBOL, 0)) {
-	  reduce_subordinate (NEXT (q), BOUNDS);
-	  f (q, NULL, &z, DECLARER, FLEX_SYMBOL, BOUNDS, DECLARER, 0);
-	  f (q, NULL, &z, DECLARER, FLEX_SYMBOL, FORMAL_BOUNDS, DECLARER, 0);
-	}
+          && SUB (NEXT (q)) != NULL) {
+        if (!whether (q, FLEX_SYMBOL, OPEN_SYMBOL, DECLARER, COLON_SYMBOL, 0)) {
+          reduce_subordinate (NEXT (q), BOUNDS);
+          f (q, NULL, &z, DECLARER, FLEX_SYMBOL, BOUNDS, DECLARER, 0);
+          f (q, NULL, &z, DECLARER, FLEX_SYMBOL, FORMAL_BOUNDS, DECLARER, 0);
+        }
       }
 /* [] DECL. */
       if (whether (q, SUB_SYMBOL, DECLARER, 0) && SUB (q) != NULL) {
-	reduce_subordinate (q, BOUNDS);
-	f (q, NULL, &z, DECLARER, BOUNDS, DECLARER, 0);
-	f (q, NULL, &z, DECLARER, FORMAL_BOUNDS, DECLARER, 0);
+        reduce_subordinate (q, BOUNDS);
+        f (q, NULL, &z, DECLARER, BOUNDS, DECLARER, 0);
+        f (q, NULL, &z, DECLARER, FORMAL_BOUNDS, DECLARER, 0);
       }
 /* () DECL. */
       if (whether (q, OPEN_SYMBOL, DECLARER, 0) && SUB (q) != NULL) {
-	if (whether (q, OPEN_SYMBOL, DECLARER, COLON_SYMBOL, 0)) {
+        if (whether (q, OPEN_SYMBOL, DECLARER, COLON_SYMBOL, 0)) {
 /* Catch e.g. (INT i) () INT: */
-	  if (whether_formal_bounds (SUB (q))) {
-	    reduce_subordinate (q, BOUNDS);
-	    f (q, NULL, &z, DECLARER, BOUNDS, DECLARER, 0);
-	    f (q, NULL, &z, DECLARER, FORMAL_BOUNDS, DECLARER, 0);
-	  }
-	} else {
-	  reduce_subordinate (q, BOUNDS);
-	  f (q, NULL, &z, DECLARER, BOUNDS, DECLARER, 0);
-	  f (q, NULL, &z, DECLARER, FORMAL_BOUNDS, DECLARER, 0);
-	}
+          if (whether_formal_bounds (SUB (q))) {
+            reduce_subordinate (q, BOUNDS);
+            f (q, NULL, &z, DECLARER, BOUNDS, DECLARER, 0);
+            f (q, NULL, &z, DECLARER, FORMAL_BOUNDS, DECLARER, 0);
+          }
+        } else {
+          reduce_subordinate (q, BOUNDS);
+          f (q, NULL, &z, DECLARER, BOUNDS, DECLARER, 0);
+          f (q, NULL, &z, DECLARER, FORMAL_BOUNDS, DECLARER, 0);
+        }
       }
     }
 /* PROC DECL, PROC () DECL, OP () DECL. */
     for (q = p; q != NULL; FORWARD (q)) {
       int a = ATTRIBUTE (q);
       if (a == REF_SYMBOL) {
-	f (q, NULL, &z, DECLARER, REF_SYMBOL, DECLARER, 0);
+        f (q, NULL, &z, DECLARER, REF_SYMBOL, DECLARER, 0);
       } else if (a == PROC_SYMBOL) {
-	f (q, NULL, &z, DECLARER, PROC_SYMBOL, DECLARER, 0);
-	f (q, NULL, &z, DECLARER, PROC_SYMBOL, FORMAL_DECLARERS, DECLARER, 0);
-	f (q, NULL, &z, DECLARER, PROC_SYMBOL, VOID_SYMBOL, 0);
-	f (q, NULL, &z, DECLARER, PROC_SYMBOL, FORMAL_DECLARERS, VOID_SYMBOL, 0);
+        f (q, NULL, &z, DECLARER, PROC_SYMBOL, DECLARER, 0);
+        f (q, NULL, &z, DECLARER, PROC_SYMBOL, FORMAL_DECLARERS, DECLARER, 0);
+        f (q, NULL, &z, DECLARER, PROC_SYMBOL, VOID_SYMBOL, 0);
+        f (q, NULL, &z, DECLARER, PROC_SYMBOL, FORMAL_DECLARERS, VOID_SYMBOL, 0);
       } else if (a == OP_SYMBOL) {
-	f (q, NULL, &z, OPERATOR_PLAN, OP_SYMBOL, FORMAL_DECLARERS, DECLARER, 0);
-	f (q, NULL, &z, OPERATOR_PLAN, OP_SYMBOL, FORMAL_DECLARERS, VOID_SYMBOL, 0);
+        f (q, NULL, &z, OPERATOR_PLAN, OP_SYMBOL, FORMAL_DECLARERS, DECLARER, 0);
+        f (q, NULL, &z, OPERATOR_PLAN, OP_SYMBOL, FORMAL_DECLARERS, VOID_SYMBOL, 0);
       }
     }
   }
@@ -2151,9 +2150,9 @@ static void reduce_primary_bits (NODE_T * p, int expect)
     if (expect == SERIAL_CLAUSE || expect == ENQUIRY_CLAUSE || expect == SOME_CLAUSE) {
       BOOL_T z = A_TRUE;
       while (z) {
-	z = A_FALSE;
-	f (q, NULL, &z, LABEL, DEFINING_IDENTIFIER, COLON_SYMBOL, 0);
-	f (q, NULL, &z, LABEL, LABEL, DEFINING_IDENTIFIER, COLON_SYMBOL, 0);
+        z = A_FALSE;
+        f (q, NULL, &z, LABEL, DEFINING_IDENTIFIER, COLON_SYMBOL, 0);
+        f (q, NULL, &z, LABEL, LABEL, DEFINING_IDENTIFIER, COLON_SYMBOL, 0);
       }
     }
   }
@@ -2200,20 +2199,20 @@ static void reduce_primaries (NODE_T * p, int expect)
       NODE_T *x = NEXT (q);
       z = A_FALSE;
       if (WHETHER (q, PRIMARY) && x != NULL) {
-	if (WHETHER (x, OPEN_SYMBOL)) {
-	  reduce_subordinate (NEXT (q), GENERIC_ARGUMENT);
-	  f (q, NULL, &z, SLICE, PRIMARY, GENERIC_ARGUMENT, 0);
-	  f (q, NULL, &z, PRIMARY, SLICE, 0);
+        if (WHETHER (x, OPEN_SYMBOL)) {
+          reduce_subordinate (NEXT (q), GENERIC_ARGUMENT);
+          f (q, NULL, &z, SLICE, PRIMARY, GENERIC_ARGUMENT, 0);
+          f (q, NULL, &z, PRIMARY, SLICE, 0);
 /*
 	  reduce_subordinate (NEXT (q), ARGUMENT);
 	  f (q, NULL, &z, CALL, PRIMARY, ARGUMENT, 0);
 	  f (q, NULL, &z, PRIMARY, CALL, 0);
 */
-	} else if (WHETHER (x, SUB_SYMBOL)) {
-	  reduce_subordinate (NEXT (q), GENERIC_ARGUMENT);
-	  f (q, NULL, &z, SLICE, PRIMARY, GENERIC_ARGUMENT, 0);
-	  f (q, NULL, &z, PRIMARY, SLICE, 0);
-	}
+        } else if (WHETHER (x, SUB_SYMBOL)) {
+          reduce_subordinate (NEXT (q), GENERIC_ARGUMENT);
+          f (q, NULL, &z, SLICE, PRIMARY, GENERIC_ARGUMENT, 0);
+          f (q, NULL, &z, PRIMARY, SLICE, 0);
+        }
       }
     }
 /* Now that call and slice are known, reduce remaining ( .. ). */
@@ -2225,17 +2224,17 @@ static void reduce_primaries (NODE_T * p, int expect)
       f (q, NULL, NULL, ENCLOSED_CLAUSE, INTEGER_CASE_CLAUSE, 0);
       f (q, NULL, NULL, ENCLOSED_CLAUSE, UNITED_CASE_CLAUSE, 0);
       if (PREVIOUS (q) != NULL) {
-	q = PREVIOUS (q);
-	fwd = A_FALSE;
+        q = PREVIOUS (q);
+        fwd = A_FALSE;
       }
     }
 /* Format text items. */
     if (expect == FORMAT_TEXT) {
       NODE_T *r;
       for (r = p; r != NULL; r = NEXT (r)) {
-	f (r, NULL, NULL, DYNAMIC_REPLICATOR, FORMAT_ITEM_N, ENCLOSED_CLAUSE, 0);
-	f (r, NULL, NULL, GENERAL_PATTERN, FORMAT_ITEM_G, ENCLOSED_CLAUSE, 0);
-	f (r, NULL, NULL, FORMAT_PATTERN, FORMAT_ITEM_F, ENCLOSED_CLAUSE, 0);
+        f (r, NULL, NULL, DYNAMIC_REPLICATOR, FORMAT_ITEM_N, ENCLOSED_CLAUSE, 0);
+        f (r, NULL, NULL, GENERAL_PATTERN, FORMAT_ITEM_G, ENCLOSED_CLAUSE, 0);
+        f (r, NULL, NULL, FORMAT_PATTERN, FORMAT_ITEM_F, ENCLOSED_CLAUSE, 0);
       }
     }
     if (fwd) {
@@ -2265,21 +2264,21 @@ routines for implementing formatted transput. This is a pragmatic system.
   NODE_T *q, *last_pat = NULL;
   for (q = p; q != NULL; FORWARD (q)) {
     switch (ATTRIBUTE (q)) {
-    case INTEGRAL_PATTERN:	/* These are the potentially ambiguous patterns. */
+    case INTEGRAL_PATTERN:     /* These are the potentially ambiguous patterns. */
     case REAL_PATTERN:
     case COMPLEX_PATTERN:
     case BITS_PATTERN:
       {
-	if (last_pat != NULL) {
-	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_COMMA_MUST_SEPARATE, ATTRIBUTE (last_pat), ATTRIBUTE (q));
-	}
-	last_pat = q;
-	break;
+        if (last_pat != NULL) {
+          diagnostic_node (A_SYNTAX_ERROR, q, ERROR_COMMA_MUST_SEPARATE, ATTRIBUTE (last_pat), ATTRIBUTE (q));
+        }
+        last_pat = q;
+        break;
       }
     case COMMA_SYMBOL:
       {
-	last_pat = NULL;
-	break;
+        last_pat = NULL;
+        break;
       }
     }
   }
@@ -2522,10 +2521,12 @@ static void reduce_format_texts (NODE_T * p)
       BOOL_T z = A_TRUE;
       f (q, NULL, NULL, PICTURE_LIST, PICTURE, 0);
       while (z) {
-	z = A_FALSE;
-	f (q, NULL, &z, PICTURE_LIST, PICTURE_LIST, COMMA_SYMBOL, PICTURE, 0);
-	/* We filtered ambiguous patterns, so commas may be omitted. */
-	f (q, NULL, &z, PICTURE_LIST, PICTURE_LIST, PICTURE, 0);
+        z = A_FALSE;
+        f (q, NULL, &z, PICTURE_LIST, PICTURE_LIST, COMMA_SYMBOL, PICTURE, 0);
+        /*
+         * We filtered ambiguous patterns, so commas may be omitted. 
+         */
+        f (q, NULL, &z, PICTURE_LIST, PICTURE_LIST, PICTURE, 0);
       }
     }
   }
@@ -2592,37 +2593,37 @@ static void reduce_formulae (NODE_T * p)
   for (priority = MAX_PRIORITY; priority >= 0; priority--) {
     for (q = p; q != NULL; FORWARD (q)) {
       if (operator_with_priority (q, priority)) {
-	BOOL_T z = A_FALSE;
-	NODE_T *op = NEXT (q);
-	if (WHETHER (q, SECONDARY)) {
-	  f (q, NULL, &z, FORMULA, SECONDARY, OPERATOR, SECONDARY, 0);
-	  f (q, NULL, &z, FORMULA, SECONDARY, OPERATOR, MONADIC_FORMULA, 0);
-	  f (q, NULL, &z, FORMULA, SECONDARY, OPERATOR, FORMULA, 0);
-	} else if (WHETHER (q, MONADIC_FORMULA)) {
-	  f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, SECONDARY, 0);
-	  f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, MONADIC_FORMULA, 0);
-	  f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, FORMULA, 0);
-	}
-	if (priority == 0 && z) {
-	  diagnostic_node (A_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
-	}
-	z = A_TRUE;
-	while (z) {
-	  NODE_T *op = NEXT (q);
-	  z = A_FALSE;
-	  if (operator_with_priority (q, priority)) {
-	    f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, SECONDARY, 0);
-	  }
-	  if (operator_with_priority (q, priority)) {
-	    f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, MONADIC_FORMULA, 0);
-	  }
-	  if (operator_with_priority (q, priority)) {
-	    f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, FORMULA, 0);
-	  }
-	  if (priority == 0 && z) {
-	    diagnostic_node (A_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
-	  }
-	}
+        BOOL_T z = A_FALSE;
+        NODE_T *op = NEXT (q);
+        if (WHETHER (q, SECONDARY)) {
+          f (q, NULL, &z, FORMULA, SECONDARY, OPERATOR, SECONDARY, 0);
+          f (q, NULL, &z, FORMULA, SECONDARY, OPERATOR, MONADIC_FORMULA, 0);
+          f (q, NULL, &z, FORMULA, SECONDARY, OPERATOR, FORMULA, 0);
+        } else if (WHETHER (q, MONADIC_FORMULA)) {
+          f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, SECONDARY, 0);
+          f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, MONADIC_FORMULA, 0);
+          f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, FORMULA, 0);
+        }
+        if (priority == 0 && z) {
+          diagnostic_node (A_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
+        }
+        z = A_TRUE;
+        while (z) {
+          NODE_T *op = NEXT (q);
+          z = A_FALSE;
+          if (operator_with_priority (q, priority)) {
+            f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, SECONDARY, 0);
+          }
+          if (operator_with_priority (q, priority)) {
+            f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, MONADIC_FORMULA, 0);
+          }
+          if (operator_with_priority (q, priority)) {
+            f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, FORMULA, 0);
+          }
+          if (priority == 0 && z) {
+            diagnostic_node (A_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
+          }
+        }
       }
     }
   }
@@ -2647,17 +2648,17 @@ static NODE_T *reduce_dyadic (NODE_T * p, int u)
       BOOL_T z;
       q = p;
       do {
-	PRIO (q->info) = 10;
-	z = (NEXT (q) != NULL) && (WHETHER (NEXT (q), OPERATOR));
-	if (z) {
-	  FORWARD (q);
-	}
+        PRIO (q->info) = 10;
+        z = (NEXT (q) != NULL) && (WHETHER (NEXT (q), OPERATOR));
+        if (z) {
+          FORWARD (q);
+        }
       }
       while (z);
       f (q, NULL, NULL, MONADIC_FORMULA, OPERATOR, SECONDARY, 0);
       while (q != p) {
-	q = PREVIOUS (q);
-	f (q, NULL, NULL, MONADIC_FORMULA, OPERATOR, MONADIC_FORMULA, 0);
+        q = PREVIOUS (q);
+        f (q, NULL, NULL, MONADIC_FORMULA, OPERATOR, MONADIC_FORMULA, 0);
       }
     }
     FORWARD (p);
@@ -2800,13 +2801,13 @@ static void reduce_generic_arguments (NODE_T * p)
   for (q = p; q && NEXT (q); FORWARD (q)) {
     if (WHETHER (q, COMMA_SYMBOL)) {
       if (!(ATTRIBUTE (NEXT (q)) == UNIT || ATTRIBUTE (NEXT (q)) == TRIMMER)) {
-	pad_node (q, TRIMMER);
+        pad_node (q, TRIMMER);
       }
     } else {
       if (WHETHER (NEXT (q), COMMA_SYMBOL)) {
-	if (WHETHER_NOT (q, UNIT) && WHETHER_NOT (q, TRIMMER)) {
-	  pad_node (q, TRIMMER);
-	}
+        if (WHETHER_NOT (q, UNIT) && WHETHER_NOT (q, TRIMMER)) {
+          pad_node (q, TRIMMER);
+        }
       }
     }
   }
@@ -2897,7 +2898,7 @@ static void reduce_declaration_lists (NODE_T * p)
       f (q, NULL, &z, IDENTITY_DECLARATION, IDENTITY_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, EQUALS_SYMBOL, UNIT, 0);
       f (q, NULL, &z, VARIABLE_DECLARATION, VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0);
       if (!whether (q, VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
-	f (q, NULL, &z, VARIABLE_DECLARATION, VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, 0);
+        f (q, NULL, &z, VARIABLE_DECLARATION, VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, 0);
       }
     }
     while (z);
@@ -2963,7 +2964,7 @@ static void precheck_serial_clause (NODE_T * q)
   for (p = q; p != NULL; FORWARD (p)) {
     if (WHETHER (p, EXIT_SYMBOL)) {
       if (NEXT (p) == NULL || WHETHER_NOT (NEXT (p), LABELED_UNIT)) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_LABELED_UNIT_MUST_FOLLOW);
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_LABELED_UNIT_MUST_FOLLOW);
       }
     }
   }
@@ -2973,7 +2974,7 @@ static void precheck_serial_clause (NODE_T * q)
       label_seen = A_TRUE;
     } else if (WHETHER (p, DECLARATION_LIST)) {
       if (label_seen) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_LABEL_BEFORE_DECLARATION);
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_LABEL_BEFORE_DECLARATION);
       }
     }
   }
@@ -2996,28 +2997,32 @@ static void reduce_serial_clauses (NODE_T * p)
     do {
       z = A_FALSE;
       if (WHETHER (q, SERIAL_CLAUSE)) {
-	f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, SEMI_SYMBOL, UNIT, 0);
-	f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, EXIT_SYMBOL, LABELED_UNIT, 0);
-	f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, SEMI_SYMBOL, LABELED_UNIT, 0);
-	f (q, NULL, &z, INITIALISER_SERIES, SERIAL_CLAUSE, SEMI_SYMBOL, DECLARATION_LIST, 0);
-	/* Errors. */
-	f (q, wrong_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, COMMA_SYMBOL, UNIT, 0);
-	f (q, wrong_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, COMMA_SYMBOL, LABELED_UNIT, 0);
-	f (q, wrong_separator, &z, INITIALISER_SERIES, SERIAL_CLAUSE, COMMA_SYMBOL, DECLARATION_LIST, 0);
-	f (q, missing_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, UNIT, 0);
-	f (q, missing_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, LABELED_UNIT, 0);
-	f (q, missing_separator, &z, INITIALISER_SERIES, SERIAL_CLAUSE, DECLARATION_LIST, 0);
+        f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, SEMI_SYMBOL, UNIT, 0);
+        f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, EXIT_SYMBOL, LABELED_UNIT, 0);
+        f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, SEMI_SYMBOL, LABELED_UNIT, 0);
+        f (q, NULL, &z, INITIALISER_SERIES, SERIAL_CLAUSE, SEMI_SYMBOL, DECLARATION_LIST, 0);
+        /*
+         * Errors. 
+         */
+        f (q, wrong_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, COMMA_SYMBOL, UNIT, 0);
+        f (q, wrong_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, COMMA_SYMBOL, LABELED_UNIT, 0);
+        f (q, wrong_separator, &z, INITIALISER_SERIES, SERIAL_CLAUSE, COMMA_SYMBOL, DECLARATION_LIST, 0);
+        f (q, missing_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, UNIT, 0);
+        f (q, missing_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, LABELED_UNIT, 0);
+        f (q, missing_separator, &z, INITIALISER_SERIES, SERIAL_CLAUSE, DECLARATION_LIST, 0);
       } else if (WHETHER (q, INITIALISER_SERIES)) {
-	f (q, NULL, &z, SERIAL_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, UNIT, 0);
-	f (q, NULL, &z, SERIAL_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, LABELED_UNIT, 0);
-	f (q, NULL, &z, INITIALISER_SERIES, INITIALISER_SERIES, SEMI_SYMBOL, DECLARATION_LIST, 0);
-	/* Errors. */
-	f (q, wrong_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, COMMA_SYMBOL, UNIT, 0);
-	f (q, wrong_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, COMMA_SYMBOL, LABELED_UNIT, 0);
-	f (q, wrong_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, COMMA_SYMBOL, DECLARATION_LIST, 0);
-	f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, UNIT, 0);
-	f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, LABELED_UNIT, 0);
-	f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
+        f (q, NULL, &z, SERIAL_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, UNIT, 0);
+        f (q, NULL, &z, SERIAL_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, LABELED_UNIT, 0);
+        f (q, NULL, &z, INITIALISER_SERIES, INITIALISER_SERIES, SEMI_SYMBOL, DECLARATION_LIST, 0);
+        /*
+         * Errors. 
+         */
+        f (q, wrong_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, COMMA_SYMBOL, UNIT, 0);
+        f (q, wrong_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, COMMA_SYMBOL, LABELED_UNIT, 0);
+        f (q, wrong_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, COMMA_SYMBOL, DECLARATION_LIST, 0);
+        f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, UNIT, 0);
+        f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, LABELED_UNIT, 0);
+        f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
       }
     }
     while (z);
@@ -3039,15 +3044,15 @@ static void reduce_enquiry_clauses (NODE_T * p)
     do {
       z = A_FALSE;
       if (WHETHER (q, ENQUIRY_CLAUSE)) {
-	f (q, NULL, &z, ENQUIRY_CLAUSE, ENQUIRY_CLAUSE, SEMI_SYMBOL, UNIT, 0);
-	f (q, NULL, &z, INITIALISER_SERIES, ENQUIRY_CLAUSE, SEMI_SYMBOL, DECLARATION_LIST, 0);
-	f (q, missing_separator, &z, ENQUIRY_CLAUSE, ENQUIRY_CLAUSE, UNIT, 0);
-	f (q, missing_separator, &z, INITIALISER_SERIES, ENQUIRY_CLAUSE, DECLARATION_LIST, 0);
+        f (q, NULL, &z, ENQUIRY_CLAUSE, ENQUIRY_CLAUSE, SEMI_SYMBOL, UNIT, 0);
+        f (q, NULL, &z, INITIALISER_SERIES, ENQUIRY_CLAUSE, SEMI_SYMBOL, DECLARATION_LIST, 0);
+        f (q, missing_separator, &z, ENQUIRY_CLAUSE, ENQUIRY_CLAUSE, UNIT, 0);
+        f (q, missing_separator, &z, INITIALISER_SERIES, ENQUIRY_CLAUSE, DECLARATION_LIST, 0);
       } else if (WHETHER (q, INITIALISER_SERIES)) {
-	f (q, NULL, &z, ENQUIRY_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, UNIT, 0);
-	f (q, NULL, &z, INITIALISER_SERIES, INITIALISER_SERIES, SEMI_SYMBOL, DECLARATION_LIST, 0);
-	f (q, missing_separator, &z, ENQUIRY_CLAUSE, INITIALISER_SERIES, UNIT, 0);
-	f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
+        f (q, NULL, &z, ENQUIRY_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, UNIT, 0);
+        f (q, NULL, &z, INITIALISER_SERIES, INITIALISER_SERIES, SEMI_SYMBOL, DECLARATION_LIST, 0);
+        f (q, missing_separator, &z, ENQUIRY_CLAUSE, INITIALISER_SERIES, UNIT, 0);
+        f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
       }
     }
     while (z);
@@ -3067,18 +3072,18 @@ static void reduce_collateral_clauses (NODE_T * p)
       BOOL_T z;
       f (q, NULL, NULL, UNIT_LIST, UNIT, 0);
       do {
-	z = A_FALSE;
-	f (q, NULL, &z, UNIT_LIST, UNIT_LIST, COMMA_SYMBOL, UNIT, 0);
-	f (q, missing_separator, &z, UNIT_LIST, UNIT_LIST, UNIT, 0);
+        z = A_FALSE;
+        f (q, NULL, &z, UNIT_LIST, UNIT_LIST, COMMA_SYMBOL, UNIT, 0);
+        f (q, missing_separator, &z, UNIT_LIST, UNIT_LIST, UNIT, 0);
       }
       while (z);
     } else if (WHETHER (q, SPECIFIED_UNIT)) {
       BOOL_T z;
       f (q, NULL, NULL, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT, 0);
       do {
-	z = A_FALSE;
-	f (q, NULL, &z, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_LIST, COMMA_SYMBOL, SPECIFIED_UNIT, 0);
-	f (q, missing_separator, &z, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT, 0);
+        z = A_FALSE;
+        f (q, NULL, &z, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_LIST, COMMA_SYMBOL, SPECIFIED_UNIT, 0);
+        f (q, missing_separator, &z, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT, 0);
       }
       while (z);
     }
@@ -3107,8 +3112,8 @@ static void reduce_enclosed_clause_bits (NODE_T * p, int expect)
       f (p, empty_clause, NULL, ARGUMENT, OPEN_SYMBOL, INITIALISER_SERIES, CLOSE_SYMBOL, 0);
     } else if (expect == GENERIC_ARGUMENT) {
       if (whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0)) {
-	pad_node (p, TRIMMER);
-	f (p, NULL, NULL, GENERIC_ARGUMENT, OPEN_SYMBOL, TRIMMER, CLOSE_SYMBOL, 0);
+        pad_node (p, TRIMMER);
+        f (p, NULL, NULL, GENERIC_ARGUMENT, OPEN_SYMBOL, TRIMMER, CLOSE_SYMBOL, 0);
       }
       f (p, NULL, NULL, GENERIC_ARGUMENT, OPEN_SYMBOL, GENERIC_ARGUMENT_LIST, CLOSE_SYMBOL, 0);
     } else if (expect == BOUNDS) {
@@ -3125,8 +3130,8 @@ static void reduce_enclosed_clause_bits (NODE_T * p, int expect)
   } else if (WHETHER (p, SUB_SYMBOL)) {
     if (expect == GENERIC_ARGUMENT) {
       if (whether (p, SUB_SYMBOL, BUS_SYMBOL, 0)) {
-	pad_node (p, TRIMMER);
-	f (p, NULL, NULL, GENERIC_ARGUMENT, SUB_SYMBOL, TRIMMER, BUS_SYMBOL, 0);
+        pad_node (p, TRIMMER);
+        f (p, NULL, NULL, GENERIC_ARGUMENT, SUB_SYMBOL, TRIMMER, BUS_SYMBOL, 0);
       }
       f (p, NULL, NULL, GENERIC_ARGUMENT, SUB_SYMBOL, GENERIC_ARGUMENT_LIST, BUS_SYMBOL, 0);
     } else if (expect == BOUNDS) {
@@ -3446,15 +3451,15 @@ static int find_tag_definition (SYMBOL_TABLE_T * table, char *name)
     found = A_FALSE;
     for (s = table->indicants; s != NULL && !found; s = NEXT (s)) {
       if (SYMBOL (NODE (s)) == name) {
-	ret += INDICANT;
-	found = A_TRUE;
+        ret += INDICANT;
+        found = A_TRUE;
       }
     }
     found = A_FALSE;
     for (s = table->operators; s != NULL && !found; s = NEXT (s)) {
       if (SYMBOL (NODE (s)) == name) {
-	ret += OPERATOR;
-	found = A_TRUE;
+        ret += OPERATOR;
+        found = A_TRUE;
       }
     }
     if (ret == 0) {
@@ -3479,20 +3484,20 @@ static void elaborate_bold_tags (NODE_T * p)
     if (WHETHER (q, BOLD_TAG)) {
       switch (find_tag_definition (SYMBOL_TABLE (q), SYMBOL (q))) {
       case 0:
-	{
-	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
-	  break;
-	}
+        {
+          diagnostic_node (A_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
+          break;
+        }
       case INDICANT:
-	{
-	  ATTRIBUTE (q) = INDICANT;
-	  break;
-	}
+        {
+          ATTRIBUTE (q) = INDICANT;
+          break;
+        }
       case OPERATOR:
-	{
-	  ATTRIBUTE (q) = OPERATOR;
-	  break;
-	}
+        {
+          ATTRIBUTE (q) = OPERATOR;
+          break;
+        }
       }
     }
   }
@@ -3532,17 +3537,17 @@ static void extract_indicants (NODE_T * p)
     if (WHETHER (q, MODE_SYMBOL)) {
       BOOL_T z = A_TRUE;
       do {
-	FORWARD (q);
-	if (whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)) {
-	  add_tag (SYMBOL_TABLE (p), INDICANT, q, NULL, 0);
-	  ATTRIBUTE (q) = DEFINING_INDICANT;
-	  FORWARD (q);
-	  q->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_pack_declarer (NEXT (q));
-	  FORWARD (q);
-	} else {
-	  z = A_FALSE;
-	}
+        FORWARD (q);
+        if (whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)) {
+          add_tag (SYMBOL_TABLE (p), INDICANT, q, NULL, 0);
+          ATTRIBUTE (q) = DEFINING_INDICANT;
+          FORWARD (q);
+          q->attribute = ALT_EQUALS_SYMBOL;
+          q = skip_pack_declarer (NEXT (q));
+          FORWARD (q);
+        } else {
+          z = A_FALSE;
+        }
       }
       while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
@@ -3574,61 +3579,61 @@ static void extract_priorities (NODE_T * p)
     if (WHETHER (q, PRIO_SYMBOL)) {
       BOOL_T z = A_TRUE;
       do {
-	FORWARD (q);
+        FORWARD (q);
 /* An operator tag like ++ or && gives strange errors so we catch it here. */
-	if (whether (q, OPERATOR, OPERATOR, 0)) {
-	  int k;
-	  NODE_T *y = q;
-	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
-	  ATTRIBUTE (q) = DEFINING_OPERATOR;
+        if (whether (q, OPERATOR, OPERATOR, 0)) {
+          int k;
+          NODE_T *y = q;
+          diagnostic_node (A_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
+          ATTRIBUTE (q) = DEFINING_OPERATOR;
 /* Remove one superfluous operator, and hope it was only one.   	 */
-	  NEXT (q) = NEXT (NEXT (q));
-	  PREVIOUS (NEXT (q)) = q;
-	  FORWARD (q);
-	  q->attribute = ALT_EQUALS_SYMBOL;
-	  FORWARD (q);
-	  GET_PRIORITY (q, k);
-	  ATTRIBUTE (q) = PRIORITY;
-	  add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
-	  FORWARD (q);
-	} else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTER, 0)
-		   || whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTER, 0)
-		   || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTER, 0)) {
-	  int k;
-	  NODE_T *y = q;
-	  ATTRIBUTE (q) = DEFINING_OPERATOR;
-	  FORWARD (q);
-	  q->attribute = ALT_EQUALS_SYMBOL;
-	  FORWARD (q);
-	  GET_PRIORITY (q, k);
-	  ATTRIBUTE (q) = PRIORITY;
-	  add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
-	  FORWARD (q);
-	} else if (whether (q, BOLD_TAG, INT_DENOTER, 0)
-		   || whether (q, OPERATOR, INT_DENOTER, 0)
-		   || whether (q, EQUALS_SYMBOL, INT_DENOTER, 0)) {
+          NEXT (q) = NEXT (NEXT (q));
+          PREVIOUS (NEXT (q)) = q;
+          FORWARD (q);
+          q->attribute = ALT_EQUALS_SYMBOL;
+          FORWARD (q);
+          GET_PRIORITY (q, k);
+          ATTRIBUTE (q) = PRIORITY;
+          add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
+          FORWARD (q);
+        } else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTER, 0)
+            || whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTER, 0)
+            || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTER, 0)) {
+          int k;
+          NODE_T *y = q;
+          ATTRIBUTE (q) = DEFINING_OPERATOR;
+          FORWARD (q);
+          q->attribute = ALT_EQUALS_SYMBOL;
+          FORWARD (q);
+          GET_PRIORITY (q, k);
+          ATTRIBUTE (q) = PRIORITY;
+          add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
+          FORWARD (q);
+        } else if (whether (q, BOLD_TAG, INT_DENOTER, 0)
+            || whether (q, OPERATOR, INT_DENOTER, 0)
+            || whether (q, EQUALS_SYMBOL, INT_DENOTER, 0)) {
 /* The scanner cannot separate operator and "=" sign so we do this here. */
-	  int len = (int) strlen (SYMBOL (q));
-	  if (len > 1 && SYMBOL (q)[len - 1] == '=') {
-	    int k;
-	    NODE_T *y = q;
-	    char *sym = (char *) get_temp_heap_space (len);
-	    strncpy (sym, SYMBOL (q), len - 1);
-	    sym[len] = NULL_CHAR;
-	    SYMBOL (q) = TEXT (add_token (&top_token, sym));
-	    ATTRIBUTE (q) = DEFINING_OPERATOR;
-	    insert_node (q, ALT_EQUALS_SYMBOL);
-	    q = NEXT (NEXT (q));
-	    GET_PRIORITY (q, k);
-	    ATTRIBUTE (q) = PRIORITY;
-	    add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
-	    FORWARD (q);
-	  } else {
-	    diagnostic_node (A_SYNTAX_ERROR, (q != NULL ? q : p), ERROR_SYNTAX_EXPECTED, EQUALS_SYMBOL, NULL);
-	  }
-	} else {
-	  z = A_FALSE;
-	}
+          int len = (int) strlen (SYMBOL (q));
+          if (len > 1 && SYMBOL (q)[len - 1] == '=') {
+            int k;
+            NODE_T *y = q;
+            char *sym = (char *) get_temp_heap_space (len);
+            bufcpy (sym, SYMBOL (q), len - 1);
+            sym[len] = NULL_CHAR;
+            SYMBOL (q) = TEXT (add_token (&top_token, sym));
+            ATTRIBUTE (q) = DEFINING_OPERATOR;
+            insert_node (q, ALT_EQUALS_SYMBOL);
+            q = NEXT (NEXT (q));
+            GET_PRIORITY (q, k);
+            ATTRIBUTE (q) = PRIORITY;
+            add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
+            FORWARD (q);
+          } else {
+            diagnostic_node (A_SYNTAX_ERROR, (q != NULL ? q : p), ERROR_SYNTAX_EXPECTED, EQUALS_SYMBOL, NULL);
+          }
+        } else {
+          z = A_FALSE;
+        }
       }
       while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
@@ -3652,52 +3657,52 @@ static void extract_operators (NODE_T * p)
       BOOL_T z = A_TRUE;
 /* Skip operator plan. */
       if (NEXT (q) != NULL && WHETHER (NEXT (q), OPEN_SYMBOL)) {
-	q = skip_pack_declarer (NEXT (q));
+        q = skip_pack_declarer (NEXT (q));
       }
 /* Sample operators. */
       if (q != NULL) {
-	do {
-	  FORWARD (q);
+        do {
+          FORWARD (q);
 /* An unacceptable operator tag like ++ or && gives strange errors so we catch it here. */
-	  if (whether (q, OPERATOR, OPERATOR, 0)) {
-	    diagnostic_node (A_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
-	    ATTRIBUTE (q) = DEFINING_OPERATOR;
-	    add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
-	    NEXT (q) = NEXT (NEXT (q));	/* Remove one superfluous operator, and hope it was only one. */
-	    PREVIOUS (NEXT (q)) = q;
-	    FORWARD (q);
-	    q->attribute = ALT_EQUALS_SYMBOL;
-	    q = skip_unit (q);
-	  } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0)
-		     || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)
-		     || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
-	    ATTRIBUTE (q) = DEFINING_OPERATOR;
-	    add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
-	    FORWARD (q);
-	    q->attribute = ALT_EQUALS_SYMBOL;
-	    q = skip_unit (q);
-	  } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG)
-				   || WHETHER (q, EQUALS_SYMBOL))) {
+          if (whether (q, OPERATOR, OPERATOR, 0)) {
+            diagnostic_node (A_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
+            ATTRIBUTE (q) = DEFINING_OPERATOR;
+            add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
+            NEXT (q) = NEXT (NEXT (q)); /* Remove one superfluous operator, and hope it was only one. */
+            PREVIOUS (NEXT (q)) = q;
+            FORWARD (q);
+            q->attribute = ALT_EQUALS_SYMBOL;
+            q = skip_unit (q);
+          } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0)
+              || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)
+              || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
+            ATTRIBUTE (q) = DEFINING_OPERATOR;
+            add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
+            FORWARD (q);
+            q->attribute = ALT_EQUALS_SYMBOL;
+            q = skip_unit (q);
+          } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG)
+                  || WHETHER (q, EQUALS_SYMBOL))) {
 /* The scanner cannot separate operator and "=" sign so we do this here. */
-	    int len = (int) strlen (SYMBOL (q));
-	    if (len > 1 && SYMBOL (q)[len - 1] == '=') {
-	      char *sym = (char *) get_temp_heap_space (len);
-	      strncpy (sym, SYMBOL (q), len - 1);
-	      sym[len] = NULL_CHAR;
-	      SYMBOL (q) = TEXT (add_token (&top_token, sym));
-	      ATTRIBUTE (q) = DEFINING_OPERATOR;
-	      insert_node (q, ALT_EQUALS_SYMBOL);
-	      add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
-	      FORWARD (q);
-	      q = skip_unit (q);
-	    } else {
-	      diagnostic_node (A_SYNTAX_ERROR, (q != NULL ? q : p), ERROR_SYNTAX_EXPECTED, EQUALS_SYMBOL, NULL);
-	    }
-	  } else {
-	    z = A_FALSE;
-	  }
-	}
-	while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+            int len = (int) strlen (SYMBOL (q));
+            if (len > 1 && SYMBOL (q)[len - 1] == '=') {
+              char *sym = (char *) get_temp_heap_space (len);
+              bufcpy (sym, SYMBOL (q), len - 1);
+              sym[len] = NULL_CHAR;
+              SYMBOL (q) = TEXT (add_token (&top_token, sym));
+              ATTRIBUTE (q) = DEFINING_OPERATOR;
+              insert_node (q, ALT_EQUALS_SYMBOL);
+              add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
+              FORWARD (q);
+              q = skip_unit (q);
+            } else {
+              diagnostic_node (A_SYNTAX_ERROR, (q != NULL ? q : p), ERROR_SYNTAX_EXPECTED, EQUALS_SYMBOL, NULL);
+            }
+          } else {
+            z = A_FALSE;
+          }
+        }
+        while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
       }
     }
   }
@@ -3716,9 +3721,9 @@ static void extract_labels (NODE_T * p, int expect)
   if (expect == SERIAL_CLAUSE || expect == ENQUIRY_CLAUSE || expect == SOME_CLAUSE) {
     for (q = p; q != NULL; FORWARD (q)) {
       if (whether (q, IDENTIFIER, COLON_SYMBOL, 0)) {
-	TAG_T *z = add_tag (SYMBOL_TABLE (p), LABEL, q, NULL, LOCAL_LABEL);
-	ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	z->unit = NULL;
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), LABEL, q, NULL, LOCAL_LABEL);
+        ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+        z->unit = NULL;
       }
     }
   }
@@ -3736,22 +3741,22 @@ static void extract_identities (NODE_T * p)
     if (whether (q, DECLARER, IDENTIFIER, EQUALS_SYMBOL, 0)) {
       BOOL_T z = A_TRUE;
       do {
-	if (whether ((FORWARD (q)), IDENTIFIER, EQUALS_SYMBOL, 0)) {
-	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  FORWARD (q);
-	  q->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
-	} else if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
+        if (whether ((FORWARD (q)), IDENTIFIER, EQUALS_SYMBOL, 0)) {
+          add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          FORWARD (q);
+          q->attribute = ALT_EQUALS_SYMBOL;
+          q = skip_unit (q);
+        } else if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
-	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
-	} else {
-	  z = A_FALSE;
-	}
+          diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
+          add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
+          q = skip_unit (q);
+        } else {
+          z = A_FALSE;
+        }
       }
       while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
@@ -3772,19 +3777,19 @@ static void extract_variables (NODE_T * p)
     if (whether (q, DECLARER, IDENTIFIER, 0)) {
       BOOL_T z = A_TRUE;
       do {
-	FORWARD (q);
-	if (whether (q, IDENTIFIER, 0)) {
-	  if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
+        FORWARD (q);
+        if (whether (q, IDENTIFIER, 0)) {
+          if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	    diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
-	    NEXT (q)->attribute = ASSIGN_SYMBOL;
-	  }
-	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  q = skip_unit (q);
-	} else {
-	  z = A_FALSE;
-	}
+            diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
+            NEXT (q)->attribute = ASSIGN_SYMBOL;
+          }
+          add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          q = skip_unit (q);
+        } else {
+          z = A_FALSE;
+        }
       }
       while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
@@ -3805,23 +3810,23 @@ static void extract_proc_identities (NODE_T * p)
     if (whether (q, PROC_SYMBOL, IDENTIFIER, EQUALS_SYMBOL, 0)) {
       BOOL_T z = A_TRUE;
       do {
-	FORWARD (q);
-	if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
-	  TAG_T *t = add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  t->in_proc = A_TRUE;
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
-	} else if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
+        FORWARD (q);
+        if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
+          TAG_T *t = add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          t->in_proc = A_TRUE;
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
+          q = skip_unit (q);
+        } else if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
-	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
-	} else {
-	  z = A_FALSE;
-	}
+          diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
+          add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
+          q = skip_unit (q);
+        } else {
+          z = A_FALSE;
+        }
       }
       while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
@@ -3842,21 +3847,21 @@ static void extract_proc_variables (NODE_T * p)
     if (whether (q, PROC_SYMBOL, IDENTIFIER, 0)) {
       BOOL_T z = A_TRUE;
       do {
-	FORWARD (q);
-	if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
-	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  q = skip_unit (FORWARD (q));
-	} else if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
+        FORWARD (q);
+        if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
+          add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          q = skip_unit (FORWARD (q));
+        } else if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
-	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
-	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
-	  (FORWARD (q))->attribute = ASSIGN_SYMBOL;
-	  q = skip_unit (q);
-	} else {
-	  z = A_FALSE;
-	}
+          diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
+          add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
+          ATTRIBUTE (q) = DEFINING_IDENTIFIER;
+          (FORWARD (q))->attribute = ASSIGN_SYMBOL;
+          q = skip_unit (q);
+        } else {
+          z = A_FALSE;
+        }
       }
       while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
@@ -3905,15 +3910,15 @@ static void extract_declarations (NODE_T * p)
   for (q = p; q != NULL; FORWARD (q)) {
     if (WHETHER (q, OPERATOR)) {
       if (find_tag_global (SYMBOL_TABLE (q), OP_SYMBOL, SYMBOL (q))) {
-	TAG_T *s = find_tag_global (SYMBOL_TABLE (q), PRIO_SYMBOL, SYMBOL (q));
-	if (s != NULL) {
-	  PRIO (q->info) = PRIO (s);
-	} else {
-	  PRIO (q->info) = 0;
-	}
+        TAG_T *s = find_tag_global (SYMBOL_TABLE (q), PRIO_SYMBOL, SYMBOL (q));
+        if (s != NULL) {
+          PRIO (q->info) = PRIO (s);
+        } else {
+          PRIO (q->info) = 0;
+        }
       } else {
-	diagnostic_node (A_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
-	PRIO (q->info) = 1;
+        diagnostic_node (A_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
+        PRIO (q->info) = 1;
       }
     }
   }
@@ -3949,7 +3954,7 @@ void bottom_up_error_check (NODE_T * p)
       int k = 0;
       count_pictures (SUB (p), &k);
       if (k != 2) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_FORMAT_PICTURE_NUMBER, ATTRIBUTE (p), NULL);
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_FORMAT_PICTURE_NUMBER, ATTRIBUTE (p), NULL);
       }
     } else {
       bottom_up_error_check (SUB (p));
@@ -3970,55 +3975,55 @@ void rearrange_goto_less_jumps (NODE_T * p)
     if (WHETHER (p, UNIT)) {
       NODE_T *q = SUB (p);
       if (WHETHER (q, TERTIARY)) {
-	NODE_T *tertiary = q;
-	q = SUB (q);
-	if (q != NULL && WHETHER (q, SECONDARY)) {
-	  q = SUB (q);
-	  if (q != NULL && WHETHER (q, PRIMARY)) {
-	    q = SUB (q);
-	    if (q != NULL && WHETHER (q, IDENTIFIER)) {
-	      if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
-		ATTRIBUTE (tertiary) = JUMP;
-		SUB (tertiary) = q;
-	      }
-	    }
-	  }
-	}
+        NODE_T *tertiary = q;
+        q = SUB (q);
+        if (q != NULL && WHETHER (q, SECONDARY)) {
+          q = SUB (q);
+          if (q != NULL && WHETHER (q, PRIMARY)) {
+            q = SUB (q);
+            if (q != NULL && WHETHER (q, IDENTIFIER)) {
+              if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
+                ATTRIBUTE (tertiary) = JUMP;
+                SUB (tertiary) = q;
+              }
+            }
+          }
+        }
       }
     } else if (WHETHER (p, TERTIARY)) {
       NODE_T *q = SUB (p);
       if (q != NULL && WHETHER (q, SECONDARY)) {
-	NODE_T *secondary = q;
-	q = SUB (q);
-	if (q != NULL && WHETHER (q, PRIMARY)) {
-	  q = SUB (q);
-	  if (q != NULL && WHETHER (q, IDENTIFIER)) {
-	    if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
-	      ATTRIBUTE (secondary) = JUMP;
-	      SUB (secondary) = q;
-	    }
-	  }
-	}
+        NODE_T *secondary = q;
+        q = SUB (q);
+        if (q != NULL && WHETHER (q, PRIMARY)) {
+          q = SUB (q);
+          if (q != NULL && WHETHER (q, IDENTIFIER)) {
+            if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
+              ATTRIBUTE (secondary) = JUMP;
+              SUB (secondary) = q;
+            }
+          }
+        }
       }
     } else if (WHETHER (p, SECONDARY)) {
       NODE_T *q = SUB (p);
       if (q != NULL && WHETHER (q, PRIMARY)) {
-	NODE_T *primary = q;
-	q = SUB (q);
-	if (q != NULL && WHETHER (q, IDENTIFIER)) {
-	  if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
-	    ATTRIBUTE (primary) = JUMP;
-	    SUB (primary) = q;
-	  }
-	}
+        NODE_T *primary = q;
+        q = SUB (q);
+        if (q != NULL && WHETHER (q, IDENTIFIER)) {
+          if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q)) == LABEL) {
+            ATTRIBUTE (primary) = JUMP;
+            SUB (primary) = q;
+          }
+        }
       }
     } else if (WHETHER (p, PRIMARY)) {
       NODE_T *q = SUB (p);
       if (q != NULL && WHETHER (q, IDENTIFIER)) {
-	if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q))
-	    == LABEL) {
-	  make_sub (q, q, JUMP);
-	}
+        if (whether_identifier_or_label_global (SYMBOL_TABLE (q), SYMBOL (q))
+            == LABEL) {
+          make_sub (q, q, JUMP);
+        }
       }
     }
     rearrange_goto_less_jumps (SUB (p));
@@ -4095,11 +4100,11 @@ static void victal_check_mode_dec (NODE_T * p)
       victal_check_mode_dec (SUB (p));
       victal_check_mode_dec (NEXT (p));
     } else if (WHETHER (p, MODE_SYMBOL) || WHETHER (p, DEFINING_INDICANT)
-	       || WHETHER (p, EQUALS_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+        || WHETHER (p, EQUALS_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_mode_dec (NEXT (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, ACTUAL_DECLARER_MARK)) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
       }
     }
   }
@@ -4117,13 +4122,13 @@ static void victal_check_variable_dec (NODE_T * p)
       victal_check_variable_dec (SUB (p));
       victal_check_variable_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER) || WHETHER (p, ASSIGN_SYMBOL)
-	       || WHETHER (p, COMMA_SYMBOL)) {
+        || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_variable_dec (NEXT (p));
     } else if (WHETHER (p, UNIT)) {
       victal_checker (SUB (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, ACTUAL_DECLARER_MARK)) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
       }
       victal_check_variable_dec (NEXT (p));
     }
@@ -4142,13 +4147,13 @@ static void victal_check_identity_dec (NODE_T * p)
       victal_check_identity_dec (SUB (p));
       victal_check_identity_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER) || WHETHER (p, EQUALS_SYMBOL)
-	       || WHETHER (p, COMMA_SYMBOL)) {
+        || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_identity_dec (NEXT (p));
     } else if (WHETHER (p, UNIT)) {
       victal_checker (SUB (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, FORMAL_DECLARER_MARK)) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
       }
       victal_check_identity_dec (NEXT (p));
     }
@@ -4215,7 +4220,7 @@ static void victal_check_structure_pack (NODE_T * p, int x, BOOL_T * z)
     } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_structure_pack (NEXT (p), x, z);
     } else if (WHETHER (p, STRUCTURED_FIELD_LIST)
-	       || WHETHER (p, STRUCTURED_FIELD)) {
+        || WHETHER (p, STRUCTURED_FIELD)) {
       victal_check_structure_pack (NEXT (p), x, z);
       victal_check_structure_pack (SUB (p), x, z);
     } else if (WHETHER (p, DECLARER)) {
@@ -4237,7 +4242,7 @@ static void victal_check_union_pack (NODE_T * p, int x, BOOL_T * z)
     if (WHETHER (p, UNION_PACK)) {
       victal_check_union_pack (SUB (p), x, z);
     } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)
-	       || WHETHER (p, VOID_SYMBOL)) {
+        || WHETHER (p, VOID_SYMBOL)) {
       victal_check_union_pack (NEXT (p), x, z);
     } else if (WHETHER (p, UNION_DECLARER_LIST)) {
       victal_check_union_pack (NEXT (p), x, z);
@@ -4264,7 +4269,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
   } else if (WHETHER (p, LONGETY) || WHETHER (p, SHORTETY)) {
     return (A_TRUE);
   } else if (WHETHER (p, VOID_SYMBOL) || WHETHER (p, INDICANT)
-	     || WHETHER (p, STANDARD)) {
+      || WHETHER (p, STANDARD)) {
     return (A_TRUE);
   } else if (WHETHER (p, REF_SYMBOL)) {
     return (victal_check_declarer (NEXT (p), VIRTUAL_DECLARER_MARK));
@@ -4308,7 +4313,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
       BOOL_T z = A_TRUE;
       victal_check_formal_pack (NEXT (p), FORMAL_DECLARER_MARK, &z);
       if (!z) {
-	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
+        diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
       }
       FORWARD (p);
     }

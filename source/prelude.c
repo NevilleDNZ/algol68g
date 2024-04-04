@@ -1940,7 +1940,6 @@ static void stand_extensions (void)
   m = a68_proc (MODE (REAL), MODE (REAL), MODE (REAL), MODE (REAL), MODE (REAL), NULL);
   a68_idf (A_FALSE, "ellipticintegralrj", m, genie_elliptic_integral_rj_real);
 #endif
-#ifdef HAVE_UNIX
   m = proc_int;
   a68_idf (A_FALSE, "argc", m, genie_argc);
   a68_idf (A_FALSE, "errno", m, genie_errno);
@@ -1976,7 +1975,6 @@ static void stand_extensions (void)
   a68_idf (A_FALSE, "grepinstring", m, genie_grep_in_string);
   m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_STRING), NULL);
   a68_idf (A_FALSE, "subinstring", m, genie_sub_in_string);
-#endif
 #endif
 #ifdef HAVE_CURSES
   m = proc_void;

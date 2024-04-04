@@ -66,7 +66,7 @@ static int mon_errors = 0;
 #define MAX_ROW_ELEMS 24
 #define STACK_SIZE 3
 #define NO_VALUE " uninitialised value"
-#define CANNOT_SHOW " unprintable value or" ## NO_VALUE
+#define CANNOT_SHOW " unprintable value or uninitialised value"
 #define TOP_MODE (m_stack[m_sp - 1])
 #define LOGOUT_STRING "exit"
 
@@ -90,7 +90,7 @@ static BOOL_T confirm_exit (void)
   int k;
   WRITELN (STDOUT_FILENO, "++++ Terminate program (y or n)? ");
   cmd = read_string_from_tty (NULL);
-  if (cmd[0] == EOF_CHAR) {
+  if (TO_UCHAR (cmd[0]) == TO_UCHAR (EOF_CHAR)) {
     return (confirm_exit ());
   }
   for (k = 0; cmd[k] != NULL_CHAR; k++) {
@@ -120,7 +120,7 @@ void monitor_error (char *msg, char *info)
   char edit[BUFFER_SIZE];
   QUIT_ON_ERROR;
   mon_errors++;
-  strcpy (edit, msg);
+  bufcpy (edit, msg, BUFFER_SIZE);
   WRITELN (STDOUT_FILENO, "++++ Monitor: ");
   WRITE (STDOUT_FILENO, edit);
   if (info != NULL) {
@@ -159,19 +159,19 @@ static void scan_sym (FILE_T f, NODE_T * p)
   } else if (expr[pos] == ':') {
     if (strncmp (&(expr[pos]), ":=:", 3) == 0) {
       pos += 3;
-      strcpy (buffer, ":=:");
+      bufcpy (buffer, ":=:", BUFFER_SIZE);
       attr = IS_SYMBOL;
     } else if (strncmp (&(expr[pos]), ":/=:", 4) == 0) {
       pos += 4;
-      strcpy (buffer, ":/=:");
+      bufcpy (buffer, ":/=:", BUFFER_SIZE);
       attr = ISNT_SYMBOL;
     } else if (strncmp (&(expr[pos]), ":=", 2) == 0) {
       pos += 2;
-      strcpy (buffer, ":=");
+      bufcpy (buffer, ":=", BUFFER_SIZE);
       attr = ASSIGN_SYMBOL;
     } else {
       pos++;
-      strcpy (buffer, ":");
+      bufcpy (buffer, ":", BUFFER_SIZE);
       attr = COLON_SYMBOL;
     }
     symbol = add_token (&top_token, buffer)->text;
@@ -181,12 +181,12 @@ static void scan_sym (FILE_T f, NODE_T * p)
     pos++;
     while (cont) {
       while (expr[pos] != QUOTE_CHAR) {
-	buffer[k++] = expr[pos++];
+        buffer[k++] = expr[pos++];
       }
       if (expr[++pos] == QUOTE_CHAR) {
-	buffer[k++] = QUOTE_CHAR;
+        buffer[k++] = QUOTE_CHAR;
       } else {
-	cont = A_FALSE;
+        cont = A_FALSE;
       }
     }
     buffer[k] = NULL_CHAR;
@@ -196,9 +196,9 @@ static void scan_sym (FILE_T f, NODE_T * p)
   } else if (IS_LOWER (expr[pos])) {
     while (IS_LOWER (expr[pos]) || IS_DIGIT (expr[pos]) || IS_SPACE (expr[pos])) {
       if (IS_SPACE (expr[pos])) {
-	pos++;
+        pos++;
       } else {
-	buffer[k++] = expr[pos++];
+        buffer[k++] = expr[pos++];
       }
     }
     buffer[k] = NULL_CHAR;
@@ -227,23 +227,23 @@ static void scan_sym (FILE_T f, NODE_T * p)
     if (expr[pos] == 'r') {
       buffer[k++] = expr[pos++];
       while (IS_XDIGIT (expr[pos])) {
-	buffer[k++] = expr[pos++];
+        buffer[k++] = expr[pos++];
       }
       buffer[k] = NULL_CHAR;
       symbol = add_token (&top_token, buffer)->text;
       attr = BITS_DENOTER;
       return;
     }
-    if (expr[pos] != '.' && expr[pos] != 'e' && expr[pos] != 'E') {
+    if (expr[pos] != POINT_CHAR && expr[pos] != 'e' && expr[pos] != 'E') {
       buffer[k] = NULL_CHAR;
       symbol = add_token (&top_token, buffer)->text;
       attr = INT_DENOTER;
       return;
     }
-    if (expr[pos] == '.') {
+    if (expr[pos] == POINT_CHAR) {
       buffer[k++] = expr[pos++];
       while (IS_DIGIT (expr[pos])) {
-	buffer[k++] = expr[pos++];
+        buffer[k++] = expr[pos++];
       }
     }
     if (expr[pos] != 'e' && expr[pos] != 'E') {
@@ -271,18 +271,18 @@ static void scan_sym (FILE_T f, NODE_T * p)
     if (expr[pos] == ':') {
       buffer[k++] = expr[pos++];
       if (expr[pos] == '=') {
-	buffer[k++] = expr[pos++];
+        buffer[k++] = expr[pos++];
       } else {
-	buffer[k] = NULL_CHAR;
-	monitor_error ("operator symbol error", buffer);
+        buffer[k] = NULL_CHAR;
+        monitor_error ("operator symbol error", buffer);
       }
     } else if (expr[pos] == '=') {
       buffer[k++] = expr[pos++];
       if (expr[pos] == ':') {
-	buffer[k++] = expr[pos++];
+        buffer[k++] = expr[pos++];
       } else {
-	buffer[k] = NULL_CHAR;
-	monitor_error ("operator symbol error", buffer);
+        buffer[k] = NULL_CHAR;
+        monitor_error ("operator symbol error", buffer);
       }
     }
     buffer[k] = NULL_CHAR;
@@ -333,6 +333,7 @@ static int prio (FILE_T f, NODE_T * p)
   (void) f;
   if (s == NULL) {
     monitor_error ("unknown operator", symbol);
+    return (0);
   }
   return (PRIO (s));
 }
@@ -395,10 +396,10 @@ static MOID_T *search_mode (int refs, int leng, char *indy)
     MOID_T *m = MOID (l);
     if (NODE (m) != NULL) {
       if (indy == SYMBOL (NODE (m)) && leng == DIMENSION (m)) {
-	z = m;
-	while (EQUIVALENT (z) != NULL) {
-	  z = EQUIVALENT (z);
-	}
+        z = m;
+        while (EQUIVALENT (z) != NULL) {
+          z = EQUIVALENT (z);
+        }
       }
     }
   }
@@ -416,7 +417,7 @@ static MOID_T *search_mode (int refs, int leng, char *indy)
     if (k == refs && m == z) {
       z = MOID (l);
       while (EQUIVALENT (z) != NULL) {
-	z = EQUIVALENT (z);
+        z = EQUIVALENT (z);
       }
       return (z);
     }
@@ -435,14 +436,14 @@ static TAG_T *search_operator (char *sym, MOID_T * x, MOID_T * y)
     if (SYMBOL (NODE (t)) == sym) {
       PACK_T *p = PACK (MOID (t));
       if (x == MOID (p)) {
-	FORWARD (p);
-	if (p == NULL && y == NULL) {
+        FORWARD (p);
+        if (p == NULL && y == NULL) {
 /* Matched in case of a monad. */
-	  return (t);
-	} else if (p != NULL && y != NULL && y == MOID (p)) {
+          return (t);
+        } else if (p != NULL && y != NULL && y == MOID (p)) {
 /* Matched in case of a nomad. */
-	  return (t);
-	}
+          return (t);
+        }
       }
     }
   }
@@ -455,9 +456,9 @@ static TAG_T *search_operator (char *sym, MOID_T * x, MOID_T * y)
   }
 /* Not found. Grrrr. Give a message. */
   if (y == NULL) {
-    sprintf (edit_line, "OP %s (%s) ...", sym, moid_to_string (x, 80));
+    snprintf (edit_line, BUFFER_SIZE, "OP %s (%s) ...", sym, moid_to_string (x, MOID_WIDTH));
   } else {
-    sprintf (edit_line, "OP %s (%s, %s) ...", sym, moid_to_string (x, 80), moid_to_string (y, 80));
+    snprintf (edit_line, BUFFER_SIZE, "OP %s (%s, %s) ...", sym, moid_to_string (x, MOID_WIDTH), moid_to_string (y, MOID_WIDTH));
   }
   monitor_error ("cannot find operator in standard environ", edit_line);
   return (NULL);
@@ -476,13 +477,13 @@ static void search_identifier (FILE_T f, NODE_T * p, ADDR_T link, char *sym)
       SYMBOL_TABLE_T *q = SYMBOL_TABLE (u);
       TAG_T *i = q->identifiers;
       for (; i != NULL; FORWARD (i)) {
-	if (sym == SYMBOL (NODE (i))) {
-	  ADDR_T pos = link + FRAME_INFO_SIZE + i->offset;
-	  MOID_T *m = MOID (i);
-	  PUSH (p, FRAME_ADDRESS (pos), MOID_SIZE (m));
-	  push_mode (f, m);
-	  return;
-	}
+        if (sym == SYMBOL (NODE (i))) {
+          ADDR_T pos = link + FRAME_INFO_SIZE + i->offset;
+          MOID_T *m = MOID (i);
+          PUSH (p, FRAME_ADDRESS (pos), MOID_SIZE (m));
+          push_mode (f, m);
+          return;
+        }
       }
     }
     search_identifier (f, p, dynamic_link, sym);
@@ -491,19 +492,19 @@ static void search_identifier (FILE_T f, NODE_T * p, ADDR_T link, char *sym)
     TAG_T *i = q->identifiers;
     for (; i != NULL; FORWARD (i)) {
       if (sym == SYMBOL (NODE (i))) {
-	if (WHETHER (MOID (i), PROC_SYMBOL)) {
-	  static A68_PROCEDURE z;
-	  z.status = (INITIALISED_MASK | STANDENV_PROCEDURE_MASK);
-	  z.body = (void *) i->procedure;
-	  z.environ = 0;
-	  z.locale = nil_ref;
-	  z.proc_mode = MOID (i);
-	  PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
-	} else {
-	  (i->procedure) (p);
-	}
-	push_mode (f, MOID (i));
-	return;
+        if (WHETHER (MOID (i), PROC_SYMBOL)) {
+          static A68_PROCEDURE z;
+          z.status = (INITIALISED_MASK | STANDENV_PROCEDURE_MASK);
+          z.body = (void *) i->procedure;
+          z.environ = 0;
+          z.locale = nil_ref;
+          z.proc_mode = MOID (i);
+          PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+        } else {
+          (i->procedure) (p);
+        }
+        push_mode (f, MOID (i));
+        return;
       }
     }
     monitor_error ("cannot find identifier", sym);
@@ -534,10 +535,10 @@ static void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int 
       sp_2 += SIZE_OF (A68_REF);
       deref (p, k, STRONG);
       if (m_stack[k] != MOID (u)) {
-	monitor_error ("argument mode error", moid_to_string (m_stack[k], 80));
+        monitor_error ("argument mode error", moid_to_string (m_stack[k], MOID_WIDTH));
       }
     } else {
-      monitor_error ("argument mode error", moid_to_string (m_stack[k], 80));
+      monitor_error ("argument mode error", moid_to_string (m_stack[k], MOID_WIDTH));
     }
     QUIT_ON_ERROR;
   }
@@ -573,19 +574,19 @@ static void selection (FILE_T f, NODE_T * p, char *field)
     v = PACK (moid);
   }
   if (WHETHER_NOT (moid, STRUCT_SYMBOL)) {
-    monitor_error ("selection mode error", moid_to_string (moid, 80));
+    monitor_error ("selection mode error", moid_to_string (moid, MOID_WIDTH));
   }
   QUIT_ON_ERROR;
   for (; u != NULL; FORWARD (u), FORWARD (v)) {
     if (field == u->text) {
       if (name) {
-	A68_REF *z = (A68_REF *) (STACK_OFFSET (-SIZE_OF (A68_REF)));
-	TEST_NIL (p, *z, moid);
-	z->offset += v->offset;
+        A68_REF *z = (A68_REF *) (STACK_OFFSET (-SIZE_OF (A68_REF)));
+        TEST_NIL (p, *z, moid);
+        z->offset += v->offset;
       } else {
-	DECREMENT_STACK_POINTER (p, MOID_SIZE (moid));
-	MOVE (STACK_TOP, STACK_OFFSET (v->offset), (unsigned) MOID_SIZE (MOID (u)));
-	INCREMENT_STACK_POINTER (p, MOID_SIZE (MOID (u)));
+        DECREMENT_STACK_POINTER (p, MOID_SIZE (moid));
+        MOVE (STACK_TOP, STACK_OFFSET (v->offset), (unsigned) MOID_SIZE (MOID (u)));
+        INCREMENT_STACK_POINTER (p, MOID_SIZE (MOID (u)));
       }
       push_mode (f, MOID (u));
       return;
@@ -611,7 +612,7 @@ static void call (FILE_T f, NODE_T * p, int depth)
   proc = m_stack[--m_sp];
   old_m_sp = m_sp;
   if (WHETHER_NOT (proc, PROC_SYMBOL)) {
-    monitor_error ("procedure mode error", moid_to_string (proc, 80));
+    monitor_error ("procedure mode error", moid_to_string (proc, MOID_WIDTH));
   }
   QUIT_ON_ERROR;
   POP (p, &z, SIZE_OF (A68_PROCEDURE));
@@ -666,7 +667,7 @@ static void slice (FILE_T f, NODE_T * p, int depth)
     res = SUB (moid);
   }
   if (WHETHER_NOT (moid, ROW_SYMBOL) && WHETHER_NOT (moid, FLEX_SYMBOL)) {
-    monitor_error ("row mode error", moid_to_string (moid, 80));
+    monitor_error ("row mode error", moid_to_string (moid, MOID_WIDTH));
   }
   QUIT_ON_ERROR;
 /* Get descriptor. */
@@ -700,7 +701,7 @@ static void slice (FILE_T f, NODE_T * p, int depth)
     A68_INT i;
     deref (p, m_sp - 1, MEEK);
     if (TOP_MODE != MODE (INT)) {
-      monitor_error ("indexer mode error", moid_to_string (TOP_MODE, 80));
+      monitor_error ("indexer mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
     QUIT_ON_ERROR;
     POP_INT (p, &i);
@@ -751,53 +752,53 @@ static void parse (FILE_T f, NODE_T * p, int depth)
 /* Identity relations. */
       PARSE_CHECK (f, p, 1);
       while (attr == IS_SYMBOL || attr == ISNT_SYMBOL) {
-	A68_REF x, y;
-	BOOL_T res;
-	int op = attr;
-	if (TOP_MODE != MODE (HIP) && WHETHER_NOT (TOP_MODE, REF_SYMBOL)) {
-	  monitor_error ("identity relation operand must yield a name", moid_to_string (TOP_MODE, 80));
-	}
-	SCAN_CHECK (f, p);
-	PARSE_CHECK (f, p, 1);
-	if (TOP_MODE != MODE (HIP) && WHETHER_NOT (TOP_MODE, REF_SYMBOL)) {
-	  monitor_error ("identity relation operand must yield a name", moid_to_string (TOP_MODE, 80));
-	}
-	QUIT_ON_ERROR;
-	if (TOP_MODE != MODE (HIP) && m_stack[m_sp - 2] != MODE (HIP)) {
-	  if (TOP_MODE != m_stack[m_sp - 2]) {
-	    monitor_error ("identity relation operand mode error", NULL);
-	  }
-	}
-	QUIT_ON_ERROR;
-	m_sp -= 2;
-	POP_REF (p, &y);
-	POP_REF (p, &x);
-	res = (ADDRESS (&x) == ADDRESS (&y));
-	PUSH_BOOL (p, (op == IS_SYMBOL ? res : !res));
-	push_mode (f, MODE (BOOL));
+        A68_REF x, y;
+        BOOL_T res;
+        int op = attr;
+        if (TOP_MODE != MODE (HIP) && WHETHER_NOT (TOP_MODE, REF_SYMBOL)) {
+          monitor_error ("identity relation operand must yield a name", moid_to_string (TOP_MODE, MOID_WIDTH));
+        }
+        SCAN_CHECK (f, p);
+        PARSE_CHECK (f, p, 1);
+        if (TOP_MODE != MODE (HIP) && WHETHER_NOT (TOP_MODE, REF_SYMBOL)) {
+          monitor_error ("identity relation operand must yield a name", moid_to_string (TOP_MODE, MOID_WIDTH));
+        }
+        QUIT_ON_ERROR;
+        if (TOP_MODE != MODE (HIP) && m_stack[m_sp - 2] != MODE (HIP)) {
+          if (TOP_MODE != m_stack[m_sp - 2]) {
+            monitor_error ("identity relation operand mode error", NULL);
+          }
+        }
+        QUIT_ON_ERROR;
+        m_sp -= 2;
+        POP_REF (p, &y);
+        POP_REF (p, &x);
+        res = (ADDRESS (&x) == ADDRESS (&y));
+        PUSH_BOOL (p, (op == IS_SYMBOL ? res : !res));
+        push_mode (f, MODE (BOOL));
       }
     } else {
 /* Dyadic expressions. */
       PARSE_CHECK (f, p, depth + 1);
       while (attr == OPERATOR && prio (f, p) == depth) {
-	int args;
-	ADDR_T top_sp;
-	NODE_T q;
-	TAG_T *opt;
-	char *op = symbol;
-	args = m_sp - 1;
-	top_sp = stack_pointer - MOID_SIZE (m_stack[args]);
-	SCAN_CHECK (f, p);
-	PARSE_CHECK (f, p, depth + 1);
-	opt = search_operator (op, m_stack[m_sp - 2], TOP_MODE);
-	QUIT_ON_ERROR;
-	coerce_arguments (f, p, MOID (opt), args, m_sp, top_sp);
-	m_sp -= 2;
-	MOID (&q) = MOID (opt);
-	INFO (&q) = INFO (p);
-	SYMBOL (&q) = SYMBOL (p);
-	(void) ((GENIE_PROCEDURE *) (opt->procedure)) (&q);
-	push_mode (f, SUB (MOID (opt)));
+        int args;
+        ADDR_T top_sp;
+        NODE_T q;
+        TAG_T *opt;
+        char *op = symbol;
+        args = m_sp - 1;
+        top_sp = stack_pointer - MOID_SIZE (m_stack[args]);
+        SCAN_CHECK (f, p);
+        PARSE_CHECK (f, p, depth + 1);
+        opt = search_operator (op, m_stack[m_sp - 2], TOP_MODE);
+        QUIT_ON_ERROR;
+        coerce_arguments (f, p, MOID (opt), args, m_sp, top_sp);
+        m_sp -= 2;
+        MOID (&q) = MOID (opt);
+        INFO (&q) = INFO (p);
+        SYMBOL (&q) = SYMBOL (p);
+        (void) ((GENIE_PROCEDURE *) (opt->procedure)) (&q);
+        push_mode (f, SUB (MOID (opt)));
       }
     }
   } else if (attr == OPERATOR) {
@@ -854,7 +855,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
       TOP_MODE = sub;
     }
     if (TOP_MODE != m) {
-      monitor_error ("cast mode error", moid_to_string (TOP_MODE, 80));
+      monitor_error ("cast mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
   } else if (attr == LONG_SYMBOL) {
     int length = 0;
@@ -869,16 +870,16 @@ static void parse (FILE_T f, NODE_T * p, int depth)
       MOID_T *r = (length == 1 ? MODE (LONG_REAL) : MODE (LONGLONG_REAL));
       SCAN_CHECK (f, p);
       if (attr != OPEN_SYMBOL) {
-	monitor_error ("cast expects open-symbol", NULL);
+        monitor_error ("cast expects open-symbol", NULL);
       }
       SCAN_CHECK (f, p);
       PARSE_CHECK (f, p, 0);
       if (attr != CLOSE_SYMBOL) {
-	monitor_error ("cast expects close-symbol", NULL);
+        monitor_error ("cast expects close-symbol", NULL);
       }
       SCAN_CHECK (f, p);
       if (TOP_MODE != i) {
-	monitor_error ("cast argument mode error", moid_to_string (TOP_MODE, 80));
+        monitor_error ("cast argument mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
       }
       QUIT_ON_ERROR;
       TOP_MODE = r;
@@ -899,8 +900,8 @@ static void parse (FILE_T f, NODE_T * p, int depth)
       MP_DIGIT_T *z;
       STACK_MP (z, p, digits);
       if (genie_string_to_value_internal (p, m, symbol, (BYTE_T *) z) == A_FALSE) {
-	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
-	exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
+        exit_genie (p, A_RUNTIME_ERROR);
       }
       z[0] = INITIALISED_MASK | CONSTANT_MASK;
       push_mode (f, m);
@@ -976,7 +977,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
     }
     SCAN_CHECK (f, p);
     if (TOP_MODE != MODE (INT)) {
-      monitor_error ("cast argument mode error", moid_to_string (TOP_MODE, 80));
+      monitor_error ("cast argument mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
     QUIT_ON_ERROR;
     POP_INT (p, &k);
@@ -997,7 +998,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
     moid = TOP_MODE;
     QUIT_ON_ERROR;
     if (check_initialisation (p, STACK_ADDRESS (old_sp), moid, NULL) == A_FALSE) {
-      monitor_error ("cannot process value of mode", moid_to_string (moid, 80));
+      monitor_error ("cannot process value of mode", moid_to_string (moid, MOID_WIDTH));
     }
   } else if (attr == OPEN_SYMBOL) {
     do {
@@ -1025,7 +1026,7 @@ static void assign (FILE_T f, NODE_T * p)
     MOID_T *m = m_stack[--m_sp];
     A68_REF z;
     if (WHETHER_NOT (m, REF_SYMBOL)) {
-      monitor_error ("destination mode error", moid_to_string (m, 80));
+      monitor_error ("destination mode error", moid_to_string (m, MOID_WIDTH));
     }
     QUIT_ON_ERROR;
     POP_REF (p, &z);
@@ -1042,7 +1043,7 @@ static void assign (FILE_T f, NODE_T * p)
       TOP_MODE = sub;
     }
     if (TOP_MODE != SUB (m) && TOP_MODE != MODE (HIP)) {
-      monitor_error ("source mode error", moid_to_string (TOP_MODE, 80));
+      monitor_error ("source mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
     QUIT_ON_ERROR;
     POP (p, ADDRESS (&z), MOID_SIZE (TOP_MODE));
@@ -1060,7 +1061,7 @@ static void evaluate (FILE_T f, NODE_T * p, char *str)
   m_sp = 0;
   m_stack[0] = NULL;
   pos = 0;
-  strcpy (expr, str);
+  bufcpy (expr, str, BUFFER_SIZE);
   SCAN_CHECK (f, p);
   QUIT_ON_ERROR;
   assign (f, p);
@@ -1093,7 +1094,7 @@ static int argval (char *num, char **rest)
     k = a68g_strtoul (num, &end, 10);
     if (end != num && errno == 0) {
       if (rest != NULL) {
-	*rest = end;
+        *rest = end;
       }
       return (k);
     } else {
@@ -1280,14 +1281,14 @@ static void print_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
   genie_write_standard (p, mode, item, nil_file);
   if (get_transput_buffer_index (UNFORMATTED_BUFFER) > 0) {
     if (mode == MODE (CHAR) || mode == MODE (ROW_CHAR) || mode == MODE (STRING)) {
-      sprintf (output_line, " \"%s\"", get_transput_buffer (UNFORMATTED_BUFFER));
+      snprintf (output_line, BUFFER_SIZE, " \"%s\"", get_transput_buffer (UNFORMATTED_BUFFER));
       WRITE (f, output_line);
     } else {
       char *str = get_transput_buffer (UNFORMATTED_BUFFER);
       while (IS_SPACE (str[0])) {
-	str++;
+        str++;
       }
-      sprintf (output_line, " %s", str);
+      snprintf (output_line, BUFFER_SIZE, " %s", str);
       WRITE (f, output_line);
     }
   } else {
@@ -1323,24 +1324,24 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     A68_REF *z = (A68_REF *) item;
     if (IS_NIL (*z)) {
       if (z->status & INITIALISED_MASK) {
-	WRITE (STDOUT_FILENO, " = NIL");
+        WRITE (STDOUT_FILENO, " = NIL");
       } else {
-	WRITE (STDOUT_FILENO, NO_VALUE);
+        WRITE (STDOUT_FILENO, NO_VALUE);
       }
     } else {
       ADDR_T addr = z->offset;
       WRITE (STDOUT_FILENO, " refers to");
       if (z->segment == heap_segment) {
-	addr += z->handle->offset;
-	WRITE (STDOUT_FILENO, " heap");
+        addr += z->handle->offset;
+        WRITE (STDOUT_FILENO, " heap");
       } else if (z->segment == frame_segment) {
-	WRITE (STDOUT_FILENO, " frame");
+        WRITE (STDOUT_FILENO, " frame");
       } else if (z->segment == stack_segment) {
-	WRITE (STDOUT_FILENO, " stack");
+        WRITE (STDOUT_FILENO, " stack");
       } else if (z->segment == handle_segment) {
-	WRITE (STDOUT_FILENO, " handle");
+        WRITE (STDOUT_FILENO, " handle");
       }
-      sprintf (output_line, "(%d)", addr);
+      snprintf (output_line, BUFFER_SIZE, "(%d)", addr);
       WRITE (STDOUT_FILENO, output_line);
     }
   } else if (mode == MODE (STRING)) {
@@ -1359,28 +1360,28 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     } else {
       int count = 0;
       GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
-      sprintf (output_line, " has %d elements", get_row_size (tup, arr->dimensions));
+      snprintf (output_line, BUFFER_SIZE, " has %d elements", get_row_size (tup, arr->dimensions));
       WRITE (f, output_line);
       if (get_row_size (tup, arr->dimensions) != 0) {
-	BYTE_T *base_addr = ADDRESS (&arr->array);
-	BOOL_T done = A_FALSE;
-	initialise_internal_index (tup, arr->dimensions);
-	while (!done && ++count <= (max_row_elems + 1)) {
-	  if (count > max_row_elems) {
-	    indent_crlf (f);
-	    WRITE (f, "...");
-	  } else {
-	    ADDR_T index = calculate_internal_index (tup, arr->dimensions);
-	    ADDR_T elem_addr = ROW_ELEMENT (arr, index);
-	    BYTE_T *elem = &base_addr[elem_addr];
-	    indent_crlf (f);
-	    WRITE (f, "[");
-	    print_internal_index (f, tup, arr->dimensions);
-	    WRITE (f, "]");
-	    show_item (p, f, elem, SUB (deflexed));
-	    done = increment_internal_index (tup, arr->dimensions);
-	  }
-	}
+        BYTE_T *base_addr = ADDRESS (&arr->array);
+        BOOL_T done = A_FALSE;
+        initialise_internal_index (tup, arr->dimensions);
+        while (!done && ++count <= (max_row_elems + 1)) {
+          if (count > max_row_elems) {
+            indent_crlf (f);
+            WRITE (f, "...");
+          } else {
+            ADDR_T index = calculate_internal_index (tup, arr->dimensions);
+            ADDR_T elem_addr = ROW_ELEMENT (arr, index);
+            BYTE_T *elem = &base_addr[elem_addr];
+            indent_crlf (f);
+            WRITE (f, "[");
+            print_internal_index (f, tup, arr->dimensions);
+            WRITE (f, "]");
+            show_item (p, f, elem, SUB (deflexed));
+            done = increment_internal_index (tup, arr->dimensions);
+          }
+        }
       }
     }
     tabs--;
@@ -1390,7 +1391,7 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     for (; q != NULL; q = NEXT (q)) {
       BYTE_T *elem = &item[q->offset];
       indent_crlf (f);
-      sprintf (output_line, "%s \"%s\"", moid_to_string (MOID (q), 32), TEXT (q));
+      snprintf (output_line, BUFFER_SIZE, "%s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH), TEXT (q));
       WRITE (STDOUT_FILENO, output_line);
       show_item (p, f, elem, MOID (q));
     }
@@ -1399,7 +1400,7 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     A68_POINTER *z = (A68_POINTER *) item;
     tabs++;
     indent_crlf (f);
-    sprintf (output_line, "%s", moid_to_string ((MOID_T *) (z->value), 32));
+    snprintf (output_line, BUFFER_SIZE, "%s", moid_to_string ((MOID_T *) (z->value), MOID_WIDTH));
     WRITE (STDOUT_FILENO, output_line);
     show_item (p, f, &item[SIZE_OF (A68_POINTER)], (MOID_T *) (z->value));
     tabs--;
@@ -1407,37 +1408,37 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     BOOL_T init;
     if (check_initialisation (p, item, mode, &init)) {
       if (init) {
-	if (WHETHER (mode, PROC_SYMBOL)) {
-	  A68_PROCEDURE *z = (A68_PROCEDURE *) item;
-	  if (z != NULL && z->status & STANDENV_PROCEDURE_MASK) {
-	    char *fname = standard_environ_proc_name (z->body);
-	    WRITE (STDOUT_FILENO, " standenv procedure");
-	    if (fname != NULL) {
-	      WRITE (STDOUT_FILENO, " (");
-	      WRITE (STDOUT_FILENO, fname);
-	      WRITE (STDOUT_FILENO, ")");
-	    }
-	  } else if (z != NULL && z->status & SKIP_PROCEDURE_MASK) {
-	    WRITE (STDOUT_FILENO, " skip procedure");
-	  } else if (z != NULL && z->body != NULL) {
-	    sprintf (output_line, " line %d, environ at frame(%d)", LINE ((NODE_T *) z->body)->number, z->environ);
-	    WRITE (STDOUT_FILENO, output_line);
-	  } else {
-	    WRITE (STDOUT_FILENO, " cannot show value");
-	  }
-	} else if (mode == MODE (FORMAT)) {
-	  A68_FORMAT *z = (A68_FORMAT *) item;
-	  if (z != NULL && z->body != NULL) {
-	    sprintf (output_line, " line %d, environ at frame(%d)", LINE (z->body)->number, z->environ);
-	    WRITE (STDOUT_FILENO, output_line);
-	  } else {
-	    WRITE (STDOUT_FILENO, CANNOT_SHOW);
-	  }
-	} else {
-	  print_item (p, f, item, mode);
-	}
+        if (WHETHER (mode, PROC_SYMBOL)) {
+          A68_PROCEDURE *z = (A68_PROCEDURE *) item;
+          if (z != NULL && z->status & STANDENV_PROCEDURE_MASK) {
+            char *fname = standard_environ_proc_name (*(GENIE_PROCEDURE *) & z->body);
+            WRITE (STDOUT_FILENO, " standenv procedure");
+            if (fname != NULL) {
+              WRITE (STDOUT_FILENO, " (");
+              WRITE (STDOUT_FILENO, fname);
+              WRITE (STDOUT_FILENO, ")");
+            }
+          } else if (z != NULL && z->status & SKIP_PROCEDURE_MASK) {
+            WRITE (STDOUT_FILENO, " skip procedure");
+          } else if (z != NULL && z->body != NULL) {
+            snprintf (output_line, BUFFER_SIZE, " line %d, environ at frame(%d)", LINE ((NODE_T *) z->body)->number, z->environ);
+            WRITE (STDOUT_FILENO, output_line);
+          } else {
+            WRITE (STDOUT_FILENO, " cannot show value");
+          }
+        } else if (mode == MODE (FORMAT)) {
+          A68_FORMAT *z = (A68_FORMAT *) item;
+          if (z != NULL && z->body != NULL) {
+            snprintf (output_line, BUFFER_SIZE, " line %d, environ at frame(%d)", LINE (z->body)->number, z->environ);
+            WRITE (STDOUT_FILENO, output_line);
+          } else {
+            WRITE (STDOUT_FILENO, CANNOT_SHOW);
+          }
+        } else {
+          print_item (p, f, item, mode);
+        }
       } else {
-	WRITE (STDOUT_FILENO, NO_VALUE);
+        WRITE (STDOUT_FILENO, NO_VALUE);
       }
     } else {
       WRITE (STDOUT_FILENO, CANNOT_SHOW);
@@ -1461,22 +1462,22 @@ static void show_frame_items (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, int 
     ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + q->offset;
     indent_crlf (STDOUT_FILENO);
     if (modif != ANONYMOUS) {
-      sprintf (output_line, "frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (q), 32), SYMBOL (NODE (q)));
+      snprintf (output_line, BUFFER_SIZE, "frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH), SYMBOL (NODE (q)));
       WRITE (STDOUT_FILENO, output_line);
     } else {
       switch (PRIO (q)) {
       case GENERATOR:
-	{
-	  sprintf (output_line, "frame(%d) LOC %s", pos_in_frame_stack, moid_to_string (MOID (q), 32));
-	  WRITE (STDOUT_FILENO, output_line);
-	  break;
-	}
+        {
+          snprintf (output_line, BUFFER_SIZE, "frame(%d) LOC %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
+          WRITE (STDOUT_FILENO, output_line);
+          break;
+        }
       default:
-	{
-	  sprintf (output_line, "frame(%d) internal %s", pos_in_frame_stack, moid_to_string (MOID (q), 32));
-	  WRITE (STDOUT_FILENO, output_line);
-	  break;
-	}
+        {
+          snprintf (output_line, BUFFER_SIZE, "frame(%d) internal %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
+          WRITE (STDOUT_FILENO, output_line);
+          break;
+        }
       }
     }
     show_item (p, f, FRAME_ADDRESS (pos_in_frame_stack), MOID (q));
@@ -1496,7 +1497,7 @@ void show_stack_frame (FILE_T f, NODE_T * p, ADDR_T link)
   if (p != NULL) {
     SYMBOL_TABLE_T *q = SYMBOL_TABLE (p);
     where (STDOUT_FILENO, p);
-    sprintf (output_line, "stack frame level %d", q->level);
+    snprintf (output_line, BUFFER_SIZE, "stack frame level %d", q->level);
     WRITELN (STDOUT_FILENO, output_line);
     show_frame_items (f, p, link, q->identifiers, IDENTIFIER);
     show_frame_items (f, p, link, q->operators, OPERATOR);
@@ -1529,16 +1530,16 @@ static void list (FILE_T f, NODE_T * p, int n, int m)
       SOURCE_LINE_T *r = INFO (p)->line;
       SOURCE_LINE_T *l = INFO (p)->module->top_line;
       for (; l != NULL; l = NEXT (l)) {
-	if (l->number > 0 && abs (r->number - l->number) <= n) {
-	  write_source_line (f, l, NULL, A_TRUE);
-	}
+        if (l->number > 0 && abs (r->number - l->number) <= n) {
+          write_source_line (f, l, NULL, A_TRUE);
+        }
       }
     } else {
       SOURCE_LINE_T *l = INFO (p)->module->top_line;
       for (; l != NULL; l = NEXT (l)) {
-	if (l->number > 0 && l->number >= n && l->number <= m) {
-	  write_source_line (f, l, NULL, A_TRUE);
-	}
+        if (l->number > 0 && l->number >= n && l->number <= m) {
+          write_source_line (f, l, NULL, A_TRUE);
+        }
       }
     }
   }
@@ -1555,17 +1556,17 @@ void show_heap (FILE_T f, NODE_T * p, A68_HANDLE * z, int top, int n)
 {
   int k = 0, m = n;
   (void) p;
-  sprintf (output_line, "size=%d available=%d garbage collections=%d", heap_size, heap_available (), garbage_collects);
+  snprintf (output_line, BUFFER_SIZE, "size=%d available=%d garbage collections=%d", heap_size, heap_available (), garbage_collects);
   WRITELN (f, output_line);
   for (; z != NULL; z = NEXT (z), k++) {
     if (z->offset <= top && n > 0) {
       n--;
       indent_crlf (f);
-      sprintf (output_line, "heap(%d-%d) %s", z->offset, z->offset + z->size, moid_to_string (MOID (z), 32));
+      snprintf (output_line, BUFFER_SIZE, "heap(%d-%d) %s", z->offset, z->offset + z->size, moid_to_string (MOID (z), MOID_WIDTH));
       WRITE (f, output_line);
     }
   }
-  sprintf (output_line, "printed %d out of %d handles", m, k);
+  snprintf (output_line, BUFFER_SIZE, "printed %d out of %d handles", m, k);
   WRITELN (f, output_line);
 }
 
@@ -1622,7 +1623,7 @@ void examine_tags (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * i, char *sym)
     ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + i->offset;
     if (NODE (i) != NULL && SYMBOL (NODE (i)) == sym) {
       where (f, NODE (i));
-      sprintf (output_line, "frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (i), 32), SYMBOL (NODE (i)));
+      snprintf (output_line, BUFFER_SIZE, "frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (i), MOID_WIDTH), SYMBOL (NODE (i)));
       WRITELN (STDOUT_FILENO, output_line);
       show_item (p, f, FRAME_ADDRESS (pos_in_frame_stack), MOID (i));
     }
@@ -1663,8 +1664,8 @@ static void breakpoints (NODE_T * p, BOOL_T set, int num, char *expr)
     breakpoints (SUB (p), set, num, expr);
     if (set) {
       if (LINE (p)->number == num) {
-	MASK (p) |= BREAKPOINT_MASK;
-	INFO (p)->expr = expr;
+        MASK (p) |= BREAKPOINT_MASK;
+        INFO (p)->expr = expr;
       }
     } else {
       MASK (p) &= ~BREAKPOINT_MASK;
@@ -1754,7 +1755,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       sym++;
     }
     if (sym[0] != NULL_CHAR) {
-      sprintf (output_line, "return code %d", system (sym));
+      snprintf (output_line, BUFFER_SIZE, "return code %d", system (sym));
       WRITELN (STDOUT_FILENO, output_line);
     }
     return (A_FALSE);
@@ -1776,22 +1777,22 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       ADDR_T old_sp = stack_pointer;
       evaluate (STDOUT_FILENO, p, sym);
       if (mon_errors == 0 && m_sp > 0) {
-	MOID_T *res;
-	BOOL_T cont = A_TRUE;
-	while (cont) {
-	  res = m_stack[0];
-	  WRITELN (STDOUT_FILENO, "(");
-	  WRITE (STDOUT_FILENO, moid_to_string (res, 80));
-	  WRITE (STDOUT_FILENO, ")");
-	  show_item (p, STDOUT_FILENO, STACK_ADDRESS (old_sp), res);
-	  cont = (WHETHER (res, REF_SYMBOL) && !IS_NIL (*(A68_REF *) STACK_ADDRESS (old_sp)));
-	  if (cont) {
-	    A68_REF z;
-	    POP_REF (p, &z);
-	    m_stack[0] = SUB (m_stack[0]);
-	    PUSH (p, ADDRESS (&z), MOID_SIZE (m_stack[0]));
-	  }
-	}
+        MOID_T *res;
+        BOOL_T cont = A_TRUE;
+        while (cont) {
+          res = m_stack[0];
+          WRITELN (STDOUT_FILENO, "(");
+          WRITE (STDOUT_FILENO, moid_to_string (res, MOID_WIDTH));
+          WRITE (STDOUT_FILENO, ")");
+          show_item (p, STDOUT_FILENO, STACK_ADDRESS (old_sp), res);
+          cont = (WHETHER (res, REF_SYMBOL) && !IS_NIL (*(A68_REF *) STACK_ADDRESS (old_sp)));
+          if (cont) {
+            A68_REF z;
+            POP_REF (p, &z);
+            m_stack[0] = SUB (m_stack[0]);
+            PUSH (p, ADDRESS (&z), MOID_SIZE (m_stack[0]));
+          }
+        }
       }
       stack_pointer = old_sp;
       m_sp = 0;
@@ -1827,11 +1828,11 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       char *term_type = getenv ("TERM");
       int term_lines;
       if (term_type == NULL) {
-	term_lines = 24;
+        term_lines = 24;
       } else if (tgetent (term_buffer, term_type) < 0) {
-	term_lines = 24;
+        term_lines = 24;
       } else {
-	term_lines = tgetnum ("li");
+        term_lines = tgetnum ("li");
       }
       show_heap (STDOUT_FILENO, p, busy_handles, top, term_lines - 4);
     }
@@ -1850,7 +1851,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     int k = argval (cmd, &expr);
     if (k > 0) {
       while (expr[0] != NULL_CHAR && IS_SPACE (expr[0])) {
-	expr++;
+        expr++;
       }
       breakpoints (INFO (p)->module->top_node, A_TRUE, k, new_string (expr));
     } else if (k == 0) {
@@ -1863,9 +1864,9 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     int m = argval (where, NULL);
     if (m == 0) {
       if (n > 0) {
-	list (STDOUT_FILENO, p, n, 0);
+        list (STDOUT_FILENO, p, n, 0);
       } else if (n == 0) {
-	list (STDOUT_FILENO, p, 10, 0);
+        list (STDOUT_FILENO, p, 10, 0);
       }
     } else if (n > 0 && m > 0 && n <= m) {
       list (STDOUT_FILENO, p, n, m);
@@ -1881,12 +1882,12 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     }
     if (sym[0] != NULL_CHAR) {
       if (sym[0] == QUOTE_CHAR) {
-	sym++;
+        sym++;
       }
       if (sym[strlen (sym) - 1] == QUOTE_CHAR) {
-	sym[strlen (sym) - 1] = NULL_CHAR;
+        sym[strlen (sym) - 1] = NULL_CHAR;
       }
-      strncpy (prompt, sym, BUFFER_SIZE - 1);
+      bufcpy (prompt, sym, BUFFER_SIZE);
     }
     return (A_FALSE);
   } else if (match_string (cmd, "Resume", NULL_CHAR)) {
@@ -1912,13 +1913,13 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     genie_help (STDOUT_FILENO);
     return (A_FALSE);
   } else if (match_string (cmd, "Sizes", BLANK_CHAR)) {
-    sprintf (output_line, "Frame stack pointer=%d available=%d", frame_pointer, frame_stack_size - frame_pointer);
+    snprintf (output_line, BUFFER_SIZE, "Frame stack pointer=%d available=%d", frame_pointer, frame_stack_size - frame_pointer);
     WRITELN (STDOUT_FILENO, output_line);
-    sprintf (output_line, "Expression stack pointer=%d available=%d", stack_pointer, expr_stack_size - stack_pointer);
+    snprintf (output_line, BUFFER_SIZE, "Expression stack pointer=%d available=%d", stack_pointer, expr_stack_size - stack_pointer);
     WRITELN (STDOUT_FILENO, output_line);
-    sprintf (output_line, "Heap size=%d available=%d", heap_size, heap_available ());
+    snprintf (output_line, BUFFER_SIZE, "Heap size=%d available=%d", heap_size, heap_available ());
     WRITELN (STDOUT_FILENO, output_line);
-    sprintf (output_line, "Garbage collections=%d", garbage_collects);
+    snprintf (output_line, BUFFER_SIZE, "Garbage collections=%d", garbage_collects);
     WRITELN (STDOUT_FILENO, output_line);
     return (A_FALSE);
   } else if (strlen (cmd) == 0) {
@@ -1945,7 +1946,7 @@ BOOL_T breakpoint_expression (NODE_T * p)
       POP_BOOL (p, &z);
       res = (STATUS (&z) == INITIALISED_MASK && VALUE (&z) == A_TRUE);
     } else {
-      monitor_error ("breakpoint expression mode error", moid_to_string (TOP_MODE, 80));
+      monitor_error ("breakpoint expression mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
   }
   stack_pointer = top_sp;
@@ -1968,6 +1969,7 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
   sys_request_flag = A_FALSE;
   UP_SWEEP_SEMA;
   if (sigint) {
+    WRITE (STDOUT_FILENO, NEWLINE_STRING);
     where (STDOUT_FILENO, p);
     if (confirm_exit ()) {
       exit_genie (p, A_RUNTIME_ERROR + A_FORCE_QUIT);
@@ -1975,9 +1977,9 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
   }
   if (breakpoint) {
     if (INFO (p)->expr != NULL) {
-      sprintf (output_line, "\n++++ Breakpoint (%s)", INFO (p)->expr);
+      snprintf (output_line, BUFFER_SIZE, "\n++++ Breakpoint (%s)", INFO (p)->expr);
     } else {
-      sprintf (output_line, "\n++++ Breakpoint");
+      snprintf (output_line, BUFFER_SIZE, "\n++++ Breakpoint");
     }
     where (STDOUT_FILENO, p);
   }
@@ -1987,8 +1989,8 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
     io_close_tty_line ();
     while (strlen (cmd = read_string_from_tty (prompt)) == 0) {;
     }
-    if (cmd[0] == EOF_CHAR) {
-      strcpy (cmd, LOGOUT_STRING);
+    if (TO_UCHAR (cmd[0]) == TO_UCHAR (EOF_CHAR)) {
+      bufcpy (cmd, LOGOUT_STRING, BUFFER_SIZE);
       WRITE (STDOUT_FILENO, LOGOUT_STRING);
       WRITE (STDOUT_FILENO, NEWLINE_STRING);
     }
@@ -2028,10 +2030,10 @@ void genie_break (NODE_T * p)
 
 void genie_evaluate (NODE_T * p)
 {
-  volatile A68_REF z;
+  A68_REF z;
   volatile ADDR_T top_sp;
 /* Pop argument. */
-  POP_REF (p, &z);
+  POP_REF (p, (A68_REF *) & z);
   top_sp = stack_pointer;
   TEST_INIT (p, z, MODE (STRING));
   TEST_NIL (p, z, MODE (STRING));
@@ -2045,7 +2047,7 @@ void genie_evaluate (NODE_T * p)
   if (m_sp != 1) {
     monitor_error ("invalid expression", NULL);
   }
-  z = empty_string (p);
+  (A68_REF) z = empty_string (p);
   if (mon_errors == 0) {
     MOID_T *res;
     BOOL_T cont = A_TRUE;
@@ -2053,10 +2055,10 @@ void genie_evaluate (NODE_T * p)
       res = TOP_MODE;
       cont = (WHETHER (res, REF_SYMBOL) && !IS_NIL (*(A68_REF *) STACK_ADDRESS (top_sp)));
       if (cont) {
-	A68_REF z;
-	POP_REF (p, &z);
-	TOP_MODE = SUB (TOP_MODE);
-	PUSH (p, ADDRESS (&z), MOID_SIZE (TOP_MODE));
+        A68_REF z;
+        POP_REF (p, &z);
+        TOP_MODE = SUB (TOP_MODE);
+        PUSH (p, ADDRESS (&z), MOID_SIZE (TOP_MODE));
       }
     }
     reset_transput_buffer (UNFORMATTED_BUFFER);

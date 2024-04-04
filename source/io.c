@@ -63,7 +63,7 @@ char get_stdin_char (void)
   char ch;
   RESET_ERRNO;
   j = io_read_conv (STDIN_FILENO, &ch, 1);
-  ABNORMAL_END (errno != 0, "cannot read char from stdin", NULL);
+  ABNORMAL_END (j < 0, "cannot read char from stdin", NULL);
   return (j == 1 ? ch : EOF_CHAR);
 }
 
@@ -115,7 +115,7 @@ size_t io_read_string (FILE_T f, char *z, size_t max)
   while ((j == 1) && (ch != nl) && (k < (int) (max - 1))) {
     RESET_ERRNO;
     j = io_read_conv (f, &ch, 1);
-    ABNORMAL_END (errno != 0, "cannot read string", NULL);
+    ABNORMAL_END (j < 0, "cannot read string", NULL);
     if (j == 1) {
       z[k++] = ch;
     }
@@ -132,11 +132,12 @@ size_t io_read_string (FILE_T f, char *z, size_t max)
 
 void io_write_string (FILE_T f, const char *z)
 {
+  ssize_t j;
   RESET_ERRNO;
   if (f != STDOUT_FILENO && f != STDERR_FILENO) {
 /* Writing to file. */
-    io_write_conv (f, z, strlen (z));
-    ABNORMAL_END (errno != 0, "cannot write", NULL);
+    j = io_write_conv (f, z, strlen (z));
+    ABNORMAL_END (j < 0, "cannot write", NULL);
   } else {
 /* Writing to TTY. */
     int first, k;
@@ -146,22 +147,22 @@ void io_write_string (FILE_T f, const char *z)
       k = first;
 /* How far can we get? */
       while (z[k] != NULL_CHAR && z[k] != NEWLINE_CHAR) {
-	k++;
+        k++;
       }
       if (k > first) {
 /* Write these characters. */
-	int n = k - first;
-	io_write_conv (f, &(z[first]), n);
-	ABNORMAL_END (errno != 0, "cannot write", NULL);
-	chars_in_tty_line += n;
+        int n = k - first;
+        j = io_write_conv (f, &(z[first]), n);
+        ABNORMAL_END (j < 0, "cannot write", NULL);
+        chars_in_tty_line += n;
       }
       if (z[k] == NEWLINE_CHAR) {
 /* Pretty-print newline. */
-	k++;
-	first = k;
-	io_write_conv (f, NEWLINE_STRING, 1);
-	ABNORMAL_END (errno != 0, "cannot write", NULL);
-	chars_in_tty_line = 0;
+        k++;
+        first = k;
+        j = io_write_conv (f, NEWLINE_STRING, 1);
+        ABNORMAL_END (j < 0, "cannot write", NULL);
+        chars_in_tty_line = 0;
       }
     }
     while (z[k] != NULL_CHAR);
@@ -192,21 +193,21 @@ ssize_t io_read (FILE_T fd, void *buf, size_t n)
     if (bytes_read < 0) {
       if (errno == EINTR) {
 /* interrupt, retry. */
-	bytes_read = 0;
-	if (restarts++ > 3) {
-	  return (-1);
-	}
+        bytes_read = 0;
+        if (restarts++ > 3) {
+          return (-1);
+        }
       } else {
 /* read error. */
-	return (-1);
+        return (-1);
       }
     } else if (bytes_read == 0) {
-      break;			/* EOF_CHAR. */
+      break;                    /* EOF_CHAR. */
     }
     to_do -= bytes_read;
     z += bytes_read;
   }
-  return (n - to_do);		/* return >= 0 */
+  return (n - to_do);           /* return >= 0 */
 }
 
 /*!
@@ -229,13 +230,13 @@ ssize_t io_write (FILE_T fd, const void *buf, size_t n)
     if (bytes_written <= 0) {
       if (errno == EINTR) {
 /* interrupt, retry. */
-	bytes_written = 0;
-	if (restarts++ > 3) {
-	  return (-1);
-	}
+        bytes_written = 0;
+        if (restarts++ > 3) {
+          return (-1);
+        }
       } else {
 /* write error. */
-	return (-1);
+        return (-1);
       }
     }
     to_do -= bytes_written;
@@ -268,21 +269,21 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
     if (bytes_read < 0) {
       if (errno == EINTR) {
 /* interrupt, retry. */
-	bytes_read = 0;
-	if (restarts++ > 3) {
-	  return (-1);
-	}
+        bytes_read = 0;
+        if (restarts++ > 3) {
+          return (-1);
+        }
       } else {
 /* read error. */
-	return (-1);
+        return (-1);
       }
     } else if (bytes_read == 0) {
-      break;			/* EOF_CHAR. */
+      break;                    /* EOF_CHAR. */
     }
     to_do -= bytes_read;
     z += bytes_read;
   }
-  return (n - to_do);		/* return >= 0 */
+  return (n - to_do);           /* return >= 0 */
 }
 
 /*!
@@ -305,13 +306,13 @@ ssize_t io_write_conv (FILE_T fd, const void *buf, size_t n)
     if (bytes_written <= 0) {
       if (errno == EINTR) {
 /* interrupt, retry. */
-	bytes_written = 0;
-	if (restarts++ > 3) {
-	  return (-1);
-	}
+        bytes_written = 0;
+        if (restarts++ > 3) {
+          return (-1);
+        }
       } else {
 /* write error. */
-	return (-1);
+        return (-1);
       }
     }
     to_do -= bytes_written;

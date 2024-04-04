@@ -17,8 +17,8 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
@@ -46,7 +46,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -76,26 +76,23 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 
 <font color=black>
 <pre>
-# 
-Breaks a unique code of `n' pegs and `m' colours you think of.
-This is an application of A68's flexible rows.
-#
+# This breaks a code of 'pegs' unique digits that you think of. #
 
-INT pegs = 4, colours = 6;
+INT pegs = 4, max digit = 6;
 
 MODE LIST = FLEX [1 : 0] COMBINATION, 
-     COMBINATION = [pegs] COLOUR, 
-     COLOUR = INT;
+     COMBINATION = [pegs] DIGIT, 
+     DIGIT = INT;
 
 OP +:= = (REF LIST u, COMBINATION v) REF LIST:
    # Add one combination to a list. #
-   ([UPB u + 1] COMBINATION w; w[ : UPB u] := u; w[UPB w] := v; u := w);
+   (sweep heap; [UPB u + 1] COMBINATION w; w[ : UPB u] := u; w[UPB w] := v; u := w);
 
 PROC gen = (REF COMBINATION part, INT peg) VOID:
-     # Generate all unique [colours!/(colours-pegs)!] combinations. #
+     # Generate all unique [max digit!/(max digit-pegs)!] combinations. #
      IF peg > pegs
      THEN all combs +:= part
-     ELSE FOR i TO colours
+     ELSE FOR i TO max digit
           DO IF BOOL unique := TRUE;
                 FOR j TO peg - 1 WHILE unique
                 DO unique := part[j] ~= i
@@ -113,10 +110,10 @@ gen (LOC COMBINATION, 1);
 PROC break code = (LIST sieved) VOID:
      # Present a trial and sieve the list with the entered score. #
      CASE UPB sieved + 1
-     IN # No elements. # printf ($l"Inconsistent scores"$),
-        # One element. # printf (($l"Solution is "4(xd)$, sieved[1]))
-     OUT printf (($l"["g(0)"]"x4(xd)": "$, UPB sieved, sieved[1]));
-     # Read the score as a sequence of "w" and "b". #
+     IN printf ($"Inconsistent scores"$),
+        printf (($"Solution is "4(d)$, sieved[1]))
+     OUT printf (($"["g(0)" solutions in set] Guess is "4(d)": "$, UPB sieved, sieved[1]));
+         # Read the score as a sequence of "w" and "b" #
          INT col ok := 0, pos ok := 0, STRING z := "";
          WHILE z = ""
          DO read ((z, new line))
@@ -125,7 +122,7 @@ PROC break code = (LIST sieved) VOID:
          DO (z[i] = "w" | col ok |: z[i] = "b" | pos ok) +:= 1 
          OD;
          (pos ok = pegs | stop);
-     # Survivors are combinations with score as entered. #
+         # Survivors are combinations with score as entered. #
          LIST survivors;
          FOR i FROM 2 TO UPB sieved
          DO INT col ok i := 0, pos ok i := 0;
@@ -138,9 +135,12 @@ PROC break code = (LIST sieved) VOID:
             OD;
             (col ok = col ok i AND pos ok = pos ok i | survivors +:= sieved[i])
          OD;
-     # Solution must be among the survivors. #
          break code (survivors) 
      ESAC;
+
+printf (($"This breaks a unique code of "g(0)" digits in range 1.."g(0)" that you think of."$, pegs, max digit));
+print ((new line, "Enter score as a series of w(hite) and b(lack) for instance www, wbw or bbbb."));
+new line (standout);
 
 break code (all combs)
 </pre>
@@ -156,7 +156,7 @@ break code (all combs)
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>

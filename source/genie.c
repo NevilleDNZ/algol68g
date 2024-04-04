@@ -36,14 +36,16 @@ this program; if not, write to the Free Software Foundation, Inc.,
 void genie_preprocess (NODE_T *, int *);
 void get_global_level (NODE_T *);
 
-jmp_buf genie_exit_label;
-int global_level = 0, ret_code, ret_line_number, ret_char_number;
 A68_HANDLE nil_handle = { INITIALISED_MASK, 0, 0, NULL, NULL, NULL };
-A68_REF nil_ref = { INITIALISED_MASK, NULL, 0, PRIMAL_SCOPE, NULL };
 A68_POINTER nil_pointer = { INITIALISED_MASK, NULL };
-BYTE_T *frame_segment = NULL, *stack_segment = NULL, *heap_segment = NULL, *handle_segment = NULL;
+A68_REF nil_ref = { INITIALISED_MASK, NULL, 0, PRIMAL_SCOPE, NULL };
 ADDR_T frame_pointer = 0, stack_pointer = 0, heap_pointer = 0, handle_pointer = 0, global_pointer = 0;
+BYTE_T *frame_segment = NULL, *stack_segment = NULL, *heap_segment = NULL, *handle_segment = NULL;
+NODE_T *last_unit = NULL;
+int global_level = 0, ret_code, ret_line_number, ret_char_number;
 int max_lex_lvl = 0;
+jmp_buf genie_exit_label;
+unsigned check_time_limit_count = 0;
 
 int frame_stack_size, expr_stack_size, heap_size, handle_pool_size;
 int stack_limit, frame_stack_limit, expr_stack_limit;
@@ -130,6 +132,7 @@ void genie_init_rng (void)
     init_rng (seed);
   }
 }
+
 /*!
 \brief tie label to the clause it is defined in
 \param p
@@ -139,20 +142,20 @@ void genie_init_rng (void)
     if (WHETHER (p, SERIAL_CLAUSE)) {
       BOOL_T valid_follow;
       if (NEXT (p) == NULL) {
-	valid_follow = A_TRUE;
+        valid_follow = A_TRUE;
       } else if (WHETHER (NEXT (p), CLOSE_SYMBOL)) {
-	valid_follow = A_TRUE;
+        valid_follow = A_TRUE;
       } else if (WHETHER (NEXT (p), END_SYMBOL)) {
-	valid_follow = A_TRUE;
+        valid_follow = A_TRUE;
       } else if (WHETHER (NEXT (p), EDOC_SYMBOL)) {
-	valid_follow = A_TRUE;
+        valid_follow = A_TRUE;
       } else if (WHETHER (NEXT (p), OD_SYMBOL)) {
-	valid_follow = A_TRUE;
+        valid_follow = A_TRUE;
       } else {
-	valid_follow = A_FALSE;
+        valid_follow = A_FALSE;
       }
       if (valid_follow) {
-	SYMBOL_TABLE (SUB (p))->jump_to = NULL;
+        SYMBOL_TABLE (SUB (p))->jump_to = NULL;
       }
     }
     tie_label_to_serial (SUB (p));
@@ -219,15 +222,15 @@ become prone to the heap sweeper.
     case DEPROCEDURING:
     case ROWING:
       {
-	MOID_T *m = MOID (p);
-	if (m != NULL && (WHETHER (m, REF_SYMBOL) || WHETHER (DEFLEX (m), ROW_SYMBOL))) {
-	  TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m,
-			      PROTECT_FROM_SWEEP);
-	  p->protect_sweep = z;
-	  HEAP (z) = HEAP_SYMBOL;
-	  z->use = A_TRUE;
-	}
-	break;
+        MOID_T *m = MOID (p);
+        if (m != NULL && (WHETHER (m, REF_SYMBOL) || WHETHER (DEFLEX (m), ROW_SYMBOL))) {
+          TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m,
+              PROTECT_FROM_SWEEP);
+          p->protect_sweep = z;
+          HEAP (z) = HEAP_SYMBOL;
+          z->use = A_TRUE;
+        }
+        break;
       }
     }
   }
@@ -331,30 +334,30 @@ void genie_preprocess (NODE_T * p, int *max_lev)
     if (SYMBOL_TABLE (p) != NULL) {
       SYMBOL_TABLE (p)->empty_table = genie_empty_table (SYMBOL_TABLE (p));
       if (LEX_LEVEL (p) > *max_lev) {
-	*max_lev = LEX_LEVEL (p);
+        *max_lev = LEX_LEVEL (p);
       }
     }
     if (WHETHER (p, FORMAT_TEXT)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL) {
-	NODE (q) = p;
+        NODE (q) = p;
       }
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL && SYMBOL_TABLE (NODE (q)) != NULL) {
-	p->genie.level = LEX_LEVEL (NODE (q));
+        p->genie.level = LEX_LEVEL (NODE (q));
       }
     } else if (WHETHER (p, IDENTIFIER)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL && SYMBOL_TABLE (NODE (q)) != NULL) {
-	p->genie.level = LEX_LEVEL (NODE (q));
-	p->genie.offset = &frame_segment[FRAME_INFO_SIZE + q->offset];
+        p->genie.level = LEX_LEVEL (NODE (q));
+        p->genie.offset = &frame_segment[FRAME_INFO_SIZE + q->offset];
       }
     } else if (WHETHER (p, OPERATOR)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL && SYMBOL_TABLE (NODE (q)) != NULL) {
-	p->genie.level = LEX_LEVEL (NODE (q));
-	p->genie.offset = &frame_segment[FRAME_INFO_SIZE + q->offset];
+        p->genie.level = LEX_LEVEL (NODE (q));
+        p->genie.offset = &frame_segment[FRAME_INFO_SIZE + q->offset];
       }
     }
     if (SUB (p) != NULL) {
@@ -374,9 +377,9 @@ void get_global_level (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     if (LINE (p)->number != 0) {
       if (find_keyword (top_keyword, SYMBOL (p)) == NULL) {
-	if (LEX_LEVEL (p) < global_level || global_level == 0) {
-	  global_level = LEX_LEVEL (p);
-	}
+        if (LEX_LEVEL (p) < global_level || global_level == 0) {
+          global_level = LEX_LEVEL (p);
+        }
       }
     }
     get_global_level (SUB (p));
@@ -423,7 +426,7 @@ void genie (MODULE_T * module)
   count_parallel_clauses (module->top_node);
 #endif
   if (module->options.trace) {
-    sprintf (output_line, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", frame_stack_size / 1024, expr_stack_size / 1024, heap_size / 1024, handle_pool_size / 1024);
+    snprintf (output_line, BUFFER_SIZE, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", frame_stack_size / 1024, expr_stack_size / 1024, heap_size / 1024, handle_pool_size / 1024);
     io_write_string (STDOUT_FILENO, output_line);
   }
   install_signal_handlers ();
@@ -451,9 +454,9 @@ void genie (MODULE_T * module)
 /* Abnormal end of program. */
     if (ret_code == A_RUNTIME_ERROR) {
       if (module->files.listing.opened) {
-	sprintf (output_line, "\n++++ Stack traceback");
-	io_write_string (module->files.listing.fd, output_line);
-	stack_dump (module->files.listing.fd, frame_pointer, 128);
+        snprintf (output_line, BUFFER_SIZE, "\n++++ Stack traceback");
+        io_write_string (module->files.listing.fd, output_line);
+        stack_dump (module->files.listing.fd, frame_pointer, 128);
       }
     }
   }
@@ -462,7 +465,7 @@ void genie (MODULE_T * module)
 /* Normal end of program. */
   diagnostics_to_terminal (module->top_line, A_RUNTIME_ERROR);
   if (module->options.trace) {
-    sprintf (output_line, "\n++++ Genie finishes: %.2f seconds\n", seconds () - cputime_0);
+    snprintf (output_line, BUFFER_SIZE, "\n++++ Genie finishes: %.2f seconds\n", seconds () - cputime_0);
     io_write_string (STDOUT_FILENO, output_line);
   }
 }

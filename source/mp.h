@@ -176,6 +176,7 @@ extern MP_DIGIT_T *sinh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *sqrt_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *string_to_mp (NODE_T *, MP_DIGIT_T *, char *, int);
 extern MP_DIGIT_T *sub_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *sub_pos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *tan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *tanh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *unsigned_to_mp (NODE_T *, MP_DIGIT_T *, unsigned, int);

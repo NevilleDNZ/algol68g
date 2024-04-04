@@ -17,15 +17,15 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
@@ -52,7 +52,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -80,9 +80,9 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </td>
 </table>
 
-<p>On systems that have installed the <a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> (version 2.4.1 or compatible), Algol68G can be linked with that library to extend the standard prelude. This section contains a list of procedures supported by the current revision of Algol68G.
+<p>On systems that have installed the <a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> (version 2.5 or compatible), Algol68G can be linked with that library to extend the standard prelude. This section contains a list of procedures supported by the current revision of Algol68G.
 </p>
-<p><a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> offer a number of routines for drawing. This allows for drawing in <code>X Windows, postscript format</code>, <code>pseudo graphical interface format (pseudo-gif)</code> and <code>portable any-map format (pnm)</code> from Algol 68. Note that Algol68G is not a full Algol 68 binding for libplot.
+<p><a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> offer a number of routines for drawing. This allows for drawing in <code>X windows, postscript format</code>, <code>pseudo graphical interface format (pseudo-gif)</code> and <code>portable any-map format (pnm)</code> from Algol 68. Note that Algol68G is not a full Algol 68 binding for libplot.
 </p>
 <p>
 A plotter (window, postscript file, etcetera) can be considered as a stream to which plotting commands are written. Therefore Algol68G considers plotters to be objects of mode <code>REF FILE</code>. This seems consistent with the design of Algol 68 transput since a file is associated with a channel that describes the device, and therefore can be considered as a description of a device driver.
@@ -237,53 +237,8 @@ vert_justify, [] CHAR s) VOID</code>
 
 <br>
 <h3><a name="mandelbrot"></a>Example: Mandelbrot set</h3>
-
-<font color=black>
-<pre>
-# Plot (part of) the Mandelbrot set, that are points z[0] in the complex plane
-  for which the sequence z[n+1] := z[n] ** 2 + z[0] (n >= 0) is bounded.
-#
-
-INT pix = 300, max iter = 256, REAL zoom = 0.33 / pix;
-[-pix : pix, -pix : pix] INT plane;
-COMPL ctr = 0.05 I 0.75 # center of set #;
-
-# Compute the length of an orbit. #
-PROC iterate = (COMPL z0) INT:
-  BEGIN COMPL z := z0, INT iter := 1;
-        WHILE (iter +:= 1) < max iter # not converged # AND ABS z < 2 # not diverged #
-        DO z := z * z + z0
-        OD;
-        iter
-  END;
-
-# Compute set and find maximum orbit length. #     
-INT max col := 0;
-FOR x FROM -pix TO pix
-DO FOR y FROM -pix TO pix
-   DO COMPL z0 = ctr + (x * zoom) I (y * zoom);
-      IF (plane [x, y] := iterate (z0)) < max iter
-      THEN (plane [x, y] > max col | max col := plane [x, y])
-      FI
-   OD
-OD;
-
-# Make a plot. #
-FILE plot;
-INT num pix = 2 * pix + 1;
-make device (plot, "gif", whole (num pix, 0) + "x" + whole (num pix, 0));
-open (plot, "mandelbrot.gif", stand draw channel);
-FOR x FROM -pix TO pix
-DO FOR y FROM -pix TO pix
-   DO INT col = (plane [x, y] > max col | max col | plane [x, y]);
-      REAL c = sqrt (1- col / max col); # sqrt to enhance contrast #
-      draw colour (plot, c, c, c);
-      draw point (plot, (x + pix) / (num pix - 1), (y + pix) / (num pix  - 1))
-   OD
-OD;
-close (plot)
-</pre>
-</font>
+<p>
+This example program can be found <a href="mandelbrot.a68.html">here</a>.
 
 <p>
 <br>
@@ -295,7 +250,7 @@ close (plot)
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>

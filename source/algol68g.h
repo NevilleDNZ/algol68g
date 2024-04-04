@@ -55,7 +55,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 /* System dependencies. */
 
-#ifdef HAVE_UNIX
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -63,9 +62,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef O_BINARY
 #define O_BINARY 0x0000
 #endif
-#endif
 
-#if defined WIN32_VERSION && defined __DEVCPP__
+#if defined WIN32_VERSION
 /* typedef size_t ssize_t; */
 #define S_IRGRP 0x040
 #define S_IROTH 0x004
@@ -91,16 +89,18 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define TIME_FORMAT "%A %d-%b-%Y %H:%M:%S"
 
 #define ALIGN_T void *
-#define ALIGNMENT (sizeof (ALIGN_T))
-#define ALIGN(s) ((s) % ALIGNMENT == 0 ? (s) : ((s) + ALIGNMENT - (s) % ALIGNMENT))
+#define ALIGNMENT ((int) (sizeof (ALIGN_T)))
+#define ALIGN(s) ((int) ((s) % ALIGNMENT) == 0 ? (s) : ((s) + ALIGNMENT - (s) % ALIGNMENT))
 #define SIZE_OF(p) ((int) ALIGN (sizeof (p)))
 #define MOID_SIZE(p) ALIGN ((p)->size)
 
 #define BUFFER_SIZE (KILOBYTE)			/* BUFFER_SIZE exceeds actual requirements. */
+#define SMALL_BUFFER_SIZE 128
 #define MAX_ERRORS 8
 #define MAX_PRIORITY 9				/* Algol 68 requirement. */
 #define MIN_MEM_SIZE (256 * KILOBYTE)		/* Stack, heap blocks not smaller than this in kB. */
 #define MAX_LINE_WIDTH (BUFFER_SIZE / 2)	/* Must be smaller than BUFFER_SIZE */
+#define MOID_WIDTH 80
 
 #define BYTES_WIDTH 32		/* More useful than the usual 4. */
 #define LONG_BYTES_WIDTH 64	/* More useful than the usual 8. */
@@ -120,16 +120,17 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define CR_CHAR		'\r'
 #define EOF_CHAR	TO_UCHAR (EOF)
 #define ERROR_CHAR      '*'
-#define ESC_CHAR	27
-#define EXPONENT_CHAR   'E'
+#define ESCAPE_CHAR	'\\'
+#define EXPONENT_CHAR   'e'
 #define FLIP_CHAR       'T'
 #define FLOP_CHAR       'F'
 #define FORMFEED_CHAR	'\f'
 #define NEWLINE_CHAR	'\n'
 #define NEWLINE_STRING	"\n"
 #define NULL_CHAR	'\0'
+#define POINT_CHAR 	'.'
 #define QUOTE_CHAR	'"'
-#define RADIX_CHAR      'R'
+#define RADIX_CHAR      'r'
 #define TAB_CHAR	'\t'
 
 #define A68G_PI 	3.1415926535897932384626433832795029L	/* pi*/
@@ -157,7 +158,7 @@ char on various systems. PDP-11s and IBM 370s are still haunting us with this.
 
 /* Type definitions. */
 
-typedef int ADDR_T, FILE_T;
+typedef int ADDR_T, FILE_T, LEAP_T;
 typedef unsigned char BYTE_T, BOOL_T;
 typedef unsigned STATUS_MASK;
 
@@ -552,6 +553,11 @@ struct MODULE_T
   OPTIONS_T options;
   REFINEMENT_T *top_refinement;
   NODE_T *top_node;
+  struct {
+    SOURCE_LINE_T *save_l;
+    char *save_s;
+    char save_c;
+  } scan_state;
 };
 
 /* Internal constants. */
@@ -936,7 +942,7 @@ enum
 { NOT_PRINTED, TO_PRINT, PRINTED };
 
 enum
-{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_ALL_DIAGNOSTICS, FORCE_DIAGNOSTIC = 128, A_FORCE_QUIT = 256 };
+{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_STORAGE_ERROR, A_ALL_DIAGNOSTICS, FORCE_DIAGNOSTIC = 128, A_FORCE_QUIT = 256 };
 
 enum
 { NO_DEFLEXING = 1, SAFE_DEFLEXING, ALIAS_DEFLEXING, FORCE_DEFLEXING, SKIP_DEFLEXING };
@@ -1069,10 +1075,8 @@ extern int symbol_table_count, mode_count;
 extern int term_width;
 extern jmp_buf exit_compilation;
 
-#ifdef HAVE_UNIX
 extern int global_argc;
 extern char **global_argv;
-#endif
 
 extern A68_REF heap_generator (NODE_T *, MOID_T *, int);
 extern ADDR_T calculate_internal_index (A68_TUPLE *, int);
@@ -1133,6 +1137,7 @@ extern ssize_t io_read (FILE_T, void *, size_t);
 extern ssize_t io_read_conv (FILE_T, void *, size_t);
 extern ssize_t io_write (FILE_T, const void *, size_t);
 extern ssize_t io_write_conv (FILE_T, const void *, size_t);
+extern unsigned long a68g_strtoul (char *, char **, int);
 extern void *get_heap_space (size_t);
 extern void PROTECT_SWEEP_HANDLE (A68_REF *);
 extern void UNPROTECT_SWEEP_HANDLE (A68_REF *);
@@ -1153,11 +1158,13 @@ extern void bind_routine_tags_to_tree (NODE_T *);
 extern void bind_tag (TAG_T **, TAG_T *);
 extern void bottom_up_error_check (NODE_T *);
 extern void bottom_up_parser (NODE_T *);
+extern void bufcat (char *, char *, int);
+extern void bufcpy (char *, char *, int);
 extern void check_parenthesis (NODE_T *);
 extern void coercion_inserter (NODE_T *);
 extern void collect_taxes (NODE_T *);
 extern void contract_union (MOID_T *, int *);
-extern void default_mem_sizes (void);
+extern void default_mem_sizes ();
 extern void default_options (MODULE_T *);
 extern void diagnostic_line (int, SOURCE_LINE_T *, char *, char *, ...);
 extern void diagnostic_node (int, NODE_T *, char *, ...);
@@ -1195,6 +1202,7 @@ extern void math_rte (NODE_T *, BOOL_T, MOID_T *, const char *);
 extern void mode_checker (NODE_T *);
 extern void monitor_error (char *, char *);
 extern void msg (int, int, NODE_T *, SOID_T *, SOID_T *, char *);
+extern void online_help (FILE_T);
 extern void portcheck (NODE_T *);
 extern void preliminary_symbol_table_setup (NODE_T *);
 extern void print_internal_index (FILE_T, A68_TUPLE *, int);
@@ -1219,6 +1227,8 @@ extern void set_par_level (NODE_T *, int);
 extern void set_up_mode_table (NODE_T *);
 extern void set_up_tables ();
 extern void source_listing (MODULE_T *);
+extern void state_license (FILE_T);
+extern void state_version (FILE_T);
 extern void substitute_brackets (NODE_T *);
 extern void tie_label_to_serial (NODE_T *);
 extern void tie_label_to_unit (NODE_T *);
@@ -1226,6 +1236,7 @@ extern void top_down_parser (NODE_T *);
 extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
 extern void where (FILE_T, NODE_T *);
+extern void widen_denoter (NODE_T *);
 extern void write_listing (MODULE_T *);
 extern void write_source_line (FILE_T, SOURCE_LINE_T *, NODE_T *, BOOL_T);
 

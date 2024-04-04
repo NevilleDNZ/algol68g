@@ -50,8 +50,7 @@ This part contains names for 24-bit colours recognised by libplot.
 The table below is based on the "rgb.txt" file distributed with X11R6. 
 */
 
-struct COLOUR_INFO
-{
+struct COLOUR_INFO {
   char *name;
   int r, g, b;
 };
@@ -940,12 +939,12 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-    sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
+    snprintf (size, BUFFER_SIZE, "%dx%d", f->device.window_x_size, f->device.window_y_size);
     pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
-    pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
-    pl_setplparam (f->device.plotter_params, "VANISH_ON_DELETE", "no");
-    pl_setplparam (f->device.plotter_params, "X_AUTO_FLUSH", "no");
-    pl_setplparam (f->device.plotter_params, "USE_DOUBLE_BUFFERING", "no");
+    pl_setplparam (f->device.plotter_params, "BG_COLOR", (void *) "black");
+    pl_setplparam (f->device.plotter_params, "VANISH_ON_DELETE", (void *) "no");
+    pl_setplparam (f->device.plotter_params, "X_AUTO_FLUSH", (void *) "no");
+    pl_setplparam (f->device.plotter_params, "USE_DOUBLE_BUFFERING", (void *) "no");
     f->device.plotter = pl_newpl_r ("X", NULL, NULL, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
@@ -1008,15 +1007,15 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       f->draw_mood = A_TRUE;
     }
 /* Set up plotter. */
-    sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
+    snprintf (size, BUFFER_SIZE, "%dx%d", f->device.window_x_size, f->device.window_y_size);
     f->device.plotter_params = pl_newplparams ();
     if (f->device.plotter_params == NULL) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
-    pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
-    pl_setplparam (f->device.plotter_params, "PNM_PORTABLE", "no");
+    pl_setplparam (f->device.plotter_params, "BG_COLOR", (void *) "black");
+    pl_setplparam (f->device.plotter_params, "PNM_PORTABLE", (void *) "no");
     f->device.plotter = pl_newpl_r ("pnm", NULL, f->device.stream, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
@@ -1076,10 +1075,10 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-    sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
+    snprintf (size, BUFFER_SIZE, "%dx%d", f->device.window_x_size, f->device.window_y_size);
     pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
-    pl_setplparam (f->device.plotter_params, "BG_COLOR", "black");
-    pl_setplparam (f->device.plotter_params, "GIF_ANIMATION", "no");
+    pl_setplparam (f->device.plotter_params, "BG_COLOR", (void *) "black");
+    pl_setplparam (f->device.plotter_params, "GIF_ANIMATION", (void *) "no");
     f->device.plotter = pl_newpl_r ("gif", NULL, f->device.stream, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);

@@ -1679,7 +1679,7 @@ void genie_repr_char (NODE_T * p)
 {
   A68_INT k;
   POP_INT (p, &k);
-  if (k.value < 0 || k.value > UCHAR_MAX) {
+  if (k.value < 0 || k.value > (int) UCHAR_MAX) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (CHAR));
     exit_genie (p, A_RUNTIME_ERROR);
   }
@@ -2146,7 +2146,7 @@ void genie_add_bytes (NODE_T * p)
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
-  strcat (i->value, j->value);
+  bufcat (i->value, j->value, BYTES_WIDTH);
 }
 
 /*!
@@ -2177,9 +2177,9 @@ void genie_plusto_bytes (NODE_T * p)
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
-  strcpy (j.value, i.value);
-  strcat (j.value, address->value);
-  strcpy (address->value, j.value);
+  bufcpy (j.value, i.value, BYTES_WIDTH);
+  bufcat (j.value, address->value, BYTES_WIDTH);
+  bufcpy (address->value, j.value, BYTES_WIDTH);
   PUSH_REF (p, z);
 }
 
@@ -2292,7 +2292,7 @@ void genie_add_long_bytes (NODE_T * p)
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (LONG_BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
-  strcat (i->value, j->value);
+  bufcat (i->value, j->value, LONG_BYTES_WIDTH);
 }
 
 /*!
@@ -2324,9 +2324,9 @@ void genie_plusto_long_bytes (NODE_T * p)
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (LONG_BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
-  strcpy (j.value, i.value);
-  strcat (j.value, address->value);
-  strcpy (address->value, j.value);
+  bufcpy (j.value, i.value, LONG_BYTES_WIDTH);
+  bufcat (j.value, address->value, LONG_BYTES_WIDTH);
+  bufcpy (address->value, j.value, LONG_BYTES_WIDTH);
   PUSH_REF (p, z);
 }
 
@@ -2449,7 +2449,7 @@ void genie_shr_bits (NODE_T * p)
   A68_INT *j;
   POP_OPERAND_ADDRESS (p, j, A68_INT);
   j->value = -j->value;
-  genie_shl_bits (p);		/* Conform RR. */
+  genie_shl_bits (p);           /* Conform RR. */
 }
 
 /*!
@@ -2751,7 +2751,7 @@ void genie_shr_long_mp (NODE_T * p)
   A68_INT *j;
   POP_OPERAND_ADDRESS (p, j, A68_INT);
   j->value = -j->value;
-  genie_shl_long_mp (p);	/* Conform RR. */
+  genie_shl_long_mp (p);        /* Conform RR. */
 }
 
 /*!

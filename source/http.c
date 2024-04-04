@@ -25,7 +25,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "genie.h"
 #include "transput.h"
 
-#if defined HAVE_UNIX && defined HAVE_HTTP
+#if defined HAVE_HTTP
 
 #include <sys/socket.h>
 #include <netinet/in.h>

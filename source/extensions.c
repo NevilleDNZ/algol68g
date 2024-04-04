@@ -34,8 +34,6 @@ Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>.
 #include "genie.h"
 #include "transput.h"
 
-#ifdef HAVE_UNIX
-
 #ifndef WIN32_VERSION
 #include <sys/wait.h>
 #endif
@@ -157,11 +155,11 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
       vec[k] = (char *) get_heap_space (1 + size);
       a_to_c_string (p, vec[k], *(A68_REF *) elem);
       if (k == VECTOR_SIZE - 1) {
-	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_TOO_MANY_ARGUMENTS);
-	exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_TOO_MANY_ARGUMENTS);
+        exit_genie (p, A_RUNTIME_ERROR);
       }
       if (strlen (vec[k]) > 0) {
-	k++;
+        k++;
       }
       done = increment_internal_index (tup, arr->dimensions);
     }
@@ -301,7 +299,7 @@ void genie_getenv (NODE_T * p)
 void genie_fork (NODE_T * p)
 {
   RESET_ERRNO;
-#if defined WIN32_VERSION && defined __DEVCPP__
+#if defined WIN32_VERSION
   PUSH_INT (p, -1);
 #else
   PUSH_INT (p, fork ());
@@ -356,7 +354,7 @@ void genie_execve_child (NODE_T * p)
   POP (p, &a_args, SIZE_OF (A68_REF));
   POP (p, &a_prog, SIZE_OF (A68_REF));
 /* Now create the pipes and fork. */
-#if defined WIN32_VERSION && defined __DEVCPP__
+#if defined WIN32_VERSION
   pid = -1;
 #else
   pid = fork ();
@@ -410,7 +408,7 @@ Return a PIPE that contains the descriptors for the parent.
   POP (p, &a_args, SIZE_OF (A68_REF));
   POP (p, &a_prog, SIZE_OF (A68_REF));
 /* Now create the pipes and fork. */
-#if defined WIN32_VERSION && defined __DEVCPP__
+#if defined WIN32_VERSION
   pid = -1;
 #else
   if ((pipe (ptoc_fd) == -1) || (pipe (ctop_fd) == -1)) {
@@ -478,12 +476,10 @@ void genie_waitpid (NODE_T * p)
   A68_INT k;
   RESET_ERRNO;
   POP_INT (p, &k);
-#if !defined WIN32_VERSION || !defined __DEVCPP__
+#if !defined WIN32_VERSION
   waitpid (k.value, NULL, 0);
 #endif
 }
-
-#endif /* HAVE_UNIX. */
 
 /*
 Next part contains some routines that interface Algol68G and the curses library.
@@ -525,7 +521,7 @@ void clean_curses ()
 void init_curses ()
 {
   initscr ();
-  cbreak ();			/* raw () would cut off ctrl-c. */
+  cbreak ();                    /* raw () would cut off ctrl-c. */
   noecho ();
   nonl ();
   curs_set (0);
@@ -551,7 +547,9 @@ int rgetchar (void)
   FD_SET (0, &rfds);
   retval = select (1, &rfds, NULL, NULL, &tv);
   if (retval) {
-    /* FD_ISSET(0, &rfds) will be true. */
+    /*
+     * FD_ISSET(0, &rfds) will be true. 
+     */
     return (getch ());
   } else {
     return (NULL_CHAR);
@@ -679,7 +677,7 @@ void genie_curses_move (NODE_T * p)
   move (i.value, j.value);
 }
 
-#endif /* HAVE_CURSES */
+#endif                          /* HAVE_CURSES */
 
 #ifdef HAVE_POSTGRESQL
 
@@ -1198,30 +1196,30 @@ static char *pq_edit (char *str)
     }
     while (str[0] != NULL_CHAR) {
       if (str[0] == CR_CHAR) {
-	str++;
+        str++;
       } else if (str[0] == NEWLINE_CHAR) {
-	if (newlines++ == 0) {
-	  *(q++) = '.';
-	  *(q++) = BLANK_CHAR;
-	  *(q++) = '(';
-	} else {
-	  *(q++) = BLANK_CHAR;
-	}
-	suppress_blank = A_TRUE;
-	str++;
+        if (newlines++ == 0) {
+          *(q++) = POINT_CHAR;
+          *(q++) = BLANK_CHAR;
+          *(q++) = '(';
+        } else {
+          *(q++) = BLANK_CHAR;
+        }
+        suppress_blank = A_TRUE;
+        str++;
       } else if (IS_SPACE (str[0])) {
-	if (suppress_blank) {
-	  str++;
-	} else {
-	  if (str[1] != NEWLINE_CHAR) {
-	    *(q++) = BLANK_CHAR;
-	  }
-	  str++;
-	  suppress_blank = A_TRUE;
-	}
+        if (suppress_blank) {
+          str++;
+        } else {
+          if (str[1] != NEWLINE_CHAR) {
+            *(q++) = BLANK_CHAR;
+          }
+          str++;
+          suppress_blank = A_TRUE;
+        }
       } else {
-	*(q++) = *(str++);
-	suppress_blank = A_FALSE;
+        *(q++) = *(str++);
+        suppress_blank = A_FALSE;
       }
     }
     if (newlines > 0) {
@@ -1253,13 +1251,13 @@ void genie_pq_errormessage (NODE_T * p)
     char str[BUFFER_SIZE];
     int upb;
     if (PQerrorMessage (file->connection) != NULL) {
-      strcpy (str, pq_edit (PQerrorMessage (file->connection)));
+      bufcpy (str, pq_edit (PQerrorMessage (file->connection)), BUFFER_SIZE);
       upb = strlen (str);
       if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
-	str[upb - 1] = NULL_CHAR;
+        str[upb - 1] = NULL_CHAR;
       }
     } else {
-      strcpy (str, "no error message available");
+      bufcpy (str, "no error message available", BUFFER_SIZE);
     }
     *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, str);
     file->strpos = 1;
@@ -1294,13 +1292,13 @@ void genie_pq_resulterrormessage (NODE_T * p)
     char str[BUFFER_SIZE];
     int upb;
     if (PQresultErrorMessage (file->result) != NULL) {
-      strcpy (str, pq_edit (PQresultErrorMessage (file->result)));
+      bufcpy (str, pq_edit (PQresultErrorMessage (file->result)), BUFFER_SIZE);
       upb = strlen (str);
       if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
-	str[upb - 1] = NULL_CHAR;
+        str[upb - 1] = NULL_CHAR;
       }
     } else {
-      strcpy (str, "no error message available");
+      bufcpy (str, "no error message available", BUFFER_SIZE);
     }
     *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, str);
     file->strpos = 1;
@@ -1588,4 +1586,4 @@ void genie_pq_backendpid (NODE_T * p)
   }
 }
 
-#endif /* HAVE_POSTGRESQL */
+#endif                          /* HAVE_POSTGRESQL */

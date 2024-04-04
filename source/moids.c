@@ -21,13 +21,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-
 #include "algol68g.h"
 #include "genie.h"
 #include "mp.h"
 
-enum
-{ PUT_IN_THIS_LEVEL, PUT_IN_PARENT_LEVEL };
+enum { PUT_IN_THIS_LEVEL, PUT_IN_PARENT_LEVEL };
 
 static MOID_T *get_mode_from_declarer (NODE_T *, int);
 BOOL_T check_yin_yang (NODE_T *, MOID_T *, BOOL_T, BOOL_T);
@@ -164,7 +162,7 @@ void add_moid_moid_list (NODE_T * p, MOID_LIST_T ** q)
     if (SUB (p) != NULL) {
       add_moid_moid_list (SUB (p), q);
       if (whether_new_lexical_level (p)) {
-	add_moid_list (q, SYMBOL_TABLE (SUB (p)));
+        add_moid_list (q, SYMBOL_TABLE (SUB (p)));
       }
     }
   }
@@ -286,23 +284,23 @@ static int count_sizety (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case LONGETY:
       {
-	return (count_sizety (SUB (p)) + count_sizety (NEXT (p)));
+        return (count_sizety (SUB (p)) + count_sizety (NEXT (p)));
       }
     case SHORTETY:
       {
-	return (count_sizety (SUB (p)) + count_sizety (NEXT (p)));
+        return (count_sizety (SUB (p)) + count_sizety (NEXT (p)));
       }
     case LONG_SYMBOL:
       {
-	return (1);
+        return (1);
       }
     case SHORT_SYMBOL:
       {
-	return (-1);
+        return (-1);
       }
     default:
       {
-	return (0);
+        return (0);
       }
     }
   }
@@ -330,7 +328,9 @@ static MOID_T *get_mode_from_standard_moid (int sizety, NODE_T * indicant, BOOL_
     if (supported_precision) {
       return (q);
     } else {
-      /* diagnostic_node (A_WARNING, indicant, ERROR_UNIMPLEMENTED_PRECISION, q); */
+      /*
+       * diagnostic_node (A_WARNING, indicant, ERROR_UNIMPLEMENTED_PRECISION, q); 
+       */
       return (q);
     }
   } else {
@@ -356,26 +356,26 @@ static void get_mode_from_struct_field (NODE_T * p, PACK_T ** u, MOID_T ** m)
     switch (ATTRIBUTE (p)) {
     case IDENTIFIER:
       {
-	ATTRIBUTE (p) = FIELD_IDENTIFIER;
-	add_mode_to_pack (u, NULL, SYMBOL (p), p);
-	break;
+        ATTRIBUTE (p) = FIELD_IDENTIFIER;
+        add_mode_to_pack (u, NULL, SYMBOL (p), p);
+        break;
       }
     case DECLARER:
       {
-	MOID_T *new_one = get_mode_from_declarer (p, PUT_IN_THIS_LEVEL);
-	PACK_T *t;
-	get_mode_from_struct_field (NEXT (p), u, m);
-	for (t = *u; t && MOID (t) == NULL; FORWARD (t)) {
-	  MOID (t) = new_one;
-	  MOID (NODE (t)) = new_one;
-	}
-	break;
+        MOID_T *new_one = get_mode_from_declarer (p, PUT_IN_THIS_LEVEL);
+        PACK_T *t;
+        get_mode_from_struct_field (NEXT (p), u, m);
+        for (t = *u; t && MOID (t) == NULL; FORWARD (t)) {
+          MOID (t) = new_one;
+          MOID (NODE (t)) = new_one;
+        }
+        break;
       }
     default:
       {
-	get_mode_from_struct_field (NEXT (p), u, m);
-	get_mode_from_struct_field (SUB (p), u, m);
-	break;
+        get_mode_from_struct_field (NEXT (p), u, m);
+        get_mode_from_struct_field (SUB (p), u, m);
+        break;
       }
     }
   }
@@ -394,17 +394,17 @@ static void get_mode_from_formal_pack (NODE_T * p, PACK_T ** u, MOID_T ** m)
     switch (ATTRIBUTE (p)) {
     case DECLARER:
       {
-	MOID_T *z;
-	get_mode_from_formal_pack (NEXT (p), u, m);
-	z = get_mode_from_declarer (p, PUT_IN_THIS_LEVEL);
-	add_mode_to_pack (u, z, NULL, p);
-	break;
+        MOID_T *z;
+        get_mode_from_formal_pack (NEXT (p), u, m);
+        z = get_mode_from_declarer (p, PUT_IN_THIS_LEVEL);
+        add_mode_to_pack (u, z, NULL, p);
+        break;
       }
     default:
       {
-	get_mode_from_formal_pack (NEXT (p), u, m);
-	get_mode_from_formal_pack (SUB (p), u, m);
-	break;
+        get_mode_from_formal_pack (NEXT (p), u, m);
+        get_mode_from_formal_pack (SUB (p), u, m);
+        break;
       }
     }
   }
@@ -424,17 +424,17 @@ static void get_mode_from_union_pack (NODE_T * p, PACK_T ** u, MOID_T ** m)
     case DECLARER:
     case VOID_SYMBOL:
       {
-	MOID_T *z;
-	get_mode_from_union_pack (NEXT (p), u, m);
-	z = get_mode_from_declarer (p, PUT_IN_THIS_LEVEL);
-	add_mode_to_pack (u, z, NULL, p);
-	break;
+        MOID_T *z;
+        get_mode_from_union_pack (NEXT (p), u, m);
+        z = get_mode_from_declarer (p, PUT_IN_THIS_LEVEL);
+        add_mode_to_pack (u, z, NULL, p);
+        break;
       }
     default:
       {
-	get_mode_from_union_pack (NEXT (p), u, m);
-	get_mode_from_union_pack (SUB (p), u, m);
-	break;
+        get_mode_from_union_pack (NEXT (p), u, m);
+        get_mode_from_union_pack (SUB (p), u, m);
+        break;
       }
     }
   }
@@ -453,25 +453,25 @@ static void get_mode_from_routine_pack (NODE_T * p, PACK_T ** u, MOID_T ** m)
     switch (ATTRIBUTE (p)) {
     case IDENTIFIER:
       {
-	add_mode_to_pack (u, NULL, NULL, p);
-	break;
+        add_mode_to_pack (u, NULL, NULL, p);
+        break;
       }
     case DECLARER:
       {
-	MOID_T *z = get_mode_from_declarer (p, PUT_IN_PARENT_LEVEL);
-	PACK_T *t = *u;
-	for (; t != NULL && MOID (t) == NULL; FORWARD (t)) {
-	  MOID (t) = z;
-	  MOID (NODE (t)) = z;
-	}
-	add_mode_to_pack (u, z, NULL, p);
-	break;
+        MOID_T *z = get_mode_from_declarer (p, PUT_IN_PARENT_LEVEL);
+        PACK_T *t = *u;
+        for (; t != NULL && MOID (t) == NULL; FORWARD (t)) {
+          MOID (t) = z;
+          MOID (NODE (t)) = z;
+        }
+        add_mode_to_pack (u, z, NULL, p);
+        break;
       }
     default:
       {
-	get_mode_from_routine_pack (NEXT (p), u, m);
-	get_mode_from_routine_pack (SUB (p), u, m);
-	break;
+        get_mode_from_routine_pack (NEXT (p), u, m);
+        get_mode_from_routine_pack (SUB (p), u, m);
+        break;
       }
     }
   }
@@ -491,85 +491,85 @@ static MOID_T *get_mode_from_declarer (NODE_T * p, int put_where)
   } else {
     if (WHETHER (p, DECLARER)) {
       if (MOID (p) != NULL) {
-	return (MOID (p));
+        return (MOID (p));
       } else {
-	return (MOID (p) = get_mode_from_declarer (SUB (p), put_where));
+        return (MOID (p) = get_mode_from_declarer (SUB (p), put_where));
       }
     } else {
       MOID_T **m = NULL;
       if (put_where == PUT_IN_THIS_LEVEL) {
-	m = &(SYMBOL_TABLE (p)->moids);
+        m = &(SYMBOL_TABLE (p)->moids);
       } else if (put_where == PUT_IN_PARENT_LEVEL) {
-	m = &(PREVIOUS (SYMBOL_TABLE (p))->moids);
+        m = &(PREVIOUS (SYMBOL_TABLE (p))->moids);
       }
       if (WHETHER (p, VOID_SYMBOL)) {
-	MOID (p) = MODE (VOID);
-	return (MOID (p));
+        MOID (p) = MODE (VOID);
+        return (MOID (p));
       } else if (WHETHER (p, LONGETY)) {
-	if (whether (p, LONGETY, INDICANT, 0)) {
-	  int k = count_sizety (SUB (p));
-	  MOID (p) = get_mode_from_standard_moid (k, NEXT (p), A_TRUE);
-	  return (MOID (p));
-	} else {
-	  return (NULL);
-	}
+        if (whether (p, LONGETY, INDICANT, 0)) {
+          int k = count_sizety (SUB (p));
+          MOID (p) = get_mode_from_standard_moid (k, NEXT (p), A_TRUE);
+          return (MOID (p));
+        } else {
+          return (NULL);
+        }
       } else if (WHETHER (p, SHORTETY)) {
-	if (whether (p, SHORTETY, INDICANT, 0)) {
-	  int k = count_sizety (SUB (p));
-	  MOID (p) = get_mode_from_standard_moid (k, NEXT (p), A_TRUE);
-	  return (MOID (p));
-	} else {
-	  return (NULL);
-	}
+        if (whether (p, SHORTETY, INDICANT, 0)) {
+          int k = count_sizety (SUB (p));
+          MOID (p) = get_mode_from_standard_moid (k, NEXT (p), A_TRUE);
+          return (MOID (p));
+        } else {
+          return (NULL);
+        }
       } else if (WHETHER (p, INDICANT)) {
-	MOID_T *q = get_mode_from_standard_moid (0, p, A_TRUE);
-	if (q != NULL) {
-	  MOID (p) = q;
-	} else {
-	  MOID (p) = add_mode (m, INDICANT, 0, p, NULL, NULL);
-	}
-	return (MOID (p));
+        MOID_T *q = get_mode_from_standard_moid (0, p, A_TRUE);
+        if (q != NULL) {
+          MOID (p) = q;
+        } else {
+          MOID (p) = add_mode (m, INDICANT, 0, p, NULL, NULL);
+        }
+        return (MOID (p));
       } else if (WHETHER (p, REF_SYMBOL)) {
-	MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
-	MOID (p) = add_mode (m, REF_SYMBOL, 0, p, new_one, NULL);
-	return (MOID (p));
+        MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
+        MOID (p) = add_mode (m, REF_SYMBOL, 0, p, new_one, NULL);
+        return (MOID (p));
       } else if (WHETHER (p, FLEX_SYMBOL)) {
-	MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
-	MOID (p) = add_mode (m, FLEX_SYMBOL, 0, NULL, new_one, NULL);
-	SLICE (MOID (p)) = SLICE (new_one);
-	return (MOID (p));
+        MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
+        MOID (p) = add_mode (m, FLEX_SYMBOL, 0, NULL, new_one, NULL);
+        SLICE (MOID (p)) = SLICE (new_one);
+        return (MOID (p));
       } else if (WHETHER (p, FORMAL_BOUNDS)) {
-	MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
-	MOID (p) = add_row (m, 1 + count_formal_bounds (SUB (p)), new_one, p);
-	return (MOID (p));
+        MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
+        MOID (p) = add_row (m, 1 + count_formal_bounds (SUB (p)), new_one, p);
+        return (MOID (p));
       } else if (WHETHER (p, BOUNDS)) {
-	MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
-	MOID (p) = add_row (m, count_bounds (SUB (p)), new_one, p);
-	return (MOID (p));
+        MOID_T *new_one = get_mode_from_declarer (NEXT (p), put_where);
+        MOID (p) = add_row (m, count_bounds (SUB (p)), new_one, p);
+        return (MOID (p));
       } else if (WHETHER (p, STRUCT_SYMBOL)) {
-	PACK_T *u = NULL;
-	get_mode_from_struct_field (NEXT (p), &u, m);
-	MOID (p) = add_mode (m, STRUCT_SYMBOL, count_pack_members (u), p, NULL, u);
-	return (MOID (p));
+        PACK_T *u = NULL;
+        get_mode_from_struct_field (NEXT (p), &u, m);
+        MOID (p) = add_mode (m, STRUCT_SYMBOL, count_pack_members (u), p, NULL, u);
+        return (MOID (p));
       } else if (WHETHER (p, UNION_SYMBOL)) {
-	PACK_T *u = NULL;
-	get_mode_from_union_pack (NEXT (p), &u, m);
-	MOID (p) = add_mode (m, UNION_SYMBOL, count_pack_members (u), p, NULL, u);
-	return (MOID (p));
+        PACK_T *u = NULL;
+        get_mode_from_union_pack (NEXT (p), &u, m);
+        MOID (p) = add_mode (m, UNION_SYMBOL, count_pack_members (u), p, NULL, u);
+        return (MOID (p));
       } else if (WHETHER (p, PROC_SYMBOL)) {
-	NODE_T *save = p;
-	PACK_T *u = NULL;
-	MOID_T *new_one;
-	if (WHETHER (NEXT (p), FORMAL_DECLARERS)) {
-	  get_mode_from_formal_pack (SUB (NEXT (p)), &u, m);
-	  FORWARD (p);
-	}
-	new_one = get_mode_from_declarer (NEXT (p), put_where);
-	MOID (p) = add_mode (m, PROC_SYMBOL, count_pack_members (u), save, new_one, u);
-	MOID (save) = MOID (p);
-	return (MOID (p));
+        NODE_T *save = p;
+        PACK_T *u = NULL;
+        MOID_T *new_one;
+        if (WHETHER (NEXT (p), FORMAL_DECLARERS)) {
+          get_mode_from_formal_pack (SUB (NEXT (p)), &u, m);
+          FORWARD (p);
+        }
+        new_one = get_mode_from_declarer (NEXT (p), put_where);
+        MOID (p) = add_mode (m, PROC_SYMBOL, count_pack_members (u), save, new_one, u);
+        MOID (save) = MOID (p);
+        return (MOID (p));
       } else {
-	return (NULL);
+        return (NULL);
       }
     }
   }
@@ -615,94 +615,85 @@ static MOID_T *get_mode_from_operator (NODE_T * p)
   return (MOID (p));
 }
 
-/*!
-\brief collect modes from denoters
-\param p position in syntax tree, should not be NULL
-\param sizety
-**/
-
 static void get_mode_from_denoter (NODE_T * p, int sizety)
 {
   if (p != NULL) {
     if (WHETHER (p, ROW_CHAR_DENOTER)) {
       if (strlen (SYMBOL (p)) == 1) {
-	MOID (p) = MODE (CHAR);
+        MOID (p) = MODE (CHAR);
       } else {
-	MOID (p) = MODE (ROW_CHAR);
+        MOID (p) = MODE (ROW_CHAR);
       }
     } else if (WHETHER (p, TRUE_SYMBOL) || WHETHER (p, FALSE_SYMBOL)) {
       MOID (p) = MODE (BOOL);
     } else if (WHETHER (p, INT_DENOTER)) {
       switch (sizety) {
       case 0:
-	{
-	  MOID (p) = MODE (INT);
-	  break;
-	}
+        {
+          MOID (p) = MODE (INT);
+          break;
+        }
       case 1:
-	{
-	  MOID (p) = MODE (LONG_INT);
-	  break;
-	}
+        {
+          MOID (p) = MODE (LONG_INT);
+          break;
+        }
       case 2:
-	{
-	  MOID (p) = MODE (LONGLONG_INT);
-	  break;
-	}
+        {
+          MOID (p) = MODE (LONGLONG_INT);
+          break;
+        }
       default:
-	{
-	  /* diagnostic_node (A_WARNING, p, ERROR_UNIMPLEMENTED_PRECISION, MODE (INT)); */
-	  MOID (p) = sizety > 0 ? MODE (LONGLONG_INT) : MODE (INT);
-	  break;
-	}
+        {
+          MOID (p) = sizety > 0 ? MODE (LONGLONG_INT) : MODE (INT);
+          break;
+        }
       }
     } else if (WHETHER (p, REAL_DENOTER)) {
       switch (sizety) {
       case 0:
-	{
-	  MOID (p) = MODE (REAL);
-	  break;
-	}
+        {
+          MOID (p) = MODE (REAL);
+          break;
+        }
       case 1:
-	{
-	  MOID (p) = MODE (LONG_REAL);
-	  break;
-	}
+        {
+          MOID (p) = MODE (LONG_REAL);
+          break;
+        }
       case 2:
-	{
-	  MOID (p) = MODE (LONGLONG_REAL);
-	  break;
-	}
+        {
+          MOID (p) = MODE (LONGLONG_REAL);
+          break;
+        }
       default:
-	{
-	  /* diagnostic_node (A_WARNING, p, ERROR_UNIMPLEMENTED_PRECISION, MODE (REAL)); */
-	  MOID (p) = sizety > 0 ? MODE (LONGLONG_REAL) : MODE (REAL);
-	  break;
-	}
+        {
+          MOID (p) = sizety > 0 ? MODE (LONGLONG_REAL) : MODE (REAL);
+          break;
+        }
       }
     } else if (WHETHER (p, BITS_DENOTER)) {
       switch (sizety) {
       case 0:
-	{
-	  MOID (p) = MODE (BITS);
-	  break;
-	}
+        {
+          MOID (p) = MODE (BITS);
+          break;
+        }
       case 1:
-	{
-	  MOID (p) = MODE (LONG_BITS);
-	  break;
-	}
+        {
+          MOID (p) = MODE (LONG_BITS);
+          break;
+        }
       case 2:
-	{
-	  MOID (p) = MODE (LONGLONG_BITS);
-	  break;
-	}
+        {
+          MOID (p) = MODE (LONGLONG_BITS);
+          break;
+        }
       default:
-	{
-	  /* diagnostic_node (A_WARNING, p, ERROR_UNIMPLEMENTED_PRECISION, MODE (BITS)); */
-	  MOID (p) = MODE (BITS);
-	  break;
-	}
+        {
+          MOID (p) = MODE (BITS);
+          break;
+        }
       }
     } else if (WHETHER (p, LONGETY) || WHETHER (p, SHORTETY)) {
       get_mode_from_denoter (NEXT (p), count_sizety (SUB (p)));
@@ -728,10 +719,10 @@ static void get_mode_from_modes (NODE_T * p, int attribute)
       MOID (q) = MODE (VOID);
     } else if (WHETHER (q, DECLARER)) {
       if (attribute != VARIABLE_DECLARATION) {
-	MOID (q) = get_mode_from_declarer (q, PUT_IN_THIS_LEVEL);
+        MOID (q) = get_mode_from_declarer (q, PUT_IN_THIS_LEVEL);
       } else {
-	MOID_T **m = &(SYMBOL_TABLE (q)->moids), *new_one = get_mode_from_declarer (q, PUT_IN_THIS_LEVEL);
-	MOID (q) = add_mode (m, REF_SYMBOL, 0, NULL, new_one, NULL);
+        MOID_T **m = &(SYMBOL_TABLE (q)->moids), *new_one = get_mode_from_declarer (q, PUT_IN_THIS_LEVEL);
+        MOID (q) = add_mode (m, REF_SYMBOL, 0, NULL, new_one, NULL);
       }
     } else if (WHETHER (q, ROUTINE_TEXT)) {
       MOID (q) = get_mode_from_routine_text (SUB (q));
@@ -739,21 +730,21 @@ static void get_mode_from_modes (NODE_T * p, int attribute)
       MOID (q) = get_mode_from_operator (SUB (q));
     } else if (WHETHER (q, LOC_SYMBOL) || WHETHER (q, HEAP_SYMBOL)) {
       if (attribute == GENERATOR) {
-	MOID_T **m = &(SYMBOL_TABLE (q)->moids), *new_one = get_mode_from_declarer (NEXT (q), PUT_IN_THIS_LEVEL);
-	MOID (NEXT (q)) = new_one;
-	MOID (q) = add_mode (m, REF_SYMBOL, 0, NULL, new_one, NULL);
+        MOID_T **m = &(SYMBOL_TABLE (q)->moids), *new_one = get_mode_from_declarer (NEXT (q), PUT_IN_THIS_LEVEL);
+        MOID (NEXT (q)) = new_one;
+        MOID (q) = add_mode (m, REF_SYMBOL, 0, NULL, new_one, NULL);
       }
     } else {
       if (attribute == DENOTER) {
-	get_mode_from_denoter (q, 0);
-	z = A_FALSE;
+        get_mode_from_denoter (q, 0);
+        z = A_FALSE;
       }
     }
   }
   if (z) {
     for (q = p; q != NULL; FORWARD (q)) {
       if (SUB (q) != NULL) {
-	get_mode_from_modes (SUB (q), ATTRIBUTE (q));
+        get_mode_from_modes (SUB (q), ATTRIBUTE (q));
       }
     }
   }
@@ -832,30 +823,30 @@ static BOOL_T whether_mode_has_void (MOID_T * m)
     } else if (z == STRUCT_SYMBOL) {
       PACK_T *p;
       for (p = PACK (m); p != NULL; FORWARD (p)) {
-	if (whether_mode_has_void (MOID (p))) {
-	  return (A_TRUE);
-	}
+        if (whether_mode_has_void (MOID (p))) {
+          return (A_TRUE);
+        }
       }
       return (A_FALSE);
     } else if (z == UNION_SYMBOL) {
       PACK_T *p;
       for (p = PACK (m); p != NULL; FORWARD (p)) {
-	if (MOID (p) != MODE (VOID) && whether_mode_has_void (MOID (p))) {
-	  return (A_TRUE);
-	}
+        if (MOID (p) != MODE (VOID) && whether_mode_has_void (MOID (p))) {
+          return (A_TRUE);
+        }
       }
       return (A_FALSE);
     } else if (z == PROC_SYMBOL) {
       PACK_T *p;
       for (p = PACK (m); p != NULL; FORWARD (p)) {
-	if (whether_mode_has_void (MOID (p))) {
-	  return (A_TRUE);
-	}
+        if (whether_mode_has_void (MOID (p))) {
+          return (A_TRUE);
+        }
       }
       if (SUB (m) == MODE (VOID)) {
-	return (A_FALSE);
+        return (A_FALSE);
       } else {
-	return (whether_mode_has_void (SUB (m)));
+        return (whether_mode_has_void (SUB (m)));
       }
     } else {
       return (A_FALSE);
@@ -874,10 +865,10 @@ static void check_relation_to_void (NODE_T * p)
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       MOID_T *m;
       for (m = SYMBOL_TABLE (SUB (p))->moids; m != NULL; FORWARD (m)) {
-	reset_postulates ();
-	if (NODE (m) != NULL && whether_mode_has_void (m)) {
-	  diagnostic_node (A_ERROR, NODE (m), ERROR_RELATED_MODES, m, MODE (VOID));
-	}
+        reset_postulates ();
+        if (NODE (m) != NULL && whether_mode_has_void (m)) {
+          diagnostic_node (A_ERROR, NODE (m), ERROR_RELATED_MODES, m, MODE (VOID));
+        }
       }
     }
     check_relation_to_void (SUB (p));
@@ -899,7 +890,7 @@ PACK_T *absorb_union_pack (PACK_T * t, int *modifications)
       PACK_T *s;
       (*modifications)++;
       for (s = PACK (MOID (t)); s != NULL; FORWARD (s)) {
-	add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
+        add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
       }
     } else {
       add_mode_to_pack (&z, MOID (t), NULL, NODE (t));
@@ -925,9 +916,9 @@ UNION (A, UNION (A, B)) = UNION (A, B).
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       MOID_T *m;
       for (m = SYMBOL_TABLE (SUB (p))->moids; m != NULL; FORWARD (m)) {
-	if (WHETHER (m, UNION_SYMBOL)) {
-	  PACK (m) = absorb_union_pack (PACK (m), modifications);
-	}
+        if (WHETHER (m, UNION_SYMBOL)) {
+          PACK (m) = absorb_union_pack (PACK (m), modifications);
+        }
       }
     }
     absorb_unions (SUB (p), modifications);
@@ -947,11 +938,11 @@ void contract_union (MOID_T * u, int *modifications)
     PACK_T *t = s;
     while (t != NULL) {
       if (NEXT (t) != NULL && MOID (NEXT (t)) == MOID (s)) {
-	(*modifications)++;
-	MOID (t) = MOID (t);
-	NEXT (t) = NEXT (NEXT (t));
+        (*modifications)++;
+        MOID (t) = MOID (t);
+        NEXT (t) = NEXT (NEXT (t));
       } else {
-	FORWARD (t);
+        FORWARD (t);
       }
     }
   }
@@ -972,9 +963,9 @@ static void contract_unions (NODE_T * p, int *modifications)
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       MOID_T *m;
       for (m = SYMBOL_TABLE (SUB (p))->moids; m != NULL; FORWARD (m)) {
-	if (WHETHER (m, UNION_SYMBOL) && EQUIVALENT (m) == NULL) {
-	  contract_union (m, modifications);
-	}
+        if (WHETHER (m, UNION_SYMBOL) && EQUIVALENT (m) == NULL) {
+          contract_union (m, modifications);
+        }
       }
     }
     contract_unions (SUB (p), modifications);
@@ -998,13 +989,13 @@ static BOOL_T cyclic_declaration (TAG_T * table, MOID_T * p)
     } else {
       TAG_T *z = table;
       while (z != NULL && (SYMBOL (NODE (z)) != SYMBOL (NODE (p)))) {
-	FORWARD (z);
+        FORWARD (z);
       }
       if (z == NULL) {
-	return (A_FALSE);
+        return (A_FALSE);
       } else {
-	make_postulate (&top_postulate, p, NULL);
-	return (cyclic_declaration (table, MOID (z)));
+        make_postulate (&top_postulate, p, NULL);
+        return (cyclic_declaration (table, MOID (z)));
       }
     }
   } else {
@@ -1025,10 +1016,10 @@ static void check_cyclic_modes (NODE_T * p)
       TAG_T *z, *table;
       table = SYMBOL_TABLE (SUB (p))->indicants;
       for (z = table; z != NULL; FORWARD (z)) {
-	reset_postulates ();
-	if (cyclic_declaration (table, MOID (z))) {
-	  diagnostic_node (A_ERROR, NODE (z), ERROR_CYCLIC_MODE, MOID (z));
-	}
+        reset_postulates ();
+        if (cyclic_declaration (table, MOID (z))) {
+          diagnostic_node (A_ERROR, NODE (z), ERROR_CYCLIC_MODE, MOID (z));
+        }
       }
     }
     check_cyclic_modes (SUB (p));
@@ -1073,18 +1064,18 @@ BOOL_T check_yin_yang (NODE_T * def, MOID_T * dec, BOOL_T yin, BOOL_T yang)
       return (A_TRUE);
     } else if (WHETHER (dec, INDICANT)) {
       if (SYMBOL (def) == SYMBOL (NODE (dec))) {
-	return (yin && yang);
+        return (yin && yang);
       } else {
-	TAG_T *s = SYMBOL_TABLE (def)->indicants;
-	BOOL_T z = A_TRUE;
-	while (s != NULL && z) {
-	  if (SYMBOL (NODE (s)) == SYMBOL (NODE (dec))) {
-	    z = A_FALSE;
-	  } else {
-	    FORWARD (s);
-	  }
-	}
-	return (s == NULL ? A_TRUE : check_yin_yang (def, MOID (s), yin, yang));
+        TAG_T *s = SYMBOL_TABLE (def)->indicants;
+        BOOL_T z = A_TRUE;
+        while (s != NULL && z) {
+          if (SYMBOL (NODE (s)) == SYMBOL (NODE (dec))) {
+            z = A_FALSE;
+          } else {
+            FORWARD (s);
+          }
+        }
+        return (s == NULL ? A_TRUE : check_yin_yang (def, MOID (s), yin, yang));
       }
     } else if (WHETHER (dec, REF_SYMBOL)) {
       return (yang ? A_TRUE : check_yin_yang (def, SUB (dec), A_TRUE, yang));
@@ -1096,9 +1087,9 @@ BOOL_T check_yin_yang (NODE_T * def, MOID_T * dec, BOOL_T yin, BOOL_T yang)
       return (check_yin_yang_pack (def, PACK (dec), yin, yang));
     } else if (WHETHER (dec, PROC_SYMBOL)) {
       if (PACK (dec) != NULL) {
-	return (A_TRUE);
+        return (A_TRUE);
       } else {
-	return (yang ? A_TRUE : check_yin_yang (def, SUB (dec), A_TRUE, yang));
+        return (yang ? A_TRUE : check_yin_yang (def, SUB (dec), A_TRUE, yang));
       }
     } else {
       return (A_FALSE);
@@ -1118,11 +1109,11 @@ static void check_well_formedness (NODE_T * p)
     if (WHETHER (p, DEFINING_INDICANT)) {
       MOID_T *z = NULL;
       if (NEXT (p) != NULL && NEXT (NEXT (p)) != NULL) {
-	z = MOID (NEXT (NEXT (p)));
+        z = MOID (NEXT (NEXT (p)));
       }
       if (!check_yin_yang (p, z, A_FALSE, A_FALSE)) {
-	diagnostic_node (A_ERROR, p, ERROR_NOT_WELL_FORMED);
-	z->well_formed = A_FALSE;
+        diagnostic_node (A_ERROR, p, ERROR_NOT_WELL_FORMED);
+        z->well_formed = A_FALSE;
       }
     }
   }
@@ -1274,7 +1265,7 @@ static void find_equivalent_moids (MOID_LIST_T * start, MOID_LIST_T * stop)
     BOOL_T z = A_TRUE;
     for (; p != NULL && z; FORWARD (p)) {
       if (EQUIVALENT (MOID (p)) != MOID (start)) {
-	z = !check_equivalent_moids (MOID (p), MOID (start));
+        z = !check_equivalent_moids (MOID (p), MOID (start));
       }
     }
   }
@@ -1292,10 +1283,10 @@ static void bind_indicants_to_tags (NODE_T * p)
       SYMBOL_TABLE_T *s = SYMBOL_TABLE (SUB (p));
       TAG_T *z;
       for (z = s->indicants; z != NULL; FORWARD (z)) {
-	TAG_T *y = find_tag_global (s, INDICANT, SYMBOL (NODE (z)));
-	if (y != NULL && NODE (y) != NULL) {
-	  MOID (z) = MOID (NEXT (NEXT (NODE (y))));
-	}
+        TAG_T *y = find_tag_global (s, INDICANT, SYMBOL (NODE (z)));
+        if (y != NULL && NODE (y) != NULL) {
+          MOID (z) = MOID (NEXT (NEXT (NODE (y))));
+        }
       }
     }
     bind_indicants_to_tags (SUB (p));
@@ -1314,14 +1305,14 @@ static void bind_indicants_to_modes (NODE_T * p)
       SYMBOL_TABLE_T *s = SYMBOL_TABLE (SUB (p));
       MOID_T *z;
       for (z = s->moids; z != NULL; FORWARD (z)) {
-	if (WHETHER (z, INDICANT)) {
-	  TAG_T *y = find_tag_global (s, INDICANT, SYMBOL (NODE (z)));
-	  if (y != NULL && NODE (y) != NULL) {
-	    EQUIVALENT (z) = MOID (NEXT (NEXT (NODE (y))));
-	  } else {
-	    diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_2, SYMBOL (NODE (z)));
-	  }
-	}
+        if (WHETHER (z, INDICANT)) {
+          TAG_T *y = find_tag_global (s, INDICANT, SYMBOL (NODE (z)));
+          if (y != NULL && NODE (y) != NULL) {
+            EQUIVALENT (z) = MOID (NEXT (NEXT (NODE (y))));
+          } else {
+            diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_2, SYMBOL (NODE (z)));
+          }
+        }
       }
     }
     bind_indicants_to_modes (SUB (p));
@@ -1396,13 +1387,13 @@ static void track_equivalent_tree (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     if (MOID (p) != NULL) {
       while (EQUIVALENT (MOID (p)) != NULL) {
-	MOID (p) = EQUIVALENT (MOID (p));
+        MOID (p) = EQUIVALENT (MOID (p));
       }
     }
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       if (SYMBOL_TABLE (SUB (p)) != NULL) {
-	track_equivalent_tags (SYMBOL_TABLE (SUB (p))->indicants);
-	moid_list_track_equivalent (SYMBOL_TABLE (SUB (p))->moids);
+        track_equivalent_tags (SYMBOL_TABLE (SUB (p))->indicants);
+        moid_list_track_equivalent (SYMBOL_TABLE (SUB (p))->moids);
       }
     }
     track_equivalent_tree (SUB (p));
@@ -1500,25 +1491,25 @@ static void make_structured_names (NODE_T * p, int *modifications)
       MOID_T **topmoid = &(symbol_table->moids);
       BOOL_T k = A_TRUE;
       while (k) {
-	MOID_T *m = symbol_table->moids;
-	k = A_FALSE;
-	for (; m != NULL; FORWARD (m)) {
-	  if (NAME (m) == NULL && WHETHER (m, REF_SYMBOL)) {
-	    if (WHETHER (SUB (m), STRUCT_SYMBOL)) {
-	      k = A_TRUE;
-	      (*modifications)++;
-	      NAME (m) = make_name_struct (SUB (m), topmoid);
-	    } else if (WHETHER (SUB (m), ROW_SYMBOL)) {
-	      k = A_TRUE;
-	      (*modifications)++;
-	      NAME (m) = make_name_row (SUB (m), topmoid);
-	    } else if (WHETHER (SUB (m), FLEX_SYMBOL)) {
-	      k = A_TRUE;
-	      (*modifications)++;
-	      NAME (m) = make_name_row (SUB (SUB (m)), topmoid);
-	    }
-	  }
-	}
+        MOID_T *m = symbol_table->moids;
+        k = A_FALSE;
+        for (; m != NULL; FORWARD (m)) {
+          if (NAME (m) == NULL && WHETHER (m, REF_SYMBOL)) {
+            if (WHETHER (SUB (m), STRUCT_SYMBOL)) {
+              k = A_TRUE;
+              (*modifications)++;
+              NAME (m) = make_name_struct (SUB (m), topmoid);
+            } else if (WHETHER (SUB (m), ROW_SYMBOL)) {
+              k = A_TRUE;
+              (*modifications)++;
+              NAME (m) = make_name_row (SUB (m), topmoid);
+            } else if (WHETHER (SUB (m), FLEX_SYMBOL)) {
+              k = A_TRUE;
+              (*modifications)++;
+              NAME (m) = make_name_row (SUB (SUB (m)), topmoid);
+            }
+          }
+        }
       }
     }
     make_structured_names (SUB (p), modifications);
@@ -1612,34 +1603,34 @@ static void make_multiple_modes (NODE_T * p, int *modifications)
       MOID_T **top = &symbol_table->moids;
       BOOL_T z = A_TRUE;
       while (z) {
-	MOID_T *q = symbol_table->moids;
-	z = A_FALSE;
-	for (; q != NULL; FORWARD (q)) {
-	  if (MULTIPLE (q) != NULL) {
-	    ;
-	  } else if (WHETHER (q, REF_SYMBOL)) {
-	    if (MULTIPLE (SUB (q)) != NULL) {
-	      (*modifications)++;
-	      MULTIPLE (q) = make_name_struct (MULTIPLE (SUB (q)), top);
-	    }
-	  } else if (WHETHER (q, ROW_SYMBOL)) {
-	    if (WHETHER (SUB (q), STRUCT_SYMBOL)) {
-	      z = A_TRUE;
-	      (*modifications)++;
-	      MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIMENSION (q));
-	    }
-	  } else if (WHETHER (q, FLEX_SYMBOL)) {
-	    if (SUB (SUB (q)) == NULL) {
-	      (*modifications)++;	/* as yet unresolved FLEX INDICANT. */
-	    } else {
-	      if (WHETHER (SUB (SUB (q)), STRUCT_SYMBOL)) {
-		z = A_TRUE;
-		(*modifications)++;
-		MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIMENSION (SUB (q)));
-	      }
-	    }
-	  }
-	}
+        MOID_T *q = symbol_table->moids;
+        z = A_FALSE;
+        for (; q != NULL; FORWARD (q)) {
+          if (MULTIPLE (q) != NULL) {
+            ;
+          } else if (WHETHER (q, REF_SYMBOL)) {
+            if (MULTIPLE (SUB (q)) != NULL) {
+              (*modifications)++;
+              MULTIPLE (q) = make_name_struct (MULTIPLE (SUB (q)), top);
+            }
+          } else if (WHETHER (q, ROW_SYMBOL)) {
+            if (WHETHER (SUB (q), STRUCT_SYMBOL)) {
+              z = A_TRUE;
+              (*modifications)++;
+              MULTIPLE (q) = make_multiple_struct (SUB (q), top, DIMENSION (q));
+            }
+          } else if (WHETHER (q, FLEX_SYMBOL)) {
+            if (SUB (SUB (q)) == NULL) {
+              (*modifications)++;       /* as yet unresolved FLEX INDICANT. */
+            } else {
+              if (WHETHER (SUB (SUB (q)), STRUCT_SYMBOL)) {
+                z = A_TRUE;
+                (*modifications)++;
+                MULTIPLE (q) = make_flex_multiple_struct (SUB (SUB (q)), top, DIMENSION (SUB (q)));
+              }
+            }
+          }
+        }
       }
     }
     make_multiple_modes (SUB (p), modifications);
@@ -1675,7 +1666,7 @@ static BOOL_T whether_mode_has_flex_2 (MOID_T * m)
       PACK_T *t = PACK (m);
       BOOL_T z = A_FALSE;
       for (; t != NULL && !z; FORWARD (t)) {
-	z |= whether_mode_has_flex_2 (MOID (t));
+        z |= whether_mode_has_flex_2 (MOID (t));
       }
       return (z);
     } else {
@@ -1722,7 +1713,7 @@ static void make_deflexed_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p)
 
 static MOID_T *make_deflexed (MOID_T * m, MOID_T ** p)
 {
-  if (DEFLEXED (m) != NULL) {	/* Keep this condition on top. */
+  if (DEFLEXED (m) != NULL) {   /* Keep this condition on top. */
     return (DEFLEXED (m));
   }
   if (WHETHER (m, REF_SYMBOL)) {
@@ -1793,23 +1784,23 @@ static void make_deflexed_modes (NODE_T * p, int *modifications)
       MOID_T *m, **top = &s->moids;
       for (m = s->moids; m != NULL; FORWARD (m)) {
 /* 'Complete' deflexing. */
-	if (!m->has_flex) {
-	  m->has_flex = whether_mode_has_flex (m);
-	}
-	if (m->has_flex && DEFLEXED (m) == NULL) {
-	  (*modifications)++;
-	  DEFLEXED (m) = make_deflexed (m, top);
-	  ABNORMAL_END (whether_mode_has_flex (DEFLEXED (m)), "deflexing failed", moid_to_string (DEFLEXED (m), 80));
-	}
+        if (!m->has_flex) {
+          m->has_flex = whether_mode_has_flex (m);
+        }
+        if (m->has_flex && DEFLEXED (m) == NULL) {
+          (*modifications)++;
+          DEFLEXED (m) = make_deflexed (m, top);
+          ABNORMAL_END (whether_mode_has_flex (DEFLEXED (m)), "deflexing failed", moid_to_string (DEFLEXED (m), MOID_WIDTH));
+        }
 /* 'Light' deflexing needed for trims. */
-	if (TRIM (m) == NULL && WHETHER (m, FLEX_SYMBOL)) {
-	  (*modifications)++;
-	  TRIM (m) = SUB (m);
-	} else if (TRIM (m) == NULL && WHETHER (m, REF_SYMBOL) && WHETHER (SUB (m), FLEX_SYMBOL)) {
-	  (*modifications)++;
-	  add_mode (top, REF_SYMBOL, DIMENSION (m), NULL, SUB (SUB (m)), NULL);
-	  TRIM (m) = *top;
-	}
+        if (TRIM (m) == NULL && WHETHER (m, FLEX_SYMBOL)) {
+          (*modifications)++;
+          TRIM (m) = SUB (m);
+        } else if (TRIM (m) == NULL && WHETHER (m, REF_SYMBOL) && WHETHER (SUB (m), FLEX_SYMBOL)) {
+          (*modifications)++;
+          add_mode (top, REF_SYMBOL, DIMENSION (m), NULL, SUB (SUB (m)), NULL);
+          TRIM (m) = *top;
+        }
       }
     }
     make_deflexed_modes (SUB (p), modifications);
@@ -1838,7 +1829,7 @@ static BOOL_T whether_mode_has_ref_2 (MOID_T * m)
       PACK_T *t = PACK (m);
       BOOL_T z = A_FALSE;
       for (; t != NULL && !z; FORWARD (t)) {
-	z |= whether_mode_has_ref_2 (MOID (t));
+        z |= whether_mode_has_ref_2 (MOID (t));
       }
       return (z);
     } else {
@@ -1922,7 +1913,7 @@ static void mark_row_modes (NODE_T * p)
     if (SUB (p) != NULL && whether_new_lexical_level (p)) {
       MOID_T *m;
       for (m = SYMBOL_TABLE (SUB (p))->moids; m != NULL; FORWARD (m)) {
-	m->has_rows = whether_mode_has_row (m);
+        m->has_rows = whether_mode_has_row (m);
       }
     }
     mark_row_modes (SUB (p));
@@ -1970,7 +1961,7 @@ static int expand_contract_moids (NODE_T * top_node, int cycle_no)
 {
   int modifications = 0;
   reset_postulates ();
-  if (cycle_no >= 0) {		/* Just experimental, might remove. */
+  if (cycle_no >= 0) {          /* Just experimental, might remove. */
 /* Calculate derived modes. */
     absorb_unions (top_node, &modifications);
     contract_unions (top_node, &modifications);
@@ -2029,7 +2020,7 @@ void set_up_mode_table (NODE_T * top_node)
       int cycle = 0;
       track_equivalent_standard_modes ();
       while (expand_contract_moids (top_node, cycle) > 0 || cycle <= 1) {
-	ABNORMAL_END (cycle++ > 16, "apparent indefinite loop in set_up_mode_table", NULL);
+        ABNORMAL_END (cycle++ > 16, "apparent indefinite loop in set_up_mode_table", NULL);
       }
 /* Set standard modes. */
       track_equivalent_standard_modes ();
@@ -2065,10 +2056,10 @@ static void max_unitings_to_simplout (NODE_T * p, int *max)
     if (WHETHER (p, UNITING) && MOID (p) == MODE (SIMPLOUT)) {
       MOID_T *q = MOID (SUB (p));
       if (q != MODE (SIMPLOUT)) {
-	int size = moid_size (q);
-	if (size > *max) {
-	  *max = size;
-	}
+        int size = moid_size (q);
+        if (size > *max) {
+          *max = size;
+        }
       }
     }
     max_unitings_to_simplout (SUB (p), max);
@@ -2212,7 +2203,7 @@ static int moid_size_2 (MOID_T * p)
     int size = 0;
     for (; z != NULL; FORWARD (z)) {
       if (moid_size (MOID (z)) > size) {
-	size = moid_size (MOID (z));
+        size = moid_size (MOID (z));
       }
     }
     return (SIZE_OF (A68_POINTER) + size);
@@ -2253,9 +2244,9 @@ int moid_size (MOID_T * p)
 static void moid_to_string_3 (char *dst, char *str, int w)
 {
   if (w >= (int) strlen (str)) {
-    strcat (dst, str);
+    bufcat (dst, str, BUFFER_SIZE);
   } else {
-    strcat (dst, "..");
+    bufcat (dst, "..", BUFFER_SIZE);
   }
 }
 
@@ -2274,33 +2265,33 @@ static void pack_to_string (char *b, PACK_T * p, int w, BOOL_T text)
     while (p != NULL && w > 0) {
       int l = (int) strlen (b);
       if (text && TEXT (p) != NULL && last != NULL && MOID (p) == last) {
-	strcat (b, TEXT (p));
-	w -= (int) strlen (b) - l;
+        bufcat (b, TEXT (p), BUFFER_SIZE);
+        w -= (int) strlen (b) - l;
       } else {
-	if (w > (int) strlen ("..")) {
-	  moid_to_string_2 (b, MOID (p), w);
-	  if (text && TEXT (p) != NULL) {
-	    strcat (b, " ");
-	    strcat (b, TEXT (p));
-	  }
-	  w -= (int) strlen (b) - l;
-	} else {
-	  strcat (b, "..");
-	  w = 0;
-	}
+        if (w > (int) strlen ("..")) {
+          moid_to_string_2 (b, MOID (p), w);
+          if (text && TEXT (p) != NULL) {
+            bufcat (b, " ", BUFFER_SIZE);
+            bufcat (b, TEXT (p), BUFFER_SIZE);
+          }
+          w -= (int) strlen (b) - l;
+        } else {
+          bufcat (b, "..", BUFFER_SIZE);
+          w = 0;
+        }
       }
       last = MOID (p);
       FORWARD (p);
       if (p != NULL) {
-	strcat (b, ", ");
-	if (w <= (int) strlen (", ") + (int) strlen ("..")) {
-	  strcat (b, "..");
-	  w = 0;
-	}
+        bufcat (b, ", ", BUFFER_SIZE);
+        if (w <= (int) strlen (", ") + (int) strlen ("..")) {
+          bufcat (b, "..", BUFFER_SIZE);
+          w = 0;
+        }
       }
     }
   } else {
-    strcat (b, "..");
+    bufcat (b, "..", BUFFER_SIZE);
   }
 }
 
@@ -2314,11 +2305,11 @@ static void pack_to_string (char *b, PACK_T * p, int w, BOOL_T text)
 static void moid_to_string_2 (char *b, MOID_T * n, int w)
 {
   if (n == NULL) {
-    strcat (b, "NULL");
+    bufcat (b, "NULL", BUFFER_SIZE);
     return;
   }
   if (whether_postulated (postulates, n)) {
-    strcat (b, "\"SELF\"");
+    bufcat (b, "\"SELF\"", BUFFER_SIZE);
   } else if (n == MODE (HIP)) {
     moid_to_string_3 (b, "HIP", w);
   } else if (n == MODE (ERROR)) {
@@ -2351,69 +2342,69 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w)
     int i = 1;
     for (; i <= abs (n->dimensions) && w > 0; i++) {
       if (n->dimensions < 0) {
-	if (w >= (int) strlen ("SHORT ..")) {
-	  strcat (b, "SHORT ");
-	  w -= (int) strlen ("SHORT ");
-	} else {
-	  strcat (b, "..");
-	  w = 0;
-	}
+        if (w >= (int) strlen ("SHORT ..")) {
+          bufcat (b, "SHORT ", BUFFER_SIZE);
+          w -= (int) strlen ("SHORT ");
+        } else {
+          bufcat (b, "..", BUFFER_SIZE);
+          w = 0;
+        }
       } else if (w >= (int) strlen ("LONG ..")) {
-	strcat (b, "LONG ");
-	w -= (int) strlen ("LONG ");
+        bufcat (b, "LONG ", BUFFER_SIZE);
+        w -= (int) strlen ("LONG ");
       } else {
-	strcat (b, "..");
-	w = 0;
+        bufcat (b, "..", BUFFER_SIZE);
+        w = 0;
       }
     }
     moid_to_string_3 (b, SYMBOL (NODE (n)), w);
   } else if (WHETHER (n, REF_SYMBOL)) {
     if (w >= (int) strlen ("REF ..")) {
-      strcat (b, "REF ");
+      bufcat (b, "REF ", BUFFER_SIZE);
       moid_to_string_2 (b, SUB (n), w - (int) strlen ("REF .."));
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
   } else if (WHETHER (n, FLEX_SYMBOL)) {
     if (w >= (int) strlen ("FLEX ..")) {
-      strcat (b, "FLEX ");
+      bufcat (b, "FLEX ", BUFFER_SIZE);
       moid_to_string_2 (b, SUB (n), w - (int) strlen ("FLEX .."));
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
   } else if (WHETHER (n, ROW_SYMBOL)) {
     int j = (int) strlen ("[] ..") + 2 * (n->dimensions - 1);
     if (w >= j) {
       int i;
-      strcat (b, "[");
+      bufcat (b, "[", BUFFER_SIZE);
       for (i = 1; i < n->dimensions; i++) {
-	strcat (b, ", ");
+        bufcat (b, ", ", BUFFER_SIZE);
       }
-      strcat (b, "] ");
+      bufcat (b, "] ", BUFFER_SIZE);
       moid_to_string_2 (b, SUB (n), w - j);
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
   } else if (WHETHER (n, STRUCT_SYMBOL)) {
     POSTULATE_T *save = postulates;
     make_postulate (&postulates, n, NULL);
     if (w >= (int) strlen ("STRUCT (..)")) {
-      strcat (b, "STRUCT (");
+      bufcat (b, "STRUCT (", BUFFER_SIZE);
       pack_to_string (b, PACK (n), w - (int) strlen ("STRUCT (..)"), A_TRUE);
-      strcat (b, ")");
+      bufcat (b, ")", BUFFER_SIZE);
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
     postulates = save;
   } else if (WHETHER (n, UNION_SYMBOL)) {
     POSTULATE_T *save = postulates;
     make_postulate (&postulates, n, NULL);
     if (w >= (int) strlen ("UNION (..)")) {
-      strcat (b, "UNION (");
+      bufcat (b, "UNION (", BUFFER_SIZE);
       pack_to_string (b, PACK (n), w - (int) strlen ("UNION (..)"), A_FALSE);
-      strcat (b, ")");
+      bufcat (b, ")", BUFFER_SIZE);
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
     postulates = save;
   } else if (WHETHER (n, PROC_SYMBOL)) {
@@ -2421,40 +2412,42 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w)
     make_postulate (&postulates, n, NULL);
     if (PACK (n) != NULL) {
       if (w >= (int) strlen ("PROC (..) ..")) {
-	strcat (b, "PROC (");
-	pack_to_string (b, PACK (n), w - (int) strlen ("PROC (..) .."), A_FALSE);
-	strcat (b, ") ");
-	moid_to_string_2 (b, SUB (n), w - (int) strlen (b));
+        bufcat (b, "PROC (", BUFFER_SIZE);
+        pack_to_string (b, PACK (n), w - (int) strlen ("PROC (..) .."), A_FALSE);
+        bufcat (b, ") ", BUFFER_SIZE);
+        moid_to_string_2 (b, SUB (n), w - (int) strlen (b));
       } else {
-	strcat (b, "..");
+        bufcat (b, "..", BUFFER_SIZE);
       }
     } else {
       if (w >= (int) strlen ("PROC ..")) {
-	strcat (b, "PROC ");
-	moid_to_string_2 (b, SUB (n), w - (int) strlen ("PROC .."));
+        bufcat (b, "PROC ", BUFFER_SIZE);
+        moid_to_string_2 (b, SUB (n), w - (int) strlen ("PROC .."));
       } else {
-	strcat (b, "..");
+        bufcat (b, "..", BUFFER_SIZE);
       }
     }
     postulates = save;
   } else if (WHETHER (n, SERIES_MODE)) {
     if (w >= (int) strlen ("(..)")) {
-      strcat (b, "(");
+      bufcat (b, "(", BUFFER_SIZE);
       pack_to_string (b, PACK (n), w - (int) strlen ("(..)"), A_FALSE);
-      strcat (b, ")");
+      bufcat (b, ")", BUFFER_SIZE);
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
   } else if (WHETHER (n, STOWED_MODE)) {
     if (w >= (int) strlen ("(..)")) {
-      strcat (b, "(");
+      bufcat (b, "(", BUFFER_SIZE);
       pack_to_string (b, PACK (n), w - (int) strlen ("(..)"), A_FALSE);
-      strcat (b, ")");
+      bufcat (b, ")", BUFFER_SIZE);
     } else {
-      strcat (b, "..");
+      bufcat (b, "..", BUFFER_SIZE);
     }
   } else {
-    strcat (b, "???");
+    char str[SMALL_BUFFER_SIZE];
+    snprintf (str, SMALL_BUFFER_SIZE, "\\%d", ATTRIBUTE (n));
+    bufcat (b, str, BUFFER_SIZE);
   }
 }
 
@@ -2476,7 +2469,7 @@ char *moid_to_string (MOID_T * n, int w)
   if (n != NULL) {
     moid_to_string_2 (a, n, w);
   } else {
-    strcat (a, "NULL");
+    bufcat (a, "NULL", BUFFER_SIZE);
   }
   return (new_string (a));
 }
