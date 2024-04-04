@@ -426,11 +426,11 @@ diagnostic is not as important as accurately indicating *were* the problem is!
       }
 /* Add initiation. */
       if (count == 0) {
-        bufcat (buffer, "Construct starts with", BUFFER_SIZE);
+        bufcat (buffer, "the construct starting with", BUFFER_SIZE);
       } else if (count == 1) {
-        bufcat (buffer, " which is followed by", BUFFER_SIZE);
+        bufcat (buffer, " followed by", BUFFER_SIZE);
       } else if (count == 2) {
-        bufcat (buffer, " and than", BUFFER_SIZE);
+        bufcat (buffer, " and then", BUFFER_SIZE);
       } else if (count >= 3) {
         bufcat (buffer, ",", BUFFER_SIZE);
       }
@@ -3495,7 +3495,7 @@ static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
         diagnostic_node (A_SYNTAX_ERROR, w, ERROR_SYNTAX_EXPECTED, expect, NULL);
       }
     } else {
-      diagnostic_node (A_SYNTAX_ERROR, w, ERROR_INVALID_SEQUENCE, seq, NULL);
+      diagnostic_node (A_SYNTAX_ERROR, w, ERROR_INVALID_SEQUENCE, expect, seq, NULL);
     }
     if (error_count >= MAX_ERRORS) {
       longjmp (bottom_up_crash_exit, 1);

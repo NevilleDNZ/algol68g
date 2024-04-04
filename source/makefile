@@ -1,11 +1,12 @@
-# ./source/makefile generated on Wed Apr 11 20:55:02 NZST 2007 by nevilled.
+# ./source/makefile generated on Fri Dec 29 10:31:51 NZDT 2006 by root.
 SHELL=/bin/sh
-USR_BIN=/home/nevilled/bin
-USR_LIB=/usr/lib
-USR_INC=/usr/include
+USR_BIN=/usr/local/bin
+USR_LIB=/usr/local/lib
+USR_INC=/usr/local/include
 CC=gcc
-POSIX_THREADS_LIBS=-lpthread
-POSIX_THREADS_FLAG=-DHAVE_POSIX_THREADS
+CURSES_LIBS=-lcurses
+CURSES_FLAG=-DHAVE_CURSES
+TERMINFO_FLAG=-DHAVE_TERMINFO
 HTTP_FLAG=-DHAVE_HTTP
 REGEX_FLAG=-DHAVE_REGEX
 IEEE_754_FLAG=-DHAVE_IEEE_754

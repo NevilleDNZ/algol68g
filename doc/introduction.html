@@ -28,7 +28,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-Documentation for Algol 68 Genie Mark 10
+Documentation for Algol 68 Genie Mark 10.1
 </td>
 </table>
 
@@ -36,7 +36,7 @@ Documentation for Algol 68 Genie Mark 10
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 10</h2>
+<h2>Algol 68 Genie Mark 10.1</h2>
 <h3>An Algol 68 interpreter</h3>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
 &middot;&nbsp;<a href="#obtaining">Obtaining Algol 68 Genie</a><br>
@@ -62,7 +62,7 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10</b>
+<b>Algol68G Mark 10.1</b>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
 &nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
@@ -96,11 +96,10 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 Algol 68 is a rather lean, orthogonal general-purpose programming language, that is a beautiful means for denoting algorithms.
 <p>
 <i>Algol 68 Genie</i> (Algol68G) is an <a href="description.html">Algol 68 interpreter</a>.
-It can be used for executing Algol 68 programs or scripts when execution time is not of primary importance; Algol68G is pedantic rather than fast.
+It can be used for executing Algol 68 programs or scripts.
 <p>
-Algol68G is free software under the GNU General Public License.
-The current version is Mark 10, released in August 2006.
-You can <a href="introduction.html#obtaining">download</a> it from this page.
+The current version of Algol 68 Genie is Mark 10.1, released in December 2006.
+You can download it from this page.
 </p>
 
 <br>
@@ -114,16 +113,20 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <ul>
 <li>
 Download 
-<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk10/algol68g-mk10.tar.gz">Algol68G Mark 10</a>, a gzipped tar archive containing C source code and documentation. 
+<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk10.1/algol68g-mk10.1.tar.gz">Algol68G Mark 10.1</a>, a gzipped tar archive containing C source code and documentation. 
 
 <p>
 <a href="install.html">Here</a> are instructions for installation of Algol68G on UNIX, Linux or MacOS X.
 
 <p>
-The archive includes <code>a68g.exe</code>, a WIN32 executable of Algol 68 Genie Mark 10, which has been built and tested on Microsoft Windows XP and can be run from <code>cmd.exe</code>. This executable has been linked to the GNU Plotting Utilities and the GNU Scientific Library.
+The archive includes <code>a68g10.1.exe</code>, a WIN32 executable of Algol 68 Genie Mark 10.1, which has been built and tested on Microsoft Windows XP and can for instance be run from <code>cmd.exe</code>. This executable has been linked to the GNU Plotting Utilities and the GNU Scientific Library.
 
 <p>
-Algol68G Mark 10 is regression-tested using a test set of more than 1100 programs. 
+Algol 68 Genie Mark 10.1 was developed and regression tested on OpenBSD 4.0 (P4, gcc 3.3.5),
+and was regression tested on MacOS 10.4 (G4, gcc 4.0.1),
+Windows XP (P4, gcc 3.4.2) and 
+Slackware Linux 8.0 (P4, gcc 2.95.3).
+The Algol 68 Genie test set comprises more than 1150 programs and includes the MC test set.
 
 <li>For Apple's MacOS X Darwin environment, Norman Hardy has posted a 
 <a href="http://www.cap-lore.com/Languages/A68/Build.html">binary package</a>.
@@ -181,10 +184,12 @@ Richard O'Keefe,
 France Pahlplatz, 
 Steven Pemberton,
 Richard Pinch,
+Rubin Simons,
 Robert Uzgalis,
 Merijn Vogel,
 Theo Vosse, 
-Andy Walker 
+Andy Walker,
+Jim Watt
 </i>
 and
 <i>
@@ -197,10 +202,8 @@ Algol68G would not be what it is without their help.
 <br>
 <h3><a name="previous"></a>Available releases</h3>
 <p>
+<li><a href="../../algol68g-mk10.1/doc/introduction.html">Algol 68 Genie Mark 10.1</a>
 <li><a href="../../algol68g-mk10/doc/introduction.html">Algol 68 Genie Mark 10</a>
-<li><a href="../../algol68g-mk9.2/doc/introduction.html">Algol 68 Genie Mark 9.2</a>
-<li><a href="../../algol68g-mk9.1/doc/introduction.html">Algol 68 Genie Mark 9.1</a>
-<li><a href="../../algol68g-mk9/doc/introduction.html">Algol 68 Genie Mark 9</a>
 </p>
 
 <br>
@@ -220,6 +223,18 @@ Algol68G would not be what it is without their help.
 </tr>
 <tr bgcolor="#f0f0f0">
 <td valign=top>
+Mark 10.1
+</td>
+<td valign=top>
+December 2006
+</td>
+<td valign=top>
+Improves interpreter efficiency<br>
+Fixes minor bugs
+</td>
+</tr>
+<tr bgcolor="#f0f0f0">
+<td valign=top>
 Mark 10
 </td>
 <td valign=top>
@@ -231,7 +246,7 @@ Adds procedures <code>arctan2</code>, <code>long arctan2</code> and <code>long l
 Adds procedure <code>execve output</code><br>
 Improves diagnostics<br>
 Adds option [NO]BACKTRACE<br>
-Fixes small bugs
+Fixes minor bugs
 </td>
 </tr>
 <tr bgcolor="#f0f0f0">
@@ -438,36 +453,16 @@ From November 2001 onward
 </tr>
 </table>
 
-<hr color=#f0f0f0>
-<p>
-<table width=100%>
-<tr width=100%>
-<td>
-Algol 68 Genie Mark 10 was developed on OpenBSD
-</td>
-<td>
-<a href="http://www.openbsd.org"><img src="ppuf100X91.gif" align=right border=0></a>
-</td>
-</tr>
-</table>
-
 <!-- Footer -->
 <hr color=#f0f0f0>
 <p>
-<table width="100%" border=0 cellspacing=0 cellpadding=0>
-<td width="50%" valign=top bgcolor="white">
-<font color="black">
-Copyright &copy; 2001-2006 J. Marcel van der Veer.
-</font>
-</td>
-<td width="50%" align=right valign=top bgcolor="white">
-<font color="black">
-Algol 68 Genie Mark 10 (August 2006)
-</font>
-</td>
-</table>
+<small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 10.1 (December 2006)
+</small>
 </p>
 <hr color=#f0f0f0>
+
 </body>
 </html>
 

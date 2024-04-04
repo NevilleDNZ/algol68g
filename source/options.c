@@ -441,6 +441,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         module->options.regression_test = A_TRUE;
         gnu_diags = A_FALSE;
         module->options.time_limit = 10;
+        term_width = MAX_LINE_WIDTH;
       }
 /* NOWARNINGS switches warnings off. */
       else if (eq (module, p, "NOWarnings")) {

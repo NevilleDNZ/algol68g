@@ -92,7 +92,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_INVALID_PARAMETER "invalid parameter"
 #define ERROR_INVALID_PRIORITY "invalid priority declaration"
 #define ERROR_INVALID_RADIX "invalid radix D"
-#define ERROR_INVALID_SEQUENCE "U"
+#define ERROR_INVALID_SEQUENCE "assumed A, which is not consistent with U"
 #define ERROR_INVALID_SIZE "object of invalid size"
 #define ERROR_IN_DENOTER "error in M denoter"
 #define ERROR_KEYWORD "check for missing or unmatched keyword in clause starting at S"
@@ -141,7 +141,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_REQUIRE_THREADS "parallel clause requires posix threads"
 #define ERROR_SCOPE_DYNAMIC_0 "value is exported out of its scope"
 #define ERROR_SCOPE_DYNAMIC_1 "M value is exported out of its scope"
-#define ERROR_SCOPE_DYNAMIC_2 "M %s is exported out of its scope"
+#define ERROR_SCOPE_DYNAMIC_2 "M value from %s is exported out of its scope"
 #define ERROR_SOURCE_FILE_OPEN "error while opening source file"
 #define ERROR_SPECIFICATION (errno == 0 ? NULL : strerror (errno))
 #define ERROR_STACK_OVERFLOW "stack overflow"

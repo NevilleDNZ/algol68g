@@ -28,7 +28,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-Documentation for Algol 68 Genie Mark 10
+Documentation for Algol 68 Genie Mark 10.1
 </td>
 </table>
 
@@ -48,7 +48,7 @@ Documentation for Algol 68 Genie Mark 10
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10</b>
+<b>Algol68G Mark 10.1</b>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
 &nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
@@ -77,7 +77,7 @@ Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
 
-<h3>Algol 68 Genie Mark 10</h3>
+<h3>Algol 68 Genie Mark 10.1</h3>
 <p>
 Algol 68 Genie (Algol68G) is free software distributed under GNU GPL. This software is 
 distributed in the hope that it will be useful, but without any warranty. 
@@ -91,8 +91,8 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <p>
 The following list of commands may suffice to help you on your way (if not, follow the detailed instructions in next paragraphs):
 <pre>
-tar -xzf algol68g-mk10.tar.gz
-cd algol68g-mk10
+tar -xzf algol68g-mk10.1.tar.gz
+cd algol68g-mk10.1
 ./configure -O --threads
 make depend
 make
@@ -117,7 +117,7 @@ If available on your system, Algol68G can use next libraries to extend its funct
 <li><a href="http://www.postgresql.org/">PostgreSQL</a> for writing PostgreSQL database client applications
 </ul>
 <p>
-Algol 68 Genie Mark 10 was developed using next versions of optional libraries:
+Algol 68 Genie Mark 10.1 was developed using next versions of optional libraries:
 <ul>
 <li><a href="http://www.gnu.org/software/plotutils/">GNU plotutils</a> version 2.5
 <li><a href="http://www.gnu.org/software/gsl/">GNU scientific library</a> version 1.8
@@ -137,7 +137,7 @@ Algol68G builds without support for absent libraries.
 For a generic installation, follow next instructions.
 For customised installation, refer to the INSTALL file in the distribution.
 <p>
-Suppose you are user <code>algol68g</code> at your GNU/Linux machine, and your prompt indicates your present working directory in this way:
+Suppose you are user <code>algol68g</code> and your prompt indicates your present working directory in this way:
 <pre>
 /home/algol68g> 
 </pre>
@@ -146,20 +146,20 @@ Suppose you are user <code>algol68g</code> at your GNU/Linux machine, and your p
 <p>
 <li>Unpack the distribution by typing:
 <pre>
-/home/algol68g> tar -xzf algol68g-mk10.tar.gz
+/home/algol68g> tar -xzf algol68g-mk10.1.tar.gz
 </pre>
 
 <h4>Step 2: Configuring</h4>
 <p>
 <li>Make the distribution directory the present working directory by typing:
 <pre>
-/home/algol68g> cd algol68g-mk10
+/home/algol68g> cd algol68g-mk10.1
 </pre>
 
 <p>
 <li>In the distribution directory type:
 <pre>
-/home/algol68g/algol68g-mk10> ./configure
+/home/algol68g/algol68g-mk10.1> ./configure
 </pre>
 
 <p>
@@ -169,7 +169,7 @@ The configure script accepts various
 options. For an overview of options, type:
 <p>
 <pre>
-/home/algol68g/algol68g-mk10> ./configure --help
+/home/algol68g/algol68g-mk10.1> ./configure --help
 </pre>
 
 <p>
@@ -179,7 +179,7 @@ assume you are using <code>gcc</code>, <code>gdb</code> and <code>gprof</code>.
 If you are interested in Algol68G's parallel clause, you need to 
 build using POSIX threads. To build with POSIX threads, type:
 <pre>
-/home/algol68g/algol68g-mk10> ./configure --threads
+/home/algol68g/algol68g-mk10.1> ./configure --threads
 </pre>
 
 <h4>Step 3: Building</h4>
@@ -195,7 +195,7 @@ can be safely ignored.
 <p>
 <li>Type:
 <pre>
-/home/algol68g/algol68g-mk10> make depend
+/home/algol68g/algol68g-mk10.1> make depend
 </pre>
 
 <p>
@@ -204,13 +204,13 @@ This will register dependencies needed to build Algol68G.
 <p>
 <li>If you do not want to install Algol68G for all users, type:
 <pre>
-/home/algol68g/algol68g-mk10> make all
+/home/algol68g/algol68g-mk10.1> make all
 </pre>
 
 <p>
 or, simply:
 <pre>
-/home/algol68g/algol68g-mk10> make
+/home/algol68g/algol68g-mk10.1> make
 </pre>
 
 <p>
@@ -218,7 +218,7 @@ The executable <code>a68g</code> will be put in the present working directory.
 <p>
 If you want to install Algol68G for all users on your system, type:
 <pre>
-/home/algol68g/algol68g-mk10> make install
+/home/algol68g/algol68g-mk10.1> make install
 </pre>
 
 <p>
@@ -229,39 +229,39 @@ are tried.
 <p>
 <li>Installation can be undone by typing:
 <pre>
-/home/algol68g/algol68g-mk10> make uninstall
+/home/algol68g/algol68g-mk10.1> make uninstall
 </pre>
 
 <p>
 <li>Note that in you can supply <code>CPPFLAGS</code>, <code>CFLAGS</code> and <code>LDFLAGS</code> to <code>make</code>; 
 for instance type:
 <pre>
-/home/algol68g/algol68g-mk10> make CFLAGS="-O"
+/home/algol68g/algol68g-mk10.1> make CFLAGS="-O"
 </pre>
 to optimise the code.
 
 <p>
 <li>To remove binaries used for building, type: 
 <pre>
-/home/algol68g/algol68g-mk10> make clean
+/home/algol68g/algol68g-mk10.1> make clean
 </pre>
 To remove all files used for building, type:
 <pre>
-/home/algol68g/algol68g-mk10> make distclean
+/home/algol68g/algol68g-mk10.1> make distclean
 </pre>
 
 <h4>Step 4: Starting Algol 68 Genie</h4>
 <p>
 When you install <code>a68g</code> in the present working directory, you may want to include the current directory in your <TT>PATH</TT> variable. Otherwise you will need to indicate the current directory by typing <code>./a68g</code> as in the following example:
 <pre>
-/home/algol68g/algol68g-mk10> ./a68g --version
-Algol 68 Genie Mark 10, copyright 2006 J. Marcel van der Veer.
+/home/algol68g/algol68g-mk10.1> ./a68g --version
+Algol 68 Genie Mark 10.1, copyright 2006 J. Marcel van der Veer.
 Algol 68 Genie is free software covered by the GNU General Public License.
 There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.
 See the GNU General Public License for more details.
 
-Algol 68 Genie Mark 10, released August 2006
-Image "a68g" compiled by a68g on Aug 1 2006 23:59:59 with gcc 3.3.5
+Algol 68 Genie Mark 10.1, released December 2006
+Image "a68g" compiled by a68g on Dec 1 2006 23:59:59 with gcc 3.3.5
 GNU libplot 4.2
 GNU Scientific Library 1.8
 PostgreSQL libpq 8.1.4
@@ -271,14 +271,14 @@ Default expression stack size: 1024 kB
 Default heap size: 25600 kB
 Default handle pool size: 4096 kB
 Default stack overhead: 256 kB
-/home/algol68g/algol68g-mk10>
+/home/algol68g/algol68g-mk10.1>
 </pre>
 If instead of above version statement you get a message like
 <pre>
-/home/algol68g/algol68g-mk10> ./a68g --version
+/home/algol68g/algol68g-mk10.1> ./a68g --version
 psql: error in loading shared libraries
 libpq.so.4.1: cannot open shared object file: No such file or directory
-/home/algol68g/algol68g-mk10>
+/home/algol68g/algol68g-mk10.1>
 </pre>
 then your shared library search path was not porperly set for PostgreSQL's <code>libpq</code> library. Find out where PostgreSQL library files are at, probably at <code>/usr/local/pgsql/lib</code>. The method to set the shared library search path varies between platforms, but the most widely used method is to set the environment variable <code>LD_LIBRARY_PATH</code>. In Bourne shells (<code>sh</code>, <code>ksh</code>, <code>bash</code>, <code>zsh</code>) you would use
 <pre>
@@ -295,20 +295,13 @@ If in doubt, refer to the manual pages of your system.
 <!-- Footer -->
 <hr color=#f0f0f0>
 <p>
-<table width="100%" border=0 cellspacing=0 cellpadding=0>
-<td width="50%" valign=top bgcolor="white">
-<font color="black">
-Copyright &copy; 2001-2006 J. Marcel van der Veer.
-</font>
-</td>
-<td width="50%" align=right valign=top bgcolor="white">
-<font color="black">
-Algol 68 Genie Mark 10 (August 2006)
-</font>
-</td>
-</table>
+<small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 10.1 (December 2006)
+</small>
 </p>
 <hr color=#f0f0f0>
+
 </body>
 </html>
 

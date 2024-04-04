@@ -78,7 +78,10 @@ void get_stack_size (void)
 #if ! defined HAVE_WIN32
   struct rlimit limits;
   RESET_ERRNO;
-  ABNORMAL_END (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0), "getrlimit fails", NULL);
+/* Some systems do not implement RLIMIT_STACK so if getrlimit fails, we do not abend. */
+  if (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0)) {
+    stack_size = MEGABYTE;
+  }
   stack_size = (int) (limits.rlim_cur < limits.rlim_max ? limits.rlim_cur : limits.rlim_max);
 /* A heuristic in case getrlimit yields extreme numbers: the frame stack is
    assumed to fill at a rate comparable to the C stack, so the C stack needs
@@ -139,8 +142,8 @@ NODE_T *new_node (void)
   z->info = new_node_info ();
   z->attribute = 0;
   z->annotation = 0;
-  DNS (z) = A_FALSE;
   z->error = A_FALSE;
+  z->need_dns = A_FALSE;
   z->genie.propagator.unit = NULL;
   z->genie.propagator.source = NULL;
   z->genie.whether_coercion = A_FALSE;
@@ -1000,7 +1003,7 @@ double a68g_asinh (double x)
     return (s * log (2.0 * a + 1.0 / (a + sqrt (a * a + 1.0))));
   } else if (a > sqrt (DBL_EPSILON)) {
     double a2 = a * a;
-    return (s * log1p (a + a2 / (1.0 + sqrt (1.0 + a2))));
+    return (s * a68g_log1p (a + a2 / (1.0 + sqrt (1.0 + a2))));
   } else {
     return (x);
   }
@@ -1020,7 +1023,7 @@ double a68g_acosh (double x)
     return (log (2.0 * x - 1.0 / (sqrt (x * x - 1.0) + x)));
   } else if (x > 1.0) {
     double t = x - 1.0;
-    return (log1p (t + sqrt (2.0 * t + t * t)));
+    return (a68g_log1p (t + sqrt (2.0 * t + t * t)));
   } else if (x == 1.0) {
     return (0.0);
   } else {
@@ -1039,16 +1042,13 @@ double a68g_atanh (double x)
 {
   double a = ABS (x);
   double s = (x < 0 ? -1 : 1);
-  if (a > 1.0) {
-    errno = EDOM;
-    return (0.0);
-  } else if (a == 1.0) {
+  if (a >= 1.0) {
     errno = EDOM;
     return (0.0);
   } else if (a >= 0.5) {
-    return (s * 0.5 * log1p (2 * a / (1.0 - a)));
+    return (s * 0.5 * a68g_log1p (2 * a / (1.0 - a)));
   } else if (a > DBL_EPSILON) {
-    return (s * 0.5 * log1p (2.0 * a + 2.0 * a * a / (1.0 - a)));
+    return (s * 0.5 * a68g_log1p (2.0 * a + 2.0 * a * a / (1.0 - a)));
   } else {
     return (x);
   }

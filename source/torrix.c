@@ -104,8 +104,8 @@ static gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
   gsl_permutation *v;
 /* Pop arguments. */
   POP (p, &desc, SIZE_OF (A68_REF));
-  TEST_INIT (p, desc, MODE (ROW_INT));
-  TEST_NIL (p, desc, MODE (ROW_INT));
+  CHECK_INIT (p, INITIALISED (&desc), MODE (ROW_INT));
+  CHECK_NIL (p, desc, MODE (ROW_INT));
   GET_DESCRIPTOR (arr, tup, &desc);
   len = ROW_SIZE (tup);
   v = gsl_permutation_alloc (len);
@@ -115,7 +115,7 @@ static gsl_permutation *pop_permutation (NODE_T * p, BOOL_T get)
     inc = tup->span * arr->elem_size;
     for (k = 0; k < len; k++, index += inc) {
       A68_INT *x = (A68_INT *) (base + index);
-      TEST_INIT (p, *x, MODE (INT));
+      CHECK_INIT (p, INITIALISED (x), MODE (INT));
       gsl_permutation_set (v, k, x->value);
     }
   }
@@ -179,8 +179,8 @@ static gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
   gsl_vector *v;
 /* Pop arguments. */
   POP (p, &desc, SIZE_OF (A68_REF));
-  TEST_INIT (p, desc, MODE (ROW_REAL));
-  TEST_NIL (p, desc, MODE (ROW_REAL));
+  CHECK_INIT (p, INITIALISED (&desc), MODE (ROW_REAL));
+  CHECK_NIL (p, desc, MODE (ROW_REAL));
   GET_DESCRIPTOR (arr, tup, &desc);
   len = ROW_SIZE (tup);
   v = gsl_vector_alloc (len);
@@ -190,7 +190,7 @@ static gsl_vector *pop_vector (NODE_T * p, BOOL_T get)
     inc = tup->span * arr->elem_size;
     for (k = 0; k < len; k++, index += inc) {
       A68_REAL *x = (A68_REAL *) (base + index);
-      TEST_INIT (p, *x, MODE (REAL));
+      CHECK_INIT (p, INITIALISED (x), MODE (REAL));
       gsl_vector_set (v, k, x->value);
     }
   }
@@ -255,8 +255,8 @@ static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
   gsl_matrix *a;
 /* Pop arguments. */
   POP (p, &desc, SIZE_OF (A68_REF));
-  TEST_INIT (p, desc, MODE (ROWROW_REAL));
-  TEST_NIL (p, desc, MODE (ROWROW_REAL));
+  CHECK_INIT (p, INITIALISED (&desc), MODE (ROWROW_REAL));
+  CHECK_NIL (p, desc, MODE (ROWROW_REAL));
   GET_DESCRIPTOR (arr, tup1, &desc);
   tup2 = &(tup1[1]);
   len1 = ROW_SIZE (tup1);
@@ -270,7 +270,7 @@ static gsl_matrix *pop_matrix (NODE_T * p, BOOL_T get)
     for (k1 = 0; k1 < len1; k1++, index1 += inc1) {
       for (k2 = 0, index2 = index1; k2 < len2; k2++, index2 += inc2) {
         A68_REAL *x = (A68_REAL *) (base + index2);
-        TEST_INIT (p, *x, MODE (REAL));
+        CHECK_INIT (p, INITIALISED (x), MODE (REAL));
         gsl_matrix_set (a, k1, k2, x->value);
       }
     }
@@ -344,8 +344,8 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
   gsl_vector_complex *v;
 /* Pop arguments. */
   POP (p, &desc, SIZE_OF (A68_REF));
-  TEST_INIT (p, desc, MODE (ROW_COMPLEX));
-  TEST_NIL (p, desc, MODE (ROW_COMPLEX));
+  CHECK_INIT (p, INITIALISED (&desc), MODE (ROW_COMPLEX));
+  CHECK_NIL (p, desc, MODE (ROW_COMPLEX));
   GET_DESCRIPTOR (arr, tup, &desc);
   len = ROW_SIZE (tup);
   v = gsl_vector_complex_alloc (len);
@@ -357,8 +357,8 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
       A68_REAL *re = (A68_REAL *) (base + index);
       A68_REAL *im = &(re[1]);
       gsl_complex z;
-      TEST_INIT (p, *re, MODE (COMPLEX));
-      TEST_INIT (p, *im, MODE (COMPLEX));
+      CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
+      CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
       GSL_SET_COMPLEX (&z, re->value, im->value);
       gsl_vector_complex_set (v, k, z);
     }
@@ -427,8 +427,8 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
   gsl_matrix_complex *a;
 /* Pop arguments. */
   POP (p, &desc, SIZE_OF (A68_REF));
-  TEST_INIT (p, desc, MODE (ROWROW_COMPLEX));
-  TEST_NIL (p, desc, MODE (ROWROW_COMPLEX));
+  CHECK_INIT (p, INITIALISED (&desc), MODE (ROWROW_COMPLEX));
+  CHECK_NIL (p, desc, MODE (ROWROW_COMPLEX));
   GET_DESCRIPTOR (arr, tup1, &desc);
   tup2 = &(tup1[1]);
   len1 = ROW_SIZE (tup1);
@@ -444,8 +444,8 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
         A68_REAL *re = (A68_REAL *) (base + index2);
         A68_REAL *im = &(re[1]);
         gsl_complex z;
-        TEST_INIT (p, *re, MODE (COMPLEX));
-        TEST_INIT (p, *im, MODE (COMPLEX));
+        CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
+        CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
         GSL_SET_COMPLEX (&z, re->value, im->value);
         gsl_matrix_complex_set (a, k1, k2, z);
       }
@@ -520,7 +520,7 @@ static A68_REF dereference_ref_row (NODE_T * p, MOID_T * m, ADDR_T par_size)
   A68_REF *u, v;
   u = (A68_REF *) STACK_OFFSET (-par_size);
   v = *u;
-  TEST_NIL (p, v, m);
+  CHECK_NIL (p, v, m);
   *u = *DEREF (A68_ROW, &v);
   return (v);
 }
@@ -753,7 +753,7 @@ void genie_matrix_det (NODE_T * p)
   q = gsl_permutation_alloc (u->size1);
   rc = gsl_linalg_LU_decomp (u, q, &signum);
   test_error (rc);
-  PUSH_REAL (p, gsl_linalg_LU_det (u, signum));
+  PUSH_PRIMITIVE (p, gsl_linalg_LU_det (u, signum), A68_REAL);
   gsl_matrix_free (u);
   gsl_permutation_free (q);
   (void) gsl_set_error_handler (save_handler);
@@ -777,8 +777,8 @@ void genie_matrix_complex_det (NODE_T * p)
   rc = gsl_linalg_complex_LU_decomp (u, q, &signum);
   test_error (rc);
   det = gsl_linalg_complex_LU_det (u, signum);
-  PUSH_REAL (p, GSL_REAL (det));
-  PUSH_REAL (p, GSL_IMAG (det));
+  PUSH_PRIMITIVE (p, GSL_REAL (det), A68_REAL);
+  PUSH_PRIMITIVE (p, GSL_IMAG (det), A68_REAL);
   gsl_matrix_complex_free (u);
   gsl_permutation_free (q);
   (void) gsl_set_error_handler (save_handler);
@@ -806,7 +806,7 @@ void genie_matrix_trace (NODE_T * p)
   for (k = 0; k < len1; k++) {
     sum += gsl_matrix_get (a, k, k);
   }
-  PUSH_REAL (p, sum);
+  PUSH_PRIMITIVE (p, sum, A68_REAL);
   gsl_matrix_free (a);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -833,8 +833,8 @@ void genie_matrix_complex_trace (NODE_T * p)
   for (k = 0; k < len1; k++) {
     sum = gsl_complex_add (sum, gsl_matrix_complex_get (a, k, k));
   }
-  PUSH_REAL (p, GSL_REAL (sum));
-  PUSH_REAL (p, GSL_IMAG (sum));
+  PUSH_PRIMITIVE (p, GSL_REAL (sum), A68_REAL);
+  PUSH_PRIMITIVE (p, GSL_IMAG (sum), A68_REAL);
   gsl_matrix_complex_free (a);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -934,7 +934,7 @@ void genie_vector_eq (NODE_T * p)
   u = pop_vector (p, A_TRUE);
   rc = gsl_vector_sub (u, v);
   test_error (rc);
-  PUSH_BOOL (p, (gsl_vector_isnull (u) ? A_TRUE : A_FALSE));
+  PUSH_PRIMITIVE (p, (gsl_vector_isnull (u) ? A_TRUE : A_FALSE), A68_BOOL);
   gsl_vector_free (u);
   gsl_vector_free (v);
   (void) gsl_set_error_handler (save_handler);
@@ -1028,7 +1028,7 @@ void genie_matrix_eq (NODE_T * p)
   u = pop_matrix (p, A_TRUE);
   rc = gsl_matrix_sub (u, v);
   test_error (rc);
-  PUSH_BOOL (p, (gsl_matrix_isnull (u) ? A_TRUE : A_FALSE));
+  PUSH_PRIMITIVE (p, (gsl_matrix_isnull (u) ? A_TRUE : A_FALSE), A68_BOOL);
   gsl_matrix_free (u);
   gsl_matrix_free (v);
   (void) gsl_set_error_handler (save_handler);
@@ -1128,7 +1128,7 @@ void genie_vector_complex_eq (NODE_T * p)
   u = pop_vector_complex (p, A_TRUE);
   rc = gsl_blas_zaxpy (one, v, u);
   test_error (rc);
-  PUSH_BOOL (p, (gsl_vector_complex_isnull (u) ? A_TRUE : A_FALSE));
+  PUSH_PRIMITIVE (p, (gsl_vector_complex_isnull (u) ? A_TRUE : A_FALSE), A68_BOOL);
   gsl_vector_complex_free (u);
   gsl_vector_complex_free (v);
   (void) gsl_set_error_handler (save_handler);
@@ -1222,7 +1222,7 @@ void genie_matrix_complex_eq (NODE_T * p)
   u = pop_matrix_complex (p, A_TRUE);
   rc = gsl_matrix_complex_sub (u, v);
   test_error (rc);
-  PUSH_BOOL (p, (gsl_matrix_complex_isnull (u) ? A_TRUE : A_FALSE));
+  PUSH_PRIMITIVE (p, (gsl_matrix_complex_isnull (u) ? A_TRUE : A_FALSE), A68_BOOL);
   gsl_matrix_complex_free (u);
   gsl_matrix_complex_free (v);
   (void) gsl_set_error_handler (save_handler);
@@ -1271,7 +1271,7 @@ void genie_vector_scale_real (NODE_T * p)
   A68_REAL v;
   int rc;
   error_node = p;
-  POP_REAL (p, &v);
+  POP_PRIMITIVE (p, &v, A68_REAL);
   u = pop_vector (p, A_TRUE);
   rc = gsl_vector_scale (u, VALUE (&v));
   test_error (rc);
@@ -1293,7 +1293,7 @@ void genie_real_scale_vector (NODE_T * p)
   int rc;
   error_node = p;
   u = pop_vector (p, A_TRUE);
-  POP_REAL (p, &v);
+  POP_PRIMITIVE (p, &v, A68_REAL);
   rc = gsl_vector_scale (u, VALUE (&v));
   test_error (rc);
   push_vector (p, u);
@@ -1313,7 +1313,7 @@ void genie_matrix_scale_real (NODE_T * p)
   A68_REAL v;
   int rc;
   error_node = p;
-  POP_REAL (p, &v);
+  POP_PRIMITIVE (p, &v, A68_REAL);
   u = pop_matrix (p, A_TRUE);
   rc = gsl_matrix_scale (u, VALUE (&v));
   test_error (rc);
@@ -1335,7 +1335,7 @@ void genie_real_scale_matrix (NODE_T * p)
   int rc;
   error_node = p;
   u = pop_matrix (p, A_TRUE);
-  POP_REAL (p, &v);
+  POP_PRIMITIVE (p, &v, A68_REAL);
   rc = gsl_matrix_scale (u, VALUE (&v));
   test_error (rc);
   push_matrix (p, u);
@@ -1355,8 +1355,8 @@ void genie_vector_complex_scale_complex (NODE_T * p)
   A68_REAL re, im;
   gsl_complex v;
   error_node = p;
-  POP_REAL (p, &im);
-  POP_REAL (p, &re);
+  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_PRIMITIVE (p, &re, A68_REAL);
   GSL_SET_COMPLEX (&v, VALUE (&re), VALUE (&im));
   u = pop_vector_complex (p, A_TRUE);
   gsl_blas_zscal (v, u);
@@ -1378,8 +1378,8 @@ void genie_complex_scale_vector_complex (NODE_T * p)
   gsl_complex v;
   error_node = p;
   u = pop_vector_complex (p, A_TRUE);
-  POP_REAL (p, &im);
-  POP_REAL (p, &re);
+  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_PRIMITIVE (p, &re, A68_REAL);
   GSL_SET_COMPLEX (&v, VALUE (&re), VALUE (&im));
   gsl_blas_zscal (v, u);
   push_vector_complex (p, u);
@@ -1400,8 +1400,8 @@ void genie_matrix_complex_scale_complex (NODE_T * p)
   gsl_complex v;
   int rc;
   error_node = p;
-  POP_REAL (p, &im);
-  POP_REAL (p, &re);
+  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_PRIMITIVE (p, &re, A68_REAL);
   GSL_SET_COMPLEX (&v, VALUE (&re), VALUE (&im));
   u = pop_matrix_complex (p, A_TRUE);
   rc = gsl_matrix_complex_scale (u, v);
@@ -1425,8 +1425,8 @@ void genie_complex_scale_matrix_complex (NODE_T * p)
   int rc;
   error_node = p;
   u = pop_matrix_complex (p, A_TRUE);
-  POP_REAL (p, &im);
-  POP_REAL (p, &re);
+  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_PRIMITIVE (p, &re, A68_REAL);
   GSL_SET_COMPLEX (&v, VALUE (&re), VALUE (&im));
   rc = gsl_matrix_complex_scale (u, v);
   test_error (rc);
@@ -1487,7 +1487,7 @@ void genie_vector_div_real (NODE_T * p)
   A68_REAL v;
   int rc;
   error_node = p;
-  POP_REAL (p, &v);
+  POP_PRIMITIVE (p, &v, A68_REAL);
   if (VALUE (&v) == 0.0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (ROW_REAL));
     exit_genie (p, A_RUNTIME_ERROR);
@@ -1512,7 +1512,7 @@ void genie_matrix_div_real (NODE_T * p)
   A68_REAL v;
   int rc;
   error_node = p;
-  POP_REAL (p, &v);
+  POP_PRIMITIVE (p, &v, A68_REAL);
   if (VALUE (&v) == 0.0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (ROWROW_REAL));
     exit_genie (p, A_RUNTIME_ERROR);
@@ -1537,8 +1537,8 @@ void genie_vector_complex_div_complex (NODE_T * p)
   A68_REAL re, im;
   gsl_complex v;
   error_node = p;
-  POP_REAL (p, &im);
-  POP_REAL (p, &re);
+  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_PRIMITIVE (p, &re, A68_REAL);
   if (VALUE (&re) == 0.0 && VALUE (&im) == 0.0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (ROW_COMPLEX));
     exit_genie (p, A_RUNTIME_ERROR);
@@ -1565,8 +1565,8 @@ void genie_matrix_complex_div_complex (NODE_T * p)
   gsl_complex v;
   int rc;
   error_node = p;
-  POP_REAL (p, &im);
-  POP_REAL (p, &re);
+  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_PRIMITIVE (p, &re, A68_REAL);
   if (VALUE (&re) == 0.0 && VALUE (&im) == 0.0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (ROWROW_COMPLEX));
     exit_genie (p, A_RUNTIME_ERROR);
@@ -1637,7 +1637,7 @@ void genie_vector_dot (NODE_T * p)
   u = pop_vector (p, A_TRUE);
   rc = gsl_blas_ddot (u, v, &w);
   test_error (rc);
-  PUSH_REAL (p, w);
+  PUSH_PRIMITIVE (p, w, A68_REAL);
   gsl_vector_free (u);
   gsl_vector_free (v);
   (void) gsl_set_error_handler (save_handler);
@@ -1659,8 +1659,8 @@ void genie_vector_complex_dot (NODE_T * p)
   u = pop_vector_complex (p, A_TRUE);
   rc = gsl_blas_zdotc (u, v, &w);
   test_error (rc);
-  PUSH_REAL (p, GSL_REAL (w));
-  PUSH_REAL (p, GSL_IMAG (w));
+  PUSH_PRIMITIVE (p, GSL_REAL (w), A68_REAL);
+  PUSH_PRIMITIVE (p, GSL_IMAG (w), A68_REAL);
   gsl_vector_complex_free (u);
   gsl_vector_complex_free (v);
   (void) gsl_set_error_handler (save_handler);
@@ -1677,7 +1677,7 @@ void genie_vector_norm (NODE_T * p)
   gsl_vector *u;
   error_node = p;
   u = pop_vector (p, A_TRUE);
-  PUSH_REAL (p, gsl_blas_dnrm2 (u));
+  PUSH_PRIMITIVE (p, gsl_blas_dnrm2 (u), A68_REAL);
   gsl_vector_free (u);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -1693,7 +1693,7 @@ void genie_vector_complex_norm (NODE_T * p)
   gsl_vector_complex *u;
   error_node = p;
   u = pop_vector_complex (p, A_TRUE);
-  PUSH_REAL (p, gsl_blas_dznrm2 (u));
+  PUSH_PRIMITIVE (p, gsl_blas_dznrm2 (u), A68_REAL);
   gsl_vector_complex_free (u);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -1947,9 +1947,9 @@ void genie_matrix_lu (NODE_T * p)
   A68_INT signum;
   error_node = p;
   POP_REF (p, &ref_signum);
-  TEST_NIL (p, ref_signum, MODE (REF_INT));
+  CHECK_NIL (p, ref_signum, MODE (REF_INT));
   POP_REF (p, &ref_q);
-  TEST_NIL (p, ref_q, MODE (REF_ROW_INT));
+  CHECK_NIL (p, ref_q, MODE (REF_ROW_INT));
   PUSH_ROW (p, *DEREF (A68_ROW, &ref_q));
   q = pop_permutation (p, A_FALSE);
   u = pop_matrix (p, A_TRUE);
@@ -1976,9 +1976,9 @@ void genie_matrix_lu_det (NODE_T * p)
   gsl_matrix *lu;
   A68_INT signum;
   error_node = p;
-  POP_INT (p, &signum);
+  POP_PRIMITIVE (p, &signum, A68_INT);
   lu = pop_matrix (p, A_TRUE);
-  PUSH_REAL (p, gsl_linalg_LU_det (lu, signum.value));
+  PUSH_PRIMITIVE (p, gsl_linalg_LU_det (lu, signum.value), A68_REAL);
   gsl_matrix_free (lu);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -2055,9 +2055,9 @@ void genie_matrix_complex_lu (NODE_T * p)
   A68_INT signum;
   error_node = p;
   POP_REF (p, &ref_signum);
-  TEST_NIL (p, ref_signum, MODE (REF_INT));
+  CHECK_NIL (p, ref_signum, MODE (REF_INT));
   POP_REF (p, &ref_q);
-  TEST_NIL (p, ref_q, MODE (REF_ROW_INT));
+  CHECK_NIL (p, ref_q, MODE (REF_ROW_INT));
   PUSH_ROW (p, *DEREF (A68_ROW, &ref_q));
   q = pop_permutation (p, A_FALSE);
   u = pop_matrix_complex (p, A_TRUE);
@@ -2085,11 +2085,11 @@ void genie_matrix_complex_lu_det (NODE_T * p)
   A68_INT signum;
   gsl_complex det;
   error_node = p;
-  POP_INT (p, &signum);
+  POP_PRIMITIVE (p, &signum, A68_INT);
   lu = pop_matrix_complex (p, A_TRUE);
   det = gsl_linalg_complex_LU_det (lu, signum.value);
-  PUSH_REAL (p, GSL_REAL (det));
-  PUSH_REAL (p, GSL_IMAG (det));
+  PUSH_PRIMITIVE (p, GSL_REAL (det), A68_REAL);
+  PUSH_PRIMITIVE (p, GSL_IMAG (det), A68_REAL);
   gsl_matrix_complex_free (lu);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -2165,11 +2165,11 @@ void genie_matrix_svd (NODE_T * p)
   int rc;
   error_node = p;
   POP_REF (p, &ref_s);
-  TEST_NIL (p, ref_s, MODE (REF_ROW_REAL));
+  CHECK_NIL (p, ref_s, MODE (REF_ROW_REAL));
   PUSH_ROW (p, *DEREF (A68_ROW, &ref_s));
   s = pop_vector (p, A_FALSE);
   POP_REF (p, &ref_v);
-  TEST_NIL (p, ref_v, MODE (REF_ROWROW_REAL));
+  CHECK_NIL (p, ref_v, MODE (REF_ROWROW_REAL));
   PUSH_ROW (p, *DEREF (A68_ROW, &ref_v));
   v = pop_matrix (p, A_FALSE);
   a = pop_matrix (p, A_TRUE);
@@ -2229,7 +2229,7 @@ void genie_matrix_qr (NODE_T * p)
   int rc;
   error_node = p;
   POP_REF (p, &ref_t);
-  TEST_NIL (p, ref_t, MODE (REF_ROW_REAL));
+  CHECK_NIL (p, ref_t, MODE (REF_ROW_REAL));
   PUSH_ROW (p, *DEREF (A68_ROW, &ref_t));
   t = pop_vector (p, A_FALSE);
   a = pop_matrix (p, A_TRUE);
