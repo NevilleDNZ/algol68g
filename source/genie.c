@@ -37,8 +37,7 @@ void genie_preprocess (NODE_T *, int *);
 void get_global_level (NODE_T *);
 
 A68_HANDLE nil_handle = { INITIALISED_MASK, 0, 0, NULL, NULL, NULL };
-A68_POINTER nil_pointer = { INITIALISED_MASK, NULL };
-A68_REF nil_ref = { INITIALISED_MASK, NULL, 0, PRIMAL_SCOPE, NULL };
+A68_REF nil_ref = { INITIALISED_MASK | NIL_MASK, 0, {NULL} };
 ADDR_T frame_pointer = 0, stack_pointer = 0, heap_pointer = 0, handle_pointer = 0, global_pointer = 0;
 BYTE_T *frame_segment = NULL, *stack_segment = NULL, *heap_segment = NULL, *handle_segment = NULL;
 NODE_T *last_unit = NULL;
@@ -73,11 +72,11 @@ void genie_system (NODE_T * p)
   A68_REF cmd;
   A68_REF ref_z;
   POP (p, &cmd, SIZE_OF (A68_REF));
-  TEST_INIT (p, cmd, MODE (STRING));
+  CHECK_INIT (p, INITIALISED (&cmd), MODE (STRING));
   size = 1 + a68_string_size (p, cmd);
   ref_z = heap_generator (p, MODE (C_STRING), 1 + size);
   ret_code = system (a_to_c_string (p, (char *) ADDRESS (&ref_z), cmd));
-  PUSH_INT (p, ret_code);
+  PUSH_PRIMITIVE (p, ret_code, A68_INT);
 }
 
 /*!
@@ -215,7 +214,15 @@ become prone to the heap sweeper.
     case FORMULA:
     case MONADIC_FORMULA:
     case GENERATOR:
-    case ENCLOSED_CLAUSE:
+/*  case ENCLOSED_CLAUSE: */
+    case PARALLEL_CLAUSE:
+    case CLOSED_CLAUSE:
+    case COLLATERAL_CLAUSE:
+    case CONDITIONAL_CLAUSE:
+    case INTEGER_CASE_CLAUSE:
+    case UNITED_CASE_CLAUSE:
+    case LOOP_CLAUSE:
+    case CODE_CLAUSE:
     case CALL:
     case SLICE:
     case SELECTION:
@@ -224,8 +231,7 @@ become prone to the heap sweeper.
       {
         MOID_T *m = MOID (p);
         if (m != NULL && (WHETHER (m, REF_SYMBOL) || WHETHER (DEFLEX (m), ROW_SYMBOL))) {
-          TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m,
-              PROTECT_FROM_SWEEP);
+          TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m, PROTECT_FROM_SWEEP);
           p->protect_sweep = z;
           HEAP (z) = HEAP_SYMBOL;
           z->use = A_TRUE;
@@ -330,6 +336,15 @@ void genie_preprocess (NODE_T * p, int *max_lev)
     if (MOID (p) != NULL) {
       MOID (p)->size = moid_size (MOID (p));
       MOID (p)->short_id = mode_attribute (MOID (p));
+      if (WHETHER (MOID (p), REF_SYMBOL)) {
+        p->need_dns = A_TRUE;
+      } else if (WHETHER (MOID (p), PROC_SYMBOL)) {
+        p->need_dns = A_TRUE;
+      } else if (WHETHER (MOID (p), UNION_SYMBOL)) {
+        p->need_dns = A_TRUE;
+      } else if (WHETHER (MOID (p), FORMAT_SYMBOL)) {
+        p->need_dns = A_TRUE;
+      }
     }
     if (SYMBOL_TABLE (p) != NULL) {
       SYMBOL_TABLE (p)->empty_table = genie_empty_table (SYMBOL_TABLE (p));
@@ -383,6 +398,31 @@ void get_global_level (NODE_T * p)
       }
     }
     get_global_level (SUB (p));
+  }
+}
+
+/*!
+\brief get outermost lexical level in the user program
+\param p
+**/
+
+void get_global_pointer (NODE_T * p)
+{
+  for (; p != NULL; FORWARD (p)) {
+    if (LINE (p)->number != 0) {
+      if (find_keyword (top_keyword, SYMBOL (p)) == NULL) {
+        if (LEX_LEVEL (p) == global_level && global_pointer == 0) {
+          int sum = 0;
+          SYMBOL_TABLE_T *t = PREVIOUS (SYMBOL_TABLE (p));
+          for (; t != stand_env; t = PREVIOUS (t)) {
+            sum += (FRAME_INFO_SIZE + t->ap_increment);
+          }
+          global_pointer = sum;
+          return;
+        }
+      }
+    }
+    get_global_pointer (SUB (p));
   }
 }
 
@@ -444,16 +484,16 @@ void genie (MODULE_T * module)
     RESET_ERRNO;
     ret_code = 0;
     global_level = 0;
-    get_global_level (p);
     global_pointer = 0;
     frame_pointer = 0;
     stack_pointer = 0;
+    get_global_level (p);
+    get_global_pointer (p);
     FRAME_DYNAMIC_LINK (frame_pointer) = 0;
     FRAME_DYNAMIC_SCOPE (frame_pointer) = 0;
     FRAME_STATIC_LINK (frame_pointer) = 0;
     FRAME_TREE (frame_pointer) = (NODE_T *) p;
     FRAME_LEXICAL_LEVEL (frame_pointer) = LEX_LEVEL (p);
-    FRAME_GLOBAL_POINTER (frame_pointer) = 0;
     initialise_frame (p);
     genie_init_heap (p, module);
     genie_init_transput (module->top_node);

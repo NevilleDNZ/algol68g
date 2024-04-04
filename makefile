@@ -1,10 +1,10 @@
-# makefile generated on Wed Apr 11 20:55:02 NZST 2007 by nevilled.
+# makefile generated on Fri Dec 29 10:31:51 NZDT 2006 by root.
 SHELL=/bin/sh
-PACKAGE_NAME=algol68g-mk10
-USR_BIN=/home/nevilled/bin
+PACKAGE_NAME=algol68g-mk10.1
+USR_BIN=/usr/local/bin
 USR_SRC=./source
-USR_CHK=./regression-mk10
-man_dir=/home/nevilled/prj/a68/algol68g-mk10
+USR_CHK=./regression-mk10.1
+man_dir=/usr/local/man/man1
 all a68g::
 	@cd $(USR_SRC); $(MAKE) CPP_FLAGS="$(CPP_FLAGS)" CFLAGS="$(CFLAGS)" LD_FLAGS="$(LD_FLAGS)"; mv a68g ..; cd ..
 install:	all

@@ -3648,11 +3648,9 @@ static void coerce_serial (NODE_T * p, SOID_T * q, int k)
     coerce_serial (SUB (p), q, k);
   } else if (WHETHER (p, UNIT)) {
     if (k) {
-      DNS (p) = A_TRUE;
       coerce_unit (p, q);
     } else {
       SOID_T strongvoid;
-      DNS (p) = A_FALSE;
       make_soid (&strongvoid, STRONG, MODE (VOID), 0);
       coerce_unit (p, &strongvoid);
     }

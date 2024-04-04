@@ -36,7 +36,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 static char *brief_mode_string (MOID_T * p)
 {
   static char q[BUFFER_SIZE];
-  snprintf (q, BUFFER_SIZE, "MODE#%X", p->number);
+  snprintf (q, BUFFER_SIZE, "#%x", p->number);
   return (new_string (q));
 }
 
@@ -156,8 +156,6 @@ static void print_mode_flat (FILE_T f, MOID_T * m)
 {
   if (m != NULL) {
     brief_moid_flat (f, m);
-    snprintf (output_line, BUFFER_SIZE, " ");
-    io_write_string (f, output_line);
     if (m->equivalent_mode != NULL) {
       snprintf (output_line, BUFFER_SIZE, " equi: %s", brief_mode_string (EQUIVALENT (m)));
       io_write_string (f, output_line);
@@ -186,6 +184,8 @@ static void print_mode_flat (FILE_T f, MOID_T * m)
       snprintf (output_line, BUFFER_SIZE, " unused");
       io_write_string (f, output_line);
     }
+    snprintf (output_line, BUFFER_SIZE, " size: %d", MOID_SIZE (m));
+    io_write_string (f, output_line);
   }
 }
 
@@ -266,7 +266,7 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
             }
           case PROTECT_FROM_SWEEP:
             {
-              snprintf (output_line, BUFFER_SIZE, "Sweep protect %p ", NODE (s));
+              snprintf (output_line, BUFFER_SIZE, "Sweep protect ");
               break;
             }
           }
@@ -281,6 +281,10 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
           brief_moid_flat (f, MOID (s));
           break;
         }
+      }
+      if (NODE (s) != NULL) {
+        snprintf (output_line, BUFFER_SIZE, " node %p", NODE (s));
+        io_write_string (f, output_line);
       }
       if (where != NULL && where->info != NULL && where->info->line != NULL) {
         snprintf (output_line, BUFFER_SIZE, " line %d", where->info->line->number);
@@ -427,24 +431,22 @@ static void tree_listing (FILE_T f, NODE_T * p, int x, int *y, SOURCE_LINE_T * l
     for (; p != NULL; FORWARD (p)) {
       if ((MASK (p) & TREE_MASK) && l == LINE (p)) {
         if (MASK (p) & TREE_MASK) {
-          snprintf (output_line, BUFFER_SIZE, "\n     %p %-3x ", p, x);
-          io_write_string (f, output_line);
-          if (p->protect_sweep == NULL) {
-            snprintf (output_line, BUFFER_SIZE, " ");
-          } else {
-            snprintf (output_line, BUFFER_SIZE, "*");
-          }
+          snprintf (output_line, BUFFER_SIZE, "\n     %08x %3x ", (unsigned) p, x);
           io_write_string (f, output_line);
           if (SYMBOL_TABLE (p) != NULL) {
-            snprintf (output_line, BUFFER_SIZE, "%c ", digit_to_char (LEX_LEVEL (p)));
+            snprintf (output_line, BUFFER_SIZE, "%3x ", LEX_LEVEL (p));
           } else {
             snprintf (output_line, BUFFER_SIZE, "  ");
           }
           io_write_string (f, output_line);
-          snprintf (output_line, BUFFER_SIZE, "%c %c %c ", digit_to_char (p->info->PROCEDURE_NUMBER), digit_to_char (p->info->PROCEDURE_LEVEL), digit_to_char (PAR_LEVEL (p)));
+          snprintf (output_line, BUFFER_SIZE, "%3x %3x %3x ", p->info->PROCEDURE_NUMBER, p->info->PROCEDURE_LEVEL, PAR_LEVEL (p));
           io_write_string (f, output_line);
 /* Print grammatical stuff. */
-          snprintf (output_line, BUFFER_SIZE, "%-24s ", non_terminal_string (edit_line, ATTRIBUTE (p)));
+          if (MOID (p) != NULL) {
+            snprintf (output_line, BUFFER_SIZE, "%s ", moid_to_string (MOID (p), MOID_WIDTH));
+            io_write_string (f, output_line);
+          }
+          snprintf (output_line, BUFFER_SIZE, "%s ", non_terminal_string (edit_line, ATTRIBUTE (p)));
           io_write_string (f, output_line);
           if (SUB (p) == NULL) {
             snprintf (output_line, BUFFER_SIZE, "%-24s ", SYMBOL (p));
@@ -452,10 +454,6 @@ static void tree_listing (FILE_T f, NODE_T * p, int x, int *y, SOURCE_LINE_T * l
             snprintf (output_line, BUFFER_SIZE, "%-24s ", " ");
           }
           io_write_string (f, output_line);
-          if (MOID (p) != NULL) {
-            snprintf (output_line, BUFFER_SIZE, "#%03X %s ", MOID (p)->number, moid_to_string (MOID (p), MOID_WIDTH));
-            io_write_string (f, output_line);
-          }
         }
       }
       tree_listing (f, SUB (p), x + 1, y, l);
@@ -523,6 +521,20 @@ X "ABCD.A68" 0001 01 01 # Source line #
         snprintf (output_line, BUFFER_SIZE, "\n++++ Syntax tree for line %d", line->number);
         io_write_string (f, output_line);
         low_level (module->top_node, 1, &y, line);
+        snprintf (output_line, BUFFER_SIZE, "\n\n     node: node number");
+        io_write_string (f, output_line);
+        snprintf (output_line, BUFFER_SIZE, "\n     lvl: syntax tree level");
+        io_write_string (f, output_line);
+        snprintf (output_line, BUFFER_SIZE, "\n     lex: lexical level");
+        io_write_string (f, output_line);
+        snprintf (output_line, BUFFER_SIZE, "\n     prn: procedure number");
+        io_write_string (f, output_line);
+        snprintf (output_line, BUFFER_SIZE, "\n     prl: procedure level");
+        io_write_string (f, output_line);
+        snprintf (output_line, BUFFER_SIZE, "\n     par: parallel clause level");
+        io_write_string (f, output_line);
+        snprintf (output_line, BUFFER_SIZE, "\n\n     node     lvl lex prn prl par");
+        io_write_string (f, output_line);
         tree_listing (f, module->top_node, 1, &y, line);
       }
     }
@@ -610,4 +622,13 @@ void write_listing (MODULE_T * module)
     io_write_string (f, output_line);
   }
   io_write_string (f, NEWLINE_STRING);
+}
+
+extern void write_listing_header (MODULE_T * module)
+{
+  state_version (module->files.listing.fd);
+  io_write_string (module->files.listing.fd, "\n++++ File \"");
+  io_write_string (module->files.listing.fd, a68_prog.files.source.name);
+  io_write_string (module->files.listing.fd, "\"");
+  io_write_string (module->files.listing.fd, "\n++++ Source listing");
 }

@@ -504,12 +504,6 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
 #endif
 }
 
-#define CHECK_INIT(p, c, q)\
-  if (!(c)) {\
-    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE_FROM, (q));\
-    exit_genie ((p), A_RUNTIME_ERROR);\
-  }
-
 /*!
 \brief OP LEVEL = (INT) SEMA
 \param p position in syntax tree, should not be NULL
@@ -520,7 +514,7 @@ void genie_level_sema_int (NODE_T * p)
 #if defined HAVE_POSIX_THREADS
   A68_INT k;
   A68_REF s;
-  POP_INT (p, &k);
+  POP_PRIMITIVE (p, &k, A68_INT);
   s = heap_generator (p, MODE (INT), SIZE_OF (A68_INT));
   *(A68_INT *) ADDRESS (&s) = k;
   PUSH_REF (p, s);
@@ -541,8 +535,8 @@ void genie_level_int_sema (NODE_T * p)
 #if defined HAVE_POSIX_THREADS
   A68_REF s;
   POP_REF (p, &s);
-  CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
-  PUSH_INT (p, ((A68_INT *) ADDRESS (&s))->value);
+  CHECK_INIT (p, INITIALISED (&s), MODE (SEMA));
+  PUSH_PRIMITIVE (p, ((A68_INT *) ADDRESS (&s))->value, A68_INT);
 #else
   diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
   exit_genie (p, A_RUNTIME_ERROR);
@@ -559,7 +553,7 @@ void genie_up_sema (NODE_T * p)
 #if defined HAVE_POSIX_THREADS
   A68_REF s;
   POP_REF (p, &s);
-  CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
+  CHECK_INIT (p, INITIALISED (&s), MODE (SEMA));
   ((A68_INT *) ADDRESS (&s))->value++;
 #else
   diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
@@ -579,7 +573,7 @@ void genie_down_sema (NODE_T * p)
   A68_INT *k;
   BOOL_T cont = A_TRUE;
   POP_REF (p, &s);
-  CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
+  CHECK_INIT (p, INITIALISED (&s), MODE (SEMA));
   while (cont) {
     k = (A68_INT *) ADDRESS (&s);
     if (k->value <= 0) {

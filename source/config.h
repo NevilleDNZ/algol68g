@@ -82,7 +82,6 @@ HAVE_IEEE_754 is ok for Pentiums.
 #endif
 
 #if defined HAVE_WIN32
-#undef HAVE_CURSES
 #define HAVE_PLOTUTILS 1
 #define HAVE_GSL 1
 #define HAVE_CURSES 1
