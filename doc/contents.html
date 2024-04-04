@@ -4,9 +4,9 @@
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: navy; text-decoration: underline;}
-a:visited {color: navy; text-decoration: underline;}
-a:active  {color: navy; text-decoration: underline;}
+a:link    {color: blue; text-decoration: underline;}
+a:visited {color: blue; text-decoration: underline;}
+a:active  {color: blue; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
@@ -25,12 +25,20 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <body bgcolor="white">
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="100%" background="lines.gif">
+<img src="lines.gif" align=right>
+<small>Documentation for Algol 68 Genie Mark 9</small>
+</td>
+</table>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
-<h2>Algol 68 Genie Mark 8</h2>
+<br>
+<h2>Algol 68 Genie Mark 9</h2>
 <p>
 <address>J. Marcel van der Veer
 <br>
-July 2005
+March 2006
 </address>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
@@ -42,27 +50,28 @@ July 2005
 <!-- Navigation bar -->
 <table border="0" cellspacing="0" width="100%">
 <tr>
-<td bgcolor="skyblue">
-&nbsp;&nbsp;<b>Manual</b>
-</td>
-</tr>
-<tr>
-<td bgcolor="powderblue">
+<td background="lines.gif">
+<small><b>Algol68G Mark 9</b></small>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+<small><b>Extensions</b></small>
+<br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
 </td>
 </tr>
 </table>
@@ -74,31 +83,68 @@ July 2005
 <h3><a href="introduction.html">Algol 68 Genie - An Algol 68 interpreter</a></h3>
 <ul>
 <li><a href="introduction.html#whatis">What is Algol 68 Genie?</a>
-<li><a href="introduction.html#about">Algol 68 Genie features</a>
 <li><a href="introduction.html#obtaining">Obtaining Algol 68 Genie</a>
 <li><a href="introduction.html#contact">Author and contact information</a>
+<li><a href="introduction.html#previous">Available previous releases</a>
 <li><a href="introduction.html#release">Release history</a>
 </ul>
+
 <p><h3><a href="install.html">Installing Algol 68 Genie</a></h3>
+
 <p><h3><a href="description.html">Description of Algol68G</a></h3>
 <ul>
 <li><a href="description.html#high">About this Algol 68 implementation</a>
 <li><a href="description.html#diff">Algol68G compared to the Revised Report description</a>
+<li><a href="description.html#params">Partial parametrisation and currying</a>
 <li><a href="description.html#io">Transput implementation</a>
 <ul>
 <li><a href="description.html#genio">Transput in general</a>
 <li><a href="description.html#fmtio">Formatted transput</a>
 </ul>
+<li><a href="description.html#assert">Assertions as pre- or postconditions</a>
+<li><a href="description.html#prep">The preprocessor</a>
+<ul>
+<li><a href="description.html#prepcat">Concatenation of lines</a>
+<li><a href="description.html#prepinc">Inclusion of files</a>
+<li><a href="description.html#refine">The refinement preprocessor</a>
+<li><a href="description.html#prepsw">Switching the preprocessor on or off</a>
+</ul>
 <li><a href="description.html#speed">Interpreter speed</a>
 <li><a href="description.html#limitations">Limitations and bugs</a>
 </ul>
+
+<p>
+<h3><a href="extensions.html">UNIX extensions</a></h3>
+<ul>
+<li><a href="extensions.html#envunix">UNIX extensions</a>
+<ul>
+<li><a href="extensions.html#unixgen">General definitions</a>
+<li><a href="extensions.html#unixproc">Processes</a>
+<li><a href="extensions.html#unixfetch">Fetching web page contents and sending requests</a>
+<li><a href="extensions.html#unixregex">Regular expressions in string manipulation</a>
+</ul>
+<li><a href="extensions.html#curses">Curses support</a>
+</ul>
+
+<p><h3><a href="postgresql.html">PostgreSQL client routines</a></h3>
+<ul>
+<li><a href="postgresql.html#pgconnect">Connecting to a server</a><br>
+<li><a href="postgresql.html#pgquery">Sending queries and retrieving results</a><br>
+<li><a href="postgresql.html#pgstatus">Connection status information</a><br>
+<li><a href="postgresql.html#pgthread">Behaviour in threaded programs</a><br>
+<li><a href="postgresql.html#pgexample">Example code</a><br>
+<li><a href="postgresql.html#pgcopyright">Copyright and license notice</a><br>
+</ul>
+
 <p><h3><a href="drawing.html">Drawing using the GNU Plotting Utilities</a></h3>
 <ul>
 <li><a href="drawing.html#drawsetup">Setting up a graphics device</a>
 <li><a href="drawing.html#drawcolour">Specifying colours</a>
 <li><a href="drawing.html#drawdraw">Drawing objects</a>
 <li><a href="drawing.html#drawtext">Drawing text</a>
+<li><a href="drawing.html#mandelbrot">Example: Mandelbrot set</a>
 </ul>
+
 <p><h3><a href="numerical.html">Extra numerical procedures</a></h3>
 <ul>
 <li><a href="numerical.html#gslreal">REAL functions</a>
@@ -107,6 +153,7 @@ July 2005
 <li><a href="numerical.html#gslbessel">REAL Bessel functions</a>
 <li><a href="numerical.html#gslelliptic">REAL Elliptic integrals</a>
 <li><a href="numerical.html#gslerror">REAL Error and Gamma functions</a>
+<li><a href="numerical.html#torrix">Basic REAL vector library</a>
 <li><a href="numerical.html#constants">Physical Constants</a>
 <ul>
 <li><a href="numerical.html#contants_1">Fundamental constants</a>
@@ -127,27 +174,7 @@ July 2005
 <li><a href="numerical.html#constants_7">Printer units</a>
 </ul>
 </ul>
-<p><h3><a href="extensions.html">Extensions</a></h3>
-<ul>
-<li><a href="extensions.html#params">Partial parametrisation and currying</a>
-<li><a href="extensions.html#envunix">UNIX extensions</a>
-<ul>
-<li><a href="extensions.html#unixgen">General definitions</a>
-<li><a href="extensions.html#unixproc">Processes</a>
-<li><a href="extensions.html#unixfetch">Fetching web page contents and sending requests</a>
-<li><a href="extensions.html#unixregex">Matching regular expressions</a>
-</ul>
-<li><a href="extensions.html#curses">Curses support</a>
-<li><a href="extensions.html#torrix">An elementary vector library</a>
-<li><a href="extensions.html#assert">Assertions as pre- or postconditions</a>
-<li><a href="extensions.html#prep">The preprocessor</a>
-<ul>
-<li><a href="extensions.html#prepcat">Concatenation of lines</a>
-<li><a href="extensions.html#prepinc">Inclusion of files</a>
-<li><a href="extensions.html#refine">The refinement preprocessor</a>
-<li><a href="extensions.html#prepsw">Switching the preprocessor on or off</a>
-</ul>
-</ul>
+
 <p><h3><a href="synopsis.html">Synopsis and options</a></h3>
 <ul>
 <li><a href="synopsis.html#synopsis">Synopsis</a>
@@ -161,9 +188,11 @@ July 2005
 </ul>
 <li><a href="synopsis.html#monitor">Monitor commands</a>
 </ul>
+
 <p><h3><a href="syntax.html">Context-free syntax summary</a></h3>
 <ul>
 <li><a href="syntax.html#basic">Notions and notation</a>
+<li><a href="syntax.html#reserved">Reserved symbols</a>
 <li><a href="syntax.html#coercions">Coercions</a>
 <li><a href="syntax.html#tags">Tags</a>
 <li><a href="syntax.html#program">Particular program</a>
@@ -181,6 +210,7 @@ July 2005
 <li><a href="syntax.html#pragments">Pragments</a>
 <li><a href="syntax.html#refinements">Refinements</a>
 </ul>
+
 <p><h3><a href="environ.html">The standard environment</a></h3>
 <ul>
 <li><a href="environ.html#envenq">Enquiries</a>
@@ -195,11 +225,13 @@ July 2005
 <li><a href="environ.html#envrng">Random number generator</a>
 <li><a href="environ.html#envmisc">Miscellaneous</a>
 </ul>
+
 <p><h3><a href="examples.html">Example Algol68G programs</a></h3>
 <ul>
 <li><a href="examples.html#introduction">Introduction</a>
 <li><a href="examples.html#code">Example programs</a>
 </ul>
+
 <p><h3><a href="resources.html">Algol 68 resources</a></h3>
 <ul>
 <li><a href="resources.html#history">A brief history of Algol 68</a>
@@ -207,7 +239,9 @@ July 2005
 <li><a href="resources.html#implementations">Algol 68 implementations</a>
 <li><a href="resources.html#ref">References</a>
 </ul>
+
 <p><h3><a href="thanks.html">Acknowledgements</a></h3>
+
 <p><h3><a href="license.html">GNU Free Documentation License</a></h3>
 
 </td>
@@ -227,12 +261,12 @@ Back-Cover Texts. A copy of the license is included in the section entitled
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
+<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 8</small>
+<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
 </font>
 </td>
 </table>

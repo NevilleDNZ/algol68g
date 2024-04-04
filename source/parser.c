@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -98,7 +98,6 @@ static void reduce_parameter_pack (NODE_T *);
 static void reduce_particular_program (NODE_T *);
 static void reduce_primaries (NODE_T *, int);
 static void reduce_primary_bits (NODE_T *, int);
-static void reduce_qualifiers (NODE_T *);
 static void reduce_right_to_left_constructs (NODE_T * q);
 static void reduce_row_proc_op_declarers (NODE_T *);
 static void reduce_secondaries (NODE_T *);
@@ -111,7 +110,6 @@ static void reduce_subordinate (NODE_T *, int);
 static void reduce_tertiaries (NODE_T *);
 static void reduce_union_pack (NODE_T *);
 static void reduce_units (NODE_T *);
-static void signal_wrong_exits (NODE_T *, int);
 
 /*!
 \brief insert node
@@ -182,7 +180,6 @@ static int whether_unit_terminator (NODE_T * p)
   case OUT_SYMBOL:
   case OUSE_SYMBOL:
   case ESAC_SYMBOL:
-  case FED_SYMBOL:
   case EDOC_SYMBOL:
   case OCCA_SYMBOL:
     {
@@ -245,7 +242,6 @@ static int whether_semicolon_less (NODE_T * p)
   case OUT_SYMBOL:
   case OUSE_SYMBOL:
   case ESAC_SYMBOL:
-  case FED_SYMBOL:
   case EDOC_SYMBOL:
   case OCCA_SYMBOL:
   case OD_SYMBOL:
@@ -284,7 +280,7 @@ static int get_good_attribute (NODE_T * p)
 }
 
 /*!
-\brief intelligible diagnostic from syntax tree branch
+\brief intelligible diagnostic_node from syntax tree branch
 \param p position in syntax tree, should not be NULL
 \param q
 \return
@@ -300,12 +296,12 @@ static char *phrase_to_text (NODE_T * p, NODE_T * q)
        && length < BUFFER_SIZE / 2; FORWARD (p)) {
     char *z = non_terminal_string (edit_line, get_good_attribute (p));
     if (strlen (buffer) > 1) {
-      strcat (buffer, " ");
+      strcat (buffer, ", ");
     }
     if (z != NULL) {
       strcat (buffer, z);
     } else if (SYMBOL (p) != NULL) {
-      sprintf (edit_line, "`%s'", SYMBOL (p));
+      sprintf (edit_line, "\"%s\"", SYMBOL (p));
       strcat (buffer, edit_line);
     }
     count++;
@@ -320,13 +316,13 @@ static char *phrase_to_text (NODE_T * p, NODE_T * q)
 /*
 This is a parenthesis checker. After this checker, we know that at least
 brackets are matched. This stabilises later parser phases.
-Top-down parsing is done to place error messages near offending lines.
+Top-down parsing is done to place error diagnostics near offending lines.
 */
 
 static char bracket_check_error_text[BUFFER_SIZE];
 
 /*!
-\brief intelligible messages for the bracket checker
+\brief intelligible diagnostics for the bracket checker
 \param txt
 \param n
 \param bra
@@ -338,9 +334,9 @@ static void bracket_check_error (char *txt, int n, char *bra, char *ket)
 {
   if (n != 0) {
     char b[BUFFER_SIZE];
-    sprintf (b, "`%s' without matching `%s'", (n > 0 ? bra : ket), (n > 0 ? ket : bra));
+    sprintf (b, "\"%s\" without matching \"%s\"", (n > 0 ? bra : ket), (n > 0 ? ket : bra));
     if (strlen (txt) > 0) {
-      strcat (txt, ", ");
+      strcat (txt, " and ");
     }
     strcat (txt, b);
   }
@@ -530,7 +526,7 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
     }
     if (q == NULL || WHETHER_NOT (q, ket)) {
       char *diag = bracket_check_diagnose (top);
-      diagnostic (A_SYNTAX_ERROR, p, PARENTHESIS_ERROR, strlen (diag) > 0 ? diag : "missing or unmatched keywords");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_PARENTHESIS, strlen (diag) > 0 ? diag : INFO_MISSING_KEYWORDS);
       longjmp (top_down_crash_exit, 1);
     }
     p = q;
@@ -551,7 +547,7 @@ void check_parenthesis (NODE_T * top)
 {
   if (!setjmp (top_down_crash_exit)) {
     if (bracket_check_parse (top, top) != NULL) {
-      diagnostic (A_SYNTAX_ERROR, top, PARENTHESIS_ERROR, "missing or unmatched keywords", NULL);
+      diagnostic_node (A_SYNTAX_ERROR, top, ERROR_PARENTHESIS, INFO_MISSING_KEYWORDS, NULL);
     }
   }
 }
@@ -573,9 +569,9 @@ static void top_down_diagnose (NODE_T * start, NODE_T * where, int clause, int e
 {
   NODE_T *issue = (where != NULL ? where : start);
   if (expected != 0) {
-    diagnostic (A_SYNTAX_ERROR, issue, "B expected in A near S L", expected, clause, start, start->info->line, NULL);
+    diagnostic_node (A_SYNTAX_ERROR, issue, ERROR_EXPECTED_NEAR, expected, clause, SYMBOL (start), start->info->line, NULL);
   } else {
-    diagnostic (A_SYNTAX_ERROR, issue, "missing or unbalanced keyword in A near S L", clause, start, start->info->line, NULL);
+    diagnostic_node (A_SYNTAX_ERROR, issue, ERROR_UNBALANCED_KEYWORD, clause, SYMBOL (start), start->info->line, NULL);
   }
 }
 
@@ -588,7 +584,7 @@ static void top_down_diagnose (NODE_T * start, NODE_T * where, int clause, int e
 static void tokens_exhausted (NODE_T * p, NODE_T * q)
 {
   if (p == NULL) {
-    diagnostic (A_SYNTAX_ERROR, q, KEYWORD_ERROR);
+    diagnostic_node (A_SYNTAX_ERROR, q, ERROR_KEYWORD);
     longjmp (top_down_crash_exit, 1);
   }
 }
@@ -662,8 +658,7 @@ static NODE_T *top_down_skip_loop_unit (NODE_T * p)
       if (p != NULL && whether_loop_keyword (p)) {
 	p = top_down_loop (p);
       }
-    } else if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, COMMA_SYMBOL)
-	       || WHETHER (p, EXIT_SYMBOL)) {
+    } else if (WHETHER (p, SEMI_SYMBOL) || WHETHER (p, COMMA_SYMBOL) || WHETHER (p, EXIT_SYMBOL)) {
 /* Statement separators. */
       return (p);
     } else {
@@ -894,31 +889,12 @@ static NODE_T *top_down_code (NODE_T * code_p)
 {
   NODE_T *edoc_p = top_down_series (NEXT (code_p));
   if (edoc_p == NULL || WHETHER_NOT (edoc_p, EDOC_SYMBOL)) {
-    diagnostic (A_SYNTAX_ERROR, code_p, KEYWORD_ERROR);
+    diagnostic_node (A_SYNTAX_ERROR, code_p, ERROR_KEYWORD);
     longjmp (top_down_crash_exit, 1);
     return (NULL);
   } else {
     make_sub (code_p, edoc_p, CODE_SYMBOL);
     return (NEXT (code_p));
-  }
-}
-
-/*!
-\brief branch out DEF .. FED
-\param def_p
-\return token from where to proceed
-**/
-
-static NODE_T *top_down_def (NODE_T * def_p)
-{
-  NODE_T *fed_p = top_down_series (NEXT (def_p));
-  if (fed_p == NULL || WHETHER_NOT (fed_p, FED_SYMBOL)) {
-    diagnostic (A_SYNTAX_ERROR, def_p, KEYWORD_ERROR);
-    longjmp (top_down_crash_exit, 1);
-    return (NULL);
-  } else {
-    make_sub (def_p, fed_p, DEF_SYMBOL);
-    return (NEXT (def_p));
   }
 }
 
@@ -1001,7 +977,7 @@ static NODE_T *top_down_acco (NODE_T * acco_p)
     make_sub (acco_p, occa_p, ACCO_SYMBOL);
     return (NEXT (acco_p));
   } else {
-    diagnostic (A_SYNTAX_ERROR, acco_p, KEYWORD_ERROR);
+    top_down_diagnose (acco_p, occa_p, ENCLOSED_CLAUSE, OCCA_SYMBOL);
     longjmp (top_down_crash_exit, 1);
     return (NULL);
   }
@@ -1062,7 +1038,6 @@ static NODE_T *top_down_case (NODE_T * case_p)
   NODE_T *in_p = top_down_series (NEXT (case_p)), *ouse_p;
   if (in_p == NULL || WHETHER_NOT (in_p, IN_SYMBOL)) {
     top_down_diagnose (case_p, in_p, ENCLOSED_CLAUSE, IN_SYMBOL);
-    diagnostic (A_SYNTAX_ERROR, case_p, KEYWORD_ERROR);
     longjmp (top_down_crash_exit, 1);
   }
   make_sub (case_p, PREVIOUS (in_p), CASE_SYMBOL);
@@ -1115,8 +1090,6 @@ NODE_T *top_down_skip_unit (NODE_T * p)
       p = top_down_if (p);
     } else if (WHETHER (p, CASE_SYMBOL)) {
       p = top_down_case (p);
-    } else if (WHETHER (p, DEF_SYMBOL)) {
-      p = top_down_def (p);
     } else if (WHETHER (p, CODE_SYMBOL)) {
       p = top_down_code (p);
     } else if (WHETHER (p, ACCO_SYMBOL)) {
@@ -1269,7 +1242,8 @@ static int serial_or_collateral (NODE_T * p)
   } else if (semis == 0 && exits == 0 && commas == 0) {
     return (SERIAL_CLAUSE);
   } else {
-    return (SOME_CLAUSE);
+/* Heuristic guess to give intelligible error message. */
+    return ((semis + exits) >= commas ? SERIAL_CLAUSE : COLLATERAL_CLAUSE);
   }
 }
 
@@ -1304,17 +1278,7 @@ Filling in gives one format for such construct; this helps later passes.
 
 static void not_supported (NODE_T * p)
 {
-  diagnostic (A_SYNTAX_ERROR, p, "this feature is not supported");
-}
-
-/*!
-\brief indicate future work
-\param p position in syntax tree, should not be NULL
-**/
-
-static void not_implemented_yet (NODE_T * p)
-{
-  diagnostic (A_SYNTAX_ERROR, p, "this feature has not been implemented yet");
+  diagnostic_node (A_SYNTAX_ERROR, p, ERROR_FEATURE_UNSUPPORTED, NULL);
 }
 
 /*!
@@ -1324,7 +1288,7 @@ static void not_implemented_yet (NODE_T * p)
 
 static void empty_clause (NODE_T * p)
 {
-  diagnostic (A_SYNTAX_ERROR, p, "clause does not yield a value");
+  diagnostic_node (A_SYNTAX_ERROR, p, ERROR_CLAUSE_WITHOUT_VALUE);
 }
 
 #ifndef HAVE_POSIX_THREADS
@@ -1336,10 +1300,21 @@ static void empty_clause (NODE_T * p)
 
 static void par_clause (NODE_T * p)
 {
-  diagnostic (A_WARNING | FORCE_DIAGNOSTIC, p, "A will be executed as A", PARALLEL_CLAUSE, COLLATERAL_CLAUSE);
+  diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_EXECUTED_AS, PARALLEL_CLAUSE, COLLATERAL_CLAUSE);
 }
 
 #endif
+
+/*!
+\brief diagnose for missing symbol
+\param p position in syntax tree, should not be NULL
+**/
+
+static void missing_symbol (NODE_T * p)
+{
+  NODE_T *q = (p != NULL && NEXT (p) != NULL) ? NEXT (p) : p;
+  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MISSING_SYMBOL);
+}
 
 /*!
 \brief diagnose for missing separator
@@ -1349,7 +1324,18 @@ static void par_clause (NODE_T * p)
 static void missing_separator (NODE_T * p)
 {
   NODE_T *q = (p != NULL && NEXT (p) != NULL) ? NEXT (p) : p;
-  diagnostic (A_SYNTAX_ERROR, q, "probably a missing semicolon, comma or exit nearby");
+  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MISSING_SEPARATOR);
+}
+
+/*!
+\brief diagnose for wrong separator
+\param p position in syntax tree, should not be NULL
+**/
+
+static void wrong_separator (NODE_T * p)
+{
+  NODE_T *q = (p != NULL && NEXT (p) != NULL) ? NEXT (p) : p;
+  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_WRONG_SEPARATOR);
 }
 
 /*!
@@ -1385,12 +1371,12 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     strcat (output_line, phrase_to_text (head, tail));
     io_write_string (STDOUT_FILENO, output_line);
   }
-  make_sub (head, tail, result);
-  va_end (list);
 /* Execute procedure in case reduction succeeds. */
   if (a != NULL) {
-    a (tail != NULL ? tail : head);
+    a (head);
   }
+  make_sub (head, tail, result);
+  va_end (list);
   if (z != NULL) {
     *z = A_TRUE;
   }
@@ -1455,7 +1441,6 @@ static void reduce_particular_program (NODE_T * p)
   q = p;
   f (q, NULL, NULL, PARTICULAR_PROGRAM, LABEL, ENCLOSED_CLAUSE, 0);
   f (q, NULL, NULL, PARTICULAR_PROGRAM, ENCLOSED_CLAUSE, 0);
-  f (q, NULL, NULL, PARTICULAR_PROGRAM, EXPORT_CLAUSE, 0);
   if (SUB (p) == NULL || NEXT (p) != NULL) {
     recover_from_error (p, PARTICULAR_PROGRAM, (error_count - old_error_count) > MAX_ERRORS);
   }
@@ -1472,7 +1457,7 @@ static void reduce_subordinate (NODE_T * p, int expect)
 {
 /*
 If this is unsuccessful then it will at least copy the resulting attribute
-as the parser can repair some faults. This gives less spurious messages.
+as the parser can repair some faults. This gives less spurious diagnostics.
 */
   if (p != NULL) {
     if (SUB (p) != NULL) {
@@ -1494,7 +1479,7 @@ as the parser can repair some faults. This gives less spurious messages.
 
 BOOL_T reduce_phrase (NODE_T * p, int expect)
 {
-  int old_error_count = error_count;
+  int old_error_count = error_count, old_error_count2;
   BOOL_T declarer_pack = (expect == STRUCTURE_PACK || expect == PARAMETER_PACK || expect == FORMAL_DECLARERS || expect == UNION_PACK || expect == SPECIFIER);
 /* Sample all info needed to decide whether a bold tag is operator or indicant. */
   extract_indicants (p);
@@ -1502,17 +1487,24 @@ BOOL_T reduce_phrase (NODE_T * p, int expect)
     extract_priorities (p);
     extract_operators (p);
   }
+  old_error_count2 = error_count;
   elaborate_bold_tags (p);
+  if ((error_count - old_error_count2) > 0) {
+    longjmp (bottom_up_crash_exit, 1);
+  }
 /* Now we can reduce declarers, knowing which bold tags are indicants. */
   reduce_declarers (p, expect);
 /* Parse the phrase, as appropriate. */
   if (!declarer_pack) {
+    old_error_count2 = error_count;
     extract_declarations (p);
+    if ((error_count - old_error_count2) > 0) {
+      longjmp (bottom_up_crash_exit, 1);
+    }
     extract_labels (p, expect);
     reduce_deeper_clauses_driver (p);
     reduce_statements (p, expect);
     reduce_right_to_left_constructs (p);
-    signal_wrong_exits (p, expect);
     reduce_constructs (p, expect);
     reduce_control_structure (p, expect);
   }
@@ -1688,38 +1680,14 @@ for instance "FI; OD". These provoke only a warning.
   for (; p != NULL; FORWARD (p)) {
     ignore_superfluous_semicolons (SUB (p));
     if (NEXT (p) != NULL && WHETHER (NEXT (p), SEMI_SYMBOL) && NEXT (NEXT (p)) == NULL) {
-      diagnostic (A_WARNING | FORCE_DIAGNOSTIC, NEXT (p), "superfluous S skipped");
+      diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, NEXT (p), WARNING_SKIPPED_SUPERFLUOUS, ATTRIBUTE (NEXT (p)));
       NEXT (p) = NULL;
     } else if (WHETHER (p, SEMI_SYMBOL) && whether_semicolon_less (NEXT (p))) {
-      /* diagnostic (A_WARNING | FORCE_DIAGNOSTIC, p, "superfluous S before A skipped", whether_semicolon_less (NEXT (p))); */
-      diagnostic (A_WARNING | FORCE_DIAGNOSTIC, p, "superfluous S skipped");
+      diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_SKIPPED_SUPERFLUOUS, ATTRIBUTE (p));
       if (PREVIOUS (p) != NULL) {
 	NEXT (PREVIOUS (p)) = NEXT (p);
       }
       PREVIOUS (NEXT (p)) = PREVIOUS (p);
-    }
-  }
-}
-
-/*!
-\brief signal badly used exits
-\param p position in syntax tree, should not be NULL
-\param expect information the parser may have on what is expected
-\return
-**/
-
-static void signal_wrong_exits (NODE_T * p, int expect)
-{
-  (void) expect;		/* currently no use for this. */
-  for (; p != NULL && NEXT (p) != NULL; FORWARD (p)) {
-    if (NEXT (p) != NULL && WHETHER (NEXT (p), EXIT_SYMBOL) && NEXT (NEXT (p)) == NULL) {
-      diagnostic (A_SYNTAX_ERROR, NEXT (p), "S must be followed by a labeled unit");
-      NEXT (p) = NULL;
-    } else if (WHETHER (p, EXIT_SYMBOL)) {
-      int z = whether_semicolon_less (NEXT (p));
-      if (z != 0) {
-	diagnostic (A_SYNTAX_ERROR, NEXT (p), "S must be followed by a labeled unit");
-      }
     }
   }
 }
@@ -1732,7 +1700,6 @@ static void signal_wrong_exits (NODE_T * p, int expect)
 
 static void reduce_constructs (NODE_T * p, int expect)
 {
-  reduce_qualifiers (p);
   reduce_basic_declarations (p);
   reduce_units (p);
   reduce_erroneous_units (p);
@@ -1747,10 +1714,6 @@ static void reduce_constructs (NODE_T * p, int expect)
 	reduce_labels (p);
 	if (expect == SOME_CLAUSE) {
 	  expect = serial_or_collateral (p);
-	  if (expect == SOME_CLAUSE) {
-	    diagnostic (A_SYNTAX_ERROR, p, "check for mixed use of semicolons, commas or exits in this clause");
-	    return;
-	  }
 	}
 	if (expect == SERIAL_CLAUSE) {
 	  reduce_serial_clauses (p);
@@ -1836,28 +1799,28 @@ static void reduce_small_declarers (NODE_T * p)
     if (whether (q, LONGETY, INDICANT, 0)) {
       int a;
       if (SUB (NEXT (q)) == NULL) {
-	diagnostic (A_SYNTAX_ERROR, NEXT (q), EXPECTED, "appropriate declarer");
+	diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
 	f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
       } else {
 	a = ATTRIBUTE (SUB (NEXT (q)));
 	if (a == INT_SYMBOL || a == REAL_SYMBOL || a == BITS_SYMBOL || a == BYTES_SYMBOL || a == COMPLEX_SYMBOL || a == COMPL_SYMBOL) {
 	  f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
 	} else {
-	  diagnostic (A_SYNTAX_ERROR, NEXT (q), EXPECTED, "appropriate declarer");
+	  diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
 	  f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
 	}
       }
     } else if (whether (q, SHORTETY, INDICANT, 0)) {
       int a;
       if (SUB (NEXT (q)) == NULL) {
-	diagnostic (A_SYNTAX_ERROR, NEXT (q), EXPECTED, "appropriate declarer");
+	diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
 	f (q, NULL, NULL, DECLARER, SHORTETY, INDICANT, 0);
       } else {
 	a = ATTRIBUTE (SUB (NEXT (q)));
 	if (a == INT_SYMBOL || a == REAL_SYMBOL || a == BITS_SYMBOL || a == BYTES_SYMBOL || a == COMPLEX_SYMBOL || a == COMPL_SYMBOL) {
 	  f (q, NULL, NULL, DECLARER, SHORTETY, INDICANT, 0);
 	} else {
-	  diagnostic (A_SYNTAX_ERROR, NEXT (q), EXPECTED, "appropriate declarer");
+	  diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_EXPECTED, INFO_APPROPRIATE_DECLARER);
 	  f (q, NULL, NULL, DECLARER, LONGETY, INDICANT, 0);
 	}
       }
@@ -2026,6 +1989,7 @@ static void reduce_struct_pack (NODE_T * p)
       f (q, NULL, &z, STRUCTURED_FIELD_LIST, STRUCTURED_FIELD, 0);
       f (q, NULL, &z, STRUCTURED_FIELD_LIST, STRUCTURED_FIELD_LIST, COMMA_SYMBOL, STRUCTURED_FIELD, 0);
       f (q, missing_separator, &z, STRUCTURED_FIELD_LIST, STRUCTURED_FIELD_LIST, STRUCTURED_FIELD, 0);
+      f (q, wrong_separator, &z, STRUCTURED_FIELD_LIST, STRUCTURED_FIELD_LIST, SEMI_SYMBOL, STRUCTURED_FIELD, 0);
     }
   }
   q = p;
@@ -2139,7 +2103,7 @@ static void reduce_deeper_clauses (NODE_T * p)
     reduce_subordinate (p, ENQUIRY_CLAUSE);
   } else if (WHETHER (p, BEGIN_SYMBOL)) {
     reduce_subordinate (p, SOME_CLAUSE);
-  } else if (WHETHER (p, THEN_SYMBOL) || WHETHER (p, ELSE_SYMBOL) || WHETHER (p, OUT_SYMBOL) || WHETHER (p, DO_SYMBOL) || WHETHER (p, ALT_DO_SYMBOL) || WHETHER (p, CODE_SYMBOL) || WHETHER (p, DEF_SYMBOL)) {
+  } else if (WHETHER (p, THEN_SYMBOL) || WHETHER (p, ELSE_SYMBOL) || WHETHER (p, OUT_SYMBOL) || WHETHER (p, DO_SYMBOL) || WHETHER (p, ALT_DO_SYMBOL) || WHETHER (p, CODE_SYMBOL)) {
     reduce_subordinate (p, SERIAL_CLAUSE);
   } else if (WHETHER (p, IN_SYMBOL)) {
     reduce_subordinate (p, COLLATERAL_CLAUSE);
@@ -2207,7 +2171,6 @@ static void reduce_primary_bits (NODE_T * p, int expect)
     f (q, NULL, NULL, ENCLOSED_CLAUSE, UNITED_CASE_CLAUSE, 0);
     f (q, NULL, NULL, ENCLOSED_CLAUSE, LOOP_CLAUSE, 0);
     f (q, NULL, NULL, ENCLOSED_CLAUSE, CODE_CLAUSE, 0);
-    f (q, NULL, NULL, ENCLOSED_CLAUSE, EXPORT_CLAUSE, 0);
   }
 }
 
@@ -2308,7 +2271,7 @@ routines for implementing formatted transput. This is a pragmatic system.
     case BITS_PATTERN:
       {
 	if (last_pat != NULL) {
-	  diagnostic (A_SYNTAX_ERROR, q, "A and A must be separated by a comma", ATTRIBUTE (last_pat), ATTRIBUTE (q));
+	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_COMMA_MUST_SEPARATE, ATTRIBUTE (last_pat), ATTRIBUTE (q));
 	}
 	last_pat = q;
 	break;
@@ -2641,7 +2604,7 @@ static void reduce_formulae (NODE_T * p)
 	  f (q, NULL, &z, FORMULA, MONADIC_FORMULA, OPERATOR, FORMULA, 0);
 	}
 	if (priority == 0 && z) {
-	  diagnostic (A_SYNTAX_ERROR, op, "no priority declaration for operator S", NULL);
+	  diagnostic_node (A_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
 	}
 	z = A_TRUE;
 	while (z) {
@@ -2657,7 +2620,7 @@ static void reduce_formulae (NODE_T * p)
 	    f (q, NULL, &z, FORMULA, FORMULA, OPERATOR, FORMULA, 0);
 	  }
 	  if (priority == 0 && z) {
-	    diagnostic (A_SYNTAX_ERROR, op, "no priority declaration for operator S", NULL);
+	    diagnostic_node (A_SYNTAX_ERROR, op, ERROR_NO_PRIORITY, NULL);
 	  }
 	}
       }
@@ -2735,21 +2698,6 @@ static void reduce_tertiaries (NODE_T * p)
 }
 
 /*!
-\brief reduce qualifiers in declarations
-\param p position in syntax tree, should not be NULL
-**/
-
-static void reduce_qualifiers (NODE_T * p)
-{
-  NODE_T *q;
-  for (q = p; q != NULL; FORWARD (q)) {
-    f (q, not_implemented_yet, NULL, ACCESS, PUBLIC_SYMBOL, 0);
-    f (q, not_implemented_yet, NULL, ACCESS, PRELUDE_SYMBOL, 0);
-    f (q, not_implemented_yet, NULL, ACCESS, POSTLUDE_SYMBOL, 0);
-  }
-}
-
-/*!
 \brief reduce declarations
 \param p position in syntax tree, should not be NULL
 **/
@@ -2757,15 +2705,6 @@ static void reduce_qualifiers (NODE_T * p)
 static void reduce_basic_declarations (NODE_T * p)
 {
   NODE_T *q;
-  for (q = p; q != NULL; FORWARD (q)) {
-    f (q, NULL, NULL, PRIORITY_DECLARATION, ACCESS, PRIO_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, PRIORITY, 0);
-    f (q, NULL, NULL, MODE_DECLARATION, ACCESS, MODE_SYMBOL, DEFINING_INDICANT, EQUALS_SYMBOL, DECLARER, 0);
-    f (q, NULL, NULL, MODE_DECLARATION, ACCESS, MODE_SYMBOL, DEFINING_INDICANT, EQUALS_SYMBOL, VOID_SYMBOL, 0);
-    f (q, NULL, NULL, PROCEDURE_DECLARATION, ACCESS, PROC_SYMBOL, DEFINING_IDENTIFIER, EQUALS_SYMBOL, ROUTINE_TEXT, 0);
-    f (q, NULL, NULL, PROCEDURE_VARIABLE_DECLARATION, ACCESS, PROC_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, ROUTINE_TEXT, 0);
-    f (q, NULL, NULL, PROCEDURE_VARIABLE_DECLARATION, ACCESS, QUALIFIER, PROC_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, ROUTINE_TEXT, 0);
-    f (q, NULL, NULL, BRIEF_OPERATOR_DECLARATION, ACCESS, OP_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, ROUTINE_TEXT, 0);
-  }
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, ENVIRON_NAME, ENVIRON_SYMBOL, ROW_CHAR_DENOTER, 0);
     f (q, NULL, NULL, PRIORITY_DECLARATION, PRIO_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, PRIORITY, 0);
@@ -2775,6 +2714,8 @@ static void reduce_basic_declarations (NODE_T * p)
     f (q, NULL, NULL, PROCEDURE_VARIABLE_DECLARATION, PROC_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, ROUTINE_TEXT, 0);
     f (q, NULL, NULL, PROCEDURE_VARIABLE_DECLARATION, QUALIFIER, PROC_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, ROUTINE_TEXT, 0);
     f (q, NULL, NULL, BRIEF_OPERATOR_DECLARATION, OP_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, ROUTINE_TEXT, 0);
+/* Errors. WILDCARD catches TERTIARY which catches IDENTIFIER. */
+    f (q, missing_symbol, NULL, PROCEDURE_DECLARATION, PROC_SYMBOL, WILDCARD, ROUTINE_TEXT, 0);
   }
   for (q = p; q != NULL; FORWARD (q)) {
     BOOL_T z;
@@ -2787,6 +2728,8 @@ static void reduce_basic_declarations (NODE_T * p)
       f (q, NULL, &z, PROCEDURE_DECLARATION, PROCEDURE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, EQUALS_SYMBOL, ROUTINE_TEXT, 0);
       f (q, NULL, &z, PROCEDURE_VARIABLE_DECLARATION, PROCEDURE_VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, ROUTINE_TEXT, 0);
       f (q, NULL, &z, BRIEF_OPERATOR_DECLARATION, BRIEF_OPERATOR_DECLARATION, COMMA_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, ROUTINE_TEXT, 0);
+/* Errors. WILDCARD catches TERTIARY which catches IDENTIFIER. */
+      f (q, missing_symbol, &z, PROCEDURE_DECLARATION, PROCEDURE_DECLARATION, COMMA_SYMBOL, WILDCARD, ROUTINE_TEXT, 0);
     }
     while (z);
   }
@@ -2941,13 +2884,6 @@ static void reduce_declaration_lists (NODE_T * p)
 {
   NODE_T *q;
   for (q = p; q != NULL; FORWARD (q)) {
-    f (q, NULL, NULL, IDENTITY_DECLARATION, ACCESS, DECLARER, DEFINING_IDENTIFIER, EQUALS_SYMBOL, UNIT, 0);
-    f (q, NULL, NULL, VARIABLE_DECLARATION, ACCESS, QUALIFIER, DECLARER, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0);
-    f (q, NULL, NULL, VARIABLE_DECLARATION, ACCESS, QUALIFIER, DECLARER, DEFINING_IDENTIFIER, 0);
-    f (q, NULL, NULL, VARIABLE_DECLARATION, ACCESS, DECLARER, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0);
-    f (q, NULL, NULL, VARIABLE_DECLARATION, ACCESS, DECLARER, DEFINING_IDENTIFIER, 0);
-  }
-  for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, IDENTITY_DECLARATION, DECLARER, DEFINING_IDENTIFIER, EQUALS_SYMBOL, UNIT, 0);
     f (q, NULL, NULL, VARIABLE_DECLARATION, QUALIFIER, DECLARER, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0);
     f (q, NULL, NULL, VARIABLE_DECLARATION, QUALIFIER, DECLARER, DEFINING_IDENTIFIER, 0);
@@ -2967,7 +2903,6 @@ static void reduce_declaration_lists (NODE_T * p)
     while (z);
   }
   for (q = p; q != NULL; FORWARD (q)) {
-    f (q, NULL, NULL, OPERATOR_DECLARATION, ACCESS, OPERATOR_PLAN, DEFINING_OPERATOR, EQUALS_SYMBOL, UNIT, 0);
     f (q, NULL, NULL, OPERATOR_DECLARATION, OPERATOR_PLAN, DEFINING_OPERATOR, EQUALS_SYMBOL, UNIT, 0);
   }
   for (q = p; q != NULL; FORWARD (q)) {
@@ -3014,6 +2949,37 @@ static void reduce_labels (NODE_T * p)
 }
 
 /*!
+\brief signal badly used exits
+\param p position in syntax tree, should not be NULL
+\param expect information the parser may have on what is expected
+\return
+**/
+
+static void precheck_serial_clause (NODE_T * q)
+{
+  NODE_T *p;
+  BOOL_T label_seen = A_FALSE;
+/* Wrong exits. */
+  for (p = q; p != NULL; FORWARD (p)) {
+    if (WHETHER (p, EXIT_SYMBOL)) {
+      if (NEXT (p) == NULL || WHETHER_NOT (NEXT (p), LABELED_UNIT)) {
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_LABELED_UNIT_MUST_FOLLOW);
+      }
+    }
+  }
+/* Wrong jumps and declarations. */
+  for (p = q; p != NULL; FORWARD (p)) {
+    if (WHETHER (p, LABELED_UNIT)) {
+      label_seen = A_TRUE;
+    } else if (WHETHER (p, DECLARATION_LIST)) {
+      if (label_seen) {
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_LABEL_BEFORE_DECLARATION);
+      }
+    }
+  }
+}
+
+/*!
 \brief reduce serial clauses
 \param p position in syntax tree, should not be NULL
 **/
@@ -3023,6 +2989,7 @@ static void reduce_serial_clauses (NODE_T * p)
   if (NEXT (p) != NULL) {
     NODE_T *q = NEXT (p);
     BOOL_T z;
+    precheck_serial_clause (p);
     f (q, NULL, NULL, SERIAL_CLAUSE, LABELED_UNIT, 0);
     f (q, NULL, NULL, SERIAL_CLAUSE, UNIT, 0);
     f (q, NULL, NULL, INITIALISER_SERIES, DECLARATION_LIST, 0);
@@ -3034,6 +3001,9 @@ static void reduce_serial_clauses (NODE_T * p)
 	f (q, NULL, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, SEMI_SYMBOL, LABELED_UNIT, 0);
 	f (q, NULL, &z, INITIALISER_SERIES, SERIAL_CLAUSE, SEMI_SYMBOL, DECLARATION_LIST, 0);
 	/* Errors. */
+	f (q, wrong_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, COMMA_SYMBOL, UNIT, 0);
+	f (q, wrong_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, COMMA_SYMBOL, LABELED_UNIT, 0);
+	f (q, wrong_separator, &z, INITIALISER_SERIES, SERIAL_CLAUSE, COMMA_SYMBOL, DECLARATION_LIST, 0);
 	f (q, missing_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, UNIT, 0);
 	f (q, missing_separator, &z, SERIAL_CLAUSE, SERIAL_CLAUSE, LABELED_UNIT, 0);
 	f (q, missing_separator, &z, INITIALISER_SERIES, SERIAL_CLAUSE, DECLARATION_LIST, 0);
@@ -3042,6 +3012,9 @@ static void reduce_serial_clauses (NODE_T * p)
 	f (q, NULL, &z, SERIAL_CLAUSE, INITIALISER_SERIES, SEMI_SYMBOL, LABELED_UNIT, 0);
 	f (q, NULL, &z, INITIALISER_SERIES, INITIALISER_SERIES, SEMI_SYMBOL, DECLARATION_LIST, 0);
 	/* Errors. */
+	f (q, wrong_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, COMMA_SYMBOL, UNIT, 0);
+	f (q, wrong_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, COMMA_SYMBOL, LABELED_UNIT, 0);
+	f (q, wrong_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, COMMA_SYMBOL, DECLARATION_LIST, 0);
 	f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, UNIT, 0);
 	f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, LABELED_UNIT, 0);
 	f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
@@ -3172,9 +3145,6 @@ static void reduce_enclosed_clause_bits (NODE_T * p, int expect)
     f (p, NULL, NULL, FORMAT_TEXT, FORMAT_DELIMITER_SYMBOL, FORMAT_DELIMITER_SYMBOL, 0);
   } else if (WHETHER (p, FORMAT_ITEM_OPEN)) {
     f (p, NULL, NULL, COLLECTION, FORMAT_ITEM_OPEN, PICTURE_LIST, FORMAT_ITEM_CLOSE, 0);
-  } else if (WHETHER (p, DEF_SYMBOL)) {
-/* Export-clauses are a future extension, but fragments are already here. */
-    f (p, not_implemented_yet, NULL, EXPORT_CLAUSE, DEF_SYMBOL, INITIALISER_SERIES, FED_SYMBOL, 0);
   } else if (WHETHER (p, CODE_SYMBOL)) {
     f (p, NULL, NULL, CODE_CLAUSE, CODE_SYMBOL, SERIAL_CLAUSE, EDOC_SYMBOL, 0);
   } else if (WHETHER (p, IF_SYMBOL)) {
@@ -3330,14 +3300,13 @@ static void reduce_enclosed_clauses (NODE_T * p)
 \brief substitute reduction when a phrase could not be parsed
 \param p position in syntax tree, should not be NULL
 \param expect information the parser may have on what is expected
-\param suppress suppresses a diagnostic message (nested c.q. related messages)
+\param suppress suppresses a diagnostic_node message (nested c.q. related diagnostics)
 \return
 **/
 
 static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
 {
-/* This routine does not do fancy things as that might introduce more errors. */
-  NODE_T *q = p;
+/* This routine does not do fancy things as that might introduce more errors. */ NODE_T *q = p;
   if (p == NULL) {
     return;
   }
@@ -3346,12 +3315,12 @@ static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
     if (expect == SOME_CLAUSE) {
       expect = serial_or_collateral (p);
     }
-    diagnostic (A_SYNTAX_ERROR, p, "in A, detected at `Y'", expect, phrase_to_text (p, NULL));
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_INVALID_SEQUENCE, expect, phrase_to_text (p, NULL), NULL);
     if (error_count >= MAX_ERRORS) {
       longjmp (bottom_up_crash_exit, 1);
     }
   }
-/* Try to prevent spurious messages by guessing what was expected. */
+/* Try to prevent spurious diagnostics by guessing what was expected. */
   while (NEXT (q) != NULL) {
     FORWARD (q);
   }
@@ -3367,8 +3336,6 @@ static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
     }
   } else if (WHETHER (p, FORMAT_DELIMITER_SYMBOL) && expect == FORMAT_TEXT) {
     make_sub (p, q, FORMAT_TEXT);
-  } else if (WHETHER (p, DEF_SYMBOL)) {
-    make_sub (p, q, EXPORT_CLAUSE);
   } else if (WHETHER (p, CODE_SYMBOL)) {
     make_sub (p, q, CODE_CLAUSE);
   } else if (WHETHER (p, THEN_BAR_SYMBOL) || WHETHER (p, CHOICE)) {
@@ -3415,22 +3382,22 @@ static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
 
 static void reduce_erroneous_units (NODE_T * p)
 {
-/* Constructs are reduced to units in an attempt to limit spurious messages. */
+/* Constructs are reduced to units in an attempt to limit spurious diagnostics. */
   NODE_T *q;
   for (q = p; q != NULL; FORWARD (q)) {
 /* Some implementations allow selection from a tertiary, when there is no risk
 of ambiguity. Algol68G follows RR, so some extra attention here to guide an
 unsuspecting user. */
     if (whether (q, SELECTOR, -SECONDARY, 0)) {
-      diagnostic (A_SYNTAX_ERROR, NEXT (q), SYNTAX_ERROR_EXPECTED, SECONDARY);
+      diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_SYNTAX_EXPECTED, SECONDARY);
       f (q, NULL, NULL, UNIT, SELECTOR, WILDCARD, 0);
     }
 /* Attention for identity relations that require tertiaries. */
     if (whether (q, -TERTIARY, IS_SYMBOL, TERTIARY, 0) || whether (q, TERTIARY, IS_SYMBOL, -TERTIARY, 0) || whether (q, -TERTIARY, IS_SYMBOL, -TERTIARY, 0)) {
-      diagnostic (A_SYNTAX_ERROR, NEXT (q), SYNTAX_ERROR_EXPECTED, TERTIARY);
+      diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_SYNTAX_EXPECTED, TERTIARY);
       f (q, NULL, NULL, UNIT, WILDCARD, IS_SYMBOL, WILDCARD, 0);
     } else if (whether (q, -TERTIARY, ISNT_SYMBOL, TERTIARY, 0) || whether (q, TERTIARY, ISNT_SYMBOL, -TERTIARY, 0) || whether (q, -TERTIARY, ISNT_SYMBOL, -TERTIARY, 0)) {
-      diagnostic (A_SYNTAX_ERROR, NEXT (q), SYNTAX_ERROR_EXPECTED, TERTIARY);
+      diagnostic_node (A_SYNTAX_ERROR, NEXT (q), ERROR_SYNTAX_EXPECTED, TERTIARY);
       f (q, NULL, NULL, UNIT, WILDCARD, ISNT_SYMBOL, WILDCARD, 0);
     }
   }
@@ -3513,7 +3480,7 @@ static void elaborate_bold_tags (NODE_T * p)
       switch (find_tag_definition (SYMBOL_TABLE (q), SYMBOL (q))) {
       case 0:
 	{
-	  diagnostic (A_SYNTAX_ERROR, q, UNDECLARED_TAG);
+	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
 	  break;
 	}
       case INDICANT:
@@ -3528,6 +3495,28 @@ static void elaborate_bold_tags (NODE_T * p)
 	}
       }
     }
+  }
+}
+
+/*!
+\brief skip declarer, or argument pack and declarer
+\param p position in syntax tree, should not be NULL
+\return node before token that is not part of pack or declarer 
+**/
+
+static NODE_T *skip_pack_declarer (NODE_T * p)
+{
+/* Skip () REF [] REF FLEX [] [] ... */
+  while (p != NULL && (WHETHER (p, SUB_SYMBOL) || WHETHER (p, OPEN_SYMBOL) || WHETHER (p, REF_SYMBOL) || WHETHER (p, FLEX_SYMBOL) || WHETHER (p, SHORT_SYMBOL) || WHETHER (p, LONG_SYMBOL))) {
+    FORWARD (p);
+  }
+/* Skip STRUCT (), UNION () or PROC [()]. */
+  if (p != NULL && (WHETHER (p, STRUCT_SYMBOL) || WHETHER (p, UNION_SYMBOL))) {
+    return (NEXT (p));
+  } else if (p != NULL && WHETHER (p, PROC_SYMBOL)) {
+    return (skip_pack_declarer (NEXT (p)));
+  } else {
+    return (p);
   }
 }
 
@@ -3549,7 +3538,8 @@ static void extract_indicants (NODE_T * p)
 	  ATTRIBUTE (q) = DEFINING_INDICANT;
 	  FORWARD (q);
 	  q->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
+	  q = skip_pack_declarer (NEXT (q));
+	  FORWARD (q);
 	} else {
 	  z = A_FALSE;
 	}
@@ -3565,10 +3555,10 @@ static void extract_indicants (NODE_T * p)
   RESET_ERRNO;\
   (k) = atoi (SYMBOL (q));\
   if (errno != 0) {\
-    diagnostic (A_SYNTAX_ERROR, (q), "error in priority");\
+    diagnostic_node (A_SYNTAX_ERROR, (q), ERROR_INVALID_PRIORITY, NULL);\
     (k) = MAX_PRIORITY;\
   } else if ((k) < 1 || (k) > MAX_PRIORITY) {\
-    diagnostic (A_SYNTAX_ERROR, (q), "priority range is 1 to D", MAX_PRIORITY);\
+    diagnostic_node (A_SYNTAX_ERROR, (q), ERROR_INVALID_PRIORITY, NULL);\
     (k) = MAX_PRIORITY;\
   }
 
@@ -3589,7 +3579,7 @@ static void extract_priorities (NODE_T * p)
 	if (whether (q, OPERATOR, OPERATOR, 0)) {
 	  int k;
 	  NODE_T *y = q;
-	  diagnostic (A_SYNTAX_ERROR, q, "invalid operator", NULL);
+	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
 	  ATTRIBUTE (q) = DEFINING_OPERATOR;
 /* Remove one superfluous operator, and hope it was only one.   	 */
 	  NEXT (q) = NEXT (NEXT (q));
@@ -3634,7 +3624,7 @@ static void extract_priorities (NODE_T * p)
 	    add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
 	    FORWARD (q);
 	  } else {
-	    diagnostic (A_SYNTAX_ERROR, p, SYNTAX_ERROR_EXPECTED, EQUALS_SYMBOL, NULL);
+	    diagnostic_node (A_SYNTAX_ERROR, (q != NULL ? q : p), ERROR_SYNTAX_EXPECTED, EQUALS_SYMBOL, NULL);
 	  }
 	} else {
 	  z = A_FALSE;
@@ -3656,58 +3646,59 @@ static void extract_operators (NODE_T * p)
 {
   NODE_T *q = p;
   while (q != NULL) {
-    if (WHETHER (q, OP_SYMBOL)) {
+    if (WHETHER_NOT (q, OP_SYMBOL)) {
+      FORWARD (q);
+    } else {
       BOOL_T z = A_TRUE;
-/* Skip operator plan until next item is a candidate operator. */
-      while (NEXT (q) != NULL && !(WHETHER (NEXT (q), OPERATOR) || WHETHER (NEXT (q), BOLD_TAG)
-				   || WHETHER (NEXT (q), EQUALS_SYMBOL))) {
-	FORWARD (q);
+/* Skip operator plan. */
+      if (NEXT (q) != NULL && WHETHER (NEXT (q), OPEN_SYMBOL)) {
+	q = skip_pack_declarer (NEXT (q));
       }
 /* Sample operators. */
-      do {
-	FORWARD (q);
+      if (q != NULL) {
+	do {
+	  FORWARD (q);
 /* An unacceptable operator tag like ++ or && gives strange errors so we catch it here. */
-	if (whether (q, OPERATOR, OPERATOR, 0)) {
-	  diagnostic (A_SYNTAX_ERROR, q, "invalid operator", NULL);
-	  ATTRIBUTE (q) = DEFINING_OPERATOR;
-	  add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
-	  NEXT (q) = NEXT (NEXT (q));	/* Remove one superfluous operator, and hope it was only one. */
-	  PREVIOUS (NEXT (q)) = q;
-	  FORWARD (q);
-	  q->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
-	} else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0)
-		   || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)
-		   || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
-	  ATTRIBUTE (q) = DEFINING_OPERATOR;
-	  add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
-	  FORWARD (q);
-	  q->attribute = ALT_EQUALS_SYMBOL;
-	  q = skip_unit (q);
-	} else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG)
-				 || WHETHER (q, EQUALS_SYMBOL))) {
-/* The scanner cannot separate operator and "=" sign so we do this here. */
-	  int len = (int) strlen (SYMBOL (q));
-	  if (len > 1 && SYMBOL (q)[len - 1] == '=') {
-	    char *sym = (char *) get_temp_heap_space (len);
-	    strncpy (sym, SYMBOL (q), len - 1);
-	    sym[len] = '\0';
-	    SYMBOL (q) = TEXT (add_token (&top_token, sym));
+	  if (whether (q, OPERATOR, OPERATOR, 0)) {
+	    diagnostic_node (A_SYNTAX_ERROR, q, ERROR_INVALID_OPERATOR_TAG, NULL);
 	    ATTRIBUTE (q) = DEFINING_OPERATOR;
-	    insert_node (q, ALT_EQUALS_SYMBOL);
+	    add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
+	    NEXT (q) = NEXT (NEXT (q));	/* Remove one superfluous operator, and hope it was only one. */
+	    PREVIOUS (NEXT (q)) = q;
+	    FORWARD (q);
+	    q->attribute = ALT_EQUALS_SYMBOL;
+	    q = skip_unit (q);
+	  } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0)
+		     || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)
+		     || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
+	    ATTRIBUTE (q) = DEFINING_OPERATOR;
 	    add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
 	    FORWARD (q);
+	    q->attribute = ALT_EQUALS_SYMBOL;
 	    q = skip_unit (q);
+	  } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG)
+				   || WHETHER (q, EQUALS_SYMBOL))) {
+/* The scanner cannot separate operator and "=" sign so we do this here. */
+	    int len = (int) strlen (SYMBOL (q));
+	    if (len > 1 && SYMBOL (q)[len - 1] == '=') {
+	      char *sym = (char *) get_temp_heap_space (len);
+	      strncpy (sym, SYMBOL (q), len - 1);
+	      sym[len] = '\0';
+	      SYMBOL (q) = TEXT (add_token (&top_token, sym));
+	      ATTRIBUTE (q) = DEFINING_OPERATOR;
+	      insert_node (q, ALT_EQUALS_SYMBOL);
+	      add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
+	      FORWARD (q);
+	      q = skip_unit (q);
+	    } else {
+	      diagnostic_node (A_SYNTAX_ERROR, (q != NULL ? q : p), ERROR_SYNTAX_EXPECTED, EQUALS_SYMBOL, NULL);
+	    }
 	  } else {
-	    diagnostic (A_SYNTAX_ERROR, p, SYNTAX_ERROR_EXPECTED, EQUALS_SYMBOL, NULL);
+	    z = A_FALSE;
 	  }
-	} else {
-	  z = A_FALSE;
 	}
+	while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
       }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
-    } else {
-      FORWARD (q);
     }
   }
 }
@@ -3753,7 +3744,7 @@ static void extract_identities (NODE_T * p)
 	  q = skip_unit (q);
 	} else if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	  diagnostic (A_SYNTAX_ERROR, q, SYNTAX_ERROR_MIXED);
+	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
 	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
 	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
 	  (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
@@ -3785,7 +3776,7 @@ static void extract_variables (NODE_T * p)
 	if (whether (q, IDENTIFIER, 0)) {
 	  if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	    diagnostic (A_SYNTAX_ERROR, q, SYNTAX_ERROR_MIXED);
+	    diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
 	    NEXT (q)->attribute = ASSIGN_SYMBOL;
 	  }
 	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
@@ -3816,15 +3807,14 @@ static void extract_proc_identities (NODE_T * p)
       do {
 	FORWARD (q);
 	if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
-	  TAG_T *t = add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL,
-			      NORMAL_IDENTIFIER);
+	  TAG_T *t = add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
 	  t->in_proc = A_TRUE;
 	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
 	  (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
 	  q = skip_unit (q);
 	} else if (whether (q, IDENTIFIER, ASSIGN_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	  diagnostic (A_SYNTAX_ERROR, q, SYNTAX_ERROR_MIXED);
+	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
 	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
 	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
 	  (FORWARD (q))->attribute = ALT_EQUALS_SYMBOL;
@@ -3859,7 +3849,7 @@ static void extract_proc_variables (NODE_T * p)
 	  q = skip_unit (FORWARD (q));
 	} else if (whether (q, IDENTIFIER, EQUALS_SYMBOL, 0)) {
 /* Handle common error in ALGOL 68 programs. */
-	  diagnostic (A_SYNTAX_ERROR, q, SYNTAX_ERROR_MIXED);
+	  diagnostic_node (A_SYNTAX_ERROR, q, ERROR_SYNTAX_MIXED_DECLARATION);
 	  add_tag (SYMBOL_TABLE (p), IDENTIFIER, q, NULL, NORMAL_IDENTIFIER);
 	  ATTRIBUTE (q) = DEFINING_IDENTIFIER;
 	  (FORWARD (q))->attribute = ASSIGN_SYMBOL;
@@ -3922,7 +3912,7 @@ static void extract_declarations (NODE_T * p)
 	  PRIO (q->info) = 0;
 	}
       } else {
-	diagnostic (A_SYNTAX_ERROR, q, UNDECLARED_TAG);
+	diagnostic_node (A_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
 	PRIO (q->info) = 1;
       }
     }
@@ -3930,23 +3920,6 @@ static void extract_declarations (NODE_T * p)
 }
 
 /* A posteriori checks of the syntax tree built by the BU parser. */
-
-/*!
-\brief check import-export clause
-\param p position in syntax tree, should not be NULL
-**/
-
-static void check_export_clause (NODE_T * p)
-{
-/* Export-clauses are a future extension, but parts are already here. */
-  for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, UNIT)) {
-      diagnostic (A_SYNTAX_ERROR, p, "export clause must be a proper declaration list");
-    } else {
-      check_export_clause (SUB (p));
-    }
-  }
-}
 
 /*!
 \brief count pictures
@@ -3972,13 +3945,11 @@ static void count_pictures (NODE_T * p, int *k)
 void bottom_up_error_check (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, EXPORT_CLAUSE)) {
-      check_export_clause (SUB (p));
-    } else if (WHETHER (p, BOOLEAN_PATTERN)) {
+    if (WHETHER (p, BOOLEAN_PATTERN)) {
       int k = 0;
       count_pictures (SUB (p), &k);
       if (k != 2) {
-	diagnostic (A_SYNTAX_ERROR, p, "A should have two pictures", ATTRIBUTE (p), NULL);
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_FORMAT_PICTURE_NUMBER, ATTRIBUTE (p), NULL);
       }
     } else {
       bottom_up_error_check (SUB (p));
@@ -4064,7 +4035,7 @@ void rearrange_goto_less_jumps (NODE_T * p)
 static void victal_check_generator (NODE_T * p)
 {
   if (!victal_check_declarer (NEXT (p), ACTUAL_DECLARER_MARK)) {
-    diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "actual declarer");
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
   }
 }
 
@@ -4103,12 +4074,12 @@ static void victal_check_operator_dec (NODE_T * p)
     BOOL_T z = A_TRUE;
     victal_check_formal_pack (NEXT (p), FORMAL_DECLARER_MARK, &z);
     if (!z) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarers");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarers");
     }
     FORWARD (p);
   }
   if (!victal_check_declarer (NEXT (p), FORMAL_DECLARER_MARK)) {
-    diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer");
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
   }
 }
 
@@ -4128,7 +4099,7 @@ static void victal_check_mode_dec (NODE_T * p)
       victal_check_mode_dec (NEXT (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, ACTUAL_DECLARER_MARK)) {
-	diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "actual declarer");
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
       }
     }
   }
@@ -4152,7 +4123,7 @@ static void victal_check_variable_dec (NODE_T * p)
       victal_checker (SUB (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, ACTUAL_DECLARER_MARK)) {
-	diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "actual declarer");
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual declarer");
       }
       victal_check_variable_dec (NEXT (p));
     }
@@ -4177,7 +4148,7 @@ static void victal_check_identity_dec (NODE_T * p)
       victal_checker (SUB (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, FORMAL_DECLARER_MARK)) {
-	diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer");
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
       }
       victal_check_identity_dec (NEXT (p));
     }
@@ -4219,12 +4190,12 @@ static void victal_check_routine_text (NODE_T * p)
     BOOL_T z = A_TRUE;
     victal_check_routine_pack (p, FORMAL_DECLARER_MARK, &z);
     if (!z) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarers");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarers");
     }
     FORWARD (p);
   }
   if (!victal_check_declarer (p, FORMAL_DECLARER_MARK)) {
-    diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer");
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
   }
   victal_checker (NEXT (p));
 }
@@ -4302,11 +4273,11 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
   } else if (WHETHER (p, BOUNDS)) {
     victal_checker (SUB (p));
     if (x == FORMAL_DECLARER_MARK) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal bounds");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal bounds");
       victal_check_declarer (NEXT (p), x);
       return (A_TRUE);
     } else if (x == VIRTUAL_DECLARER_MARK) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "virtual bounds");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "virtual bounds");
       victal_check_declarer (NEXT (p), x);
       return (A_TRUE);
     } else {
@@ -4315,7 +4286,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
   } else if (WHETHER (p, FORMAL_BOUNDS)) {
     victal_checker (SUB (p));
     if (x == ACTUAL_DECLARER_MARK) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "actual bounds");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "actual bounds");
       victal_check_declarer (NEXT (p), x);
       return (A_TRUE);
     } else {
@@ -4329,7 +4300,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
     BOOL_T z = A_TRUE;
     victal_check_union_pack (NEXT (p), FORMAL_DECLARER_MARK, &z);
     if (!z) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer pack");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer pack");
     }
     return (A_TRUE);
   } else if (WHETHER (p, PROC_SYMBOL)) {
@@ -4337,12 +4308,12 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
       BOOL_T z = A_TRUE;
       victal_check_formal_pack (NEXT (p), FORMAL_DECLARER_MARK, &z);
       if (!z) {
-	diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer");
+	diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
       }
       FORWARD (p);
     }
     if (!victal_check_declarer (NEXT (p), FORMAL_DECLARER_MARK)) {
-      diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer");
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
     }
     return (A_TRUE);
   } else {
@@ -4358,7 +4329,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
 static void victal_check_cast (NODE_T * p)
 {
   if (!victal_check_declarer (p, FORMAL_DECLARER_MARK)) {
-    diagnostic (A_SYNTAX_ERROR, p, EXPECTED, "formal declarer");
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_EXPECTED, "formal declarer");
     victal_checker (NEXT (p));
   }
 }
@@ -4387,6 +4358,36 @@ void victal_checker (NODE_T * p)
       victal_check_cast (SUB (p));
     } else {
       victal_checker (SUB (p));
+    }
+  }
+}
+
+/*
+\brief set nests for diagnostics
+\param p position in syntax tree, should not be NULL
+\param s start of enclosing nest
+*/
+
+void set_nests (NODE_T * p, NODE_T * s)
+{
+  for (; p != NULL; FORWARD (p)) {
+    NEST (p) = s;
+    if (WHETHER (p, PARTICULAR_PROGRAM)) {
+      set_nests (SUB (p), p);
+    } else if (WHETHER (p, CLOSED_CLAUSE) && NUMBER (LINE (p)) != 0) {
+      set_nests (SUB (p), p);
+    } else if (WHETHER (p, COLLATERAL_CLAUSE) && NUMBER (LINE (p)) != 0) {
+      set_nests (SUB (p), p);
+    } else if (WHETHER (p, CONDITIONAL_CLAUSE) && NUMBER (LINE (p)) != 0) {
+      set_nests (SUB (p), p);
+    } else if (WHETHER (p, INTEGER_CASE_CLAUSE) && NUMBER (LINE (p)) != 0) {
+      set_nests (SUB (p), p);
+    } else if (WHETHER (p, UNITED_CASE_CLAUSE) && NUMBER (LINE (p)) != 0) {
+      set_nests (SUB (p), p);
+    } else if (WHETHER (p, LOOP_CLAUSE) && NUMBER (LINE (p)) != 0) {
+      set_nests (SUB (p), p);
+    } else {
+      set_nests (SUB (p), s);
     }
   }
 }

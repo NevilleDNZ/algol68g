@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -44,23 +44,18 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define MAX_TRANSPUT_BUFFER	64	/* Some OS's open only 64 files. */
 
 enum
-{ INPUT_BUFFER = 0, OUTPUT_BUFFER, EDIT_BUFFER, UNFORMATTED_BUFFER, FORMATTED_BUFFER, DOMAIN_BUFFER, PATH_BUFFER, REQUEST_BUFFER, CONTENT_BUFFER, FIXED_TRANSPUT_BUFFERS
+{ INPUT_BUFFER = 0, OUTPUT_BUFFER, EDIT_BUFFER, UNFORMATTED_BUFFER, FORMATTED_BUFFER, DOMAIN_BUFFER, PATH_BUFFER, REQUEST_BUFFER, CONTENT_BUFFER, STRING_BUFFER, PATTERN_BUFFER, REPLACE_BUFFER, FIXED_TRANSPUT_BUFFERS
 };
+
+extern A68_CHANNEL stand_in_channel, stand_out_channel, stand_draw_channel, stand_back_channel, stand_error_channel, associate_channel;
 
 extern GENIE_PROCEDURE genie_associate;
 extern GENIE_PROCEDURE genie_bin_possible;
-extern GENIE_PROCEDURE genie_get_possible;
-extern GENIE_PROCEDURE genie_put_possible;
-extern GENIE_PROCEDURE genie_reset_possible;
-extern GENIE_PROCEDURE genie_set_possible;
-extern GENIE_PROCEDURE genie_draw_possible;
-extern GENIE_PROCEDURE genie_compressible;
 extern GENIE_PROCEDURE genie_blank_char;
-extern GENIE_PROCEDURE genie_newline_char;
-extern GENIE_PROCEDURE genie_formfeed_char;
-extern GENIE_PROCEDURE genie_tab_char;
 extern GENIE_PROCEDURE genie_close;
+extern GENIE_PROCEDURE genie_compressible;
 extern GENIE_PROCEDURE genie_create;
+extern GENIE_PROCEDURE genie_draw_possible;
 extern GENIE_PROCEDURE genie_erase;
 extern GENIE_PROCEDURE genie_error_char;
 extern GENIE_PROCEDURE genie_establish;
@@ -69,16 +64,19 @@ extern GENIE_PROCEDURE genie_fixed;
 extern GENIE_PROCEDURE genie_flip_char;
 extern GENIE_PROCEDURE genie_float;
 extern GENIE_PROCEDURE genie_flop_char;
+extern GENIE_PROCEDURE genie_formfeed_char;
+extern GENIE_PROCEDURE genie_get_possible;
 extern GENIE_PROCEDURE genie_init_transput;
 extern GENIE_PROCEDURE genie_lock;
 extern GENIE_PROCEDURE genie_new_line;
 extern GENIE_PROCEDURE genie_new_page;
+extern GENIE_PROCEDURE genie_newline_char;
 extern GENIE_PROCEDURE genie_on_file_end;
-extern GENIE_PROCEDURE genie_on_page_end;
-extern GENIE_PROCEDURE genie_on_line_end;
 extern GENIE_PROCEDURE genie_on_format_end;
 extern GENIE_PROCEDURE genie_on_format_error;
+extern GENIE_PROCEDURE genie_on_line_end;
 extern GENIE_PROCEDURE genie_on_open_error;
+extern GENIE_PROCEDURE genie_on_page_end;
 extern GENIE_PROCEDURE genie_on_transput_error;
 extern GENIE_PROCEDURE genie_on_value_error;
 extern GENIE_PROCEDURE genie_open;
@@ -97,7 +95,9 @@ extern GENIE_PROCEDURE genie_print_longlong_int;
 extern GENIE_PROCEDURE genie_print_longlong_real;
 extern GENIE_PROCEDURE genie_print_real;
 extern GENIE_PROCEDURE genie_print_string;
+extern GENIE_PROCEDURE genie_put_possible;
 extern GENIE_PROCEDURE genie_read;
+extern GENIE_PROCEDURE genie_read_bin;
 extern GENIE_PROCEDURE genie_read_bin_file;
 extern GENIE_PROCEDURE genie_read_bits;
 extern GENIE_PROCEDURE genie_read_bool;
@@ -118,9 +118,13 @@ extern GENIE_PROCEDURE genie_read_longlong_real;
 extern GENIE_PROCEDURE genie_read_real;
 extern GENIE_PROCEDURE genie_read_string;
 extern GENIE_PROCEDURE genie_reset;
+extern GENIE_PROCEDURE genie_reset_possible;
+extern GENIE_PROCEDURE genie_set_possible;
 extern GENIE_PROCEDURE genie_space;
+extern GENIE_PROCEDURE genie_tab_char;
 extern GENIE_PROCEDURE genie_whole;
 extern GENIE_PROCEDURE genie_write;
+extern GENIE_PROCEDURE genie_write_bin;
 extern GENIE_PROCEDURE genie_write_bin_file;
 extern GENIE_PROCEDURE genie_write_file;
 extern GENIE_PROCEDURE genie_write_file_format;
@@ -154,7 +158,6 @@ extern GENIE_PROCEDURE genie_make_device;
 
 extern FILE_T open_physical_file (NODE_T *, A68_REF, int, mode_t);
 extern NODE_T *get_next_format_pattern (NODE_T *, A68_REF, BOOL_T);
-extern unsigned long a68g_strtoul (char *, char **, int);
 extern char *error_chars (char *, int);
 extern char *fixed (NODE_T * p);
 extern char *fleet (NODE_T * p);
@@ -172,6 +175,7 @@ extern int get_transput_buffer_index (int);
 extern int get_transput_buffer_length (int);
 extern int get_transput_buffer_size (int);
 extern int get_unblocked_transput_buffer (NODE_T *);
+extern unsigned long a68g_strtoul (char *, char **, int);
 extern void add_a_string_transput_buffer (NODE_T *, int, BYTE_T *);
 extern void add_char_transput_buffer (NODE_T *, int, char);
 extern void add_string_from_stack_transput_buffer (NODE_T *, int);

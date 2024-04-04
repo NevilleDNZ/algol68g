@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -51,12 +51,35 @@ void math_rte (NODE_T * p, BOOL_T z, MOID_T * m, const char *t)
 {
   if (z) {
     if (t == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "M math error", m, NULL);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, m, NULL);
     } else {
-      diagnostic (A_RUNTIME_ERROR, p, "M math error (Z)", m, t);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH_INFO, m, t);
     }
     exit_genie (p, A_RUNTIME_ERROR);
   }
+}
+
+/*!
+\brief generic procedure for OP AND BECOMES (+:=, -:=, ...)
+\param p position in syntax tree, should not be NULL
+\param ref mode of destination
+\param f pointer to function that performs operation
+**/
+
+void genie_f_and_becomes (NODE_T * p, MOID_T * ref, GENIE_PROCEDURE * f)
+{
+  MOID_T *mode = SUB (ref);
+  int size = MOID_SIZE (mode);
+  BYTE_T *src = STACK_OFFSET (-size), *addr;
+  A68_REF *dst = (A68_REF *) STACK_OFFSET (-size - SIZE_OF (A68_REF));
+  TEST_NIL (p, *dst, ref);
+  addr = ADDRESS (dst);
+  PUSH (p, addr, size);
+  GENIE_CHECK_INITIALISATION (p, STACK_OFFSET (-size), mode);
+  PUSH (p, src, size);
+  f (p);
+  POP (p, addr, size);
+  DECREMENT_STACK_POINTER (p, size);
 }
 
 /* Environment enquiries. */
@@ -223,7 +246,7 @@ void genie_max_bits (NODE_T * p)
 }
 
 /*!
-\brief gLONG BITS long max bits
+\brief LONG BITS long max bits
 \param p position in syntax tree, should not be NULL
 **/
 
@@ -399,7 +422,7 @@ void genie_over_int (NODE_T * p)
   A68_INT *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_INT);
   if (j->value == 0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   i->value /= j->value;
@@ -416,7 +439,7 @@ void genie_mod_int (NODE_T * p)
   int k;
   POP_OPERAND_ADDRESSES (p, i, j, A68_INT);
   if (j->value == 0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   k = i->value % j->value;
@@ -438,7 +461,7 @@ void genie_div_int (NODE_T * p)
   POP_INT (p, &j);
   POP_INT (p, &i);
   if (j.value == 0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   PUSH_REAL (p, (double) (i.value) / (double) (j.value));
@@ -455,7 +478,7 @@ void genie_pow_int (NODE_T * p)
   int expo, mult, prod;
   POP_INT (p, &j);
   if (j.value < 0) {
-    diagnostic (A_RUNTIME_ERROR, p, "invalid M exponent", MODE (INT), j.value);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EXPONENT_INVALID, MODE (INT), j.value);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   POP_INT (p, &i);
@@ -499,15 +522,7 @@ A68_CMP_INT (genie_ge_int, p, >=);
 
 void genie_plusab_int (NODE_T * p)
 {
-  A68_INT *i, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, i, A68_INT);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_INT));
-  address = (A68_INT *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (INT));
-  TEST_INT_ADDITION (p, address->value, i->value);
-  address->value += i->value;
+  genie_f_and_becomes (p, MODE (REF_INT), genie_add_int);
 }
 
 /*!
@@ -517,15 +532,7 @@ void genie_plusab_int (NODE_T * p)
 
 void genie_minusab_int (NODE_T * p)
 {
-  A68_INT *i, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, i, A68_INT);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_INT));
-  address = (A68_INT *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (INT));
-  TEST_INT_ADDITION (p, address->value, -i->value);
-  address->value -= i->value;
+  genie_f_and_becomes (p, MODE (REF_INT), genie_sub_int);
 }
 
 /*!
@@ -535,15 +542,7 @@ void genie_minusab_int (NODE_T * p)
 
 void genie_timesab_int (NODE_T * p)
 {
-  A68_INT *i, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, i, A68_INT);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_INT));
-  address = (A68_INT *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (INT));
-  TEST_TIMES_OVERFLOW_INT (p, address->value, i->value);
-  address->value *= i->value;
+  genie_f_and_becomes (p, MODE (REF_INT), genie_mul_int);
 }
 
 /*!
@@ -553,18 +552,7 @@ void genie_timesab_int (NODE_T * p)
 
 void genie_overab_int (NODE_T * p)
 {
-  A68_INT *i, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, i, A68_INT);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_INT));
-  address = (A68_INT *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (INT));
-  if (i->value == 0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (INT));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  address->value /= i->value;
+  genie_f_and_becomes (p, MODE (REF_INT), genie_over_int);
 }
 
 /*!
@@ -574,23 +562,7 @@ void genie_overab_int (NODE_T * p)
 
 void genie_modab_int (NODE_T * p)
 {
-  A68_INT *i, *address;
-  A68_REF *z;
-  int k;
-  POP_ADDRESS (p, i, A68_INT);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_INT));
-  address = (A68_INT *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (INT));
-  if (i->value == 0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (INT));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  k = address->value % i->value;
-  if (k < 0) {
-    k += (i->value >= 0 ? i->value : -i->value);
-  }
-  address->value = k;
+  genie_f_and_becomes (p, MODE (REF_INT), genie_mod_int);
 }
 
 /*!
@@ -632,7 +604,7 @@ void genie_lengthen_unsigned_to_long_mp (NODE_T * p)
 
 void genie_shorten_long_mp_to_int (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   DECREMENT_STACK_POINTER (p, size);
@@ -647,7 +619,7 @@ void genie_shorten_long_mp_to_int (NODE_T * p)
 
 void genie_odd_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   DECREMENT_STACK_POINTER (p, size);
@@ -668,7 +640,7 @@ void genie_odd_long_mp (NODE_T * p)
 void test_long_int_range (NODE_T * p, MP_DIGIT_T * z, MOID_T * m)
 {
   if (!check_mp_int (z, m)) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, m);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, m);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -680,7 +652,7 @@ void test_long_int_range (NODE_T * p, MP_DIGIT_T * z, MOID_T * m)
 
 void genie_add_long_int (NODE_T * p)
 {
-  MOID_T *m = MOID (PACK (MOID (p)));
+  MOID_T *m = RHS_MODE (p);
   int digits = get_mp_digits (m), size = get_mp_size (m);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -697,7 +669,7 @@ void genie_add_long_int (NODE_T * p)
 
 void genie_minus_long_int (NODE_T * p)
 {
-  MOID_T *m = MOID (PACK (MOID (p)));
+  MOID_T *m = RHS_MODE (p);
   int digits = get_mp_digits (m), size = get_mp_size (m);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -714,7 +686,7 @@ void genie_minus_long_int (NODE_T * p)
 
 void genie_mul_long_int (NODE_T * p)
 {
-  MOID_T *m = MOID (PACK (MOID (p)));
+  MOID_T *m = RHS_MODE (p);
   int digits = get_mp_digits (m), size = get_mp_size (m);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -731,7 +703,7 @@ void genie_mul_long_int (NODE_T * p)
 
 void genie_pow_long_mp_int_int (NODE_T * p)
 {
-  MOID_T *m = MOID (PACK (MOID (p)));
+  MOID_T *m = LHS_MODE (p);
   int digits = get_mp_digits (m), size = get_mp_size (m);
   A68_INT k;
   MP_DIGIT_T *x;
@@ -749,19 +721,8 @@ void genie_pow_long_mp_int_int (NODE_T * p)
 
 void genie_plusab_long_int (NODE_T * p)
 {
-  MOID_T *m = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (m), size = get_mp_size (m);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, m);
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  add_mp (p, x, x, y, digits);
-  test_long_int_range (p, x, m);
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_add_long_int);
 }
 
 /*!
@@ -771,19 +732,8 @@ void genie_plusab_long_int (NODE_T * p)
 
 void genie_minusab_long_int (NODE_T * p)
 {
-  MOID_T *m = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (m), size = get_mp_size (m);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, m);
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  sub_mp (p, x, x, y, digits);
-  test_long_int_range (p, x, m);
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_minus_long_int);
 }
 
 /*!
@@ -793,19 +743,8 @@ void genie_minusab_long_int (NODE_T * p)
 
 void genie_timesab_long_int (NODE_T * p)
 {
-  MOID_T *m = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (m), size = get_mp_size (m);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, m);
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  mul_mp (p, x, x, y, digits);
-  test_long_int_range (p, x, m);
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_mul_long_int);
 }
 
 /* REAL operations. REAL math is in gsl.c. */
@@ -849,7 +788,7 @@ void genie_round_real (NODE_T * p)
   int j;
   POP_REAL (p, &x);
   if (x.value < -MAX_INT || x.value > MAX_INT) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (x.value > 0) {
@@ -870,7 +809,7 @@ void genie_entier_real (NODE_T * p)
   A68_REAL x;
   POP_REAL (p, &x);
   if (x.value < -MAX_INT || x.value > MAX_INT) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   PUSH_INT (p, (int) floor (x.value));
@@ -939,7 +878,7 @@ void genie_div_real (NODE_T * p)
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
 #ifndef HAVE_IEEE_754
   if (y->value == 0.0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (REAL));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (REAL));
     exit_genie (p, A_RUNTIME_ERROR);
   }
 #endif
@@ -996,7 +935,7 @@ void genie_pow_real (NODE_T * p)
   POP_REAL (p, &y);
   POP_REAL (p, &x);
   if (x.value <= 0.0) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MODE (REAL), &x);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (REAL), &x);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   RESET_ERRNO;
@@ -1028,15 +967,7 @@ A68_CMP_REAL (genie_ge_real, p, >=);
 
 void genie_plusab_real (NODE_T * p)
 {
-  A68_REAL *a, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, a, A68_REAL);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_REAL));
-  address = (A68_REAL *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (REAL));
-  address->value += a->value;
-  TEST_REAL_REPRESENTATION (p, address->value);
+  genie_f_and_becomes (p, MODE (REF_REAL), genie_add_real);
 }
 
 /*!
@@ -1046,15 +977,7 @@ void genie_plusab_real (NODE_T * p)
 
 void genie_minusab_real (NODE_T * p)
 {
-  A68_REAL *a, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, a, A68_REAL);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_REAL));
-  address = (A68_REAL *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (REAL));
-  address->value -= a->value;
-  TEST_REAL_REPRESENTATION (p, address->value);
+  genie_f_and_becomes (p, MODE (REF_REAL), genie_sub_real);
 }
 
 /*!
@@ -1064,16 +987,7 @@ void genie_minusab_real (NODE_T * p)
 
 void genie_timesab_real (NODE_T * p)
 {
-  A68_REAL *a, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, a, A68_REAL);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_REAL));
-  address = (A68_REAL *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (REAL));
-  TEST_TIMES_OVERFLOW_REAL (p, address->value, a->value);
-  address->value *= a->value;
-  TEST_REAL_REPRESENTATION (p, address->value);
+  genie_f_and_becomes (p, MODE (REF_REAL), genie_mul_real);
 }
 
 /*!
@@ -1081,23 +995,9 @@ void genie_timesab_real (NODE_T * p)
 \param p position in syntax tree, should not be NULL
 **/
 
-void genie_overab_real (NODE_T * p)
+void genie_divab_real (NODE_T * p)
 {
-  A68_REAL *a, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, a, A68_REAL);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_REAL));
-  address = (A68_REAL *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (REAL));
-#ifndef HAVE_IEEE_754
-  if (a->value == 0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (REAL));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-#endif
-  address->value /= a->value;
-  TEST_REAL_REPRESENTATION (p, address->value);
+  genie_f_and_becomes (p, MODE (REF_REAL), genie_div_real);
 }
 
 /*!
@@ -1123,7 +1023,7 @@ void genie_lengthen_real_to_long_mp (NODE_T * p)
 
 void genie_shorten_long_mp_to_real (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   DECREMENT_STACK_POINTER (p, size);
@@ -1137,7 +1037,7 @@ void genie_shorten_long_mp_to_real (NODE_T * p)
 
 void genie_round_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1162,7 +1062,7 @@ void genie_round_long_mp (NODE_T * p)
 
 void genie_entier_long_mp (NODE_T * p)
 {
-  int digits = get_mp_digits (MOID (PACK (MOID (p)))), size = get_mp_size (MOID (PACK (MOID (p))));
+  int digits = get_mp_digits (LHS_MODE (p)), size = get_mp_size (LHS_MODE (p));
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (MP_DIGIT (z, 1) >= 0) {
@@ -1188,7 +1088,7 @@ void genie_sqrt_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (sqrt_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longsqrt");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longsqrt");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1204,7 +1104,7 @@ void genie_curt_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (curt_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longcurt");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longcurt");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1236,7 +1136,7 @@ void genie_ln_long_mp (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (ln_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longln");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longln");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1255,7 +1155,7 @@ void genie_log_long_mp (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (log_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longlog");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longlog");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1377,7 +1277,7 @@ void genie_tan_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (tan_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longtan");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longtan");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1393,7 +1293,7 @@ void genie_asin_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (asin_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longarcsin");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longarcsin");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1409,7 +1309,7 @@ void genie_acos_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (acos_mp (p, x, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, "longarcsin");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longarcsin");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1457,7 +1357,7 @@ void genie_shorten_longlong_mp_to_long_mp (NODE_T * p)
   STACK_MP (z, p, long_mp_digits ());
   if (m == MODE (LONG_INT)) {
     if (MP_EXPONENT (z) > LONG_MP_DIGITS - 1) {
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, m, NULL);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, m, NULL);
       exit_genie (p, A_RUNTIME_ERROR);
     }
   }
@@ -1472,7 +1372,7 @@ void genie_shorten_longlong_mp_to_long_mp (NODE_T * p)
 
 void genie_minus_long_mp (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   MP_STATUS (z) = INITIALISED_MASK;
   MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
@@ -1485,7 +1385,7 @@ void genie_minus_long_mp (NODE_T * p)
 
 void genie_abs_long_mp (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   MP_STATUS (z) = INITIALISED_MASK;
   MP_DIGIT (z, 1) = ABS (MP_DIGIT (z, 1));
@@ -1498,7 +1398,7 @@ void genie_abs_long_mp (NODE_T * p)
 
 void genie_sign_long_mp (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   DECREMENT_STACK_POINTER (p, size);
   PUSH_INT (p, SIGN (MP_DIGIT (z, 1)));
@@ -1511,7 +1411,7 @@ void genie_sign_long_mp (NODE_T * p)
 
 void genie_add_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1527,7 +1427,7 @@ void genie_add_long_mp (NODE_T * p)
 
 void genie_sub_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1543,7 +1443,7 @@ void genie_sub_long_mp (NODE_T * p)
 
 void genie_mul_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1559,12 +1459,12 @@ void genie_mul_long_mp (NODE_T * p)
 
 void genie_div_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (div_mp (p, x, x, y, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (LONG_REAL));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (LONG_REAL));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1578,12 +1478,12 @@ void genie_div_long_mp (NODE_T * p)
 
 void genie_over_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (over_mp (p, x, x, y, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (LONG_INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (LONG_INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   MP_STATUS (x) = INITIALISED_MASK;
@@ -1597,12 +1497,12 @@ void genie_over_long_mp (NODE_T * p)
 
 void genie_mod_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
   if (mod_mp (p, x, x, y, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (LONG_INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (LONG_INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (MP_DIGIT (x, 1) < 0) {
@@ -1620,18 +1520,8 @@ void genie_mod_long_mp (NODE_T * p)
 
 void genie_plusab_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  add_mp (p, x, x, y, digits);
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_add_long_mp);
 }
 
 /*!
@@ -1641,18 +1531,8 @@ void genie_plusab_long_mp (NODE_T * p)
 
 void genie_minusab_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  sub_mp (p, x, x, y, digits);
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_sub_long_mp);
 }
 
 /*!
@@ -1662,18 +1542,8 @@ void genie_minusab_long_mp (NODE_T * p)
 
 void genie_timesab_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  mul_mp (p, x, x, y, digits);
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_mul_long_mp);
 }
 
 /*!
@@ -1683,21 +1553,8 @@ void genie_timesab_long_mp (NODE_T * p)
 
 void genie_divab_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  if (div_mp (p, x, x, y, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MOID (NEXT (p)));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_div_long_mp);
 }
 
 /*!
@@ -1707,21 +1564,8 @@ void genie_divab_long_mp (NODE_T * p)
 
 void genie_overab_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  if (over_mp (p, x, x, y, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MOID (NEXT (p)));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_over_long_mp);
 }
 
 /*!
@@ -1731,31 +1575,14 @@ void genie_overab_long_mp (NODE_T * p)
 
 void genie_modab_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  MP_DIGIT_T *x, *y;
-  A68_REF *z;
-  y = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  z = (A68_REF *) (STACK_OFFSET (-size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  x = (MP_DIGIT_T *) ADDRESS (z);
-  TEST_MP_INIT (p, x, MOID (NEXT (p)));
-  if (mod_mp (p, x, x, y, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MOID (NEXT (p)));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  if (MP_DIGIT (x, 1) < 0) {
-    MP_DIGIT (y, 1) = ABS (MP_DIGIT (y, 1));
-    add_mp (p, x, x, y, digits);
-  }
-  MP_STATUS (x) = INITIALISED_MASK;
-  DECREMENT_STACK_POINTER (p, size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_mod_long_mp);
 }
 
 /* OP (LONG MODE, LONG MODE) BOOL. */
 
 #define A68_CMP_LONG(n, p, OP) void n (NODE_T * p) {\
-  MOID_T *mode = MOID (PACK (MOID (p)));\
+  MOID_T *mode = LHS_MODE (p);\
   int digits = get_mp_digits (mode), size = get_mp_size (mode);\
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);\
   MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);\
@@ -1778,7 +1605,7 @@ A68_CMP_LONG (genie_ge_long_mp, p, >=);
 
 void genie_pow_long_mp_int (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   A68_INT k;
   MP_DIGIT_T *x;
@@ -1796,7 +1623,7 @@ void genie_pow_long_mp_int (NODE_T * p)
 
 void genie_pow_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
@@ -1804,7 +1631,7 @@ void genie_pow_long_mp (NODE_T * p)
   MP_DIGIT_T *z;
   STACK_MP (z, p, digits);
   if (ln_mp (p, z, x, digits) == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MOID (p), x, SYMBOL (p));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, SYMBOL (p));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   mul_mp (p, z, y, z, digits);
@@ -1853,7 +1680,7 @@ void genie_repr_char (NODE_T * p)
   A68_INT k;
   POP_INT (p, &k);
   if (k.value < 0 || k.value > UCHAR_MAX) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (CHAR));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (CHAR));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   PUSH_CHAR (p, (char) (k.value));
@@ -1921,10 +1748,10 @@ void genie_elem_string (NODE_T * p)
   POP_INT (p, &k);
   GET_DESCRIPTOR (a, t, &z);
   if (k.value < t->lower_bound) {
-    diagnostic (A_RUNTIME_ERROR, p, INDEX_OUT_OF_BOUNDS);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A_RUNTIME_ERROR);
   } else if (k.value > t->upper_bound) {
-    diagnostic (A_RUNTIME_ERROR, p, INDEX_OUT_OF_BOUNDS);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   base = ADDRESS (&(a->array));
@@ -1992,78 +1819,6 @@ void genie_add_string (NODE_T * p)
 }
 
 /*!
-\brief OP +:= = (REF STRING, STRING) REF STRING
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_plusab_string (NODE_T * p)
-{
-  A68_REF refa, a, b;
-  POP_REF (p, &b);
-  POP_REF (p, &refa);
-  TEST_NIL (p, refa, MODE (REF_STRING));
-  a = *(A68_REF *) ADDRESS (&refa);
-  TEST_INIT (p, a, MODE (STRING));
-  PUSH_REF (p, a);
-  PUSH_REF (p, b);
-  genie_add_string (p);
-  POP (p, (A68_REF *) ADDRESS (&refa), SIZE_OF (A68_REF));
-  PUSH_REF (p, refa);
-}
-
-/*!
-\brief OP +=: = (STRING, REF STRING) REF STRING
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_plusto_string (NODE_T * p)
-{
-  A68_REF refa, a, b;
-  POP_REF (p, &refa);
-  TEST_NIL (p, refa, MODE (REF_STRING));
-  a = *(A68_REF *) ADDRESS (&refa);
-  TEST_INIT (p, a, MODE (STRING));
-  POP_REF (p, &b);
-  PUSH_REF (p, b);
-  PUSH_REF (p, a);
-  genie_add_string (p);
-  POP (p, (A68_REF *) ADDRESS (&refa), SIZE_OF (A68_REF));
-  PUSH_REF (p, refa);
-}
-
-/*!
-\brief OP *:= = (REF STRING, INT) REF STRING
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_timesab_string (NODE_T * p)
-{
-  A68_INT k;
-  A68_REF refa, a;
-  int i;
-/* INT. */
-  POP_INT (p, &k);
-  if (k.value < 0) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MODE (INT), k);
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-/* REF STRING. */
-  POP_REF (p, &refa);
-  TEST_NIL (p, refa, MODE (REF_STRING));
-  a = *(A68_REF *) ADDRESS (&refa);
-  TEST_INIT (p, a, MODE (STRING));
-/* Multiplication as repeated addition. */
-  PUSH_REF (p, empty_string (p));
-  for (i = 1; i <= k.value; i++) {
-    PUSH_REF (p, a);
-    genie_add_string (p);
-  }
-/* The stack contains a STRING, promote to REF STRING. */
-  POP_REF (p, (A68_REF *) ADDRESS (&refa));
-  PUSH_REF (p, refa);
-}
-
-/*!
 \brief OP * = (INT, STRING) STRING
 \param p position in syntax tree, should not be NULL
 **/
@@ -2075,7 +1830,7 @@ void genie_times_int_string (NODE_T * p)
   POP_REF (p, &a);
   POP_INT (p, &k);
   if (k.value < 0) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MODE (INT), k);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (INT), k);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   UP_SWEEP_SEMA;
@@ -2121,7 +1876,7 @@ void genie_times_int_char (NODE_T * p)
   POP_CHAR (p, &a);
   POP_INT (p, &str_size);
   if (str_size.value < 0) {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MODE (INT), str_size);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (INT), str_size);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Make new_one string. */
@@ -2167,6 +1922,68 @@ void genie_times_char_int (NODE_T * p)
   PUSH_INT (p, k.value);
   PUSH_CHAR (p, a.value);
   genie_times_int_char (p);
+}
+
+/*!
+\brief OP +:= = (REF STRING, STRING) REF STRING
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_plusab_string (NODE_T * p)
+{
+  genie_f_and_becomes (p, MODE (REF_STRING), genie_add_string);
+}
+
+/*!
+\brief OP +=: = (STRING, REF STRING) REF STRING
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_plusto_string (NODE_T * p)
+{
+  A68_REF refa, a, b;
+  POP_REF (p, &refa);
+  TEST_NIL (p, refa, MODE (REF_STRING));
+  a = *(A68_REF *) ADDRESS (&refa);
+  TEST_INIT (p, a, MODE (STRING));
+  POP_REF (p, &b);
+  PUSH_REF (p, b);
+  PUSH_REF (p, a);
+  genie_add_string (p);
+  POP (p, (A68_REF *) ADDRESS (&refa), SIZE_OF (A68_REF));
+  PUSH_REF (p, refa);
+}
+
+/*!
+\brief OP *:= = (REF STRING, INT) REF STRING
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_timesab_string (NODE_T * p)
+{
+  A68_INT k;
+  A68_REF refa, a;
+  int i;
+/* INT. */
+  POP_INT (p, &k);
+  if (k.value < 0) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (INT), k);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+/* REF STRING. */
+  POP_REF (p, &refa);
+  TEST_NIL (p, refa, MODE (REF_STRING));
+  a = *(A68_REF *) ADDRESS (&refa);
+  TEST_INIT (p, a, MODE (STRING));
+/* Multiplication as repeated addition. */
+  PUSH_REF (p, empty_string (p));
+  for (i = 1; i <= k.value; i++) {
+    PUSH_REF (p, a);
+    genie_add_string (p);
+  }
+/* The stack contains a STRING, promote to REF STRING. */
+  POP_REF (p, (A68_REF *) ADDRESS (&refa));
+  PUSH_REF (p, refa);
 }
 
 /*!
@@ -2307,7 +2124,7 @@ void genie_dyad_elems (NODE_T * p)
   POP_INT (p, &k);
   GET_DESCRIPTOR (x, t, &z);
   if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic (A_RUNTIME_ERROR, p, "invalid dimension D", (int) k.value);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   u = &(t[k.value - 1]);
@@ -2333,7 +2150,7 @@ void genie_dyad_lwb (NODE_T * p)
   POP_INT (p, &k);
   GET_DESCRIPTOR (x, t, &z);
   if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic (A_RUNTIME_ERROR, p, "invalid dimension D", (int) k.value);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   PUSH_INT (p, t[k.value - 1].lower_bound);
@@ -2358,7 +2175,7 @@ void genie_dyad_upb (NODE_T * p)
   POP_INT (p, &k);
   GET_DESCRIPTOR (x, t, &z);
   if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic (A_RUNTIME_ERROR, p, "invalid dimension D", (int) k.value);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   PUSH_INT (p, t[k.value - 1].upper_bound);
@@ -2420,7 +2237,7 @@ void genie_elem_bytes (NODE_T * p)
   POP_BYTES (p, &j);
   POP_INT (p, &i);
   if (i.value < 1 || i.value > BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (i.value > (int) strlen (j.value)) {
@@ -2443,7 +2260,7 @@ void genie_bytespack (NODE_T * p)
   TEST_INIT (p, z, MODE (STRING));
   TEST_NIL (p, z, MODE (STRING));
   if (a68_string_size (p, z) > BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (STRING));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (STRING));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   b.status = INITIALISED_MASK;
@@ -2461,7 +2278,7 @@ void genie_add_bytes (NODE_T * p)
   A68_BYTES *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_BYTES);
   if (((int) strlen (i->value) + (int) strlen (j->value)) > BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (BYTES));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   strcat (i->value, j->value);
@@ -2474,18 +2291,7 @@ void genie_add_bytes (NODE_T * p)
 
 void genie_plusab_bytes (NODE_T * p)
 {
-  A68_BYTES *i, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, i, A68_BYTES);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_BYTES));
-  address = (A68_BYTES *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (BYTES));
-  if (((int) strlen (address->value) + (int) strlen (i->value)) > BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (BYTES));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  strcat (address->value, i->value);
+  genie_f_and_becomes (p, MODE (REF_BYTES), genie_add_bytes);
 }
 
 /*!
@@ -2503,7 +2309,7 @@ void genie_plusto_bytes (NODE_T * p)
   TEST_INIT (p, *address, MODE (BYTES));
   POP (p, &i, SIZE_OF (A68_BYTES));
   if (((int) strlen (address->value) + (int) strlen (i.value)) > BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (BYTES));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   strcpy (j.value, i.value);
@@ -2576,7 +2382,7 @@ void genie_elem_long_bytes (NODE_T * p)
   POP_LONG_BYTES (p, &j);
   POP_INT (p, &i);
   if (i.value < 1 || i.value > LONG_BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (i.value > (int) strlen (j.value)) {
@@ -2599,7 +2405,7 @@ void genie_long_bytespack (NODE_T * p)
   TEST_INIT (p, z, MODE (STRING));
   TEST_NIL (p, z, MODE (STRING));
   if (a68_string_size (p, z) > LONG_BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (STRING));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (STRING));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   b.status = INITIALISED_MASK;
@@ -2618,7 +2424,7 @@ void genie_add_long_bytes (NODE_T * p)
   A68_LONG_BYTES *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_LONG_BYTES);
   if (((int) strlen (i->value) + (int) strlen (j->value)) > LONG_BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (LONG_BYTES));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (LONG_BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   strcat (i->value, j->value);
@@ -2631,18 +2437,7 @@ void genie_add_long_bytes (NODE_T * p)
 
 void genie_plusab_long_bytes (NODE_T * p)
 {
-  A68_LONG_BYTES *i, *address;
-  A68_REF *z;
-  POP_ADDRESS (p, i, A68_LONG_BYTES);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_LONG_BYTES));
-  address = (A68_LONG_BYTES *) ADDRESS (z);
-  TEST_INIT (p, *address, MODE (LONG_BYTES));
-  if (((int) strlen (address->value) + (int) strlen (i->value)) > LONG_BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (LONG_BYTES));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-  strcat (address->value, i->value);
+  genie_f_and_becomes (p, MODE (REF_LONG_BYTES), genie_add_long_bytes);
 }
 
 /*!
@@ -2661,7 +2456,7 @@ void genie_plusto_long_bytes (NODE_T * p)
   TEST_INIT (p, *address, MODE (LONG_BYTES));
   POP (p, &i, SIZE_OF (A68_LONG_BYTES));
   if (((int) strlen (address->value) + (int) strlen (i.value)) > LONG_BYTES_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (LONG_BYTES));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (LONG_BYTES));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   strcpy (j.value, i.value);
@@ -2770,7 +2565,7 @@ void genie_shl_bits (NODE_T * p)
   POP_BITS (p, &i);
   if (j.value >= 0) {
     if (i.value > (MAX_BITS >> j.value)) {
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (BITS));
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BITS));
       exit_genie (p, A_RUNTIME_ERROR);
     }
     PUSH_BITS (p, i.value << j.value);
@@ -2805,7 +2600,7 @@ void genie_elem_bits (NODE_T * p)
   POP_BITS (p, &j);
   POP_INT (p, &i);
   if (i.value < 1 || i.value > BITS_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   for (n = 0; n < (BITS_WIDTH - i.value); n++) {
@@ -2851,7 +2646,7 @@ void genie_bin_long_mp (NODE_T * p)
 
 void genie_not_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   int k, words = get_mp_bits_words (mode);
@@ -2872,7 +2667,7 @@ void genie_not_long_mp (NODE_T * p)
 
 void genie_shorten_long_mp_to_bits (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   MP_DIGIT_T *z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   DECREMENT_STACK_POINTER (p, size);
@@ -2916,7 +2711,7 @@ void genie_elem_long_bits (NODE_T * p)
   z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   i = (A68_INT *) STACK_OFFSET (-(size + SIZE_OF (A68_INT)));
   if (i->value < 1 || i->value > bits) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   w = elem_long_bits (p, i->value, z, MODE (LONG_BITS));
@@ -2938,7 +2733,7 @@ void genie_elem_longlong_bits (NODE_T * p)
   z = (MP_DIGIT_T *) STACK_OFFSET (-size);
   i = (A68_INT *) STACK_OFFSET (-(size + SIZE_OF (A68_INT)));
   if (i->value < 1 || i->value > bits) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (INT));
     exit_genie (p, A_RUNTIME_ERROR);
   }
   w = elem_long_bits (p, i->value, z, MODE (LONGLONG_BITS));
@@ -2966,7 +2761,7 @@ void genie_bits_pack (NODE_T * p)
   GET_DESCRIPTOR (arr, tup, &z);
   size = ROW_SIZE (tup);
   if (size < 0 || size > BITS_WIDTH) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (ROW_BOOL));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (ROW_BOOL));
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Convert so that LWB goes to MSB, so ELEM gives same order. */
@@ -3013,7 +2808,7 @@ void genie_long_bits_pack (NODE_T * p)
   bits = get_mp_bits_width (mode);
   digits = get_mp_digits (mode);
   if (size < 0 || size > bits) {
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (ROW_BOOL));
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (ROW_BOOL));
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Convert so that LWB goes to MSB, so ELEM gives same order as [] BOOL. */
@@ -3047,7 +2842,7 @@ void genie_long_bits_pack (NODE_T * p)
 
 void genie_shl_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   MOID_T *int_m = (mode == MODE (LONG_BITS) ? MODE (LONG_INT) : MODE (LONGLONG_INT));
   int size = get_mp_size (mode), digits = get_mp_digits (mode);
   A68_INT j;
@@ -3101,7 +2896,7 @@ void genie_shr_long_mp (NODE_T * p)
 
 void genie_and_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int k, size = get_mp_size (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *u = (MP_DIGIT_T *) STACK_OFFSET (-2 * size), *v = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -3122,7 +2917,7 @@ void genie_and_long_mp (NODE_T * p)
 
 void genie_or_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int k, size = get_mp_size (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *u = (MP_DIGIT_T *) STACK_OFFSET (-2 * size), *v = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -3143,7 +2938,7 @@ void genie_or_long_mp (NODE_T * p)
 
 void genie_xor_long_mp (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int k, size = get_mp_size (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *u = (MP_DIGIT_T *) STACK_OFFSET (-2 * size), *v = (MP_DIGIT_T *) STACK_OFFSET (-size);

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -53,11 +53,11 @@ void genie_icomplex (NODE_T * p)
 
 void genie_iint_complex (NODE_T * p)
 {
-  A68_INT jre, jim;
-  POP_INT (p, &jim);
-  POP_INT (p, &jre);
-  PUSH_REAL (p, (double) jre.value);
-  PUSH_REAL (p, (double) jim.value);
+  A68_INT re, im;
+  POP_INT (p, &im);
+  POP_INT (p, &re);
+  PUSH_REAL (p, (double) re.value);
+  PUSH_REAL (p, (double) im.value);
 }
 
 /*!
@@ -89,11 +89,11 @@ void genie_im_complex (NODE_T * p)
 
 void genie_minus_complex (NODE_T * p)
 {
-  A68_REAL *rex, *imx;
-  imx = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  rex = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
-  imx->value = -imx->value;
-  rex->value = -rex->value;
+  A68_REAL *re_x, *im_x;
+  im_x = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
+  re_x = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im_x->value = -im_x->value;
+  re_x->value = -re_x->value;
   (void) p;
 }
 
@@ -104,9 +104,9 @@ void genie_minus_complex (NODE_T * p)
 
 void genie_abs_complex (NODE_T * p)
 {
-  A68_REAL rex, imx;
-  POP_COMPLEX (p, &rex, &imx);
-  PUSH_REAL (p, a68g_hypot (rex.value, imx.value));
+  A68_REAL re_x, im_x;
+  POP_COMPLEX (p, &re_x, &im_x);
+  PUSH_REAL (p, a68g_hypot (re_x.value, im_x.value));
 }
 
 /*!
@@ -116,12 +116,12 @@ void genie_abs_complex (NODE_T * p)
 
 void genie_arg_complex (NODE_T * p)
 {
-  A68_REAL rex, imx;
-  POP_COMPLEX (p, &rex, &imx);
-  if (rex.value != 0.0 || imx.value != 0.0) {
-    PUSH_REAL (p, atan2 (imx.value, rex.value));
+  A68_REAL re_x, im_x;
+  POP_COMPLEX (p, &re_x, &im_x);
+  if (re_x.value != 0.0 || im_x.value != 0.0) {
+    PUSH_REAL (p, atan2 (im_x.value, re_x.value));
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, INVALID_ARGUMENT_ERROR, MODE (COMPLEX), NULL);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (COMPLEX), NULL);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -145,13 +145,13 @@ void genie_conj_complex (NODE_T * p)
 
 void genie_add_complex (NODE_T * p)
 {
-  A68_REAL *rex, *imx, rey, imy;
-  POP_COMPLEX (p, &rey, &imy);
-  imx = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  rex = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
-  imx->value += imy.value;
-  rex->value += rey.value;
-  TEST_COMPLEX_REPRESENTATION (p, rex->value, imx->value);
+  A68_REAL *re_x, *im_x, re_y, im_y;
+  POP_COMPLEX (p, &re_y, &im_y);
+  im_x = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
+  re_x = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im_x->value += im_y.value;
+  re_x->value += re_y.value;
+  TEST_COMPLEX_REPRESENTATION (p, re_x->value, im_x->value);
 }
 
 /*!
@@ -161,13 +161,13 @@ void genie_add_complex (NODE_T * p)
 
 void genie_sub_complex (NODE_T * p)
 {
-  A68_REAL *rex, *imx, rey, imy;
-  POP_COMPLEX (p, &rey, &imy);
-  imx = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
-  rex = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
-  imx->value -= imy.value;
-  rex->value -= rey.value;
-  TEST_COMPLEX_REPRESENTATION (p, rex->value, imx->value);
+  A68_REAL *re_x, *im_x, re_y, im_y;
+  POP_COMPLEX (p, &re_y, &im_y);
+  im_x = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));
+  re_x = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));
+  im_x->value -= im_y.value;
+  re_x->value -= re_y.value;
+  TEST_COMPLEX_REPRESENTATION (p, re_x->value, im_x->value);
 }
 
 /*!
@@ -177,12 +177,12 @@ void genie_sub_complex (NODE_T * p)
 
 void genie_mul_complex (NODE_T * p)
 {
-  A68_REAL rex, imx, rey, imy;
+  A68_REAL re_x, im_x, re_y, im_y;
   double re, im;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_COMPLEX (p, &rex, &imx);
-  re = rex.value * rey.value - imx.value * imy.value;
-  im = imx.value * rey.value + rex.value * imy.value;
+  POP_COMPLEX (p, &re_y, &im_y);
+  POP_COMPLEX (p, &re_x, &im_x);
+  re = re_x.value * re_y.value - im_x.value * im_y.value;
+  im = im_x.value * re_y.value + re_x.value * im_y.value;
   TEST_COMPLEX_REPRESENTATION (p, re, im);
   PUSH_COMPLEX (p, re, im);
 }
@@ -194,24 +194,24 @@ void genie_mul_complex (NODE_T * p)
 
 void genie_div_complex (NODE_T * p)
 {
-  A68_REAL rex, imx, rey, imy;
+  A68_REAL re_x, im_x, re_y, im_y;
   double re = 0.0, im = 0.0;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_COMPLEX (p, &rex, &imx);
+  POP_COMPLEX (p, &re_y, &im_y);
+  POP_COMPLEX (p, &re_x, &im_x);
 #ifndef HAVE_IEEE_754
-  if (rey.value == 0.0 && imy.value == 0.0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (COMPLEX));
+  if (re_y.value == 0.0 && im_y.value == 0.0) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (COMPLEX));
     exit_genie (p, A_RUNTIME_ERROR);
   }
 #endif
-  if (ABS (rey.value) >= ABS (imy.value)) {
-    double r = imy.value / rey.value, den = rey.value + r * imy.value;
-    re = (rex.value + r * imx.value) / den;
-    im = (imx.value - r * rex.value) / den;
+  if (ABS (re_y.value) >= ABS (im_y.value)) {
+    double r = im_y.value / re_y.value, den = re_y.value + r * im_y.value;
+    re = (re_x.value + r * im_x.value) / den;
+    im = (im_x.value - r * re_x.value) / den;
   } else {
-    double r = rey.value / imy.value, den = imy.value + r * rey.value;
-    re = (rex.value * r + imx.value) / den;
-    im = (imx.value * r - rex.value) / den;
+    double r = re_y.value / im_y.value, den = im_y.value + r * re_y.value;
+    re = (re_x.value * r + im_x.value) / den;
+    im = (im_x.value * r - re_x.value) / den;
   }
   TEST_COMPLEX_REPRESENTATION (p, re, im);
   PUSH_COMPLEX (p, re, im);
@@ -224,17 +224,17 @@ void genie_div_complex (NODE_T * p)
 
 void genie_pow_complex_int (NODE_T * p)
 {
-  A68_REAL rex, imx;
-  double rey, imy, rez, imz, rea;
+  A68_REAL re_x, im_x;
+  double re_y, im_y, re_z, im_z, rea;
   A68_INT j;
   int expo;
   BOOL_T negative;
   POP_INT (p, &j);
-  POP_COMPLEX (p, &rex, &imx);
-  rez = 1.0;
-  imz = 0.0;
-  rey = rex.value;
-  imy = imx.value;
+  POP_COMPLEX (p, &re_x, &im_x);
+  re_z = 1.0;
+  im_z = 0.0;
+  re_y = re_x.value;
+  im_y = im_x.value;
   expo = 1;
   negative = (j.value < 0.0);
   if (negative) {
@@ -242,25 +242,25 @@ void genie_pow_complex_int (NODE_T * p)
   }
   while ((unsigned) expo <= (unsigned) (j.value)) {
     if (expo & j.value) {
-      rea = rez * rey - imz * imy;
-      imz = rez * imy + imz * rey;
-      rez = rea;
+      rea = re_z * re_y - im_z * im_y;
+      im_z = re_z * im_y + im_z * re_y;
+      re_z = rea;
     }
-    rea = rey * rey - imy * imy;
-    imy = imy * rey + rey * imy;
-    rey = rea;
+    rea = re_y * re_y - im_y * im_y;
+    im_y = im_y * re_y + re_y * im_y;
+    re_y = rea;
     expo <<= 1;
   }
-  TEST_COMPLEX_REPRESENTATION (p, rez, imz);
+  TEST_COMPLEX_REPRESENTATION (p, re_z, im_z);
   if (negative) {
     PUSH_REAL (p, 1.0);
     PUSH_REAL (p, 0.0);
-    PUSH_REAL (p, rez);
-    PUSH_REAL (p, imz);
+    PUSH_REAL (p, re_z);
+    PUSH_REAL (p, im_z);
     genie_div_complex (p);
   } else {
-    PUSH_REAL (p, rez);
-    PUSH_REAL (p, imz);
+    PUSH_REAL (p, re_z);
+    PUSH_REAL (p, im_z);
   }
 }
 
@@ -271,10 +271,10 @@ void genie_pow_complex_int (NODE_T * p)
 
 void genie_eq_complex (NODE_T * p)
 {
-  A68_REAL rex, imx, rey, imy;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_COMPLEX (p, &rex, &imx);
-  PUSH_BOOL (p, (rex.value == rey.value) && (imx.value == imy.value));
+  A68_REAL re_x, im_x, re_y, im_y;
+  POP_COMPLEX (p, &re_y, &im_y);
+  POP_COMPLEX (p, &re_x, &im_x);
+  PUSH_BOOL (p, (re_x.value == re_y.value) && (im_x.value == im_y.value));
 }
 
 /*!
@@ -285,10 +285,10 @@ void genie_eq_complex (NODE_T * p)
 
 void genie_ne_complex (NODE_T * p)
 {
-  A68_REAL rex, imx, rey, imy;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_COMPLEX (p, &rex, &imx);
-  PUSH_BOOL (p, !((rex.value == rey.value) && (imx.value == imy.value)));
+  A68_REAL re_x, im_x, re_y, im_y;
+  POP_COMPLEX (p, &re_y, &im_y);
+  POP_COMPLEX (p, &re_x, &im_x);
+  PUSH_BOOL (p, !((re_x.value == re_y.value) && (im_x.value == im_y.value)));
 }
 
 /*!
@@ -298,19 +298,7 @@ void genie_ne_complex (NODE_T * p)
 
 void genie_plusab_complex (NODE_T * p)
 {
-  A68_REF *z;
-  A68_REAL rey, imy, *rex, *imx, *address;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_COMPLEX));
-  address = (A68_REAL *) ADDRESS (z);
-  imx = &address[1];
-  TEST_INIT (p, *imx, MODE (COMPLEX));
-  rex = &address[0];
-  TEST_INIT (p, *rex, MODE (COMPLEX));
-  imx->value += imy.value;
-  rex->value += rey.value;
-  TEST_COMPLEX_REPRESENTATION (p, rex->value, imx->value);
+  genie_f_and_becomes (p, MODE (REF_COMPLEX), genie_add_complex);
 }
 
 /*!
@@ -320,19 +308,7 @@ void genie_plusab_complex (NODE_T * p)
 
 void genie_minusab_complex (NODE_T * p)
 {
-  A68_REF *z;
-  A68_REAL rey, imy, *rex, *imx, *address;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_COMPLEX));
-  address = (A68_REAL *) ADDRESS (z);
-  imx = &address[1];
-  TEST_INIT (p, *imx, MODE (COMPLEX));
-  rex = &address[0];
-  TEST_INIT (p, *rex, MODE (COMPLEX));
-  imx->value -= imy.value;
-  rex->value -= rey.value;
-  TEST_COMPLEX_REPRESENTATION (p, rex->value, imx->value);
+  genie_f_and_becomes (p, MODE (REF_COMPLEX), genie_sub_complex);
 }
 
 /*!
@@ -342,22 +318,7 @@ void genie_minusab_complex (NODE_T * p)
 
 void genie_timesab_complex (NODE_T * p)
 {
-  A68_REF *z;
-  A68_REAL rey, imy, *rex, *imx, *address;
-  double rez, imz;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_COMPLEX));
-  address = (A68_REAL *) ADDRESS (z);
-  imx = &address[1];
-  TEST_INIT (p, *imx, MODE (COMPLEX));
-  rex = &address[0];
-  TEST_INIT (p, *rex, MODE (COMPLEX));
-  rez = rex->value * rey.value - imx->value * imy.value;
-  imz = imx->value * rey.value + rex->value * imy.value;
-  TEST_COMPLEX_REPRESENTATION (p, rez, imz);
-  imx->value = imz;
-  rex->value = rez;
+  genie_f_and_becomes (p, MODE (REF_COMPLEX), genie_mul_complex);
 }
 
 /*!
@@ -367,35 +328,7 @@ void genie_timesab_complex (NODE_T * p)
 
 void genie_divab_complex (NODE_T * p)
 {
-  A68_REF *z;
-  A68_REAL rey, imy, *rex, *imx, *address;
-  double rez, imz;
-  POP_COMPLEX (p, &rey, &imy);
-  POP_OPERAND_ADDRESS (p, z, A68_REF);
-  TEST_NIL (p, *z, MODE (REF_COMPLEX));
-  address = (A68_REAL *) ADDRESS (z);
-  imx = &address[1];
-  TEST_INIT (p, *imx, MODE (COMPLEX));
-  rex = &address[0];
-  TEST_INIT (p, *rex, MODE (COMPLEX));
-#ifndef HAVE_IEEE_754
-  if (rey.value == 0.0 && imy.value == 0.0) {
-    diagnostic (A_RUNTIME_ERROR, p, DIVISION_BY_ZERO_ERROR, MODE (COMPLEX));
-    exit_genie (p, A_RUNTIME_ERROR);
-  }
-#endif
-  if (ABS (rey.value) >= ABS (imy.value)) {
-    double r = imy.value / rey.value, den = rey.value + r * imy.value;
-    rez = (rex->value + r * imx->value) / den;
-    imz = (imx->value - r * rex->value) / den;
-  } else {
-    double r = rey.value / imy.value, den = imy.value + r * rey.value;
-    rez = (rex->value * r + imx->value) / den;
-    imz = (imx->value * r - rex->value) / den;
-  }
-  TEST_COMPLEX_REPRESENTATION (p, rez, imz);
-  imx->value = imz;
-  rex->value = rez;
+  genie_f_and_becomes (p, MODE (REF_COMPLEX), genie_div_complex);
 }
 
 /*!
@@ -486,7 +419,7 @@ void genie_shorten_longlong_complex_to_long_complex (NODE_T * p)
 
 void genie_re_long_complex (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_STATUS (a) = INITIALISED_MASK;
   DECREMENT_STACK_POINTER (p, (int) size_long_mp ());
@@ -499,7 +432,7 @@ void genie_re_long_complex (NODE_T * p)
 
 void genie_im_long_complex (NODE_T * p)
 {
-  int digits = get_mp_digits (MOID (PACK (MOID (p)))), size = get_mp_size (MOID (PACK (MOID (p))));
+  int digits = get_mp_digits (LHS_MODE (p)), size = get_mp_size (MOID (PACK (MOID (p))));
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-size);
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MOVE_MP (a, b, digits);
@@ -514,7 +447,7 @@ void genie_im_long_complex (NODE_T * p)
 
 void genie_minus_long_complex (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-size);
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT (a, 1) = -MP_DIGIT (a, 1);
@@ -531,7 +464,7 @@ void genie_minus_long_complex (NODE_T * p)
 
 void genie_conj_long_complex (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-size);
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT (b, 1) = -MP_DIGIT (b, 1);
@@ -546,7 +479,7 @@ void genie_conj_long_complex (NODE_T * p)
 
 void genie_abs_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -568,7 +501,7 @@ void genie_abs_long_complex (NODE_T * p)
 
 void genie_arg_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -590,7 +523,7 @@ void genie_arg_long_complex (NODE_T * p)
 
 void genie_add_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *d = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -612,7 +545,7 @@ void genie_add_long_complex (NODE_T * p)
 
 void genie_sub_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *d = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -634,7 +567,7 @@ void genie_sub_long_complex (NODE_T * p)
 
 void genie_mul_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *d = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -655,7 +588,7 @@ void genie_mul_long_complex (NODE_T * p)
 
 void genie_div_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
+  MOID_T *mode = RHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *d = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -676,25 +609,25 @@ void genie_div_long_complex (NODE_T * p)
 
 void genie_pow_long_complex_int (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp;
-  MP_DIGIT_T *rex, *imx, *rey, *imy, *rez, *imz, *rea, *acc;
+  MP_DIGIT_T *re_x, *im_x, *re_y, *im_y, *re_z, *im_z, *rea, *acc;
   A68_INT j;
   int expo;
   BOOL_T negative;
   POP_INT (p, &j);
   pop_sp = stack_pointer;
-  imx = (MP_DIGIT_T *) STACK_OFFSET (-size);
-  rex = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
-  STACK_MP (rez, p, digits);
-  set_mp_short (rez, (MP_DIGIT_T) 1, 0, digits);
-  STACK_MP (imz, p, digits);
-  SET_MP_ZERO (imz, digits);
-  STACK_MP (rey, p, digits);
-  STACK_MP (imy, p, digits);
-  MOVE_MP (rey, rex, digits);
-  MOVE_MP (imy, imx, digits);
+  im_x = (MP_DIGIT_T *) STACK_OFFSET (-size);
+  re_x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
+  STACK_MP (re_z, p, digits);
+  set_mp_short (re_z, (MP_DIGIT_T) 1, 0, digits);
+  STACK_MP (im_z, p, digits);
+  SET_MP_ZERO (im_z, digits);
+  STACK_MP (re_y, p, digits);
+  STACK_MP (im_y, p, digits);
+  MOVE_MP (re_y, re_x, digits);
+  MOVE_MP (im_y, im_x, digits);
   STACK_MP (rea, p, digits);
   STACK_MP (acc, p, digits);
   expo = 1;
@@ -704,35 +637,35 @@ void genie_pow_long_complex_int (NODE_T * p)
   }
   while ((unsigned) expo <= (unsigned) (j.value)) {
     if (expo & j.value) {
-      mul_mp (p, acc, imz, imy, digits);
-      mul_mp (p, rea, rez, rey, digits);
+      mul_mp (p, acc, im_z, im_y, digits);
+      mul_mp (p, rea, re_z, re_y, digits);
       sub_mp (p, rea, rea, acc, digits);
-      mul_mp (p, acc, imz, rey, digits);
-      mul_mp (p, imz, rez, imy, digits);
-      add_mp (p, imz, imz, acc, digits);
-      MOVE_MP (rez, rea, digits);
+      mul_mp (p, acc, im_z, re_y, digits);
+      mul_mp (p, im_z, re_z, im_y, digits);
+      add_mp (p, im_z, im_z, acc, digits);
+      MOVE_MP (re_z, rea, digits);
     }
-    mul_mp (p, acc, imy, imy, digits);
-    mul_mp (p, rea, rey, rey, digits);
+    mul_mp (p, acc, im_y, im_y, digits);
+    mul_mp (p, rea, re_y, re_y, digits);
     sub_mp (p, rea, rea, acc, digits);
-    mul_mp (p, acc, imy, rey, digits);
-    mul_mp (p, imy, rey, imy, digits);
-    add_mp (p, imy, imy, acc, digits);
-    MOVE_MP (rey, rea, digits);
+    mul_mp (p, acc, im_y, re_y, digits);
+    mul_mp (p, im_y, re_y, im_y, digits);
+    add_mp (p, im_y, im_y, acc, digits);
+    MOVE_MP (re_y, rea, digits);
     expo <<= 1;
   }
   stack_pointer = pop_sp;
   if (negative) {
-    set_mp_short (rex, (MP_DIGIT_T) 1, 0, digits);
-    SET_MP_ZERO (imx, digits);
+    set_mp_short (re_x, (MP_DIGIT_T) 1, 0, digits);
+    SET_MP_ZERO (im_x, digits);
     INCREMENT_STACK_POINTER (p, 2 * size);
     genie_div_long_complex (p);
   } else {
-    MOVE_MP (rex, rez, digits);
-    MOVE_MP (imx, imz, digits);
+    MOVE_MP (re_x, re_z, digits);
+    MOVE_MP (im_x, im_z, digits);
   }
-  MP_STATUS (rex) = INITIALISED_MASK;
-  MP_STATUS (imx) = INITIALISED_MASK;
+  MP_STATUS (re_x) = INITIALISED_MASK;
+  MP_STATUS (im_x) = INITIALISED_MASK;
 }
 
 /*!
@@ -742,7 +675,7 @@ void genie_pow_long_complex_int (NODE_T * p)
 
 void genie_eq_long_complex (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-3 * size);
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-4 * size);
   genie_sub_long_complex (p);
@@ -757,7 +690,7 @@ void genie_eq_long_complex (NODE_T * p)
 
 void genie_ne_long_complex (NODE_T * p)
 {
-  int size = get_mp_size (MOID (PACK (MOID (p))));
+  int size = get_mp_size (LHS_MODE (p));
   MP_DIGIT_T *b = (MP_DIGIT_T *) STACK_OFFSET (-3 * size);
   MP_DIGIT_T *a = (MP_DIGIT_T *) STACK_OFFSET (-4 * size);
   genie_sub_long_complex (p);
@@ -772,32 +705,8 @@ void genie_ne_long_complex (NODE_T * p)
 
 void genie_plusab_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  ADDR_T pop_sp = stack_pointer;
-  A68_REF *z;
-  MP_DIGIT_T *a, *b, *c, *d, *e, *f, *g, *h;
-  d = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  c = (MP_DIGIT_T *) (STACK_OFFSET (-2 * size));
-  z = (A68_REF *) (STACK_OFFSET (-2 * size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  a = (MP_DIGIT_T *) ADDRESS (z);
-  b = (MP_DIGIT_T *) & (((BYTE_T *) a)[size]);
-  TEST_MP_INIT (p, a, MOID (NEXT (p)));
-  TEST_MP_INIT (p, b, MOID (NEXT (p)));
-  STACK_MP (e, p, digits);
-  STACK_MP (f, p, digits);
-  STACK_MP (g, p, digits);
-  STACK_MP (h, p, digits);
-  MOVE_MP (e, a, digits);
-  MOVE_MP (f, b, digits);
-  MOVE_MP (g, c, digits);
-  MOVE_MP (h, d, digits);
-  genie_add_long_complex (p);
-  MOVE_MP (a, e, digits);
-  MOVE_MP (b, f, digits);
-  stack_pointer = pop_sp;
-  DECREMENT_STACK_POINTER (p, 2 * size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_add_long_complex);
 }
 
 /*!
@@ -807,32 +716,8 @@ void genie_plusab_long_complex (NODE_T * p)
 
 void genie_minusab_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  ADDR_T pop_sp = stack_pointer;
-  A68_REF *z;
-  MP_DIGIT_T *a, *b, *c, *d, *e, *f, *g, *h;
-  d = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  c = (MP_DIGIT_T *) (STACK_OFFSET (-2 * size));
-  z = (A68_REF *) (STACK_OFFSET (-2 * size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  a = (MP_DIGIT_T *) ADDRESS (z);
-  b = (MP_DIGIT_T *) & (((BYTE_T *) a)[size]);
-  TEST_MP_INIT (p, a, MOID (NEXT (p)));
-  TEST_MP_INIT (p, b, MOID (NEXT (p)));
-  STACK_MP (e, p, digits);
-  STACK_MP (f, p, digits);
-  STACK_MP (g, p, digits);
-  STACK_MP (h, p, digits);
-  MOVE_MP (e, a, digits);
-  MOVE_MP (f, b, digits);
-  MOVE_MP (g, c, digits);
-  MOVE_MP (h, d, digits);
-  genie_sub_long_complex (p);
-  MOVE_MP (a, e, digits);
-  MOVE_MP (b, f, digits);
-  stack_pointer = pop_sp;
-  DECREMENT_STACK_POINTER (p, 2 * size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_sub_long_complex);
 }
 
 /*!
@@ -842,32 +727,8 @@ void genie_minusab_long_complex (NODE_T * p)
 
 void genie_timesab_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  ADDR_T pop_sp = stack_pointer;
-  A68_REF *z;
-  MP_DIGIT_T *a, *b, *c, *d, *e, *f, *g, *h;
-  d = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  c = (MP_DIGIT_T *) (STACK_OFFSET (-2 * size));
-  z = (A68_REF *) (STACK_OFFSET (-2 * size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  a = (MP_DIGIT_T *) ADDRESS (z);
-  b = (MP_DIGIT_T *) & (((BYTE_T *) a)[size]);
-  TEST_MP_INIT (p, a, MOID (NEXT (p)));
-  TEST_MP_INIT (p, b, MOID (NEXT (p)));
-  STACK_MP (e, p, digits);
-  STACK_MP (f, p, digits);
-  STACK_MP (g, p, digits);
-  STACK_MP (h, p, digits);
-  MOVE_MP (e, a, digits);
-  MOVE_MP (f, b, digits);
-  MOVE_MP (g, c, digits);
-  MOVE_MP (h, d, digits);
-  genie_mul_long_complex (p);
-  MOVE_MP (a, e, digits);
-  MOVE_MP (b, f, digits);
-  stack_pointer = pop_sp;
-  DECREMENT_STACK_POINTER (p, 2 * size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_mul_long_complex);
 }
 
 /*!
@@ -877,32 +738,8 @@ void genie_timesab_long_complex (NODE_T * p)
 
 void genie_divab_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (NEXT (PACK (MOID (p))));
-  int digits = get_mp_digits (mode), size = get_mp_size (mode);
-  ADDR_T pop_sp = stack_pointer;
-  A68_REF *z;
-  MP_DIGIT_T *a, *b, *c, *d, *e, *f, *g, *h;
-  d = (MP_DIGIT_T *) (STACK_OFFSET (-size));
-  c = (MP_DIGIT_T *) (STACK_OFFSET (-2 * size));
-  z = (A68_REF *) (STACK_OFFSET (-2 * size - SIZE_OF (A68_REF)));
-  TEST_NIL (p, *z, MOID (PREVIOUS (p)));
-  a = (MP_DIGIT_T *) ADDRESS (z);
-  b = (MP_DIGIT_T *) & (((BYTE_T *) a)[size]);
-  TEST_MP_INIT (p, a, MOID (NEXT (p)));
-  TEST_MP_INIT (p, b, MOID (NEXT (p)));
-  STACK_MP (e, p, digits);
-  STACK_MP (f, p, digits);
-  STACK_MP (g, p, digits);
-  STACK_MP (h, p, digits);
-  MOVE_MP (e, a, digits);
-  MOVE_MP (f, b, digits);
-  MOVE_MP (g, c, digits);
-  MOVE_MP (h, d, digits);
-  genie_div_long_complex (p);
-  MOVE_MP (a, e, digits);
-  MOVE_MP (b, f, digits);
-  stack_pointer = pop_sp;
-  DECREMENT_STACK_POINTER (p, 2 * size);
+  MOID_T *mode = LHS_MODE (p);
+  genie_f_and_becomes (p, mode, genie_div_long_complex);
 }
 
 /*!
@@ -948,7 +785,7 @@ void genie_sqrt_complex (NODE_T * p)
 
 void genie_sqrt_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *im = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -986,7 +823,7 @@ void genie_exp_complex (NODE_T * p)
 
 void genie_exp_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *im = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1027,7 +864,7 @@ void genie_ln_complex (NODE_T * p)
 
 void genie_ln_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *im = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1068,7 +905,7 @@ void genie_sin_complex (NODE_T * p)
 
 void genie_sin_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *im = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1109,7 +946,7 @@ void genie_cos_complex (NODE_T * p)
 
 void genie_cos_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *im = (MP_DIGIT_T *) STACK_OFFSET (-size);
@@ -1156,7 +993,7 @@ void genie_tan_complex (NODE_T * p)
 
 void genie_tan_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *re = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
@@ -1198,7 +1035,7 @@ void genie_arcsin_complex (NODE_T * p)
 
 void genie_asin_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *re = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
@@ -1240,7 +1077,7 @@ void genie_arccos_complex (NODE_T * p)
 
 void genie_acos_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *re = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
@@ -1281,7 +1118,7 @@ void genie_arctan_complex (NODE_T * p)
 
 void genie_atan_long_complex (NODE_T * p)
 {
-  MOID_T *mode = MOID (PACK (MOID (p)));
+  MOID_T *mode = LHS_MODE (p);
   int digits = get_mp_digits (mode), size = get_mp_size (mode);
   ADDR_T pop_sp = stack_pointer;
   MP_DIGIT_T *re = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);

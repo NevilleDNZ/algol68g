@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -47,7 +47,7 @@ extern char *XPLOT_APP_NAME;
 
 /*
 This part contains names for 24-bit colours recognised by libplot.
-The table below is based on the `rgb.txt' file distributed with X11R6. 
+The table below is based on the "rgb.txt" file distributed with X11R6. 
 */
 
 struct COLOUR_INFO
@@ -807,7 +807,7 @@ void genie_make_device (NODE_T * p)
   TEST_NIL (p, ref_file, MODE (REF_FILE));
   file = (A68_FILE *) ADDRESS (&ref_file);
   if (file->device.device_made) {
-    diagnostic (A_RUNTIME_ERROR, p, "device parameters already set");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_ALREADY_SET);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Fill in page_size. */
@@ -839,11 +839,11 @@ BOOL_T close_device (NODE_T * p, A68_FILE * f)
 {
   TEST_INIT (p, *f, MODE (FILE));
   if (!f->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, "file is not open");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!(f->device.device_opened)) {
-    diagnostic (A_RUNTIME_ERROR, p, "device is not open");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (f->device.device_made) {
@@ -855,15 +855,15 @@ BOOL_T close_device (NODE_T * p, A68_FILE * f)
     }
   }
   if (pl_closepl_r (f->device.plotter) < 0) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while closing plotter");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CLOSING_DEVICE);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (pl_deletepl_r (f->device.plotter) < 0) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while deleting plotter");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CLOSING_DEVICE);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (f->device.stream != NULL && fclose (f->device.stream) != 0) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while closing output stream");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CLOSING_FILE);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   f->device.device_opened = A_FALSE;
@@ -887,30 +887,30 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 /* This one in front as to quickly select the plotter. */
   if (f->device.device_opened) {
     if (f->device.device_handle < 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     return (f->device.plotter);
   }
 /* Device not set up yet. */
   if (!f->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, "file is not open");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (f->read_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, "file is in read mood");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (f->write_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, "file is in write mood");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!f->channel.draw) {
-    diagnostic (A_RUNTIME_ERROR, p, "channel does not allow drawing");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "drawing");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!f->device.device_made) {
-    diagnostic (A_RUNTIME_ERROR, p, "device parameters not set");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_NOT_SET);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   device_type = (char *) ADDRESS (&(f->device.device));
@@ -922,22 +922,22 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     char *page_size = z;
 /* Establish page size. */
     if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (z[0] != '\0') {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
 /* Make the X window. */
     f->fd = -1;
     f->device.plotter_params = pl_newplparams ();
     if (f->device.plotter_params == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
@@ -948,7 +948,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_setplparam (f->device.plotter_params, "USE_DOUBLE_BUFFERING", "no");
     f->device.plotter = pl_newpl_r ("X", NULL, NULL, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
 #ifdef HAVE_MODIFIABLE_X_TITLE
@@ -960,7 +960,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     XPLOT_APP_NAME = filename;
 #endif
     if (pl_openpl_r (f->device.plotter) < 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
@@ -982,15 +982,15 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     char *page_size = z;
 /* Establish page size. */
     if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (z[0] != '\0') {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
 /* Open the output file for drawing. */
@@ -999,7 +999,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     filename = (char *) ADDRESS (&ref_filename);
     RESET_ERRNO;
     if ((f->device.stream = fopen (filename, "wb")) == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
       exit_genie (p, A_RUNTIME_ERROR);
     } else {
       f->read_mood = A_FALSE;
@@ -1011,7 +1011,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
     f->device.plotter_params = pl_newplparams ();
     if (f->device.plotter_params == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
@@ -1019,11 +1019,11 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_setplparam (f->device.plotter_params, "PNM_PORTABLE", "no");
     f->device.plotter = pl_newpl_r ("pnm", NULL, f->device.stream, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (pl_openpl_r (f->device.plotter) < 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
@@ -1045,15 +1045,15 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     char *page_size = z;
 /* Establish page size. */
     if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (z[0] != '\0') {
-      diagnostic (A_RUNTIME_ERROR, p, "error in page size");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
 /* Open the output file for drawing. */
@@ -1062,7 +1062,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     filename = (char *) ADDRESS (&ref_filename);
     RESET_ERRNO;
     if ((f->device.stream = fopen (filename, "wb")) == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
       exit_genie (p, A_RUNTIME_ERROR);
     } else {
       f->read_mood = A_FALSE;
@@ -1073,7 +1073,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 /* Set up plotter. */
     f->device.plotter_params = pl_newplparams ();
     if (f->device.plotter_params == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     sprintf (size, "%dx%d", f->device.window_x_size, f->device.window_y_size);
@@ -1082,11 +1082,11 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_setplparam (f->device.plotter_params, "GIF_ANIMATION", "no");
     f->device.plotter = pl_newpl_r ("gif", NULL, f->device.stream, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (pl_openpl_r (f->device.plotter) < 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     pl_space_r (f->device.plotter, 0, 0, f->device.window_x_size, f->device.window_y_size);
@@ -1110,7 +1110,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     filename = (char *) ADDRESS (&ref_filename);
     RESET_ERRNO;
     if ((f->device.stream = fopen (filename, "w")) == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for drawing", filename);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
       exit_genie (p, A_RUNTIME_ERROR);
     } else {
       f->read_mood = A_FALSE;
@@ -1121,17 +1121,17 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 /* Set up ps plotter. */
     f->device.plotter_params = pl_newplparams ();
     if (f->device.plotter_params == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot allocate device parameters");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     pl_setplparam (f->device.plotter_params, "PAGESIZE", (char *) ADDRESS (&(f->device.page_size)));
     f->device.plotter = pl_newpl_r ("ps", NULL, f->device.stream, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot create device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     if (pl_openpl_r (f->device.plotter) < 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot open device");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     f->device.window_x_size = 1000;
@@ -1148,7 +1148,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     f->device.y_coord = 0;
     return (f->device.plotter);
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, "unrecognised or unsupported plotter type");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   return (NULL);
@@ -1310,7 +1310,7 @@ void genie_draw_colour_name (NODE_T * p)
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
   if (!string_to_colour (p, name, &index)) {
-    diagnostic (A_RUNTIME_ERROR, p, "unrecognised colour name", NULL);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, NULL);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   x = (double) (A_COLOURS[index].r) / (double) (0xff);
@@ -1347,7 +1347,7 @@ void genie_draw_background_colour_name (NODE_T * p)
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
   if (!string_to_colour (p, name, &index)) {
-    diagnostic (A_RUNTIME_ERROR, p, "unrecognised colour name", NULL);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, NULL);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   x = (double) (A_COLOURS[index].r) / (double) (0xff);

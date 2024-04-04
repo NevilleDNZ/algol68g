@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -25,9 +25,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 #include "transput.h"
-
-#define PATTERN_BUFFER INPUT_BUFFER
-#define STRING_BUFFER OUTPUT_BUFFER
 
 /*!
 \brief PROC char in string = (CHAR, REF INT, STRING) BOOL
@@ -157,7 +154,7 @@ void push_grep_rc (NODE_T * p, int rc)
 }
 
 /*!
-\brief PROC grep in string = (STRING, REF INT, REF INT, STRING) INT
+\brief PROC grep in string = (STRING, STRING, REF INT, REF INT) INT
 \param p position in syntax tree, should not be NULL
 \return 0: match, 1: no match, 2: no core, 3: other error
 **/
@@ -183,8 +180,9 @@ void genie_grep_in_string (NODE_T * p)
     return;
   }
   nmatch = compiled.re_nsub;
-  if (nmatch == 0)
+  if (nmatch == 0) {
     nmatch = 1;
+  }
   matches = malloc (nmatch * SIZE_OF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
     PUSH_INT (p, rc);
@@ -221,4 +219,76 @@ void genie_grep_in_string (NODE_T * p)
   push_grep_rc (p, 0);
 }
 
+/*!
+\brief PROC sub in string = (STRING, STRING, REF STRING) INT
+\param p position in syntax tree, should not be NULL
+\return 0: match, 1: no match, 2: no core, 3: other error
+**/
+
+void genie_sub_in_string (NODE_T * p)
+{
+  A68_REF ref_pat, ref_rep, ref_str;
+  int rc, nmatch, k, max_k, widest, begin, end;
+  char *txt;
+  regex_t compiled;
+  regmatch_t *matches;
+  POP_REF (p, &ref_str);
+  POP_REF (p, &ref_rep);
+  POP_REF (p, &ref_pat);
+  if (IS_NIL (ref_str)) {
+    PUSH_INT (p, 3);
+    return;
+  }
+  reset_transput_buffer (STRING_BUFFER);
+  reset_transput_buffer (REPLACE_BUFFER);
+  reset_transput_buffer (PATTERN_BUFFER);
+  add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_pat);
+  add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) (A68_REF *) ADDRESS (&ref_str));
+  rc = regcomp (&compiled, get_transput_buffer (PATTERN_BUFFER), REG_NEWLINE | REG_EXTENDED);
+  if (rc != 0) {
+    push_grep_rc (p, rc);
+    regfree (&compiled);
+    return;
+  }
+  nmatch = compiled.re_nsub;
+  if (nmatch == 0) {
+    nmatch = 1;
+  }
+  matches = malloc (nmatch * SIZE_OF (regmatch_t));
+  if (nmatch > 0 && matches == NULL) {
+    PUSH_INT (p, rc);
+    regfree (&compiled);
+    return;
+  }
+  rc = regexec (&compiled, get_transput_buffer (STRING_BUFFER), nmatch, matches, 0);
+  if (rc != 0) {
+    push_grep_rc (p, rc);
+    regfree (&compiled);
+    return;
+  }
+/* Find widest match. Do not assume it is the first one. */
+  widest = 0;
+  max_k = 0;
+  for (k = 0; k < nmatch; k++) {
+    int dif = matches[k].rm_eo - (int) matches[k].rm_so;
+    if (dif > widest) {
+      widest = dif;
+      max_k = k;
+    }
+  }
+  begin = matches[max_k].rm_so + 1;
+  end = matches[max_k].rm_eo;
+/* Substitute text. */
+  txt = get_transput_buffer (STRING_BUFFER);
+  for (k = 0; k < begin - 1; k++) {
+    add_char_transput_buffer (p, REPLACE_BUFFER, txt[k]);
+  }
+  add_a_string_transput_buffer (p, REPLACE_BUFFER, (BYTE_T *) & ref_rep);
+  for (k = end; k < get_transput_buffer_size (STRING_BUFFER); k++) {
+    add_char_transput_buffer (p, REPLACE_BUFFER, txt[k]);
+  }
+  *(A68_REF *) ADDRESS (&ref_str) = c_to_a_string (p, get_transput_buffer (REPLACE_BUFFER));
+  free (matches);
+  push_grep_rc (p, 0);
+}
 #endif

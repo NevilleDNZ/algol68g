@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # This file is part of Algol 68 Genie - an Algol 68 interpreter.
-# Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+# Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -18,20 +18,34 @@
 #
 # configure: configuring script for Algol 68 Genie.
 #
+
+A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER=8
+VERSION_NUMBER="9"
+REVISION="Mark $VERSION_NUMBER"
+TIME_STAMP="March 2006"
+RELEASE_DATE="released $TIME_STAMP"
 PACKAGE="algol68g-mk$VERSION_NUMBER"
 # Where does the system store things
 SYS_INC=/usr/include
 SYS_LIB=/usr/lib
 SYS_BIN=/usr/bin
+USR_LOC=/usr/local
+LOC_INC=$USR_LOC/include
 USR_CHK="./regression-mk$VERSION_NUMBER"
+USR_DOC="./doc"
+USR_DOC_TEMPLATES="$USR_DOC/templates"
 USR_SRC="./source"
+SQL_DIR=$USR_LOC/pgsql
 BUILD_FILE="$USR_SRC/$MAKEFILE"
+VERSION_FILE="$USR_SRC/version.h"
 TEST_FILE="$USR_CHK/regression"
-echo "configuring $PACKAGE"
+BATCH_FILE="$USR_CHK/regression.bat"
+LINK_COLOUR="blue"
+BACKGROUND_COLOUR="#e8e8e8"
+echo "configuring $A68G_NAME $REVISION $RELEASE_DATE ($PACKAGE)"
 #
-userid=`whoami`
+USERID=`whoami`
 POWERPC=`uname -a | grep powerpc`
 PPC=`uname -a | grep ppc`
 X86=`uname -a | grep [3456]86`
@@ -41,10 +55,11 @@ echo "platform: $POWERPC $PPC $X86"
 #
 prev_arg=
 build=no
-warn=-w
+warn="-w"
 threads=no
 opt=
 ld_opt=
+doc_opt=no
 for arg in "$@"
 do
 # Handle option = value
@@ -71,10 +86,12 @@ do
 		prev_arg=cc ;;
 	-cc=* | --cc=*)
 		cc=$val_arg ;;
-	-debug)
+	-debug | --debug)
 		opt=`echo $opt "-ggdb"`
 		ld_opt=`echo $ld_opt "-ggdb"` ;;
-	-profile)
+	-docs | --docs)
+		doc_opt=;;
+	-profile | --profile)
 		opt=`echo $opt "-pg"`
 		ld_opt=`echo $ld_opt "-pg"` ;;
 	-incdir | --incdir)
@@ -106,7 +123,7 @@ do
 	-version | --version | -v | --v)
 		echo "$PACKAGE"
 		exit ;;
-	-w)
+	-warn)
 		warn="-W -Wall" ;;
 	-help | --help | -? | ?)
 		echo "usage: $0 [options]"
@@ -129,6 +146,7 @@ do
 --build 		build target after configuring
 --help  		print help and exit
 --version       	print version and exit
+--warn			give warning messages during compilation
 _HELP
 		exit 1 ;;
 	*)
@@ -143,11 +161,25 @@ then
 	exit 1
 fi
 #
+# Generate documentation
+#
+if [	-z $doc_opt	]
+then
+	cd $USR_DOC_TEMPLATES
+	for f in `find . -name "*.html" -print`
+	do
+		sed "s/REVISION/$REVISION/g" < $f | sed "s/TIME_STAMP/$TIME_STAMP/g" - | sed "s/PACKAGE/$PACKAGE/g" - | sed "s/LINK_COLOUR/$LINK_COLOUR/g" - | sed "s/BACKGROUND_COLOUR/$BACKGROUND_COLOUR/g" - > ../$f
+	done
+	echo "generated documentation"
+	echo "$0 done"
+	exit
+fi
+#
 # Can we write to the current dir?
 #
 if ! [  -w `pwd`	]
 then
-	echo "exiting: $userid cannot write to `pwd`"
+	echo "exiting: $USERID cannot write to `pwd`"
 	exit 1
 fi
 #
@@ -176,9 +208,9 @@ fi
 if [    -z $USR_INC     ]
 then
 	echo -n "include directory: "
-	if [    -d /usr/local/include   ]
+	if [    -d $USR_LOC/include   ]
 	then
-		USR_INC=/usr/local/include
+		USR_INC=$USR_LOC/include
 	else
 		USR_INC=$SYS_INC
 	fi
@@ -188,9 +220,9 @@ fi
 if [    -z $USR_LIB     ]
 then
 	echo -n "library directory: "
-	if [    -d /usr/local/lib       ]
+	if [    -d $USR_LOC/lib       ]
 	then
-		USR_LIB=/usr/local/lib
+		USR_LIB=$USR_LOC/lib
 	else
 		USR_LIB=$SYS_LIB
 	fi
@@ -200,9 +232,9 @@ fi
 if [    -z $USR_BIN     ]
 then
 	echo -n "target binary directory: "
-	if [    -d /usr/local/bin       ]
+	if [    -d $USR_LOC/bin       ]
 	then
-		USR_BIN=/usr/local/bin
+		USR_BIN=$USR_LOC/bin
 	elif [  -d /usr/share/bin       ]
 	then
 		USR_BIN=/usr/share/bin
@@ -220,16 +252,16 @@ then
 fi
 if ! [  -w $USR_BIN     ]
 then
-	echo "$userid cannot write to $USR_BIN, set to `pwd`"
+	echo "$USERID cannot write to $USR_BIN, set to `pwd`"
 	USR_BIN=`pwd`
 fi
 # Find default man_dir if none was given
 if [    -z $man_dir     ]
 then
 	echo -n "target man directory: "
-	if [    -d /usr/local/man/man1       ]
+	if [    -d $USR_LOC/man/man1       ]
 	then
-		man_dir="/usr/local/man/man1"
+		man_dir="$USR_LOC/man/man1"
 	elif [  -d /usr/share/man/man1       ]
 	then
 		man_dir="/usr/share/man/man1"
@@ -246,7 +278,7 @@ then
 fi
 if ! [  -w $man_dir     ]
 then
-	echo "$userid cannot write to $man_dir, set to `pwd`"
+	echo "$USERID cannot write to $man_dir, set to `pwd`"
 	man_dir=`pwd`
 fi
 #
@@ -270,7 +302,7 @@ fi
 #
 # Generate top level makefile
 #
-echo "# $MAKEFILE generated on `date` for $userid." 1>$MAKEFILE
+echo "# $MAKEFILE generated on `date` by $USERID." 1>$MAKEFILE
 echo "SHELL=/bin/sh" 1>>$MAKEFILE
 echo "PACKAGE_NAME=$PACKAGE" 1>>$MAKEFILE
 echo "USR_BIN=$USR_BIN" 1>>$MAKEFILE
@@ -298,6 +330,7 @@ clean:
 distclean mostlyclean maintainer-clean: clean
 	for f in `find . -name "makefile" -print`; do rm -f $$f; done
 	rm -f a68g .a68g.log .a68g.tmp .a68g.x .a68g.x.l
+	rm -f source/version.h
 dist:   distclean
 	cd ..;tar -czf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
 indent:
@@ -309,7 +342,7 @@ echo "generated $MAKEFILE"
 #
 # Generate source level makefile
 #
-echo "# $BUILD_FILE generated on `date` for $userid." 1>$BUILD_FILE
+echo "# $BUILD_FILE generated on `date` by $USERID." 1>$BUILD_FILE
 echo "SHELL=/bin/sh" 1>>$BUILD_FILE
 echo "USR_BIN=$USR_BIN" 1>>$BUILD_FILE
 echo "USR_LIB=$USR_LIB" 1>>$BUILD_FILE
@@ -383,6 +416,19 @@ then
 else
 	echo "not found"
 fi
+# Find terminfo 
+echo -n "checking terminfo in $SYS_INC and $SYS_LIB: "
+if [    -f $SYS_INC/term.h -a -f $SYS_LIB/libcurses.so ]
+then
+	echo "found"
+	echo "TERMINFO_FLAG=-DHAVE_TERMINFO" 1>>$BUILD_FILE
+elif [  -f $SYS_INC/term.h -a  -f $SYS_LIB/libcurses.dylib ]
+then
+	echo "found"
+	echo "TERMINFO_FLAG=-DHAVE_TERMINFO" 1>>$BUILD_FILE
+else
+	echo "not found"
+fi
 # Find HTTP support
 echo -n "checking HTTP support in $SYS_INC: "
 if [    -f $SYS_INC/netdb.h -a -f $SYS_INC/arpa/inet.h -a -f $SYS_INC/netinet/in.h -a -f $SYS_INC/sys/socket.h	]
@@ -400,6 +446,26 @@ then
 	echo "REGEX_FLAG=-DHAVE_REGEX" 1>>$BUILD_FILE
 else
 	echo "not found"
+fi
+# Find PostgreSQL libraries
+echo -n "checking PostgreSQL libraries in $SYS_LIB, $USR_LIB and $SQL_DIR: "
+if [ -f $SQL_DIR/lib/libpq.so	]
+then
+       echo "found"
+       echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
+       echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
+elif [ -f $SYS_LIB/libpq.so -o -f $USR_LIB/libpq.so ]
+then
+       echo "found"
+       echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
+       echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
+elif [ -f $SYS_LIB/libpq.dylib -o -f $USR_LIB/libpq.dylib ]
+then
+       echo "found"
+       echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
+       echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
+else
+       echo "not found"
 fi
 # Find IEEE-754 compatibility
 echo -n "checking IEEE 754 floating point compatibility using system information: "
@@ -423,24 +489,30 @@ echo "OS_FLAG=-DHAVE_UNIX" 1>>$BUILD_FILE
 # Finish Makefile
 if [    $cc = gcc       ]
 then
-	echo "STD_CFLAGS=$warn -I\$(USR_INC) $opt" 1>>$BUILD_FILE
-	echo "STD_LD_FLAGS=$ld_opt -L\$(USR_LIB)" 1>>$BUILD_FILE
+        if ! [	-d $SQL_DIR	]
+        then
+		echo "STD_CFLAGS=$warn -I\$(USR_INC) $opt" 1>>$BUILD_FILE
+		echo "STD_LD_FLAGS=$ld_opt -L\$(USR_LIB)" 1>>$BUILD_FILE
+	else
+		echo "STD_CFLAGS=$warn -I\$(USR_INC) -I$USR_LOC/pgsql/include $opt" 1>>$BUILD_FILE
+		echo "STD_LD_FLAGS=$ld_opt -L\$(USR_LIB) -L$USR_LOC/pgsql/lib" 1>>$BUILD_FILE
+	fi
 else
 	echo "STD_CFLAGS=-I\$(USR_INC)" 1>>$BUILD_FILE
 	echo "STD_LD_FLAGS=-L\$(USR_LIB)" 1>>$BUILD_FILE
 fi
+echo "HS=`find $USR_SRC -name "*.h" -printf "%f "`" 1>>$BUILD_FILE
+echo "CS=`find $USR_SRC -name "*.c" -printf "%f " | sed "s/\.c/\.o/g"`" 1>>$BUILD_FILE
 cat >>$BUILD_FILE <<\_BUILD_EOF
-FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(OS_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(CFLAGS)
-HS=config.h algol68g.h environ.h genie.h gsl.h mp.h transput.h
-OBJ=algol68g.o coercion.o complex.o diagnostics.o engine.o extensions.o garbage.o genie.o gsl.o http.o io.o listing.o moids.o monitor.o mp.o names.o options.o parallel.o parser.o plotutils.o prelude.o regex.o scanner.o scope.o signal.o standard.o stowed.o support.o taxes.o transput.o vector.o
+FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(OS_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(CFLAGS)
 all:    a68g
-a68g:   $(OBJ)
-	$(CC) $(OBJ) $(CFLAGS) $(STD_LD_FLAGS) $(POSIX_THREADS_LIBS) $(PLOTUTILS_LIBS) $(GSL_LIBS) $(CURSES_LIBS) -lm $(LD_FLAGS) -o a68g
-$(OBJ): $(HS)
+a68g:   $(CS)
+	$(CC) $(CS) $(CFLAGS) $(STD_LD_FLAGS) $(POSIX_THREADS_LIBS) $(PLOTUTILS_LIBS) $(GSL_LIBS) $(CURSES_LIBS) $(SQL_LIBS) -lm $(LD_FLAGS) -o a68g
+$(CS): $(HS)
 .c.o:
 	$(CC) -c $(FLAGS) $<
 clean:
-	rm -f $(OBJ)
+	rm -f $(CS)
 depend:
 	touch $(HS)
 indent: clean
@@ -484,22 +556,75 @@ esac
 date
 for f in `find . -name "*.a68" -print | grep -v quote-stropping | sort`
 do
-	echo "$k $f" 1>&2
-	echo "$k $f"
-	$A68 -regression $f
+	echo "$f" 1>&2
+	echo "$f"
+	$A68 --regression $f
 done
 for f in `find . -name "*.a68" -print | grep quote-stropping | sort`
 do
-	echo "$k $f" 1>&2
-	echo "$k $f"
-	$A68 -regression -quotestrop $f
+	echo "$f" 1>&2
+	echo "$f"
+	$A68 --regression --quotestrop $f
 done
 date
 ls -l
 rm -v *.tmp .a68g.tmp
 _REGRESSION_EOF
+	cat >$BATCH_FILE <<\_BATCH_EOF
+#! /bin/sh
+if [	-n $1 ]
+then
+	cd ./$1
+fi
+#
+A68=a68g
+#
+for f in `find . -name "*.a68" -print | grep -v quote-stropping | sort`
+do
+	echo "$A68 --regression $f"
+done
+for f in `find . -name "*.a68" -print | grep quote-stropping | sort`
+do
+	echo "$A68 --regression --quotestrop $f"
+done
+_BATCH_EOF
 chmod +x $TEST_FILE
+chmod +x $BATCH_FILE
 echo "generated $TEST_FILE"
+echo "generated $BATCH_FILE"
+fi
+#
+# Generate a version header
+#
+echo "/* $VERSION_FILE generated on `date` by $USERID. */" 1>$VERSION_FILE
+echo "#define A68G_NAME \"$A68G_NAME\"" 1>>$VERSION_FILE
+echo "#define REVISION \"$REVISION\"" 1>>$VERSION_FILE
+echo "#define RELEASE_DATE \"$RELEASE_DATE\"" 1>>$VERSION_FILE
+echo "#define USERID \"$USERID\"" 1>>$VERSION_FILE
+if [    $cc = gcc       ]
+then
+	echo "#define GCC_VERSION \"`gcc --version`\"" 1>>$VERSION_FILE
+fi
+if [ -f $USR_INC/plot.h ]
+then
+	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $USR_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+elif [ -f $LOC_INC/plot.h ]
+then
+	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $LOC_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+fi
+if [ -f $USR_INC/gsl/gsl_version.h ]
+then
+	echo "#define A68_GSL_VERSION \"`grep '#define GSL_VERSION ' $USR_INC/gsl/gsl_version.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+elif [ -f $LOC_INC/gsl/gsl_version.h ]
+then
+	echo "#define A68_GSL_VERSION \"`grep '#define GSL_VERSION ' $LOC_INC/gsl/gsl_version.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+fi
+if [ -f $USR_INC/pgsql/include/pg_config.h ]
+then
+	echo "#define A68_PG_VERSION \"`grep '#define PG_VERSION ' $USR_INC/pgsql/pg_config.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+elif [ -f $USR_LOC/pgsql/include/pg_config.h ]
+then
+	echo "#define A68_PG_VERSION \"`grep '#define PG_VERSION ' $USR_LOC/pgsql/include/pg_config.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
 fi
 #
 # Build target if required
@@ -527,5 +652,5 @@ then
 			exit 1 ;;
 	esac
 fi
-# We're all set.
+echo "$0 done"
 exit

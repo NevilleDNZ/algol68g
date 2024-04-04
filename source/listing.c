@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -26,156 +26,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "genie.h"
 
 #define SHOW_EQ A_FALSE
-
-/*!
-\brief get_level
-\param t
-**/
-
-void print_raw_source (FILE_T f, NODE_T * p, int *line)
-{
-  for (; p != NULL; FORWARD (p)) {
-    if (SUB (p) != NULL) {
-      print_raw_source (f, SUB (p), line);
-    } else if (p->info->line->number > 0) {
-      if (p->info->line->number > (*line)) {
-	(*line) = p->info->line->number;
-	io_write_string (f, "\n");
-      }
-      if (SYMBOL (p) != NULL) {
-	if (WHETHER (p, ROW_CHAR_DENOTER)) {
-	  sprintf (output_line, "\"%s\" ", SYMBOL (p));
-	} else {
-	  sprintf (output_line, "%s ", SYMBOL (p));
-	}
-	io_write_string (f, output_line);
-      }
-    }
-  }
-}
-
-/*!
-\brief fill out lexical level of TAXes
-\param t
-**/
-
-void get_level (NODE_T * t)
-{
-  for (; t != NULL; FORWARD (t)) {
-    if (SUB (t) != NULL) {
-      get_level (SUB (t));
-    }
-    switch (ATTRIBUTE (t)) {
-    case DENOTER:
-    case IDENTIFIER:
-    case DEFINING_IDENTIFIER:
-    case FIELD_IDENTIFIER:
-/*      case LABEL_IDENTIFIER: */
-    case INDICANT:
-    case DEFINING_INDICANT:
-    case NIHIL:
-    case OPERATOR:
-    case DEFINING_OPERATOR:
-    case SKIP:
-      {
-	if (t->info->PROCEDURE_LEVEL < LINE (t)->min_proc_level) {
-	  LINE (t)->min_proc_level = t->info->PROCEDURE_LEVEL;
-	}
-	if (t->info->PROCEDURE_LEVEL > LINE (t)->max_proc_level) {
-	  LINE (t)->max_proc_level = t->info->PROCEDURE_LEVEL;
-	}
-	if (SYMBOL_TABLE (t) != NULL && (LEX_LEVEL (t) < LINE (t)->min_level)) {
-	  LINE (t)->min_level = LEX_LEVEL (t);
-	}
-	if (SYMBOL_TABLE (t) != NULL && (LEX_LEVEL (t) > LINE (t)->max_level)) {
-	  LINE (t)->max_level = LEX_LEVEL (t);
-	}
-      }
-    }
-  }
-}
-
-/*!
-\brief number procedure levels for listing
-\param p
-\param l
-**/
-
-void number_proc_levels (NODE_T * p, int l)
-{
-  for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, ROUTINE_TEXT) || WHETHER (p, PROCEDURING)) {
-      number_proc_levels (SUB (p), l + 1);
-    } else {
-      number_proc_levels (SUB (p), l);
-    }
-    p->info->PROCEDURE_LEVEL = l;
-  }
-}
-
-/*!
-\brief start numbering a new procedure level
-\param p
-\param k
-**/
-
-static void number_this_proc (NODE_T * p, int k)
-{
-  if (p != NULL && ATTRIBUTE (p) != ROUTINE_TEXT && ATTRIBUTE (p) != PROCEDURING) {
-    p->info->PROCEDURE_NUMBER = k;
-    number_this_proc (SUB (p), k);
-    number_this_proc (NEXT (p), k);
-  }
-}
-
-/*!
-\brief driver for numbering procedure levels
-\param p
-\param k
-**/
-
-void number_procs (NODE_T * p, int *k)
-{
-  for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, ROUTINE_TEXT) || WHETHER (p, PROCEDURING)) {
-      (*k)++;
-      number_this_proc (SUB (p), *k);
-      p->info->PROCEDURE_NUMBER = *k;
-    }
-    number_procs (SUB (p), k);
-  }
-}
-
-/*!
-\brief make_numbers
-\param a
-\param b
-\return
-**/
-
-static char *make_numbers (int a, int b)
-{
-  char z[3];
-  strcpy (z, "   ");
-  if (a == 0 && b == 0) {
-    return (new_string (z));
-  } else {
-    if (a == b && a != 0) {
-      z[1] = digit_to_char (a);
-    } else {
-      if (a != INT_MAX) {
-	if (a == 0) {
-	  z[1] = digit_to_char (b);
-	} else {
-	  z[0] = digit_to_char (a);
-	  z[1] = '-';
-	  z[2] = digit_to_char (b);
-	}
-      }
-    }
-  }
-  return (new_string (z));
-}
 
 /*!
 \brief brief_mode_string
@@ -351,38 +201,38 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
   for (; s != NULL; FORWARD (s)) {
     NODE_T *where = NODE (s);
     if (where != NULL && ((MASK (where) & CROSS_REFERENCE_MASK))) {
-      io_write_string (f, "\n ");
+      io_write_string (f, "\n     ");
       switch (a) {
       case IDENTIFIER:
 	{
-	  sprintf (output_line, "identifier %s ", SYMBOL (NODE (s)));
+	  sprintf (output_line, "Identifier %s ", SYMBOL (NODE (s)));
 	  io_write_string (f, output_line);
 	  brief_moid_flat (f, MOID (s));
 	  break;
 	}
       case INDICANT:
 	{
-	  sprintf (output_line, "indicant %s ", SYMBOL (NODE (s)));
+	  sprintf (output_line, "Indicant %s ", SYMBOL (NODE (s)));
 	  io_write_string (f, output_line);
 	  brief_moid_flat (f, MOID (s));
 	  break;
 	}
       case PRIO_SYMBOL:
 	{
-	  sprintf (output_line, "PRIO %s %d", SYMBOL (NODE (s)), PRIO (s));
+	  sprintf (output_line, "Priority %s %d", SYMBOL (NODE (s)), PRIO (s));
 	  io_write_string (f, output_line);
 	  break;
 	}
       case OP_SYMBOL:
 	{
-	  sprintf (output_line, "operator %s ", SYMBOL (NODE (s)));
+	  sprintf (output_line, "Operator %s ", SYMBOL (NODE (s)));
 	  io_write_string (f, output_line);
 	  brief_moid_flat (f, MOID (s));
 	  break;
 	}
       case LABEL:
 	{
-	  sprintf (output_line, "label %s", SYMBOL (NODE (s)));
+	  sprintf (output_line, "Label %s", SYMBOL (NODE (s)));
 	  io_write_string (f, output_line);
 	  break;
 	}
@@ -391,32 +241,32 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
 	  switch (PRIO (s)) {
 	  case ROUTINE_TEXT:
 	    {
-	      sprintf (output_line, "routine text ");
+	      sprintf (output_line, "Routine text ");
 	      break;
 	    }
 	  case FORMAT_TEXT:
 	    {
-	      sprintf (output_line, "format text ");
+	      sprintf (output_line, "Format text ");
 	      break;
 	    }
 	  case FORMAT_IDENTIFIER:
 	    {
-	      sprintf (output_line, "format item ");
+	      sprintf (output_line, "Format item ");
 	      break;
 	    }
 	  case COLLATERAL_CLAUSE:
 	    {
-	      sprintf (output_line, "display ");
+	      sprintf (output_line, "Display ");
 	      break;
 	    }
 	  case GENERATOR:
 	    {
-	      sprintf (output_line, "generator ");
+	      sprintf (output_line, "Generator ");
 	      break;
 	    }
 	  case PROTECT_FROM_SWEEP:
 	    {
-	      sprintf (output_line, "sweep protect %p ", NODE (s));
+	      sprintf (output_line, "Sweep protect %p ", NODE (s));
 	      break;
 	    }
 	  }
@@ -426,7 +276,7 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
 	}
       default:
 	{
-	  sprintf (output_line, "internal %d ", a);
+	  sprintf (output_line, "Internal %d ", a);
 	  io_write_string (f, output_line);
 	  brief_moid_flat (f, MOID (s));
 	  break;
@@ -435,26 +285,6 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
       if (where != NULL && where->info != NULL && where->info->line != NULL) {
 	sprintf (output_line, " line %d", where->info->line->number);
 	io_write_string (f, output_line);
-      }
-      switch (ACCESS (s)) {
-      case PUBLIC_SYMBOL:
-	{
-	  sprintf (output_line, " public");
-	  io_write_string (f, output_line);
-	  break;
-	}
-      case PRELUDE_SYMBOL:
-	{
-	  sprintf (output_line, " prelude ");
-	  io_write_string (f, output_line);
-	  break;
-	}
-      case POSTLUDE_SYMBOL:
-	{
-	  sprintf (output_line, " postlude");
-	  io_write_string (f, output_line);
-	  break;
-	}
       }
     }
   }
@@ -497,7 +327,7 @@ static void xref_decs (FILE_T f, SYMBOL_TABLE_T * next)
 static void xref1_moid (FILE_T f, MOID_T * p)
 {
   if (EQUIVALENT (p) == NULL || SHOW_EQ) {
-    sprintf (output_line, "\n  %s ", brief_mode_string (p));
+    sprintf (output_line, "\n     %s ", brief_mode_string (p));
     io_write_string (f, output_line);
     print_mode_flat (f, p);
   }
@@ -542,7 +372,7 @@ static void cross_reference (FILE_T f, NODE_T * p, SOURCE_LINE_T * l)
     for (; p != NULL; FORWARD (p)) {
       if (whether_new_lexical_level (p) && l == LINE (p)) {
 	SYMBOL_TABLE_T *c = SYMBOL_TABLE (SUB (p));
-	sprintf (output_line, "\n%scross reference [level %d", BARS, c->level);
+	sprintf (output_line, "\n++++ Cross reference [level %d", c->level);
 	io_write_string (f, output_line);
 	if (PREVIOUS (c) == stand_env) {
 	  sprintf (output_line, ", in standard environ]");
@@ -597,8 +427,7 @@ static void tree_listing (FILE_T f, NODE_T * p, int x, int *y, SOURCE_LINE_T * l
     for (; p != NULL; FORWARD (p)) {
       if ((MASK (p) & TREE_MASK) && l == LINE (p)) {
 	if (MASK (p) & TREE_MASK) {
-	  io_write_string (f, "\n");
-	  sprintf (output_line, "%p %-3x ", p, x);
+	  sprintf (output_line, "\n     %p %-3x ", p, x);
 	  io_write_string (f, output_line);
 	  if (p->protect_sweep == NULL) {
 	    sprintf (output_line, " ");
@@ -665,7 +494,7 @@ void source_listing (MODULE_T * module)
   FILE_T f = module->files.listing.fd;
   int listed = 0;
   if (module->files.listing.opened == 0) {
-    diagnostic (A_ERROR, NULL, "cannot write source listing", NULL);
+    diagnostic_node (A_ERROR, NULL, ERROR_CANNOT_WRITE_LISTING, NULL);
     return;
   }
   for (; line != NULL; line = NEXT (line)) {
@@ -682,52 +511,8 @@ X "ABCD.A68" 0001 01 01 # Source line #
 */
     if (line->list) {
       listed++;
-      sprintf (output_line, "\n%s \"%-8s\" %04d", BARS, line->filename, line->number);
-      io_write_string (f, output_line);
-      if (error_count) {
-	sprintf (output_line, "      ");
-	io_write_string (f, output_line);
-      } else {
-	sprintf (output_line, " %2s %2s", make_numbers (line->min_proc_level, line->max_proc_level), make_numbers (line->min_level, line->max_level));
-	io_write_string (f, output_line);
-      }
 /* Print source line. */
-      io_write_string (f, " ");
-      io_write_string (f, line->string);
-/* Print diagnostics. */
-      if (line->messages != NULL) {
-	MESSAGE_T *d = line->messages;
-	char *p = line->string;
-	sprintf (output_line, "\n%s                       ", BARS);
-	io_write_string (f, output_line);
-	while (*p != '\0') {
-	  if (*p == ' ' || *p == '\t') {
-	    sprintf (output_line, "%c", *p++);
-	    io_write_string (f, output_line);
-	  } else {
-	    int first = 0, length, more = 0;
-	    for (d = line->messages; d != NULL; FORWARD (d)) {
-	      if (d->where->info->char_in_line == p && ++more == 1) {
-		first = d->number;
-		length = strlen (SYMBOL (d->where));
-	      }
-	    }
-	    p++;
-	    if (more == 0) {
-	      sprintf (output_line, " ");
-	    } else if (more == 1) {
-	      sprintf (output_line, "%c", digit_to_char (first));
-	    } else {
-	      sprintf (output_line, "*");
-	    }
-	    io_write_string (f, output_line);
-	  }
-	}
-	for (d = line->messages; d != NULL; FORWARD (d)) {
-	  sprintf (output_line, "\n%s%s", BARS, d->text);
-	  io_write_string (f, output_line);
-	}
-      }
+      write_source_line (f, line);
 /* Cross reference for lexical levels starting at this line. */
       if (module->options.cross_reference) {
 	cross_reference (f, line->top_node, line);
@@ -735,7 +520,7 @@ X "ABCD.A68" 0001 01 01 # Source line #
 /* Syntax tree listing connected with this line. */
       if (module->options.tree_listing && leaves_to_print (module->top_node, line)) {
 	int y = INT_MAX;
-	sprintf (output_line, "\n%sSyntax tree for line %d", BARS, line->number);
+	sprintf (output_line, "\n++++ Syntax tree for line %d", line->number);
 	io_write_string (f, output_line);
 	low_level (module->top_node, 1, &y, line);
 	tree_listing (f, module->top_node, 1, &y, line);
@@ -744,7 +529,7 @@ X "ABCD.A68" 0001 01 01 # Source line #
   }
 /* Warn if there was no source at all. */
   if (listed == 0) {
-    sprintf (output_line, "\n  no lines to list");
+    sprintf (output_line, "\n     No lines to list");
     io_write_string (f, output_line);
   }
 }
@@ -757,24 +542,20 @@ X "ABCD.A68" 0001 01 01 # Source line #
 void write_listing (MODULE_T * module)
 {
   SOURCE_LINE_T *z;
-  int line = -1;
   FILE_T f = module->files.listing.fd;
-  sprintf (output_line, "\n%sRaw source", BARS);
-  io_write_string (f, output_line);
-  print_raw_source (f, module->top_node, &line);
   if (module->options.moid_listing && top_moid_list != NULL) {
-    sprintf (output_line, "\n%sMoid listing", BARS);
+    sprintf (output_line, "\n++++ Moid listing");
     io_write_string (f, output_line);
     moid_listing (f, top_moid_list);
   }
   if (module->options.standard_prelude_listing && stand_env != NULL) {
-    sprintf (output_line, "\n%sStandard prelude listing", BARS);
+    sprintf (output_line, "\n++++ Standard prelude listing");
     io_write_string (f, output_line);
     xref_decs (f, stand_env);
   }
   if (module->top_refinement != NULL) {
     REFINEMENT_T *x = module->top_refinement;
-    sprintf (output_line, "\n%sRefinements", BARS);
+    sprintf (output_line, "\n++++ Refinements");
     io_write_string (f, output_line);
     while (x != NULL) {
       sprintf (output_line, "\n  \"%s\"", x->name);
@@ -808,26 +589,24 @@ void write_listing (MODULE_T * module)
   if (module->options.list != NULL) {
     OPTION_LIST_T *i;
     int k = 1;
-    sprintf (output_line, "\n%sOptions and pragmat items", BARS);
+    sprintf (output_line, "\n++++ Options and pragmat items");
     io_write_string (f, output_line);
     for (i = module->options.list; i != NULL; i = NEXT (i)) {
-      sprintf (output_line, "\n%s\t%-4d %s", BARS, k++, i->str);
+      sprintf (output_line, "\n     %-4d %s", k++, i->str);
       io_write_string (f, output_line);
     }
   }
   if (module->options.statistics_listing) {
     if (error_count + warning_count > 0) {
-      sprintf (output_line, "\n%sDiagnostics: errors: %d, warnings: %d", BARS, error_count, warning_count);
+      sprintf (output_line, "\n++++ Diagnostics: %d error(s), %d warning(s)", error_count, warning_count);
       io_write_string (f, output_line);
       for (z = module->top_line; z != NULL; z = NEXT (z)) {
-	MESSAGE_T *d;
-	for (d = z->messages; d != NULL; FORWARD (d)) {
-	  sprintf (output_line, "\n  line %d: %s", z->number, d->text);
-	  io_write_string (f, output_line);
+	if (z->diagnostics != NULL) {
+	  write_source_line (f, z);
 	}
       }
     }
-    sprintf (output_line, "\n%sGarbage collections: %d", BARS, garbage_collects);
+    sprintf (output_line, "\n++++ Garbage collections: %d", garbage_collects);
     io_write_string (f, output_line);
   }
   io_write_string (f, "\n");

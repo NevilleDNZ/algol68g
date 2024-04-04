@@ -4,9 +4,9 @@
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: navy; text-decoration: underline;}
-a:visited {color: navy; text-decoration: underline;}
-a:active  {color: navy; text-decoration: underline;}
+a:link    {color: blue; text-decoration: underline;}
+a:visited {color: blue; text-decoration: underline;}
+a:active  {color: blue; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
@@ -25,8 +25,17 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <body bgcolor="white">
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="100%" background="lines.gif">
+<img src="lines.gif" align=right>
+<small>Documentation for Algol 68 Genie Mark 9</small>
+</td>
+</table>
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
+<br>
 <h2>Synopsis and options</h2>
+<small>
 &middot;&nbsp;<a href="synopsis.html#synopsis">Synopsis</a><br>
 &middot;&nbsp;<a href="synopsis.html#options">Options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionone">One-liners</a><br>
@@ -35,6 +44,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionint">Interpreter options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionmisc">Miscellaneous options</a><br>
 &middot;&nbsp;<a href="synopsis.html#monitor">Monitor commands</a>
+</small>
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
 <img src="logo.gif">
@@ -45,27 +55,28 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <!-- Navigation bar -->
 <table border="0" cellspacing="0" width="100%">
 <tr>
-<td bgcolor="skyblue">
-&nbsp;&nbsp;<b>Manual</b>
-</td>
-</tr>
-<tr>
-<td bgcolor="powderblue">
+<td background="lines.gif">
+<small><b>Algol68G Mark 9</b></small>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+<small><b>Extensions</b></small>
+<br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
 </td>
 </tr>
 </table>
@@ -78,8 +89,8 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 From the command-line you would use:
 <p>
 <table border=0 cellpadding=12>
-<td bgcolor="#000000">
-<font color="#00ff00">
+<td>
+<font color=black>
 <tt>
 a68g [options | filename]
 </tt>
@@ -87,14 +98,12 @@ a68g [options | filename]
 </td>
 </table>
 <p>
-where options have syntax <code>-option [[=] value[suffix]]</code>
-<p>
-If Algol68G cannot open <i>filename</i>, it will try opening with extensions <i>.a68</i>, <i>.a68g</i>, <i>.algol68</i> or <i>.algol68g</i>. 
+If Algol68G cannot open <code>filename</code>, it will try opening with extensions <code>.a68</code>, <code>.a68g</code>, <code>.algol68</code> or <code>.algol68g</code>. 
 <p>Alternatively, under UNIX or Linux an Algol 68 source file can be made a script by entering:
 <p>
 <table border=0 cellpadding=12>
-<td bgcolor="#000000">
-<font color="#00ff00">
+<td>
+<font color=black>
 <tt>
 #! [path/]a68g [options]
 </tt>
@@ -106,8 +115,8 @@ as the <b>first</b> line in the source file.
 After making the script executable by typing:
 <p>
 <table border=0 cellpadding=12>
-<td bgcolor="#000000">
-<font color="#00ff00">
+<td>
+<font color=black>
 <tt>
 chmod +x [path/]filename
 </tt>
@@ -118,19 +127,35 @@ chmod +x [path/]filename
 the script can be started from the command line by typing:
 <p>
 <table border=0 cellpadding=12>
-<td bgcolor="#000000">
-<font color="#00ff00">
+<td>
+<font color=black>
 <tt>
 [path/]filename
 </tt>
 </font>
 </td>
 </table>
+<p>
+On UNIX/Linux, Algol 68 Genie recognises next environment variables:
+<dl>
+<dt><code>A68G_STANDIN</code>
+<dd>The value will be the name of the file to which <code>stand in</code> will be redirected.
+<dt><code>A68G_STANDOUT</code>
+<dd>The value will be the name of the file to which <code>stand out</code> will be redirected.
+<dt><code>A68G_STANDERROR</code>
+<dd>The value will be the name of the file to which <code>stand error</code> will be redirected.
+<dt><code>A68G_OPTIONS</code>
+<dd>The value will be tokenised and processed as options. These options will supersede options set in file <code>.a68grc</code> (vide infra).
+</dl>
 </p>
 
 <br>
 <h3><a name="options"></a>Options</h3>
-<p>Options are passed to Algol68G either from the file <i>.a68g.rc</i> in the working directory, the command-line or through pragmats. Precedence is as follows: pragmats supersede command-line options, command-line options supersede options in <i>.a68g.rc</i>. Options are not case sensitive. In the list below, bold letters denote letters mandatory for recognition. Listing options, tracing options and pragmat, -nopragmat, take their effect when they are encountered in a left-to-right pass of the program text, and can thus be used, for example, to generate a cross reference for a particular part of the user program. In integral arguments, suffix "k", "M" or "G" is accepted to specify 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
+<p>Options are passed to Algol68G either from the file <code>.a68grc</code> in the working directory, the <code>A68G_OPTIONS</code> environment variable, the command-line or through pragmats. Precedence is as follows: pragmats supersede command-line options, command-line options supersede options from <code>A68G_OPTIONS</code> that supersede options in <code>.a68grc</code>. 
+<p>
+Options have syntax <code>-option [[=] value[suffix]]</code>
+<p>
+Options are not case sensitive. In the list below, bold letters denote letters mandatory for recognition. Listing options, tracing options and pragmat, -nopragmat, take their effect when they are encountered in a left-to-right pass of the program text, and can thus be used, for example, to generate a cross reference for a particular part of the user program. In integral arguments, suffix "k", "M" or "G" is accepted to specify 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
 </p>
 
 <h4><a name="optionone"></a>One-liners</h4>
@@ -239,8 +264,12 @@ the script can be started from the command line by typing:
 <dd>Generates GNU style diagnostics.
 <dt><b>h</b>elp
 <dd>Provides an overview of options.
-<dt><b>now</b>arnings
-<dd>Suppresses suppressible warning messages.
+<dt><b>pedantic</b>
+<dd>Equivalent to <b>warnings portcheck</b>.
+<dt><b>port</b>check, <b>noport</b>check
+<dd>Enable or suppress portability warning messages.
+<dt><b>warnings</b>, <b>now</b>arnings
+<dd>Enable warning messages or suppresses suppressible warning messages.
 <dt><b>pr</b>agmats, <b>nopr</b>agmats
 <dd>Starts (or stops) elaboration of pragmat items. When disabled, pragmat items are ignored, except for pragmats.
 <dt><b>red</b>uctions
@@ -302,12 +331,12 @@ Algol68G has a monitor for basic debugging of a running program. The monitor is 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
+<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 8</small>
+<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
 </font>
 </td>
 </table>
