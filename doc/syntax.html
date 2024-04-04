@@ -17,8 +17,8 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
@@ -67,7 +67,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -133,7 +133,7 @@ To accept only semantically correct programs, a two-level grammar is needed <a h
 
 <h3><a name="reserved"></a>Reserved symbols</h3>
 <p>
-Next symbols are reserved in Algol 68 Genie Mark 9.1:
+Next symbols are reserved in Algol 68 Genie Mark 9.2:
 <p>
 <code>
   ANDF,
@@ -579,8 +579,8 @@ Expressions are orthogonal, for instance an enclosed-clause can be an operand in
 </ul>
 
 <ul>
-<b>bits-denotation</b>: [`LONG'-sequence, `SHORT'-sequence] digit-sequence `r' digit-sequence.<br>
-<small>The left-hand side digit-sequence yields the radix for the number and can range from 2 to 16.</small>
+<b>bits-denotation</b>: [`LONG'-sequence, `SHORT'-sequence] digit-sequence `r' bits-digit-sequence.<br>
+<small>The left-hand side digit-sequence yields the radix for the number and can range from 2 to 16. Hexadecimal digits, when letters, must be lower case conform the Revised Report.</small>
 <ul><code>
 <li>2r1010, 8r377, LONG 16rffffffffffff
 </code></ul>
@@ -1039,7 +1039,7 @@ The <a href="extensions.html#refine">refinement preprocessor</a> is a low-level 
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>

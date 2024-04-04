@@ -21,9 +21,9 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="9.1"
+VERSION_NUMBER="9.2"
 REVISION="Mark $VERSION_NUMBER"
-TIME_STAMP="April 2006"
+TIME_STAMP="July 2006"
 RELEASE_DATE="released $TIME_STAMP"
 PACKAGE="algol68g-mk$VERSION_NUMBER"
 # Where does the system store things
@@ -43,14 +43,13 @@ TEST_FILE="$USR_CHK/regression"
 BATCH_FILE="$USR_CHK/regression.bat"
 LINK_COLOUR="blue"
 BACKGROUND_COLOUR="#e8e8e8"
-echo "configuring $A68G_NAME $REVISION $RELEASE_DATE ($PACKAGE)"
+echo "$A68G_NAME $REVISION $RELEASE_DATE ($PACKAGE) `uname -mrs`"
 #
 USERID=`whoami`
 POWERPC=`uname -a | grep powerpc`
 PPC=`uname -a | grep ppc`
 X86=`uname -a | grep [3456]86`
-echo "platform: $POWERPC $PPC $X86" 
-SED_JOIN="./sed_join"
+BSD=`uname -s | grep BSD`
 #
 # Option processing
 #
@@ -60,6 +59,7 @@ warn="-w"
 threads=no
 opt=
 ld_opt=
+indent_opt=no
 doc_opt=no
 anonymus=no
 for arg in "$@"
@@ -95,6 +95,8 @@ do
 		ld_opt=`echo $ld_opt "-ggdb"` ;;
 	-docs | --docs)
 		doc_opt=;;
+	-indent | --indent)
+		indent_opt=;;
 	-profile | --profile)
 		opt=`echo $opt "-pg"`
 		ld_opt=`echo $ld_opt "-pg"` ;;
@@ -122,6 +124,8 @@ do
 		opt=`echo $opt "-O2"` ;;
 	-O3)
 		opt=`echo $opt "-O3 -funroll-loops"` ;;
+	-O4)
+		opt=`echo $opt "-O3 -funroll-loops -march=prescott -mno-align-double"` ;;
 	-threads | --threads)
 		threads=;;
 	-version | --version | -v | --v)
@@ -171,10 +175,30 @@ fi
 if [	-z $doc_opt	]
 then
 	cd $USR_DOC_TEMPLATES
-	for f in `find . -name "*.html" -print`
-	do sed "/<!-- Navigation bar -->/r navigation" < $f | sed "s/REVISION/$REVISION/g" - | sed "s/TIME_STAMP/$TIME_STAMP/g" - | sed "s/PACKAGE/$PACKAGE/g" - | sed "s/LINK_COLOUR/$LINK_COLOUR/g" - | sed "s/BACKGROUND_COLOUR/$BACKGROUND_COLOUR/g" - > ../$f
+	for f in `echo *.html`
+	do
+		echo $f
+#		sed "/<!-- Navigation bar -->/r navigation" < $f | sed "s/REVISION/$REVISION/g" - | sed "s/TIME_STAMP/$TIME_STAMP/g" - | sed "s/PACKAGE/$PACKAGE/g" - | sed "s/LINK_COLOUR/$LINK_COLOUR/g" - | sed "s/BACKGROUND_COLOUR/$BACKGROUND_COLOUR/g" - > ../$f
+		sed "/<!-- Navigation bar -->/r navigation" < $f | sed "s/REVISION/$REVISION/g" | sed "s/TIME_STAMP/$TIME_STAMP/g" | sed "s/PACKAGE/$PACKAGE/g" | sed "s/LINK_COLOUR/$LINK_COLOUR/g" | sed "s/BACKGROUND_COLOUR/$BACKGROUND_COLOUR/g" > ../$f
 	done
 	echo "generated documentation"
+	echo "$0 done"
+	exit
+fi
+#
+# Indent source
+#
+if [	-z $indent_opt	]
+then
+	cd $USR_SRC
+	for f in `echo *.c`
+	do
+		echo $f
+		gindent $f -l500 -br -ce -cdw -nfca -npsl -nut -i2 -nbad -cs -pcs
+		rm $f~
+	done
+	wc *.c *.h
+	echo "indented source"
 	echo "$0 done"
 	exit
 fi
@@ -199,7 +223,7 @@ fi
 #
 # Can we write to the current dir?
 #
-if ! [  -w `pwd`	]
+if ! [  -w "`pwd`"	]
 then
 	echo "exiting: $USERID cannot write to `pwd`"
 	exit 1
@@ -263,6 +287,9 @@ then
 	elif [  -w $SYS_BIN     ]
 	then
 		USR_BIN=$SYS_BIN
+	elif [ 	-d ~/bin	]
+	then
+		USR_BIN=~/bin
 	else
 		USR_BIN=`pwd`
 	fi
@@ -287,8 +314,12 @@ then
 	elif [  -d /usr/share/man/man1       ]
 	then
 		man_dir="/usr/share/man/man1"
-	elif [  -w /usr/man/man1     ]; then
+	elif [  -w /usr/man/man1     ]
+	then
 		man_dir="/usr/man/man1"
+	elif [	-d ~/man	]
+	then
+		man_dir="~/man"
 	else
 		man_dir=`pwd`
 	fi
@@ -322,19 +353,6 @@ then
 	exit 1
 fi
 #
-# SED scripts
-#
-cat >$SED_JOIN <<\_SED_JOIN_EOF
-:join
-{
-s/\.\/[a-z0-9]*\///
-s/\.c/.o/
-N
-s/\n/ /
-b join
-}
-_SED_JOIN_EOF
-#
 # Generate top level makefile
 #
 echo "# $MAKEFILE generated on `date` by $USERID." 1>$MAKEFILE
@@ -358,15 +376,13 @@ regression:  all
 	@cd $(USR_CHK); ./regression $(DIR); cd ..
 clean:
 	@cd $(USR_SRC); $(MAKE) clean; cd ..
-	@for f in `find . -name "core" -print`; do rm -f $$f; done
+	@for f in `echo core`; do rm -f $$f; done
 distclean mostlyclean maintainer-clean: clean
-	@for f in `find . -name "makefile" -print`; do rm -f $$f; done
+	@for f in `echo makefile`; do rm -f $$f; done
 	@rm -f a68g .a68g.log .a68g.tmp .a68g.x .a68g.x.l
 	./configure -anonymus
 dist:   distclean
 	@cd ..;tar -czf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
-indent:
-	@cd $(USR_SRC); $(MAKE) indent; cd ..
 TAGS info dvi:
 	@echo "target not implemented"
 _MAKE_EOF
@@ -384,19 +400,20 @@ echo "CC=$cc" 1>>$BUILD_FILE
 # Shared libraries are called .so (Linux etcetera) or .dylib (BSD).
 #
 # Find POSIX threads
-if [    -z $threads     ]
+#if [    -z $threads -a -f $SYS_INC/pthread.h ]
+if [    -z $threads ]
 then
 	echo -n "checking POSIX threads in $SYS_LIB and $SYS_INC: "
-	if [    -f $SYS_LIB/libpthread.so -a -f $SYS_INC/pthread.h ]
+	if [ -f $SYS_INC/pthread.h ]
 	then
-		echo "found"
-		echo "POSIX_THREADS_LIBS=-lpthread" 1>>$BUILD_FILE
-		echo "POSIX_THREADS_FLAG=-DHAVE_POSIX_THREADS" 1>>$BUILD_FILE
-	elif [    -f $SYS_LIB/libpthread.dylib -a -f $SYS_INC/pthread.h ]
-	then
-		echo "found"
-		echo "POSIX_THREADS_LIBS=-lpthread" 1>>$BUILD_FILE
-		echo "POSIX_THREADS_FLAG=-DHAVE_POSIX_THREADS" 1>>$BUILD_FILE
+		if [ -f $SYS_LIB/libpthread.so -o -f $SYS_LIB/libpthread.a -o -f $SYS_LIB/libpthread.dylib ]
+		then
+			echo "found"
+			echo "POSIX_THREADS_LIBS=-lpthread" 1>>$BUILD_FILE
+			echo "POSIX_THREADS_FLAG=-DHAVE_POSIX_THREADS" 1>>$BUILD_FILE
+		else
+			echo "not found"
+		fi
 	else
 		echo "not found"
 	fi
@@ -405,42 +422,37 @@ else
 fi
 # Find GNU Plotutils
 echo -n "checking GNU plotutils in $USR_LIB and $USR_INC: "
-if [    -f $USR_LIB/libplot.so -a -f $USR_INC/plot.h ]
+if [    -f $USR_INC/plot.h ]
 then
-	echo "found"
-	echo "PLOTUTILS_LIBS=-L/usr/X11R6/lib -lXaw -lXmu -lXt -lSM -lICE -lXext -lX11 -lplot" 1>>$BUILD_FILE
-	echo "PLOTUTILS_FLAG=-DHAVE_PLOTUTILS" 1>>$BUILD_FILE
-elif [    -f $USR_LIB/libplot.dylib -a -f $USR_INC/plot.h ]
-then
-	echo "found"
-	echo "PLOTUTILS_LIBS=-L/usr/X11R6/lib -lXaw -lXmu -lXt -lSM -lICE -lXext -lX11 -lplot" 1>>$BUILD_FILE
-	echo "PLOTUTILS_FLAG=-DHAVE_PLOTUTILS" 1>>$BUILD_FILE
+	if [    -f $USR_LIB/libplot.so -o -f $USR_LIB/libplot.a	-o -f $USR_LIB/libplot.dylib	]
+	then
+		echo "found"
+		echo "PLOTUTILS_LIBS=-L/usr/X11R6/lib -lXaw -lXmu -lXt -lSM -lICE -lXext -lX11 -lplot" 1>>$BUILD_FILE
+		echo "PLOTUTILS_FLAG=-DHAVE_PLOTUTILS" 1>>$BUILD_FILE
+	else
+		echo "not found"
+	fi
 else
 	echo "not found"
 fi
 # Find GSL
 echo -n "checking GNU scientific library in $USR_LIB: "
-if [    -f $USR_LIB/libgsl.so -a -f $USR_LIB/libgslcblas.so ]
+if [    -f $USR_LIB/libgsl.so -o -f $USR_LIB/libgsl.a -o -f $USR_LIB/libgsl.dylib 	]
 then
-	echo "found"
-	echo "GSL_LIBS=-lgsl -lgslcblas" 1>>$BUILD_FILE
-	echo "GSL_FLAG=-DHAVE_GSL" 1>>$BUILD_FILE
-elif [    -f $USR_LIB/libgsl.dylib -a -f $USR_LIB/libgslcblas.so ]
-then
-	echo "found"
-	echo "GSL_LIBS=-lgsl -lgslcblas" 1>>$BUILD_FILE
-	echo "GSL_FLAG=-DHAVE_GSL" 1>>$BUILD_FILE
+	if [    -f $USR_LIB/libgslcblas.so -o -f $USR_LIB/libgslcblas.a -o -f $USR_LIB/libgslcblas.dylib	]
+	then
+		echo "found"
+		echo "GSL_LIBS=-lgsl -lgslcblas" 1>>$BUILD_FILE
+		echo "GSL_FLAG=-DHAVE_GSL" 1>>$BUILD_FILE
+	else
+		echo "not found"
+	fi
 else
 	echo "not found"
 fi
 # Find curses
 echo -n "checking curses in $SYS_LIB: "
-if [    -f $SYS_LIB/libcurses.so ]
-then
-	echo "found"
-	echo "CURSES_LIBS=-lcurses" 1>>$BUILD_FILE
-	echo "CURSES_FLAG=-DHAVE_CURSES" 1>>$BUILD_FILE
-elif [    -f $SYS_LIB/libcurses.dylib ]
+if [    -f $SYS_LIB/libcurses.so -o -f $SYS_LIB/libcurses.a -o -f $SYS_LIB/libcurses.dylib ]
 then
 	echo "found"
 	echo "CURSES_LIBS=-lcurses" 1>>$BUILD_FILE
@@ -450,14 +462,15 @@ else
 fi
 # Find terminfo 
 echo -n "checking terminfo in $SYS_INC and $SYS_LIB: "
-if [    -f $SYS_INC/term.h -a -f $SYS_LIB/libcurses.so ]
+if [    -f $SYS_INC/term.h	]
 then
-	echo "found"
-	echo "TERMINFO_FLAG=-DHAVE_TERMINFO" 1>>$BUILD_FILE
-elif [  -f $SYS_INC/term.h -a  -f $SYS_LIB/libcurses.dylib ]
-then
-	echo "found"
-	echo "TERMINFO_FLAG=-DHAVE_TERMINFO" 1>>$BUILD_FILE
+	if [    -f $SYS_LIB/libcurses.so -o -f $SYS_LIB/libcurses.a -o -f $SYS_LIB/libcurses.dylib ]
+	then
+		echo "found"
+		echo "TERMINFO_FLAG=-DHAVE_TERMINFO" 1>>$BUILD_FILE
+	else
+		echo "not found"
+	fi
 else
 	echo "not found"
 fi
@@ -481,23 +494,26 @@ else
 fi
 # Find PostgreSQL libraries
 echo -n "checking PostgreSQL libraries in $SYS_LIB, $USR_LIB and $SQL_DIR: "
-if [ -f $SQL_DIR/lib/libpq.so	]
+if [ -f $SQL_DIR/lib/libpq.so -o -f $SQL_DIR/lib/libpq.a -o -f $SQL_DIR/lib/libpq.dylib	]
 then
-       echo "found"
-       echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
-       echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
-elif [ -f $SYS_LIB/libpq.so -o -f $USR_LIB/libpq.so ]
+	echo "found"
+	echo "SQL_DIR=$SQL_DIR">>$BUILD_FILE
+	echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
+	echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
+elif [ -f $SYS_DIR/lib/libpq.so -o -f $SYS_DIR/lib/libpq.a -o -f $SYS_DIR/lib/libpq.dylib	]
 then
-       echo "found"
-       echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
-       echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
-elif [ -f $SYS_LIB/libpq.dylib -o -f $USR_LIB/libpq.dylib ]
+	echo "found"
+	echo "SQL_DIR=$SYS_DIR">>$BUILD_FILE
+	echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
+	echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
+elif [ -f $USR_DIR/lib/libpq.so -o -f $USR_DIR/lib/libpq.a -o -f $USR_DIR/lib/libpq.dylib	]
 then
-       echo "found"
-       echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
-       echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
+	echo "found"
+	echo "SQL_DIR=$USR_DIR">>$BUILD_FILE
+	echo "SQL_LIBS=-lpq" 1>>$BUILD_FILE
+	echo "SQL_FLAG=-DHAVE_POSTGRESQL" 1>>$BUILD_FILE
 else
-       echo "not found"
+	echo "not found"
 fi
 # Find IEEE-754 compatibility
 echo -n "checking IEEE 754 floating point compatibility using system information: "
@@ -516,30 +532,45 @@ else
 		echo "not found: if your platform is IEEE 754 compatible then build with 'make CFLAGS=HAVE_IEEE_754'"
 	fi
 fi
-# Since we are executing a shell script, assume we are on UNIX or compatible.
-echo "OS_FLAG=-DHAVE_UNIX" 1>>$BUILD_FILE
 # Finish Makefile
+echo -n "STD_CFLAGS=" 1>>$BUILD_FILE
+if [	-d /opt/local/include	]
+then
+	echo -n "-I/opt/local/include " 1>>$BUILD_FILE
+fi
 if [    $cc = gcc       ]
 then
         if ! [	-d $SQL_DIR	]
         then
-		echo "STD_CFLAGS=$warn -I\$(USR_INC) $opt" 1>>$BUILD_FILE
-		echo "STD_LD_FLAGS=$ld_opt -L\$(USR_LIB)" 1>>$BUILD_FILE
+		echo "-I\$(USR_INC) $warn $opt" 1>>$BUILD_FILE
 	else
-		echo "STD_CFLAGS=$warn -I\$(USR_INC) -I$USR_LOC/pgsql/include $opt" 1>>$BUILD_FILE
-		echo "STD_LD_FLAGS=$ld_opt -L\$(USR_LIB) -L$USR_LOC/pgsql/lib" 1>>$BUILD_FILE
+		echo "-I\$(USR_INC) -I$USR_LOC/pgsql/include $warn $opt" 1>>$BUILD_FILE
 	fi
 else
-	echo "STD_CFLAGS=-I\$(USR_INC)" 1>>$BUILD_FILE
-	echo "STD_LD_FLAGS=-L\$(USR_LIB)" 1>>$BUILD_FILE
+	echo "-I\$(USR_INC)" 1>>$BUILD_FILE
 fi
-#
-# On some BSDs, find does not have -printf, so we use sed instead.
-#
-echo "HS=`find $USR_SRC -name '*.h' -print | sort | sed -f $SED_JOIN`" 1>>$BUILD_FILE
-echo "CS=`find $USR_SRC -name '*.c' -print | sort | sed -f $SED_JOIN`" 1>>$BUILD_FILE
+echo -n "STD_LD_FLAGS=" 1>>$BUILD_FILE
+if [	-d /opt/local/lib	]
+then
+	echo -n "-L/opt/local/lib " 1>>$BUILD_FILE
+fi
+if [    $cc = gcc       ]
+then
+        if ! [	-d $SQL_DIR	]
+        then
+		echo "-L\$(USR_LIB) $ld_opt" 1>>$BUILD_FILE
+	else
+		echo "-L\$(USR_LIB) -L\$(SQL_DIR)/lib $ld_opt" 1>>$BUILD_FILE
+	fi
+else
+	echo "-L\$(USR_LIB)" 1>>$BUILD_FILE
+fi
+# Sources
+echo "HS=`echo $USR_SRC/*.h | sort | sed 's/\.\/[a-zA-Z0-9]*\///g'`" 1>>$BUILD_FILE
+echo "CS=`echo $USR_SRC/*.c | sort | sed 's/\.\/[a-zA-Z0-9]*\///g' | sed 's/\.c/\.o/g'`" 1>>$BUILD_FILE
+
 cat >>$BUILD_FILE <<\_BUILD_EOF
-FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(OS_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(CFLAGS)
+FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(CFLAGS)
 all:    a68g
 a68g:   $(CS)
 	@echo "building a68g ..."
@@ -552,9 +583,6 @@ clean:
 	@rm -f $(CS)
 depend:
 	@touch $(HS)
-indent: clean
-	@indent -l256 -br -ce -npsl *.c
-	@rm -f *.c~
 _BUILD_EOF
 echo "generated $BUILD_FILE"
 #
@@ -604,7 +632,7 @@ do
 done
 date
 ls -l
-rm -v *.tmp .a68g.tmp
+rm *.tmp .a68g.tmp
 _REGRESSION_EOF
 	cat >$BATCH_FILE <<\_BATCH_EOF
 #! /bin/sh
@@ -643,10 +671,10 @@ then
 fi
 if [ -f $USR_INC/plot.h ]
 then
-	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $USR_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g'1>>$VERSION_FILE
+	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $USR_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
 elif [ -f $LOC_INC/plot.h ]
 then
-	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $LOC_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g'1>>$VERSION_FILE
+	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $LOC_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
 fi
 if [ -f $USR_INC/gsl/gsl_version.h ]
 then
@@ -688,6 +716,5 @@ then
 			exit 1 ;;
 	esac
 fi
-rm $SED_JOIN
 echo "$0 done"
 exit

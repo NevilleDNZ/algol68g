@@ -176,7 +176,6 @@ extern int get_transput_buffer_index (int);
 extern int get_transput_buffer_length (int);
 extern int get_transput_buffer_size (int);
 extern int get_unblocked_transput_buffer (NODE_T *);
-extern unsigned long a68g_strtoul (char *, char **, int);
 extern void add_a_string_transput_buffer (NODE_T *, int, BYTE_T *);
 extern void add_char_transput_buffer (NODE_T *, int, char);
 extern void add_string_from_stack_transput_buffer (NODE_T *, int);

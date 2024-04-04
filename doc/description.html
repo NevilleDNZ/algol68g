@@ -17,8 +17,8 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
@@ -27,7 +27,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
@@ -62,7 +62,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -85,6 +85,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 &nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
 </td>
 </tr>
+</table>
 </table>
 <!-- End navigation bar -->
 </td>
@@ -675,10 +676,10 @@ Algol 68 Genie speed approximately scales linearly in clock speed when run on Po
 <tr><td bgcolor=#e8e8e8>ICL 2980<br>IBM 370/168</td><td bgcolor="#e8e8e8">2</td><td bgcolor="#e8e8e8">FORTRAN</td></tr>
 <tr><td bgcolor=#e8e8e8>PowerPC G3 (233 MHz)</td><td bgcolor="#e8e8e8">2</td><td bgcolor="#e8e8e8">Algol68G/Linux/gcc</td></tr>
 <tr><td bgcolor=#e8e8e8>Cyber 7600</td><td bgcolor="#e8e8e8">9</td><td bgcolor="#e8e8e8">FORTRAN</td></tr>
-<tr><td bgcolor=#e8e8e8>Pentium III (1200 MHz)</td><td bgcolor="#e8e8e8">10</td><td bgcolor="#e8e8e8">Algol68G/Windows XP/gcc</td></tr>
+<tr><td bgcolor=#e8e8e8>Pentium III (1.2 GHz)</td><td bgcolor="#e8e8e8">10</td><td bgcolor="#e8e8e8">Algol68G/Windows XP/gcc</td></tr>
 <tr><td bgcolor=#e8e8e8>Cyber 205 (Scalar)<br>Cray-1A (Scalar)<br></td><td bgcolor="#e8e8e8">12</td><td bgcolor="#e8e8e8">FORTRAN</td></tr>
-<tr><td bgcolor=#e8e8e8>Pentium IV (2800 MHz)</td><td bgcolor="#e8e8e8">17</td><td bgcolor="#e8e8e8">Algol68G/Windows XP/gcc</td></tr>
-<tr><td bgcolor=#e8e8e8>PowerPC G5 (Dual 2500 MHz)</td><td bgcolor="#e8e8e8">20</td><td bgcolor="#e8e8e8">Algol68G/MacOS X/gcc</td></tr>
+<tr><td bgcolor=#e8e8e8>PowerPC G5 (Dual 2.5 GHz)</td><td bgcolor="#e8e8e8">20</td><td bgcolor="#e8e8e8">Algol68G/MacOS X/gcc</td></tr>
+<tr><td bgcolor=#e8e8e8>Pentium IV (3 GHz)</td><td bgcolor="#e8e8e8">23</td><td bgcolor="#e8e8e8">Algol68G/OpenBSD/gcc</td></tr>
 </table>
 </p>
 
@@ -695,7 +696,7 @@ Algol 68 Genie speed approximately scales linearly in clock speed when run on Po
 <li>When the <a href="synopsis.html#optionmem">stack overhead</a> is set to a too small value, a segment violation may occur.
 <li>Algorithms for extended precision (<code>LONG LONG</code> arithmetic modes)</code> are not really suited for precisions larger than about a thousand digits. State of the art in the field offers more efficient algorithms than implemented here.
 <li>Overflow- and underflow checks on <code>REAL</code> and <code>COMPLEX</code> operations require IEEE-754 compatibility. Many processor types, notably ix86's and PowerPC processors, are IEEE-754 compatible.
-<li>A garbage collector cannot solve all memory allocation issues. It is therefore possible to get an unexpected "out of memory" diagnostic. Two options in such case are (1) to increase heap size or (2) to call standard prelude routine "sweep heap" at strategic positions in the program.
+<li>A garbage collector cannot solve all memory allocation issues. It is therefore possible to get an unexpected "out of memory" diagnostic. Two options in such case are (1) to increase heap size or (2) to call standard prelude routine "sweep heap" or "preemptive sweep heap" at strategic positions in the program.
 </ul>
 </td>
 
@@ -712,7 +713,7 @@ Algol 68 Genie speed approximately scales linearly in clock speed when run on Po
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>

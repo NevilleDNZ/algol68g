@@ -28,8 +28,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <curses.h>
 #endif
 
-#define SMALL_BUFFER_SIZE 32
-
 #define TABULATE(n) (8 * (n / 8 + 1) - n)
 
 int error_count, warning_count, run_time_error_count;
@@ -53,11 +51,11 @@ char *ctrl_char (int ch)
   static char str[SMALL_BUFFER_SIZE];
   ch = TO_UCHAR (ch);
   if (ch > 0 && ch < 27) {
-    sprintf (str, "\\^%c", ch + 96);
+    snprintf (str, SMALL_BUFFER_SIZE, "\\^%c", ch + 96);
   } else if (ch >= 27 && ch < 128) {
-    sprintf (str, "'%c'", ch);
+    snprintf (str, SMALL_BUFFER_SIZE, "'%c'", ch);
   } else {
-    sprintf (str, "\\%02x", ch);
+    snprintf (str, SMALL_BUFFER_SIZE, "\\%02x", ch);
   }
   return (str);
 }
@@ -96,7 +94,7 @@ static void pretty_diag (FILE_T f, char *p)
     int k;
     if (IS_GRAPH (p[0])) {
       for (k = 0, q = p; q[0] != BLANK_CHAR && q[0] != NULL_CHAR && k <= line_width - 5; q++, k++) {
-	;
+        ;
       }
     } else {
       k = 1;
@@ -106,11 +104,11 @@ static void pretty_diag (FILE_T f, char *p)
     }
     if ((pos + k) >= line_width) {
       if (a68c_diags) {
-	io_write_string (f, "\n     ");
-	pos = 5;
+        io_write_string (f, "\n     ");
+        pos = 5;
       } else {
-	io_write_string (f, NEWLINE_STRING);
-	pos = 1;
+        io_write_string (f, NEWLINE_STRING);
+        pos = 1;
       }
     }
     for (; k > 0; k--, p++, pos++) {
@@ -133,18 +131,18 @@ static void pretty_diag (FILE_T f, char *p)
 void abend (char *reason, char *info, char *file, int line)
 {
   if (a68c_diags) {
-    sprintf (output_line, "Abnormal end in line %d of file \"%s\": %s.", line, file, reason);
+    snprintf (output_line, BUFFER_SIZE, "Abnormal end in line %d of file \"%s\": %s", line, file, reason);
   } else {
-    sprintf (output_line, "abnormal end: %s: %d: %s", file, line, reason);
+    snprintf (output_line, BUFFER_SIZE, "abnormal end: %s: %d: %s", file, line, reason);
   }
   if (info != NULL) {
-    strcat (output_line, ", ");
-    strcat (output_line, info);
+    bufcat (output_line, ", ", BUFFER_SIZE);
+    bufcat (output_line, info, BUFFER_SIZE);
   }
   if (errno != 0) {
-    strcat (output_line, " (");
-    strcat (output_line, ERROR_SPECIFICATION);
-    strcat (output_line, ")");
+    bufcat (output_line, " (", BUFFER_SIZE);
+    bufcat (output_line, ERROR_SPECIFICATION, BUFFER_SIZE);
+    bufcat (output_line, ")", BUFFER_SIZE);
   }
   io_close_tty_line ();
   pretty_diag (STDOUT_FILENO, output_line);
@@ -228,15 +226,15 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
     if (p->number == 0) {
-      sprintf (output_line, "     ");
+      snprintf (output_line, BUFFER_SIZE, "     ");
     } else {
-      sprintf (output_line, "%-4d ", p->number % 10000);
+      snprintf (output_line, BUFFER_SIZE, "%-4d ", p->number % 10000);
     }
   } else {
     if (p->number == 0) {
-      sprintf (output_line, "\n     ");
+      snprintf (output_line, BUFFER_SIZE, "\n     ");
     } else {
-      sprintf (output_line, "\n%-4d ", p->number % 10000);
+      snprintf (output_line, BUFFER_SIZE, "\n%-4d ", p->number % 10000);
     }
   }
   io_write_string (f, output_line);
@@ -248,40 +246,40 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
     int len = 0;
     char *new_pos = NULL;
     if (c[0] == NULL_CHAR) {
-      strcpy (output_line, "");
+      bufcpy (output_line, "", BUFFER_SIZE);
       line_ended = A_TRUE;
     } else {
       if (IS_GRAPH (c[0])) {
-	char *c1;
-	strcpy (output_line, "");
-	for (c1 = c; IS_GRAPH (c1[0]) && len <= line_width - 5; c1++, len++) {
-	  strcat (output_line, char_to_str (c1[0]));
-	}
-	if (len > line_width - 5) {
-	  strcpy (output_line, char_to_str (c[0]));
-	  len = 1;
-	}
-	new_pos = &c[len];
-	col += len;
+        char *c1;
+        bufcpy (output_line, "", BUFFER_SIZE);
+        for (c1 = c; IS_GRAPH (c1[0]) && len <= line_width - 5; c1++, len++) {
+          bufcat (output_line, char_to_str (c1[0]), BUFFER_SIZE);
+        }
+        if (len > line_width - 5) {
+          bufcpy (output_line, char_to_str (c[0]), BUFFER_SIZE);
+          len = 1;
+        }
+        new_pos = &c[len];
+        col += len;
       } else if (c[0] == TAB_CHAR) {
-	int n = TABULATE (col);
-	len = n;
-	col += n;
-	strcpy (output_line, "");
-	while (n--) {
-	  strcat (output_line, " ");
-	}
-	new_pos = &c[1];
+        int n = TABULATE (col);
+        len = n;
+        col += n;
+        bufcpy (output_line, "", BUFFER_SIZE);
+        while (n--) {
+          bufcat (output_line, " ", BUFFER_SIZE);
+        }
+        new_pos = &c[1];
       } else if (unprintable (c[0])) {
-	strcpy (output_line, ctrl_char ((int) c[0]));
-	len = strlen (output_line);
-	new_pos = &c[1];
-	col++;
+        bufcpy (output_line, ctrl_char ((int) c[0]), BUFFER_SIZE);
+        len = strlen (output_line);
+        new_pos = &c[1];
+        col++;
       } else {
-	strcpy (output_line, char_to_str (c[0]));
-	len = 1;
-	new_pos = &c[1];
-	col++;
+        bufcpy (output_line, char_to_str (c[0]), BUFFER_SIZE);
+        len = 1;
+        new_pos = &c[1];
+        col++;
       }
     }
     if (!line_ended && (pos + len) <= line_width) {
@@ -294,84 +292,84 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
       BOOL_T y = A_FALSE, z = A_FALSE;
       DIAGNOSTIC_T *d = p->diagnostics;
       if (d != NULL || where != NULL) {
-	char *c1;
-	for (c1 = c0; c1 != c; c1++) {
-	  y |= (where != NULL && p == LINE (where) ? c1 == where_pos (p, where) : A_FALSE);
-	  if (diag) {
-	    for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-	      z |= (c1 == diag_pos (p, d));
-	    }
-	  }
-	}
+        char *c1;
+        for (c1 = c0; c1 != c; c1++) {
+          y |= (where != NULL && p == LINE (where) ? c1 == where_pos (p, where) : A_FALSE);
+          if (diag) {
+            for (d = p->diagnostics; d != NULL; FORWARD (d)) {
+              z |= (c1 == diag_pos (p, d));
+            }
+          }
+        }
       }
 /* If diagnostics are to be printed then print marks */
       if (y || z) {
-	DIAGNOSTIC_T *d;
-	char *c1;
-	int col_2 = 1;
-	io_write_string (f, "\n     ");
-	for (c1 = c0; c1 != c; c1++) {
-	  int k = 0, diags_at_this_pos = 0;
-	  for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-	    if (c1 == diag_pos (p, d)) {
-	      diags_at_this_pos++;
-	      k = d->number;
-	    }
-	  }
-	  if (y == A_TRUE && c1 == where_pos (p, where)) {
-	    strcpy (output_line, "^");
-	  } else if (diags_at_this_pos != 0) {
-	    if (diags_at_this_pos == 1) {
-	      sprintf (output_line, "%c", digit_to_char (k));
-	    } else {
-	      strcpy (output_line, "*");
-	    }
-	  } else {
-	    if (unprintable (c1[0])) {
-	      int n = strlen (ctrl_char (c1[0]));
-	      col_2 += 1;
-	      strcpy (output_line, "");
-	      while (n--) {
-		strcat (output_line, " ");
-	      }
-	    } else if (c1[0] == TAB_CHAR) {
-	      int n = TABULATE (col_2);
-	      col_2 += n;
-	      strcpy (output_line, "");
-	      while (n--) {
-		strcat (output_line, " ");
-	      }
-	    } else {
-	      strcpy (output_line, " ");
-	      col_2++;
-	    }
-	  }
-	  io_write_string (f, output_line);
-	}
+        DIAGNOSTIC_T *d;
+        char *c1;
+        int col_2 = 1;
+        io_write_string (f, "\n     ");
+        for (c1 = c0; c1 != c; c1++) {
+          int k = 0, diags_at_this_pos = 0;
+          for (d = p->diagnostics; d != NULL; FORWARD (d)) {
+            if (c1 == diag_pos (p, d)) {
+              diags_at_this_pos++;
+              k = d->number;
+            }
+          }
+          if (y == A_TRUE && c1 == where_pos (p, where)) {
+            bufcpy (output_line, "^", BUFFER_SIZE);
+          } else if (diags_at_this_pos != 0) {
+            if (diags_at_this_pos == 1) {
+              snprintf (output_line, BUFFER_SIZE, "%c", digit_to_char (k));
+            } else {
+              bufcpy (output_line, "*", BUFFER_SIZE);
+            }
+          } else {
+            if (unprintable (c1[0])) {
+              int n = strlen (ctrl_char (c1[0]));
+              col_2 += 1;
+              bufcpy (output_line, "", BUFFER_SIZE);
+              while (n--) {
+                bufcat (output_line, " ", BUFFER_SIZE);
+              }
+            } else if (c1[0] == TAB_CHAR) {
+              int n = TABULATE (col_2);
+              col_2 += n;
+              bufcpy (output_line, "", BUFFER_SIZE);
+              while (n--) {
+                bufcat (output_line, " ", BUFFER_SIZE);
+              }
+            } else {
+              bufcpy (output_line, " ", BUFFER_SIZE);
+              col_2++;
+            }
+          }
+          io_write_string (f, output_line);
+        }
       }
 /* Resume pretty printing of line */
       if (!line_ended) {
-	continuations++;
-	sprintf (output_line, "\n.%1d   ", continuations);
-	io_write_string (f, output_line);
-	if (continuations >= 9) {
-	  io_write_string (f, "...");
-	  line_ended = A_TRUE;
-	} else {
-	  c0 = c;
-	  pos = 5;
-	  col = 1;
-	}
+        continuations++;
+        snprintf (output_line, BUFFER_SIZE, "\n.%1d   ", continuations);
+        io_write_string (f, output_line);
+        if (continuations >= 9) {
+          io_write_string (f, "...");
+          line_ended = A_TRUE;
+        } else {
+          c0 = c;
+          pos = 5;
+          col = 1;
+        }
       }
     }
-  }				/* while */
+  }                             /* while */
 /* Print the diagnostics */
   if (diag) {
     if (p->diagnostics != NULL) {
       DIAGNOSTIC_T *d;
       for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-	io_write_string (f, NEWLINE_STRING);
-	pretty_diag (f, d->text);
+        io_write_string (f, NEWLINE_STRING);
+        pretty_diag (f, d->text);
       }
     }
   }
@@ -390,14 +388,14 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
       BOOL_T z = A_FALSE;
       DIAGNOSTIC_T *d = p->diagnostics;
       for (; d != NULL; FORWARD (d)) {
-	if (what == A_ALL_DIAGNOSTICS) {
-	  z |= (WHETHER (d, A_WARNING) || WHETHER (d, A_ERROR) || WHETHER (d, A_SYNTAX_ERROR));
-	} else if (what == A_RUNTIME_ERROR) {
-	  z |= (WHETHER (d, A_RUNTIME_ERROR));
-	}
+        if (what == A_ALL_DIAGNOSTICS) {
+          z |= (WHETHER (d, A_WARNING) || WHETHER (d, A_ERROR) || WHETHER (d, A_SYNTAX_ERROR));
+        } else if (what == A_RUNTIME_ERROR) {
+          z |= (WHETHER (d, A_RUNTIME_ERROR));
+        }
       }
       if (z) {
-	write_source_line (STDOUT_FILENO, p, NULL, A_TRUE);
+        write_source_line (STDOUT_FILENO, p, NULL, A_TRUE);
       }
     }
   }
@@ -461,17 +459,17 @@ static char *get_severity (int sev)
 static void write_diagnostic (int sev, char *b)
 {
   char st[SMALL_BUFFER_SIZE];
-  strcpy (st, get_severity (sev));
+  bufcpy (st, get_severity (sev), SMALL_BUFFER_SIZE);
   if (gnu_diags) {
     if (a68_prog.files.generic_name != NULL) {
-      sprintf (output_line, "%s: %s: %s", a68_prog.files.generic_name, st, b);
+      snprintf (output_line, BUFFER_SIZE, "%s: %s: %s", a68_prog.files.generic_name, st, b);
     } else {
-      sprintf (output_line, "%s: %s: %s", A68G_NAME, st, b);
+      snprintf (output_line, BUFFER_SIZE, "%s: %s: %s", A68G_NAME, st, b);
     }
   } else {
     st[0] = TO_UPPER (st[0]);
     b[0] = TO_UPPER (b[0]);
-    sprintf (output_line, "%s. %s.", st, b);
+    snprintf (output_line, BUFFER_SIZE, "%s. %s.", st, b);
   }
   io_close_tty_line ();
   pretty_diag (STDOUT_FILENO, output_line);
@@ -495,7 +493,7 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
     monitor_error (b, NULL);
     return;
   }
-  strcpy (st, get_severity (sev));
+  bufcpy (st, get_severity (sev), SMALL_BUFFER_SIZE);
   nst[0] = NULL_CHAR;
   if (line == NULL && p != NULL) {
     line = LINE (p);
@@ -512,50 +510,50 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
     k++;
   }
   if (gnu_diags) {
-    sprintf (a, "%s: %d: %s: %s (%x)", line->filename, line->number, st, b, k);
+    snprintf (a, BUFFER_SIZE, "%s: %d: %s: %s (%x)", line->filename, line->number, st, b, k);
   } else {
     if (p != NULL) {
       NODE_T *n;
       n = NEST (p);
       if (n != NULL && SYMBOL (n) != NULL) {
-	char *nt = non_terminal_string (edit_line, ATTRIBUTE (n));
-	if (nt != NULL) {
-	  if (NUMBER (LINE (n)) == 0) {
-	    sprintf (nst, "Detected in %s.", nt);
-	  } else {
-	    if (MOID (n) != NULL) {
-	      if (NUMBER (LINE (n)) == NUMBER (line)) {
-		sprintf (nst, "Detected in %s %s starting at \"%.64s\" in this line.", moid_to_string (MOID (n), MOID_ERROR_WIDTH), nt, SYMBOL (n));
-	      } else {
-		sprintf (nst, "Detected in %s %s starting at \"%.64s\" in line %d.", moid_to_string (MOID (n), MOID_ERROR_WIDTH), nt, SYMBOL (n), NUMBER (LINE (n)));
-	      }
-	    } else {
-	      if (NUMBER (LINE (n)) == NUMBER (line)) {
-		sprintf (nst, "Detected in %s starting at \"%.64s\" in this line.", nt, SYMBOL (n));
-	      } else {
-		sprintf (nst, "Detected in %s starting at \"%.64s\" in line %d.", nt, SYMBOL (n), NUMBER (LINE (n)));
-	      }
-	    }
-	  }
-	}
+        char *nt = non_terminal_string (edit_line, ATTRIBUTE (n));
+        if (nt != NULL) {
+          if (NUMBER (LINE (n)) == 0) {
+            snprintf (nst, BUFFER_SIZE, "Detected in %s.", nt);
+          } else {
+            if (MOID (n) != NULL) {
+              if (NUMBER (LINE (n)) == NUMBER (line)) {
+                snprintf (nst, BUFFER_SIZE, "Detected in %s %s starting at \"%.64s\" in this line.", moid_to_string (MOID (n), MOID_ERROR_WIDTH), nt, SYMBOL (n));
+              } else {
+                snprintf (nst, BUFFER_SIZE, "Detected in %s %s starting at \"%.64s\" in line %d.", moid_to_string (MOID (n), MOID_ERROR_WIDTH), nt, SYMBOL (n), NUMBER (LINE (n)));
+              }
+            } else {
+              if (NUMBER (LINE (n)) == NUMBER (line)) {
+                snprintf (nst, BUFFER_SIZE, "Detected in %s starting at \"%.64s\" in this line.", nt, SYMBOL (n));
+              } else {
+                snprintf (nst, BUFFER_SIZE, "Detected in %s starting at \"%.64s\" in line %d.", nt, SYMBOL (n), NUMBER (LINE (n)));
+              }
+            }
+          }
+        }
       }
     }
     st[0] = TO_UPPER (st[0]);
     b[0] = TO_UPPER (b[0]);
     if (line->filename != NULL && strcmp (a68_prog.files.source.name, line->filename) == 0) {
-      sprintf (a, "(%x) %s. %s.", k, st, b);
+      snprintf (a, BUFFER_SIZE, "(%x) %s. %s.", k, st, b);
     } else if (line->filename != NULL) {
-      sprintf (a, "(%x) %s in file \"%s\". %s.", k, st, line->filename, b);
+      snprintf (a, BUFFER_SIZE, "(%x) %s in file \"%s\". %s.", k, st, line->filename, b);
     } else {
-      sprintf (a, "(%x) %s. %s.", k, st, b);
+      snprintf (a, BUFFER_SIZE, "(%x) %s. %s.", k, st, b);
     }
   }
   msg = (DIAGNOSTIC_T *) get_heap_space (SIZE_OF (DIAGNOSTIC_T));
   *ref_msg = msg;
   ATTRIBUTE (msg) = sev;
   if (nst[0] != NULL_CHAR) {
-    strcat (a, " ");
-    strcat (a, nst);
+    bufcat (a, " ", BUFFER_SIZE);
+    bufcat (a, nst, BUFFER_SIZE);
   }
   msg->text = new_string (a);
   msg->where = p;
@@ -592,131 +590,130 @@ Z string literal.
     } else if (t[0] == '@') {\
       char *nt = non_terminal_string (edit_line, ATTRIBUTE (p));\
       if (t != NULL) {\
-	strcat (q, nt);\
+	bufcat (b, nt, BUFFER_SIZE);\
       } else {\
-	strcat (q, "construct");\
+	bufcat (b, "construct", BUFFER_SIZE);\
       }\
     } else if (t[0] == 'A') {\
       int att = va_arg (args, int);\
       char *nt = non_terminal_string (edit_line, att);\
       if (nt != NULL) {\
-	strcat (q, nt);\
+	bufcat (b, nt, BUFFER_SIZE);\
       } else {\
-	strcat (q, "construct");\
+	bufcat (b, "construct", BUFFER_SIZE);\
       }\
     } else if (t[0] == 'B') {\
       int att = va_arg (args, int);\
       KEYWORD_T *nt = find_keyword_from_attribute (top_keyword, att);\
       if (nt != NULL) {\
-	strcat (q, "\"");\
-	strcat (q, nt->text);\
-	strcat (q, "\"");\
+	bufcat (b, "\"", BUFFER_SIZE);\
+	bufcat (b, nt->text, BUFFER_SIZE);\
+	bufcat (b, "\"", BUFFER_SIZE);\
       } else {\
-	strcat (q, "keyword");\
+	bufcat (b, "keyword", BUFFER_SIZE);\
       }\
     } else if (t[0] == 'C') {\
       int att = va_arg (args, int);\
       if (att == NO_SORT) {\
-	strcat (q, "this");\
+	bufcat (b, "this", BUFFER_SIZE);\
       }\
       if (att == SOFT) {\
-	strcat (q, "a soft");\
+	bufcat (b, "a soft", BUFFER_SIZE);\
       } else if (att == WEAK) {\
-	strcat (q, "a weak");\
+	bufcat (b, "a weak", BUFFER_SIZE);\
       } else if (att == MEEK) {\
-	strcat (q, "a meek");\
+	bufcat (b, "a meek", BUFFER_SIZE);\
       } else if (att == FIRM) {\
-	strcat (q, "a firm");\
+	bufcat (b, "a firm", BUFFER_SIZE);\
       } else if (att == STRONG) {\
-	strcat (q, "a strong");\
+	bufcat (b, "a strong", BUFFER_SIZE);\
       }\
     } else if (t[0] == 'D') {\
       int a = va_arg (args, int);\
       char d[BUFFER_SIZE];\
-      sprintf (d, "%d", a);\
-      strncat (q, d, BUFFER_SIZE);\
+      snprintf (d, BUFFER_SIZE, "%d", a);\
+      bufcat (b, d, BUFFER_SIZE);\
     } else if (t[0] == 'H') {\
       char *a = va_arg (args, char *);\
       char d[SMALL_BUFFER_SIZE];\
-      sprintf (d, "'%c'", a[0]);\
-      strcat (q, d);\
+      snprintf (d, SMALL_BUFFER_SIZE, "'%c'", a[0]);\
+      bufcat (b, d, BUFFER_SIZE);\
     } else if (t[0] == 'L') {\
       SOURCE_LINE_T *a = va_arg (args, SOURCE_LINE_T *);\
       char d[SMALL_BUFFER_SIZE];\
       ABNORMAL_END (a == NULL, "NULL source line in error", NULL);\
       if (a->number > 0) {\
         if (p != NULL && a->number == LINE (p)->number) {\
-          sprintf (d, "in this line");\
+          snprintf (d, SMALL_BUFFER_SIZE, "in this line");\
 	} else {\
-          sprintf (d, "in line %d", a->number);\
+          snprintf (d, SMALL_BUFFER_SIZE, "in line %d", a->number);\
         }\
-	strcat (q, d);\
+	bufcat (b, d, BUFFER_SIZE);\
       }\
     } else if (t[0] == 'M') {\
       moid = va_arg (args, MOID_T *);\
       if (moid == MODE (ERROR)) {\
 	return;\
       } else if (moid == NULL) {\
-	strcat (q, "\"NULL\"");\
+	bufcat (b, "\"NULL\"", BUFFER_SIZE);\
       } else if (WHETHER (moid, SERIES_MODE)) {\
 	if (PACK (moid) != NULL && NEXT (PACK (moid)) == NULL) {\
-	  strcat (q, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH));\
+	  bufcat (b, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH), BUFFER_SIZE);\
 	} else {\
-	  strcat (q, moid_to_string (moid, MOID_ERROR_WIDTH));\
+	  bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
 	}\
       } else {\
-	strcat (q, moid_to_string (moid, MOID_ERROR_WIDTH));\
+	bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
       }\
     } else if (t[0] == 'N') {\
-      strcat (q, "NIL value of mode ");\
+      bufcat (b, "NIL value of mode ", BUFFER_SIZE);\
       moid = va_arg (args, MOID_T *);\
       if (moid != NULL) {\
-	strcat (q, moid_to_string (moid, MOID_ERROR_WIDTH));\
+	bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
       }\
     } else if (t[0] == 'O') {\
       moid = va_arg (args, MOID_T *);\
       if (moid == MODE (ERROR)) {\
 	return;\
       } else if (moid == NULL) {\
-	strcat (q, "\"NULL\"");\
+	bufcat (b, "\"NULL\"", BUFFER_SIZE);\
       } else if (moid == MODE (VOID)) {\
-	strcat (q, "UNION (VOID, ..)");\
+	bufcat (b, "UNION (VOID, ..)", BUFFER_SIZE);\
       } else if (WHETHER (moid, SERIES_MODE)) {\
 	if (PACK (moid) != NULL && NEXT (PACK (moid)) == NULL) {\
-	  strcat (q, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH));\
+	  bufcat (b, moid_to_string (MOID (PACK (moid)), MOID_ERROR_WIDTH), BUFFER_SIZE);\
 	} else {\
-	  strcat (q, moid_to_string (moid, MOID_ERROR_WIDTH));\
+	  bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
 	}\
       } else {\
-	strcat (q, moid_to_string (moid, MOID_ERROR_WIDTH));\
+	bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
       }\
     } else if (t[0] == 'S') {\
       if (p != NULL && SYMBOL (p) != NULL) {\
-	strcat (q, "\"");\
-	strncat (q, SYMBOL (p), 64);\
-	strcat (q, "\"");\
+	bufcat (b, "\"", BUFFER_SIZE);\
+	bufcat (b, SYMBOL (p), BUFFER_SIZE);\
+	bufcat (b, "\"", BUFFER_SIZE);\
       } else {\
-	strcat (q, "symbol");\
+	bufcat (b, "symbol", BUFFER_SIZE);\
       }\
     } else if (t[0] == 'X') {\
       int att = va_arg (args, int);\
       char z[BUFFER_SIZE];\
-      sprintf (z, "\"%s\"", find_keyword_from_attribute (top_keyword, att)->text);\
-      strcat (q, new_string (z));\
+      snprintf (z, BUFFER_SIZE, "\"%s\"", find_keyword_from_attribute (top_keyword, att)->text);\
+      bufcat (b, new_string (z), BUFFER_SIZE);\
     } else if (t[0] == 'Y') {\
       char *str = va_arg (args, char *);\
-      strcat (q, str);\
+      bufcat (b, str, BUFFER_SIZE);\
     } else if (t[0] == 'Z') {\
       char *str = va_arg (args, char *);\
-      strcat (q, "\"");\
-      strcat (q, str);\
-      strcat (q, "\"");\
+      bufcat (b, "\"", BUFFER_SIZE);\
+      bufcat (b, str, BUFFER_SIZE);\
+      bufcat (b, "\"", BUFFER_SIZE);\
     } else {\
-      *(q++) = *t;\
-      *q = NULL_CHAR;\
-    }\
-    while (*q != NULL_CHAR) {\
-      q++;\
+      char q[2];\
+      q[0] = t[0];\
+      q[1] = NULL_CHAR;\
+      bufcat (b, q, BUFFER_SIZE);\
     }\
     t++;\
   }
@@ -733,11 +730,11 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
 {
   va_list args;
   MOID_T *moid = NULL;
-  char *t = str, b[BUFFER_SIZE], *q = b;
+  char *t = str, b[BUFFER_SIZE];
   BOOL_T force, extra_syntax = A_TRUE, shortcut = A_FALSE;
   int err = errno;
   va_start (args, str);
-  q[0] = NULL_CHAR;
+  b[0] = NULL_CHAR;
   force = (sev & FORCE_DIAGNOSTIC) != 0;
   sev &= ~FORCE_DIAGNOSTIC;
 /* No warnings? */
@@ -747,7 +744,7 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
 /* Suppressed? */
   if (sev == A_ERROR || sev == A_SYNTAX_ERROR) {
     if (error_count == MAX_ERRORS) {
-      strcpy (b, "further error diagnostics suppressed");
+      bufcpy (b, "further error diagnostics suppressed", BUFFER_SIZE);
       sev = A_ERROR;
       shortcut = A_TRUE;
     } else if (error_count > MAX_ERRORS) {
@@ -756,7 +753,7 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
     }
   } else if (sev == A_WARNING) {
     if (warning_count == MAX_ERRORS) {
-      strcpy (b, "further warning diagnostics suppressed");
+      bufcpy (b, "further warning diagnostics suppressed", BUFFER_SIZE);
       shortcut = A_TRUE;
     } else if (warning_count > MAX_ERRORS) {
       warning_count++;
@@ -770,13 +767,13 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
     if (err != 0) {
       char *str = new_string (ERROR_SPECIFICATION);
       if (str != NULL) {
-	char *stu;
-	strcat (q, " (");
-	for (stu = str; stu[0] != NULL_CHAR; stu++) {
-	  stu[0] = TO_LOWER (stu[0]);
-	}
-	strncat (q, str, 128);
-	strcat (q, ")");
+        char *stu;
+        bufcat (b, " (", BUFFER_SIZE);
+        for (stu = str; stu[0] != NULL_CHAR; stu++) {
+          stu[0] = TO_LOWER (stu[0]);
+        }
+        bufcat (b, str, BUFFER_SIZE);
+        bufcat (b, ")", BUFFER_SIZE);
       }
     }
   }
@@ -801,12 +798,12 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
 {
   va_list args;
   MOID_T *moid = NULL;
-  char *t = str, b[BUFFER_SIZE], *q = b;
+  char *t = str, b[BUFFER_SIZE];
   BOOL_T force, extra_syntax = A_TRUE, shortcut = A_FALSE;
   int err = errno;
   NODE_T *p = NULL;
   va_start (args, str);
-  q[0] = NULL_CHAR;
+  b[0] = NULL_CHAR;
   force = (sev & FORCE_DIAGNOSTIC) != 0;
   sev &= ~FORCE_DIAGNOSTIC;
 /* No warnings? */
@@ -816,7 +813,7 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
 /* Suppressed? */
   if (sev == A_ERROR || sev == A_SYNTAX_ERROR) {
     if (error_count == MAX_ERRORS) {
-      strcpy (b, "further error diagnostics suppressed");
+      bufcpy (b, "further error diagnostics suppressed", BUFFER_SIZE);
       sev = A_ERROR;
       shortcut = A_TRUE;
     } else if (error_count > MAX_ERRORS) {
@@ -825,7 +822,7 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
     }
   } else if (sev == A_WARNING) {
     if (warning_count == MAX_ERRORS) {
-      strcpy (b, "further warning diagnostics suppressed");
+      bufcpy (b, "further warning diagnostics suppressed", BUFFER_SIZE);
       shortcut = A_TRUE;
     } else if (warning_count > MAX_ERRORS) {
       warning_count++;
@@ -839,13 +836,13 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
     if (err != 0) {
       char *str = new_string (ERROR_SPECIFICATION);
       if (str != NULL) {
-	char *stu;
-	strcat (q, " (");
-	for (stu = str; stu[0] != NULL_CHAR; stu++) {
-	  stu[0] = TO_LOWER (stu[0]);
-	}
-	strncat (q, str, 128);
-	strcat (q, ")");
+        char *stu;
+        bufcat (b, " (", BUFFER_SIZE);
+        for (stu = str; stu[0] != NULL_CHAR; stu++) {
+          stu[0] = TO_LOWER (stu[0]);
+        }
+        bufcat (b, str, BUFFER_SIZE);
+        bufcat (b, ")", BUFFER_SIZE);
       }
     }
   }

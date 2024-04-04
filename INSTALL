@@ -1,4 +1,4 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 9.1)
+ALGOL68G - ALGOL 68 GENIE (MARK 9.X)
 ------------------------------------
 
 Algol68G is free software distributed under GNU GPL. This software is 
@@ -15,29 +15,24 @@ This page describes how to install Algol68G on GNU/Linux. The procedure
 should work equally well on related operating systems as Unix, FreeBSD or 
 MacOS X.
 
-Although Algol68G runs on other platforms (for example Microsoft Windows, 
-MacOS 7 or MacOS 8), installation on such platforms is not described here. 
-A precompiled Win32 application for Microsoft Windows is available from 
-Algol68G's web page.
-
 
 A. GENERIC INSTALLATION
 -----------------------
 
-* If available on your system, Algol68G uses GNU plotutils (version 2.4.0 or 
-compatible) for its graphics routines.
+* If available on your system, Algol68G links to GNU plotutils (version 2.5 or 
+compatible).
 
-* If available on your system, Algol68G uses the GNU scientific library 
-(version 1.7 or compatible) to implement extensions of the standard prelude.  
+* If available on your system, Algol68G links to GNU scientific library 
+(version 1.8 or compatible).  
 
-* If available on your system, Algol68G uses POSIX threads to implement the 
-parallel clause. However, you need to specify when configuring that you wish 
-to use POSIX threads - see instructions below.
+* If available on your system, Algol68G links to glibc POSIX threads. 
+  You need to specify when configuring that you wish to use POSIX threads - 
+  see instructions below.
 
 * If available on your system, Algol68G links to the curses library.
 
 * If available on your system, Algol68G links to the PostgreSQL library 
-(version 8.1.2 or compatible).
+(version 8.1.4 or compatible).
 
 The 'configure' script checks your system for shared libraries and necessary 
 includes. If necessary files are not detected then Algol68G builds without 

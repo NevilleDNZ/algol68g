@@ -37,8 +37,7 @@ registers and stack for each concurrent unit.
 
 typedef struct STACK STACK;
 
-struct STACK
-{
+struct STACK {
   ADDR_T cur_ptr, ini_ptr;
   BYTE_T *swap, *start;
   int bytes;
@@ -68,8 +67,7 @@ Don't copy POSIX_THREAD_THREADS_MAX since it may be ULONG_MAX.
 
 typedef struct A68_CONTEXT A68_CONTEXT;
 
-struct A68_CONTEXT
-{
+struct A68_CONTEXT {
   pthread_t id;
   STACK stack, frame;
   NODE_T *unit;
@@ -237,7 +235,7 @@ static void save (STACK * s, BYTE_T * start, int size)
       z = s->swap;
     } else {
       if (s->swap != NULL) {
-	free (s->swap);
+        free (s->swap);
       }
       z = (BYTE_T *) malloc ((size_t) size);
       ABNORMAL_END (z == NULL, ERROR_OUT_OF_CORE, NULL);
@@ -382,11 +380,13 @@ static void genie_parallel_units (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, UNIT)) {
       pthread_t new_id;
+      pthread_attr_t new_at;
+      ssize_t ss;
       BYTE_T stack_offset;
 /* Set up a thread for this unit.       				*/
       if (condex >= THREAD_MAX) {
-	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_OVERFLOW);
-	exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_OVERFLOW);
+        exit_genie (p, A_RUNTIME_ERROR);
       }
 /* Fill out a context for this thread.  				*/
       context[condex].unit = p;
@@ -404,10 +404,14 @@ static void genie_parallel_units (NODE_T * p)
       context[condex].frame.bytes = 0;
 /* Create the actual thread.    					*/
       RESET_ERRNO;
-      pthread_create (&new_id, NULL, start_unit, NULL);
+      pthread_attr_init (&new_at);
+      pthread_attr_setstacksize (&new_at, stack_size);
+      pthread_attr_getstacksize (&new_at, &ss);
+      ABNORMAL_END (ss != stack_size, "cannot set thread stack size", NULL);
+      pthread_create (&new_id, &new_at, start_unit, NULL);
       if (errno != 0) {
-	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_CREATE);
-	exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_CREATE);
+        exit_genie (p, A_RUNTIME_ERROR);
       }
       context[condex].id = new_id;
       condex++;
@@ -460,8 +464,8 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
       RESET_ERRNO;
       pthread_join (context[j].id, NULL);
       if (errno != 0) {
-	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_JOIN);
-	exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_JOIN);
+        exit_genie (p, A_RUNTIME_ERROR);
       }
     }
 /* Restore state for the outermost PAR level that is now exiting. */
@@ -471,10 +475,10 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
     system_stack_offset = system_stack_offset_s;
     for (j = 0; j < condex; j++) {
       if (context[j].stack.swap != NULL) {
-	free (context[j].stack.swap);
+        free (context[j].stack.swap);
       }
       if (context[j].frame.swap != NULL) {
-	free (context[j].frame.swap);
+        free (context[j].frame.swap);
       }
     }
     condex = 0;

@@ -17,8 +17,8 @@ h4 {font-size: 10pt; font-family: Arial,Helvetica;}
 td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
 </style>
 </head>
 
@@ -27,14 +27,14 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.1</small>
+<small>Documentation for Algol 68 Genie Mark 9.2</small>
 </td>
 </table>
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 9.1</h2>
+<h2>Algol 68 Genie Mark 9.2</h2>
 <h3>An Algol 68 interpreter</h3>
 <small>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
@@ -60,7 +60,7 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.1</b></small>
+<small><b>Algol68G Mark 9.2</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -96,7 +96,7 @@ Algol 68 is a rather lean, orthogonal general-purpose programming language, that
 It can be used for executing Algol 68 programs or scripts when execution time is not of primary importance; Algol68G is pedantic rather than fast.
 <p>
 Algol68G is free software under the GNU General Public License.
-The current version is Mark 9.1, released in April 2006.
+The current version is Mark 9.2, released in July 2006.
 You can <a href="introduction.html#obtaining">download</a> it from this page.
 </p>
 
@@ -111,12 +111,12 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <ul>
 <li>
 Download 
-<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk9.1/algol68g-mk9.1.tar.gz">Algol68G Mark 9.1</a>, a gzipped tar archive containing C source code and documentation. <a href="install.html">Here</a> are instructions for installation of Algol68G on GNU/Linux.
-<br>
-Algol68G Mark 9.1 is regression-tested using a test set of more than 1100 programs. 
-<li>The <a href="#previous">Algol 68 Genie Mark 8.1 archive</a> 
-includes a Win32 executable</a> for Microsoft Windows, which is made available by Theo Vosse. 
-<br>
+<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk9.2/algol68g-mk9.2.tar.gz">Algol68G Mark 9.2</a>, a gzipped tar archive containing C source code and documentation. <a href="install.html">Here</a> are instructions for installation of Algol68G on UNIX/Linux.
+<p>
+Algol68G Mark 9.2 is regression-tested using a test set of more than 1100 programs. 
+<p>
+The archive includes <code>a68g.exe</code>, a Win32 executable of Algol 68 Genie Mark 9.2.
+This executable has been built and tested on Microsoft Windows XP and can be run from <code>cmd.exe</code>. 
 <li>For Apple's MacOS X Darwin environment, Norman Hardy has posted a 
 <a href="http://www.cap-lore.com/Languages/A68/Build.html">binary package</a>.
 <li>
@@ -135,9 +135,9 @@ If you have a question or remark, or have found a bug, please send a note to
 <br>
 <h3><a name="previous"></a>Available previous releases</h3>
 <p>
-<li><a href="algol68g-mk9/doc/introduction.html"><small><b>Algol 68 Genie Mark 9</b></small></a>
-<li><a href="algol68g-mk8.1/doc/introduction.html"><small><b>Algol 68 Genie Mark 8.1</b></small></a>
-<li><a href="algol68g-mk8/doc/introduction.html"><small><b>Algol 68 Genie Mark 8</b></small></a>
+<li><a href="../../algol68g-mk9.2/doc/introduction.html"><small><b>Algol 68 Genie Mark 9.2</b></small></a>
+<li><a href="../../algol68g-mk9.1/doc/introduction.html"><small><b>Algol 68 Genie Mark 9.1</b></small></a>
+<li><a href="../../algol68g-mk9/doc/introduction.html"><small><b>Algol 68 Genie Mark 9</b></small></a>
 </p>
 
 <br>
@@ -157,10 +157,22 @@ If you have a question or remark, or have found a bug, please send a note to
 </tr>
 <tr bgcolor="#e8e8e8">
 <td valign=top>
+9.2
+</td>
+<td valign=top>
+July 2006
+</td>
+<td valign=top>
+Improved scanner implements typographical display features<br>
+Various bug fixes (generator, parallel-clause)
+</td>
+</tr>
+<tr bgcolor="#e8e8e8">
+<td valign=top>
 9.1
 </td>
 <td valign=top>
-April 2006
+May 2006
 </td>
 <td valign=top>
 64-bit safe interpreter<br>
@@ -319,8 +331,8 @@ March 2003
 Added mode BYTES and LONG BYTES<br>
 Added mode FORMAT and parsing of FORMAT texts<br>
 Added straightening in unformatted transput<br>
-Added mode PIPE and Linux support<br>
-Changed to Linux system level IO
+Added mode PIPE and UNIX support<br>
+Changed to UNIX system level IO
 </td>
 </tr>
 <tr bgcolor="#e8e8e8">
@@ -348,16 +360,18 @@ From November 2001 onward
 </table>
 
 <hr color=#e8e8e8>
-<table width="100%">
-<td width="85%">
-<small>
-Algol 68 Genie is being developed on GNU/Linux.
-</small>
+<p>
+<table width=100%>
+<tr width=100%>
+<td>
+Algol 68 Genie Mark 9.2 was developed on OpenBSD
 </td>
-<td width="15%">
-<a href="http://www.linux.org"><img src="linux.gif" border=0 align=right></a>
+<td>
+<a href="http://www.openbsd.org"><img src="ppuf100X91.gif" align=right border=0></a>
 </td>
+</tr>
 </table>
+
 <hr color=#e8e8e8>
 <p>
 <br>
@@ -369,7 +383,7 @@ Algol 68 Genie is being developed on GNU/Linux.
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
 </font>
 </td>
 </table>
