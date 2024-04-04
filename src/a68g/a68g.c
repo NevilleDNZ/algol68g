@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -119,25 +119,25 @@ void verbosity (void)
 void state_license (FILE_T f)
 {
 #define PR(s)\
-  ASSERT (snprintf(A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, A68 (output_line));
   if (f == A68_STDOUT) {
     io_close_tty_line ();
   }
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Algol 68 Genie %s\n", PACKAGE_VERSION) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Algol 68 Genie %s\n", PACKAGE_VERSION) >= 0);
   WRITE (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Copyright 2001-2023 %s.\n", PACKAGE_BUGREPORT) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Copyright 2001-2024 %s.\n", PACKAGE_BUGREPORT) >= 0);
   WRITE (f, A68 (output_line));
   PR ("");
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "This is free software covered by the GNU General Public License.\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "This is free software covered by the GNU General Public License.\n") >= 0);
   WRITE (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "There is ABSOLUTELY NO WARRANTY for Algol 68 Genie;\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "There is ABSOLUTELY NO WARRANTY for Algol 68 Genie;\n") >= 0);
   WRITE (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n") >= 0);
   WRITE (f, A68 (output_line));
   PR ("See the GNU General Public License for more details.");
   PR ("");
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Please report bugs to %s.\n", PACKAGE_BUGREPORT) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Please report bugs to %s.\n", PACKAGE_BUGREPORT) >= 0);
   WRITE (f, A68 (output_line));
 #undef PR
 }
@@ -147,7 +147,7 @@ void state_license (FILE_T f)
 void state_version (FILE_T f)
 {
 #define PR(s)\
-  ASSERT (snprintf(A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, A68 (output_line));
   if (f == A68_STDOUT) {
     io_close_tty_line ();
@@ -155,74 +155,74 @@ void state_version (FILE_T f)
   state_license (f);
   PR ("");
 #if defined (BUILD_WIN32)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "WIN32 executable\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "WIN32 executable\n") >= 0);
   WRITE (f, A68 (output_line));
   WRITELN (f, "");
 #endif
 #if (A68_LEVEL >= 3)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With hardware support for long modes\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With hardware support for long modes\n") >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (BUILD_A68_COMPILER)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With plugin-compilation support\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With plugin-compilation support\n") >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (BUILD_PARALLEL_CLAUSE)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With parallel-clause support\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With parallel-clause support\n") >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_POSTGRESQL)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With PostgreSQL support\n") >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With PostgreSQL support\n") >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_CURL)
   curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With curl %s\n", data->version) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With curl %s\n", data->version) >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_GNU_MPFR)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With GNU MP %s\n", gmp_version) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With GNU MP %s\n", gmp_version) >= 0);
   WRITE (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With GNU MPFR %s\n", mpfr_get_version ()) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With GNU MPFR %s\n", mpfr_get_version ()) >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_MATHLIB)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With mathlib from R %s\n", R_VERSION_STRING) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With mathlib from R %s\n", R_VERSION_STRING) >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_GSL)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With GNU Scientific Library %s\n", GSL_VERSION) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With GNU Scientific Library %s\n", GSL_VERSION) >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_GNU_PLOTUTILS)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With GNU plotutils %s\n", PL_LIBPLOT_VER_STRING) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With GNU plotutils %s\n", PL_LIBPLOT_VER_STRING) >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_CURSES)
   #if defined (NCURSES_VERSION)
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With ncurses %s\n", NCURSES_VERSION) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With ncurses %s\n", NCURSES_VERSION) >= 0);
   #else
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With curses support\n") >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "With curses support\n") >= 0);
   #endif
   WRITE (f, A68 (output_line));
 #endif
 #if defined (_CS_GNU_LIBC_VERSION) && defined (BUILD_UNIX)
   if (confstr (_CS_GNU_LIBC_VERSION, A68 (input_line), BUFFER_SIZE) > (size_t) 0) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "GNU libc version %s\n", A68 (input_line)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "GNU libc version %s\n", A68 (input_line)) >= 0);
     WRITE (f, A68 (output_line));
   }
 #if (defined (BUILD_PARALLEL_CLAUSE) && defined (_CS_GNU_LIBPTHREAD_VERSION))
   if (confstr (_CS_GNU_LIBPTHREAD_VERSION, A68 (input_line), BUFFER_SIZE) > (size_t) 0) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "GNU libpthread version %s\n", A68 (input_line)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "GNU libpthread version %s\n", A68 (input_line)) >= 0);
     WRITE (f, A68 (output_line));
   }
 #endif
 #endif
 #define RSIZE(n) (unt) (sizeof (n) / sizeof (int))
 #if defined (BUILD_A68_COMPILER) && defined (C_COMPILER)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Build level %d.%x%x%x%x %s %s\n", A68_LEVEL, RSIZE (INT_T), RSIZE (REAL_T), RSIZE (MP_INT_T), RSIZE (MP_REAL_T), C_COMPILER, __DATE__) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Build level %d.%x%x%x%x %s %s\n", A68_LEVEL, RSIZE (INT_T), RSIZE (REAL_T), RSIZE (MP_INT_T), RSIZE (MP_REAL_T), C_COMPILER, __DATE__) >= 0);
 #else
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Build level %d.%x%x%x%x %s\n", A68_LEVEL, RSIZE (INT_T), RSIZE (REAL_T), RSIZE (MP_INT_T), RSIZE (MP_REAL_T), __DATE__) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Build level %d.%x%x%x%x %s\n", A68_LEVEL, RSIZE (INT_T), RSIZE (REAL_T), RSIZE (MP_INT_T), RSIZE (MP_REAL_T), __DATE__) >= 0);
 #endif
 #undef RSIZE
 WRITE (f, A68 (output_line));
@@ -237,9 +237,9 @@ void online_help (FILE_T f)
     io_close_tty_line ();
   }
   state_license (f);
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Usage: %s [options | filename]", A68 (a68_cmd_name)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Usage: %s [options | filename]", A68 (a68_cmd_name)) >= 0);
   WRITELN (f, A68 (output_line));
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "For help: %s --apropos [keyword]", A68 (a68_cmd_name)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "For help: %s --apropos [keyword]", A68 (a68_cmd_name)) >= 0);
   WRITELN (f, A68 (output_line));
 }
 
@@ -248,7 +248,7 @@ void online_help (FILE_T f)
 void announce_phase (char *t)
 {
   if (OPTION_VERBOSE (&A68_JOB)) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s", A68 (a68_cmd_name), t) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: %s", A68 (a68_cmd_name), t) >= 0);
     io_close_tty_line ();
     WRITE (A68_STDOUT, A68 (output_line));
   }
@@ -264,7 +264,7 @@ BOOL_T strip_extension (char *ext)
   int nlen = (int) strlen (FILE_SOURCE_NAME (&A68_JOB)), xlen = (int) strlen (ext);
   if (nlen > xlen && strcmp (&(FILE_SOURCE_NAME (&A68_JOB)[nlen - xlen]), ext) == 0) {
     char *fn = (char *) get_heap_space ((size_t) (nlen + 1));
-    bufcpy (fn, FILE_SOURCE_NAME (&A68_JOB), nlen);
+    a68_bufcpy (fn, FILE_SOURCE_NAME (&A68_JOB), nlen);
     fn[nlen - xlen] = NULL_CHAR;
     a68_free (FILE_GENERIC_NAME (&A68_JOB));
     FILE_GENERIC_NAME (&A68_JOB) = new_string (fn, NO_TEXT);
@@ -286,12 +286,12 @@ void open_with_extensions (void)
     if (extensions[k] == NO_TEXT) {
       len = (int) strlen (FILE_INITIAL_NAME (&A68_JOB)) + 1;
       fn = (char *) get_heap_space ((size_t) len);
-      bufcpy (fn, FILE_INITIAL_NAME (&A68_JOB), len);
+      a68_bufcpy (fn, FILE_INITIAL_NAME (&A68_JOB), len);
     } else {
       len = (int) strlen (FILE_INITIAL_NAME (&A68_JOB)) + (int) strlen (extensions[k]) + 1;
       fn = (char *) get_heap_space ((size_t) len);
-      bufcpy (fn, FILE_INITIAL_NAME (&A68_JOB), len);
-      bufcat (fn, extensions[k], len);
+      a68_bufcpy (fn, FILE_INITIAL_NAME (&A68_JOB), len);
+      a68_bufcat (fn, extensions[k], len);
     }
     FILE_SOURCE_FD (&A68_JOB) = open (fn, O_RDONLY | O_BINARY);
     if (FILE_SOURCE_FD (&A68_JOB) != -1) {
@@ -400,33 +400,33 @@ void compiler_interpreter (void)
 // Object file.
   int len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (OBJECT_EXTENSION);
   FILE_OBJECT_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
-  bufcpy (FILE_OBJECT_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
-  bufcat (FILE_OBJECT_NAME (&A68_JOB), OBJECT_EXTENSION, len);
+  a68_bufcpy (FILE_OBJECT_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
+  a68_bufcat (FILE_OBJECT_NAME (&A68_JOB), OBJECT_EXTENSION, len);
 // Binary.
   len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (PLUGIN_EXTENSION);
   FILE_BINARY_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
-  bufcpy (FILE_BINARY_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
-  bufcat (FILE_BINARY_NAME (&A68_JOB), BINARY_EXTENSION, len);
+  a68_bufcpy (FILE_BINARY_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
+  a68_bufcat (FILE_BINARY_NAME (&A68_JOB), BINARY_EXTENSION, len);
 // Library file.
   len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (PLUGIN_EXTENSION);
   FILE_PLUGIN_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
-  bufcpy (FILE_PLUGIN_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
-  bufcat (FILE_PLUGIN_NAME (&A68_JOB), PLUGIN_EXTENSION, len);
+  a68_bufcpy (FILE_PLUGIN_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
+  a68_bufcat (FILE_PLUGIN_NAME (&A68_JOB), PLUGIN_EXTENSION, len);
 // Listing file.
   len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (LISTING_EXTENSION);
   FILE_LISTING_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
-  bufcpy (FILE_LISTING_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
-  bufcat (FILE_LISTING_NAME (&A68_JOB), LISTING_EXTENSION, len);
+  a68_bufcpy (FILE_LISTING_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
+  a68_bufcat (FILE_LISTING_NAME (&A68_JOB), LISTING_EXTENSION, len);
 // Pretty file.
   len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (PRETTY_EXTENSION);
   FILE_PRETTY_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
-  bufcpy (FILE_PRETTY_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
-  bufcat (FILE_PRETTY_NAME (&A68_JOB), PRETTY_EXTENSION, len);
+  a68_bufcpy (FILE_PRETTY_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
+  a68_bufcat (FILE_PRETTY_NAME (&A68_JOB), PRETTY_EXTENSION, len);
 // Script file.
   len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (SCRIPT_EXTENSION);
   FILE_SCRIPT_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
-  bufcpy (FILE_SCRIPT_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
-  bufcat (FILE_SCRIPT_NAME (&A68_JOB), SCRIPT_EXTENSION, len);
+  a68_bufcpy (FILE_SCRIPT_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
+  a68_bufcat (FILE_SCRIPT_NAME (&A68_JOB), SCRIPT_EXTENSION, len);
 // Parser.
   a68_parser ();
   if (TOP_NODE (&A68_JOB) == NO_NODE) {
@@ -495,7 +495,7 @@ void compiler_interpreter (void)
 // Normal end of program.
     diagnostics_to_terminal (TOP_LINE (&A68_JOB), A68_RUNTIME_ERROR);
     if (OPTION_DEBUG (&A68_JOB) || OPTION_TRACE (&A68_JOB) || OPTION_CLOCK (&A68_JOB)) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nGenie finished in %.2f seconds\n", seconds () - A68 (cputime_0)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\nGenie finished in %.2f seconds\n", seconds () - A68 (cputime_0)) >= 0);
       WRITE (A68_STDOUT, A68 (output_line));
     }
     verbosity ();
@@ -593,7 +593,7 @@ int main (int argc, char *argv[])
   A68 (close_tty_on_exit) = A68_TRUE;
   FILE_DIAGS_FD (&A68_JOB) = -1;
 // Get command name and discard path.
-  bufcpy (A68 (a68_cmd_name), argv[0], BUFFER_SIZE);
+  a68_bufcpy (A68 (a68_cmd_name), argv[0], BUFFER_SIZE);
   for (int k = (int) strlen (A68 (a68_cmd_name)) - 1; k >= 0; k--) {
 #if defined (BUILD_WIN32)
     char delim = '\\';

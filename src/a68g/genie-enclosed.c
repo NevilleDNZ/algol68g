@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -291,10 +291,9 @@ void genie_serial_clause (NODE_T * p, jmp_buf * exit_buf)
   if (LABELS (TABLE (p)) == NO_TAG) {
 // No labels in this clause.
     if (SEQUENCE (p) == NO_NODE && !STATUS_TEST (p, SEQUENCE_MASK)) {
-      NODE_T top_seq;
-      NODE_T *seq = &top_seq;
-      GINFO_T g;
-      GINFO (&top_seq) = &g;
+      NODE_T top_seq; GINFO_T g; NODE_T *seq = &top_seq;
+      GINFO (seq) = &g;
+      SEQUENCE (seq) = NO_NODE;
       genie_serial_units_no_label (SUB (p), A68_SP, &seq);
       SEQUENCE (p) = SEQUENCE (&top_seq);
       STATUS_SET (p, SEQUENCE_MASK);

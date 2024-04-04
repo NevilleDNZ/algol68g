@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -251,7 +251,7 @@ void start_parallel_units (NODE_T * p, pthread_t parent)
 // Set up a thread for this unit.
       if (A68_PAR (context_index) >= THREAD_MAX) {
         static BUFFER msg;
-        snprintf (msg, SNPRINTF_SIZE, "platform supports %d parallel units", THREAD_MAX);
+        a68_bufprt (msg, SNPRINTF_SIZE, "platform supports %d parallel units", THREAD_MAX);
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_OVERFLOW, msg);
         exit_genie (p, A68_RUNTIME_ERROR);
       }

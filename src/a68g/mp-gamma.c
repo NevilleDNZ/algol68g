@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -226,7 +226,7 @@ void mp_gamma_table (NODE_T *p, int digs)
       (void) mul_mp (p, ck, ck, dz, gdigs);
       (void) div_mp (p, ck, ck, fac, gdigs);
       A68_MP (mp_gam_ck)[k] = (MP_T *) get_heap_space (SIZE_MP (gdigs));
-      (void) move_mp ((A68_MP(mp_gam_ck)[k]), ck, gdigs);
+      (void) move_mp ((A68_MP (mp_gam_ck)[k]), ck, gdigs);
       (void) mul_mp (p, fac, fac, dk, gdigs);
       (void) minus_mp (p, fac, fac, gdigs);
     }

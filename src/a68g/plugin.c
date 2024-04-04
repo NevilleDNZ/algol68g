@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -136,7 +136,7 @@ void plugin_driver_emit (FILE_T out)
 // At the end we discard temporary declarations.
   A68 (temp_heap_pointer) = pop_temp_heap_pointer;
   if (OPTION_VERBOSE (&A68_JOB)) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: A68_OPT (procedures)=%d unique-names=%d", A68 (a68_cmd_name), A68_OPT (procedures), A68_OPT (unic_pointer)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: A68_OPT (procedures)=%d unique-names=%d", A68 (a68_cmd_name), A68_OPT (procedures), A68_OPT (unic_pointer)) >= 0);
     io_close_tty_line ();
     WRITE (A68_STDOUT, A68 (output_line));
   }
@@ -171,9 +171,9 @@ char *moid_with_name (char *pre, MOID_T * m, char *post)
     mode = "VOID";
   }
   if (ref == NO_TEXT) {
-    snprintf (buf, NAME_SIZE, "%s%s%s", pre, mode, post);
+    a68_bufprt (buf, NAME_SIZE, "%s%s%s", pre, mode, post);
   } else {
-    snprintf (buf, NAME_SIZE, "%sREF_%s%s", pre, mode, post);
+    a68_bufprt (buf, NAME_SIZE, "%sREF_%s%s", pre, mode, post);
   }
   return buf;
 }
@@ -326,9 +326,9 @@ void print_declarations (FILE_T out, DEC_T * p)
 char *make_unic_name (char *buf, char *name, char *tag, char *ext)
 {
   if (strlen (tag) > 0) {
-    ASSERT (snprintf (buf, NAME_SIZE, "genie_%s_%s_%s", name, tag, ext) >= 0);
+    ASSERT (a68_bufprt (buf, NAME_SIZE, "genie_%s_%s_%s", name, tag, ext) >= 0);
   } else {
-    ASSERT (snprintf (buf, NAME_SIZE, "genie_%s_%s", name, ext) >= 0);
+    ASSERT (a68_bufprt (buf, NAME_SIZE, "genie_%s_%s", name, ext) >= 0);
   }
   ABEND (strlen (buf) >= NAME_SIZE, ERROR_ACTION, __func__);
   return buf;
@@ -392,9 +392,9 @@ BOOK_T *signed_in (int action, int phase, char *idf)
 char *make_name (char *buf, char *name, char *tag, int n)
 {
   if (strlen (tag) > 0) {
-    ASSERT (snprintf (buf, NAME_SIZE, "genie_%s_%s_%d", name, tag, n) >= 0);
+    ASSERT (a68_bufprt (buf, NAME_SIZE, "genie_%s_%s_%d", name, tag, n) >= 0);
   } else {
-    ASSERT (snprintf (buf, NAME_SIZE, "genie_%s_%d", name, n) >= 0);
+    ASSERT (a68_bufprt (buf, NAME_SIZE, "genie_%s_%d", name, n) >= 0);
   }
   ABEND (strlen (buf) >= NAME_SIZE, ERROR_ACTION, __func__);
   return buf;
@@ -537,7 +537,7 @@ void comment_tree (NODE_T * p, FILE_T out, int *want_space, int *max_print)
 void comment_source (NODE_T * p, FILE_T out)
 {
   int want_space = 0, max_print = 16, ld = -1;
-  undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "\n// %s: %d: ", FILENAME (LINE (INFO (p))), LINE_NUMBER (p)));
+  undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "\n// %s: %d: ", FILENAME (LINE (INFO (p))), LINE_NUMBER (p)));
   comment_tree (p, out, &want_space, &max_print);
   tree_listing (out, p, 1, LINE (INFO (p)), &ld, A68_TRUE);
   undent (out, "\n");
@@ -557,17 +557,17 @@ void inline_comment_source (NODE_T * p, FILE_T out)
 
 void write_prelude (FILE_T out)
 {
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "// \"%s\" %s\n", FILE_OBJECT_NAME (&A68_JOB), PACKAGE_STRING));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "// optimiser_level=%d code_level=%d\n", OPTION_OPT_LEVEL (&A68_JOB), A68_OPT (OPTION_CODE_LEVEL)));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "// %s %s\n", __DATE__, __TIME__));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "\n#include <%s/a68g-config.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-genie.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-prelude.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-environ.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-lib.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-optimiser.h>\n", PACKAGE));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-frames.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "// \"%s\" %s\n", FILE_OBJECT_NAME (&A68_JOB), PACKAGE_STRING));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "// optimiser_level=%d code_level=%d\n", OPTION_OPT_LEVEL (&A68_JOB), A68_OPT (OPTION_CODE_LEVEL)));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "// %s %s\n", __DATE__, __TIME__));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "\n#include <%s/a68g-config.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-genie.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-prelude.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-environ.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-lib.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-optimiser.h>\n", PACKAGE));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "#include <%s/a68g-frames.h>\n", PACKAGE));
   indent (out, "\n#define _NODE_(n) (A68 (node_register)[n])\n");
   indent (out, "#define _STATUS_(z) (STATUS (z))\n");
   indent (out, "#define _VALUE_(z) (VALUE (z))\n");
@@ -578,13 +578,13 @@ void write_prelude (FILE_T out)
 void init_static_frame (FILE_T out, NODE_T * p)
 {
   if (AP_INCREMENT (TABLE (p)) > 0) {
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "FRAME_CLEAR (" A68_LU ");\n", AP_INCREMENT (TABLE (p))));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "FRAME_CLEAR (" A68_LU ");\n", AP_INCREMENT (TABLE (p))));
   }
   if (LEX_LEVEL (p) == A68 (global_level)) {
     indent (out, "A68_GLOBALS = A68_FP;\n");
   }
   if (need_initialise_frame (p)) {
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "initialise_frame (_NODE_ (%d));\n", NUMBER (p)));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "initialise_frame (_NODE_ (%d));\n", NUMBER (p)));
   }
 }
 
@@ -594,12 +594,12 @@ void gen_check_init (NODE_T * p, FILE_T out, char *idf)
 {
   if (OPTION_COMPILE_CHECK (&A68_JOB) && folder_mode (MOID (p))) {
     if (MOID (p) == M_COMPLEX) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "if (!(INITIALISED (&(*%s)[0]) && INITIALISED (&(*%s)[1]))) {\n", idf, idf));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "if (!(INITIALISED (&(*%s)[0]) && INITIALISED (&(*%s)[1]))) {\n", idf, idf));
       A68_OPT (indentation)++;
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, M_COMPLEX);\n"));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "exit_genie ((p), A68_RUNTIME_ERROR);\n"));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, M_COMPLEX);\n"));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "exit_genie ((p), A68_RUNTIME_ERROR);\n"));
       A68_OPT (indentation)--;
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "}\n"));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "}\n"));
     } else {
       char *M = "M_ERROR";
       if (MOID (p) == M_INT) {
@@ -611,12 +611,12 @@ void gen_check_init (NODE_T * p, FILE_T out, char *idf)
       } else if (MOID (p) == M_CHAR) {
         M = "M_CHAR";
       }
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "if (!INITIALISED(%s)) {\n", idf));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "if (!INITIALISED(%s)) {\n", idf));
       A68_OPT (indentation)++;
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, %s);\n", M));
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "exit_genie ((p), A68_RUNTIME_ERROR);\n"));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, %s);\n", M));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "exit_genie ((p), A68_RUNTIME_ERROR);\n"));
       A68_OPT (indentation)--;
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "}\n"));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "}\n"));
     }
   }
 }
@@ -627,12 +627,12 @@ void get_stack (NODE_T * p, FILE_T out, char *dst, char *cast)
 {
   if (A68_OPT (OPTION_CODE_LEVEL) >= 4) {
     if (LEVEL (GINFO (p)) == A68 (global_level)) {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_GLOBAL (%s, %s, " A68_LU ");\n", dst, cast, OFFSET (TAX (p))));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_GLOBAL (%s, %s, " A68_LU ");\n", dst, cast, OFFSET (TAX (p))));
     } else {
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_FRAME (%s, %s, %d, " A68_LU ");\n", dst, cast, LEVEL (GINFO (p)), OFFSET (TAX (p))));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_FRAME (%s, %s, %d, " A68_LU ");\n", dst, cast, LEVEL (GINFO (p)), OFFSET (TAX (p))));
     }
   } else {
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GET_FRAME (%s, %s, %d, " A68_LU ");\n", dst, cast, LEVEL (GINFO (p)), OFFSET (TAX (p))));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "GET_FRAME (%s, %s, %d, " A68_LU ");\n", dst, cast, LEVEL (GINFO (p)), OFFSET (TAX (p))));
   }
 }
 
@@ -641,11 +641,11 @@ void get_stack (NODE_T * p, FILE_T out, char *dst, char *cast)
 void write_fun_prelude (NODE_T * p, FILE_T out, char *fn)
 {
   (void) p;
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "\nPROP_T %s (NODE_T *p) {\n", fn));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "\nPROP_T %s (NODE_T *p) {\n", fn));
   A68_OPT (indentation)++;
   indent (out, "PROP_T self;\n");
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "UNIT (&self) = %s;\n", fn));
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "SOURCE (&self) = _NODE_ (%d);\n", NUMBER (p)));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "UNIT (&self) = %s;\n", fn));
+  indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "SOURCE (&self) = _NODE_ (%d);\n", NUMBER (p)));
   A68_OPT (cse_pointer) = 0;
 }
 
@@ -693,7 +693,7 @@ char *compile_denotation (NODE_T * p, FILE_T out)
     if (MOID (p) == M_INT) {
       char *end;
       UNSIGNED_T z = (UNSIGNED_T) a68_strtoi (NSYMBOL (p), &end, 10);
-      ASSERT (snprintf (N, NAME_SIZE, A68_LX "_", z) >= 0);
+      ASSERT (a68_bufprt (N, NAME_SIZE, A68_LX "_", z) >= 0);
       (void) make_unic_name (fn, moid_with_name ("", MOID (p), "_denotation"), "", N);
     } else if (MOID (p) == M_REAL) {
       A68_SP = 0;
@@ -720,7 +720,7 @@ char *compile_denotation (NODE_T * p, FILE_T out)
     } else if (MOID (p) == M_BOOL) {
       (void) make_unic_name (fn, moid_with_name ("", MOID (p), "_denotation"), "", NSYMBOL (SUB (p)));
     } else if (MOID (p) == M_CHAR) {
-      ASSERT (snprintf (N, NAME_SIZE, "%02x_", NSYMBOL (SUB (p))[0]) >= 0);
+      ASSERT (a68_bufprt (N, NAME_SIZE, "%02x_", NSYMBOL (SUB (p))[0]) >= 0);
       (void) make_unic_name (fn, moid_with_name ("", MOID (p), "_denotation"), "", N);
     }
     if (fn[0] != '\0') {
@@ -734,9 +734,9 @@ char *compile_denotation (NODE_T * p, FILE_T out)
         (void) make_name (fn, moid_with_name ("", MOID (p), "_denotation_alt"), "", NUMBER (p));
       }
       write_fun_prelude (p, out, fn);
-      indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "PUSH_VALUE (p, "));
+      indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "PUSH_VALUE (p, "));
       inline_unit (p, out, L_YIELD);
-      undentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, ", %s);\n", inline_mode (MOID (p))));
+      undentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, ", %s);\n", inline_mode (MOID (p))));
       write_fun_postlude (p, out, fn);
     }
     return fn;
@@ -784,7 +784,7 @@ char *compile_identifier (NODE_T * p, FILE_T out)
       }
     }
 // Push the identifier.
-    ASSERT (snprintf (N, NAME_SIZE, "%d_%d_" A68_LU, NUM (TABLE (TAX (p))), LEVEL (GINFO (p)), OFFSET (TAX (p))) >= 0);
+    ASSERT (a68_bufprt (N, NAME_SIZE, "%d_%d_" A68_LU, NUM (TABLE (TAX (p))), LEVEL (GINFO (p)), OFFSET (TAX (p))) >= 0);
     comment_source (p, out);
     fn[0] = '\0';
     (void) make_unic_name (fn, moid_with_name ("", MOID (p), "_identifier"), "", N);
@@ -819,7 +819,7 @@ char *compile_dereference_identifier (NODE_T * p, FILE_T out)
     int action = UNIC_MAKE_ALT;
     char N[NAME_SIZE];
     NODE_T *q = SUB (p);
-    ASSERT (snprintf (N, NAME_SIZE, "%d_%d_" A68_LU, NUM (TABLE (TAX (q))), LEVEL (GINFO (q)), OFFSET (TAX (q))) >= 0);
+    ASSERT (a68_bufprt (N, NAME_SIZE, "%d_%d_" A68_LU, NUM (TABLE (TAX (q))), LEVEL (GINFO (q)), OFFSET (TAX (q))) >= 0);
     comment_source (p, out);
     fn[0] = '\0';
     (void) make_unic_name (fn, moid_with_name ("deref_REF_", MOID (p), "_identifier"), "", N);
@@ -856,7 +856,7 @@ char *compile_formula (NODE_T * p, FILE_T out)
     write_fun_prelude (p, out, fn);
     if (OPTION_COMPILE_CHECK (&A68_JOB) && !constant_unit (p)) {
       if (MOID (p) == M_REAL || MOID (p) == M_COMPLEX) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_REAL * _st_ = (A68_REAL *) STACK_TOP;\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "A68_REAL * _st_ = (A68_REAL *) STACK_TOP;\n"));
       }
     }
     A68_OPT (root_idf) = NO_DEC;
@@ -864,26 +864,26 @@ char *compile_formula (NODE_T * p, FILE_T out)
     print_declarations (out, A68_OPT (root_idf));
     if (OPTION_COMPILE_CHECK (&A68_JOB) && !constant_unit (p)) {
       if (folder_mode (MOID (p))) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "errno = 0;\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "errno = 0;\n"));
       }
     }
     inline_unit (p, out, L_EXECUTE);
     gen_push (p, out);
     if (OPTION_COMPILE_CHECK (&A68_JOB) && !constant_unit (p)) {
       if (MOID (p) == M_INT) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_INT, NO_TEXT);\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_INT, NO_TEXT);\n"));
       }
       if (MOID (p) == M_REAL) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_REAL, NO_TEXT);\n"));
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "CHECK_REAL (p, _VALUE_ (_st_));\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_REAL, NO_TEXT);\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "CHECK_REAL (p, _VALUE_ (_st_));\n"));
       }
       if (MOID (p) == M_BITS) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_BITS, NO_TEXT);\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_BITS, NO_TEXT);\n"));
       }
       if (MOID (p) == M_COMPLEX) {
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_COMPLEX, NO_TEXT);\n"));
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "CHECK_REAL (p, _VALUE_ (&(_st_[0])));\n"));
-        indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "CHECK_REAL (p, _VALUE_ (&(_st_[1])));\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "MATH_RTE (p, errno != 0, M_COMPLEX, NO_TEXT);\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "CHECK_REAL (p, _VALUE_ (&(_st_[0])));\n"));
+        indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "CHECK_REAL (p, _VALUE_ (&(_st_[1])));\n"));
       }
     }
     write_fun_postlude (p, out, fn);
@@ -947,22 +947,22 @@ char *compile_call (NODE_T * p, FILE_T out)
     (void) add_declaration (&A68_OPT (root_idf), "NODE_T", 1, "body");
     print_declarations (out, A68_OPT (root_idf));
 // Initialise.
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s = A68_SP;\n", pop));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s = A68_SP;\n", pop));
     inline_arguments (args, out, L_INITIALISE, &size);
     get_stack (idf, out, fun, "A68_PROCEDURE");
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "body = SUB (NODE (&BODY (%s)));\n", fun));
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "OPEN_PROC_FRAME (body, ENVIRON (%s));\n", fun));
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "INIT_STATIC_FRAME (body);\n"));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "body = SUB (NODE (&BODY (%s)));\n", fun));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "OPEN_PROC_FRAME (body, ENVIRON (%s));\n", fun));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "INIT_STATIC_FRAME (body);\n"));
     size = 0;
     inline_arguments (args, out, L_EXECUTE, &size);
     size = 0;
     inline_arguments (args, out, L_YIELD, &size);
 // Execute procedure.
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_SP = %s;\n", pop));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "A68_SP = %s;\n", pop));
     indent (out, "GENIE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
     indent (out, "if (A68_FP == A68_MON (finish_frame_pointer)) {\n");
     A68_OPT (indentation)++;
-    indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));
+    indentf (out, a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));
     A68_OPT (indentation)--;
     indent (out, "}\n");
     indent (out, "CLOSE_FRAME;\n");

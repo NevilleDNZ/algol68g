@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -75,7 +75,7 @@ int store_file_entry (NODE_T * p, FILE_T fd, char *idf, BOOL_T is_tmp)
       FD (fe) = fd;
       IDF (fe) = heap_generator (p, M_C_STRING, len);
       BLOCK_GC_HANDLE (&(IDF (fe)));
-      bufcpy (DEREF (char, &IDF (fe)), idf, len);
+      a68_bufcpy (DEREF (char, &IDF (fe)), idf, len);
       return k;
     }
   }
@@ -245,7 +245,7 @@ void enlarge_transput_buffer (NODE_T * p, int k, int size)
   set_transput_buffer_size (k, size);
   set_transput_buffer_index (k, n);
   sb_2 = get_transput_buffer (k);
-  bufcpy (sb_2, sb_1, size);
+  a68_bufcpy (sb_2, sb_1, size);
 }
 
 //! @brief Add char to transput buffer; if the buffer is full, make it larger.
@@ -613,7 +613,7 @@ void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, BOOL_T 
     int len = 1 + (int) strlen (filename);
     IDENTIFICATION (f) = heap_generator (p, M_C_STRING, len);
     BLOCK_GC_HANDLE (&(IDENTIFICATION (f)));
-    bufcpy (DEREF (char, &IDENTIFICATION (f)), filename, len);
+    a68_bufcpy (DEREF (char, &IDENTIFICATION (f)), filename, len);
     FD (f) = A68_NO_FILE;
     READ_MOOD (f) = A68_FALSE;
     WRITE_MOOD (f) = A68_FALSE;

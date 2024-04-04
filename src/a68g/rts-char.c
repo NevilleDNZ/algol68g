@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -412,7 +412,7 @@ void genie_add_bytes (NODE_T * p)
   A68_BYTES *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_BYTES);
   PRELUDE_ERROR (((int) strlen (VALUE (i)) + (int) strlen (VALUE (j))) > A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
-  bufcat (VALUE (i), VALUE (j), A68_BYTES_WIDTH);
+  a68_bufcat (VALUE (i), VALUE (j), A68_BYTES_WIDTH);
 }
 
 //! @brief OP +:= = (REF BYTES, BYTES) REF BYTES
@@ -435,9 +435,9 @@ void genie_plusto_bytes (NODE_T * p)
   POP_OBJECT (p, &i, A68_BYTES);
   PRELUDE_ERROR (((int) strlen (VALUE (address)) + (int) strlen (VALUE (&i))) > A68_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_BYTES);
   A68_BYTES j;
-  bufcpy (VALUE (&j), VALUE (&i), A68_BYTES_WIDTH);
-  bufcat (VALUE (&j), VALUE (address), A68_BYTES_WIDTH);
-  bufcpy (VALUE (address), VALUE (&j), A68_BYTES_WIDTH);
+  a68_bufcpy (VALUE (&j), VALUE (&i), A68_BYTES_WIDTH);
+  a68_bufcat (VALUE (&j), VALUE (address), A68_BYTES_WIDTH);
+  a68_bufcpy (VALUE (address), VALUE (&j), A68_BYTES_WIDTH);
   PUSH_REF (p, z);
 }
 
@@ -472,7 +472,7 @@ A68_CMP_BYTES (genie_ge_bytes, >=);
 void genie_leng_bytes (NODE_T * p)
 {
   A68_LONG_BYTES a;
-  memset (VALUE (&a), 0, sizeof (VALUE (&a)));
+  a68_bufset (VALUE (&a), 0, sizeof (VALUE (&a)));
   POP_OBJECT (p, (A68_BYTES *) &a, A68_BYTES);
   PUSH_LONG_BYTES (p, VALUE (&a));
 }
@@ -524,7 +524,7 @@ void genie_add_long_bytes (NODE_T * p)
   A68_LONG_BYTES *i, *j;
   POP_OPERAND_ADDRESSES (p, i, j, A68_LONG_BYTES);
   PRELUDE_ERROR (((int) strlen (VALUE (i)) + (int) strlen (VALUE (j))) > A68_LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_LONG_BYTES);
-  bufcat (VALUE (i), VALUE (j), A68_LONG_BYTES_WIDTH);
+  a68_bufcat (VALUE (i), VALUE (j), A68_LONG_BYTES_WIDTH);
 }
 
 //! @brief OP +:= = (REF LONG BYTES, LONG BYTES) REF LONG BYTES
@@ -547,9 +547,9 @@ void genie_plusto_long_bytes (NODE_T * p)
   POP_OBJECT (p, &i, A68_LONG_BYTES);
   PRELUDE_ERROR (((int) strlen (VALUE (address)) + (int) strlen (VALUE (&i))) > A68_LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_LONG_BYTES);
   A68_LONG_BYTES j;
-  bufcpy (VALUE (&j), VALUE (&i), A68_LONG_BYTES_WIDTH);
-  bufcat (VALUE (&j), VALUE (address), A68_LONG_BYTES_WIDTH);
-  bufcpy (VALUE (address), VALUE (&j), A68_LONG_BYTES_WIDTH);
+  a68_bufcpy (VALUE (&j), VALUE (&i), A68_LONG_BYTES_WIDTH);
+  a68_bufcat (VALUE (&j), VALUE (address), A68_LONG_BYTES_WIDTH);
+  a68_bufcpy (VALUE (address), VALUE (&j), A68_LONG_BYTES_WIDTH);
   PUSH_REF (p, z);
 }
 

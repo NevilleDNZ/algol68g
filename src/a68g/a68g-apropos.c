@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -128,9 +128,9 @@ static A68_INFO info_text[] = {
 void print_info (FILE_T f, char *prompt, int k)
 {
   if (prompt != NO_TEXT) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s %s: %s.", prompt, TERM (&info_text[k]), DEF (&info_text[k])) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s %s: %s.", prompt, TERM (&info_text[k]), DEF (&info_text[k])) >= 0);
   } else {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s.", TERM (&info_text[k]), DEF (&info_text[k])) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%s: %s.", TERM (&info_text[k]), DEF (&info_text[k])) >= 0);
   }
   WRITE (f, A68 (output_line));
   WRITELN (f, "");

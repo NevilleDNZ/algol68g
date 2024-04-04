@@ -28,14 +28,8 @@
 /* Define to 1 if you have the <assert.h> header file. */
 #define HAVE_ASSERT_H 1
 
-/* Define to 1 if you have the `basename' function. */
-#define HAVE_BASENAME 1
-
 /* Define to 1 if you have the <complex.h> header file. */
 #define HAVE_COMPLEX_H 1
-
-/* Define to 1 if you have the `csqrt' function. */
-#define HAVE_CSQRT 1
 
 /* Define to 1 if you have the <ctype.h> header file. */
 #define HAVE_CTYPE_H 1
@@ -80,9 +74,6 @@
 /* Define to 1 if you have the <execinfo.h> header file. */
 #define HAVE_EXECINFO_H 1
 
-/* Define to 1 if you have the `exit' function. */
-#define HAVE_EXIT 1
-
 /* Define this if EXPORT_DYNAMIC is recognised */
 #define HAVE_EXPORT_DYNAMIC 1
 
@@ -100,12 +91,6 @@
 
 /* Define this if long double has a 64-bit mantissa */
 #define HAVE_FLT80 1
-
-/* Define to 1 if you have the `fprintf' function. */
-#define HAVE_FPRINTF 1
-
-/* Define to 1 if you have the `free' function. */
-#define HAVE_FREE 1
 
 /* Define this if GNU C library is detected. */
 #define HAVE_GNU_C_LIB 1
@@ -230,14 +215,8 @@
 /* Define to 1 if you have the <limits.h> header file. */
 #define HAVE_LIMITS_H 1
 
-/* Define to 1 if you have the `longjmp' function. */
-#define HAVE_LONGJMP 1
-
 /* Define this if a good INT*8/REAL*10/REAL*16 installation was detected */
 /* #undef HAVE_LONG_TYPES */
-
-/* Define to 1 if you have the `malloc' function. */
-#define HAVE_MALLOC 1
 
 /* Define this if a good mathlib installation was detected */
 /* #undef HAVE_MATHLIB */
@@ -247,15 +226,6 @@
 
 /* Define this if math.h includes POSIX's signgam. */
 /* #undef HAVE_MATH_H_SIGNGAM */
-
-/* Define to 1 if you have the `memcpy' function. */
-#define HAVE_MEMCPY 1
-
-/* Define to 1 if you have the `memmove' function. */
-#define HAVE_MEMMOVE 1
-
-/* Define to 1 if you have the `memset' function. */
-#define HAVE_MEMSET 1
 
 /* Define to 1 if you have the <mpfr.h> header file. */
 /* #undef HAVE_MPFR_H */
@@ -296,9 +266,6 @@
 /* Define this if a good PostgreSQL installation was detected */
 /* #undef HAVE_POSTGRESQL */
 
-/* Define to 1 if you have the `printf' function. */
-#define HAVE_PRINTF 1
-
 /* Define to 1 if you have the <pthread.h> header file. */
 /* #undef HAVE_PTHREAD_H */
 
@@ -314,23 +281,11 @@
 /* Define to 1 if you have the <Rmath.h> header file. */
 /* #undef HAVE_RMATH_H */
 
-/* Define to 1 if you have the `setjmp' function. */
-#define HAVE_SETJMP 1
-
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define HAVE_SETJMP_H 1
 
-/* Define to 1 if you have the `signal' function. */
-#define HAVE_SIGNAL 1
-
 /* Define to 1 if you have the <signal.h> header file. */
 #define HAVE_SIGNAL_H 1
-
-/* Define to 1 if you have the `snprintf' function. */
-#define HAVE_SNPRINTF 1
-
-/* Define to 1 if you have the `sqrt' function. */
-#define HAVE_SQRT 1
 
 /* Define to 1 if you have the <stdarg.h> header file. */
 #define HAVE_STDARG_H 1
@@ -347,20 +302,11 @@
 /* Define to 1 if you have the <stdlib.h> header file. */
 #define HAVE_STDLIB_H 1
 
-/* Define to 1 if you have the `strcmp' function. */
-#define HAVE_STRCMP 1
-
 /* Define to 1 if you have the <strings.h> header file. */
 #define HAVE_STRINGS_H 1
 
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
-
-/* Define to 1 if you have the `strncmp' function. */
-#define HAVE_STRNCMP 1
-
-/* Define to 1 if you have the `strncpy' function. */
-#define HAVE_STRNCPY 1
 
 /* Define to 1 if you have the <sys/dir.h> header file, and it defines `DIR'.
    */
@@ -428,7 +374,7 @@
 #define PACKAGE_NAME "algol68g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "algol68g 3.4.4"
+#define PACKAGE_STRING "algol68g 3.4.5"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "algol68g"
@@ -437,7 +383,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.4.4"
+#define PACKAGE_VERSION "3.4.5"
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -445,7 +391,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.4.4"
+#define VERSION "3.4.5"
 
 /* Define to 1 if type `char' is unsigned and your compiler does not
    predefine this macro.  */

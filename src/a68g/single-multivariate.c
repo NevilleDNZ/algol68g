@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -558,7 +558,7 @@ void genie_matrix_pls2 (NODE_T *p)
   MATH_RTE (p, Mf == 0 || Nf == 0, M_ROW_ROW_REAL, "invalid column vector F");
   MATH_RTE (p, Me == 0 || Ne == 0, M_ROW_ROW_REAL, "invalid data matrix E");
   MATH_RTE (p, Me != Mf, M_ROW_ROW_REAL, "rows in F must match columns in E");
-  CHECK_INT_SHORTEN(p, VALUE (&Nc));
+  CHECK_INT_SHORTEN (p, VALUE (&Nc));
 // Sensible defaults.
   int Nk = (VALUE (&Nc) == 0 ? MIN (Ne, Mf) : MIN (Mf, VALUE (&Nc)));
   if (VALUE (&lim) <= 0) {
@@ -627,7 +627,7 @@ void genie_matrix_pls2 (NODE_T *p)
       a68_dgemm (FLIP, SELF, 1.0, t, u, 0.0, &b);
       a68_dgemm (SELF, FLIP, -gsl_matrix_get (b, 0, 0), t, ql, 1.0, &F);
 // Build vector and matrices.
-      gsl_vector_set (dD, k, gsl_matrix_get(b, 0, 0));
+      gsl_vector_set (dD, k, gsl_matrix_get (b, 0, 0));
       nP = mat_before_ab (p, nP, pl); // P
       nC = mat_before_ab (p, nC, c);  // C
     }

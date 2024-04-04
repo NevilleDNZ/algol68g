@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -562,7 +562,7 @@ TAG_T *add_tag (TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
     PRIO (z) = p;
     MOID (z) = m;
     NODE (z) = n;
-//    TAX(n) = z;.
+//    TAX (n) = z;.
     switch (a) {
     case IDENTIFIER: {
         already_declared_hidden (n, IDENTIFIER);

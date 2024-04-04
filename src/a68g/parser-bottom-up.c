@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -177,7 +177,7 @@ void reduce (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
   if (head != NO_NODE && OPTION_REDUCTIONS (&A68_JOB) && LINE_NUMBER (head) > 0) {
     A68_PARSER (reductions)++;
     WIS (head);
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nReduction %d: %s<-", A68_PARSER (reductions), non_terminal_string (A68 (edit_line), result)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "\nReduction %d: %s<-", A68_PARSER (reductions), non_terminal_string (A68 (edit_line), result)) >= 0);
     WRITE (A68_STDOUT, A68 (output_line));
     int count = 0;
     for (NODE_T *q = head; q != NO_NODE && tail != NO_NODE && q != NEXT (tail); FORWARD (q), count++) {
@@ -189,7 +189,7 @@ void reduce (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
       if (str != NO_TEXT) {
         WRITE (A68_STDOUT, str);
         if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTATION || gatt == INDICANT) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (q)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (q)) >= 0);
           WRITE (A68_STDOUT, A68 (output_line));
         }
       } else {

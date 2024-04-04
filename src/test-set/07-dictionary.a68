@@ -26,8 +26,9 @@ MODE DICT = FLEX [0] PAIR,
      BASIC = UNION (INT, REAL, BOOL, STRING),
      KEY = STRING;
 
-REF DICT empty dict = NIL;
-VALUE null = EMPTY;
+REF DICT empty dict = NIL, VALUE null = EMPTY;
+
+DICT empty := PAIR ("empty_field", null);
 
 CHAR quote = """";
 
@@ -66,7 +67,6 @@ OP JSON = (REF DICT dict) VOID:
         OD
    FI;
 
-DICT empty := PAIR ("empty_field", null);
 [] BASIC row = (1, pi, TRUE, "algol 68");
 DICT test := (("empty_dict", empty), ("row", row), ("string", "string"));
 

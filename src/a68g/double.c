@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -1213,7 +1213,6 @@ void genie_elem_double_bits (NODE_T * p)
     w = &(LW (VALUE (&j)));
   } else {
     w = &(HW (VALUE (&j)));
-    k -= A68_BITS_WIDTH;
   }
   for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
     mask = mask << 1;
@@ -1235,7 +1234,6 @@ void genie_set_double_bits (NODE_T * p)
     w = &(LW (VALUE (&j)));
   } else {
     w = &(HW (VALUE (&j)));
-    k -= A68_BITS_WIDTH;
   }
   for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
     mask = mask << 1;
@@ -1258,7 +1256,6 @@ void genie_clear_double_bits (NODE_T * p)
     w = &(LW (VALUE (&j)));
   } else {
     w = &(HW (VALUE (&j)));
-    k -= A68_BITS_WIDTH;
   }
   for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
     mask = mask << 1;

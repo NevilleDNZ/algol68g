@@ -4,7 +4,7 @@
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
-//! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
+//! Copyright 2001-2024 J. Marcel van der Veer [algol68g@xs4all.nl].
 
 //! @section License
 //!
@@ -99,11 +99,11 @@ BOOL_T check_initialisation (NODE_T *, BYTE_T *, MOID_T *, BOOL_T *);
 
 #define CHECK_MON_REF(p, z, m)\
   if (! INITIALISED (&z)) {\
-    ASSERT (snprintf(A68 (edit_line), SNPRINTF_SIZE, "%s", moid_to_string ((m), MOID_WIDTH, NO_NODE)) >= 0);\
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", moid_to_string ((m), MOID_WIDTH, NO_NODE)) >= 0);\
     monitor_error (NO_VALUE, A68 (edit_line));\
     QUIT_ON_ERROR;\
   } else if (IS_NIL (z)) {\
-    ASSERT (snprintf(A68 (edit_line), SNPRINTF_SIZE, "%s", moid_to_string ((m), MOID_WIDTH, NO_NODE)) >= 0);\
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s", moid_to_string ((m), MOID_WIDTH, NO_NODE)) >= 0);\
     monitor_error ("accessing NIL name", A68 (edit_line));\
     QUIT_ON_ERROR;\
   }
@@ -125,7 +125,7 @@ BOOL_T check_initialisation (NODE_T *, BYTE_T *, MOID_T *, BOOL_T *);
 
 BOOL_T confirm_exit (void)
 {
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Terminate %s (yes|no): ", A68 (a68_cmd_name)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Terminate %s (yes|no): ", A68 (a68_cmd_name)) >= 0);
   WRITELN (A68_STDOUT, A68 (output_line));
   char *cmd = read_string_from_tty (NULL);
   if (TO_UCHAR (cmd[0]) == TO_UCHAR (EOF_CHAR)) {
@@ -155,7 +155,7 @@ void monitor_error (char *msg, char *info)
 {
   QUIT_ON_ERROR;
   A68_MON (mon_errors)++;
-  bufcpy (A68_MON (error_text), msg, BUFFER_SIZE);
+  a68_bufcpy (A68_MON (error_text), msg, BUFFER_SIZE);
   WRITELN (A68_STDOUT, A68 (a68_cmd_name));
   WRITE (A68_STDOUT, ": monitor error: ");
   WRITE (A68_STDOUT, A68_MON (error_text));
@@ -186,19 +186,19 @@ void scan_sym (FILE_T f, NODE_T * p)
   } else if (A68_MON (expr)[A68_MON (pos)] == ':') {
     if (strncmp (&(A68_MON (expr)[A68_MON (pos)]), ":=:", 3) == 0) {
       A68_MON (pos) += 3;
-      bufcpy (A68_MON (symbol), ":=:", BUFFER_SIZE);
+      a68_bufcpy (A68_MON (symbol), ":=:", BUFFER_SIZE);
       A68_MON (attr) = IS_SYMBOL;
     } else if (strncmp (&(A68_MON (expr)[A68_MON (pos)]), ":/=:", 4) == 0) {
       A68_MON (pos) += 4;
-      bufcpy (A68_MON (symbol), ":/=:", BUFFER_SIZE);
+      a68_bufcpy (A68_MON (symbol), ":/=:", BUFFER_SIZE);
       A68_MON (attr) = ISNT_SYMBOL;
     } else if (strncmp (&(A68_MON (expr)[A68_MON (pos)]), ":=", 2) == 0) {
       A68_MON (pos) += 2;
-      bufcpy (A68_MON (symbol), ":=", BUFFER_SIZE);
+      a68_bufcpy (A68_MON (symbol), ":=", BUFFER_SIZE);
       A68_MON (attr) = ASSIGN_SYMBOL;
     } else {
       A68_MON (pos)++;
-      bufcpy (A68_MON (symbol), ":", BUFFER_SIZE);
+      a68_bufcpy (A68_MON (symbol), ":", BUFFER_SIZE);
       A68_MON (attr) = COLON_SYMBOL;
     }
     return;
@@ -482,9 +482,9 @@ TAG_T *search_operator (char *sym, MOID_T * x, MOID_T * y)
   }
 // Not found. Grrrr. Give a message.
   if (y == NO_MOID) {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s %s", sym, moid_to_string (x, MOID_WIDTH, NO_NODE)) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s %s", sym, moid_to_string (x, MOID_WIDTH, NO_NODE)) >= 0);
   } else {
-    ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s %s %s", moid_to_string (x, MOID_WIDTH, NO_NODE), sym, moid_to_string (y, MOID_WIDTH, NO_NODE)) >= 0);
+    ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s %s %s", moid_to_string (x, MOID_WIDTH, NO_NODE), sym, moid_to_string (y, MOID_WIDTH, NO_NODE)) >= 0);
   }
   monitor_error ("cannot find operator in standard environ", A68 (edit_line));
   return NO_TAG;
@@ -558,11 +558,11 @@ void coerce_arguments (FILE_T f, NODE_T * p, MOID_T * proc, int bot, int top, in
       pop_sp += A68_REF_SIZE;
       deref (p, k, STRONG);
       if (A68_MON (_m_stack)[k] != MOID (u)) {
-        ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s to %s", moid_to_string (A68_MON (_m_stack)[k], MOID_WIDTH, NO_NODE), moid_to_string (MOID (u), MOID_WIDTH, NO_NODE)) >= 0);
+        ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s to %s", moid_to_string (A68_MON (_m_stack)[k], MOID_WIDTH, NO_NODE), moid_to_string (MOID (u), MOID_WIDTH, NO_NODE)) >= 0);
         monitor_error ("invalid argument mode", A68 (edit_line));
       }
     } else {
-      ASSERT (snprintf (A68 (edit_line), SNPRINTF_SIZE, "%s to %s", moid_to_string (A68_MON (_m_stack)[k], MOID_WIDTH, NO_NODE), moid_to_string (MOID (u), MOID_WIDTH, NO_NODE)) >= 0);
+      ASSERT (a68_bufprt (A68 (edit_line), SNPRINTF_SIZE, "%s to %s", moid_to_string (A68_MON (_m_stack)[k], MOID_WIDTH, NO_NODE), moid_to_string (MOID (u), MOID_WIDTH, NO_NODE)) >= 0);
       monitor_error ("cannot coerce argument", A68 (edit_line));
     }
     QUIT_ON_ERROR;
@@ -791,7 +791,7 @@ void parse (FILE_T f, NODE_T * p, int depth)
       PARSE_CHECK (f, p, depth + 1);
       while (A68_MON (attr) == OPERATOR && prio (f, p) == depth) {
         BUFFER name;
-        bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
+        a68_bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
         int args = A68_MON (_m_sp) - 1;
         ADDR_T top_sp = A68_SP - SIZE (A68_MON (_m_stack)[args]);
         SCAN_CHECK (f, p);
@@ -810,7 +810,7 @@ void parse (FILE_T f, NODE_T * p, int depth)
     }
   } else if (A68_MON (attr) == OPERATOR) {
     BUFFER name;
-    bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
+    a68_bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
     int args = A68_MON (_m_sp);
     ADDR_T top_sp = A68_SP;
     SCAN_CHECK (f, p);
@@ -989,7 +989,7 @@ void parse (FILE_T f, NODE_T * p, int depth)
   } else if (A68_MON (attr) == IDENTIFIER) {
     ADDR_T old_sp = A68_SP;
     BUFFER name;
-    bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
+    a68_bufcpy (name, A68_MON (symbol), BUFFER_SIZE);
     SCAN_CHECK (f, p);
     if (A68_MON (attr) == OF_SYMBOL) {
       selection (f, p, name);
@@ -1067,7 +1067,7 @@ void evaluate (FILE_T f, NODE_T * p, char *str)
   A68_MON (_m_sp) = 0;
   A68_MON (_m_stack)[0] = NO_MOID;
   A68_MON (pos) = 0;
-  bufcpy (A68_MON (expr), str, BUFFER_SIZE);
+  a68_bufcpy (A68_MON (expr), str, BUFFER_SIZE);
   SCAN_CHECK (f, p);
   QUIT_ON_ERROR;
   assign (f, p);
@@ -1269,14 +1269,14 @@ void print_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
   genie_write_standard (p, mode, item, nil_file);
   if (get_transput_buffer_index (UNFORMATTED_BUFFER) > 0) {
     if (mode == M_CHAR || mode == M_ROW_CHAR || mode == M_STRING) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", get_transput_buffer (UNFORMATTED_BUFFER)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", get_transput_buffer (UNFORMATTED_BUFFER)) >= 0);
       WRITE (f, A68 (output_line));
     } else {
       char *str = get_transput_buffer (UNFORMATTED_BUFFER);
       while (IS_SPACE (str[0])) {
         str++;
       }
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " %s", str) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " %s", str) >= 0);
       WRITE (f, A68 (output_line));
     }
   } else {
@@ -1313,16 +1313,16 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
       if (INITIALISED (z)) {
         WRITE (A68_STDOUT, " refers to ");
         if (IS_IN_HEAP (z)) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "heap(%p)", (void *) ADDRESS (z)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "heap(%p)", (void *) ADDRESS (z)) >= 0);
           WRITE (A68_STDOUT, A68 (output_line));
           A68_MON (tabs)++;
           show_item (f, p, ADDRESS (z), SUB (mode));
           A68_MON (tabs)--;
         } else if (IS_IN_FRAME (z)) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "frame(" A68_LU ")", REF_OFFSET (z)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "frame(" A68_LU ")", REF_OFFSET (z)) >= 0);
           WRITE (A68_STDOUT, A68 (output_line));
         } else if (IS_IN_STACK (z)) {
-          ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "stack(" A68_LU ")", REF_OFFSET (z)) >= 0);
+          ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "stack(" A68_LU ")", REF_OFFSET (z)) >= 0);
           WRITE (A68_STDOUT, A68 (output_line));
         }
       } else {
@@ -1345,7 +1345,7 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
       A68_ARRAY *arr; A68_TUPLE *tup;
       GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
       int elems = get_row_size (tup, DIM (arr));
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", %d element(s)", elems) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, ", %d element(s)", elems) >= 0);
       WRITE (f, A68 (output_line));
       if (get_row_size (tup, DIM (arr)) != 0) {
         BYTE_T *base_addr = ADDRESS (&ARRAY (arr));
@@ -1367,7 +1367,7 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
           }
         }
         indent_crlf (f);
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " %d element(s) written (%d%%)", act_count, (int) ((100.0 * act_count) / elems)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " %d element(s) written (%d%%)", act_count, (int) ((100.0 * act_count) / elems)) >= 0);
         WRITE (f, A68 (output_line));
       }
     }
@@ -1377,23 +1377,23 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
     for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
       indent_crlf (f);
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     %s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH, NO_NODE), TEXT (q)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "     %s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH, NO_NODE), TEXT (q)) >= 0);
       WRITE (A68_STDOUT, A68 (output_line));
       show_item (f, p, elem, MOID (q));
     }
     A68_MON (tabs)--;
   } else if (IS (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (VALUE (z)), MOID_WIDTH, NO_NODE)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (VALUE (z)), MOID_WIDTH, NO_NODE)) >= 0);
     WRITE (A68_STDOUT, A68 (output_line));
     show_item (f, p, &item[SIZE_ALIGNED (A68_UNION)], (MOID_T *) (VALUE (z)));
   } else if (mode == M_SIMPLIN) {
     A68_UNION *z = (A68_UNION *) item;
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (VALUE (z)), MOID_WIDTH, NO_NODE)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (VALUE (z)), MOID_WIDTH, NO_NODE)) >= 0);
     WRITE (A68_STDOUT, A68 (output_line));
   } else if (mode == M_SIMPLOUT) {
     A68_UNION *z = (A68_UNION *) item;
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (VALUE (z)), MOID_WIDTH, NO_NODE)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " united-moid %s", moid_to_string ((MOID_T *) (VALUE (z)), MOID_WIDTH, NO_NODE)) >= 0);
     WRITE (A68_STDOUT, A68 (output_line));
   } else {
     BOOL_T init;
@@ -1412,7 +1412,7 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
           } else if (z != NO_PROCEDURE && STATUS (z) & SKIP_PROCEDURE_MASK) {
             WRITE (A68_STDOUT, " skip procedure");
           } else if (z != NO_PROCEDURE && (PROCEDURE (&BODY (z))) != NO_GPROC) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " line %d, environ at frame(" A68_LU "), locale %p", LINE_NUMBER ((NODE_T *) NODE (&BODY (z))), ENVIRON (z), (void *) LOCALE (z)) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " line %d, environ at frame(" A68_LU "), locale %p", LINE_NUMBER ((NODE_T *) NODE (&BODY (z))), ENVIRON (z), (void *) LOCALE (z)) >= 0);
             WRITE (A68_STDOUT, A68 (output_line));
           } else {
             WRITE (A68_STDOUT, " cannot show value");
@@ -1420,7 +1420,7 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
         } else if (mode == M_FORMAT) {
           A68_FORMAT *z = (A68_FORMAT *) item;
           if (z != NO_FORMAT && BODY (z) != NO_NODE) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " line %d, environ at frame(" A68_LU ")", LINE_NUMBER (BODY (z)), ENVIRON (z)) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " line %d, environ at frame(" A68_LU ")", LINE_NUMBER (BODY (z)), ENVIRON (z)) >= 0);
             WRITE (A68_STDOUT, A68 (output_line));
           } else {
             monitor_error (CANNOT_SHOW, NO_TEXT);
@@ -1428,7 +1428,7 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
         } else if (mode == M_SOUND) {
           A68_SOUND *z = (A68_SOUND *) item;
           if (z != NO_SOUND) {
-            ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%u channels, %u bits, %u rate, %u samples", NUM_CHANNELS (z), BITS_PER_SAMPLE (z), SAMPLE_RATE (z), NUM_SAMPLES (z)) >= 0);
+            ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "%u channels, %u bits, %u rate, %u samples", NUM_CHANNELS (z), BITS_PER_SAMPLE (z), SAMPLE_RATE (z), NUM_SAMPLES (z)) >= 0);
             WRITE (A68_STDOUT, A68 (output_line));
 
           } else {
@@ -1441,7 +1441,7 @@ void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
         WRITE (A68_STDOUT, NO_VALUE);
       }
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " mode %s, %s", moid_to_string (mode, MOID_WIDTH, NO_NODE), CANNOT_SHOW) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, " mode %s, %s", moid_to_string (mode, MOID_WIDTH, NO_NODE), CANNOT_SHOW) >= 0);
       WRITE (A68_STDOUT, A68 (output_line));
     }
   }
@@ -1456,18 +1456,18 @@ void show_frame_item (FILE_T f, NODE_T * p, ADDR_T a68_link, TAG_T * q, int modi
   ADDR_T loc = FRAME_INFO_SIZE + OFFSET (q);
   indent_crlf (A68_STDOUT);
   if (modif != ANONYMOUS) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") %s \"%s\"", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE), NSYMBOL (NODE (q))) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") %s \"%s\"", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE), NSYMBOL (NODE (q))) >= 0);
     WRITE (A68_STDOUT, A68 (output_line));
     show_item (f, p, FRAME_ADDRESS (addr), MOID (q));
   } else {
     switch (PRIO (q)) {
     case GENERATOR: {
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") LOC %s", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") LOC %s", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE)) >= 0);
         WRITE (A68_STDOUT, A68 (output_line));
         break;
       }
     default: {
-        ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") internal %s", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE)) >= 0);
+        ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "     frame(" A68_LU "=" A68_LU "+" A68_LU ") internal %s", addr, a68_link, loc, moid_to_string (MOID (q), MOID_WIDTH, NO_NODE)) >= 0);
         WRITE (A68_STDOUT, A68 (output_line));
         break;
       }
@@ -1496,7 +1496,7 @@ void intro_frame (FILE_T f, NODE_T * p, ADDR_T a68_link, int *printed)
   (*printed)++;
   TABLE_T *q = TABLE (p);
   where_in_source (f, p);
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Stack frame %d at frame(" A68_LU "), level=%d, size=" A68_LU " bytes", FRAME_NUMBER (a68_link), a68_link, LEVEL (q), (UNSIGNED_T) (FRAME_INCREMENT (a68_link) + FRAME_INFO_SIZE)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Stack frame %d at frame(" A68_LU "), level=%d, size=" A68_LU " bytes", FRAME_NUMBER (a68_link), a68_link, LEVEL (q), (UNSIGNED_T) (FRAME_INCREMENT (a68_link) + FRAME_INFO_SIZE)) >= 0);
   WRITELN (f, A68 (output_line));
 }
 
@@ -1509,19 +1509,19 @@ void show_stack_frame (FILE_T f, NODE_T * p, ADDR_T a68_link, int *printed)
     TABLE_T *q = TABLE (p);
     intro_frame (f, p, a68_link, printed);
 #if (A68_LEVEL >= 3)
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Dynamic link=frame(%llu), static link=frame(%llu), parameters=frame(%llu)", FRAME_DYNAMIC_LINK (a68_link), FRAME_STATIC_LINK (a68_link), FRAME_PARAMETERS (a68_link)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Dynamic link=frame(%llu), static link=frame(%llu), parameters=frame(%llu)", FRAME_DYNAMIC_LINK (a68_link), FRAME_STATIC_LINK (a68_link), FRAME_PARAMETERS (a68_link)) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
 #else
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Dynamic link=frame(%u), static link=frame(%u), parameters=frame(%u)", FRAME_DYNAMIC_LINK (a68_link), FRAME_STATIC_LINK (a68_link), FRAME_PARAMETERS (a68_link)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Dynamic link=frame(%u), static link=frame(%u), parameters=frame(%u)", FRAME_DYNAMIC_LINK (a68_link), FRAME_STATIC_LINK (a68_link), FRAME_PARAMETERS (a68_link)) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
 #endif
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Procedure frame=%s", (FRAME_PROC_FRAME (a68_link) ? "yes" : "no")) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Procedure frame=%s", (FRAME_PROC_FRAME (a68_link) ? "yes" : "no")) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
 #if defined (BUILD_PARALLEL_CLAUSE)
     if (pthread_equal (FRAME_THREAD_ID (a68_link), A68_PAR (main_thread_id)) != 0) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "In main thread") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "In main thread") >= 0);
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Not in main thread") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Not in main thread") >= 0);
     }
     WRITELN (A68_STDOUT, A68 (output_line));
 #endif
@@ -1559,18 +1559,18 @@ void show_heap (FILE_T f, NODE_T * p, A68_HANDLE * z, int top, int n)
 {
   int k = 0, m = n, sum = 0;
   (void) p;
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "size=%u available=%d garbage collections=" A68_LD, A68 (heap_size), heap_available (), A68_GC (sweeps)) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "size=%u available=%d garbage collections=" A68_LD, A68 (heap_size), heap_available (), A68_GC (sweeps)) >= 0);
   WRITELN (f, A68 (output_line));
   for (; z != NO_HANDLE; FORWARD (z), k++) {
     if (n > 0 && sum <= top) {
       n--;
       indent_crlf (f);
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "heap(%p+%d) %s", (void *) POINTER (z), SIZE (z), moid_to_string (MOID (z), MOID_WIDTH, NO_NODE)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "heap(%p+%d) %s", (void *) POINTER (z), SIZE (z), moid_to_string (MOID (z), MOID_WIDTH, NO_NODE)) >= 0);
       WRITE (f, A68 (output_line));
       sum += SIZE (z);
     }
   }
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "printed %d out of %d handles", m, k) >= 0);
+  ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "printed %d out of %d handles", m, k) >= 0);
   WRITELN (f, A68 (output_line));
 }
 
@@ -1742,7 +1742,7 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
     char *sym = cmd;
     SKIP_ONE_SYMBOL (sym);
     if (sym[0] != NULL_CHAR) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "return code %d", system (sym)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "return code %d", system (sym)) >= 0);
       WRITELN (A68_STDOUT, A68 (output_line));
     }
     return A68_FALSE;
@@ -1944,7 +1944,7 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
       if (sym[strlen (sym) - 1] == QUOTE_CHAR) {
         sym[strlen (sym) - 1] = NULL_CHAR;
       }
-      bufcpy (A68_MON (prompt), sym, BUFFER_SIZE);
+      a68_bufcpy (A68_MON (prompt), sym, BUFFER_SIZE);
     }
     return A68_FALSE;
   } else if (match_string (cmd, "RERun", NULL_CHAR) || match_string (cmd, "REStart", NULL_CHAR)) {
@@ -2012,13 +2012,13 @@ BOOL_T single_stepper (NODE_T * p, char *cmd)
     apropos (A68_STDOUT, A68_MON (prompt), "monitor");
     return A68_FALSE;
   } else if (match_string (cmd, "Sizes", NULL_CHAR)) {
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Frame stack pointer=" A68_LU " available=" A68_LU, A68_FP, A68 (frame_stack_size) - A68_FP) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Frame stack pointer=" A68_LU " available=" A68_LU, A68_FP, A68 (frame_stack_size) - A68_FP) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Expression stack pointer=" A68_LU " available=" A68_LU, A68_SP, (UNSIGNED_T) (A68 (expr_stack_size) - A68_SP)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Expression stack pointer=" A68_LU " available=" A68_LU, A68_SP, (UNSIGNED_T) (A68 (expr_stack_size) - A68_SP)) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Heap size=%u available=%u", A68 (heap_size), heap_available ()) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Heap size=%u available=%u", A68 (heap_size), heap_available ()) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
-    ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Garbage collections=" A68_LD, A68_GC (sweeps)) >= 0);
+    ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Garbage collections=" A68_LD, A68_GC (sweeps)) >= 0);
     WRITELN (A68_STDOUT, A68 (output_line));
     return A68_FALSE;
   } else if (match_string (cmd, "XRef", NULL_CHAR)) {
@@ -2141,9 +2141,9 @@ void single_step (NODE_T * p, unt mask)
       if (!evaluate_breakpoint_expression (p)) {
         return;
       }
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Breakpoint (%s)", EXPR (INFO (p))) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Breakpoint (%s)", EXPR (INFO (p))) >= 0);
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Breakpoint") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Breakpoint") >= 0);
     }
     WRITELN (A68_STDOUT, A68 (output_line));
     WIS (p);
@@ -2159,9 +2159,9 @@ void single_step (NODE_T * p, unt mask)
       return;
     }
     if (A68_MON (watchpoint_expression) != NO_TEXT) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Watchpoint (%s)", A68_MON (watchpoint_expression)) >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Watchpoint (%s)", A68_MON (watchpoint_expression)) >= 0);
     } else {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Watchpoint (now removed)") >= 0);
+      ASSERT (a68_bufprt (A68 (output_line), SNPRINTF_SIZE, "Watchpoint (now removed)") >= 0);
     }
     WRITELN (A68_STDOUT, A68 (output_line));
     WIS (p);
@@ -2186,7 +2186,7 @@ void single_step (NODE_T * p, unt mask)
 #endif
 // Entry into the monitor.
   if (A68_MON (prompt_set) == A68_FALSE) {
-    bufcpy (A68_MON (prompt), "(a68g) ", BUFFER_SIZE);
+    a68_bufcpy (A68_MON (prompt), "(a68g) ", BUFFER_SIZE);
     A68_MON (prompt_set) = A68_TRUE;
   }
   A68_MON (in_monitor) = A68_TRUE;
@@ -2200,7 +2200,7 @@ void single_step (NODE_T * p, unt mask)
     while (strlen (cmd = read_string_from_tty (A68_MON (prompt))) == 0) {;
     }
     if (TO_UCHAR (cmd[0]) == TO_UCHAR (EOF_CHAR)) {
-      bufcpy (cmd, LOGOUT_STRING, BUFFER_SIZE);
+      a68_bufcpy (cmd, LOGOUT_STRING, BUFFER_SIZE);
       WRITE (A68_STDOUT, LOGOUT_STRING);
       WRITE (A68_STDOUT, NEWLINE_STRING);
     }

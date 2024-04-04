@@ -1,4 +1,4 @@
-Version 3.4.0-4, October 2023
+Version 3.4.0-5, October 2023/January 2024
 * Fix Darwin configuration issue.
 * Enable plugin compiler on Apple Silicon Macs.
 * C17 compliant code.
