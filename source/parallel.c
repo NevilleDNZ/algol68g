@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
@@ -180,7 +179,7 @@ void set_par_level (NODE_T * p, int n)
 
 /*!
 \brief whether we are in the main thread
-\return TRUE if in main thread or FALSE otherwise
+\return same
 **/
 
 BOOL_T whether_main_thread (void)
@@ -216,8 +215,8 @@ void genie_set_exit_from_threads (int ret)
 /*!
 \brief when we jump out of a parallel clause we zap all threads
 \param p position in tree
-\param jump_stat
-\param label
+\param jump_stat jump buffer
+\param label node where label is at
 **/
 
 void genie_abend_all_threads (NODE_T * p, jmp_buf * jump_stat, NODE_T * label)
@@ -233,7 +232,7 @@ void genie_abend_all_threads (NODE_T * p, jmp_buf * jump_stat, NODE_T * label)
 }
 
 /*!
-\brief SAVE_STACK this thread and try to start another
+\brief save this thread and try to start another
 \param p position in tree
 **/
 
@@ -254,8 +253,7 @@ static void try_change_thread (NODE_T * p)
 
 /*!
 \brief store the stacks of threads
-\param t
-\return
+\param t thread number
 **/
 
 static void save_stacks (pthread_t t)
@@ -280,13 +278,13 @@ static void save_stacks (pthread_t t)
 }
 
 /*!
-\brief RESTORE_STACK stacks of thread
-\param t thread
+\brief restore stacks of thread
+\param t thread number
 **/
 
 static void restore_stacks (pthread_t t)
 {
-  if (error_count > 0 || abend_all_threads) {
+  if (a68_prog.error_count > 0 || abend_all_threads) {
     genie_abend_thread ();
   } else {
     int k;
@@ -304,7 +302,8 @@ static void restore_stacks (pthread_t t)
 
 /*!
 \brief check whether parallel units have terminated
-\param p position in tree
+\param active checks whether there are still active threads
+\param parent parent thread number
 **/
 
 static void check_parallel_units (BOOL_T * active, pthread_t parent)
@@ -343,6 +342,7 @@ static void *start_unit (void *arg)
 /*!
 \brief execute parallel units
 \param p position in tree
+\param parent parent thread number
 **/
 
 static void start_parallel_units (NODE_T * p, pthread_t parent)
@@ -540,7 +540,7 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
     if (whether_main_thread () && exit_from_threads) {
       exit_genie (p, par_return_code);
     }
-    if (whether_main_thread () && error_count > 0) {
+    if (whether_main_thread () && a68_prog.error_count > 0) {
       exit_genie (p, A68_RUNTIME_ERROR);
     }
 /* See if we jumped out of the parallel clause(s). */
@@ -576,7 +576,7 @@ void genie_level_sema_int (NODE_T * p)
   A68_INT k;
   A68_REF s;
   POP_OBJECT (p, &k, A68_INT);
-  s = heap_generator (p, MODE (INT), ALIGNED_SIZEOF (A68_INT));
+  s = heap_generator (p, MODE (INT), ALIGNED_SIZE_OF (A68_INT));
   *(A68_INT *) ADDRESS (&s) = k;
   PUSH_REF (p, s);
 }
@@ -632,7 +632,7 @@ void genie_down_sema (NODE_T * p)
     if (VALUE (k) <= 0) {
       save_stacks (pthread_self ());
       while (VALUE (k) <= 0) {
-        if (error_count > 0 || abend_all_threads) {
+        if (a68_prog.error_count > 0 || abend_all_threads) {
           genie_abend_thread ();
         }
         CHECK_TIME_LIMIT (p);

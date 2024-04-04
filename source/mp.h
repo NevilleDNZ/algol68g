@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if ! defined A68G_MP_H
@@ -78,7 +77,7 @@ enum
 #define MP_EXPONENT(z) ((z)[1])
 #define MP_DIGIT(z, n) ((z)[(n) + 1])
 
-#define SIZE_MP(digits) ((2 + digits) * ALIGNED_SIZEOF (MP_DIGIT_T))
+#define SIZE_MP(digits) ((2 + digits) * ALIGNED_SIZE_OF (MP_DIGIT_T))
 
 #define IS_ZERO_MP(z) (MP_DIGIT (z, 1) == (MP_DIGIT_T) 0)
 
@@ -162,6 +161,7 @@ extern MP_DIGIT_T *ln_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *log_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *mod_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *mp_pi (NODE_T *, MP_DIGIT_T *, int, int);
+extern MP_DIGIT_T *mp_ten_up (NODE_T *, MP_DIGIT_T *, int, int);
 extern MP_DIGIT_T *mul_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *mul_mp_digit (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T, int);
 extern MP_DIGIT_T *over_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
@@ -176,7 +176,6 @@ extern MP_DIGIT_T *sinh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *sqrt_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *string_to_mp (NODE_T *, MP_DIGIT_T *, char *, int);
 extern MP_DIGIT_T *sub_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *sub_pos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *tan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *tanh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *unsigned_to_mp (NODE_T *, MP_DIGIT_T *, unsigned, int);

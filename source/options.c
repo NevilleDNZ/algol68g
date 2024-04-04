@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
@@ -38,12 +37,13 @@ Options come from:
 #include "mp.h"
 
 OPTIONS_T *options;
-BOOL_T a68c_diags, gnu_diags, no_warnings;
+BOOL_T no_warnings;
 
 /*!
 \brief error handler for options
-\param l
-\param option
+\param l source line
+\param option option text
+\param info info text
 **/
 
 static void option_error (SOURCE_LINE_T * l, char *option, char *info)
@@ -54,16 +54,16 @@ static void option_error (SOURCE_LINE_T * l, char *option, char *info)
     output_line[k] = TO_LOWER (output_line[k]);
   }
   if (info != NULL) {
-    snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION_INFO, output_line, info);
+    snprintf (edit_line, BUFFER_SIZE, "%s option \"%s\"", info, output_line);
   } else {
-    snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION, output_line);
+    snprintf (edit_line, BUFFER_SIZE, "error in option \"%s\"", output_line);
   }
   scan_error (l, NULL, edit_line);
 }
 
 /*!
 \brief strip minus preceeding a string
-\param p
+\param p text to strip
 \return stripped string
 **/
 
@@ -77,16 +77,16 @@ static char *strip_sign (char *p)
 
 /*!
 \brief add an option to the list, to be processed later
-\param l
-\param str
-\param line
+\param l option chain to link into
+\param str option text
+\param line source line
 **/
 
 void add_option_list (OPTION_LIST_T ** l, char *str, SOURCE_LINE_T * line)
 {
   if (*l == NULL) {
-    *l = (OPTION_LIST_T *) get_heap_space (ALIGNED_SIZEOF (OPTION_LIST_T));
-    (*l)->scan = source_scan;
+    *l = (OPTION_LIST_T *) get_heap_space (ALIGNED_SIZE_OF (OPTION_LIST_T));
+    (*l)->scan = a68_prog.source_scan;
     (*l)->str = new_string (str);
     (*l)->processed = A68_FALSE;
     (*l)->line = line;
@@ -98,20 +98,20 @@ void add_option_list (OPTION_LIST_T ** l, char *str, SOURCE_LINE_T * line)
 
 /*!
 \brief initialise option handler
-\param module
+\param module current module
 **/
 
 void init_options (MODULE_T * module)
 {
-  options = (OPTIONS_T *) malloc ((size_t) ALIGNED_SIZEOF (OPTIONS_T));
+  options = (OPTIONS_T *) malloc ((size_t) ALIGNED_SIZE_OF (OPTIONS_T));
   module->options.list = NULL;
 }
 
 /*!
 \brief test equality of p and q, upper case letters in q are mandatory
-\param module
-\param p
-\param q
+\param module current module
+\param p string to match
+\param q pattern
 \return whether equal
 **/
 
@@ -127,14 +127,14 @@ static BOOL_T eq (MODULE_T * module, char *p, char *q)
 
 /*!
 \brief process echoes gathered in the option list
-\param module
-\param i
+\param module current module
+\param i option chain
 **/
 
 void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
 {
   while (i != NULL) {
-    if (i->scan == source_scan) {
+    if (i->scan == module->source_scan) {
       char *p = strip_sign (i->str);
 /* ECHO echoes a string. */
       if (eq (module, p, "ECHO")) {
@@ -166,9 +166,9 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
 
 /*!
 \brief translate integral option argument
-\param p
-\param i
-\param error
+\param p text
+\param i option chain
+\param error whether error
 \return argument value
 **/
 
@@ -259,9 +259,9 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 
 /*!
 \brief process options gathered in the option list
-\param module
-\param i
-\param cmd_line
+\param module current module
+\param i option chain
+\param cmd_line whether command line argument
 \return whether processing was successful
 **/
 
@@ -283,7 +283,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
           module->files.generic_name = new_string (p);
           name_set = A68_TRUE;
         } else {
-          option_error (NULL, start_c, "filename already set");
+          option_error (NULL, start_c, "filename reset by");
         }
       }
 /* Preprocessor items stop option processing. */
@@ -322,8 +322,16 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         }
       }
 /* HELP gives online help. */
-      else if (eq (module, p, "Help") && cmd_line == A68_TRUE) {
-        online_help (STDOUT_FILENO);
+      else if ((eq (module, p, "APropos") || eq (module, p, "Help") || eq (module, p, "INfo")) && cmd_line) {
+        FORWARD (i);
+        if (i != NULL && strcmp (i->str, "=") == 0) {
+          FORWARD (i);
+        }
+        if (i != NULL) {
+          apropos (STDOUT_FILENO, NULL, i->str);
+        } else {
+          apropos (STDOUT_FILENO, NULL, "options");
+        }
         a68g_exit (EXIT_SUCCESS);
       }
 /* ECHO is treated later. */
@@ -340,7 +348,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 /* EXECUTE and PRINT execute their argument as Algol 68 text. */
       else if (eq (module, p, "Execute") || eq (module, p, "Print")) {
         if (cmd_line == A68_FALSE) {
-          option_error (start_l, start_c, "command line only");
+          option_error (start_l, start_c, "not at command line when encountering");
         } else if ((FORWARD (i)) != NULL) {
           BOOL_T error = A68_FALSE;
           if (strcmp (i->str, "=") == 0) {
@@ -350,7 +358,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
             char name[BUFFER_SIZE];
             FILE *f;
             bufcpy (name, ".", BUFFER_SIZE);
-            bufcat (name, A68G_NAME, BUFFER_SIZE);
+            bufcat (name, a68g_cmd_name, BUFFER_SIZE);
             bufcat (name, ".x", BUFFER_SIZE);
             f = fopen (name, "w");
             ABNORMAL_END (f == NULL, "cannot open temp file", NULL);
@@ -369,9 +377,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         }
       }
 /* HEAP, HANDLES, STACK, FRAME and OVERHEAD  set core allocation. */
-      else if (eq (module, p, "HEAP") || eq (module, p, "HANDLES")
-               || eq (module, p, "STACK") || eq (module, p, "FRAME")
-               || eq (module, p, "OVERHEAD")) {
+      else if (eq (module, p, "HEAP") || eq (module, p, "HANDLES") || eq (module, p, "STACK") || eq (module, p, "FRAME") || eq (module, p, "OVERHEAD")) {
         BOOL_T error = A68_FALSE;
         int k = fetch_integral (p, &i, &error);
 /* Adjust size. */
@@ -402,21 +408,6 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 /* REDUCTIONS gives parser reductions.*/
       else if (eq (module, p, "REDuctions")) {
         module->options.reductions = A68_TRUE;
-      }
-/* A68CDIAGNOSTIC gives A68C style diagnostics. */
-      else if (eq (module, p, "A68CDiagnostics")) {
-        a68c_diags = A68_TRUE;
-        gnu_diags = A68_FALSE;
-      }
-/* GNUDIAGNOSTIC gives GNU style diagnostics. */
-      else if (eq (module, p, "GNUDiagnostics")) {
-        gnu_diags = A68_TRUE;
-        a68c_diags = A68_FALSE;
-      }
-/* VMSDIAGNOSTIC gives VMS style diagnostics. */
-      else if (eq (module, p, "VMSDiagnostics")) {
-        a68c_diags = A68_FALSE;
-        gnu_diags = A68_FALSE;
       }
 /* QUOTESTROPPING sets stropping to quote stropping. */
       else if (eq (module, p, "QUOTEstropping")) {
@@ -449,8 +440,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 /* REGRESSION is an option that sets preferences when running the Algol68G test suite. */
       else if (eq (module, p, "REGRESSION")) {
         module->options.regression_test = A68_TRUE;
-        gnu_diags = A68_FALSE;
-        module->options.time_limit = 60;
+        module->options.time_limit = 30;
         term_width = MAX_LINE_WIDTH;
       }
 /* NOWARNINGS switches warnings off. */
@@ -618,7 +608,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
     }
   }
 /* Mark options as processed. */
-  for (; j != NULL; j = NEXT (j)) {
+  for (; j != NULL; FORWARD (j)) {
     j->processed = A68_TRUE;
   }
   return (errno == 0);
@@ -639,13 +629,11 @@ void default_mem_sizes (void)
 
 /*!
 \brief set default values for options
-\param module
+\param module current module
 **/
 
 void default_options (MODULE_T * module)
 {
-  a68c_diags = A68_TRUE;
-  gnu_diags = A68_FALSE;
   no_warnings = A68_FALSE;
   module->options.backtrace = A68_FALSE;
   module->options.brackets = A68_FALSE;
@@ -674,16 +662,16 @@ void default_options (MODULE_T * module)
 
 /*!
 \brief read options from the .rc file
-\param module
+\param module current module
 **/
 
 void read_rc_options (MODULE_T * module)
 {
   FILE *f;
-  int len = 2 + strlen (A68G_NAME) + strlen ("rc");
+  int len = 2 + strlen (a68g_cmd_name) + strlen ("rc");
   char *name = (char *) get_heap_space (len);
   bufcpy (name, ".", len);
-  bufcat (name, A68G_NAME, len);
+  bufcat (name, a68g_cmd_name, len);
   bufcat (name, "rc", len);
   f = fopen (name, "r");
   if (f != NULL) {
@@ -704,7 +692,7 @@ void read_rc_options (MODULE_T * module)
 
 /*!
 \brief read options from A68G_OPTIONS
-\param module
+\param module current module
 **/
 
 void read_env_options (MODULE_T * module)
@@ -718,9 +706,9 @@ void read_env_options (MODULE_T * module)
 
 /*!
 \brief tokenise string 'p' that holds options
-\param module
-\param p
-\param line
+\param module current module
+\param p text
+\param line source line
 **/
 
 void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
@@ -729,8 +717,7 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 /* 'q' points at first significant char in item .*/
   while (p[0] != NULL_CHAR) {
 /* Skip white space ... */
-    while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',')
-           && p[0] != NULL_CHAR) {
+    while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',') && p[0] != NULL_CHAR) {
       p++;
     }
 /* ... then tokenise an item. */
@@ -757,9 +744,7 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
         if (*q == '=') {
           p++;
         } else {
-          /*
-           * Skip item. 
-           */
+          /* Skip item. */
           while (p[0] != BLANK_CHAR && p[0] != NULL_CHAR && p[0] != '=' && p[0] != ',') {
             p++;
           }

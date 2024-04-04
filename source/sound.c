@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "algol68g.h"
@@ -87,6 +86,8 @@ static unsigned pow256[] = { 1, 256, 65536, 16777216 };
 
 /*!
 \brief test bits per sample
+\param p position in tree
+\param bps bits per second
 **/
 
 static void test_bits_per_sample (NODE_T * p, unsigned bps)
@@ -99,6 +100,9 @@ static void test_bits_per_sample (NODE_T * p, unsigned bps)
 
 /*!
 \brief code string into big-endian unsigned
+\param p position in tree
+\param s string to code
+\param n chars to code
 **/
 
 static unsigned code_string (NODE_T * p, char *s, int n)
@@ -116,6 +120,8 @@ static unsigned code_string (NODE_T * p, char *s, int n)
 
 /*!
 \brief code unsigned into string
+\param p position in tree
+\param n value to code
 **/
 
 static char *code_unsigned (NODE_T * p, unsigned n)
@@ -139,6 +145,7 @@ static char *code_unsigned (NODE_T * p, unsigned n)
 
 /*!
 \brief WAVE format category
+\param n category number
 **/
 
 static char *format_category (unsigned n)
@@ -345,6 +352,10 @@ static char *format_category (unsigned n)
 
 /*!
 \brief read RIFF item
+\param p position in tree
+\param fd file number
+\param n word length
+\param little whether little-endian
 **/
 
 static unsigned read_riff_item (NODE_T * p, FILE_T fd, int n, BOOL_T little)
@@ -381,6 +392,9 @@ static unsigned read_riff_item (NODE_T * p, FILE_T fd, int n, BOOL_T little)
 
 /*!
 \brief read sound from file
+\param p position in tree
+\param ref_file pointer to file
+\param w sound object
 **/
 
 void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
@@ -466,6 +480,11 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
 
 /*!
 \brief write RIFF item
+\param p position in tree
+\param fd file number
+\param z item
+\param n number of chars
+\param little whether little endian
 **/
 
 void write_riff_item (NODE_T * p, FILE_T fd, unsigned z, int n, BOOL_T little)
@@ -497,6 +516,9 @@ void write_riff_item (NODE_T * p, FILE_T fd, unsigned z, int n, BOOL_T little)
 
 /*!
 \brief write sound to file
+\param p position in tree
+\param ref_file pointer to file
+\param w sound object
 **/
 
 void write_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
@@ -533,6 +555,7 @@ void write_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
 
 /*!
 \brief PROC new sound = (INT bits, INT sample rate, INT channels, INT samples) SOUND
+\param p position in tree
 **/
 
 void genie_new_sound (NODE_T * p)
@@ -555,6 +578,7 @@ void genie_new_sound (NODE_T * p)
 
 /*!
 \brief PROC get sound = (SOUND w, INT channel, sample) INT
+\param p position in tree
 **/
 
 void genie_get_sound (NODE_T * p)
@@ -592,6 +616,7 @@ void genie_get_sound (NODE_T * p)
 
 /*!
 \brief PROC set sound = (SOUND w, INT channel, sample, value) VOID
+\param p position in tree
 **/
 
 void genie_set_sound (NODE_T * p)
@@ -619,7 +644,6 @@ void genie_set_sound (NODE_T * p)
   n = A68_SOUND_BYTES (&w);
   d = &(ADDRESS (&(w.data))
         [((VALUE (&sample) - 1) * w.num_channels + (VALUE (&channel) - 1)) * n]);
-
 /* Convert to little-endian. */
   for (k = 0, z = VALUE (&value); k < n; k++) {
     d[k] = (BYTE_T) (z & 0xff);
@@ -629,6 +653,7 @@ void genie_set_sound (NODE_T * p)
 
 /*!
 \brief OP SOUND = (SOUND) INT
+\param p position in tree
 **/
 
 void genie_sound_samples (NODE_T * p)
@@ -640,6 +665,7 @@ void genie_sound_samples (NODE_T * p)
 
 /*!
 \brief OP RATE = (SOUND) INT
+\param p position in tree
 **/
 
 void genie_sound_rate (NODE_T * p)
@@ -651,6 +677,7 @@ void genie_sound_rate (NODE_T * p)
 
 /*!
 \brief OP CHANNELS = (SOUND) INT
+\param p position in tree
 **/
 
 void genie_sound_channels (NODE_T * p)
@@ -662,6 +689,7 @@ void genie_sound_channels (NODE_T * p)
 
 /*!
 \brief OP RESOLUTION = (SOUND) INT
+\param p position in tree
 **/
 
 void genie_sound_resolution (NODE_T * p)

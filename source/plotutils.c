@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "algol68g.h"
@@ -738,9 +737,9 @@ const colour_info A68_COLOURS[COLOUR_NAMES + 1] = {
 /*!
 \brief searches colour in the list
 \param p position in tree
-\param name
-\param index
-\return
+\param name colour name
+\param index set to index in table
+\return whether colour name is found
 **/
 
 static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
@@ -770,24 +769,22 @@ static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
 
 /*!
 \brief scans string for an integer
-\param buffer
-\param current
-\param k
-\return
+\param z text buffer
+\param k set to int value
+\return whether conversion is successful
 **/
 
-static int scan_int (char *buffer, char **current, int *k)
+static BOOL_T scan_int (char **z, int *k)
 {
-  char *z = *current;
-  (void) buffer;
-  while (z[0] != NULL_CHAR && !IS_DIGIT (z[0])) {
-    z++;
+  char *y = *z;
+  while (y[0] != NULL_CHAR && !IS_DIGIT (y[0])) {
+    y++;
   }
-  if (z[0] != 0) {
-    (*k) = strtol (z, current, 10);
-    return (1);
+  if (y[0] != NULL_CHAR) {
+    (*k) = strtol (y, z, 10);
+    return (errno == 0);
   } else {
-    return (0);
+    return (A68_FALSE);
   }
 }
 
@@ -813,8 +810,7 @@ void genie_make_device (NODE_T * p)
   }
 /* Fill in page_size. */
   size = a68_string_size (p, ref_page);
-  if (INITIALISED (&(file->device.page_size))
-      && !IS_NIL (file->device.page_size)) {
+  if (INITIALISED (&(file->device.page_size)) && !IS_NIL (file->device.page_size)) {
     UNPROTECT_SWEEP_HANDLE (&file->device.page_size);
   }
   file->device.page_size = heap_generator (p, MODE (STRING), 1 + size);
@@ -835,8 +831,8 @@ void genie_make_device (NODE_T * p)
 /*!
 \brief closes the plotter
 \param p position in tree
-\param f
-\return
+\param f pointer to file
+\return TRUE or exits
 **/
 
 BOOL_T close_device (NODE_T * p, A68_FILE * f)
@@ -877,8 +873,8 @@ BOOL_T close_device (NODE_T * p, A68_FILE * f)
 /*!
 \brief sets up the plotter prior to using it
 \param p position in tree
-\param f
-\return
+\param f pointer to file
+\return plotter of file
 **/
 
 static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
@@ -927,13 +923,12 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 | Supported plotter type - X Window System |
 +-----------------------------------------*/
     char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
-    char *page_size = z;
 /* Establish page size. */
-    if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
+    if (!scan_int (&z, &(f->device.window_x_size))) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
+    if (!scan_int (&z, &(f->device.window_y_size))) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
@@ -987,13 +982,12 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 | Supported plotter type - Portable aNyMap |
 +-----------------------------------------*/
     char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
-    char *page_size = z;
 /* Establish page size. */
-    if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
+    if (!scan_int (&z, &(f->device.window_x_size))) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
+    if (!scan_int (&z, &(f->device.window_y_size))) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
@@ -1049,13 +1043,12 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
 | Supported plotter type - pseudo GIF |
 +------------------------------------*/
     char *z = (char *) ADDRESS (&(f->device.page_size)), size[BUFFER_SIZE];
-    char *page_size = z;
 /* Establish page size. */
-    if (!scan_int (page_size, &z, &(f->device.window_x_size))) {
+    if (!scan_int (&z, &(f->device.window_x_size))) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    if (!scan_int (page_size, &z, &(f->device.window_y_size))) {
+    if (!scan_int (&z, &(f->device.window_y_size))) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
@@ -1456,7 +1449,6 @@ void genie_draw_line (NODE_T * p)
 /*!
 \brief PROC (REF FILE, REAL, REAL) VOID draw point
 \param p position in tree
-\return
 **/
 
 void genie_draw_point (NODE_T * p)
@@ -1479,7 +1471,6 @@ void genie_draw_point (NODE_T * p)
 /*!
 \brief PROC (REF FILE, REAL, REAL) VOID draw rect
 \param p position in tree
-\return
 **/
 
 void genie_draw_rect (NODE_T * p)
@@ -1551,8 +1542,10 @@ void genie_draw_atom (NODE_T * p)
     pl_fcircle_r (plotter, VALUE (&x) * f->device.window_x_size, VALUE (&y) * f->device.window_y_size, (double) j);
   }
   pl_filltype_r (plotter, 0);
+/*
   pl_color_r (plotter, (int) COLOUR_MAX, (int) COLOUR_MAX, (int) COLOUR_MAX);
   pl_fpoint_r (plotter, VALUE (&x) * f->device.window_x_size, VALUE (&y) * f->device.window_y_size);
+*/
   f->device.x_coord = VALUE (&x);
   f->device.y_coord = VALUE (&y);
 }

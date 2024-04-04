@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "algol68g.h"
@@ -152,13 +151,13 @@ static void push_permutation (NODE_T * p, gsl_permutation * v)
   int len, inc, index, k;
   BYTE_T *base;
   len = v->size;
-  desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZEOF (A68_INT));
+  row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZE_OF (A68_INT));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (INT);
-  arr.elem_size = ALIGNED_SIZEOF (A68_INT);
+  arr.elem_size = ALIGNED_SIZE_OF (A68_INT);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup) = 1;
@@ -227,13 +226,13 @@ static void push_vector (NODE_T * p, gsl_vector * v)
   int len, inc, index, k;
   BYTE_T *base;
   len = v->size;
-  desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZEOF (A68_REAL));
+  row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZE_OF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (REAL);
-  arr.elem_size = ALIGNED_SIZEOF (A68_REAL);
+  arr.elem_size = ALIGNED_SIZE_OF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup) = 1;
@@ -309,13 +308,13 @@ static void push_matrix (NODE_T * p, gsl_matrix * a)
   BYTE_T *base;
   len1 = a->size1;
   len2 = a->size2;
-  desc = heap_generator (p, MODE (ROWROW_REAL), ALIGNED_SIZEOF (A68_ARRAY) + 2 * ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROWROW_REAL), ALIGNED_SIZE_OF (A68_ARRAY) + 2 * ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROWROW_REAL), len1 * len2 * ALIGNED_SIZEOF (A68_REAL));
+  row = heap_generator (p, MODE (ROWROW_REAL), len1 * len2 * ALIGNED_SIZE_OF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 2;
   MOID (&arr) = MODE (REAL);
-  arr.elem_size = ALIGNED_SIZEOF (A68_REAL);
+  arr.elem_size = ALIGNED_SIZE_OF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup1) = 1;
@@ -373,7 +372,7 @@ static gsl_vector_complex *pop_vector_complex (NODE_T * p, BOOL_T get)
     inc = tup->span * arr->elem_size;
     for (k = 0; k < len; k++, index += inc) {
       A68_REAL *re = (A68_REAL *) (base + index);
-      A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
+      A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZE_OF (A68_REAL));
       gsl_complex z;
       CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
       CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
@@ -397,13 +396,13 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
   int len, inc, index, k;
   BYTE_T *base;
   len = v->size;
-  desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZEOF (A68_REAL));
+  row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZE_OF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (COMPLEX);
-  arr.elem_size = 2 * ALIGNED_SIZEOF (A68_REAL);
+  arr.elem_size = 2 * ALIGNED_SIZE_OF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup) = 1;
@@ -417,7 +416,7 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
   inc = tup.span * arr.elem_size;
   for (k = 0; k < len; k++, index += inc) {
     A68_REAL *re = (A68_REAL *) (base + index);
-    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
+    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZE_OF (A68_REAL));
     gsl_complex z = gsl_vector_complex_get (v, k);
     STATUS (re) = INITIALISED_MASK;
     VALUE (re) = GSL_REAL (z);
@@ -460,7 +459,7 @@ static gsl_matrix_complex *pop_matrix_complex (NODE_T * p, BOOL_T get)
       int index2, k2;
       for (k2 = 0, index2 = index1; k2 < len2; k2++, index2 += inc2) {
         A68_REAL *re = (A68_REAL *) (base + index2);
-        A68_REAL *im = (A68_REAL *) (base + index2 + ALIGNED_SIZEOF (A68_REAL));
+        A68_REAL *im = (A68_REAL *) (base + index2 + ALIGNED_SIZE_OF (A68_REAL));
         gsl_complex z;
         CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
         CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
@@ -486,13 +485,13 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
   BYTE_T *base;
   len1 = a->size1;
   len2 = a->size2;
-  desc = heap_generator (p, MODE (ROWROW_COMPLEX), ALIGNED_SIZEOF (A68_ARRAY) + 2 * ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROWROW_COMPLEX), ALIGNED_SIZE_OF (A68_ARRAY) + 2 * ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROWROW_COMPLEX), len1 * len2 * 2 * ALIGNED_SIZEOF (A68_REAL));
+  row = heap_generator (p, MODE (ROWROW_COMPLEX), len1 * len2 * 2 * ALIGNED_SIZE_OF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 2;
   MOID (&arr) = MODE (COMPLEX);
-  arr.elem_size = 2 * ALIGNED_SIZEOF (A68_REAL);
+  arr.elem_size = 2 * ALIGNED_SIZE_OF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup1) = 1;
@@ -513,7 +512,7 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
   for (k1 = 0; k1 < len1; k1++, index1 += inc1) {
     for (k2 = 0, index2 = index1; k2 < len2; k2++, index2 += inc2) {
       A68_REAL *re = (A68_REAL *) (base + index2);
-      A68_REAL *im = (A68_REAL *) (base + index2 + ALIGNED_SIZEOF (A68_REAL));
+      A68_REAL *im = (A68_REAL *) (base + index2 + ALIGNED_SIZE_OF (A68_REAL));
       gsl_complex z = gsl_matrix_complex_get (a, k1, k2);
       STATUS (re) = INITIALISED_MASK;
       VALUE (re) = GSL_REAL (z);
@@ -2439,13 +2438,13 @@ static void push_array_real (NODE_T * p, double *v, int len)
   int inc, index, k;
   BYTE_T *base;
   error_node = p;
-  desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZEOF (A68_REAL));
+  row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZE_OF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (REAL);
-  arr.elem_size = ALIGNED_SIZEOF (A68_REAL);
+  arr.elem_size = ALIGNED_SIZE_OF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup) = 1;
@@ -2499,7 +2498,7 @@ static double *pop_array_complex (NODE_T * p, int *len)
   inc = tup->span * arr->elem_size;
   for (k = 0; k < (*len); k++, index += inc) {
     A68_REAL *re = (A68_REAL *) (base + index);
-    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
+    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZE_OF (A68_REAL));
     CHECK_INIT (p, INITIALISED (re), MODE (COMPLEX));
     CHECK_INIT (p, INITIALISED (im), MODE (COMPLEX));
     v[2 * k] = VALUE (re);
@@ -2521,13 +2520,13 @@ static void push_array_complex (NODE_T * p, double *v, int len)
   int inc, index, k;
   BYTE_T *base;
   error_node = p;
-  desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZEOF (A68_REAL));
+  row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZE_OF (A68_REAL));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (COMPLEX);
-  arr.elem_size = 2 * ALIGNED_SIZEOF (A68_REAL);
+  arr.elem_size = 2 * ALIGNED_SIZE_OF (A68_REAL);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup) = 1;
@@ -2541,7 +2540,7 @@ static void push_array_complex (NODE_T * p, double *v, int len)
   inc = tup.span * arr.elem_size;
   for (k = 0; k < len; k++, index += inc) {
     A68_REAL *re = (A68_REAL *) (base + index);
-    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZEOF (A68_REAL));
+    A68_REAL *im = (A68_REAL *) (base + index + ALIGNED_SIZE_OF (A68_REAL));
     STATUS (re) = INITIALISED_MASK;
     VALUE (re) = v[2 * k];
     STATUS (im) = INITIALISED_MASK;
@@ -2573,13 +2572,13 @@ void genie_prime_factors (NODE_T * p)
   CHECK_INIT (p, INITIALISED (&n), MODE (INT));
   wt = gsl_fft_complex_wavetable_alloc (VALUE (&n));
   len = wt->nf;
-  desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&desc);
-  row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZEOF (A68_INT));
+  row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZE_OF (A68_INT));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (INT);
-  arr.elem_size = ALIGNED_SIZEOF (A68_INT);
+  arr.elem_size = ALIGNED_SIZE_OF (A68_INT);
   arr.slice_offset = arr.field_offset = 0;
   ARRAY (&arr) = row;
   LWB (&tup) = 1;
