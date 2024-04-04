@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -816,6 +816,7 @@ void genie_make_device (NODE_T * p)
     UNPROTECT_SWEEP_HANDLE (&file->device.page_size);
   }
   file->device.page_size = heap_generator (p, MODE (STRING), 1 + size);
+  PROTECT_SWEEP_HANDLE (&file->device.page_size);
   a_to_c_string (p, (char *) ADDRESS (&(file->device.page_size)), ref_page);
 /* Fill in device. */
   size = a68_string_size (p, ref_device);
@@ -823,6 +824,7 @@ void genie_make_device (NODE_T * p)
     UNPROTECT_SWEEP_HANDLE (&file->device.device);
   }
   file->device.device = heap_generator (p, MODE (STRING), 1 + size);
+  PROTECT_SWEEP_HANDLE (&file->device.device);
   a_to_c_string (p, (char *) ADDRESS (&(file->device.device)), ref_device);
   file->device.device_made = A68_TRUE;
   PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
@@ -916,7 +918,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
   device_type = (char *) ADDRESS (&(f->device.device));
   if (!strcmp (device_type, "X")) {
 #if defined X_DISPLAY_MISSING
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "no X display", "");
     exit_genie (p, A68_RUNTIME_ERROR);
 #else
 /*-----------------------------------------+
@@ -948,7 +950,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_setplparam (f->device.plotter_params, "BITMAPSIZE", size);
     pl_setplparam (f->device.plotter_params, "BG_COLOR", (void *) "black");
     pl_setplparam (f->device.plotter_params, "VANISH_ON_DELETE", (void *) "no");
-    pl_setplparam (f->device.plotter_params, "X_AUTO_FLUSH", (void *) "no");
+    pl_setplparam (f->device.plotter_params, "X_AUTO_FLUSH", (void *) "yes");
     pl_setplparam (f->device.plotter_params, "USE_DOUBLE_BUFFERING", (void *) "no");
     f->device.plotter = pl_newpl_r ("X", NULL, NULL, stderr, f->device.plotter_params);
     if (f->device.plotter == NULL) {
@@ -972,7 +974,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_colorname_r (f->device.plotter, "white");
     pl_pencolorname_r (f->device.plotter, "white");
     pl_fillcolorname_r (f->device.plotter, "white");
-    pl_filltype_r (f->device.plotter, 1);
+    pl_filltype_r (f->device.plotter, 0);
     f->draw_mood = A68_TRUE;
     f->device.device_opened = A68_TRUE;
     f->device.x_coord = 0;
@@ -1036,7 +1038,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_colorname_r (f->device.plotter, "white");
     pl_pencolorname_r (f->device.plotter, "white");
     pl_fillcolorname_r (f->device.plotter, "white");
-    pl_filltype_r (f->device.plotter, 1);
+    pl_filltype_r (f->device.plotter, 0);
     f->draw_mood = A68_TRUE;
     f->device.device_opened = A68_TRUE;
     f->device.x_coord = 0;
@@ -1099,7 +1101,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_colorname_r (f->device.plotter, "white");
     pl_pencolorname_r (f->device.plotter, "white");
     pl_fillcolorname_r (f->device.plotter, "white");
-    pl_filltype_r (f->device.plotter, 1);
+    pl_filltype_r (f->device.plotter, 0);
     f->draw_mood = A68_TRUE;
     f->device.device_opened = A68_TRUE;
     f->device.x_coord = 0;
@@ -1146,14 +1148,14 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     pl_colorname_r (f->device.plotter, "white");
     pl_pencolorname_r (f->device.plotter, "white");
     pl_fillcolorname_r (f->device.plotter, "white");
-    pl_filltype_r (f->device.plotter, 1);
+    pl_filltype_r (f->device.plotter, 0);
     f->draw_mood = A68_TRUE;
     f->device.device_opened = A68_TRUE;
     f->device.x_coord = 0;
     f->device.y_coord = 0;
     return (f->device.plotter);
   } else {
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unindentified plotter", device_type);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   return (NULL);
@@ -1315,7 +1317,7 @@ void genie_draw_colour_name (NODE_T * p)
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
   if (!string_to_colour (p, name, &index)) {
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, NULL);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   x = (double) (A68_COLOURS[index].r) / (double) (0xff);
@@ -1352,7 +1354,7 @@ void genie_draw_background_colour_name (NODE_T * p)
   name = (char *) ADDRESS (&name_ref);
   a_to_c_string (p, name, ref_c);
   if (!string_to_colour (p, name, &index)) {
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, NULL);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   x = (double) (A68_COLOURS[index].r) / (double) (0xff);
@@ -1543,12 +1545,16 @@ void genie_draw_atom (NODE_T * p)
   f = (A68_FILE *) ADDRESS (&ref_file);
   plotter = set_up_device (p, f);
   k = (int) (r.value * MAXIMUM (f->device.window_x_size, f->device.window_y_size));
-  for (j = k; j >= 0; j--) {
-    frac = 1.0 - ((double) j / (double) k);
+  pl_filltype_r (plotter, 1);
+  for (j = k - 1; j >= 0; j--) {
+    frac = (double) j / (double) (k - 1);
+    frac = 0.6 + 0.3 * sqrt (1.0 - frac * frac);
     pl_color_r (plotter, (int) (frac * f->device.red * COLOUR_MAX), (int) (frac * f->device.green * COLOUR_MAX), (int) (frac * f->device.blue * COLOUR_MAX));
     pl_fcircle_r (plotter, x.value * f->device.window_x_size, y.value * f->device.window_y_size, (double) j);
   }
-  pl_color_r (plotter, (int) (f->device.red * COLOUR_MAX), (int) (f->device.green * COLOUR_MAX), (int) (f->device.blue * COLOUR_MAX));
+  pl_filltype_r (plotter, 0);
+  pl_color_r (plotter, (int) COLOUR_MAX, (int) COLOUR_MAX, (int) COLOUR_MAX);
+  pl_fpoint_r (plotter, x.value * f->device.window_x_size, y.value * f->device.window_y_size);
   f->device.x_coord = x.value;
   f->device.y_coord = y.value;
 }

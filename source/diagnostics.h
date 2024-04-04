@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -89,7 +89,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_INVALID_DIMENSION "invalid dimension D"
 #define ERROR_INVALID_OPERAND "M construct is an invalid operand"
 #define ERROR_INVALID_OPERATOR_TAG "invalid operator tag"
-#define ERROR_INVALID_PARAMETER "invalid parameter"
+#define ERROR_INVALID_PARAMETER "invalid parameter (U Z)"
 #define ERROR_INVALID_PRIORITY "invalid priority declaration"
 #define ERROR_INVALID_RADIX "invalid radix D"
 #define ERROR_INVALID_SEQUENCE "expected A, which is not consistent with U"

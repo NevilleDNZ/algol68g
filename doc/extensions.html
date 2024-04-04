@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -37,7 +38,7 @@ Documentation for Algol 68 Genie Mark 11
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
-<br>
+
 <h2>UNIX extensions</h2>
 &middot;&nbsp;<a href="#unixgen">General definitions</a><br>
 &middot;&nbsp;<a href="#unixproc">Processes</a><br>
@@ -55,20 +56,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -87,7 +82,6 @@ Algol68G maps to UNIX/Linux as to provide basic means with which a program can
 <lcode>match regular expressions in a string.
 </ul>
 
-<br>  
 <h3><a name="unixgen"></a>General definitions</h3>
 <dl>
 <dt><code>MODE PIPE = STRUCT (REF FILE read, write, INT pid)</code>
@@ -128,7 +122,6 @@ Accessing system error information through <code>errno</code> is of limited inte
 <dd>Returns a string describing the error code passed as <code>errno</code>.
 </dl>
 
-<br>  
 <h3><a name="unixproc"></a>Processes</h3>
 <dl>
 <dt><code>PROC fork = INT</code>
@@ -249,7 +242,6 @@ FI;
 </pre>
 </dl>
 
-<br>  
 <h3><a name="unixregex"></a>Regular expressions in string manipulation</h3>
 <dl>
 <dt><code>PROC grep in string = (STRING pattern, string, REF INT start, end) INT</code>
@@ -274,20 +266,21 @@ PROC awk gsub = (STRING pattern, replacement, REF STRING string) INT:
 </pre>
 </dl>
 
-<p><code>grep in string</code> and <code>sub in string</code> employ extended POSIX syntax for regular expressions. Traditional UNIX regular expression syntax is obsoleted by POSIX (but is still widely used for the purposes of backwards compatibility). POSIX extended regular expressions are similar to traditional UNIX regular expressions. Most characters are treated as literals that match themselves: "a" matches "a", "(bc" matches "(bc", et cetera.  Metacharacters "(", ")", "[", "]", "{", "}", ".", "*", "?", "+", "^" and "$" are used as special symbols that have to be marked by a preceeding "\" when they are to be matched literally.
+<p><code>grep in string</code> and <code>sub in string</code> employ extended POSIX syntax for regular expressions. Traditional UNIX regular expression syntax is obsoleted by POSIX (but is still widely used for the purposes of backwards compatibility). POSIX extended regular expressions are similar to traditional UNIX regular expressions. Most characters are treated as literals that match themselves: "a" matches "a", "(bc" matches "(bc", et cetera.  Metacharacters "(", ")", "[", "]", "{", "}", ".", "*", "?", "+", "^" and "$" are used as special symbols that have to be marked by a 
+preceding "\" when they are to be matched literally.
 
 <p>Definition of metacharacters</a>:</p>
 <dl compact>
 <dt><b>.</b>
 <dd>Matches any single character.
 <dt><b>*</b>
-<dd>Matches the preceeding expression zero or more times. Forexample, "[xyz]*" matches "", "x", "y", "zx", "zyx", and so on.
+<dd>Matches the preceding expression zero or more times. For example, "[xyz]*" matches "", "x", "y", "zx", "zyx", and so on.
 <dt>+
-<dd>Matches the preceeding expression one or more times - "ba+" matches "ba", "baa", "baaa" etcetera.
+<dd>Matches the preceding expression one or more times - "ba+" matches "ba", "baa", "baaa" etcetera.
 <dt>?
-<dd>Matches the preceeding expression zero or one times - "ba?" matches "b" or "ba".
+<dd>Matches the preceding expression zero or one times - "ba?" matches "b" or "ba".
 <dt>{<code>x</code>,<code>y</code>}
-<dd>Matches the preceeding expression at least <code>x</code> and not more than <code>y</code> times. For example, "a{3,5}" matches "aaa", "aaaa" or "aaaaa". Note that this is not implemented on all platforms.
+<dd>Matches the preceding expression at least <code>x</code> and not more than <code>y</code> times. For example, "a{3,5}" matches "aaa", "aaaa" or "aaaaa". Note that this is not implemented on all platforms.
 <dt>|
 <dd>The choice (or set union) operator: match either the expression before or the expression after the operator - "abc|def"
 matches "abc" or "def".
@@ -304,7 +297,7 @@ matches "abc" or "def".
 <dd>Matches a subexpression. A subexpression followed by "*" is invalid on most platforms.
 </dl>
 
-<p>Since many ranges of charactes depends on the chosen locale setting (e.g., in some settings letters are organized as
+<p>Since many ranges of characters depends on the chosen locale setting (e.g., in some settings letters are organized as
 abc..yzABC..YZ while in some others as aAbBcC..yYzZ) the POSIX standard defines categories of characters as shown
 in the following table:</p>
 <table border=0 cellspacing=0 cellpadding=6>
@@ -355,7 +348,7 @@ in the following table:</p>
 <tr>
 <td bgcolor=#e0e0e0>[:space:]</td>
 <td bgcolor=#e0e0e0>[ \t\n\r\f\v]</td>
-<td bgcolor=#e0e0e0>Whitespace characters, typographical display features</td>
+<td bgcolor=#e0e0e0>White space characters, typographical display features</td>
 </tr>
 <tr>
 <td bgcolor=#e0e0e0>[:cntrl:]</td>
@@ -388,8 +381,9 @@ in the following table:</p>
 </dl>
 </p>
 
-<br>
 <h3><a name="curses"></a>Curses support</h3>
+
+<p>
 On systems that have installed the curses library, Algol68G can link with that library to extend the standard prelude. Curses support is very basic.
 <dl>
 <dt><code>PROC curses start = VOID</code>
@@ -429,15 +423,19 @@ On systems that have installed the curses library, Algol68G can link with that l
 </dl>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

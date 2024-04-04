@@ -1,4 +1,4 @@
-.Dd April 2007
+.Dd February 2008
 .Dt A68G 1
 .
 .Sh NAME
@@ -42,36 +42,24 @@ a68g
 .Ar filename
 .
 .Sh DESCRIPTION
-Algol 68 Genie (a68g) is an Algol 68 interpreter.
-The interpreter offers many runtime checks and is pedantic rather than fast.
+Algol 68 Genie (a68g) is an Algol 68 interpreter. The interpreter offers many runtime checks and is pedantic rather than fast.
 .
 .Sh OPTIONS
-Options are passed to a68g either from the file .a68g.rc in the 
-working directory, the environment variable A68G_OPTIONS, 
-the command-line or from pragmats. 
+Options are passed to a68g either from the file .a68g.rc in the working directory, the environment variable A68G_OPTIONS, the command-line or from pragmats. 
 .Pp
-Option precedence is as follows: 
-pragmat options supersede command-line options, 
-command-line options supersede options in environment variable A68G_OPTIONS, 
-A68G_OPTIONS supersedes options in .a68g.rc. 
+Option precedence is as follows: pragmat options supersede command-line options, command-line options supersede options in environment variable A68G_OPTIONS, A68G_OPTIONS supersedes options in .a68g.rc. 
 .Pp
-Listing options, tracing options and -pragmat, -nopragmat, 
-take their effect when they are 
-encountered in a left-to-right pass of the program text, and can 
-thus be used, for example, to generate a cross reference for a 
-particular part of the program. 
+Listing options, tracing options and -pragmat, -nopragmat, take their effect when they are encountered in a left-to-right pass of the program text, and can thus be used, for example, to generate a cross reference for a particular part of the program. 
 .Pp
-Options are not case sensitive. In the list below, uppercase letters are
-mandatory for recognition. For instance
+Options are not case sensitive. In the list below, uppercase letters are mandatory for recognition. For instance
 .Pp
-        a68g -prec 200 -ti 60 ...
+    a68g -prec 200 -ti 60 ...
 .Pp
 means
 .Pp
-        a68g -precision 200 -timelimit 60 ...
+    a68g -precision 200 -timelimit 60 ...
 .Pp
-Where numeric arguments are required, suffix 'k', 'M' or 'G' is allowed
-for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
+Where numeric arguments are required, suffix 'k', 'M' or 'G' is allowed for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
 .Bl -tag -width Ds
 .
 .It Fl Assertions | Fl NOAssertions
@@ -81,22 +69,19 @@ Control elaboration of assertions.
 Control whether a stack backtrace is done in case a runtime-error occurs.
 .
 .It Fl BRackets
-Consider [ .. ] and { .. } as being equivalent to ( .. ).
-Traditional Algol 68 syntax allows ( .. ) to replace [ .. ] in bounds and slices.
+Consider [ .. ] and { .. } as being equivalent to ( .. ). Traditional Algol 68 syntax allows ( .. ) to replace [ .. ] in bounds and slices.
 .
 .It Fl Check | Fl NORun
 Check syntax only, the interpreter does not start.
 .
 .It Fl DEBUG | Fl MONitor
-Invoke the monitor in case a runtime-error occurs.
-The program will pause in the monitor on the line that contains the error.
+Invoke the monitor in case a runtime-error occurs. The program will pause in the monitor on the line that contains the error.
 .
 .It Fl ECHO Ar string
 Echo `string' to standout.
 .
 .It Fl Execute Ar unit
-Execute the Algol 68 unit.
-In this way one-liners can be executed from the command line.
+Execute the Algol 68 unit. In this way one-liners can be executed from the command line.
 .
 .It Fl EXTensive
 Generate an extensive listing.
@@ -146,8 +131,7 @@ significant digits.
 Generate a listing of preludes.
 .
 .It Fl Print Ar unit
-Print the value yielded by the Algol 68 unit.
-In this way one-liners can be executed from the command line.
+Print the value yielded by the Algol 68 unit. In this way one-liners can be executed from the command line.
 .
 .It Fl QUOTEstropping
 Use quote stropping.

@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -69,20 +70,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -92,6 +87,7 @@ Documentation for Algol 68 Genie Mark 11
 
 <p>
 This syntax summary provides a quick reference for Algol68G syntax.
+The distribution of Algol 68 Genie Mark 11.1 contains a copy of the <a href="report_contents.html">Revised Report in HTML</a>.
 <a href="environ.html">Predefined tags</a> can be found in a different chapter.
 There is a separate chapter with <a href="examples.html">sample programs</a>.
 <p>
@@ -128,7 +124,7 @@ The two-level Algol 68 syntax is described in the Revised Report.
 
 <h3><a name="reserved"></a>Reserved symbols</h3>
 <p>
-Next symbols are reserved in Algol 68 Genie Mark 11:
+Next symbols are reserved in Algol 68 Genie Mark 11.1:
 <p>
 <code>
 ANDF,
@@ -212,7 +208,6 @@ VOID,
 WHILE
 </code>
 
-<br>
 <h3><a name="coercions"></a>Coercions</h3>
 <p>The "strength" of a context determines what coercions are possible in that context. A "strong" context allows all coercions, and typically requires that the resulting mode is known a priori; for example in the case of initial values assigned in a declaration or parameters in procedure calls.
 <p>
@@ -302,9 +297,8 @@ In a strong context, Algol68G implements next widenings:
 </tr>
 </table>
 
-<br>
 <h3> <a name="tags"></a>Tags</h3>
-<h4>Declarer-identifier tags, identifier tags and label tags</h4>
+<h3>Declarer-identifier tags, identifier tags and label tags</h3>
 <ul>
 <b>declarer-identifier</b>: uppercase-letter-sequence.<br>
 <ul><code>
@@ -315,13 +309,13 @@ In a strong context, Algol68G implements next widenings:
 <b>identifier</b>: lowercase-letter [(lowercase letter, digit)-sequence].<br>
 <ul><code>
 <li>pi
-<li>x mod 2pi # note that whitespace is irrelevant in identifiers #
+<li>x mod 2pi # note that white space is irrelevant in identifiers #
 </code></ul>
 <p>
 <b>label</b>: identifier.
 </ul>
 
-<h4>Operator tags</h4>
+<h3>Operator tags</h3>
 <p>
 To avoid ambiguity in parsing operator tag sequences, 
 operator characters are divided into <code>monads</code> and <code>nomads</code>, 
@@ -350,7 +344,6 @@ Note that Algol 68 forbids operator tags that start with a double monad, such as
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="program"></a>Particular program</h3>
 <p>A particular program is the actual application, embedded in the standard environ.
 <ul>
@@ -361,21 +354,21 @@ Note that Algol 68 forbids operator tags that start with a double monad, such as
 </ul>
 </ul>
 
-<br>
 <h3><a name="clauses"></a>Clauses</h3>
 <p>
 Serial - and enquiry clauses describe how declarations and units ("statements") are put in sequence.
 Algol 68 requires clauses to yield a value. 
 As declarations yield no value, serial- and enquiry-clauses cannot end in a declaration. 
 <p>
-<code>EXIT</code> leaves a serial-clause, yielding the value of the preceeding unit. If the unit following 
-<code>EXIT</code> would not be labeled, it could never be reached. Hence Revised Report syntax 
-for the serial-clause is more elaborate than presented here to require that the unit following <code>EXIT</code> is labeled.
-In a serial-clause there cannot be labeled units before declarations to prevent re-entering declarations 
+<code>EXIT</code> leaves a serial-clause, yielding the value of the preceding unit. If the unit following 
+<code>EXIT</code> would not be labelled, it could never be reached. Hence Revised Report syntax 
+for the serial-clause is more elaborate than presented here to require that the unit following <code>EXIT</code> is 
+labelled.
+In a serial-clause there cannot be labelled units before declarations to prevent re-entering declarations 
 once they have been executed.
 <ul>
-<b>serial-clause</b>: [initialiser-series `;'] labeled-unit-series.<br>
-<b>labeled-unit-series</b>: [([label `:'] unit (';', `EXIT'))-sequence] unit.<br>
+<b>serial-clause</b>: [initialiser-series `;'] labelled-unit-series.<br>
+<b>labelled-unit-series</b>: [([label `:'] unit (';', `EXIT'))-sequence] unit.<br>
 <b>initialiser-series</b>: (unit, declaration-list) [`;' initialiser-series]. 
 <ul><code>
 <li># Not a recommended style #<br>
@@ -417,7 +410,8 @@ Enclosed clauses provide structure for a particular program.
 Short-hand notations for enclosed clauses:<br> 
 <ul>
 <li>`(' .. `)' for `BEGIN' .. `END'<br>
-<li>`(' .. `|' .. `|:' .. `|' .. `)' for `IF' .. `THEN' .. (`ELIF', `ELSF') .. `THEN' .. `FI'<br>
+<li>`(' .. `|' .. `|' .. `)' for `IF' .. `THEN' .. `ELSE' .. `FI'<br>
+<li>`(' .. `|' .. `|:' .. `|' .. `)' for `IF' .. `THEN' .. `ELIF' .. `THEN' .. `FI'<br>
 <li>`(' .. `|' .. `|:' .. `|' .. `)' for `CASE' .. `IN' .. `OUSE' .. `OUT' .. `ESAC'<br>
 </ul>
 </ul>
@@ -448,7 +442,7 @@ In a parallel-clause the elaboration of units can be synchronised using semaphor
 
 <ul>
 <b>conditional-clause</b>: `IF' meek-boolean-enquiry-clause `THEN' serial-clause
-                    [((`ELIF', `ELSF') meek-boolean-enquiry-clause `THEN' serial-clause)-sequence] 
+                    [(`ELIF') meek-boolean-enquiry-clause `THEN' serial-clause)-sequence] 
                     [`ELSE' serial-clause]
                     `FI'
 <ul><code>
@@ -495,12 +489,10 @@ The specified mode must be acceptable <a href="resources.html#rr">{RR 2.1.3.6}</
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="expressions"></a>Expressions</h3>
 <p>
 Expressions are orthogonal, for instance an enclosed-clause can be an operand in a formula. The constituent constructs of expressions are primaries, secondaries, tertiaries and units.
 
-<br>
 <h3><a name="primaries"></a>Primaries</h3>
 <ul>
 <b>primary</b>: enclosed-clause,
@@ -611,7 +603,6 @@ The left-hand side digit-sequence yields the radix for the number and can range 
 <b>format-text</b>: for definition see section on <a href="#formats">formats</a>.
 </ul>
 
-<br>
 <h3><a name="secondaries"></a>Secondaries</h3>
 
 <ul>
@@ -631,7 +622,7 @@ A selection selects a field from a structured value.
 
 <ul>
 <b>generator</b>: (`HEAP', `LOC') actual-declarer.<br>
-A generator allocates memory for a value, and yields a name refering to allocated space.
+A generator allocates memory for a value, and yields a name referring to allocated space.
 HEAP allocates in the heap and LOC allocates in the stack.
 <ul><code>
 <li>HEAP INT
@@ -640,7 +631,6 @@ HEAP allocates in the heap and LOC allocates in the stack.
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="tertiaries"></a>Tertiaries</h3>
 <ul>
 <b>tertiary</b>: secondary,
@@ -675,7 +665,6 @@ meek-integral-tertiary (`DIAG', `ROW', `COL') weak-tertiary.<br>
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="units"></a>Units</h3>
 <ul>
 <b>unit</b>: tertiary,
@@ -729,7 +718,7 @@ Skip has no action but yield an undefined value of the required mode.
 </ul>
 
 <ul>
-<b>conditional-function</b>: meek-boolean-tertiary (`ANDF', `ANDTH', `THEF', `ORF', `OREL') meek-boolean-tertiary.<br>
+<b>conditional-function</b>: meek-boolean-tertiary ((`ANDF', `ANDTH', `THEF'), (`ORF', `OREL', `ELSF')) meek-boolean-tertiary.<br>
 (Algol68G extension) A conditional function does not evaluate its second operand if the result can be deduced after evaluating the first.
 <ul><code>
 <li>(z ISNT NIL) ANDF freq OF z > 0 # avoid dereferencing NIL #  
@@ -747,7 +736,6 @@ A routine-text is a procedure body. It can be considered as a "procedure-denotat
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="declarations"></a>Declarations</h3>
 <p>
 Declarations introduce definitions of tags. Algol 68 does not require that a tag is defined before it is used (although Algol 68 does require that a tag is assigned a value before it is used). Hence there is no need for forward declarations when defining mutually recursive procedures, or recursive modes.
@@ -758,7 +746,7 @@ Declarations introduce definitions of tags. Algol 68 does not require that a tag
              procedure-declaration,
              procedure-variable-declaration,
              operator-declaration,
-             priority-decalaration.<br>
+             priority-declaration.<br>
 </ul>
 
 <ul>
@@ -821,7 +809,6 @@ A priority-declaration introduces a priority for operators.
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="declarers"></a>Declarers</h3>
 <p>
 Declarers describe modes. The context determines whether a mode must be formal, 
@@ -870,7 +857,6 @@ Bounds provide the size per dimension of a row, where needed.
 <br>
 </ul>
 
-<br>
 <h3><a name="formats"></a>Formats</h3>
 <p>Formats describe the lay-out for transputting data. Formats are values so you can have format-variables,
 procedures yielding formats etcetera. A format-text can be considered as a (dynamic) "format-denotation".
@@ -1012,7 +998,6 @@ The replicator yields the radix for the number and can range from 2 to 16.
 </code></ul>
 </ul>
 
-<br>
 <h3><a name="pragments"></a>Pragments</h3>
 <p>
 Pragments are either pragmats or comments. 
@@ -1031,7 +1016,6 @@ Pragmats contain preprocessor directives, or set options from within an Algol 68
 </ul></code>
 </ul>
 
-<br>
 <h3><a name="refinements"></a>Refinements</h3>
 <p>
 The <a href="extensions.html#refine">refinement preprocessor</a> is a low-level tool for top-down programming. It is not really a part of Algol68G syntax, but superimposed on top of it. Note that refinements interfere somewhat with labels.
@@ -1051,15 +1035,19 @@ The <a href="extensions.html#refine">refinement preprocessor</a> is a low-level 
 </ul>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -37,7 +37,6 @@ static char *attribute_names[WILDCARD + 1] = {
   "ALT_FORMAL_BOUNDS_LIST",
   "ANDF_SYMBOL",
   "AND_FUNCTION",
-  "ANDTH_SYMBOL",
   "ARGUMENT",
   "ARGUMENT_LIST",
   "ASSERTION",
@@ -234,7 +233,6 @@ static char *attribute_names[WILDCARD + 1] = {
   "OPERATOR_DECLARATION",
   "OPERATOR_PLAN",
   "OP_SYMBOL",
-  "OREL_SYMBOL",
   "ORF_SYMBOL",
   "OR_FUNCTION",
   "OUSE_CASE_PART",
@@ -288,7 +286,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "SIGN_MOULD",
   "SKIP",
   "SKIP_SYMBOL",
-  "SLICE",
+  "SLICE_OR_CALL",
   "SOME_CLAUSE",
   "SOUND_SYMBOL",
   "SPECIFIED_UNIT",

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -1664,9 +1664,13 @@ void genie_new_line (NODE_T * p)
       add_c_string_to_a_string (p, file->string, NEWLINE_STRING);
     }
   } else if (file->read_mood) {
-    BOOL_T go_on = !file->eof;
+    BOOL_T go_on = A68_TRUE;
     while (go_on) {
-      int ch = char_scanner (file);
+      int ch;
+      if (file->eof) {
+        end_of_file_error (p, ref_file);
+      }
+      ch = char_scanner (file);
       go_on = (ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !file->eof;
     }
   } else {
@@ -1704,9 +1708,13 @@ void genie_new_page (NODE_T * p)
       add_c_string_to_a_string (p, file->string, "\f");
     }
   } else if (file->read_mood) {
-    BOOL_T go_on = !file->eof;
+    BOOL_T go_on = A68_TRUE;
     while (go_on) {
-      int ch = char_scanner (file);
+      int ch;
+      if (file->eof) {
+        end_of_file_error (p, ref_file);
+      }
+      ch = char_scanner (file);
       go_on = (ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !file->eof;
     }
   } else {
@@ -1763,15 +1771,23 @@ void skip_nl_ff (NODE_T * p, int *ch, A68_REF ref_file)
   while ((*ch) != EOF_CHAR && IS_NL_FF (*ch)) {
     A68_BOOL *z = (A68_BOOL *) STACK_TOP;
     ADDR_T pop_sp = stack_pointer;
+    unchar_scanner (p, f, *ch);
     if (*ch == NEWLINE_CHAR) {
       on_event_handler (p, f->line_end_mended, ref_file);
+      stack_pointer = pop_sp;
+      if (z->value == A68_FALSE) {
+        PUSH_REF (p, ref_file);
+        genie_new_line (p);
+      }
     } else if (*ch == FORMFEED_CHAR) {
       on_event_handler (p, f->page_end_mended, ref_file);
+      stack_pointer = pop_sp;
+      if (z->value == A68_FALSE) {
+        PUSH_REF (p, ref_file);
+        genie_new_page (p);
+      }
     }
-    stack_pointer = pop_sp;
-    if (z->value == A68_FALSE) {
-      (*ch) = char_scanner (f);
-    }
+    (*ch) = char_scanner (f);
   }
 }
 

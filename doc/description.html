@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -41,7 +42,7 @@ Documentation for Algol 68 Genie Mark 11
 <h2>Description of Algol68G</h2>
 &nbsp;&middot;&nbsp;<a href="#high">About this Algol 68 implementation</a><br>
 &nbsp;&middot;&nbsp;<a href="#diff">Algol68G compared to the Revised Report description</a><br>
-&nbsp;&middot;&nbsp;<a href="#params">Partial parametrisation and currying</a><br>
+&nbsp;&middot;&nbsp;<a href="#params">Partial parametrisation</a><br>
 &nbsp;&middot;&nbsp;<a href="#io">Transput implementation</a><br>
 &nbsp;&nbsp;&nbsp;&middot;&nbsp;<a href="#genio">Transput in general</a><br>
 &nbsp;&nbsp;&nbsp;&middot;&nbsp;<a href="#fmtio">Formatted transput</a><br>
@@ -64,20 +65,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -86,20 +81,15 @@ Documentation for Algol 68 Genie Mark 11
 </td>
 </table>
 
-<table border=0 cellspacing=0 cellpadding=12>
-<td valign=top bgcolor="white">
-
-<br>
 <h3><a name="high"></a>About this Algol 68 implementation</h3>
 
 <p>
 <i>Algol 68 Genie</i> (Algol68G) is a nearly full implementation of Algol 68 as defined by <a href="resources.html#ref">[Revised Report 1976]</a> and also implements partial parametrisation, which is an extension of Algol 68. 
 
 <p>
-After successful parsing of an entire source program, the syntax tree, that serves as an intermediate program representation, is interpreted. The interpreter performs many runtime checks, therefore Algol68G resembles FLACC <a href="resources.html#ref">[Mailloux 1978]</a>. Algol68G employs the classical multipass scheme to parse Algol 68 <a href="resources.html#ref">[Lindsey 1993]</a>.
+After successful parsing of an entire source program, the syntax tree, that serves as an intermediate program representation, is interpreted. The interpreter performs many runtime checks, therefore Algol68G resembles FLACC <a href="resources.html#ref">[Mailloux 1978]</a>. Algol68G employs a  multipass scheme to parse Algol 68 <a href="resources.html#ref">[Lindsey 1993]</a>.
 </p>
 
-<br>
 <h3><a name="diff"></a>Algol68G compared to the Revised Report description</h3>
 <p>
 This manual contains an <a href="syntax.html">Algol68G syntax summary</a> for quick reference.
@@ -135,7 +125,7 @@ Transput routines work generically on files, (dynamic) strings and UNIX pipes.
 <p>
 <i>Extra features compared to the Revised Report language</i>
 <ul>
-<li>Implementation of C.H. Lindsey's <a href="#params">partial parametrisation proposal</a>, which allows for currying in Algol 68, giving it a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
+<li>Implementation of C.H. Lindsey's <a href="#params">partial parametrisation proposal</a>, giving Algol 68 a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
 <li>A simple <a href="#refine">refinement preprocessor</a> to facilitate top-down program construction.
 <li>Implementation of pseudo-operators <code>ANDF</code> and <code>ORF</code> (or their respective alternatives <code>THEF, ANDTH</code> and <code>OREL</code>).
 The syntactic position of those pseudo-operator expressions is a boolean-unit, the same as an identity relation. 
@@ -273,23 +263,22 @@ are not accepted by Algol68G.
 <li>Algol68G will map a declarer whose length is not implemented onto the most appropriate length available <a href="resources.html#rr">{RR 2.1.3.1}</a>. Algol68G considers mapped modes equivalent to the modes they are mapped onto. Routines or operators for not-implemented lengths are mapped accordingly.
 </ul>
 
-<br>
 <h3><a name="params"></a>Partial parametrisation and currying</h3>
 <p>
-Algol68G implements C.H. Lindsey's proposal for partial parametrisation.
-In Algol68G, a
-<a href="syntax.html#primaries">
-call
-</a>
-does not require that all arguments be specified. In case not all of the actual-parameters are specified, a call yields a routine 
+Algol68G implements C.H. Lindsey's proposal for partial parametrisation giving, an the imperative language Algol 68 a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
+
+A formal description of this proposal can be found in the <a href="report_appendix.html">appendix</a> to the Algol 68 Revised Report that is distributed with Algol 68 Genie.
+
+<p> 
+In Algol68G, a <a href="syntax.html#primaries">call</a> does not require that all arguments be specified. In case not all of the actual-parameters are specified, a call yields a routine 
 (with identical body but with already specified arguments stored) 
 that requires the unspecified actual-parameters.
 When specification of all required actual-parameters is complete (complete closure) a procedure will actually be evaluated to yield its result.
 <p>
 <small>
-<i>Currying, named after Haskell Curry, is transforming a routine taking multiple arguments into a routine taking a single parameter and yielding a routine taking the remaining parameters. 
+<i>Partial parametrisation is closely related to Currying, a transformation named after Haskell Curry.
+Currying is transforming a function <i>f:(x &times; y) &rarr; z</i> into <i>f:(x) &rarr; (y &rarr; z)</i>. 
 This transformation is for instance used in lambda-calculus.
-Currying gives an imperative language such as Algol 68 a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
 </i>
 </small>
 <p>
@@ -337,10 +326,9 @@ increment (p);
 list (p)
 </pre>
 
-<br>
 <h3><a name="io"></a>Transput implementation</h3>
 
-<h4><a name="genio"></a>Transput in general</h4>
+<h3><a name="genio"></a>Transput in general</h3>
 <p>Algol68G transput deviates from the Revised Report specification, as described below.
 For an overview of implemented procedures refer to the <a name="envio_1" href="environ.html#envio">standard environment reference</a>.
 </p>
@@ -473,7 +461,7 @@ Next event handlers are not specified by the Revised Report.
 </dl>
 </p>
 
-<h4><a name="fmtio"></a>Formatted transput</h4>
+<h3><a name="fmtio"></a>Formatted transput</h3>
 <p> Algol68G implements mode <code>FORMAT</code>, format texts, straightening and formatted transput.
 The syntax of formats is described in the <a href="syntax.html#formats">Algol68G syntax summary</a>. 
 The Algol68G implementation deviates from the Revised Report specification, as described below.
@@ -513,7 +501,6 @@ generates a runtime error since <code>print</code> cannot handle a value of mode
 <li>When getting a literal insertion, <code>space</code> is performed for every character in that literal. It is not checked whether read characters actually match the literal.
 </ul>
 
-<br>
 <h3><a name="assert"></a>Assertions as pre- or postconditions</h3>
 <p>Algol68G supports an extension called assertions. Assertions can be viewed in two ways. First, they provide a notation for invariants that can be used to code a proof of correctness together with an algorithm. Hardly anyone does this, but assertions make for debugging statements. The syntax for assertions reads
 <p>
@@ -532,7 +519,6 @@ OP FACULTY = (INT n) INT:
 will produce an error when <code>FACULTY</code> is called with a negative argument.
 </p>
 
-<br>
 <h3><a name="prep"></a>The preprocessor</h3>
 <p>
 Algol68G has a basic preprocessor. 
@@ -543,7 +529,7 @@ Currently, the preprocessor supports these features:
 <li>refinement preprocessor,
 <li>switching the preprocessor on or off.
 </ul>
-<h4><a name="prepcat"></a>Concatenation of lines</h4>
+<h3><a name="prepcat"></a>Concatenation of lines</h3>
 <p>
 Concatenation of lines is similar to what the C preprocessor does. Any line that ends in a backslash ('\') will be concatenated with the line following it. For example:
 <pre>
@@ -562,7 +548,7 @@ Using a backslash as an escape character causes no interference with Algol 68 so
 Note that when you make use of line concatenation, diagnostics in a concatenated line may be placed in an earlier source line than its actual line in the original source text. In order to preserve line numbering as much as possible, a line is emptied but not deleted if it is joined with a preceeding one. This shows in the listing file as emptied lines.
 </p>
 
-<h4><a name="prepinc"></a>Inclusion of files</h4>
+<h3><a name="prepinc"></a>Inclusion of files</h3>
 <p>
 Algol68G supports inclusion of other files in an Algol 68 source text. The inclusion directive reads:
 <pre>
@@ -575,7 +561,7 @@ The file with name <i>filename</i> is inserted textually <i>before</i> the line 
 In this way tokens remain in their original lines, which will give more accurate placement of diagnostics. It is therefore recommended that a file inclusion directive be the only text on the line it is in. A file will only be inserted once, on attempted multiple inclusion the file is ignored. Attempted multiple inclusion may for example result from specifying, in an included file, an inclusion directive for an already included file.
 </p>
 
-<h4><a name="refine"></a>The refinement preprocessor</h4>
+<h3><a name="refine"></a>The refinement preprocessor</h3>
 <p>
 Algol68G is equipped with a refinement preprocessor, which allows programming through stepwise refinement as taught in <a href="introduction.html#programmeren">[Koster 1978, 1981]</a>.
 The idea is to facilitate program construction by elaborating the description of the solution to a problem as ever more detailed steps until the description of the solution is complete. (See also <a href="http://www.acm.org/classics/dec95">Wirth's well known lecture</a>). 
@@ -584,7 +570,7 @@ The idea is to facilitate program construction by elaborating the description of
 Algol68G will check whether a program looks like a stepwise refined program. The refinement preprocessor is transparent to programs that are not stepwise refined.
 </p>
 
-<h4><a name="prepsw"></a>Switching the preprocessor on or off</h4>
+<h3><a name="prepsw"></a>Switching the preprocessor on or off</h3>
 <p>
 It is possible to switch the preprocessor on or off. The preprocessor is default switched on. If switched off, it will no longer process preprocessor items embedded in pragmats, except for switching the preprocessor on again. Concatenation of lines takes place even if the preprocessor is switched off.
 <ul>
@@ -597,7 +583,6 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 </ul>
 </p>
 
-<br>
 <h3><a name="speed"></a>Interpreter speed</h3>
 <p>The speed of the interpreter will of course depend on platform and application. Algol68G first constructs a syntax tree for a program whereafter the interpreter "executes" this syntax tree, therefore interpreter speed is relatively good. As to have a measure of speed Algol68G was rated with the Whetstone benchmark. Next table compiles approximate ratings for Algol68G and for some legacy machines (which ran <a href="resources.html#implementations">Algol 68 implementations</a>). 
 <p>
@@ -605,13 +590,12 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 <tr><td bgcolor=#e0e0e0><b>System</b></td><td bgcolor="#e0e0e0"><b>MWhets</b></td><td bgcolor="#e0e0e0"><b>Remarks</b></td></tr>
 <tr><td bgcolor=#e0e0e0>VAX 11/785</td><td bgcolor="#e0e0e0">1</td><td bgcolor="#e0e0e0">FORTRAN</td>
 <tr><td bgcolor=#e0e0e0>CYBER 205<br>Cray-1A<br></td><td bgcolor="#e0e0e0">12 (Scalar)</td><td bgcolor="#e0e0e0">FORTRAN</td></tr>
-<tr><td bgcolor=#e0e0e0>Pentium 4 (3 GHz)</td><td bgcolor="#e0e0e0">33</td><td bgcolor="#e0e0e0">Algol68G/OpenBSD/gcc</td></tr>
+<tr><td bgcolor=#e0e0e0>Pentium 4 (3 GHz)</td><td bgcolor="#e0e0e0">37</td><td bgcolor="#e0e0e0">Algol68G/Linux 2.6.24.3/gcc 4.2.3</td></tr>
 <tr><td bgcolor=#e0e0e0>Pentium 4 (3 GHz)</td><td bgcolor="#e0e0e0">820</td><td bgcolor="#e0e0e0">C/OpenBSD/gcc</td></tr>
 </table>
-<p>From above data one could conclude that Algol68G on a 3 GHz Pentium runs the Whetstone test roughly as fast as C on a 100 MHz Pentium. However Algol68G offers many runtime checks while the compiled C code offered none, therefore this speed comparison overrates the speed of compiled C code by a factor of probably 2-3. 
+<p>From above data one could conclude that Algol68G on a 3 GHz Pentium runs the Whetstone test roughly as fast as C on a 120 MHz Pentium. However Algol68G offers many runtime checks while the compiled C code offered none, therefore this speed comparison overrates the speed of compiled C code by a factor of probably 2-3. 
 </p>
-<br>
-<br>
+
 <h3><a name="limitations"></a>Limitations and bugs</h3>
 <ul>
 <li>The interpreter offers optional checking of the system stack. When this check is not activated, or on systems where this check would not work, the following may result in a segment violation: 
@@ -626,21 +610,21 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 <li>A garbage collector cannot solve all memory allocation issues. It is therefore possible to get an unexpected "out of memory" diagnostic. Two options in such case are (1) to increase heap size or (2) to call standard prelude routine "sweep heap" or "preemptive sweep heap" at strategic positions in the program.
 <li>In some versions of <code>libplot</code>, <code>pseudo-gif</code> plotters produce garbled graphics when more than 256 different colours are specified. Algol 68 Genie does not work around this problem in <code>libplot</code>.
 </ul>
-</td>
-
-</td>
-</table>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

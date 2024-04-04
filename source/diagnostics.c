@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -318,7 +318,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
             }
           }
           if (y == A68_TRUE && c1 == where_pos (p, where)) {
-            bufcpy (output_line, "^", BUFFER_SIZE);
+            bufcpy (output_line, "-", BUFFER_SIZE);
           } else if (diags_at_this_pos != 0) {
             if (diag == A68_NO_DIAGNOSTICS) {
               bufcpy (output_line, " ", BUFFER_SIZE);

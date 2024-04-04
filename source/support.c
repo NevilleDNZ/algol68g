@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -152,8 +152,9 @@ NODE_INFO_T *new_node_info (void)
 NODE_T *new_node (void)
 {
   NODE_T *z = (NODE_T *) get_fixed_heap_space (ALIGNED_SIZEOF (NODE_T));
-  z->mask = 0;
+  MASK (z) = NULL_MASK;
   z->info = new_node_info ();
+  z->reduction = 0;
   z->attribute = 0;
   z->annotation = 0;
   z->error = A68_FALSE;
@@ -812,7 +813,7 @@ void set_up_tables ()
   add_keyword (&top_keyword, ROW_ASSIGN_SYMBOL, "::=");
   add_keyword (&top_keyword, SOUND_SYMBOL, "SOUND");
   add_keyword (&top_keyword, ANDF_SYMBOL, "THEF");
-  add_keyword (&top_keyword, ELIF_SYMBOL, "ELSF");
+  add_keyword (&top_keyword, ORF_SYMBOL, "ELSF");
   add_keyword (&top_keyword, POINT_SYMBOL, ".");
   add_keyword (&top_keyword, ACCO_SYMBOL, "{");
   add_keyword (&top_keyword, OCCA_SYMBOL, "}");
@@ -837,8 +838,8 @@ void set_up_tables ()
   add_keyword (&top_keyword, PROC_SYMBOL, "PROC");
   add_keyword (&top_keyword, FOR_SYMBOL, "FOR");
   add_keyword (&top_keyword, GOTO_SYMBOL, "GOTO");
-  add_keyword (&top_keyword, ANDTH_SYMBOL, "ANDTH");
-  add_keyword (&top_keyword, OREL_SYMBOL, "OREL");
+  add_keyword (&top_keyword, ANDF_SYMBOL, "ANDTH");
+  add_keyword (&top_keyword, ORF_SYMBOL, "OREL");
   add_keyword (&top_keyword, WHILE_SYMBOL, "WHILE");
   add_keyword (&top_keyword, IS_SYMBOL, ":=:");
   add_keyword (&top_keyword, ASSIGN_TO_SYMBOL, "=:");

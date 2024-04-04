@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -29,7 +29,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 SYMBOL_TABLE_T *stand_env;
 
-static MOID_T *m, *proc_int, *proc_real, *proc_real_real, *proc_real_real_real, *proc_complex_complex, *proc_bool, *proc_char, *proc_void;
+static MOID_T *m, *proc_int, *proc_real, *proc_real_real, *proc_real_real_real, *proc_real_real_real_real, *proc_complex_complex, *proc_bool, *proc_char, *proc_void;
 static PACK_T *z;
 
 #define INSERT_TAG(l, n) {NEXT (n) = *(l); *(l) = (n);}
@@ -696,6 +696,9 @@ static void stand_prelude (void)
   a68_idf (A68_FALSE, "inverseerfc", m, genie_inverfc_real);
   m = proc_real_real_real;
   a68_idf (A68_FALSE, "arctan2", m, genie_atan2_real);
+  m = proc_real_real_real_real;
+  a68_idf (A68_FALSE, "lje126", m, genie_lj_e_12_6);
+  a68_idf (A68_FALSE, "ljf126", m, genie_lj_f_12_6);
 /* COMPLEX ops. */
   m = a68_proc (MODE (COMPLEX), MODE (REAL), MODE (REAL), NULL);
   a68_op (A68_TRUE, "I", m, genie_icomplex);
@@ -2285,6 +2288,7 @@ void make_standard_environ (void)
   proc_real = a68_proc (MODE (REAL), NULL);
   proc_real_real = a68_proc (MODE (REAL), MODE (REAL), NULL);
   proc_real_real_real = a68_proc (MODE (REAL), MODE (REAL), MODE (REAL), NULL);
+  proc_real_real_real_real = a68_proc (MODE (REAL), MODE (REAL), MODE (REAL), MODE (REAL), NULL);
   proc_complex_complex = a68_proc (MODE (COMPLEX), MODE (COMPLEX), NULL);
   proc_bool = a68_proc (MODE (BOOL), NULL);
   proc_char = a68_proc (MODE (CHAR), NULL);

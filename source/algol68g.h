@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -87,12 +87,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define A68_FALSE 0
 #define TIME_FORMAT "%A %d-%b-%Y %H:%M:%S"
 
-#if defined ENABLE_WIN32
-#define A68_ALIGN_T double
-#else
 #define A68_ALIGN_T int
-#endif
-
 #define A68_ALIGNMENT ((int) (sizeof (A68_ALIGN_T)))
 #define A68_ALIGN(s) ((int) ((s) % A68_ALIGNMENT) == 0 ? (s) : ((s) + A68_ALIGNMENT - (s) % A68_ALIGNMENT))
 
@@ -521,7 +516,7 @@ struct NODE_T
   REFINEMENT_T *refinement;
   SYMBOL_TABLE_T *symbol_table;
   TAG_T *tag, *protect_sweep;
-  int number, attribute, annotation, par_level;
+  int number, attribute, annotation, par_level, reduction;
   BOOL_T need_dns, error;
 };
 
@@ -729,7 +724,6 @@ enum ATTRIBUTES
   ALT_FORMAL_BOUNDS_LIST,
   ANDF_SYMBOL,
   AND_FUNCTION,
-  ANDTH_SYMBOL,
   ARGUMENT,
   ARGUMENT_LIST,
   ASSERTION,
@@ -926,7 +920,6 @@ enum ATTRIBUTES
   OPERATOR_DECLARATION,
   OPERATOR_PLAN,
   OP_SYMBOL,
-  OREL_SYMBOL,
   ORF_SYMBOL,
   OR_FUNCTION,
   OUSE_CASE_PART,
@@ -1051,9 +1044,11 @@ enum
 { NOT_PRINTED, TO_PRINT, PRINTED };
 
 enum
-{ A68_NO_DIAGNOSTICS = 0, A68_ERROR = 1, A68_SYNTAX_ERROR, A68_WARNING, 
+{ 
+  A68_NO_DIAGNOSTICS = 0, A68_ERROR = 1, A68_SYNTAX_ERROR, A68_WARNING,
   A68_RUNTIME_ERROR, A68_STORAGE_ERROR, A68_ALL_DIAGNOSTICS, 
-  A68_FORCE_DIAGNOSTICS = 128, A68_FORCE_QUIT = 256 };
+  A68_RERUN, A68_FORCE_DIAGNOSTICS = 128, A68_FORCE_QUIT = 256
+};
 
 enum
 { NO_DEFLEXING = 1, SAFE_DEFLEXING, ALIAS_DEFLEXING, FORCE_DEFLEXING, SKIP_DEFLEXING };
@@ -1155,6 +1150,8 @@ enum
 #define WHETHER_NOT(p, s) (ATTRIBUTE (p) != (s))
 
 #define SCAN_ERROR(c, u, v, txt) if (c) {scan_error (u, v, txt);}
+#define WRITE(f, s) io_write_string ((f), (s));
+#define WRITELN(f, s) {io_close_tty_line (); WRITE (f, s);}
 
 /* External definitions. */
 
