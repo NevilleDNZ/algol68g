@@ -41,35 +41,22 @@ OPTIONS_T *options;
 BOOL_T a68c_diags, gnu_diags, no_warnings;
 
 /*!
-\brief
+\brief error handler for options
 \param l
 \param option
-\return
 **/
 
 static void option_error (SOURCE_LINE_T * l, char *option, char *info)
 {
-  if (info != NULL) {
-    snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION_INFO, option, info);
-  } else {
-    snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION, option);
+  int k;
+  snprintf (output_line, BUFFER_SIZE, "%s", option);
+  for (k = 0; output_line[k] != NULL_CHAR; k++) {
+    output_line[k] = TO_LOWER (output_line[k]);
   }
-  scan_error (l, NULL, edit_line);
-}
-
-/*!
-\brief
-\param l
-\param option
-\return
-**/
-
-static void option_unrecognised (SOURCE_LINE_T * l, char *option)
-{
-  char *c;
-  snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION_UNKNOWN, option);
-  for (c = edit_line; c[0] != NULL_CHAR; c++) {
-    c[0] = TO_LOWER (c[0]);
+  if (info != NULL) {
+    snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION_INFO, output_line, info);
+  } else {
+    snprintf (edit_line, BUFFER_SIZE, ERROR_OPTION, output_line);
   }
   scan_error (l, NULL, edit_line);
 }
@@ -77,12 +64,12 @@ static void option_unrecognised (SOURCE_LINE_T * l, char *option)
 /*!
 \brief strip minus signs preceeding a string
 \param p
-\return
+\return stripped string
 **/
 
 static char *strip_minus (char *p)
 {
-  while (p[0] == '-') {
+  while (p[0] == '-' || p[0] == '+') {
     p++;
   }
   return (new_string (p));
@@ -121,11 +108,11 @@ void init_options (MODULE_T * module)
 }
 
 /*!
-\brief eq
+\brief test equality of p and q, upper case letters in q are mandatory
 \param module
 \param p
 \param q
-\return
+\return whether equal
 **/
 
 static BOOL_T eq (MODULE_T * module, char *p, char *q)
@@ -178,11 +165,11 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
 }
 
 /*!
-\brief process options gathered in the option list
+\brief translate integral option argument
 \param p
 \param i
 \param error
-\return
+\return argument value
 **/
 
 static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
@@ -275,7 +262,7 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 \param module
 \param i
 \param cmd_line
-\return
+\return whether processing was successful
 **/
 
 BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
@@ -296,7 +283,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
           module->files.generic_name = new_string (p);
           name_set = A_TRUE;
         } else {
-          option_error (NULL, start_c, NULL);
+          option_error (NULL, start_c, "filename already set");
         }
       }
 /* Preprocessor items stop option processing. */
@@ -530,7 +517,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         module->options.nodemask |= (CROSS_REFERENCE_MASK | TREE_MASK | CODE_MASK | SOURCE_MASK);
       }
 /* LISTING set of options for a default listing. */
-      else if (eq (module, p, "LISTing")) {
+      else if (eq (module, p, "Listing")) {
         module->options.source_listing = A_TRUE;
         module->options.cross_reference = A_TRUE;
         module->options.statistics_listing = A_TRUE;
@@ -579,6 +566,12 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
           option_error (start_l, start_c, NULL);
         }
       }
+/* BACKTRACE and NOBACKTRACE switch on/off stack backtracing. */
+      else if (eq (module, p, "BACKtrace")) {
+        module->options.backtrace = A_TRUE;
+      } else if (eq (module, p, "NOBACKtrace")) {
+        module->options.backtrace = A_FALSE;
+      }
 /* BREAK and NOBREAK switch on/off tracing of the running program. */
       else if (eq (module, p, "BReakpoint")) {
         module->options.nodemask |= BREAKPOINT_MASK;
@@ -605,7 +598,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
         }
       } else {
 /* Unrecognised. */
-        option_unrecognised (start_l, start_c);
+        option_error (start_l, start_c, "unrecognised");
       }
     }
 /* Go processing next item, if present. */
@@ -630,7 +623,7 @@ void default_mem_sizes (void)
   expr_stack_size = MEGABYTE;
   heap_size = 25 * MEGABYTE;
   handle_pool_size = 4 * MEGABYTE;
-  storage_overhead = 256 * KILOBYTE;
+  storage_overhead = 512 * KILOBYTE;
 }
 
 /*!
@@ -640,36 +633,31 @@ void default_mem_sizes (void)
 
 void default_options (MODULE_T * module)
 {
+  module->options.backtrace = A_FALSE;
+  module->options.brackets = A_FALSE;
   module->options.check_only = A_FALSE;
+  module->options.cross_reference = A_FALSE;
+  module->options.debug = A_FALSE;
   module->options.moid_listing = A_FALSE;
-  module->options.tree_listing = A_FALSE;
+  module->options.nodemask = ASSERT_MASK | SOURCE_MASK;
+  module->options.portcheck = A_FALSE;
+  module->options.pragmat_sema = A_TRUE;
+  module->options.reductions = A_FALSE;
+  module->options.regression_test = A_FALSE;
+  module->options.run = A_FALSE;
   module->options.source_listing = A_FALSE;
-  module->options.statistics_listing = A_FALSE;
   module->options.standard_prelude_listing = A_FALSE;
+  module->options.statistics_listing = A_FALSE;
+  module->options.stropping = UPPER_STROPPING;
+  module->options.time_limit = 0;
+  module->options.trace = A_FALSE;
+  module->options.tree_listing = A_FALSE;
+  module->options.unused = A_FALSE;
   module->options.verbose = A_FALSE;
   module->options.version = A_FALSE;
-  module->options.cross_reference = A_FALSE;
-  module->options.unused = A_FALSE;
-  module->options.pragmat_sema = A_TRUE;
-  module->options.trace = A_FALSE;
-  module->options.regression_test = A_FALSE;
-  module->options.nodemask = ASSERT_MASK | SOURCE_MASK;
-  module->options.time_limit = 0;
-  module->options.stropping = UPPER_STROPPING;
-  module->options.brackets = A_FALSE;
-  module->options.reductions = A_FALSE;
-  module->options.run = A_FALSE;
-  module->options.portcheck = A_FALSE;
-  module->options.debug = A_FALSE;
-#if defined WIN32_VERSION
-  a68c_diags = A_FALSE;
-  gnu_diags = A_TRUE;
-  no_warnings = A_TRUE;
-#else
   a68c_diags = A_TRUE;
   gnu_diags = A_FALSE;
   no_warnings = A_TRUE;
-#endif
 }
 
 /*!

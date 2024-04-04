@@ -876,7 +876,7 @@ void genie_div_real (NODE_T * p)
 {
   A68_REAL *x, *y;
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
-#ifndef HAVE_IEEE_754
+#if ! defined HAVE_IEEE_754
   if (y->value == 0.0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (REAL));
     exit_genie (p, A_RUNTIME_ERROR);
@@ -1325,6 +1325,24 @@ void genie_atan_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   atan_mp (p, x, x, digits);
+  MP_STATUS (x) = INITIALISED_MASK;
+}
+
+/*!
+\brief PROC long arctan2 = (LONG REAL, LONG REAL) LONG REAL
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_atan2_long_mp (NODE_T * p)
+{
+  int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
+  MP_DIGIT_T *y = (MP_DIGIT_T *) STACK_OFFSET (-size);
+  MP_DIGIT_T *x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
+  stack_pointer -= size;
+  if (atan2_mp (p, x, y, x, digits) == NULL) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MOID (p), x, "longarctan2");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   MP_STATUS (x) = INITIALISED_MASK;
 }
 
@@ -2429,10 +2447,12 @@ void genie_shl_bits (NODE_T * p)
   POP_INT (p, &j);
   POP_BITS (p, &i);
   if (j.value >= 0) {
+/*
     if (i.value > (MAX_BITS >> j.value)) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MODE (BITS));
       exit_genie (p, A_RUNTIME_ERROR);
     }
+*/
     PUSH_BITS (p, i.value << j.value);
   } else {
     PUSH_BITS (p, i.value >> -j.value);
@@ -2708,35 +2728,41 @@ void genie_long_bits_pack (NODE_T * p)
 void genie_shl_long_mp (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
-  MOID_T *int_m = (mode == MODE (LONG_BITS) ? MODE (LONG_INT) : MODE (LONGLONG_INT));
-  int size = get_mp_size (mode), digits = get_mp_digits (mode);
-  A68_INT j;
+  int i, k, size = get_mp_size (mode), words = get_mp_bits_words (mode);
+  MP_DIGIT_T *u;
+  unsigned *row_u;
   ADDR_T pop_sp;
-  MP_DIGIT_T *u, *two, *pow;
-  BOOL_T multiply;
+  A68_INT j;
 /* Pop number of bits. */
   POP_INT (p, &j);
-  if (j.value >= 0) {
-    multiply = A_TRUE;
-  } else {
-    multiply = A_FALSE;
-    j.value = -j.value;
-  }
   u = (MP_DIGIT_T *) STACK_OFFSET (-size);
-/* Determine multiplication factor, 2 ** j. */
   pop_sp = stack_pointer;
-  STACK_MP (two, p, digits);
-  set_mp_short (two, (MP_DIGIT_T) 2, 0, digits);
-  STACK_MP (pow, p, digits);
-  pow_mp_int (p, pow, two, j.value, digits);
-  test_long_int_range (p, pow, int_m);
-/*Implement shift. */
-  if (multiply) {
-    mul_mp (p, u, u, pow, digits);
-    check_long_bits_value (p, u, mode);
+  row_u = stack_mp_bits (p, u, mode);
+  if (j.value >= 0) {
+    for (i = 0; i < j.value; i++) {
+      BOOL_T carry = A_FALSE;
+      for (k = words - 1; k >= 0; k--) {
+        row_u[k] <<= 1;
+        if (carry) {
+          row_u[k] |= 0x1;
+        }
+        carry = ((row_u[k] & MP_BITS_RADIX) != 0);
+        row_u[k] &= ~(MP_BITS_RADIX);
+      }
+    }
   } else {
-    over_mp (p, u, u, pow, digits);
+    for (i = 0; i < -j.value; i++) {
+      BOOL_T carry = A_FALSE;
+      for (k = 0; k < words; k++) {
+        if (carry) {
+          row_u[k] |= MP_BITS_RADIX;
+        }
+        carry = ((row_u[k] & 0x1) != 0);
+        row_u[k] >>= 1;
+      }
+    }
   }
+  pack_mp_bits (p, u, row_u, mode);
   MP_STATUS (u) = INITIALISED_MASK;
   stack_pointer = pop_sp;
 }

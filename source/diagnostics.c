@@ -24,7 +24,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
-#ifdef HAVE_CURSES
+#if defined HAVE_CURSES
 #include <curses.h>
 #endif
 
@@ -206,6 +206,7 @@ static char *diag_pos (SOURCE_LINE_T * p, DIAGNOSTIC_T * d)
 \param f
 \param p
 \param where
+\param diag
 **/
 
 void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag)
@@ -319,7 +320,9 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag
           if (y == A_TRUE && c1 == where_pos (p, where)) {
             bufcpy (output_line, "^", BUFFER_SIZE);
           } else if (diags_at_this_pos != 0) {
-            if (diags_at_this_pos == 1) {
+            if (diag == A_FALSE) {
+              bufcpy (output_line, " ", BUFFER_SIZE);
+            } else if (diags_at_this_pos == 1) {
               snprintf (output_line, BUFFER_SIZE, "%c", digit_to_char (k));
             } else {
               bufcpy (output_line, "*", BUFFER_SIZE);
@@ -578,9 +581,10 @@ L line number
 M moid - if error mode return without giving a message
 N mode - MODE (NIL)
 O moid - operand
-S symbol
+S quoted symbol
+U unquoted string literal
 X expected attribute
-Z string literal. 
+Z quoted string literal. 
 */
 
 #define COMPOSE_DIAGNOSTIC\
@@ -642,7 +646,9 @@ Z string literal.
       SOURCE_LINE_T *a = va_arg (args, SOURCE_LINE_T *);\
       char d[SMALL_BUFFER_SIZE];\
       ABNORMAL_END (a == NULL, "NULL source line in error", NULL);\
-      if (a->number > 0) {\
+      if (a->number == 0) {\
+	bufcat (b, "in standard environment", BUFFER_SIZE);\
+      } else {\
         if (p != NULL && a->number == LINE (p)->number) {\
           snprintf (d, SMALL_BUFFER_SIZE, "in this line");\
 	} else {\
@@ -696,6 +702,9 @@ Z string literal.
       } else {\
 	bufcat (b, "symbol", BUFFER_SIZE);\
       }\
+    } else if (t[0] == 'U') {\
+      char *str = va_arg (args, char *);\
+      bufcat (b, str, BUFFER_SIZE);\
     } else if (t[0] == 'X') {\
       int att = va_arg (args, int);\
       char z[BUFFER_SIZE];\

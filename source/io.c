@@ -183,7 +183,7 @@ ssize_t io_read (FILE_T fd, void *buf, size_t n)
   int restarts = 0;
   char *z = (char *) buf;
   while (to_do > 0) {
-#ifdef WIN32_VERSION
+#if defined HAVE_WIN32
     int bytes_read;
 #else
     ssize_t bytes_read;
@@ -259,7 +259,7 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
   int restarts = 0;
   char *z = (char *) buf;
   while (to_do > 0) {
-#ifdef WIN32_VERSION
+#if defined HAVE_WIN32
     int bytes_read;
 #else
     ssize_t bytes_read;

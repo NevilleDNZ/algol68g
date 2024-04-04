@@ -32,7 +32,7 @@ routines in this file will give a runtime error when called. You can also choose
 to not have them defined in "prelude.c"
 */
 
-#ifdef HAVE_GSL
+#if defined HAVE_GSL
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_const.h>
@@ -44,7 +44,7 @@ to not have them defined in "prelude.c"
 double inverf (double);
 double inverfc (double);
 
-#ifdef HAVE_GSL
+#if defined HAVE_GSL
 A68_ENV_REAL (genie_cgs_acre, GSL_CONST_CGS_ACRE);
 A68_ENV_REAL (genie_cgs_angstrom, GSL_CONST_CGS_ANGSTROM);
 A68_ENV_REAL (genie_cgs_astronomical_unit, GSL_CONST_CGS_ASTRONOMICAL_UNIT);
@@ -617,10 +617,10 @@ void genie_atan2_real (NODE_T * p)
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
   RESET_ERRNO;
   if (x->value == 0.0 && y->value == 0.0) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (LONG_COMPLEX), NULL);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (LONG_REAL), NULL);
     exit_genie (p, A_RUNTIME_ERROR);
   }
-  x->value = atan2 (x->value, y->value);
+  x->value = a68g_atan2 (y->value, x->value);
   if (errno != 0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH_EXCEPTION);
     exit_genie (p, A_RUNTIME_ERROR);
@@ -707,67 +707,7 @@ void genie_inverfc_real (NODE_T * p)
   C_FUNCTION (p, inverfc);
 }
 
-#ifdef HAVE_GSL
-
-/*!
-\brief PROC csinh = (COMPLEX) COMPLEX
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_sinh_complex (NODE_T * p)
-{
-  GSL_COMPLEX_FUNCTION (gsl_complex_sinh);
-}
-
-/*!
-\brief PROC ccosh = (COMPLEX) COMPLEX
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_cosh_complex (NODE_T * p)
-{
-  GSL_COMPLEX_FUNCTION (gsl_complex_cosh);
-}
-
-/*!
-\brief PROC ctanh = (COMPLEX) COMPLEX
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_tanh_complex (NODE_T * p)
-{
-  GSL_COMPLEX_FUNCTION (gsl_complex_tanh);
-}
-
-/*!
-\brief PROC carcsinh = (COMPLEX) COMPLEX
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_arcsinh_complex (NODE_T * p)
-{
-  GSL_COMPLEX_FUNCTION (gsl_complex_arcsinh);
-}
-
-/*!
-\brief PROC carccosh = (COMPLEX) COMPLEX
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_arccosh_complex (NODE_T * p)
-{
-  GSL_COMPLEX_FUNCTION (gsl_complex_arccosh);
-}
-
-/*!
-\brief PROC carctanh = (COMPLEX) COMPLEX
-\param p position in syntax tree, should not be NULL
-**/
-
-void genie_arctanh_complex (NODE_T * p)
-{
-  GSL_COMPLEX_FUNCTION (gsl_complex_arctanh);
-}
+#if defined HAVE_GSL
 
 /* "Special" functions - but what is so "special" about them? */
 

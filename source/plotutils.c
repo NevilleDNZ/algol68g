@@ -32,14 +32,14 @@ this file will give a runtime error when called. You can also choose to not
 define them in "prelude.c". 
 */
 
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
 
 /*
 To use titles in an X-window you must enable HAVE_MODIFIABLE_X_TITLE and edit
 GNU libplot. See the INSTALL file. 
 */
 
-#ifdef HAVE_MODIFIABLE_X_TITLE
+#if defined HAVE_MODIFIABLE_X_TITLE
 extern char *XPLOT_APP_NAME;
 #endif
 
@@ -914,6 +914,10 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
   }
   device_type = (char *) ADDRESS (&(f->device.device));
   if (!strcmp (device_type, "X")) {
+#if defined X_DISPLAY_MISSING
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER);
+    exit_genie (p, A_RUNTIME_ERROR);
+#else
 /*-----------------------------------------+
 | Supported plotter type - X Window System |
 +-----------------------------------------*/
@@ -950,7 +954,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-#ifdef HAVE_MODIFIABLE_X_TITLE
+#if defined HAVE_MODIFIABLE_X_TITLE
 /* To use this you must enable HAVE_MODIFIABLE_X_TITLE and edit GNU libplot.
    See the INSTALL file. */
     TEST_INIT (p, ref_filename, MODE (ROWS));
@@ -973,6 +977,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     f->device.x_coord = 0;
     f->device.y_coord = 0;
     return (f->device.plotter);
+#endif
   } else if (!strcmp (device_type, "pnm")) {
 /*-----------------------------------------+
 | Supported plotter type - Portable aNyMap |

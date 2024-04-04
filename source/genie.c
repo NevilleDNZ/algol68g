@@ -29,7 +29,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/types.h>
 #include <sys/time.h>
 
-#ifndef WIN32_VERSION
+#if ! defined HAVE_WIN32
 #include <sys/resource.h>
 #endif
 
@@ -103,7 +103,7 @@ void exit_genie (NODE_T * p, int ret)
     if (ret > A_FORCE_QUIT) {
       ret -= A_FORCE_QUIT;
     }
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
     if (in_par_clause && !is_main_thread ()) {
       genie_abend_thread ();
     } else {
@@ -409,6 +409,14 @@ static void free_genie_heap (NODE_T * p)
 
 void genie (MODULE_T * module)
 {
+  MOID_LIST_T *ml;
+/* First fill in final info for modes */
+  for (ml = top_moid_list; ml != NULL; FORWARD (ml)) {
+    MOID_T *mml = MOID (ml);
+    mml->size = moid_size (mml);
+    mml->short_id = mode_attribute (mml);
+  }
+/* Preprocessing */
   max_lex_lvl = 0;
 /*  genie_lex_levels (module->top_node, 1); */
   genie_preprocess (module->top_node, &max_lex_lvl);
@@ -421,7 +429,7 @@ void genie (MODULE_T * module)
     genie_init_rng ();
   }
   io_close_tty_line ();
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   parallel_clauses = 0;
   count_parallel_clauses (module->top_node);
 #endif
@@ -445,6 +453,7 @@ void genie (MODULE_T * module)
     FRAME_STATIC_LINK (frame_pointer) = 0;
     FRAME_TREE (frame_pointer) = (NODE_T *) p;
     FRAME_LEXICAL_LEVEL (frame_pointer) = LEX_LEVEL (p);
+    FRAME_GLOBAL_POINTER (frame_pointer) = 0;
     initialise_frame (p);
     genie_init_heap (p, module);
     genie_init_transput (module->top_node);
@@ -453,10 +462,16 @@ void genie (MODULE_T * module)
   } else {
 /* Abnormal end of program. */
     if (ret_code == A_RUNTIME_ERROR) {
+      if (module->options.backtrace) {
+        snprintf (output_line, BUFFER_SIZE, "\n++++ Stack backtrace");
+        io_write_string (STDOUT_FILENO, output_line);
+        stack_dump (STDOUT_FILENO, frame_pointer, 16);
+        io_write_string (STDOUT_FILENO, "\n");
+      }
       if (module->files.listing.opened) {
-        snprintf (output_line, BUFFER_SIZE, "\n++++ Stack traceback");
+        snprintf (output_line, BUFFER_SIZE, "\n++++ Stack backtrace");
         io_write_string (module->files.listing.fd, output_line);
-        stack_dump (module->files.listing.fd, frame_pointer, 128);
+        stack_dump (module->files.listing.fd, frame_pointer, 32);
       }
     }
   }

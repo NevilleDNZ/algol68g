@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,15 +28,15 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
 <h2>Description of Algol68G</h2>
-<small>
 &nbsp;&middot;&nbsp;<a href="#high">About this Algol 68 implementation</a><br>
 &nbsp;&middot;&nbsp;<a href="#diff">Algol68G compared to the Revised Report description</a><br>
 &nbsp;&middot;&nbsp;<a href="#params">Partial parametrisation and currying</a><br>
@@ -50,7 +51,6 @@ pre {font-size: 10pt; font-family: Courier;}
 &nbsp;&nbsp;&nbsp;&middot;&nbsp;<a href="#prepsw">Switching the preprocessor on or off</a><br>
 &nbsp;&middot;&nbsp;<a href="#speed">Interpreter speed</a><br>
 &nbsp;&middot;&nbsp;<a href="#limitations">Limitations and bugs</a><br>
-</small>
 </td>
 <td width="30%" valign=top align=center>
 <img src="logo.gif">
@@ -62,27 +62,28 @@ pre {font-size: 10pt; font-family: Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -127,10 +128,11 @@ This manual contains an <a href="syntax.html">Algol68G syntax summary</a> for qu
 </ul>
 <li>On systems that support them, <a href="extensions.html#envunix">UNIX extensions</a> that allow e.g. for executing child processes that communicate through pipes, matching regular expressions or fetching web page contents.
 <li>Procedures for <a href="drawing.html">drawing</a> using the GNU Plotting Utilities.
-<li>Various <a href="numerical.html">numerical procedures</a> from the GNU Scientific Library.
+<li>Various extra <a href="numerical.html">numerical procedures</a>, many of which from the GNU Scientific Library.
+<li>Basic <a href="torrix.html">linear algebra procedures</a> from the GNU Scientific Library.
+<li>Support for <a href="http://www.postgresql.org">PostgreSQL</a>, an open-source relational database management system, enabling client applications in Algol 68.
 <li>Format texts, straightening and <a href="#fmtio">formatted transput</a>. 
 Transput routines work generically on files, (dynamic) strings and UNIX pipes.
-<li>Support for <a href="http://www.postgresql.org">PostgreSQL</a>, an open-source relational database management system, enabling client applications in Algol 68.
 <li>Parallel clause on platforms that support POSIX threads.
 <li>Upper stropping is the default, quote stropping is optional.
 </ul>
@@ -154,10 +156,6 @@ tertiary 1 ORF tertiary 2:
 The syntactic position of those pseudo-operator expressions is a boolean-unit, the same as an identity relation. The tertiaries are meek-boolean-tertiaries.
 <li>Implementation of <code>DOWNTO</code> with comparable function as <code>TO</code> in loop clauses; <code>DOWNTO</code> <i>decreases</i>, whereas <code>TO</code> <i>increases</i>, the loop counter by the value of the (implicit) by-part. 
 For example
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
 <pre>
 # Find last occurence of character in STRING s #
 
@@ -167,73 +165,42 @@ WHILE continue
 DO (s[i] = "a" | print (i); continue := FALSE)
 OD
 </pre>
-</font>
-</td>
-</table>
 <p>
 <li>Implementation of a post-checked loop. A do-part may enclose a serial clause followed by an optional until-part, or just enclose an until-part. This is an alternative to the paradigm Algol 68 post-check loop <code>WHILE ... DO SKIP OD</code>. An until-part consists of the keyword <code>UNTIL</code> followed by a meek-boolean-enquiry-clause. The loop-clause terminates when the enquiry-clause yields <code>TRUE</code>.
 For example
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
 <pre>
 DO UNTIL read string = "continue" OD
 </pre>
-</font>
-</td>
-</table>
 <p>
 <li>Implementation of monadic- and dyadic operator <code>ELEMS</code> that operate on any row, defined as
-<ul>
 <pre>
 OP ELEMS = ("ROWS" z) INT        # total number of elements in "z" #
 OP ELEMS = (INT d, "ROWS" z) INT # number of elements in dimension "d" of "z" #
 </pre>
-</ul>
 For example
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 [1 : 10, -5 : 5] INT r;<br>
 print ((1 ELEMS r, 2 ELEMS r, ELEMS r)) # prints +10 +11 +110 #
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 The monadic operator returns the total number of elements while the dyadic operator returns the number of elements in the specified dimension, if this is a valid dimension.
 <li>When option <code>brackets</code> is specified, 
 <code>(..)</code>, <code>[..]</code> and <code>{..}</code> 
 are equivalent to the parser and any pair can be used where Algol 68 requires open-symbols and close-symbols. This allows for clearer coding when parenthesis are nested. For example:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 poly := a0 + x * (a1 + x * {a2 + x * [a3 + x * a4]});<br>
 COMPL z := {cos (phi), -sin (phi)};<br>
 ln [x + sqrt {x^2 + 1}]
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 If <code>brackets</code> is not specified, <code>(..)</code> is an alternative for <code>[..]</code> in bounds and indexers, which is traditional Algol 68 syntax. 
 <li>The parser allows for colons, used in bounds and indexers, to be replaced by '<code>..</code>' which is the Pascal style. For instance
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 [1 .. n] INT z;<br>
 z [1 .. n OVER 2]
-</tt>
-</font>
-</td>
-</table>
+</pre>
 </ul>
 
 <p>
@@ -246,48 +213,30 @@ This maps better onto operating systems as UNIX or Linux.
 Details can be found <a name="io_1" href="#io">here</a>.
 <li><a name="par"></a>The Algol68G parallel clause deviates from the Algol 68 parallel clause when parallel clauses are nested. In Algol68G, stack frames inside a parallel unit are private, therefore if parallel units modify a shared variable then this variable must be declared outside the outermost parallel clause, and a jump out of a parallel unit can only be targeted at a label outside the outermost parallel clause.
 <li>The interpreter does not implement so-called ghost-elements <a href="resources.html#rr">{RR 2.1.3.4}</a>, hence it cannot check bounds when assigning to rows of mode flexible-rows-of-rows-of-... when the destination has a flat descriptor, as in 
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 FLEX [1 : 0] [1 : 3] CHAR s := "more than 3 characters"
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 A mode flexible-row-of-...-row-of-... is treated as if it were flexible throughout. The scope checker recognises the potential introduction of transient references resulting from this peculiarity in Algol68G.
 <br>
 <li>Algol68G does not recognise nonlocal environs <a href="resources.html#rr">{RR 5.2.3.2}</a>. All environs are local. Hence constructs as
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 REF INT i = (... | LOC INT | SKIP);<br>
 ...<br>
 [n] REF INT a; FOR k TO n DO a[k] := LOC INT OD
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 result in a scope violation error with Algol68G. 
 <br>
 <li>It is not possible to declare in a <code>[WHILE ...] DO ... [UNTIL ...] OD</code> part an identifier with equal spelling as the loop counter identifier. For instance
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 FOR i TO n DO INT i := 2 * n; ... OD;<br>
 ...<br>
 FOR i TO n WHILE INT i := n OVER 2; ... DO ... OD
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 are not accepted by Algol68G.
 <br>
@@ -326,10 +275,6 @@ inside the routine's locale and the scope of the routine becomes the newest of i
 </p>
 <p>
 Examples of partial parametrisation:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
 <pre>
 # Raising a function to a power #
 
@@ -342,14 +287,6 @@ OP ** = (FUN f, INT n) FUN: pow (f, n, );
 REAL x = read real;
 print ((new line, sin (3 * x),  3 *  sin (x) - 4 * (sin ** 3) (x)))
 </pre>
-</font>
-</td>
-</table>
-</p>
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
 <pre>
 # Partial parametrisation applied in handling a linked list #
 
@@ -370,10 +307,6 @@ zero (p);
 increment (p);
 list (p)
 </pre>
-</font>
-</td>
-</table>
-</p>
 
 <br>
 <h3><a name="io"></a>Transput implementation</h3>
@@ -391,10 +324,6 @@ For an overview of implemented procedures refer to the <a name="envio_1" href="e
 <a href="description.html#stringio">strings</a>
 and <a href="extensions.html#envunix">UNIX pipes</a>.
 For example, next program reads a filename and filters file contents using the UNIX program "od".
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
 <pre>
 PIPE p = execve child pipe ("/usr/bin/od", ("/usr/bin/od", "-c", read string), "");
 on logical file end (read OF p, (REF FILE f) BOOL: GOTO end);
@@ -404,21 +333,12 @@ DO STRING s;
 OD;
 end: close (read OF p); close (write OF p)
 </pre>
-</font>
-</td>
-</table>
 <p>
 <li>Algol68G implements Algol68C routines as <code>read int</code> and <code>print int</code>, but not routines as <code>get int</code> and <code>put int</code>.
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 INT k = read int; COMPL z := read compl;
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 <li>There are two extra procedures to examine a file:
 <p>
@@ -443,25 +363,22 @@ This maps better onto operating systems as UNIX or Linux.
 <li>Getting and putting a file is essentially sequential. Only <code>reset</code> can intervene with sequential processing.
 <li>Algol68G currently does not permit switching between <i>read mood</i> and <i>write mood</i> unless the file is <code>reset</code> first (and the file was opened with <code>standback channel</code>). Whether a file is in <i>read mood</i> or <i>write mood</i> is determined by the first actual transput operation (put or get) on a file after opening it.
 <li><a name="stringio"></a>Since Algol68G transput operates on a <code>FLEX [] CHAR</code>, routine <code>associate</code> is declared as
-<p>
-<ul><code>PROC associate = (REF FILE, REF STRING) VOID</code></ul>
+<pre>
+PROC associate = (REF FILE, REF STRING) VOID
+</pre>
 <p>
 Note that RR specifies a <code>REF [][][] CHAR</code> argument where Algol68G specifies a <code>REF STRING</code> argument. On putting, the string is dynamically lengthened and output is added at the end of the string. 
 Attempted getting outside the string provokes an end of file condition, and <code>on file end</code> is invoked.
 When a file that is associated with a string is <code>reset</code>, getting restarts from the start of the associated string.
 Next (trivial) code fragment illustrates the use of <code>associate</code> in transput.
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><pre>
+<pre>
 [n] COMPL u, v;
 ...
 FILE in, out, STRING z; 
 associate (in, z); associate (out, z);
 putf (out, ($g$, u)); getf (in, ($g$, v));
-</pre></font>
-</td>
-</table>
+</pre>
+
 <p>
 <li>Since a file is accessed sequentially, <code>backspace</code> is not implemented.
 <li>Since an end on file event handler cannot move the filepointer to a good position (<code>reset</code> also resets a file's <i>read mood</i> and <i>write mood</i>),
@@ -474,19 +391,15 @@ Conform RR, getting of a <code>STRING</code> value will resume if the end of lin
 <i>Event handlers</i>
 <p>
 Algol 68 transput uses event handlers to handle conditions as end of file, end of line, transput error, etcetera. For example, next program will read a filename and echo file contents to standout:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><pre>
+<pre>
 open (standin, read string , standin channel);
 on logical file end (standin, (REF FILE f) BOOL: stop);
 DO STRING s;
    read ((s, newline)); 
    print ((s, newline))
 OD
-</pre></font>
-</td>
-</table>
+</pre>
+
 <p>
 Algol68G implements transput-event handlers 
 with mode <code>PROC (REF FILE) BOOL</code> that can be set by the procedures listed below. 
@@ -542,7 +455,9 @@ The Algol68G implementation deviates from the Revised Report specification, as d
 <li>Insertions can be any combination of alignments and literals.
 <li>The argument for a general-pattern is an enclosed-clause yielding <code>[] INT</code> (which is a superset of the RR specification). 
 <li>The radix for a bits-pattern can be 2 .. 16. The radix can be dynamic, by specifying 
-<ul><code>n integral-enclosed-clause r</code></ul> 
+<pre>
+n integral-enclosed-clause r
+</pre> 
 <li>The Revised Report specification of getting using an integral choice pattern has the peculiarity that when two literals start with the same sequence of characters, the longer literal should appear first in the list. Algol68G makes no such demand, and will select the correct literal from the list whatever their order.
 </ul>
 
@@ -552,7 +467,9 @@ The Algol68G implementation deviates from the Revised Report specification, as d
 <li>When all arguments in a call of <code>readf, printf, writef, getf</code> or <code>putf</code> are processed, the format associated with the corresponding file is purged - that is, remaining insertions are processed and the format is discarded. 
 If a pattern is encountered while purging, then there was no associated argument and the event routine set by <code>on format error</code> is called.
 When this event routine returns <code>FALSE</code> (the default routine always returns <code>FALSE</code>) a runtime error will be produced. If one wants  remaining patterns to be silently ignored for a file <code>f</code>, one can specify
-<ul><code>on format error (f, (REF FILE g) BOOL: TRUE)</code></ul>
+<pre>
+on format error (f, (REF FILE g) BOOL: TRUE)
+</pre>
 <li><code>SIMPLIN</code> and <code>SIMPLOUT</code> are generic for both formatted and unformatted transput. Therefore <code>SIMPLIN</code> and <code>SIMPLOUT</code> include both mode <code>FORMAT</code> and <code>PROC (REF FILE) VOID</code>. Unformatted transput routines <code>read, print, write, get</code> and <code>put</code> ignore eventual <code>FORMAT</code> arguments. Formatted transput routines <code>readf, printf, writef, getf</code> and <code>putf</code> ignore eventual <code>PROC (REF FILE) VOID</code> arguments.
 <li>Insertion <i>x</i> has the same effect as insertion <i>q</i>; both call <code>space</code>.
 <li>Insertion <i>y</i> is not implemented since <code>backspace</code> is not implemented (see <a href="#genio">Transput in general</a>). Consequently, insertion <i>k</i> can only move forward.
@@ -566,19 +483,15 @@ When this event routine returns <code>FALSE</code> (the default routine always r
 <p>
 Assertion syntax can be found in the <a href="syntax.html#assertions">syntax summary</a>.
 <p>Under control of the 'assertions' and 'noassertions' pragmat items, the tertiary of an assertion is elaborated at runtime. If the tertiary yields <code>FALSE</code>, a runtime error is produced. For example,
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><pre>
+<pre>
 OP FACULTY = (INT n) INT:
    IF ASSERT (n >= 0); 
       n > 0 
    THEN n * FACULTY (n - 1) 
    ELSE 1 
    FI
-</pre></font>
-</td>
-</table>
+</pre>
+
 <p>
 will produce an error when <code>FACULTY</code> is called with a negative argument.
 </p>
@@ -597,25 +510,16 @@ Currently, the preprocessor supports these features:
 <h4><a name="prepcat"></a>Concatenation of lines</h4>
 <p>
 Concatenation of lines is similar to what the C preprocessor does. Any line that ends in a backslash ('\') will be concatenated with the line following it. For example:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><tt>
+<pre>
 STRING s := "spanning two \<br>
 lines"
-</tt></font>
-</td>
-</table>
+</pre>
 <p>
 will become
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><tt>
+<pre>
 STRING s := "spanning two lines"
-</tt></font>
-</td>
-</table>
+</pre>
+
 <p>
 Using a backslash as an escape character causes no interference with Algol 68 source text since when using upper stropping, a backslash is an unworthy character; when using quote stropping a backslash is a times-ten-symbol, but a real-denotation cannot span end-of-line hence no interference occurs. 
 <p>
@@ -625,17 +529,11 @@ Note that when you make use of line concatenation, diagnostics in a concatenated
 <h4><a name="prepinc"></a>Inclusion of files</h4>
 <p>
 Algol68G supports inclusion of other files in an Algol 68 source text. The inclusion directive reads:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 PR read "filename" PR<br>
 PR include "filename" PR
-</tt>
-</font>
-</td>
-</table>
+</pre>
+
 <p>
 The file with name <i>filename</i> is inserted textually <i>before</i> the line that holds the file inclusion directive. 
 In this way tokens remain in their original lines, which will give more accurate placement of diagnostics. It is therefore recommended that a file inclusion directive be the only text on the line it is in. A file will only be inserted once, on attempted multiple inclusion the file is ignored. Attempted multiple inclusion may for example result from specifying, in an included file, an inclusion directive for an already included file.
@@ -665,21 +563,20 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 
 <br>
 <h3><a name="speed"></a>Interpreter speed</h3>
-<p>The speed of the interpreter will depend on platform and application. To have a crude comparison, Algol68G was rated with the Whetstone benchmark. Next table compiles approximate Whetstone ratings for some personal computers running Algol68G and ratings for compiled FORTRAN code on various machines from the past (many of which ran 
+<p>The speed of the interpreter will of course depend on platform and application. 
+To have a measure of speed Algol68G was rated with the Whetstone benchmark. Next table compiles approximate Whetstone ratings for some personal computers running Algol68G and ratings for compiled FORTRAN code on various machines from the past (which ran 
 <a href="resources.html#implementations">legacy Algol 68 implementations</a>). 
 <p>
-Algol 68 Genie speed approximately scales linearly in clock speed when run on PowerPC or ix86.
-<p>
 <table border=0 cellspacing=0 cellpadding=6>
-<tr><td bgcolor=#e8e8e8><b>System</b></td><td bgcolor="#e8e8e8"><b>MWhets</b></td><td bgcolor="#e8e8e8"><b>Remarks</b></td></tr>
-<tr><td bgcolor=#e8e8e8>VAX 11/785<br>IBM 4341-2</td><td bgcolor="#e8e8e8">1</td><td bgcolor="#e8e8e8">FORTRAN</td>
-<tr><td bgcolor=#e8e8e8>ICL 2980<br>IBM 370/168</td><td bgcolor="#e8e8e8">2</td><td bgcolor="#e8e8e8">FORTRAN</td></tr>
-<tr><td bgcolor=#e8e8e8>PowerPC G3 (233 MHz)</td><td bgcolor="#e8e8e8">2</td><td bgcolor="#e8e8e8">Algol68G/Linux/gcc</td></tr>
-<tr><td bgcolor=#e8e8e8>Cyber 7600</td><td bgcolor="#e8e8e8">9</td><td bgcolor="#e8e8e8">FORTRAN</td></tr>
-<tr><td bgcolor=#e8e8e8>Pentium III (1.2 GHz)</td><td bgcolor="#e8e8e8">10</td><td bgcolor="#e8e8e8">Algol68G/Windows XP/gcc</td></tr>
-<tr><td bgcolor=#e8e8e8>Cyber 205 (Scalar)<br>Cray-1A (Scalar)<br></td><td bgcolor="#e8e8e8">12</td><td bgcolor="#e8e8e8">FORTRAN</td></tr>
-<tr><td bgcolor=#e8e8e8>PowerPC G5 (Dual 2.5 GHz)</td><td bgcolor="#e8e8e8">20</td><td bgcolor="#e8e8e8">Algol68G/MacOS X/gcc</td></tr>
-<tr><td bgcolor=#e8e8e8>Pentium IV (3 GHz)</td><td bgcolor="#e8e8e8">23</td><td bgcolor="#e8e8e8">Algol68G/OpenBSD/gcc</td></tr>
+<tr><td bgcolor=#f0f0f0><b>System</b></td><td bgcolor="#f0f0f0"><b>MWhets</b></td><td bgcolor="#f0f0f0"><b>Remarks</b></td></tr>
+<tr><td bgcolor=#f0f0f0>VAX 11/785</td><td bgcolor="#f0f0f0">1</td><td bgcolor="#f0f0f0">FORTRAN</td>
+<tr><td bgcolor=#f0f0f0>IBM 370/168</td><td bgcolor="#f0f0f0">2</td><td bgcolor="#f0f0f0">FORTRAN</td></tr>
+<tr><td bgcolor=#f0f0f0>PowerPC G3 (233 MHz)</td><td bgcolor="#f0f0f0">2</td><td bgcolor="#f0f0f0">Algol68G/Linux/gcc</td></tr>
+<tr><td bgcolor=#f0f0f0>Cyber 7600</td><td bgcolor="#f0f0f0">9</td><td bgcolor="#f0f0f0">FORTRAN</td></tr>
+<tr><td bgcolor=#f0f0f0>Pentium III (1.2 GHz)</td><td bgcolor="#f0f0f0">10</td><td bgcolor="#f0f0f0">Algol68G/Windows XP/gcc</td></tr>
+<tr><td bgcolor=#f0f0f0>Cray-1A (Scalar)<br></td><td bgcolor="#f0f0f0">12</td><td bgcolor="#f0f0f0">FORTRAN</td></tr>
+<tr><td bgcolor=#f0f0f0>PowerPC G5 (Dual 2.5 GHz)</td><td bgcolor="#f0f0f0">20</td><td bgcolor="#f0f0f0">Algol68G/MacOS X/gcc</td></tr>
+<tr><td bgcolor=#f0f0f0>Pentium IV (3 GHz)</td><td bgcolor="#f0f0f0">23</td><td bgcolor="#f0f0f0">Algol68G/OpenBSD/gcc</td></tr>
 </table>
 </p>
 
@@ -697,26 +594,30 @@ Algol 68 Genie speed approximately scales linearly in clock speed when run on Po
 <li>Algorithms for extended precision (<code>LONG LONG</code> arithmetic modes)</code> are not really suited for precisions larger than about a thousand digits. State of the art in the field offers more efficient algorithms than implemented here.
 <li>Overflow- and underflow checks on <code>REAL</code> and <code>COMPLEX</code> operations require IEEE-754 compatibility. Many processor types, notably ix86's and PowerPC processors, are IEEE-754 compatible.
 <li>A garbage collector cannot solve all memory allocation issues. It is therefore possible to get an unexpected "out of memory" diagnostic. Two options in such case are (1) to increase heap size or (2) to call standard prelude routine "sweep heap" or "preemptive sweep heap" at strategic positions in the program.
+<li>In some versions of <code>libplot</code>, <code>pseudo-gif</code> plotters produce garbled graphics when more than 256 different colours are specified. Algol 68 Genie does not work around this problem in <code>libplot</code>.
 </ul>
 </td>
 
 </td>
 </table>
 
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
-<br>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
 </p>
+<hr color=#f0f0f0>
 </body>
 </html>
+

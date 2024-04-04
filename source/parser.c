@@ -280,35 +280,195 @@ static int get_good_attribute (NODE_T * p)
 }
 
 /*!
-\brief intelligible diagnostic_node from syntax tree branch
+\brief preferably don't put intelligible diagnostic here
+\param p position in syntax tree, should not be NULL
+\return
+**/
+
+static BOOL_T dont_mark_here (NODE_T * p)
+{
+  switch (ATTRIBUTE (p)) {
+  case ACCO_SYMBOL:
+  case ANDF_SYMBOL:
+  case ANDTH_SYMBOL:
+  case ASSERT_SYMBOL:
+  case ASSIGN_SYMBOL:
+  case ASSIGN_TO_SYMBOL:
+  case AT_SYMBOL:
+  case BEGIN_SYMBOL:
+  case BITS_SYMBOL:
+  case BOLD_COMMENT_SYMBOL:
+  case BOLD_PRAGMAT_SYMBOL:
+  case BOOL_SYMBOL:
+  case BUS_SYMBOL:
+  case BYTES_SYMBOL:
+  case BY_SYMBOL:
+  case CASE_SYMBOL:
+  case CHANNEL_SYMBOL:
+  case CHAR_SYMBOL:
+  case CLOSE_SYMBOL:
+  case CODE_SYMBOL:
+  case COLON_SYMBOL:
+  case COMMA_SYMBOL:
+  case COMPLEX_SYMBOL:
+  case COMPL_SYMBOL:
+  case DOTDOT_SYMBOL:
+  case DOWNTO_SYMBOL:
+  case DO_SYMBOL:
+  case EDOC_SYMBOL:
+  case ELIF_SYMBOL:
+  case ELSE_BAR_SYMBOL:
+  case ELSE_SYMBOL:
+  case ELSF_SYMBOL:
+  case EMPTY_SYMBOL:
+  case END_SYMBOL:
+  case ENVIRON_SYMBOL:
+  case EQUALS_SYMBOL:
+  case ESAC_SYMBOL:
+  case EXIT_SYMBOL:
+  case FALSE_SYMBOL:
+  case FILE_SYMBOL:
+  case FI_SYMBOL:
+  case FLEX_SYMBOL:
+  case FORMAT_DELIMITER_SYMBOL:
+  case FORMAT_SYMBOL:
+  case FOR_SYMBOL:
+  case FROM_SYMBOL:
+  case GOTO_SYMBOL:
+  case GO_SYMBOL:
+  case HEAP_SYMBOL:
+  case IF_SYMBOL:
+  case INT_SYMBOL:
+  case IN_SYMBOL:
+  case ISNT_SYMBOL:
+  case IS_SYMBOL:
+  case LOC_SYMBOL:
+  case LONG_SYMBOL:
+  case MAIN_SYMBOL:
+  case MODE_SYMBOL:
+  case NIL_SYMBOL:
+  case OCCA_SYMBOL:
+  case OD_SYMBOL:
+  case OF_SYMBOL:
+  case OPEN_SYMBOL:
+  case OP_SYMBOL:
+  case OREL_SYMBOL:
+  case ORF_SYMBOL:
+  case OUSE_SYMBOL:
+  case OUT_SYMBOL:
+  case PAR_SYMBOL:
+  case PIPE_SYMBOL:
+  case POINT_SYMBOL:
+  case PRIO_SYMBOL:
+  case PROC_SYMBOL:
+  case REAL_SYMBOL:
+  case REF_SYMBOL:
+  case ROWS_SYMBOL:
+  case ROW_SYMBOL:
+  case SEMA_SYMBOL:
+  case SEMI_SYMBOL:
+  case SHORT_SYMBOL:
+  case SKIP_SYMBOL:
+  case STRING_SYMBOL:
+  case STRUCT_SYMBOL:
+  case STYLE_II_COMMENT_SYMBOL:
+  case STYLE_I_COMMENT_SYMBOL:
+  case STYLE_I_PRAGMAT_SYMBOL:
+  case SUB_SYMBOL:
+  case THEF_SYMBOL:
+  case THEN_BAR_SYMBOL:
+  case THEN_SYMBOL:
+  case TO_SYMBOL:
+  case TRUE_SYMBOL:
+  case UNION_SYMBOL:
+  case UNTIL_SYMBOL:
+  case VOID_SYMBOL:
+  case WHILE_SYMBOL:
+/* and than */
+  case SERIAL_CLAUSE:
+  case ENQUIRY_CLAUSE:
+  case INITIALISER_SERIES:
+  case DECLARATION_LIST:
+    {
+      return (A_TRUE);
+    }
+  default:
+    {
+      return (A_FALSE);
+    }
+  }
+}
+
+/*!
+\brief intelligible diagnostic from syntax tree branch
 \param p position in syntax tree, should not be NULL
 \param q
 \return
 **/
 
-static char *phrase_to_text (NODE_T * p, NODE_T * q)
+static char *phrase_to_text (NODE_T * p, NODE_T ** w)
 {
 #define MAX_TERMINALS 8
-  int length = 0, count = 0;
+  int count = 0, line = -1;
   static char buffer[BUFFER_SIZE];
-  buffer[0] = NULL_CHAR;
-  for (; p != NULL && (q != NULL ? p != NEXT (q) : count < MAX_TERMINALS)
-      && length < BUFFER_SIZE / 2; FORWARD (p)) {
-    char *z = non_terminal_string (edit_line, get_good_attribute (p));
-    if (strlen (buffer) > 1) {
-      bufcat (buffer, ", ", BUFFER_SIZE);
+  for (buffer[0] = NULL_CHAR; p != NULL && count < MAX_TERMINALS; FORWARD (p)) {
+    if (LINE_NUMBER (p) > 0) {
+      int gatt = get_good_attribute (p);
+      char *z = non_terminal_string (input_line, gatt);
+/* 
+Where to put the error message?  Bob Uzgalis noted that actual content of a 
+diagnostic is not as important as accurately indicating *were* the problem is! 
+*/
+      if (count == 0 || (*w) == NULL) {
+        *w = p;
+      } else if (dont_mark_here (*w)) {
+        *w = p;
+      }
+/* Add initiation. */
+      if (count == 0) {
+        bufcat (buffer, "Construct starts with", BUFFER_SIZE);
+      } else if (count == 1) {
+        bufcat (buffer, " which is followed by", BUFFER_SIZE);
+      } else if (count == 2) {
+        bufcat (buffer, " and than", BUFFER_SIZE);
+      } else if (count >= 3) {
+        bufcat (buffer, ",", BUFFER_SIZE);
+      }
+/* Attribute or symbol. */
+      if (z != NULL && SUB (p) != NULL) {
+        if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTER) {
+          snprintf (edit_line, BUFFER_SIZE, " \"%s\"", SYMBOL (p));
+          bufcat (buffer, edit_line, BUFFER_SIZE);
+        } else {
+          if (strchr ("aeio", z[0]) != NULL) {
+            bufcat (buffer, " an", BUFFER_SIZE);
+          } else {
+            bufcat (buffer, " a", BUFFER_SIZE);
+          }
+          snprintf (edit_line, BUFFER_SIZE, " %s", z);
+          bufcat (buffer, edit_line, BUFFER_SIZE);
+        }
+      } else if (z != NULL && SUB (p) == NULL) {
+        snprintf (edit_line, BUFFER_SIZE, " \"%s\"", SYMBOL (p));
+        bufcat (buffer, edit_line, BUFFER_SIZE);
+      } else if (SYMBOL (p) != NULL) {
+        snprintf (edit_line, BUFFER_SIZE, " \"%s\"", SYMBOL (p));
+        bufcat (buffer, edit_line, BUFFER_SIZE);
+      }
+/* Add "starting in line nn". */
+      if (z != NULL && line != LINE_NUMBER (p)) {
+        line = LINE_NUMBER (p);
+        if (gatt == SERIAL_CLAUSE || gatt == ENQUIRY_CLAUSE || gatt == INITIALISER_SERIES) {
+          bufcat (buffer, " starting", BUFFER_SIZE);
+        }
+        snprintf (edit_line, BUFFER_SIZE, " in line %d", line);
+        bufcat (buffer, edit_line, BUFFER_SIZE);
+      }
+      count++;
     }
-    if (z != NULL) {
-      bufcat (buffer, z, BUFFER_SIZE);
-    } else if (SYMBOL (p) != NULL) {
-      snprintf (edit_line, BUFFER_SIZE, "\"%s\"", SYMBOL (p));
-      bufcat (buffer, edit_line, BUFFER_SIZE);
-    }
-    count++;
-    length = strlen (buffer);
   }
-  if (p != NULL && (q == NULL ? A_FALSE : count == MAX_TERMINALS)) {
-    bufcat (buffer, " ..", BUFFER_SIZE);
+  if (p != NULL && count == MAX_TERMINALS) {
+    bufcat (buffer, " etcetera", BUFFER_SIZE);
   }
   return (buffer);
 }
@@ -524,9 +684,13 @@ static NODE_T *bracket_check_parse (NODE_T * top, NODE_T * p)
         goto next;
       }
     }
-    if (q == NULL || WHETHER_NOT (q, ket)) {
+    if (q == NULL) {
       char *diag = bracket_check_diagnose (top);
       diagnostic_node (A_SYNTAX_ERROR, p, ERROR_PARENTHESIS, strlen (diag) > 0 ? diag : INFO_MISSING_KEYWORDS);
+      longjmp (top_down_crash_exit, 1);
+    } else if (WHETHER_NOT (q, ket)) {
+      char *diag = bracket_check_diagnose (top);
+      diagnostic_node (A_SYNTAX_ERROR, p, ERROR_PARENTHESIS_2, SYMBOL (q), LINE (q), ket, strlen (diag) > 0 ? diag : INFO_MISSING_KEYWORDS);
       longjmp (top_down_crash_exit, 1);
     }
     p = q;
@@ -571,7 +735,7 @@ static void top_down_diagnose (NODE_T * start, NODE_T * where, int clause, int e
   if (expected != 0) {
     diagnostic_node (A_SYNTAX_ERROR, issue, ERROR_EXPECTED_NEAR, expected, clause, SYMBOL (start), start->info->line, NULL);
   } else {
-    diagnostic_node (A_SYNTAX_ERROR, issue, ERROR_UNBALANCED_KEYWORD, clause, SYMBOL (start), start->info->line, NULL);
+    diagnostic_node (A_SYNTAX_ERROR, issue, ERROR_UNBALANCED_KEYWORD, clause, SYMBOL (start), LINE (start), NULL);
   }
 }
 
@@ -1291,7 +1455,7 @@ static void empty_clause (NODE_T * p)
   diagnostic_node (A_SYNTAX_ERROR, p, ERROR_CLAUSE_WITHOUT_VALUE);
 }
 
-#ifndef HAVE_POSIX_THREADS
+#if ! defined HAVE_POSIX_THREADS
 
 /*!
 \brief diagnose for parallel clause
@@ -1367,7 +1531,7 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     bufcpy (output_line, "", BUFFER_SIZE);
     bufcat (output_line, non_terminal_string (edit_line, result), BUFFER_SIZE);
     bufcat (output_line, "<-", BUFFER_SIZE);
-    bufcat (output_line, phrase_to_text (head, tail), BUFFER_SIZE);
+    bufcat (output_line, phrase_to_text (head, NULL), BUFFER_SIZE);
     io_write_string (STDOUT_FILENO, output_line);
   }
 /* Execute procedure in case reduction succeeds. */
@@ -1422,7 +1586,7 @@ static void reduce_particular_program (NODE_T * p)
   }
 /* Determine the encompassing enclosed clause. */
   for (q = p; q != NULL; FORWARD (q)) {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
     f (q, NULL, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
 #else
     f (q, par_clause, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
@@ -2157,7 +2321,7 @@ static void reduce_primary_bits (NODE_T * p, int expect)
     }
   }
   for (q = p; q != NULL; FORWARD (q)) {
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
     f (q, NULL, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
 #else
     f (q, par_clause, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
@@ -2494,24 +2658,24 @@ static void reduce_format_texts (NODE_T * p)
   }
   ambiguous_patterns (p);
   for (q = p; q != NULL; FORWARD (q)) {
-    f (q, NULL, NULL, PATTERN, GENERAL_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, INTEGRAL_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, REAL_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, COMPLEX_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, BITS_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, STRING_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, BOOLEAN_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, CHOICE_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, FORMAT_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, STRING_C_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, INTEGRAL_C_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, FIXED_C_PATTERN, 0);
-    f (q, NULL, NULL, PATTERN, FLOAT_C_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, GENERAL_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, INTEGRAL_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, REAL_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, COMPLEX_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, BITS_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, STRING_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, BOOLEAN_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, CHOICE_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, FORMAT_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, STRING_C_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, INTEGRAL_C_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, FIXED_C_PATTERN, 0);
+    f (q, NULL, NULL, A68_PATTERN, FLOAT_C_PATTERN, 0);
   }
 /* Pictures. */
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, PICTURE, INSERTION, 0);
-    f (q, NULL, NULL, PICTURE, PATTERN, 0);
+    f (q, NULL, NULL, PICTURE, A68_PATTERN, 0);
     f (q, NULL, NULL, PICTURE, COLLECTION, 0);
     f (q, NULL, NULL, PICTURE, REPLICATOR, COLLECTION, 0);
   }
@@ -2794,6 +2958,9 @@ static void reduce_generic_arguments (NODE_T * p)
       f (q, NULL, NULL, TRIMMER, DOTDOT_SYMBOL, AT_SYMBOL, UNIT, 0);
       f (q, NULL, NULL, TRIMMER, DOTDOT_SYMBOL, 0);
     }
+  }
+  for (q = p; q != NULL; FORWARD (q)) {
+    f (q, NULL, NULL, TRIMMER, UNIT, AT_SYMBOL, UNIT, 0);
   }
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, TRIMMER, AT_SYMBOL, UNIT, 0);
@@ -3311,16 +3478,25 @@ static void reduce_enclosed_clauses (NODE_T * p)
 
 static void recover_from_error (NODE_T * p, int expect, BOOL_T suppress)
 {
-/* This routine does not do fancy things as that might introduce more errors. */ NODE_T *q = p;
+/* This routine does not do fancy things as that might introduce more errors. */
+  NODE_T *q = p;
   if (p == NULL) {
     return;
   }
+  if (expect == SOME_CLAUSE) {
+    expect = serial_or_collateral (p);
+  }
   if (!suppress) {
-/* Give a general error message. */
-    if (expect == SOME_CLAUSE) {
-      expect = serial_or_collateral (p);
+/* Give an error message. */
+    NODE_T *w = p;
+    char *seq = phrase_to_text (p, &w);
+    if (strlen (seq) == 0) {
+      if (error_count == 0) {
+        diagnostic_node (A_SYNTAX_ERROR, w, ERROR_SYNTAX_EXPECTED, expect, NULL);
+      }
+    } else {
+      diagnostic_node (A_SYNTAX_ERROR, w, ERROR_INVALID_SEQUENCE, seq, NULL);
     }
-    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_INVALID_SEQUENCE, expect, phrase_to_text (p, NULL), NULL);
     if (error_count >= MAX_ERRORS) {
       longjmp (bottom_up_crash_exit, 1);
     }
@@ -3596,9 +3772,7 @@ static void extract_priorities (NODE_T * p)
           ATTRIBUTE (q) = PRIORITY;
           add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
           FORWARD (q);
-        } else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTER, 0)
-            || whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTER, 0)
-            || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTER, 0)) {
+        } else if (whether (q, BOLD_TAG, EQUALS_SYMBOL, INT_DENOTER, 0) || whether (q, OPERATOR, EQUALS_SYMBOL, INT_DENOTER, 0) || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, INT_DENOTER, 0)) {
           int k;
           NODE_T *y = q;
           ATTRIBUTE (q) = DEFINING_OPERATOR;
@@ -3609,17 +3783,15 @@ static void extract_priorities (NODE_T * p)
           ATTRIBUTE (q) = PRIORITY;
           add_tag (SYMBOL_TABLE (p), PRIO_SYMBOL, y, NULL, k);
           FORWARD (q);
-        } else if (whether (q, BOLD_TAG, INT_DENOTER, 0)
-            || whether (q, OPERATOR, INT_DENOTER, 0)
-            || whether (q, EQUALS_SYMBOL, INT_DENOTER, 0)) {
+        } else if (whether (q, BOLD_TAG, INT_DENOTER, 0) || whether (q, OPERATOR, INT_DENOTER, 0) || whether (q, EQUALS_SYMBOL, INT_DENOTER, 0)) {
 /* The scanner cannot separate operator and "=" sign so we do this here. */
           int len = (int) strlen (SYMBOL (q));
           if (len > 1 && SYMBOL (q)[len - 1] == '=') {
             int k;
             NODE_T *y = q;
-            char *sym = (char *) get_temp_heap_space (len);
-            bufcpy (sym, SYMBOL (q), len - 1);
-            sym[len] = NULL_CHAR;
+            char *sym = (char *) get_temp_heap_space (len + 1);
+            bufcpy (sym, SYMBOL (q), len + 1);
+            sym[len - 1] = NULL_CHAR;
             SYMBOL (q) = TEXT (add_token (&top_token, sym));
             ATTRIBUTE (q) = DEFINING_OPERATOR;
             insert_node (q, ALT_EQUALS_SYMBOL);
@@ -3673,22 +3845,19 @@ static void extract_operators (NODE_T * p)
             FORWARD (q);
             q->attribute = ALT_EQUALS_SYMBOL;
             q = skip_unit (q);
-          } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0)
-              || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0)
-              || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
+          } else if (whether (q, OPERATOR, EQUALS_SYMBOL, 0) || whether (q, BOLD_TAG, EQUALS_SYMBOL, 0) || whether (q, EQUALS_SYMBOL, EQUALS_SYMBOL, 0)) {
             ATTRIBUTE (q) = DEFINING_OPERATOR;
             add_tag (SYMBOL_TABLE (p), OP_SYMBOL, q, NULL, 0);
             FORWARD (q);
             q->attribute = ALT_EQUALS_SYMBOL;
             q = skip_unit (q);
-          } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG)
-                  || WHETHER (q, EQUALS_SYMBOL))) {
+          } else if (q != NULL && (WHETHER (q, OPERATOR) || WHETHER (q, BOLD_TAG) || WHETHER (q, EQUALS_SYMBOL))) {
 /* The scanner cannot separate operator and "=" sign so we do this here. */
             int len = (int) strlen (SYMBOL (q));
             if (len > 1 && SYMBOL (q)[len - 1] == '=') {
-              char *sym = (char *) get_temp_heap_space (len);
-              bufcpy (sym, SYMBOL (q), len - 1);
-              sym[len] = NULL_CHAR;
+              char *sym = (char *) get_temp_heap_space (len + 1);
+              bufcpy (sym, SYMBOL (q), len + 1);
+              sym[len - 1] = NULL_CHAR;
               SYMBOL (q) = TEXT (add_token (&top_token, sym));
               ATTRIBUTE (q) = DEFINING_OPERATOR;
               insert_node (q, ALT_EQUALS_SYMBOL);

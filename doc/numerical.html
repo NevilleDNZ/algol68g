@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,25 +28,23 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
 <h2>Extra numerical procedures</h2>
 <p>
-<small>
 &middot;&nbsp;<a href="#gslreal">REAL functions</a><br>
 &middot;&nbsp;<a href="#gslcomplex">COMPLEX functions</a><br>
 &middot;&nbsp;<a href="#gslairy">REAL Airy functions</a><br>
 &middot;&nbsp;<a href="#gslbessel">REAL Bessel functions</a><br>
 &middot;&nbsp;<a href="#gslelliptic">REAL Elliptic integrals</a><br>
 &middot;&nbsp;<a href="#gslerror">REAL Error and Gamma functions</a><br>
-&middot;&nbsp;<a href="#torrix">Basic REAL vector library</a><br>
 &middot;&nbsp;<a href="#constants">Physical Constants</a><br>
-</small>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
 <img src="logo.gif" align=center>
@@ -57,27 +56,28 @@ pre {font-size: 10pt; font-family: Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -135,6 +135,14 @@ Items that do not require GSL are marked as <b>[Native]</b>.
 <dt><code>PROC long long arc tanh = (LONG LONG REAL x) LONG LONG REAL</code>
 <dd>
 [Native] Evaluates the inverse hyperbolic tangent of argument <code>x</code>.
+<br>
+<br>
+<dt><code>PROC arc tan2 = (REAL x, y) REAL</code>
+<dt><code>PROC long arc tan2 = (LONG REAL x, y) LONG REAL</code>
+<dt><code>PROC long long arc tan2 = (LONG LONG REAL x, y) LONG LONG REAL</code>
+<dd>
+[Native] Evaluates the angle whose tangent is <code>y / x</code>.
+The angle will be in range [- &pi;, &pi;].
 </dl>
 <br>
 
@@ -398,69 +406,6 @@ defined as <code>gamma (a) * gamma (b) / gamma (a + b)</code>.
 <dd>[GSL] Evaluates the normalised incomplete beta function of arguments <code>a</code>, 
 <code>b</code> and <code>x</code>.
 </dl>
-
-<br>
-<h3><a name="torrix"></a>Basic REAL vector library</h3>
-<p>Algol68G implements a small vector library that relaxes the limitation that the interpreter poses on speed in arithmetic operations. Using these elementary procedures, more complex operations can be programmed. Consider for instance multiplication of a matrix <code>m</code> times a vector <code>b</code>:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><pre>
-FOR n TO UPB a 
-DO a[n] := vector inner product(m[n, ], b) 
-OD;
-</pre></font>
-</td>
-</table>
-<p>The procedures in the vector library are optimised for speed, although they still perform runtime checks on vector length, initialisation, assignment to <code>NIL</code> and division by zero. Please note that the procedures strictly process vector elements sequentially as in
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black><pre>
-PROC vector add = ([] REAL a, b, c) VOID:
-     FOR n TO UPB a 
-     DO a[n] := b[n] + c[n] 
-     OD;
-</pre></font>
-</table>
-<p>
-Therefore, take care when passing overlapping slices as arguments.
-</p>
-<p>Following is a list of available procedures.
-<dl>
-<dt><code>PROC vector set = (REF [] REAL a, REAL b) VOID</code>
-<dd>[Native] Sets all elements of vector <code>a</code> to real value <code>b</code>.
-<br>
-<br>
-<dt><code>PROC vector move = (REF [] REAL a, [] REAL b) VOID</code>
-<dd>[Native] Copies vector <code>b</code> to vector <code>a</code>. Both vectors are required to have equal number of elements.
-<br>
-<br>
-<dt><code>PROC vector times scalar = (REF [] REAL a, [] REAL b, REAL c) VOID</code>
-<dd>[Native] Multiplies, element by element, vector <code>b</code> by scalar <code>c</code> and puts the result in vector <code>a</code>. All vectors are required to have equal number of elements.
-<br>
-<br>
-<dt><code>PROC vector plus = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
-<dd>[Native] Adds vector <code>b</code> to vector <code>c</code> and puts the result in vector <code>a</code>. All vectors are required to have equal number of elements.
-<br>
-<br>
-<dt><code>PROC vector minus = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
-<dd>[Native] Subtracts vector <code>c</code> from vector <code>b</code> and puts the result in vector <code>a</code>. All vectors are required to have equal number of elements.
-<br>
-<br>
-<dt><code>PROC vector times = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
-<dd>[Native] Multiplies, element by element, vector <code>b</code> by vector <code>c</code> and puts the result in vector <code>a</code>. All vectors are required to have equal number of elements.
-<br>
-<br>
-<dt><code>PROC vector div = (REF [] REAL a, [] REAL b, [] REAL c) VOID</code>
-<dd>[Native] Divides, element by element, vector <code>b</code> by vector <code>c</code> and puts the result in vector <code>a</code>. All vectors are required to have equal number of elements.
-<br>
-<br>
-<dt><code>PROC vector inner product = ([] REAL a, [] REAL b) REAL</code>
-<dt><code>PROC vector inproduct = ([] REAL a, [] REAL b) REAL</code>
-<dd>[Native] Yields the inner product of vector <code>a</code> and vector <code>b</code>. Both vectors are required to have equal number of elements. Summation is done at <code>LONG REAL</code> precision.
-</dl>
-</p>
 
 <br>
 <h3><a name="constants"></a>Physical Constants</h3>
@@ -964,21 +909,23 @@ the physical magnetic moment of an electron is negative.
 <dd>[GSL] The length of 1 tex point (1/72.27 inch).
 </dl>
 
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
-<br>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
-
 </p>
+<hr color=#f0f0f0>
 </body>
 </html>
+

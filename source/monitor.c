@@ -36,7 +36,7 @@ clauses) and has basic means for inspecting call-frame stack and heap.
 #include "mp.h"
 #include "transput.h"
 
-#ifdef HAVE_TERMINFO
+#if defined HAVE_TERMINFO
 #include <term.h>
 char term_buffer[2 * KILOBYTE];
 char *term_type;
@@ -1117,7 +1117,7 @@ static int argval (char *num, char **rest)
 
 static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result)
 {
-  BOOL_T initialised = A_TRUE, recognised = A_FALSE;
+  BOOL_T initialised = A_FALSE, recognised = A_FALSE;
   switch (q->short_id) {
   case MODE_NO_CHECK:
   case UNION_SYMBOL:
@@ -1157,7 +1157,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
   case MODE_COMPLEX:
     {
       A68_REAL *r = (A68_REAL *) w;
-      A68_REAL *i = (A68_REAL *) (w + SIZE_OF (A68_REAL));
+      A68_REAL *i = &r[1];
       initialised = (r->status & INITIALISED_MASK) && (i->status & INITIALISED_MASK);
       recognised = A_TRUE;
       break;
@@ -1306,7 +1306,7 @@ static void indent_crlf (FILE_T f)
   int k;
   io_close_tty_line ();
   for (k = 0; k < tabs; k++) {
-    WRITE (f, "        ");
+    WRITE (f, "     ");
   }
 }
 
@@ -1360,7 +1360,7 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     } else {
       int count = 0;
       GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
-      snprintf (output_line, BUFFER_SIZE, " has %d elements", get_row_size (tup, arr->dimensions));
+      snprintf (output_line, BUFFER_SIZE, " (elements: %d)", get_row_size (tup, arr->dimensions));
       WRITE (f, output_line);
       if (get_row_size (tup, arr->dimensions) != 0) {
         BYTE_T *base_addr = ADDRESS (&arr->array);
@@ -1391,7 +1391,7 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     for (; q != NULL; q = NEXT (q)) {
       BYTE_T *elem = &item[q->offset];
       indent_crlf (f);
-      snprintf (output_line, BUFFER_SIZE, "%s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH), TEXT (q));
+      snprintf (output_line, BUFFER_SIZE, "     %s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH), TEXT (q));
       WRITE (STDOUT_FILENO, output_line);
       show_item (p, f, elem, MOID (q));
     }
@@ -1462,19 +1462,19 @@ static void show_frame_items (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, int 
     ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + q->offset;
     indent_crlf (STDOUT_FILENO);
     if (modif != ANONYMOUS) {
-      snprintf (output_line, BUFFER_SIZE, "frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH), SYMBOL (NODE (q)));
+      snprintf (output_line, BUFFER_SIZE, "     frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH), SYMBOL (NODE (q)));
       WRITE (STDOUT_FILENO, output_line);
     } else {
       switch (PRIO (q)) {
       case GENERATOR:
         {
-          snprintf (output_line, BUFFER_SIZE, "frame(%d) LOC %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
+          snprintf (output_line, BUFFER_SIZE, "     frame(%d) LOC %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
           WRITE (STDOUT_FILENO, output_line);
           break;
         }
       default:
         {
-          snprintf (output_line, BUFFER_SIZE, "frame(%d) internal %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
+          snprintf (output_line, BUFFER_SIZE, "     frame(%d) internal %s", pos_in_frame_stack, moid_to_string (MOID (q), MOID_WIDTH));
           WRITE (STDOUT_FILENO, output_line);
           break;
         }
@@ -1497,7 +1497,7 @@ void show_stack_frame (FILE_T f, NODE_T * p, ADDR_T link)
   if (p != NULL) {
     SYMBOL_TABLE_T *q = SYMBOL_TABLE (p);
     where (STDOUT_FILENO, p);
-    snprintf (output_line, BUFFER_SIZE, "stack frame level %d", q->level);
+    snprintf (output_line, BUFFER_SIZE, "++++ Stack frame level %d", q->level);
     WRITELN (STDOUT_FILENO, output_line);
     show_frame_items (f, p, link, q->identifiers, IDENTIFIER);
     show_frame_items (f, p, link, q->operators, OPERATOR);
@@ -1556,13 +1556,13 @@ void show_heap (FILE_T f, NODE_T * p, A68_HANDLE * z, int top, int n)
 {
   int k = 0, m = n;
   (void) p;
-  snprintf (output_line, BUFFER_SIZE, "size=%d available=%d garbage collections=%d", heap_size, heap_available (), garbage_collects);
+  snprintf (output_line, BUFFER_SIZE, "     size=%d available=%d garbage collections=%d", heap_size, heap_available (), garbage_collects);
   WRITELN (f, output_line);
   for (; z != NULL; z = NEXT (z), k++) {
     if (z->offset <= top && n > 0) {
       n--;
       indent_crlf (f);
-      snprintf (output_line, BUFFER_SIZE, "heap(%d-%d) %s", z->offset, z->offset + z->size, moid_to_string (MOID (z), MOID_WIDTH));
+      snprintf (output_line, BUFFER_SIZE, "     heap(%d-%d) %s", z->offset, z->offset + z->size, moid_to_string (MOID (z), MOID_WIDTH));
       WRITE (f, output_line);
     }
   }
@@ -1582,8 +1582,10 @@ void stack_dump (FILE_T f, ADDR_T link, int depth)
   if (depth > 0 && link > 0) {
     int dynamic_link = FRAME_DYNAMIC_LINK (link);
     NODE_T *p = FRAME_TREE (link);
-    show_stack_frame (f, p, link);
-    stack_dump (f, dynamic_link, depth - 1);
+    if (p != NULL && SYMBOL_TABLE (p)->level > 3) {
+      show_stack_frame (f, p, link);
+      stack_dump (f, dynamic_link, depth - 1);
+    }
   }
 }
 
@@ -1623,7 +1625,7 @@ void examine_tags (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * i, char *sym)
     ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + i->offset;
     if (NODE (i) != NULL && SYMBOL (NODE (i)) == sym) {
       where (f, NODE (i));
-      snprintf (output_line, BUFFER_SIZE, "frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (i), MOID_WIDTH), SYMBOL (NODE (i)));
+      snprintf (output_line, BUFFER_SIZE, "     frame(%d) %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (i), MOID_WIDTH), SYMBOL (NODE (i)));
       WRITELN (STDOUT_FILENO, output_line);
       show_item (p, f, FRAME_ADDRESS (pos_in_frame_stack), MOID (i));
     }
@@ -1823,7 +1825,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     if (top <= 0) {
       top = heap_size;
     }
-#ifdef HAVE_TERMINFO
+#if defined HAVE_TERMINFO
     {
       char *term_type = getenv ("TERM");
       int term_lines;
@@ -1962,7 +1964,7 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
 {
   volatile BOOL_T do_cmd = A_TRUE;
   ADDR_T top_sp = stack_pointer;
-#ifdef HAVE_CURSES
+#if defined HAVE_CURSES
   genie_curses_end (NULL);
 #endif
   in_monitor = A_TRUE;
@@ -2047,7 +2049,7 @@ void genie_evaluate (NODE_T * p)
   if (m_sp != 1) {
     monitor_error ("invalid expression", NULL);
   }
-  (A68_REF) z = empty_string (p);
+  z = empty_string (p);
   if (mon_errors == 0) {
     MOID_T *res;
     BOOL_T cont = A_TRUE;

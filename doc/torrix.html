@@ -1,0 +1,378 @@
+<!-- Header -->
+<html>
+<head>
+<title>Algol 68 Genie</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
+<style type="text/css">
+a:link    {color: blue; text-decoration: underline;}
+a:visited {color: blue; text-decoration: underline;}
+a:active  {color: blue; text-decoration: underline;}
+p {font-size: 10pt; font-family: Arial,Helvetica;}
+u {font-size: 10pt; font-family: Arial,Helvetica;}
+dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
+h2 {font-size: 14pt; font-family: Arial,Helvetica;}
+h3 {font-size: 12pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
+ul {font-size: 10pt; font-family: Arial,Helvetica;}
+body {font-size: 10pt; font-family: Arial,Helvetica;}
+code {font-size: 10pt; font-family: Courier;}
+pre {font-size: 10pt; font-family: Courier;}
+</style>
+</head>
+
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="100%" background="lines.gif">
+<img src="lines.gif" align=right>
+Documentation for Algol 68 Genie Mark 10
+</td>
+</table>
+
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<br>
+<h2>Linear algebra using the GNU Scientific Library</h2>
+&middot;&nbsp;<a href="#elementary">Elementary operations on vectors and matrices</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#monad">Monadic operators</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#dyad">Dyadic operators</a><br>
+&middot;&nbsp;<a href="#equations">Solution of linear algebraic equations</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#lu">LU decomposition through Gaussian elimination</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#svd">Singular value decomposition</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#qr">QR decomposition</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#ch">Cholesky decomposition</a><br>
+</td>
+
+<td width="30%" bgcolor="white" valign=top align=center>
+<img src="logo.gif" align=center>
+</td>
+<td width="5%" valign=top bgcolor="white">
+</td>
+<td width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td background="lines.gif">
+<b>Algol68G Mark 10</b>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
+<br>
+<b>Extensions</b>
+<br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
+</td>
+</table>
+
+<p>
+Algol68G extends the standard environ as described by the Revised Report with a number of procedures for linear algebra. These procedures require the 
+<a href="http://sources.redhat.com/gsl/">GNU Scientific Library</a> (GSL, version 1.8 or compatible).  This library is optional; if it is not present on your system, Algol68G will build without support for linear algebra. Older releases of Algol 68 Genie had a number of native routines for elementary vector operations, but these have been decomitted as of Mark 10 as GSL is well accessible.
+
+<p>
+The routines described in this chapter provide a simple vector and
+matrix interface to Algol 68 rows
+<pre>
+	[] REAL       # vector #
+	[, ] REAL     # matrix #
+	[] COMPLEX    # complex vector #
+	[, ] COMPLEX  # complex matrix #
+</pre>
+Routines in this chapter convert Algol 68 rows to objects compatible with vector- and matrix formats used by BLAS routines. However, they are always passed to GSL routines.
+
+<h3><a name="elementary"></a>Elementary operations on vectors and matrices</h3>
+
+<h4><a name="monad"></a>Monadic operators</h4>
+
+<dl>
+<dt><code>OP + = ([] REAL u) [] REAL
+<dt><code>OP + = ([, ] REAL u) [, ] REAL
+<dt><code>OP + = ([] COMPLEX u) [] COMPLEX
+<dt><code>OP + = ([, ] COMPLEX u) [, ] COMPLEX
+<dd>Evaluates <code>+ u</code>.
+</dl>
+
+<dl>
+<dt><code>OP - = ([] REAL u) [] REAL
+<dt><code>OP - = ([, ] REAL u) [, ] REAL
+<dt><code>OP - = ([] COMPLEX u) [] COMPLEX
+<dt><code>OP - = ([, ] COMPLEX u) [, ] COMPLEX
+<dd>Evaluates <code>- u</code>.
+</dl>
+
+<dl>
+<dt><code>OP NORM = ([] REAL u) REAL</code>
+<dt><code>OP NORM = ([] COMPLEX u) REAL</code>
+<dd>Evaluates the Euclidian norm of vector <code>u</code>.
+</dl>
+
+<dl>
+<dt><code>OP TRACE = ([, ] REAL u) REAL</code>
+<dt><code>OP TRACE = ([, ] COMPLEX u) COMPLEX</code>
+<dd>Evaluates the trace (sum of diagonal elements) of square matrix <code>u</code>.
+</dl>
+
+<dl>
+<dt><code>OP T = ([, ] REAL u) [, ] REAL</code>
+<dt><code>OP T = ([, ] COMPLEX u) [, ] COMPLEX</code>
+<dd>Evaluates the transpose of matrix <code>u</code>.
+</dl>
+
+<dl>
+<dt><code>OP DET = ([, ] REAL u) REAL</code>
+<dt><code>OP DET = ([, ] COMPLEX u) COMPLEX</code>
+<dd>Evaluates the determinant of square matrix <code>u</code> by <a href="#lu">LU decomposition</a>.
+</dl>
+
+<dl>
+<dt><code>OP INV = ([, ] REAL u) [, ] REAL</code>
+<dt><code>OP INV = ([, ] COMPLEX u) [, ] COMPLEX</code>
+<dd>Evaluates the inverse of square matrix <code>u</code> by <a href="#lu">LU decomposition</a>.
+</dl>
+
+<h4><a name="dyad"></a>Dyadic operators</h4>
+
+<dl>
+<dt><code>OP = = ([] REAL u, [] REAL v) BOOL
+<dt><code>OP = = ([, ] REAL u, [, ] REAL v) BOOL
+<dt><code>OP = = ([] COMPLEX u, [] COMPLEX v) BOOL
+<dt><code>OP = = ([, ] COMPLEX u, [, ] COMPLEX v) BOOL
+<dd>Evaluates whether <code>u</code> equals <code>v</code>.
+</dl>
+
+<dl>
+<dt><code>OP /= = ([] REAL u, [] REAL v) BOOL
+<dt><code>OP /= = ([, ] REAL u, [, ] REAL v) BOOL
+<dt><code>OP /= = ([] COMPLEX u, [] COMPLEX v) BOOL
+<dt><code>OP /= = ([, ] COMPLEX u, [, ] COMPLEX v) BOOL
+<dd>Evaluates whether <code>u</code> does not equal <code>v</code>.
+</dl>
+
+<dl>
+<dt><code>OP DYAD = ([] REAL u, [] REAL v) [, ] REAL</code>
+<dt><code>OP DYAD = ([] COMPLEX u, [] COMPLEX v) [, ] COMPLEX</code>
+<dd>Evaluates the dyadic (or tensor) product of <code>u</code> and <code>v</code>.
+The priority of <code>DYAD</code> is 3. This means that (assuming standard priorities)
+addition, subtraction, multiplication and division have priority over a dyadic product:
+<code>r + dr DYAD t * r</code> is equivalent to <code>(r + dr) DYAD (t * r)</code>.
+</dl>
+
+<dl>
+<dt><code>OP + = ([] REAL u, [] REAL v) [] REAL
+<dt><code>OP + = ([, ] REAL u, [, ] REAL v) [, ] REAL
+<dt><code>OP + = ([] COMPLEX u, [] COMPLEX v) [] COMPLEX
+<dt><code>OP + = ([, ] COMPLEX u, [, ] COMPLEX v) [, ] COMPLEX
+<dd>Evaluates <code>u + v</code>.
+</dl>
+
+<dl>
+<dt><code>OP +:= ([] REAL u, [] REAL v) [] REAL
+<dt><code>OP +:= ([, ] REAL u, [, ] REAL v) [, ] REAL
+<dt><code>OP +:= ([] COMPLEX u, [] COMPLEX v) [] COMPLEX
+<dt><code>OP +:= ([, ] COMPLEX u, [, ] COMPLEX v) [, ] COMPLEX
+<dd>Evaluates <code>u := u + v</code>.
+</dl>
+<dl>
+
+<dt><code>OP - = ([] REAL u, [] REAL v) [] REAL
+<dt><code>OP - = ([, ] REAL u, [, ] REAL v) [, ] REAL
+<dt><code>OP - = ([] COMPLEX u, [] COMPLEX v) [] COMPLEX
+<dt><code>OP - = ([, ] COMPLEX u, [, ] COMPLEX v) [, ] COMPLEX
+<dd>Evaluates <code>u - v</code>.
+</dl>
+
+<dl>
+<dt><code>OP -:= ([] REAL u, [] REAL v) [] REAL
+<dt><code>OP -:= ([, ] REAL u, [, ] REAL v) [, ] REAL
+<dt><code>OP -:= ([] COMPLEX u, [] COMPLEX v) [] COMPLEX
+<dt><code>OP -:= ([, ] COMPLEX u, [, ] COMPLEX v) [, ] COMPLEX
+<dd>Evaluates <code>u := u - v</code>.
+</dl>
+
+<dl>
+<dt><code>OP * = ([] REAL u, REAL v) [] REAL
+<dt><code>OP * = ([, ] REAL u, REAL v) [, ] REAL
+<dt><code>OP * = ([] COMPLEX u, COMPLEX v) [] COMPLEX
+<dt><code>OP * = ([, ] COMPLEX u, COMPLEX v) [, ] COMPLEX
+<dd>Evaluates scaling by a scalar <code>u * v</code>.
+</dl>
+
+<dl>
+<dt><code>OP * = (REAL u, [] REAL v) [] REAL
+<dt><code>OP * = (REAL u, [, ] REAL v) [, ] REAL
+<dt><code>OP * = (COMPLEX u, [] COMPLEX v) [] COMPLEX
+<dt><code>OP * = (COMPLEX u, [, ] COMPLEX v) [, ] COMPLEX
+<dd>Evaluates scaling by a scalar <code>u * v</code>.
+</dl>
+
+<dl>
+<dt><code>OP * = ([, ] REAL u, [] REAL v) [] REAL
+<dt><code>OP * = ([, ] COMPLEX u, [] COMPLEX v) [] COMPLEX
+<dd>Evaluates matrix-vector product <code>u * v</code>.
+</dl>
+
+<dl>
+<dt><code>OP * = ([] REAL u, [, ] REAL v) [] REAL
+<dt><code>OP * = ([] COMPLEX u, [, ] COMPLEX v) [] COMPLEX
+<dd>Evaluates vector-matrix product <code>u * v</code>, that equals <code>v<sup>T</sup> * u</code>.
+</dl>
+
+<dl>
+<dt><code>OP * = ([] REAL u, [] REAL v) REAL</code>
+<dt><code>OP * = ([] COMPLEX u, [] COMPLEX v) COMPLEX</code>
+<dd>Evaluates the inner product of <code>u</code> and </code>v</code>.
+</dl>
+
+<dl>
+<dt><code>OP * = ([, ] REAL u, [, ] REAL v) [, ] REAL
+<dt><code>OP * = ([, ] COMPLEX u, [, ] COMPLEX v) [, ] COMPLEX
+<dd>Evaluates matrix-matrix product <code>u * v</code>.
+</dl>
+
+
+<dl>
+<dt><code>OP *:= = (REF [] REAL u, REAL v) REF [] REAL
+<dt><code>OP *:= = (REF [, ] REAL u, REAL v) REF [, ] REAL
+<dt><code>OP *:= = (REF [] COMPLEX u, COMPLEX v) REF [] COMPLEX
+<dt><code>OP *:= = (REF [, ] COMPLEX u, COMPLEX v) REF [, ] COMPLEX
+<dd>Evaluates scaling by a scalar <code>u := u * v</code>.
+</dl>
+
+<dl>
+<dt><code>OP / = ([] REAL u, REAL v) [] REAL
+<dt><code>OP / = ([, ] REAL u, REAL v) [, ] REAL
+<dt><code>OP / = ([] COMPLEX u, COMPLEX v) [] COMPLEX
+<dt><code>OP / = ([, ] COMPLEX u, COMPLEX v) [, ] COMPLEX
+<dd>Evaluates scaling by a scalar <code>u / v</code>.
+</dl>
+
+<dl>
+<dt><code>OP /:= = (REF [] REAL u, REAL v) REF [] REAL
+<dt><code>OP /:= = (REF [, ] REAL u, REAL v) REF [, ] REAL
+<dt><code>OP /:= = (REF [] COMPLEX u, COMPLEX v) REF [] COMPLEX
+<dt><code>OP /:= = (REF [, ] COMPLEX u, COMPLEX v) REF [, ] COMPLEX
+<dd>Evaluates <code>u := u / v</code>.
+</dl>
+
+<h3><a name="equations"></a>Solution of linear algebraic equations</h3>
+<p>
+This paragraph describes routines for solving linear algebraic equations. These are intended for &ldquo;small&rdquo; linear equations where simple algorithms are acceptable. Should you be interested in solving large linear equations please refer to for instance LAPACK.
+
+<h4><a name="lu"></a>LU decomposition through Gaussian elimination</h4>
+<p>
+A square matrix has an LU decomposition into upper and lower triangular matrices P * A = L * U where A is a square matrix, P is a permutation matrix, L is a unit lower triangular matrix and U is an upper triangular matrix. For square matrices this decomposition can be used to convert the linear equation A * x = b into a pair of triangular equations (L * y = P * b, U * x = y), which can be solved by forward- and back-substitution.
+<p>
+The algorithm that gsl uses in LU decomposition is Gaussian elimination with partial pivoting. Advantages of LU decomposition are that it works for any square matrix and will efficiently produce all solutions for a linear equation. A disadvantage of LU decomposition is that that it cannot find approximate (least-square) solutions in case of singular or ill-conditioned matrices, that are better solved by a <a href="#svd">singular value decomposition</a>.
+</p>
+
+<dl>
+<dt><code>PROC lu decomp = ([, ] REAL a, REF [] INT p, REF INT sign) [, ] REAL</code>
+<dt><code>PROC complex lu decomp = ([, ] COMPLEX a, REF [] INT p, REF INT sign) [, ] COMPLEX</code>
+<dd>These routines factorise the square matrix <code>a</code> into the LU
+decomposition P * A = L * U. The diagonal and upper
+triangular part of the returned matrix contain U. 
+The lower triangular part of the returned matrix holds L. Diagonal elements of L are unity, and are not stored. Permutation matrix P is encoded in the permutation <code>p</code>. The sign of the permutation is given by <code>sign</code>. It has the value (-1)<sup>n</sup>, where n is the number of row interchanges in the permutation.
+
+<dt><code>PROC lu solve ([, ] REAL a, lu, [] INT p, [] REAL b) [] REAL</code>
+<dt><code>PROC complex lu solve ([, ] COMPLEX a, lu, [] INT p, [] COMPLEX b) [] COMPLEX</code>
+<dd>These routines solve the equation A * x = b and apply an iterative improvement to x, using the LU decomposition of <code>a</code> into <code>lu</code>,<code>p</code> as calculated by <code>[complex] lu decomp</code>.
+
+<dt><code>PROC lu inv = ([, ] REAL lu, [] INT p) [, ] REAL</code>
+<dt><code>PROC complex lu inv = ([, ] COMPLEX lu, [] INT p) [, ] COMPLEX</code>
+<dd>These routines yield the inverse of a matrix from its
+LU decomposition <code>lu</code>,<code>p</code> as calculated by <code>[complex] lu decomp</code>. The inverse is computed by solving A * A<sup>inv</sup> = 1. 
+It is not recommended to use the inverse matrix to solve a linear equation A * x = b by applying b = A<sup>inv</sup> * b; use <code>[complex] lu solve</code> for better precision instead.
+
+<dt><code>PROC lu det = ([, ] REAL lu, INT sign) REAL</code>
+<dt><code>PROC complex lu det = ([, ] COMPLEX lu, INT sign) COMPLEX</code>
+<dd>These routines yield the determinant of a matrix from its
+LU decomposition <code>lu, sign</code> as calculated by <code>[complex] lu decomp</code>. The determinant is computed as the
+product of the diagonal elements of U and the sign of the row
+permutation <code>sign</code>.
+</dl>
+
+<h4><a name="svd"></a>Singular value decomposition</h4>
+
+<p>
+A M * N matrix A has a singular value decomposition in the product of a M * N orthogonal matrix U, a N * N diagonal matrix S and the transpose of a N * N orthogonal square matrix V, such that A = U * S * V<sup>T</sup>. The singular values S<sub>ii</sub> are zero or positive, off-diagonal elements are zero.
+<p>
+Singular value decomposition has many practical applications. The ratio of the largest to the smallest singular value is called the condition number; a high ratio means that the equation is ill conditioned. Zero singular values indicate a singular matrix A, the number of non-zero singular values is the rank of A. Small singular values should be edited by choosing a suitable tolerance since finite numerical precision may result in a singular value to be close to, but no equal to, zero.
+
+<dl>
+<dt><code>PROC sv decomp = ([, ] REAL a, REF [, ] REAL v, REF [] REAL s) [, ] REAL</code>
+<dd>This routine factorizes a M * N matrix <code>A</code> into the singular value decomposition A = U * S * V<sup>T</sup> for M >= N. The routine yields U. The diagonal elements of singular value matrix S are stored in vector <code>s</code>. The singular values are non-negative and form a non-increasing sequence from s<sub>1</sub> to s<sub>N</sub>. Matrix <code>v</code> contains on completion the elements of V in untransposed form. To form the product U * S * V<sup>T</sup> it is necessary to take the transpose of <code>V</code>. This routine uses the Golub-Reinsch SVD algorithm. 
+
+<dt><code>PROC svd solve ([, ] REAL u, v, [] REAL s, [] REAL b) [] REAL</code>
+<dd>This routine solves the system A * x = b using the singular value decomposition (<code>u</code>, <code>s</code>, <code>v</code>) of A computed by <code>svd decomp</code>. Only non-zero singular values are used in calculating the solution. The parts of the solution corresponding to singular values of zero are ignored. Other singular values can be edited out by setting them to zero before calling this routine. In the overdetermined case where A has more rows than columns the routine returns solution <code>x</code> which minimizes ||A * x - b||<sup>2</sup>. 
+</dl>
+
+<h4><a name="qr"></a>QR decomposition</h4>
+
+<p>
+A M * N matrix A has a decomposition into the product of an orthogonal M * M sqaure matrix Q, where Q<sup>T</sup> * Q = I, and an M * N right-triangular matrix R, such that A = Q * R. A linear equation A * x = b can be converted to the triangular equation R * x = Q<sup>T</sup> * b, which can be solved by back-substitution. 
+<p>
+QR decomposition can be used to determine an orthonormal basis for a set of vectors since the first N colums of Q form an orthonormal basis for the range of A.
+<dl>
+<dt><code>PROC qr decomp = ([, ] REAL a, REF [] REAL t) [, ] REAL</code>
+<dd>This routine factorizes the M * N matrix <code>a</code> into the QR decomposition A = Q * R. The diagonal and upper triangular part of the returned matrix contain matrix R. The vector <code>t</code> and the columns of the lower triangular part of matrix <code>a</code> contain the Householder coefficients and Householder vectors which encode the orthogonal matrix Q. Vector <code>t</code> must have length min(M, N). Matrix Q is related to these components by Q = q<sub>k</sub> ... q<sub>2</sub>q<sub>1</sub> where q<sub>i</sub> = I - t<sub>i</sub> v<sub>i</sub> v<sub>i</sub><sup>T</sup> and v<sub>i</sub> is the Householder vector v<sub>i</sub> = (0, ..., 1, A(i + 1, i), A(i + 2, i), ..., A(m, i)) (this is the same scheme as used by LAPACK). The algorithm used to perform the decomposition is Householder QR (Golub and Van Loan, <i>Matrix Computations</i>, Algorithm 5.2.1). 
+
+<dt><code>PROC qr solve ([, ] REAL a, [] REAL t, [] REAL b) [] REAL</code>
+<dd>This routine solves the square system A * x = b using the QR decomposition of A into (<code>a</code>, <code>t</code>) computed by <code>qr decomp</code>. The least-squares solution for rectangular equations can be found using <code>qr ls solve</code>. 
+
+<dt><code>PROC qr ls solve ([, ] REAL a, [] REAL t, [] REAL b) [] REAL</code>
+<dd>This routine finds the least squares solution to the overdetermined system A * x = b where M * N matrix <code>A</code> has more rows than columns, id est M > N. The least squares solution minimizes the Euclidean norm of the residual ||A * x - b||<sup>2</sup>. The routine uses the QR decomposition of A into (<code>a</code>, <code>t</code>) computed by <code>qr decomp</code>.
+</dl>
+
+<h4><a name="ch"></a>Cholesky decomposition</h4>
+
+<p>A symmetric, positive definite square matrix A has a Cholesky decomposition into a product of a lower triangular matrix L and its transpose L<sup>T</sup>, A = L * L<sup>T</sup>. This is sometimes referred to as taking the square-root of a matrix. The Cholesky decomposition can only be carried out when all the eigenvalues of the matrix are positive. This decomposition can be used to convert the linear system A * x = b into a pair of triangular equations (L * y = b, L<sup>T</sup> * x = y), which can be solved by forward and back-substitution.
+
+<dl>
+<dt><code>PROC cholesky decomp = ([, ] REAL a) [, ] REAL</code>
+<dd>This routine factorizes the positive-definite symmetric square matrix <code>a</code> into the Cholesky decomposition A = L * L<sup>T</sup>. The diagonal and lower triangular part of the returned matrix contain matrix L. The upper triangular part of the input matrix contains L<sup>T</sup>, the diagonal terms being identical for both L and L<sup>T</sup>. If the matrix is not positive-definite then the decomposition will fail.
+
+<dt><code>PROC cholesky solve ([, ] REAL a, [] REAL b) [] REAL</code>
+<dd>This routine solves the system A * x = b using the Cholesky decomposition of A into matrix <code>a</code> computed by <code>cholesky decomp</code>. 
+</dl>
+
+<!-- Footer -->
+<hr color=#f0f0f0>
+<p>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<font color="black">
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
+</font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+Algol 68 Genie Mark 10 (August 2006)
+</font>
+</td>
+</table>
+</p>
+<hr color=#f0f0f0>
+</body>
+</html>
+

@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,23 +28,22 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
 <h2>PostgreSQL client routines</h2>
 <p>
-<small>
 &middot;&nbsp;<a href="postgresql.html#pgconnect">Connecting to a server</a><br>
 &middot;&nbsp;<a href="postgresql.html#pgquery">Sending queries and retrieving results</a><br>
 &middot;&nbsp;<a href="postgresql.html#pgstatus">Connection status information</a><br>
 &middot;&nbsp;<a href="postgresql.html#pgthread">Behaviour in threaded programs</a><br>
 &middot;&nbsp;<a href="postgresql.html#pgexample">Example code</a><br>
 &middot;&nbsp;<a href="postgresql.html#pgcopyright">Copyright and license notice</a><br>
-<small>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
 <img src="logo.gif">
@@ -55,27 +55,28 @@ pre {font-size: 10pt; font-family: Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -422,9 +423,6 @@ For more information please refer to the PostgreSQL documentation.
 <a name="pgexample"></a>
 <h3>Example code</h3>
 <p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
 <pre>
 #
 This example assumes a database "mydb" owned by postgres user "marcel",
@@ -496,58 +494,52 @@ FI;
 exit:
 pq finish (z)
 </pre>
-</font>
-</td>
-</table>
 </p>
 
 <br>
 <a name="pgcopyright"></a>
 <h3>Copyright and license notice</h3>
-Information on this page is in part based on PostgreSQL documentation that is released under the BSD license.
+Information on this page is in part based on PostgreSQL documentation that is released under the BSD license:
 
 <p>
-<hr color=#e8e8e8>
 <table width="100%">
 <td width="85%">
-<code>
-<small>
-PostgreSQL Database Management System
-(formerly known as Postgres, then as Postgres95).
-<br><br>
+<p>
+PostgreSQL Database Management System (formerly known as Postgres, then as Postgres95).
+<p>
 Portions Copyright (c) 1996-2005, The PostgreSQL Global Development Group
-<br><br>
+<p>
 Portions Copyright (c) 1994, The Regents of the University of California
-<br><br>
+<p>
 Permission to use, copy, modify, and distribute this software and its documentation for any purpose, without fee, and without a written agreement is hereby granted, provided that the above copyright notice and this paragraph and the following two paragraphs appear in all copies.
-<br><br>
+<p>
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING LOST PROFITS, ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-<br><br>
+<p>
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATIONS TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
-</small>
-</code>
+</p>
 </td>
 <td width="15%">
 <a href="http://www.postgresql.org"><img src="pglogo.gif" border=0 align=right></a>
 </td>
 </table>
-<hr color=#e8e8e8>
 
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
-<br>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
 </p>
-
+<hr color=#f0f0f0>
 </body>
 </html>
+

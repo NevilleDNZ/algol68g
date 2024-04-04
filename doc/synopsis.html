@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,15 +28,15 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
 <h2>Synopsis and options</h2>
-<small>
 &middot;&nbsp;<a href="synopsis.html#synopsis">Synopsis</a><br>
 &middot;&nbsp;<a href="synopsis.html#options">Options</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionone">One-liners</a><br>
@@ -45,7 +46,6 @@ pre {font-size: 10pt; font-family: Courier;}
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#optionmisc">Miscellaneous options</a><br>
 &middot;&nbsp;<a href="synopsis.html#monitor">The monitor</a><br>
 &nbsp;&nbsp;&middot;&nbsp;<a href="synopsis.html#monexp">Monitor expressions</a>
-</small>
 </td>
 <td width="30%" bgcolor=white valign=top align=center>
 <img src="logo.gif">
@@ -57,27 +57,28 @@ pre {font-size: 10pt; font-family: Courier;}
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -88,55 +89,23 @@ pre {font-size: 10pt; font-family: Courier;}
 <h3><a name="synopsis"></a>Synopsis</h3>
 <p>
 From the command-line you would use:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 a68g [options | filename]
-</tt>
-</font>
-</td>
-</table>
-<p>
+</pre>
 If Algol68G cannot open <code>filename</code>, it will try opening with extensions <code>.a68</code>, <code>.a68g</code>, <code>.algol68</code> or <code>.algol68g</code>. 
 <p>Alternatively, under UNIX or Linux an Algol 68 source file can be made a script by entering:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 #! [path/]a68g [options]
-</tt>
-</font>
-</td>
-</table>
-<p>
+</pre>
 as the <b>first</b> line in the source file. 
 After making the script executable by typing:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 chmod +x [path/]filename
-</tt>
-</font>
-</td>
-</table>
-<p>
+</pre>
 the script can be started from the command line by typing:
-<p>
-<table border=0 cellpadding=12>
-<td>
-<font color=black>
-<tt>
+<pre>
 [path/]filename
-</tt>
-</font>
-</td>
-</table>
-<p>
+</pre>
 On UNIX or Linux, Algol 68 Genie recognises next environment variables:
 <dl>
 <dt><code>A68G_STANDIN</code>
@@ -217,7 +186,7 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <dt><b>prelude</b>listing
 <dd>Generates a listing of preludes.
 <dt><b>source</b>, <b>nosource</b>
-<dd>Starts (or stops) listing of source lines in listing file.
+<dd>Switches listing of source lines in listing file.
 <dt><b>st</b>atistics
 <dd>Generates statistics in listing file.
 <dt><b>tree</b>, <b>notree</b>
@@ -225,7 +194,7 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <dt><b>unused</b>
 <dd>Generates an overview of unused tags in the listing file.
 <dt><b>x</b>ref, <b>nox</b>ref
-<dd>Starts (or stops) generating a cross reference in the listing file.
+<dd>Switches generating a cross reference in the listing file.
 </dl>
 
 <br>
@@ -234,11 +203,13 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <dt><b>mon</b>itor, <b>debug</b>
 <dd>Upon encountering a runtime error, instead of terminating execution, the <a href="#monitor">monitor</a> will be entered.
 <dt><b>a</b>ssertions, <b>noa</b>ssertions
-<dd>Starts (or stops) elaboration of assertions.
+<dd>Switches elaboration of assertions.
+<dt><b>back</b>trace, <b>noback</b>trace
+<dd>Switches stack backtracing in case of a runtime error.
 <dt><b>br</b>eakpoint, <b>nobr</b>eakpoint
-<dd>Starts (or stops) setting breakpoints on following program lines.
+<dd>Switches setting breakpoints on following program lines.
 <dt><b>tr</b>ace, <b>notr</b>ace
-<dd>Starts (or stops) tracing of a program.
+<dd>Switches tracing of a program.
 <dt><b>prec</b>ision <i>number</i>
 <dd>Sets precision for LONG LONG modes to <i>number</i> significant digits. The precision cannot be less than the precision of LONG modes.
 <ul><i>
@@ -274,7 +245,7 @@ Options are not case sensitive. In the list below, bold letters denote letters m
 <dt><b>warnings</b>, <b>now</b>arnings
 <dd>Enable warning messages or suppresses suppressible warning messages.
 <dt><b>pr</b>agmats, <b>nopr</b>agmats
-<dd>Starts (or stops) elaboration of pragmat items. When disabled, pragmat items are ignored, except for pragmats.
+<dd>Switches elaboration of pragmat items. When disabled, pragmat items are ignored, except for option <b>pragmats</b>.
 <dt><b>red</b>uctions
 <dd>Prints reductions made by the parser. Meant for parser debugging but can be instructive (and bulky).
 <dt><b>verb</b>ose
@@ -390,21 +361,23 @@ Important points are:
 <li>Dereferencing is the only coercion in arithmetic. Names can be compared through <code>IS</code> and <code>ISNT</code>, and <code>NIL</code> is supplied, but there is no soft coercion of operands.
 </ul>
 
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
-<br>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
 </p>
-
+<hr color=#f0f0f0>
 </body>
 </html>
+
