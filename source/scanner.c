@@ -100,7 +100,11 @@ static void restore_state (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref
 
 static void unworthy (SOURCE_LINE_T * u, char *v, char ch)
 {
-  snprintf (edit_line, BUFFER_SIZE, ERROR_UNWORTHY_CHARACTER, ctrl_char (ch));
+  if (IS_PRINT (ch)) {
+    CHECK_RETVAL (snprintf (edit_line, BUFFER_SIZE, "%s", ERROR_UNWORTHY_CHARACTER) >= 0);
+  } else {
+    CHECK_RETVAL (snprintf (edit_line, BUFFER_SIZE, "%s %s", ERROR_UNWORTHY_CHARACTER, ctrl_char (ch)) >= 0);
+  }
   scan_error (u, v, edit_line);
 }
 
@@ -141,7 +145,7 @@ static void concatenate_lines (SOURCE_LINE_T * top)
 
 static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
 {
-  unsigned len = strlen (v);
+  unsigned len = (unsigned) strlen (v);
   if (MODULE (z)->options.stropping == QUOTE_STROPPING) {
     if (u[0] == '\'') {
       return ((BOOL_T) (strncmp (++u, v, len) == 0 && u[len] == '\''));
@@ -414,7 +418,6 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
   return (NULL);
 }
 
-
 /*!
 \brief include files
 \param top top source line
@@ -502,14 +505,15 @@ been included will not be included a second time - it will be ignored.
         SCAN_ERROR (fd == -1, start_l, start_c, ERROR_SOURCE_FILE_OPEN);
 /* Access the file. */
         RESET_ERRNO;
-        fsize = lseek (fd, 0, SEEK_END);
+        fsize = (int) lseek (fd, 0, SEEK_END);
+        CHECK_RETVAL (fsize >= 0);
         SCAN_ERROR (errno != 0, start_l, start_c, ERROR_FILE_READ);
         fbuf = (char *) get_temp_heap_space ((unsigned) (8 + fsize));
         RESET_ERRNO;
-        lseek (fd, 0, SEEK_SET);
+        CHECK_RETVAL (lseek (fd, 0, SEEK_SET) >= 0);
         SCAN_ERROR (errno != 0, start_l, start_c, ERROR_FILE_READ);
         RESET_ERRNO;
-        bytes_read = io_read (fd, fbuf, (size_t) fsize);
+        bytes_read = (int) io_read (fd, fbuf, (size_t) fsize);
         SCAN_ERROR (errno != 0 || bytes_read != fsize, start_l, start_c, ERROR_FILE_READ);
 /* Buffer still usable? */
         if (fsize > max_scan_buf_length) {
@@ -543,7 +547,7 @@ been included will not be included a second time - it will be ignored.
         NEXT (t) = s;
         PREVIOUS (s) = t;
         concatenate_lines (top);
-        close (fd);
+        CHECK_RETVAL (close (fd) == 0);
         make_pass = A68_TRUE;
       }
     search_next_pragmat:       /* skip. */ ;
@@ -604,7 +608,7 @@ static int get_source_size (MODULE_T * module)
 {
   FILE_T f = module->files.source.fd;
 /* This is why WIN32 must open as "read binary". */
-  return (lseek (f, 0, SEEK_END));
+  return ((int) lseek (f, 0, SEEK_END));
 }
 
 /*!
@@ -626,7 +630,7 @@ static void append_environ (MODULE_T * module, char *str, SOURCE_LINE_T ** ref_l
     cdr[0] = NULL_CHAR;
     text = &cdr[1];
     (*line_num)++;
-    snprintf (edit_line, BUFFER_SIZE, "%s\n", car);
+    CHECK_RETVAL (snprintf (edit_line, (size_t) BUFFER_SIZE, "%s\n", car) >= 0);
     append_source_line (module, edit_line, ref_l, &zero_line_num, name);
   }
 }
@@ -660,10 +664,10 @@ static BOOL_T read_source_file (MODULE_T * module)
   line_num = 1;
   buffer = (char *) get_temp_heap_space ((unsigned) (8 + source_file_size));
   RESET_ERRNO;
-  lseek (f, 0, SEEK_SET);
+  CHECK_RETVAL (lseek (f, 0, SEEK_SET) >= 0);
   ABNORMAL_END (errno != 0, "error while reading source file", NULL);
   RESET_ERRNO;
-  bytes_read = io_read (f, buffer, (size_t) source_file_size);
+  bytes_read = (int) io_read (f, buffer, (size_t) source_file_size);
   ABNORMAL_END (errno != 0 || bytes_read != source_file_size, "error while reading source file", NULL);
 /* Link all lines into the list. */
   k = 0;
@@ -1134,7 +1138,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       (sym++)[0] = c;
       sym[0] = NULL_CHAR;
       *att = get_format_item (c);
-      next_char (module, ref_l, ref_s, A68_FALSE);
+      (void) next_char (module, ref_l, ref_s, A68_FALSE);
       return;
     }
     if (IS_DIGIT (c)) {
@@ -1277,7 +1281,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
   } else if (a68g_strchr ("#$()[]{},;@", c) != NULL) {
 /* Single character symbols. */
     (sym++)[0] = c;
-    next_char (module, ref_l, ref_s, A68_FALSE);
+    (void) next_char (module, ref_l, ref_s, A68_FALSE);
     sym[0] = NULL_CHAR;
     *att = 0;
   } else if (c == '|') {
@@ -1286,7 +1290,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (c == ':') {
       (sym++)[0] = c;
-      next_char (module, ref_l, ref_s, A68_FALSE);
+      (void) next_char (module, ref_l, ref_s, A68_FALSE);
     }
     sym[0] = NULL_CHAR;
     *att = 0;
@@ -1297,7 +1301,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     c = next_char (module, ref_l, ref_s, A68_FALSE);
     if (c == ':') {
       (sym++)[0] = c;
-      next_char (module, ref_l, ref_s, A68_FALSE);
+      (void) next_char (module, ref_l, ref_s, A68_FALSE);
     }
     sym[0] = NULL_CHAR;
     *att = 0;
@@ -1344,7 +1348,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
         c = next_char (module, ref_l, ref_s, A68_FALSE);
         if (strlen (sym) < 4 && c == '=') {
           (sym++)[0] = '=';
-          next_char (module, ref_l, ref_s, A68_FALSE);
+          (void) next_char (module, ref_l, ref_s, A68_FALSE);
         }
       }
     } else if (c == ':') {
@@ -1352,7 +1356,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       sym[0] = NULL_CHAR;
       if (next_char (module, ref_l, ref_s, A68_FALSE) == '=') {
         (sym++)[0] = '=';
-        next_char (module, ref_l, ref_s, A68_FALSE);
+        (void) next_char (module, ref_l, ref_s, A68_FALSE);
       } else {
         SCAN_ERROR (!(strcmp (scanned, "=:") == 0 || strcmp (scanned, "==:") == 0), *start_l, *start_c, ERROR_INVALID_OPERATOR_TAG);
       }
@@ -1379,7 +1383,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
         c = next_char (module, ref_l, ref_s, A68_FALSE);
         if (strlen (scanned) < 4 && c == '=') {
           (sym++)[0] = '=';
-          next_char (module, ref_l, ref_s, A68_FALSE);
+          (void) next_char (module, ref_l, ref_s, A68_FALSE);
         }
       }
     } else if (c == ':') {
@@ -1388,7 +1392,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       if (next_char (module, ref_l, ref_s, A68_FALSE) == '=') {
         (sym++)[0] = '=';
         sym[0] = NULL_CHAR;
-        next_char (module, ref_l, ref_s, A68_FALSE);
+        (void) next_char (module, ref_l, ref_s, A68_FALSE);
       } else {
         SCAN_ERROR (strcmp (&(scanned[1]), "=:") != 0, *start_l, *start_c, ERROR_INVALID_OPERATOR_TAG);
       }
@@ -1524,7 +1528,7 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
             pragment (module, ATTRIBUTE (kw), l, s);
             if (!stop_scanner) {
               isolate_options (module, scan_buf, *start_l);
-              set_options (module, module->options.list, A68_FALSE);
+              (void) set_options (module, module->options.list, A68_FALSE);
               make_node = A68_FALSE;
             }
           }
@@ -1678,7 +1682,7 @@ void get_refinements (MODULE_T * z)
     return;
   }
   while (p != NULL && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, 0)) {
-    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (REFINEMENT_T)), *x;
+    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (REFINEMENT_T)), *x;
     BOOL_T exists;
     NEXT (new_one) = NULL;
     new_one->name = SYMBOL (p);

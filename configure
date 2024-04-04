@@ -21,10 +21,10 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="16"
+VERSION_NUMBER="17"
 REVISION="Mark $VERSION_NUMBER"
-MAN_NUMBER="4"
-MONTH="April"
+MAN_NUMBER="5"
+MONTH="May"
 YEAR="2009"
 DATE=`date +"%e %B %Y %H:%M"`
 TIME_STAMP="$MONTH $YEAR"
@@ -67,6 +67,7 @@ OPENBSD=`uname -s | grep OpenBSD`
 #
 anonymous=no
 build=no
+lint=no
 html_opt=no
 tex_opt=no
 pdf_opt=no
@@ -110,6 +111,8 @@ do
 		prev_arg=cc ;;
 	-cc=* | --cc=*)
 		cc=$val_arg ;;
+	-lint)
+		lint=;;
 	-debug | --debug)
 		opt=`echo $opt "-ggdb"`
 		ld_opt=`echo $ld_opt "-ggdb"` ;;
@@ -163,13 +166,14 @@ do
 		echo "$PACKAGE"
 		exit ;;
 	-warn | --warnings)
-		warn="-W -Wall -Wshadow -Wconversion -Wstrict-prototypes -fno-common" ;;
+		warn="-pedantic -W -Wall -Wshadow -Wconversion -Wstrict-prototypes -fno-common" ;;
 	-help | --help | -? | ?)
 		echo "usage: $0 [options]"
 		cat << \_HELP
 --bindir[=]DIR  	set target directory for executable to DIR
 --build 		build target after configuring
 --cc[=]CC       	set C compiler to CC
+--lint			runs lint programs on the source
 --debug  		set debugging mode
 --help  		print help and exit
 --incdir[=]DIR  	set include-directory for compilation to DIR
@@ -265,7 +269,7 @@ if [ -z $pdf_opt ]
 then
 	pushd .
 	cd $USR_LATEX_TEMPLATES
-	make pdf
+	make pdf0
 	popd
 	echo "generated manual"
 	echo "$0 done"
@@ -280,11 +284,33 @@ then
 	for f in `echo *.c`
 	do
 		echo $f
-		indent $f -l500 -br -ce -cdw -nfca -npsl -nut -i2 -nbad -cs -pcs
+#		indent $f -l500 -br -ce -cdw -nfca -npsl -nut -i2 -nbad -cs -pcs -sob
 		rm $f~
 	done
 	wc *.c *.h
 	echo "indented source"
+	echo "$0 done"
+	exit
+fi
+#
+# Run cppcheck
+#
+if [ -z $lint ]
+then
+	cd $USR_SRC
+	for f in `echo *.c`
+	do
+		sparse $f
+	done
+	for f in `echo *.c`
+	do
+		cppcheck --all $f
+	done
+	for f in `echo *.c`
+	do
+		gcc $f -S -pedantic -W -Wall -Wshadow -Wconversion -Wstrict-prototypes -fno-common -O2 -I/usr/include -I/usr/local/include -I/usr/local/pgsql/include -DENABLE_GRAPHICS -DENABLE_NUMERICAL -DENABLE_CURSES -DENABLE_TERMINFO -DENABLE_DIRENT -DENABLE_HTTP -DENABLE_REGEX -DENABLE_POSTGRESQL -DENABLE_IEEE_754 -DENABLE_PAR_CLAUSE -o /dev/null
+	done
+	splint *.c -weak +ret-val-int +posixlib -abstract -unrecog -I/usr/include -I/usr/local/include -I/usr/local/pgsql/include -DENABLE_GRAPHICS -DENABLE_NUMERICAL -DENABLE_CURSES -DENABLE_TERMINFO -DENABLE_DIRENT -DENABLE_HTTP -DENABLE_REGEX -DENABLE_POSTGRESQL -DENABLE_IEEE_754 -DENABLE_PAR_CLAUSE
 	echo "$0 done"
 	exit
 fi
@@ -350,8 +376,8 @@ fi
 if [ "$cc" = "gcc" ]
 then
 	printf "checking that gcc works ... "
-	gcc --version >& /dev/null
-	if [ "$?" == "0" ]
+	gcc --version > /dev/null 2>&1
+	if [ "$?" = "0" ]
 	then
 		echo "yes"
 	else
@@ -562,7 +588,7 @@ then
 	then
 		libplot=yes
 		echo "yes"
-		echo "PLOTUTILS_LIBS=-L/usr/X11R6/lib -lXaw -lXmu -lXt -lSM -lICE -lXext -lX11 -lplot" 1>>$BUILD_FILE
+		echo "PLOTUTILS_LIBS=-lplot" 1>>$BUILD_FILE
 		echo "PLOTUTILS_FLAG=-DENABLE_GRAPHICS" 1>>$BUILD_FILE
 	else
 		echo "no"

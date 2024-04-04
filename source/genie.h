@@ -27,8 +27,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #define INITIALISED(z) ((BOOL_T) ((z)->status & INITIALISED_MASK))
 
-#define BITS_WIDTH ((int) (1 + ceil (log (A68_MAX_INT) / log(2))))
-#define INT_WIDTH ((int) (1 + floor (log (A68_MAX_INT) / log (10))))
+#define BITS_WIDTH ((int) (1 + ceil (log ((double) A68_MAX_INT) / log((double) 2))))
+#define INT_WIDTH ((int) (1 + floor (log ((double) A68_MAX_INT) / log ((double) 10))))
 
 #define CHAR_WIDTH (1 + (int) log10 ((double) SCHAR_MAX))
 #define REAL_WIDTH (DBL_DIG)
@@ -92,7 +92,6 @@ extern ADDR_T frame_pointer, stack_pointer, heap_pointer, handle_pointer, global
 extern A68_FORMAT nil_format;
 extern A68_HANDLE nil_handle, *free_handles, *busy_handles;
 extern A68_REF nil_ref;
-extern A68_REF stand_in, stand_out;
 extern BOOL_T in_monitor, do_confirm_exit;
 extern BYTE_T *stack_segment, *heap_segment, *handle_segment;
 extern MOID_T *top_expr_moid;

@@ -83,7 +83,6 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 static unsigned pow256[] = { 1, 256, 65536, 16777216 };
 
-
 /*!
 \brief test bits per sample
 \param p position in tree
@@ -369,7 +368,7 @@ static unsigned read_riff_item (NODE_T * p, FILE_T fd, int n, BOOL_T little)
   if (little) {
     for (k = 0, m = 0, v = 0; k < n; k++, m++) {
       z = 0;
-      r = io_read (fd, &z, 1);
+      r = (int) io_read (fd, &z, (size_t) 1);
       if (r != 1 || errno != 0) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "error while reading file");
         exit_genie (p, A68_RUNTIME_ERROR);
@@ -379,7 +378,7 @@ static unsigned read_riff_item (NODE_T * p, FILE_T fd, int n, BOOL_T little)
   } else {
     for (k = 0, m = n - 1, v = 0; k < n; k++, m--) {
       z = 0;
-      r = io_read (fd, &z, 1);
+      r = (int) io_read (fd, &z, (size_t) 1);
       if (r != 1 || errno != 0) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "error while reading file");
         exit_genie (p, A68_RUNTIME_ERROR);
@@ -464,7 +463,7 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
       subchunk2size = read_riff_item (p, f->fd, 4, A68_LITTLE_ENDIAN);
       w->num_samples = subchunk2size / w->num_channels / A68_SOUND_BYTES (w);
       w->data = heap_generator (p, MODE (SOUND_DATA), (int) subchunk2size);
-      r = io_read (f->fd, ADDRESS (&(w->data)), subchunk2size);
+      r = (int) io_read (f->fd, ADDRESS (&(w->data)), subchunk2size);
       if (r != (int) subchunk2size) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "cannot read all of the data");
         exit_genie (p, A68_RUNTIME_ERROR);
@@ -501,11 +500,11 @@ void write_riff_item (NODE_T * p, FILE_T fd, unsigned z, int n, BOOL_T little)
   }
   if (little) {
     for (k = 0; k < n; k++) {
-      io_write (fd, &(y[k]), 1);
+      CHECK_RETVAL (io_write (fd, &(y[k]), 1) != -1);
     }
   } else {
     for (k = n - 1; k >= 0; k--) {
-      r = io_write (fd, &(y[k]), 1);
+      r = (int) io_write (fd, &(y[k]), 1);
       if (r != 1) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "error while writing file");
         exit_genie (p, A68_RUNTIME_ERROR);
@@ -546,7 +545,7 @@ void write_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "sound has no data");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  r = io_write (f->fd, ADDRESS (&(w->data)), subchunk2size);
+  r = (int) io_write (f->fd, ADDRESS (&(w->data)), subchunk2size);
   if (r != (int) subchunk2size) {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "error while writing file");
     exit_genie (p, A68_RUNTIME_ERROR);

@@ -82,7 +82,7 @@ MOID_T *add_mode (MOID_T ** z, int att, int dim, NODE_T * node, MOID_T * sub, PA
 
 static MOID_T *add_row (MOID_T ** p, int k, MOID_T * f, NODE_T * n)
 {
-  add_mode (p, ROW_SYMBOL, k, n, f, NULL);
+  (void) add_mode (p, ROW_SYMBOL, k, n, f, NULL);
   if (k > 1) {
     SLICE (*p) = add_row (&NEXT (*p), k - 1, f, n);
   } else {
@@ -95,7 +95,7 @@ static MOID_T *add_row (MOID_T ** p, int k, MOID_T * f, NODE_T * n)
 \brief initialise moid list
 **/
 
-void init_moid_list ()
+void init_moid_list (void)
 {
   top_moid_list = NULL;
   old_moid_list = NULL;
@@ -105,7 +105,7 @@ void init_moid_list ()
 \brief reset moid list
 **/
 
-void reset_moid_list ()
+void reset_moid_list (void)
 {
   old_moid_list = top_moid_list;
   top_moid_list = NULL;
@@ -122,7 +122,7 @@ void add_single_moid_to_list (MOID_LIST_T ** p, MOID_T * q, SYMBOL_TABLE_T * c)
 {
   MOID_LIST_T *m;
   if (old_moid_list == NULL) {
-    m = (MOID_LIST_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (MOID_LIST_T));
+    m = (MOID_LIST_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (MOID_LIST_T));
   } else {
     m = old_moid_list;
     old_moid_list = NEXT (old_moid_list);
@@ -344,7 +344,7 @@ static void get_mode_from_struct_field (NODE_T * p, PACK_T ** u)
     case IDENTIFIER:
       {
         ATTRIBUTE (p) = FIELD_IDENTIFIER;
-        add_mode_to_pack (u, NULL, SYMBOL (p), p);
+        (void) add_mode_to_pack (u, NULL, SYMBOL (p), p);
         break;
       }
     case DECLARER:
@@ -383,7 +383,7 @@ static void get_mode_from_formal_pack (NODE_T * p, PACK_T ** u)
         MOID_T *z;
         get_mode_from_formal_pack (NEXT (p), u);
         z = get_mode_from_declarer (p);
-        add_mode_to_pack (u, z, NULL, p);
+        (void) add_mode_to_pack (u, z, NULL, p);
         break;
       }
     default:
@@ -412,7 +412,7 @@ static void get_mode_from_union_pack (NODE_T * p, PACK_T ** u)
         MOID_T *z;
         get_mode_from_union_pack (NEXT (p), u);
         z = get_mode_from_declarer (p);
-        add_mode_to_pack (u, z, NULL, p);
+        (void) add_mode_to_pack (u, z, NULL, p);
         break;
       }
     default:
@@ -437,7 +437,7 @@ static void get_mode_from_routine_pack (NODE_T * p, PACK_T ** u)
     switch (ATTRIBUTE (p)) {
     case IDENTIFIER:
       {
-        add_mode_to_pack (u, NULL, NULL, p);
+        (void) add_mode_to_pack (u, NULL, NULL, p);
         break;
       }
     case DECLARER:
@@ -448,7 +448,7 @@ static void get_mode_from_routine_pack (NODE_T * p, PACK_T ** u)
           MOID (t) = z;
           MOID (NODE (t)) = z;
         }
-        add_mode_to_pack (u, z, NULL, p);
+        (void) add_mode_to_pack (u, z, NULL, p);
         break;
       }
     default:
@@ -863,10 +863,10 @@ PACK_T *absorb_union_pack (PACK_T * t, int *mods)
       PACK_T *s;
       (*mods)++;
       for (s = PACK (MOID (t)); s != NULL; FORWARD (s)) {
-        add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
+        (void) add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
       }
     } else {
-      add_mode_to_pack (&z, MOID (t), NULL, NODE (t));
+      (void) add_mode_to_pack (&z, MOID (t), NULL, NODE (t));
     }
   }
   return (z);
@@ -1480,7 +1480,7 @@ static void make_name_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p)
     MOID_T *z;
     make_name_pack (NEXT (src), dst, p);
     z = add_mode (p, REF_SYMBOL, 0, NULL, MOID (src), NULL);
-    add_mode_to_pack (dst, z, TEXT (src), NODE (src));
+    (void) add_mode_to_pack (dst, z, TEXT (src), NODE (src));
   }
 }
 
@@ -1495,7 +1495,7 @@ static MOID_T *make_name_struct (MOID_T * m, MOID_T ** p)
 {
   MOID_T *save;
   PACK_T *u = NULL;
-  add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
+  (void) add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
   save = *p;
   make_name_pack (PACK (m), &u, p);
   PACK (save) = u;
@@ -1570,7 +1570,7 @@ static void make_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p, in
 {
   if (src != NULL) {
     make_multiple_row_pack (NEXT (src), dst, p, dim);
-    add_mode_to_pack (dst, add_row (p, dim, MOID (src), NULL), TEXT (src), NODE (src));
+    (void) add_mode_to_pack (dst, add_row (p, dim, MOID (src), NULL), TEXT (src), NODE (src));
   }
 }
 
@@ -1586,7 +1586,7 @@ static MOID_T *make_multiple_struct (MOID_T * m, MOID_T ** p, int dim)
 {
   MOID_T *save;
   PACK_T *u = NULL;
-  add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
+  (void) add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
   save = *p;
   make_multiple_row_pack (PACK (m), &u, p, dim);
   PACK (save) = u;
@@ -1608,7 +1608,7 @@ static void make_flex_multiple_row_pack (PACK_T * src, PACK_T ** dst, MOID_T ** 
     make_flex_multiple_row_pack (NEXT (src), dst, p, dim);
     z = add_row (p, dim, MOID (src), NULL);
     z = add_mode (p, FLEX_SYMBOL, 0, NULL, z, NULL);
-    add_mode_to_pack (dst, z, TEXT (src), NODE (src));
+    (void) add_mode_to_pack (dst, z, TEXT (src), NODE (src));
   }
 }
 
@@ -1624,7 +1624,7 @@ static MOID_T *make_flex_multiple_struct (MOID_T * m, MOID_T ** p, int dim)
 {
   MOID_T *x;
   PACK_T *u = NULL;
-  add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
+  (void) add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
   x = *p;
   make_flex_multiple_row_pack (PACK (m), &u, p, dim);
   PACK (x) = u;
@@ -1781,7 +1781,7 @@ static void make_deflexed_pack (PACK_T * src, PACK_T ** dst, MOID_T ** p)
 {
   if (src != NULL) {
     make_deflexed_pack (NEXT (src), dst, p);
-    add_mode_to_pack (dst, make_deflexed (MOID (src), p), TEXT (src), NODE (src));
+    (void) add_mode_to_pack (dst, make_deflexed (MOID (src), p), TEXT (src), NODE (src));
   }
 }
 
@@ -1799,12 +1799,12 @@ static MOID_T *make_deflexed (MOID_T * m, MOID_T ** p)
   }
   if (WHETHER (m, REF_SYMBOL)) {
     MOID_T *new_one = make_deflexed (SUB (m), p);
-    add_mode (p, REF_SYMBOL, DIM (m), NULL, new_one, NULL);
+    (void) add_mode (p, REF_SYMBOL, DIM (m), NULL, new_one, NULL);
     SUB (*p) = new_one;
     return (DEFLEXED (m) = *p);
   } else if (WHETHER (m, PROC_SYMBOL)) {
     MOID_T *save, *new_one;
-    add_mode (p, PROC_SYMBOL, DIM (m), NULL, NULL, PACK (m));
+    (void) add_mode (p, PROC_SYMBOL, DIM (m), NULL, NULL, PACK (m));
     save = *p;
 /* Mark to prevent eventual cyclic references. */
     DEFLEXED (m) = save;
@@ -1819,19 +1819,19 @@ static MOID_T *make_deflexed (MOID_T * m, MOID_T ** p)
     MOID_T *new_sub, *new_slice;
     if (DIM (m) > 1) {
       new_slice = make_deflexed (SLICE (m), p);
-      add_mode (p, ROW_SYMBOL, DIM (m) - 1, NULL, new_slice, NULL);
+      (void) add_mode (p, ROW_SYMBOL, DIM (m) - 1, NULL, new_slice, NULL);
       new_sub = make_deflexed (SUB (m), p);
     } else {
       new_sub = make_deflexed (SUB (m), p);
       new_slice = new_sub;
     }
-    add_mode (p, ROW_SYMBOL, DIM (m), NULL, new_sub, NULL);
+    (void) add_mode (p, ROW_SYMBOL, DIM (m), NULL, new_sub, NULL);
     SLICE (*p) = new_slice;
     return (DEFLEXED (m) = *p);
   } else if (WHETHER (m, STRUCT_SYMBOL)) {
     MOID_T *save;
     PACK_T *u = NULL;
-    add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
+    (void) add_mode (p, STRUCT_SYMBOL, DIM (m), NULL, NULL, NULL);
     save = *p;
 /* Mark to prevent eventual cyclic references. */
     DEFLEXED (m) = save;
@@ -1879,7 +1879,7 @@ static void make_deflexed_modes_tree (NODE_T * p, int *mods)
           TRIM (m) = SUB (m);
         } else if (TRIM (m) == NULL && WHETHER (m, REF_SYMBOL) && WHETHER (SUB (m), FLEX_SYMBOL)) {
           (*mods)++;
-          add_mode (top, REF_SYMBOL, DIM (m), NULL, SUB (SUB (m)), NULL);
+          (void) add_mode (top, REF_SYMBOL, DIM (m), NULL, SUB (SUB (m)), NULL);
           TRIM (m) = *top;
         }
       }
@@ -2126,7 +2126,7 @@ static int expand_contract_moids (NODE_T * top_node, int cycle_no)
 void maintain_mode_table (NODE_T * p)
 {
   (void) p;
-  renumber_moids (top_moid_list);
+  (void) renumber_moids (top_moid_list);
 }
 
 /*!
@@ -2436,7 +2436,6 @@ static void pack_to_string (char *b, PACK_T * p, int w, BOOL_T text, NODE_T * id
   }
 }
 
-
 /*!
 \brief find a tag, searching symbol tables towards the root
 \param table symbol table to search
@@ -2622,7 +2621,7 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w, NODE_T * idf)
     }
   } else {
     char str[SMALL_BUFFER_SIZE];
-    snprintf (str, SMALL_BUFFER_SIZE, "\\%d", ATTRIBUTE (n));
+    CHECK_RETVAL (snprintf (str, (size_t) SMALL_BUFFER_SIZE, "\\%d", ATTRIBUTE (n)) >= 0);
     bufcat (b, str, BUFFER_SIZE);
   }
 }

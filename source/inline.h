@@ -58,9 +58,9 @@ this program. If not, see <http://www.gnu.org/licenses/>.
   }}
 
 #define FRAME_GET(dest, cast, p) {\
-  ADDR_T m_z;\
-  FOLLOW_STATIC_LINK (m_z, (p)->genie.level);\
-  (dest) = (cast *) & ((p)->genie.offset[m_z]);\
+  ADDR_T _m_z;\
+  FOLLOW_STATIC_LINK (_m_z, (p)->genie.level);\
+  (dest) = (cast *) & ((p)->genie.offset[_m_z]);\
   }
 
 /* Macros for row-handling. */
@@ -100,9 +100,9 @@ extern unsigned check_time_limit_count;
 
 #define CHECK_TIME_LIMIT(p) {\
   if (check_time_limit_count++ > 10000) {\
-    double m_t = MODULE (INFO (p))->options.time_limit;\
+    double _m_t = (double) MODULE (INFO (p))->options.time_limit;\
     check_time_limit_count = 0;\
-    if (m_t > 0 && (seconds () - cputime_0) > m_t) {\
+    if (_m_t > 0 && (seconds () - cputime_0) > _m_t) {\
       diagnostic_node (A68_RUNTIME_ERROR, (NODE_T *) p, ERROR_TIME_LIMIT_EXCEEDED);\
       exit_genie ((NODE_T *) p, A68_RUNTIME_ERROR);\
     }\
@@ -111,13 +111,13 @@ extern unsigned check_time_limit_count;
 #define EXECUTE_UNIT_2(p, dest) {\
   PROPAGATOR_T *_prop_ = &PROPAGATOR (p);\
   last_unit = p;\
-  dest = _prop_->unit (_prop_->source);\
+  dest = (*(_prop_->unit)) (_prop_->source);\
   }
 
 #define EXECUTE_UNIT(p) {\
   PROPAGATOR_T *_prop_ = &PROPAGATOR (p);\
   last_unit = p;\
-  (void) _prop_->unit (_prop_->source);\
+  (void) (*(_prop_->unit)) (_prop_->source);\
   }
 
 #define EXECUTE_UNIT_TRACE(p) {\
@@ -130,7 +130,7 @@ extern unsigned check_time_limit_count;
     single_step ((p), MASK (p));\
   }\
   last_unit = p;\
-  (void) (_prop_->unit (_prop_->source));\
+  (void) (*(_prop_->unit)) (_prop_->source);\
   }
 
 /* 
@@ -230,7 +230,7 @@ extern int block_heap_compacter;
 #if INT_MAX == 2147483647
 #define TEST_INT_ADDITION(p, i, j) {\
   double _sum_ = (double) (i) + (double) (j);\
-  if (ABS (_sum_) > INT_MAX) {\
+  if (ABS (_sum_) > (double) INT_MAX) {\
     errno = ERANGE;\
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
     exit_genie (p, A68_RUNTIME_ERROR);\
@@ -245,14 +245,14 @@ extern int block_heap_compacter;
 #endif
 #define TEST_INT_MULTIPLICATION(p, i, j) {\
   double _prod_ = (double ) (i) * (double) (j);\
-  if (ABS (_prod_) > A68_MAX_INT) {\
+  if (ABS (_prod_) > (double) A68_MAX_INT) {\
     errno = ERANGE;\
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
     exit_genie (p, A68_RUNTIME_ERROR);\
   }}
 #else
 #define TEST_INT_ADDITION(p, i, j) {;}
-#define TEST_TIMES_OVERFLOW_INT(p, i, j) {;}
+#define TEST_INT_MULTIPLICATION(p, i, j) {;}
 #endif
 
 /* Tests for objects of mode REAL. */
@@ -344,15 +344,15 @@ returns: static link for stack frame at 'new_lex_lvl'.
 */
 
 #define STATIC_LINK_FOR_FRAME(dest, new_lex_lvl) {\
-  int m_cur_lex_lvl = FRAME_LEXICAL_LEVEL (frame_pointer);\
-  if (m_cur_lex_lvl == (new_lex_lvl)) {\
+  int _m_cur_lex_lvl = FRAME_LEXICAL_LEVEL (frame_pointer);\
+  if (_m_cur_lex_lvl == (new_lex_lvl)) {\
     (dest) = FRAME_STATIC_LINK (frame_pointer);\
-  } else if (m_cur_lex_lvl > (new_lex_lvl)) {\
-    ADDR_T m_static_link = frame_pointer;\
-    while (FRAME_LEXICAL_LEVEL (m_static_link) >= (new_lex_lvl)) {\
-      m_static_link = FRAME_STATIC_LINK (m_static_link);\
+  } else if (_m_cur_lex_lvl > (new_lex_lvl)) {\
+    ADDR_T _m_static_link = frame_pointer;\
+    while (FRAME_LEXICAL_LEVEL (_m_static_link) >= (new_lex_lvl)) {\
+      _m_static_link = FRAME_STATIC_LINK (_m_static_link);\
     }\
-    (dest) = m_static_link;\
+    (dest) = _m_static_link;\
   } else {\
     (dest) = frame_pointer;\
   }}
@@ -526,9 +526,9 @@ returns: static link for stack frame at 'new_lex_lvl'.
   if (scope > limit) {\
     char txt[BUFFER_SIZE];\
     if (info == NULL) {\
-      snprintf (txt, BUFFER_SIZE, ERROR_SCOPE_DYNAMIC_1);\
+      CHECK_RETVAL (snprintf (txt, (size_t) BUFFER_SIZE, ERROR_SCOPE_DYNAMIC_1) >= 0);\
     } else {\
-      snprintf (txt, BUFFER_SIZE, ERROR_SCOPE_DYNAMIC_2, info);\
+      CHECK_RETVAL (snprintf (txt, (size_t) BUFFER_SIZE, ERROR_SCOPE_DYNAMIC_2, info) >= 0);\
     }\
     diagnostic_node (A68_RUNTIME_ERROR, p, txt, mode);\
     exit_genie (p, A68_RUNTIME_ERROR);\
