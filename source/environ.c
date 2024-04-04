@@ -2442,7 +2442,7 @@ void genie_long_max_int (NODE_T * p)
   MP_T *z;
   int k, j = 1 + digits;
   STACK_MP (z, p, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (digits - 1);
   for (k = 2; k <= j; k++) {
     z[k] = (MP_T) (MP_RADIX - 1);
@@ -2460,7 +2460,7 @@ void genie_longlong_max_int (NODE_T * p)
   MP_T *z;
   int k, j = 1 + digits;
   STACK_MP (z, p, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (digits - 1);
   for (k = 2; k <= j; k++) {
     z[k] = (MP_T) (MP_RADIX - 1);
@@ -2477,7 +2477,7 @@ void genie_long_max_real (NODE_T * p)
   int j, digits = get_mp_digits (MODE (LONG_REAL));
   MP_T *z;
   STACK_MP (z, p, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (MAX_MP_EXPONENT - 1);
   for (j = 2; j <= 1 + digits; j++) {
     z[j] = (MP_T) (MP_RADIX - 1);
@@ -2494,7 +2494,7 @@ void genie_longlong_max_real (NODE_T * p)
   int j, digits = get_mp_digits (MODE (LONGLONG_REAL));
   MP_T *z;
   STACK_MP (z, p, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) (MAX_MP_EXPONENT - 1);
   for (j = 2; j <= 1 + digits; j++) {
     z[j] = (MP_T) (MP_RADIX - 1);
@@ -2512,7 +2512,7 @@ void genie_long_min_real (NODE_T * p)
   MP_T *z;
   STACK_MP (z, p, digits);
   SET_MP_ZERO (z, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) -(MAX_MP_EXPONENT);
   MP_DIGIT (z, 1) = (MP_T) 1;
 }
@@ -2528,7 +2528,7 @@ void genie_longlong_min_real (NODE_T * p)
   MP_T *z;
   STACK_MP (z, p, digits);
   SET_MP_ZERO (z, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) -(MAX_MP_EXPONENT);
   MP_DIGIT (z, 1) = (MP_T) 1;
 }
@@ -2543,7 +2543,7 @@ void genie_long_small_real (NODE_T * p)
   int j, digits = get_mp_digits (MODE (LONG_REAL));
   MP_T *z;
   STACK_MP (z, p, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) -(digits - 1);
   MP_DIGIT (z, 1) = (MP_T) 1;
   for (j = 3; j <= 1 + digits; j++) {
@@ -2561,7 +2561,7 @@ void genie_longlong_small_real (NODE_T * p)
   int j, digits = get_mp_digits (MODE (LONGLONG_REAL));
   MP_T *z;
   STACK_MP (z, p, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_EXPONENT (z) = (MP_T) -(digits - 1);
   MP_DIGIT (z, 1) = (MP_T) 1;
   for (j = 3; j <= 1 + digits; j++) {
@@ -2632,7 +2632,7 @@ void genie_pi_long_mp (NODE_T * p)
   MP_T *z;
   STACK_MP (z, p, digits);
   (void) mp_pi (p, z, MP_PI, digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /* BOOL operations */
@@ -2899,7 +2899,7 @@ void genie_lengthen_int_to_long_mp (NODE_T * p)
   POP_OBJECT (p, &k, A68_INT);
   STACK_MP (z, p, digits);
   (void) int_to_mp (p, z, VALUE (&k), digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -2915,7 +2915,7 @@ void genie_lengthen_unsigned_to_long_mp (NODE_T * p)
   POP_OBJECT (p, &k, A68_BITS);
   STACK_MP (z, p, digits);
   (void) unsigned_to_mp (p, z, (unsigned) VALUE (&k), digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -2930,7 +2930,7 @@ void genie_shorten_long_mp_to_int (NODE_T * p)
   MP_T *z;
   DECREMENT_STACK_POINTER (p, size);
   z = (MP_T *) STACK_TOP;
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   PUSH_PRIMITIVE (p, mp_to_int (p, z, digits), A68_INT);
 }
 
@@ -2977,7 +2977,7 @@ void genie_add_long_int (NODE_T * p)
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   (void) add_mp (p, x, x, y, digits);
   test_long_int_range (p, x, m);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -2994,7 +2994,7 @@ void genie_sub_long_int (NODE_T * p)
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   (void) sub_mp (p, x, x, y, digits);
   test_long_int_range (p, x, m);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3011,7 +3011,7 @@ void genie_mul_long_int (NODE_T * p)
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   (void) mul_mp (p, x, x, y, digits);
   test_long_int_range (p, x, m);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3030,7 +3030,7 @@ void genie_pow_long_mp_int_int (NODE_T * p)
   x = (MP_T *) STACK_OFFSET (-size);
   (void) pow_mp_int (p, x, x, VALUE (&k), digits);
   test_long_int_range (p, x, m);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3308,7 +3308,7 @@ void genie_lengthen_real_to_long_mp (NODE_T * p)
   POP_OBJECT (p, &x, A68_REAL);
   STACK_MP (z, p, digits);
   (void) real_to_mp (p, z, VALUE (&x), digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3323,7 +3323,7 @@ void genie_shorten_long_mp_to_real (NODE_T * p)
   MP_T *z;
   DECREMENT_STACK_POINTER (p, size);
   z = (MP_T *) STACK_TOP;
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   PUSH_PRIMITIVE (p, mp_to_real (p, z, digits), A68_REAL);
 }
 
@@ -3366,7 +3366,7 @@ void genie_sqrt_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (sqrt_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3379,7 +3379,7 @@ void genie_curt_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (curt_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3393,7 +3393,7 @@ void genie_exp_long_mp (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) exp_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
 }
 
@@ -3408,7 +3408,7 @@ void genie_ln_long_mp (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (ln_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
 }
 
@@ -3423,7 +3423,7 @@ void genie_log_long_mp (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (log_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
 }
 
@@ -3437,7 +3437,7 @@ void genie_sinh_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) sinh_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3450,7 +3450,7 @@ void genie_cosh_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) cosh_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3463,7 +3463,7 @@ void genie_tanh_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) tanh_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3476,7 +3476,7 @@ void genie_arcsinh_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) asinh_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3489,7 +3489,7 @@ void genie_arccosh_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) acosh_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3502,7 +3502,7 @@ void genie_arctanh_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) atanh_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3515,7 +3515,7 @@ void genie_sin_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) sin_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3528,7 +3528,7 @@ void genie_cos_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) cos_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3541,7 +3541,7 @@ void genie_tan_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (tan_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3554,7 +3554,7 @@ void genie_asin_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (asin_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3567,7 +3567,7 @@ void genie_acos_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (acos_mp (p, x, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3580,7 +3580,7 @@ void genie_atan_long_mp (NODE_T * p)
   int digits = get_mp_digits (MOID (p)), size = get_mp_size (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   (void) atan_mp (p, x, x, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3595,7 +3595,7 @@ void genie_atan2_long_mp (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-2 * size);
   stack_pointer -= size;
   PRELUDE_ERROR (atan2_mp (p, x, y, x, digits) == NO_MP, p, ERROR_INVALID_ARGUMENT, MOID (p));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /* Arithmetic operations */
@@ -3611,7 +3611,7 @@ void genie_lengthen_long_mp_to_longlong_mp (NODE_T * p)
   DECREMENT_STACK_POINTER (p, (int) size_long_mp ());
   STACK_MP (z, p, longlong_mp_digits ());
   (void) lengthen_mp (p, z, longlong_mp_digits (), z, long_mp_digits ());
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3629,7 +3629,7 @@ void genie_shorten_longlong_mp_to_long_mp (NODE_T * p)
     PRELUDE_ERROR (MP_EXPONENT (z) > LONG_MP_DIGITS - 1, p, ERROR_OUT_OF_BOUNDS, m);
   }
   (void) shorten_mp (p, z, long_mp_digits (), z, longlong_mp_digits ());
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3641,7 +3641,7 @@ void genie_minus_long_mp (NODE_T * p)
 {
   int size = get_mp_size (LHS_MODE (p));
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
 }
 
@@ -3654,7 +3654,7 @@ void genie_abs_long_mp (NODE_T * p)
 {
   int size = get_mp_size (LHS_MODE (p));
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   MP_DIGIT (z, 1) = ABS (MP_DIGIT (z, 1));
 }
 
@@ -3683,7 +3683,7 @@ void genie_add_long_mp (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   (void) add_mp (p, x, x, y, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3699,7 +3699,7 @@ void genie_sub_long_mp (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   (void) sub_mp (p, x, x, y, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3715,7 +3715,7 @@ void genie_mul_long_mp (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   (void) mul_mp (p, x, x, y, digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3731,7 +3731,7 @@ void genie_div_long_mp (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (div_mp (p, x, x, y, digits) == NO_MP, p, ERROR_DIVISION_BY_ZERO, MODE (LONG_REAL));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3747,7 +3747,7 @@ void genie_over_long_mp (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *y = (MP_T *) STACK_OFFSET (-size);
   PRELUDE_ERROR (over_mp (p, x, x, y, digits) == NO_MP, p, ERROR_DIVISION_BY_ZERO, MODE (LONG_INT));
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3767,7 +3767,7 @@ void genie_mod_long_mp (NODE_T * p)
     MP_DIGIT (y, 1) = ABS (MP_DIGIT (y, 1));
    (void) add_mp (p, x, x, y, digits);
   }
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, size);
 }
 
@@ -3872,7 +3872,7 @@ void genie_pow_long_mp_int (NODE_T * p)
   POP_OBJECT (p, &k, A68_INT);
   x = (MP_T *) STACK_OFFSET (-size);
   (void) pow_mp_int (p, x, x, VALUE (&k), digits);
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -3901,7 +3901,7 @@ void genie_pow_long_mp (NODE_T * p)
     (void) exp_mp (p, x, z, digits);
   }
   stack_pointer = pop_sp - size;
-  MP_STATUS (x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (x) = (MP_T) INIT_MASK;
 }
 
 /* Character operations */
@@ -4173,7 +4173,7 @@ void genie_times_int_char (NODE_T * p)
   base = ADDRESS (&row);
   for (k = 0; k < VALUE (&str_size); k++) {
     A68_CHAR ch;
-    STATUS (&ch) = INITIALISED_MASK;
+    STATUS (&ch) = INIT_MASK;
     VALUE (&ch) = VALUE (&a);
     *(A68_CHAR *) & base[k * ALIGNED_SIZE_OF (A68_CHAR)] = ch;
   }
@@ -4364,7 +4364,7 @@ void genie_long_next_random (NODE_T * p)
     z[k] = (MP_T) (int) (rng_53_bit () * MP_RADIX);
   }
   MP_EXPONENT (z) = (MP_T) (-1);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /* BYTES operations */
@@ -4400,7 +4400,7 @@ void genie_bytespack (NODE_T * p)
   POP_REF (p, &z);
   CHECK_REF (p, z, MODE (STRING));
   PRELUDE_ERROR (a68_string_size (p, z) > BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, MODE (STRING));
-  STATUS (&b) = INITIALISED_MASK;
+  STATUS (&b) = INIT_MASK;
   ASSERT (a_to_c_string (p, VALUE (&b), z) != NO_TEXT);
   PUSH_BYTES (p, VALUE (&b));
 }
@@ -4534,7 +4534,7 @@ void genie_long_bytespack (NODE_T * p)
   POP_REF (p, &z);
   CHECK_REF (p, z, MODE (STRING));
   PRELUDE_ERROR (a68_string_size (p, z) > LONG_BYTES_WIDTH, p, ERROR_OUT_OF_BOUNDS, MODE (STRING));
-  STATUS (&b) = INITIALISED_MASK;
+  STATUS (&b) = INIT_MASK;
   ASSERT (a_to_c_string (p, VALUE (&b), z) != NO_TEXT);
   PUSH_LONG_BYTES (p, VALUE (&b));
 }
@@ -4822,7 +4822,7 @@ void genie_bin_long_mp (NODE_T * p)
   MP_T *u = (MP_T *) STACK_OFFSET (-size);
 /* We convert just for the operand check */
   (void) stack_mp_bits (p, u, mode);
-  MP_STATUS (u) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (u) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
 }
 
@@ -5061,7 +5061,7 @@ void genie_bits_pack (NODE_T * p)
       bit <<= 1;
     }
   }
-  STATUS (&b) = INITIALISED_MASK;
+  STATUS (&b) = INIT_MASK;
   PUSH_OBJECT (p, b, A68_BITS);
 }
 
@@ -5106,7 +5106,7 @@ void genie_long_bits_pack (NODE_T * p)
     }
   }
   stack_pointer = pop_sp;
-  MP_STATUS (sum) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (sum) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -6801,10 +6801,10 @@ void genie_lengthen_complex_to_long_complex (NODE_T * p)
   POP_OBJECT (p, &a, A68_REAL);
   STACK_MP (z, p, digits);
   (void) real_to_mp (p, z, VALUE (&a), digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
   STACK_MP (z, p, digits);
   (void) real_to_mp (p, z, VALUE (&b), digits);
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (z) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -6842,8 +6842,8 @@ void genie_lengthen_long_complex_to_longlong_complex (NODE_T * p)
   MOVE_MP (a, c, digs_long);
   MOVE_MP (&a[2 + digs_long], d, digs_long);
   stack_pointer = pop_sp;
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  (&a[2 + digs_long])[0] = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  (&a[2 + digs_long])[0] = (MP_T) INIT_MASK;
   INCREMENT_STACK_POINTER (p, 2 * (size_long - size));
 }
 
@@ -6863,8 +6863,8 @@ void genie_shorten_longlong_complex_to_long_complex (NODE_T * p)
   (void) shorten_mp (p, a, digits, a, digs_long);
   (void) shorten_mp (p, &a[2 + digits], digits, b, digs_long);
   stack_pointer = pop_sp;
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  (&a[2 + digits])[0] = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  (&a[2 + digits])[0] = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, 2 * (size_long - size));
 }
 
@@ -6877,7 +6877,7 @@ void genie_re_long_complex (NODE_T * p)
 {
   int size = get_mp_size (LHS_MODE (p));
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, (int) size_long_mp ());
 }
 
@@ -6892,7 +6892,7 @@ void genie_im_long_complex (NODE_T * p)
   MP_T *b = (MP_T *) STACK_OFFSET (-size);
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
   MOVE_MP (a, b, digits);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
   DECREMENT_STACK_POINTER (p, (int) size_long_mp ());
 }
 
@@ -6908,8 +6908,8 @@ void genie_minus_long_complex (NODE_T * p)
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT (a, 1) = -MP_DIGIT (a, 1);
   MP_DIGIT (b, 1) = -MP_DIGIT (b, 1);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (b) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  MP_STATUS (b) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -6923,8 +6923,8 @@ void genie_conj_long_complex (NODE_T * p)
   MP_T *b = (MP_T *) STACK_OFFSET (-size);
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
   MP_DIGIT (b, 1) = -MP_DIGIT (b, 1);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (b) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  MP_STATUS (b) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -6945,7 +6945,7 @@ void genie_abs_long_complex (NODE_T * p)
   stack_pointer = pop_sp;
   DECREMENT_STACK_POINTER (p, size);
   MOVE_MP (a, z, digits);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -6967,7 +6967,7 @@ void genie_arg_long_complex (NODE_T * p)
   stack_pointer = pop_sp;
   DECREMENT_STACK_POINTER (p, size);
   MOVE_MP (a, z, digits);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -6987,8 +6987,8 @@ void genie_add_long_complex (NODE_T * p)
   MP_T *a = (MP_T *) STACK_OFFSET (-4 * size);
   (void) add_mp (p, b, b, d, digits);
   (void) add_mp (p, a, a, c, digits);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (b) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  MP_STATUS (b) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
   DECREMENT_STACK_POINTER (p, 2 * size);
 }
@@ -7009,8 +7009,8 @@ void genie_sub_long_complex (NODE_T * p)
   MP_T *a = (MP_T *) STACK_OFFSET (-4 * size);
   (void) sub_mp (p, b, b, d, digits);
   (void) sub_mp (p, a, a, c, digits);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (b) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  MP_STATUS (b) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
   DECREMENT_STACK_POINTER (p, 2 * size);
 }
@@ -7030,8 +7030,8 @@ void genie_mul_long_complex (NODE_T * p)
   MP_T *b = (MP_T *) STACK_OFFSET (-3 * size);
   MP_T *a = (MP_T *) STACK_OFFSET (-4 * size);
   (void) cmul_mp (p, a, b, c, d, digits);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (b) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  MP_STATUS (b) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
   DECREMENT_STACK_POINTER (p, 2 * size);
 }
@@ -7051,8 +7051,8 @@ void genie_div_long_complex (NODE_T * p)
   MP_T *b = (MP_T *) STACK_OFFSET (-3 * size);
   MP_T *a = (MP_T *) STACK_OFFSET (-4 * size);
   PRELUDE_ERROR (cdiv_mp (p, a, b, c, d, digits) == NO_MP, p, ERROR_DIVISION_BY_ZERO, mode);
-  MP_STATUS (a) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (b) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (a) = (MP_T) INIT_MASK;
+  MP_STATUS (b) = (MP_T) INIT_MASK;
   stack_pointer = pop_sp;
   DECREMENT_STACK_POINTER (p, 2 * size);
 }
@@ -7119,8 +7119,8 @@ void genie_pow_long_complex_int (NODE_T * p)
     MOVE_MP (re_x, re_z, digits);
     MOVE_MP (im_x, im_z, digits);
   }
-  MP_STATUS (re_x) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im_x) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re_x) = (MP_T) INIT_MASK;
+  MP_STATUS (im_x) = (MP_T) INIT_MASK;
 }
 
 /*!
@@ -7248,8 +7248,8 @@ void genie_sqrt_long_complex (NODE_T * p)
   RESET_ERRNO;
   (void) csqrt_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7285,8 +7285,8 @@ void genie_exp_long_complex (NODE_T * p)
   MP_T *re = (MP_T *) STACK_OFFSET (-2 * size);
   (void) cexp_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7326,8 +7326,8 @@ void genie_ln_long_complex (NODE_T * p)
   MP_T *re = (MP_T *) STACK_OFFSET (-2 * size);
   (void) cln_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7367,8 +7367,8 @@ void genie_sin_long_complex (NODE_T * p)
   MP_T *re = (MP_T *) STACK_OFFSET (-2 * size);
   (void) csin_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7408,8 +7408,8 @@ void genie_cos_long_complex (NODE_T * p)
   MP_T *re = (MP_T *) STACK_OFFSET (-2 * size);
   (void) ccos_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7455,8 +7455,8 @@ void genie_tan_long_complex (NODE_T * p)
   MP_T *im = (MP_T *) STACK_OFFSET (-size);
   (void) ctan_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7497,8 +7497,8 @@ void genie_asin_long_complex (NODE_T * p)
   RESET_ERRNO;
   (void) casin_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7539,8 +7539,8 @@ void genie_acos_long_complex (NODE_T * p)
   RESET_ERRNO;
   (void) cacos_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7580,8 +7580,8 @@ void genie_atan_long_complex (NODE_T * p)
   RESET_ERRNO;
   (void) catan_mp (p, re, im, digits);
   stack_pointer = pop_sp;
-  MP_STATUS (re) = (MP_T) INITIALISED_MASK;
-  MP_STATUS (im) = (MP_T) INITIALISED_MASK;
+  MP_STATUS (re) = (MP_T) INIT_MASK;
+  MP_STATUS (im) = (MP_T) INIT_MASK;
   MATH_RTE (p, errno != 0, mode, NO_TEXT);
 }
 
@@ -7661,8 +7661,150 @@ it back again, as happy as could be ... Winnie the Pooh, A.A. Milne.
 A68_CHANNEL stand_in_channel, stand_out_channel, stand_draw_channel, stand_back_channel, stand_error_channel, associate_channel, skip_channel;
 A68_REF stand_in, stand_out, stand_back, stand_error, skip_file;
 A68_FORMAT nil_format = {
-  INITIALISED_MASK, NULL, 0
+  INIT_MASK, NULL, 0
 };
+
+/* File table handling 
+In a table we record opened files.
+When execution ends, unclosed files are closed, and temps are removed.
+This keeps /tmp free of spurious files :-)
+*/
+
+typedef struct FILE_ENTRY FILE_ENTRY;
+
+struct FILE_ENTRY {
+  NODE_T *pos;
+  BOOL_T is_open, is_tmp;
+  FILE_T fd;
+  A68_REF idf;
+};
+
+FILE_ENTRY file_entries[MAX_OPEN_FILES];
+
+/*
+\brief init an entry
+**/
+
+void init_file_entry (int k)
+{
+  if (k >= 0 && k < MAX_OPEN_FILES) {
+    FILE_ENTRY *fe = &(file_entries[k]);
+    POS (fe) = NO_NODE;
+    IS_OPEN (fe) = A68_FALSE;
+    IS_TMP (fe) = A68_FALSE;
+    FD (fe) = A68_NO_FILENO;
+    IDF (fe) = nil_ref;
+  }
+}
+
+/*
+\brief initialise file entry table
+**/
+
+void init_file_entries (void)
+{
+  int k;
+  for (k = 0; k < MAX_OPEN_FILES; k ++) {
+    init_file_entry (k);
+  }
+}
+
+/*
+\brief store file for later closing when not explicitly closed
+\param p entry in syntax tree
+\param fd file descriptor
+\param idf file name
+\param is_tmp whether file is a temp file
+\return entry in table
+**/
+
+int store_file_entry (NODE_T *p, FILE_T fd, char *idf, BOOL_T is_tmp)
+{
+  int k;
+  for (k = 0; k < MAX_OPEN_FILES; k ++)
+  {
+    FILE_ENTRY *fe = &(file_entries[k]);
+    if (!IS_OPEN (fe)) {
+      int len = 1 + (int) strlen (idf);
+      POS (fe) = p;
+      IS_OPEN (fe) = A68_TRUE;
+      IS_TMP (fe) = is_tmp;
+      FD (fe) = fd;
+      IDF (fe) = heap_generator (p, MODE (C_STRING), len);
+      BLOCK_GC_HANDLE (&(IDF (fe)));
+      bufcpy (DEREF (char, &IDF (fe)), idf, len);
+      return (k);
+    }
+  }
+  diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_TOO_MANY_OPEN_FILES);
+  exit_genie (p, A68_RUNTIME_ERROR);
+  return (-1); /* Fool them */
+}
+
+/*
+\brief close file and delete temp file
+\param k entry in table
+**/
+
+static void close_file_entry (NODE_T *p, int k)
+{
+  if (k >= 0 && k < MAX_OPEN_FILES) {
+    FILE_ENTRY *fe = &(file_entries[k]);
+    if (IS_OPEN (fe)) {
+/* Close the file */
+      if (FD (fe) != A68_NO_FILENO && close (FD (fe)) == -1) {
+        init_file_entry (k);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_CLOSE);
+        exit_genie (p, A68_RUNTIME_ERROR);
+      }
+      IS_OPEN (fe) = A68_FALSE;
+    }
+  }
+}
+
+/*
+\brief close file and delete temp file
+\param k entry in table
+**/
+
+static void free_file_entry (NODE_T *p, int k)
+{
+  close_file_entry (p, k);
+  if (k >= 0 && k < MAX_OPEN_FILES) {
+    FILE_ENTRY *fe = &(file_entries[k]);
+    if (IS_OPEN (fe)) {
+/* Attempt to remove a temp file, but ignore failure */
+      if (FD (fe) != A68_NO_FILENO && IS_TMP (fe)) {
+        if (!IS_NIL (IDF (fe))) {
+          char *filename;
+          CHECK_INIT (p, INITIALISED (&(IDF (fe))), MODE (ROWS));
+          filename = DEREF (char, &IDF (fe));
+          if (filename != NO_TEXT) {
+            (void) remove (filename);
+          }
+        }
+      }
+/* Restore the fields */
+      if (!IS_NIL (IDF (fe))) {
+        UNBLOCK_GC_HANDLE (&(IDF (fe)));
+      }
+      init_file_entry (k);
+    }
+  }
+}
+
+/*
+\brief close all files and delete all temp files
+**/
+
+void free_file_entries (void)
+{
+  int k;
+  for (k = 0; k < MAX_OPEN_FILES; k ++) {
+    free_file_entry (NO_NODE, k);
+  }
+}
+
 
 /*!
 \brief PROC char in string = (CHAR, REF INT, STRING) BOOL
@@ -7691,7 +7833,7 @@ void genie_char_in_string (NODE_T * p)
   ch = (char) VALUE (&c);
   for (k = 0; k < len; k++) {
     if (q[k] == ch) {
-      STATUS (&pos) = INITIALISED_MASK;
+      STATUS (&pos) = INIT_MASK;
       VALUE (&pos) = k + LOWER_BOUND (tup);
       * DEREF (A68_INT, &ref_pos) = pos;
       PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
@@ -7728,7 +7870,7 @@ void genie_last_char_in_string (NODE_T * p)
   ch = (char) VALUE (&c);
   for (k = len - 1; k >= 0; k--) {
     if (q[k] == ch) {
-      STATUS (&pos) = INITIALISED_MASK;
+      STATUS (&pos) = INIT_MASK;
       VALUE (&pos) = k + LOWER_BOUND (tup);
       * DEREF (A68_INT, &ref_pos) = pos;
       PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
@@ -7763,7 +7905,7 @@ void genie_string_in_string (NODE_T * p)
   if (q != NO_TEXT) {
     if (!IS_NIL (ref_pos)) {
       A68_INT pos;
-      STATUS (&pos) = INITIALISED_MASK;
+      STATUS (&pos) = INIT_MASK;
 /* ANSI standard leaves pointer difference undefined */
       VALUE (&pos) = LOWER_BOUND (tup) + (int) get_transput_buffer_index (STRING_BUFFER) - (int) strlen (q);
       * DEREF (A68_INT, &ref_pos) = pos;
@@ -7792,7 +7934,7 @@ static A68_REF ref_transput_buffer[MAX_TRANSPUT_BUFFER];
 void set_transput_buffer_size (int n, int size)
 {
   A68_INT *k = (A68_INT *) (ADDRESS (&ref_transput_buffer[n]));
-  STATUS (k) = INITIALISED_MASK;
+  STATUS (k) = INIT_MASK;
   VALUE (k) = size;
 }
 
@@ -7805,7 +7947,7 @@ void set_transput_buffer_size (int n, int size)
 void set_transput_buffer_index (int n, int cindex)
 {
   A68_INT *k = (A68_INT *) (ADDRESS (&ref_transput_buffer[n]) + ALIGNED_SIZE_OF (A68_INT));
-  STATUS (k) = INITIALISED_MASK;
+  STATUS (k) = INIT_MASK;
   VALUE (k) = cindex;
 }
 
@@ -8067,7 +8209,7 @@ static void add_c_string_to_a_string (NODE_T * p, A68_REF ref_str, char *str)
   }
   for (v = 0; v < l_2; v++) {
     A68_CHAR ch;
-    STATUS (&ch) = INITIALISED_MASK;
+    STATUS (&ch) = INIT_MASK;
     VALUE (&ch) = str[v];
     MOVE ((BYTE_T *) & b_3[u], (BYTE_T *) & ch, ALIGNED_SIZE_OF (A68_CHAR));
     u += ALIGNED_SIZE_OF (A68_CHAR);
@@ -8317,7 +8459,7 @@ void genie_program_idf (NODE_T * p)
 
 void set_default_event_procedure (A68_PROCEDURE * z)
 {
-  STATUS (z) = INITIALISED_MASK;
+  STATUS (z) = INIT_MASK;
   NODE (&(BODY (z))) = NO_NODE;
   ENVIRON (z) = 0;
 }
@@ -8335,7 +8477,7 @@ void set_default_event_procedure (A68_PROCEDURE * z)
 
 static void init_channel (A68_CHANNEL * chan, BOOL_T r, BOOL_T s, BOOL_T g, BOOL_T p, BOOL_T b, BOOL_T d)
 {
-  STATUS (chan) = INITIALISED_MASK;
+  STATUS (chan) = INIT_MASK;
   RESET (chan) = r;
   SET (chan) = s;
   GET (chan) = g;
@@ -8380,7 +8522,7 @@ static void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, 
   *ref_file = heap_generator (p, MODE (REF_FILE), ALIGNED_SIZE_OF (A68_FILE));
   BLOCK_GC_HANDLE (ref_file);
   f = FILE_DEREF (ref_file);
-  STATUS (f) = INITIALISED_MASK;
+  STATUS (f) = INIT_MASK;
   TERMINATOR (f) = nil_ref;
   CHANNEL (f) = c;
   if (filename != NO_TEXT && strlen (filename) > 0) {
@@ -8649,7 +8791,8 @@ void genie_open (NODE_T * p)
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
-  STATUS (file) = INITIALISED_MASK;
+  STATUS (file) = INIT_MASK;
+  FILE_ENTRY (file) = -1;
   CHANNEL (file) = channel;
   OPENED (file) = A68_TRUE;
   OPEN_EXCLUSIVE (file) = A68_FALSE;
@@ -8673,6 +8816,7 @@ void genie_open (NODE_T * p)
   }
   STRING (file) = nil_ref;
   STRPOS (file) = 0;
+  DEVICE_MADE (&DEVICE (file)) = A68_FALSE;
   STREAM (&DEVICE (file)) = NO_STREAM;
   set_default_event_procedures (file);
   {
@@ -8703,7 +8847,8 @@ void genie_establish (NODE_T * p)
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
-  STATUS (file) = INITIALISED_MASK;
+  STATUS (file) = INIT_MASK;
+  FILE_ENTRY (file) = -1;
   CHANNEL (file) = channel;
   OPENED (file) = A68_TRUE;
   OPEN_EXCLUSIVE (file) = A68_TRUE;
@@ -8731,6 +8876,7 @@ void genie_establish (NODE_T * p)
   }
   STRING (file) = nil_ref;
   STRPOS (file) = 0;
+  DEVICE_MADE (&DEVICE (file)) = A68_FALSE;
   STREAM (&DEVICE (file)) = NO_STREAM;
   set_default_event_procedures (file);
   PUSH_PRIMITIVE (p, 0, A68_INT);
@@ -8750,7 +8896,8 @@ void genie_create (NODE_T * p)
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
-  STATUS (file) = INITIALISED_MASK;
+  STATUS (file) = INIT_MASK;
+  FILE_ENTRY (file) = -1;
   CHANNEL (file) = channel;
   OPENED (file) = A68_TRUE;
   OPEN_EXCLUSIVE (file) = A68_FALSE;
@@ -8771,6 +8918,7 @@ void genie_create (NODE_T * p)
   }
   STRING (file) = nil_ref;
   STRPOS (file) = 0;
+  DEVICE_MADE (&DEVICE (file)) = A68_FALSE;
   STREAM (&DEVICE (file)) = NO_STREAM;
   set_default_event_procedures (file);
   PUSH_PRIMITIVE (p, 0, A68_INT);
@@ -8799,7 +8947,8 @@ void genie_associate (NODE_T * p)
     }
   }
   file = FILE_DEREF (&ref_file);
-  STATUS (file) = INITIALISED_MASK;
+  STATUS (file) = INIT_MASK;
+  FILE_ENTRY (file) = -1;
   CHANNEL (file) = associate_channel;
   OPENED (file) = A68_TRUE;
   OPEN_EXCLUSIVE (file) = A68_FALSE;
@@ -8821,6 +8970,7 @@ void genie_associate (NODE_T * p)
   STRING (file) = ref_string;
   BLOCK_GC_HANDLE ((A68_REF *) (&(STRING (file))));
   STRPOS (file) = 1;
+  DEVICE_MADE (&DEVICE (file)) = A68_FALSE;
   STREAM (&DEVICE (file)) = NO_STREAM;
   set_default_event_procedures (file);
 }
@@ -9057,14 +9207,10 @@ void genie_reset (NODE_T * p)
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_CANT_RESET);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  if (!IS_NIL (STRING (file))) {
-    STRPOS (file) = 1;
+  if (IS_NIL (STRING (file))) {
+    close_file_entry (p, FILE_ENTRY (file));
   } else {
-    if (FD (file) != A68_NO_FILENO && close (FD (file)) == -1) {
-      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_RESET);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    init_file_entry (FILE_ENTRY (file));
+    STRPOS (file) = 1;
   }
   READ_MOOD (file) = A68_FALSE;
   WRITE_MOOD (file) = A68_FALSE;
@@ -9901,6 +10047,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int flags, mode_t permi
     TRANSPUT_BUFFER (file) = get_unblocked_transput_buffer (p);
     reset_transput_buffer (TRANSPUT_BUFFER (file));
     END_OF_FILE (file) = A68_FALSE;
+    FILE_ENTRY (file) = -1;
     return (FD (file));
   } else if (IS_NIL (IDENTIFICATION (file))) {
 /* No identification, so generate a unique identification. */
@@ -10207,7 +10354,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     char *end;
     VALUE (z) = (int) strtol (a, &end, 10);
     if (end[0] == NULL_CHAR && errno == 0) {
-      STATUS (z) = INITIALISED_MASK;
+      STATUS (z) = INIT_MASK;
       return (A68_TRUE);
     } else {
       return (A68_FALSE);
@@ -10217,7 +10364,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     char *end;
     VALUE (z) = strtod (a, &end);
     if (end[0] == NULL_CHAR && errno == 0) {
-      STATUS (z) = INITIALISED_MASK;
+      STATUS (z) = INIT_MASK;
       return (A68_TRUE);
     } else {
       return (A68_FALSE);
@@ -10232,7 +10379,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
       errno = ERANGE;
       return (A68_FALSE);
     }
-    MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+    MP_STATUS (z) = (MP_T) INIT_MASK;
     return (A68_TRUE);
   } else if (m == MODE (LONG_REAL) || m == MODE (LONGLONG_REAL)) {
     int digits = get_mp_digits (m);
@@ -10240,14 +10387,14 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     if (string_to_mp (p, z, a, digits) == NO_MP) {
       return (A68_FALSE);
     }
-    MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+    MP_STATUS (z) = (MP_T) INIT_MASK;
     return (A68_TRUE);
   } else if (m == MODE (BOOL)) {
     A68_BOOL *z = (A68_BOOL *) item;
     char q = a[0], flip = FLIP_CHAR, flop = FLOP_CHAR;
     if (q == flip || q == flop) {
       VALUE (z) = (BOOL_T) (q == flip);
-      STATUS (z) = INITIALISED_MASK;
+      STATUS (z) = INIT_MASK;
       return (A68_TRUE);
     } else {
       return (A68_FALSE);
@@ -10280,7 +10427,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     if (errno != 0 || status == A68_FALSE) {
       return (A68_FALSE);
     }
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
     return (A68_TRUE);
   } else if (m == MODE (LONG_BITS) || m == MODE (LONGLONG_BITS)) {
     int digits = get_mp_digits (m);
@@ -10315,7 +10462,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     if (errno != 0 || status == A68_FALSE) {
       return (A68_FALSE);
     }
-    MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+    MP_STATUS (z) = (MP_T) INIT_MASK;
     return (A68_TRUE);
   }
   return (A68_FALSE);
@@ -10367,14 +10514,14 @@ void genie_string_to_value (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF re
     if (str[0] == NULL_CHAR) {
 /*      value_error (p, mode, ref_file); */
       VALUE (z) = NULL_CHAR;
-      STATUS (z) = INITIALISED_MASK;
+      STATUS (z) = INIT_MASK;
     } else {
       int len = (int) strlen (str);
       if (len == 0 || len > 1) {
         value_error (p, mode, ref_file);
       }
       VALUE (z) = str[0];
-      STATUS (z) = INITIALISED_MASK;
+      STATUS (z) = INIT_MASK;
     }
   } else if (mode == MODE (STRING)) {
     A68_REF z;
@@ -10427,7 +10574,7 @@ void genie_read_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_
     }
   } else if (IS (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
-    if (!(STATUS (z) | INITIALISED_MASK) || VALUE (z) == NULL) {
+    if (!(STATUS (z) | INIT_MASK) || VALUE (z) == NULL) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
@@ -10881,35 +11028,35 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
   if (mode == MODE (INT)) {
     A68_INT *z = (A68_INT *) item;
     ASSERT (io_read (FD (f), &(VALUE (z)), sizeof (VALUE (z))) != -1);
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
   } else if (mode == MODE (LONG_INT) || mode == MODE (LONGLONG_INT)) {
     MP_T *z = (MP_T *) item;
     ASSERT (io_read (FD (f), z, (size_t) get_mp_size (mode)) != -1);
-    MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+    MP_STATUS (z) = (MP_T) INIT_MASK;
   } else if (mode == MODE (REAL)) {
     A68_REAL *z = (A68_REAL *) item;
     ASSERT (io_read (FD (f), &(VALUE (z)), sizeof (VALUE (z))) != -1);
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
   } else if (mode == MODE (LONG_REAL) || mode == MODE (LONGLONG_REAL)) {
     MP_T *z = (MP_T *) item;
     ASSERT (io_read (FD (f), z, (size_t) get_mp_size (mode)) != -1);
-    MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+    MP_STATUS (z) = (MP_T) INIT_MASK;
   } else if (mode == MODE (BOOL)) {
     A68_BOOL *z = (A68_BOOL *) item;
     ASSERT (io_read (FD (f), &(VALUE (z)), sizeof (VALUE (z))) != -1);
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
   } else if (mode == MODE (CHAR)) {
     A68_CHAR *z = (A68_CHAR *) item;
     ASSERT (io_read (FD (f), &(VALUE (z)), sizeof (VALUE (z))) != -1);
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
   } else if (mode == MODE (BITS)) {
     A68_BITS *z = (A68_BITS *) item;
     ASSERT (io_read (FD (f), &(VALUE (z)), sizeof (VALUE (z))) != -1);
-    STATUS (z) = INITIALISED_MASK;
+    STATUS (z) = INIT_MASK;
   } else if (mode == MODE (LONG_BITS) || mode == MODE (LONGLONG_BITS)) {
     MP_T *z = (MP_T *) item;
     ASSERT (io_read (FD (f), z, (size_t) get_mp_size (mode)) != -1);
-    MP_STATUS (z) = (MP_T) INITIALISED_MASK;
+    MP_STATUS (z) = (MP_T) INIT_MASK;
   } else if (mode == MODE (ROW_CHAR) || mode == MODE (STRING)) {
     int len, k;
     ASSERT (io_read (FD (f), &(len), sizeof (len)) != -1);
@@ -10922,7 +11069,7 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
     *(A68_REF *) item = c_to_a_string (p, get_transput_buffer (UNFORMATTED_BUFFER), DEFAULT_WIDTH);
   } else if (IS (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
-    if (!(STATUS (z) | INITIALISED_MASK) || VALUE (z) == NULL) {
+    if (!(STATUS (z) | INIT_MASK) || VALUE (z) == NULL) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
@@ -12606,7 +12753,7 @@ of times it can still be used.
   for (; p != NO_NODE; FORWARD (p)) {
     if (IS (p, PICTURE)) {
       A68_COLLITEM *z = (A68_COLLITEM *) FRAME_LOCAL (frame_pointer, OFFSET (TAX (p)));
-      STATUS (z) = INITIALISED_MASK;
+      STATUS (z) = INIT_MASK;
       COUNT (z) = ITEM_NOT_USED;
     }
 /* Don't dive into f, g, n frames and collections */
@@ -13134,13 +13281,13 @@ static void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int 
   } else if (mod == FORMAT_ITEM_H) {
     int def_expo = 0, def_mult;
     A68_INT a_width, a_after, a_expo, a_mult;
-    STATUS (&a_width) = INITIALISED_MASK;
+    STATUS (&a_width) = INIT_MASK;
     VALUE (&a_width) = 0;
-    STATUS (&a_after) = INITIALISED_MASK;
+    STATUS (&a_after) = INIT_MASK;
     VALUE (&a_after) = 0;
-    STATUS (&a_expo) = INITIALISED_MASK;
+    STATUS (&a_expo) = INIT_MASK;
     VALUE (&a_expo) = 0;
-    STATUS (&a_mult) = INITIALISED_MASK;
+    STATUS (&a_mult) = INIT_MASK;
     VALUE (&a_mult) = 0;
     /*
      * Set default values 
@@ -13958,7 +14105,7 @@ static void write_real_pattern (NODE_T * p, MOID_T * mode, MOID_T * root, BYTE_T
 /* Exponent */
     if (expo_mould != NO_NODE) {
       A68_INT z;
-      STATUS (&z) = INITIALISED_MASK;
+      STATUS (&z) = INIT_MASK;
       VALUE (&z) = exp_value;
       if (e_frame != NO_NODE) {
         write_pie_frame (e_frame, ref_file, FORMAT_E_FRAME, FORMAT_ITEM_E);
@@ -14075,7 +14222,7 @@ static void genie_write_real_format (NODE_T * p, BYTE_T * item, A68_REF ref_file
     write_real_pattern (p, MODE (REAL), MODE (REAL), item, ref_file);
   } else if (IS (p, COMPLEX_PATTERN)) {
     A68_REAL im;
-    STATUS (&im) = INITIALISED_MASK;
+    STATUS (&im) = INIT_MASK;
     VALUE (&im) = 0.0;
     write_complex_pattern (p, MODE (REAL), MODE (COMPLEX), (BYTE_T *) item, (BYTE_T *) & im, ref_file);
   } else {
@@ -14106,7 +14253,7 @@ static void genie_write_long_real_format (NODE_T * p, BYTE_T * item, A68_REF ref
     MP_T *z;
     STACK_MP (z, p, get_mp_digits (MODE (LONG_REAL)));
     SET_MP_ZERO (z, get_mp_digits (MODE (LONG_REAL)));
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
     write_complex_pattern (p, MODE (LONG_REAL), MODE (LONG_COMPLEX), item, (BYTE_T *) z, ref_file);
     stack_pointer = old_stack_pointer;
   } else {
@@ -14137,7 +14284,7 @@ static void genie_write_longlong_real_format (NODE_T * p, BYTE_T * item, A68_REF
     MP_T *z;
     STACK_MP (z, p, get_mp_digits (MODE (LONGLONG_REAL)));
     SET_MP_ZERO (z, get_mp_digits (MODE (LONGLONG_REAL)));
-    z[0] = (MP_T) INITIALISED_MASK;
+    z[0] = (MP_T) INIT_MASK;
     write_complex_pattern (p, MODE (LONGLONG_REAL), MODE (LONGLONG_COMPLEX), item, (BYTE_T *) z, ref_file);
     stack_pointer = old_stack_pointer;
   } else {
@@ -14171,9 +14318,9 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
       write_real_pattern (pat, MODE (INT), MODE (INT), item, ref_file);
     } else if (IS (pat, COMPLEX_PATTERN)) {
       A68_REAL re, im;
-      STATUS (&re) = INITIALISED_MASK;
+      STATUS (&re) = INIT_MASK;
       VALUE (&re) = (double) VALUE ((A68_INT *) item);
-      STATUS (&im) = INITIALISED_MASK;
+      STATUS (&im) = INIT_MASK;
       VALUE (&im) = 0.0;
       write_complex_pattern (pat, MODE (REAL), MODE (COMPLEX), (BYTE_T *) & re, (BYTE_T *) & im, ref_file);
     } else if (IS (pat, CHOICE_PATTERN)) {
@@ -14200,7 +14347,7 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
       MP_T *z;
       STACK_MP (z, p, get_mp_digits (mode));
       SET_MP_ZERO (z, get_mp_digits (mode));
-      z[0] = (MP_T) INITIALISED_MASK;
+      z[0] = (MP_T) INIT_MASK;
       write_complex_pattern (pat, MODE (LONG_REAL), MODE (LONG_COMPLEX), item, (BYTE_T *) z, ref_file);
       stack_pointer = old_stack_pointer;
     } else if (IS (pat, CHOICE_PATTERN)) {
@@ -14229,7 +14376,7 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
       MP_T *z;
       STACK_MP (z, p, get_mp_digits (MODE (LONGLONG_REAL)));
       SET_MP_ZERO (z, get_mp_digits (mode));
-      z[0] = (MP_T) INITIALISED_MASK;
+      z[0] = (MP_T) INIT_MASK;
       write_complex_pattern (pat, MODE (LONGLONG_REAL), MODE (LONGLONG_COMPLEX), item, (BYTE_T *) z, ref_file);
       stack_pointer = old_stack_pointer;
     } else if (IS (pat, CHOICE_PATTERN)) {
@@ -15080,12 +15227,12 @@ static void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item
       if (mode == MODE (INT)) {
         A68_INT *z = (A68_INT *) item;
         VALUE (z) = k;
-        STATUS (z) = (STATUS_MASK) ((VALUE (z) > 0) ? INITIALISED_MASK : NULL_MASK);
+        STATUS (z) = (STATUS_MASK) ((VALUE (z) > 0) ? INIT_MASK : NULL_MASK);
       } else {
         MP_T *z = (MP_T *) item;
         if (k > 0) {
           (void) int_to_mp (p, z, k, get_mp_digits (mode));
-          z[0] = (MP_T) INITIALISED_MASK;
+          z[0] = (MP_T) INIT_MASK;
         } else {
           z[0] = (MP_T) NULL_MASK;
         }
@@ -15135,7 +15282,7 @@ static void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item
         int k = read_choice_pattern (pat, ref_file);
         if (k == 1 || k == 2) {
           VALUE (z) = (BOOL_T) ((k == 1) ? A68_TRUE : A68_FALSE);
-          STATUS (z) = INITIALISED_MASK;
+          STATUS (z) = INIT_MASK;
         } else {
           STATUS (z) = NULL_MASK;
         }
@@ -15581,14 +15728,14 @@ void a68g_div_complex (A68_REAL * z, A68_REAL * x, A68_REAL * y)
     errno = EDOM;
   } else  if (fabs (RE (y)) >= fabs (IM (y))) {
     double r = IM (y) / RE (y), den = RE (y) + r * IM (y);
-    STATUS_RE (z) = INITIALISED_MASK;
-    STATUS_IM (z) = INITIALISED_MASK;
+    STATUS_RE (z) = INIT_MASK;
+    STATUS_IM (z) = INIT_MASK;
     RE (z) = (RE (x) + r * IM (x)) / den;
     IM (z) = (IM (x) - r * RE (x)) / den;
   } else {
     double r = RE (y) / IM (y), den = IM (y) + r * RE (y);
-    STATUS_RE (z) = INITIALISED_MASK;
-    STATUS_IM (z) = INITIALISED_MASK;
+    STATUS_RE (z) = INIT_MASK;
+    STATUS_IM (z) = INIT_MASK;
     RE (z) = (RE (x) * r + IM (x)) / den;
     IM (z) = (IM (x) * r - RE (x)) / den;
   }
@@ -15600,8 +15747,8 @@ void a68g_div_complex (A68_REAL * z, A68_REAL * x, A68_REAL * y)
 
 void a68g_sqrt_complex (A68_REAL * z, A68_REAL * x)
 {
-  STATUS_RE (z) = INITIALISED_MASK;
-  STATUS_IM (z) = INITIALISED_MASK;
+  STATUS_RE (z) = INIT_MASK;
+  STATUS_IM (z) = INIT_MASK;
   if (RE (x) == 0.0 && IM (x) == 0.0) {
     RE (z) = 0.0;
     IM (z) = 0.0;
@@ -15633,8 +15780,8 @@ void a68g_sqrt_complex (A68_REAL * z, A68_REAL * x)
 void a68g_exp_complex (A68_REAL * z, A68_REAL * x)
 {
   double r = exp (RE (x));
-  STATUS_RE (z) = INITIALISED_MASK;
-  STATUS_IM (z) = INITIALISED_MASK;
+  STATUS_RE (z) = INIT_MASK;
+  STATUS_IM (z) = INIT_MASK;
   RE (z) = r * cos (IM (x));
   IM (z) = r * sin (IM (x));
 }
@@ -15645,8 +15792,8 @@ void a68g_exp_complex (A68_REAL * z, A68_REAL * x)
 
 void a68g_ln_complex (A68_REAL * z, A68_REAL * x)
 {
-  STATUS_RE (z) = INITIALISED_MASK;
-  STATUS_IM (z) = INITIALISED_MASK;
+  STATUS_RE (z) = INIT_MASK;
+  STATUS_IM (z) = INIT_MASK;
   RE (z) = log (a68g_abs_complex (x));
   IM (z) = a68g_arg_complex (x);
 }
@@ -15658,8 +15805,8 @@ void a68g_ln_complex (A68_REAL * z, A68_REAL * x)
 
 void a68g_sin_complex (A68_REAL * z, A68_REAL * x)
 {
-  STATUS_RE (z) = INITIALISED_MASK;
-  STATUS_IM (z) = INITIALISED_MASK;
+  STATUS_RE (z) = INIT_MASK;
+  STATUS_IM (z) = INIT_MASK;
   if (IM (x) == 0) {
     RE (z) = sin (RE (x));
     IM (z) = 0;
@@ -15675,8 +15822,8 @@ void a68g_sin_complex (A68_REAL * z, A68_REAL * x)
 
 void a68g_cos_complex (A68_REAL * z, A68_REAL * x)
 {
-  STATUS_RE (z) = INITIALISED_MASK;
-  STATUS_IM (z) = INITIALISED_MASK;
+  STATUS_RE (z) = INIT_MASK;
+  STATUS_IM (z) = INIT_MASK;
   if (IM (x) == 0) {
     RE (z) = cos (RE (x));
     IM (z) = 0;
@@ -15693,10 +15840,10 @@ void a68g_cos_complex (A68_REAL * z, A68_REAL * x)
 void a68g_tan_complex (A68_REAL * z, A68_REAL * x)
 {
   A68_COMPLEX u, v;
-  STATUS_RE (u) = INITIALISED_MASK;
-  STATUS_IM (u) = INITIALISED_MASK;
-  STATUS_RE (v) = INITIALISED_MASK;
-  STATUS_IM (v) = INITIALISED_MASK;
+  STATUS_RE (u) = INIT_MASK;
+  STATUS_IM (u) = INIT_MASK;
+  STATUS_RE (v) = INIT_MASK;
+  STATUS_IM (v) = INIT_MASK;
   if (IM (x) == 0) {
     RE (u) = sin (RE (x));
     IM (u) = 0;
@@ -15763,130 +15910,6 @@ void a68g_arctan_complex (A68_REAL * z, A68_REAL * x)
     double a = a68g_hypot (r, i + 1), b = a68g_hypot (r, i - 1);
     RE (z) = 0.5 * atan (2 * r / (1 - r * r - i * i));
     IM (z) = 0.5 * log (a / b);
-  }
-}
-
-/* File table handling 
-In a table we record opened files.
-When execution ends, unclosed files are closed, and temps are removed.
-This keeps /tmp free of spurious files :-)
-*/
-
-typedef struct FILE_ENTRY FILE_ENTRY;
-
-struct FILE_ENTRY {
-  NODE_T *pos;
-  BOOL_T is_open, is_tmp;
-  FILE_T fd;
-  A68_REF idf;
-};
-
-FILE_ENTRY file_entries[MAX_OPEN_FILES];
-
-/*
-\brief init an entry
-**/
-
-void init_file_entry (int k)
-{
-  if (k >= 0 && k < MAX_OPEN_FILES) {
-    FILE_ENTRY *fe = &(file_entries[k]);
-    POS (fe) = NO_NODE;
-    IS_OPEN (fe) = A68_FALSE;
-    IS_TMP (fe) = A68_FALSE;
-    FD (fe) = A68_NO_FILENO;
-    IDF (fe) = nil_ref;
-  }
-}
-
-/*
-\brief initialise file entry table
-**/
-
-void init_file_entries (void)
-{
-  int k;
-  for (k = 0; k < MAX_OPEN_FILES; k ++) {
-    init_file_entry (k);
-  }
-}
-
-/*
-\brief store file for later closing when not explicitly closed
-\param p entry in syntax tree
-\param fd file descriptor
-\param idf file name
-\param is_tmp whether file is a temp file
-\return entry in table
-**/
-
-int store_file_entry (NODE_T *p, FILE_T fd, char *idf, BOOL_T is_tmp)
-{
-  int k;
-  for (k = 0; k < MAX_OPEN_FILES; k ++)
-  {
-    FILE_ENTRY *fe = &(file_entries[k]);
-    if (!IS_OPEN (fe)) {
-      int len = 1 + (int) strlen (idf);
-      POS (fe) = p;
-      IS_OPEN (fe) = A68_TRUE;
-      IS_TMP (fe) = is_tmp;
-      FD (fe) = fd;
-      IDF (fe) = heap_generator (p, MODE (C_STRING), len);
-      BLOCK_GC_HANDLE (&(IDF (fe)));
-      bufcpy (DEREF (char, &IDF (fe)), idf, len);
-      return (k);
-    }
-  }
-  diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_TOO_MANY_OPEN_FILES);
-  exit_genie (p, A68_RUNTIME_ERROR);
-  return (-1); /* Fool them */
-}
-
-/*
-\brief close file and delete temp file
-\param k entry in table
-**/
-
-void free_file_entry (NODE_T *p, int k)
-{
-  if (k >= 0 && k < MAX_OPEN_FILES) {
-    FILE_ENTRY *fe = &(file_entries[k]);
-    if (IS_OPEN (fe)) {
-      if (FD (fe) != A68_NO_FILENO && close (FD (fe)) == -1) {
-        init_file_entry (k);
-        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_CLOSE);
-        exit_genie (p, A68_RUNTIME_ERROR);
-      }
-      if (FD (fe) != A68_NO_FILENO && IS_TMP (fe)) {
-/* Attempt to remove a temp file, but ignore failure */
-        if (!IS_NIL (IDF (fe))) {
-          char *filename;
-          CHECK_INIT (p, INITIALISED (&(IDF (fe))), MODE (ROWS));
-          filename = DEREF (char, &IDF (fe));
-          if (filename != NO_TEXT) {
-            (void) remove (filename);
-          }
-        }
-      }
-  /* Restore the fields */
-      if (!IS_NIL (IDF (fe))) {
-        UNBLOCK_GC_HANDLE (&(IDF (fe)));
-      }
-      init_file_entry (k);
-    }
-  }
-}
-
-/*
-\brief close all files and delete all temp files
-**/
-
-void free_file_entries (void)
-{
-  int k;
-  for (k = 0; k < MAX_OPEN_FILES; k ++) {
-    free_file_entry (NO_NODE, k);
   }
 }
 
@@ -16471,7 +16494,7 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
-  STATUS (w) = INITIALISED_MASK;
+  STATUS (w) = INIT_MASK;
 }
 
 /*!
@@ -16569,7 +16592,7 @@ void genie_new_sound (NODE_T * p)
   test_bits_per_sample (p, BITS_PER_SAMPLE (&w));
   DATA_SIZE (&w) = (unsigned) A68_SOUND_DATA_SIZE (&w);
   DATA (&w) = heap_generator (p, MODE (SOUND_DATA), (int) DATA_SIZE (&w));
-  STATUS (&w) = INITIALISED_MASK;
+  STATUS (&w) = INIT_MASK;
   PUSH_OBJECT (p, w, A68_SOUND);
 }
 
@@ -17550,7 +17573,7 @@ static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL
   A68_FILE *f;
   *z = heap_generator (p, MODE (REF_FILE), ALIGNED_SIZE_OF (A68_FILE));
   f = FILE_DEREF (z);
-  STATUS (f) = (STATUS_MASK) ((pid < 0) ? 0 : INITIALISED_MASK);
+  STATUS (f) = (STATUS_MASK) ((pid < 0) ? 0 : INIT_MASK);
   IDENTIFICATION (f) = nil_ref;
   TERMINATOR (f) = nil_ref;
   CHANNEL (f) = chan;
@@ -18262,12 +18285,12 @@ void genie_grep_in_string (NODE_T * p)
   }
   if (!IS_NIL (ref_beg)) {
     A68_INT *i = DEREF (A68_INT, &ref_beg);
-    STATUS (i) = INITIALISED_MASK;
+    STATUS (i) = INIT_MASK;
     VALUE (i) = (int) (RM_SO (&(matches[max_k]))) + (int) (LOWER_BOUND (tup));
   }
   if (!IS_NIL (ref_end)) {
     A68_INT *i = DEREF (A68_INT, &ref_end);
-    STATUS (i) = INITIALISED_MASK;
+    STATUS (i) = INIT_MASK;
     VALUE (i) = (int) (RM_EO (&(matches[max_k]))) + (int) (LOWER_BOUND (tup)) - 1;
   }
   free (matches);
@@ -18334,12 +18357,12 @@ void genie_grep_in_substring (NODE_T * p)
   }
   if (!IS_NIL (ref_beg)) {
     A68_INT *i = DEREF (A68_INT, &ref_beg);
-    STATUS (i) = INITIALISED_MASK;
+    STATUS (i) = INIT_MASK;
     VALUE (i) = (int) (RM_SO (&(matches[max_k]))) + (int) (LOWER_BOUND (tup));
   }
   if (!IS_NIL (ref_end)) {
     A68_INT *i = DEREF (A68_INT, &ref_end);
-    STATUS (i) = INITIALISED_MASK;
+    STATUS (i) = INIT_MASK;
     VALUE (i) = (int) (RM_EO (&(matches[max_k]))) + (int) (LOWER_BOUND (tup)) - 1;
   }
   free (matches);

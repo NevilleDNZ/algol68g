@@ -2209,6 +2209,7 @@ static void edit_draw (DATASET_T *dd)
   EDLIN_T *run, *tos, *lin = NO_EDLIN, *z;
   int row, k, virt_scal, lin_abo, lin_dif, col_width = 0;
   char *prompt = PROMPT;
+  BOOL_T redraw = A68_FALSE;
 /* Initialisations */
   if (SIZE (dd) == 0) {
     CURR (dd) = TOF (dd);
@@ -2599,6 +2600,7 @@ static void edit_draw (DATASET_T *dd)
           row++;
         } else {
 /* Write message in stead of identification */ 
+          redraw = A68_TRUE;
           set_colour (pair_msgline);
           for (ind = 0; ind < COLS && IS_PRINT (DL0 (scr)[ind]); ind++) {
             edit_putch (row, col, DL0 (scr)[ind], dd, NO_EDLIN, 0);
@@ -2615,7 +2617,13 @@ static void edit_draw (DATASET_T *dd)
   }
   M_MATCH (dd) = NO_EDLIN;
   M_SO (dd) = M_EO (dd) = -1;
+  if (redraw) {
+    REDRAW;
+  }
   EDIT_TEST (wrefresh (stdscr) != ERR);
+  if (redraw) {
+    REDRAW;
+  }
 }
 
 /* Routines to edit various parts of the screen */

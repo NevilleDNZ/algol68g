@@ -76,7 +76,7 @@ void genie_pq_connectdb (NODE_T * p)
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ALREADY_OPEN);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  STATUS (file) = INITIALISED_MASK;
+  STATUS (file) = INIT_MASK;
   CHANNEL (file) = associate_channel;
   OPENED (file) = A68_TRUE;
   OPEN_EXCLUSIVE (file) = A68_FALSE;
