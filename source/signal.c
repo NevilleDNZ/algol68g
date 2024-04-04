@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -40,7 +40,7 @@ static void sigsegv_handler (int i)
 static void sigttin_handler (int i)
 {
   (void) i;
-  ABNORMAL_END (A_TRUE, "background process attempts reading from disconnected terminal", NULL);
+  ABNORMAL_END (A68_TRUE, "background process attempts reading from disconnected terminal", NULL);
 }
 
 /*!
@@ -53,7 +53,7 @@ static void sigint_handler (int i)
   (void) i;
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
   if (!(sys_request_flag || in_monitor)) {
-    sys_request_flag = A_TRUE;
+    sys_request_flag = A68_TRUE;
   } else {
 /*
     a68g_exit (EXIT_FAILURE);

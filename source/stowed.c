@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -54,7 +54,7 @@ int get_row_size (A68_TUPLE * tup, int dimensions)
   int span = 1, k;
   for (k = 0; k < dimensions; k++) {
     int stride = ROW_SIZE (&tup[k]);
-    ABNORMAL_END ((stride > 0 && span > MAX_INT / stride), ERROR_INVALID_SIZE, "get_row_size");
+    ABNORMAL_END ((stride > 0 && span > A68_MAX_INT / stride), ERROR_INVALID_SIZE, "get_row_size");
     span *= stride;
   }
   return (span);
@@ -103,13 +103,13 @@ ADDR_T calculate_internal_index (A68_TUPLE * tup, int dimensions)
 BOOL_T increment_internal_index (A68_TUPLE * tup, int dimensions)
 {
 /* Returns whether maximum index + 1 is reached. */
-  BOOL_T carry = A_TRUE;
+  BOOL_T carry = A68_TRUE;
   int k;
   for (k = dimensions - 1; k >= 0 && carry; k--) {
     A68_TUPLE *ref = &tup[k];
     if (ref->k < ref->upper_bound) {
       (ref->k)++;
-      carry = A_FALSE;
+      carry = A68_FALSE;
     } else {
       ref->k = ref->lower_bound;
     }
@@ -168,6 +168,7 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
   tup.upper_bound = width;
   tup.shift = tup.lower_bound;
   tup.span = 1;
+  tup.k = 0;
   PUT_DESCRIPTOR (arr, tup, &z);
   ref_h = row.offset + REF_HANDLE (&row)->offset;
   for (k = 0; k < width; k++) {
@@ -213,6 +214,7 @@ A68_REF c_to_a_string (NODE_T * p, char *str)
     tup.upper_bound = str_size;
     tup.shift = tup.lower_bound;
     tup.span = 1;
+    tup.k = 0;
     PUT_DESCRIPTOR (arr, tup, &z);
     ref_h = row.offset + REF_HANDLE (&row)->offset;
     for (k = 0; k < str_size; k++) {
@@ -383,8 +385,8 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
         GET_DESCRIPTOR (dummy, run_tup, &run_row);
         for (j = 0; j < old_dim; j++) {
           if ((ref_tup->upper_bound != run_tup->upper_bound) || (ref_tup->lower_bound != run_tup->lower_bound)) {
-            diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-            exit_genie (p, A_RUNTIME_ERROR);
+            diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+            exit_genie (p, A68_RUNTIME_ERROR);
           }
           ref_tup++;
           run_tup++;
@@ -422,7 +424,7 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
       old_elem = ADDRESS (&(old_arr->array));
       initialise_internal_index (old_tup, old_dim);
       initialise_internal_index (&new_tup[1], old_dim);
-      done = A_FALSE;
+      done = A68_FALSE;
       while (!done) {
         ADDR_T old_index, new_index, old_addr, new_addr;
         old_index = calculate_internal_index (old_tup, old_dim);
@@ -489,7 +491,7 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR
       } else if (WHETHER (elem_mode, UNION_SYMBOL)) {
         genie_copy_union (p, dst_a, src_a, src);
       } else {
-        ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_make_row");
+        ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_make_row");
       }
     } else {
       MOVE (dst_a, src_a, (unsigned) arr->elem_size);
@@ -716,8 +718,8 @@ void genie_revise_lower_bound (NODE_T * p, A68_REF src, A68_REF dst)
   src_stride = ROW_SIZE (&src_tup[0]);
   dst_stride = ROW_SIZE (&dst_tup[0]);
   if (src_stride != dst_stride) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   dst_tup->lower_bound = src_tup->lower_bound;
   dst_tup->upper_bound = src_tup->upper_bound;
@@ -775,8 +777,8 @@ A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
   int k, span;
   UP_SWEEP_SEMA;
   if (IS_NIL (old_row)) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, m);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, m);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Cut FLEX from the mode. That is not interesting in this routine. */
   if (WHETHER (m, FLEX_SYMBOL) || m == MODE (STRING)) {
@@ -811,7 +813,7 @@ A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
     MOID_T *elem_mode = SUB (m);
     BYTE_T *old_elem = ADDRESS (&(old_arr->array));
     BYTE_T *new_elem = ADDRESS (&(new_arr->array));
-    BOOL_T done = A_FALSE;
+    BOOL_T done = A68_FALSE;
     initialise_internal_index (old_tup, DIMENSION (old_arr));
     initialise_internal_index (new_tup, DIMENSION (new_arr));
     while (!done) {
@@ -838,7 +840,7 @@ A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
         } else if (WHETHER (elem_mode, UNION_SYMBOL)) {
           genie_copy_union (p, dst_a, src_a, new_old);
         } else {
-          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_row");
+          ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_row");
         }
       } else {
         MOVE (&new_elem[new_addr], &old_elem[old_addr], elem_size);
@@ -884,7 +886,7 @@ A68_REF genie_copy_stowed (A68_REF old, NODE_T * p, MOID_T * m)
         } else if (WHETHER (MOID (fields), UNION_SYMBOL)) {
           genie_copy_union (p, dst_a, src_a, old_field);
         } else {
-          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
+          ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
         }
       } else {
         MOVE (dst_a, src_a, MOID_SIZE (fields));
@@ -905,7 +907,7 @@ A68_REF genie_copy_stowed (A68_REF old, NODE_T * p, MOID_T * m)
     DOWN_SWEEP_SEMA;
     return (new_row);
   } else {
-    ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
+    ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
     return (nil_ref);
   }
 }
@@ -925,6 +927,8 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
   A68_ARRAY *old_arr, *new_arr = NULL;
   A68_TUPLE *old_tup, *new_tup = NULL, *old_p, *new_p;
   int k, span = 0;
+  new_row.status = INITIALISED_MASK;
+  new_row.offset = 0;
 /* Get row desriptors. Switch off GC so data is not moved. */
   UP_SWEEP_SEMA;
   GET_DESCRIPTOR (old_arr, old_tup, &old_row);
@@ -956,13 +960,13 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
       old_p = &old_tup[k];
       new_p = &new_tup[k];
       if ((new_p->upper_bound != old_p->upper_bound) || (new_p->lower_bound != old_p->lower_bound)) {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-        exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       span *= ROW_SIZE (old_p);
     }
   } else {
-    ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_row");
+    ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_row");
   }
 /* The n-dimensional copier. */
   initialise_internal_index (old_tup, DIMENSION (old_arr));
@@ -971,7 +975,7 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
     unsigned elem_size = (unsigned) moid_size (MOID (old_arr));
     MOID_T *elem_mode = SUB (m);
     BYTE_T *old_elem = ADDRESS (&(old_arr->array)), *new_elem = ADDRESS (&(new_arr->array));
-    BOOL_T done = A_FALSE;
+    BOOL_T done = A68_FALSE;
     while (!done) {
       ADDR_T old_index, new_index, old_addr, new_addr;
       old_index = calculate_internal_index (old_tup, DIMENSION (old_arr));
@@ -1007,7 +1011,7 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
         } else if (WHETHER (elem_mode, UNION_SYMBOL)) {
           genie_copy_union (p, dst_a, src_a, new_old);
         } else {
-          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_row");
+          ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_row");
         }
       } else {
         MOVE (&new_elem[new_addr], &old_elem[old_addr], elem_size);
@@ -1059,7 +1063,7 @@ A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
 /* UNION (..) */
           genie_copy_union (p, dst_a, src_a, old_field);
         } else {
-          ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_stowed");
+          ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_stowed");
         }
       } else {
         MOVE (dst_a, src_a, MOID_SIZE (fields));
@@ -1080,7 +1084,7 @@ A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
     DOWN_SWEEP_SEMA;
     return (new_row);
   } else {
-    ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_stowed");
+    ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_assign_stowed");
     return (nil_ref);
   }
 }
@@ -1104,7 +1108,7 @@ void dump_stowed (NODE_T * p, FILE_T f, void *w, MOID_T * m, int level)
 {
   A68_ARRAY *arr;
   A68_TUPLE *tup;
-  BOOL_T done = A_FALSE;
+  BOOL_T done = A68_FALSE;
   int span, k;
   char buf[BUFFER_SIZE];
   INDENT (level);
@@ -1255,11 +1259,11 @@ void genie_dyad_elems (NODE_T * p)
   DECREMENT_STACK_POINTER (p, SIZE_OF (A68_UNION));
   CHECK_INIT (p, INITIALISED (&z), MODE (ROWS));
   CHECK_NIL (p, z, MODE (ROWS));
-  POP_PRIMITIVE (p, &k, A68_INT);
+  POP_OBJECT (p, &k, A68_INT);
   GET_DESCRIPTOR (x, t, &z);
   if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   u = &(t[k.value - 1]);
   PUSH_PRIMITIVE (p, ROW_SIZE (u), A68_INT);
@@ -1281,11 +1285,11 @@ void genie_dyad_lwb (NODE_T * p)
   DECREMENT_STACK_POINTER (p, SIZE_OF (A68_UNION));
   CHECK_INIT (p, INITIALISED (&z), MODE (ROWS));
   CHECK_NIL (p, z, MODE (ROWS));
-  POP_PRIMITIVE (p, &k, A68_INT);
+  POP_OBJECT (p, &k, A68_INT);
   GET_DESCRIPTOR (x, t, &z);
   if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   PUSH_PRIMITIVE (p, t[k.value - 1].lower_bound, A68_INT);
 }
@@ -1306,11 +1310,11 @@ void genie_dyad_upb (NODE_T * p)
   DECREMENT_STACK_POINTER (p, SIZE_OF (A68_UNION));
   CHECK_INIT (p, INITIALISED (&z), MODE (ROWS));
   CHECK_NIL (p, z, MODE (ROWS));
-  POP_PRIMITIVE (p, &k, A68_INT);
+  POP_OBJECT (p, &k, A68_INT);
   GET_DESCRIPTOR (x, t, &z);
   if (k.value < 1 || k.value > x->dimensions) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   PUSH_PRIMITIVE (p, t[k.value - 1].upper_bound, A68_INT);
 }

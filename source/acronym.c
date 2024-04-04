@@ -4,7 +4,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -218,11 +218,11 @@ static BOOL_T remove_extra_coda (char *str)
     if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1]) && str[2] != '+' && str[2] != NULL_CHAR) {
       for (len = 2; str[len] != NULL_CHAR && str[len] != '+'; len++);
       memmove (str + 1, str + len, strlen (str + len) + 1);
-      return (A_TRUE);
+      return (A68_TRUE);
     }
     str++;
   }
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 /*!

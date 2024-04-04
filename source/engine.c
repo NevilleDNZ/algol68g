@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -57,7 +57,7 @@ This saves a push/pop pair.
     (z) = (CAST_T *) x;\
   } else {\
     EXECUTE_UNIT (p);\
-    POP ((p), &u, SIZE_OF (CAST_T));\
+    POP_OBJECT ((p), &(u), CAST_T);\
     z = &u;\
   }}
 
@@ -139,14 +139,14 @@ void initialise_frame (NODE_T * p)
 /* Initialise routines and formats - link to environment in the frame stack. */
   if (SYMBOL_TABLE (p)->initialise_anon) {
     TAG_T *a;
-    SYMBOL_TABLE (p)->initialise_anon = A_FALSE;
+    SYMBOL_TABLE (p)->initialise_anon = A68_FALSE;
     for (a = SYMBOL_TABLE (p)->anonymous; a != NULL; a = NEXT (a)) {
       switch (PRIO (a)) {
       case FORMAT_TEXT:
         {
 /* Initialise format text. */
           int youngest = TAX (NODE (a))->youngest_environ;
-          A68_FORMAT *z = (A68_FORMAT *) (FRAME_OFFSET (FRAME_INFO_SIZE + a->offset));
+          A68_FORMAT *z = (A68_FORMAT *) (FRAME_OBJECT (a->offset));
           z->status = INITIALISED_MASK;
           z->body = NODE (a);
           if (youngest > 0) {
@@ -154,14 +154,14 @@ void initialise_frame (NODE_T * p)
           } else {
             z->environ = 0;
           }
-          SYMBOL_TABLE (p)->initialise_anon = A_TRUE;
+          SYMBOL_TABLE (p)->initialise_anon = A68_TRUE;
           break;
         }
       case ROUTINE_TEXT:
         {
 /* Initialise routine text. */
           int youngest = TAX (NODE (a))->youngest_environ;
-          A68_PROCEDURE *z = (A68_PROCEDURE *) (FRAME_OFFSET (FRAME_INFO_SIZE + a->offset));
+          A68_PROCEDURE *z = (A68_PROCEDURE *) (FRAME_OBJECT (a->offset));
           z->status = INITIALISED_MASK;
           z->body = (void *) NODE (a);
           if (youngest > 0) {
@@ -171,7 +171,7 @@ void initialise_frame (NODE_T * p)
           }
           z->locale = NULL;
           z->proc_mode = MOID (a);
-          SYMBOL_TABLE (p)->initialise_anon = A_TRUE;
+          SYMBOL_TABLE (p)->initialise_anon = A68_TRUE;
           break;
         }
       }
@@ -194,7 +194,7 @@ void initialise_frame (NODE_T * p)
       if (WHETHER (u, ROUTINE_TEXT) || (WHETHER (u, UNIT) && WHETHER (SUB (u), ROUTINE_TEXT))) {
         EXECUTE_UNIT (u);
         stack_pointer = pop_sp;
-        *(A68_PROCEDURE *) FRAME_OFFSET (FRAME_INFO_SIZE + TAX (q)->offset) = *(A68_PROCEDURE *) STACK_TOP;
+        *(A68_PROCEDURE *) FRAME_OBJECT (TAX (q)->offset) = *(A68_PROCEDURE *) STACK_TOP;
       }
     }
   }
@@ -210,8 +210,8 @@ void initialise_frame (NODE_T * p)
     } else {\
       snprintf (txt, BUFFER_SIZE, ERROR_SCOPE_DYNAMIC_2, info);\
     }\
-    diagnostic_node (A_RUNTIME_ERROR, p, txt, mode);\
-    exit_genie (p, A_RUNTIME_ERROR);\
+    diagnostic_node (A68_RUNTIME_ERROR, p, txt, mode);\
+    exit_genie (p, A68_RUNTIME_ERROR);\
   }
 
 /*!
@@ -238,7 +238,7 @@ void genie_dns_addr (NODE_T * p, MOID_T * m, BYTE_T * w, ADDR_T limit, char *inf
         BYTE_T *u = HEAP_ADDRESS (REF_OFFSET (v->locale));
         PACK_T *s = PACK (v->proc_mode);
         for (; s != NULL; FORWARD (s)) {
-          if (((A68_BOOL *) & u[0])->value == A_TRUE) {
+          if (((A68_BOOL *) & u[0])->value == A68_TRUE) {
             genie_dns_addr (p, MOID (s), &u[SIZE_OF (A68_BOOL)], _limit_2, "partial parameter value");
           }
           u = &(u[SIZE_OF (A68_BOOL) + MOID_SIZE (MOID (s))]);
@@ -299,7 +299,7 @@ void genie_check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q)
   case MODE_COMPLEX:
     {
       A68_REAL *r = (A68_REAL *) w;
-      A68_REAL *i = &(r[1]);
+      A68_REAL *i = (A68_REAL *) (w + SIZE_OF (A68_REAL));
       CHECK_INIT (p, INITIALISED (r), q);
       CHECK_INIT (p, INITIALISED (i), q);
       return;
@@ -547,12 +547,12 @@ PROPAGATOR_T genie_widening (NODE_T * p)
   else if (COERCE_FROM_TO (p, MODE (BYTES), MODE (ROW_CHAR))) {
     A68_BYTES z;
     EXECUTE_UNIT (SUB (p));
-    POP (p, &z, SIZE_OF (A68_BYTES));
+    POP_OBJECT (p, &z, A68_BYTES);
     PUSH_REF (p, c_string_to_row_char (p, z.value, BYTES_WIDTH));
   } else if (COERCE_FROM_TO (p, MODE (LONG_BYTES), MODE (ROW_CHAR))) {
     A68_LONG_BYTES z;
     EXECUTE_UNIT (SUB (p));
-    POP (p, &z, SIZE_OF (A68_LONG_BYTES));
+    POP_OBJECT (p, &z, A68_LONG_BYTES);
     PUSH_REF (p, c_string_to_row_char (p, z.value, LONG_BYTES_WIDTH));
   } else if (COERCE_FROM_TO (p, MODE (BITS), MODE (ROW_BOOL))) {
     A68_BITS x;
@@ -563,7 +563,7 @@ PROPAGATOR_T genie_widening (NODE_T * p)
     unsigned bit;
     A68_BOOL *base;
     EXECUTE_UNIT (SUB (p));
-    POP (p, &x, SIZE_OF (A68_BITS));
+    POP_OBJECT (p, &x, A68_BITS);
     z = heap_generator (p, MODE (ROW_BOOL), SIZE_OF (A68_ARRAY) + SIZE_OF (A68_TUPLE));
     PROTECT_SWEEP_HANDLE (&z);
     row = heap_generator (p, MODE (ROW_BOOL), BITS_WIDTH * SIZE_OF (A68_BOOL));
@@ -578,13 +578,14 @@ PROPAGATOR_T genie_widening (NODE_T * p)
     tup.upper_bound = BITS_WIDTH;
     tup.shift = tup.lower_bound;
     tup.span = 1;
+    tup.k = 0;
     PUT_DESCRIPTOR (arr, tup, &z);
     base = (A68_BOOL *) ADDRESS (&row);
     bit = 1;
     for (k = BITS_WIDTH - 1; k >= 0; k--) {
       A68_BOOL b;
       b.status = INITIALISED_MASK;
-      b.value = (x.value & bit) != 0 ? A_TRUE : A_FALSE;
+      b.value = (x.value & bit) != 0 ? A68_TRUE : A68_FALSE;
       base[k] = b;
       bit <<= 1;
     }
@@ -627,6 +628,7 @@ PROPAGATOR_T genie_widening (NODE_T * p)
     tup.upper_bound = width;
     tup.shift = tup.lower_bound;
     tup.span = 1;
+    tup.k = 0;
     PUT_DESCRIPTOR (arr, tup, &z);
     base = (A68_BOOL *) ADDRESS (&row);
     k = width;
@@ -636,7 +638,7 @@ PROPAGATOR_T genie_widening (NODE_T * p)
       for (j = 0; j < MP_BITS_BITS && k >= 0; j++) {
         A68_BOOL b;
         b.status = INITIALISED_MASK;
-        b.value = (bits[words - 1] & bit) ? A_TRUE : A_FALSE;
+        b.value = (bits[words - 1] & bit) ? A68_TRUE : A68_FALSE;
         base[--k] = b;
         bit <<= 1;
       }
@@ -654,8 +656,8 @@ PROPAGATOR_T genie_widening (NODE_T * p)
     PUSH_REF (p, z);
     UNPROTECT_SWEEP_HANDLE (&row);
   } else {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CANNOT_WIDEN, MOID (SUB (p)), MOID (p));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CANNOT_WIDEN, MOID (SUB (p)), MOID (p));
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   return (self);
 #undef COERCE_FROM_TO
@@ -677,7 +679,7 @@ static void genie_proceduring (NODE_T * p)
   STATIC_LINK_FOR_FRAME (z.environ, 1 + LEX_LEVEL (TAX (label)));
   z.locale = NULL;
   z.proc_mode = MODE (PROC_VOID);
-  PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+  PUSH_PROCEDURE (p, z);
 }
 
 /*!
@@ -745,8 +747,8 @@ PROPAGATOR_T genie_dereference_slice_name_quick (NODE_T * p)
     EXECUTE_UNIT (q);
     stack_pointer = pop_sp;
     if (*k < t->lower_bound || *k > t->upper_bound) {
-      diagnostic_node (A_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
-      exit_genie (q, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
+      exit_genie (q, A68_RUNTIME_ERROR);
     }
     index += (t->span * (*k - t->shift));
   }
@@ -768,7 +770,7 @@ PROPAGATOR_T genie_dereferencing (NODE_T * p)
   A68_REF z;
   PROPAGATOR_T self;
   EXECUTE_UNIT_2 (SUB (p), self);
-  POP (p, &z, SIZE_OF (A68_REF));
+  POP_REF (p, &z);
   CHECK_NIL (p, z, MOID (SUB (p)));
   PUSH (p, ADDRESS (&z), MOID_SIZE (MOID (p)));
   CHECK_INIT_GENERIC (p, STACK_OFFSET (-MOID_SIZE (MOID (p))), MOID (p));
@@ -819,6 +821,7 @@ PROPAGATOR_T genie_voiding (NODE_T * p)
 {
   PROPAGATOR_T self, source;
   ADDR_T sp_for_voiding = stack_pointer;
+  A68_TRACE ("enter genie_voiding", p);
   self.source = p;
   EXECUTE_UNIT_2 (SUB (p), source);
   stack_pointer = sp_for_voiding;
@@ -828,6 +831,7 @@ PROPAGATOR_T genie_voiding (NODE_T * p)
   } else {
     self.unit = genie_voiding;
   }
+  A68_TRACE ("exit genie_voiding", p);
   return (self);
 }
 
@@ -959,7 +963,7 @@ void genie_partial_call (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * 
 /* Move argument from stack to locale. */
       A68_BOOL w;
       w.status = INITIALISED_MASK;
-      w.value = A_TRUE;
+      w.value = A68_TRUE;
       *(A68_BOOL *) & u[0] = w;
       COPY (&(u[SIZE_OF (A68_BOOL)]), v, MOID_SIZE (MOID (t)));
       u = &(u[SIZE_OF (A68_BOOL) + MOID_SIZE (MOID (s))]);
@@ -986,7 +990,7 @@ void genie_partial_call (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T * 
     genie_call_procedure (p, pr_mode, pproc, MODE (VOID), &z, pop_sp, pop_fp);
   } else {
 /*  Closure is not complete. Return procedure body. */
-    PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+    PUSH_PROCEDURE (p, z);
   }
 }
 
@@ -1021,7 +1025,7 @@ void genie_call_procedure (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T 
       FRAME_DYNAMIC_SCOPE (frame_pointer) = pop_fp;
       for (; args != NULL; FORWARD (args)) {
         int size = MOID_SIZE (MOID (args));
-        COPY ((FRAME_OFFSET (FRAME_INFO_SIZE + fp0)), STACK_ADDRESS (pop_sp + fp0), (unsigned) size);
+        COPY ((FRAME_OBJECT (fp0)), STACK_ADDRESS (pop_sp + fp0), (unsigned) size);
         fp0 += size;
       }
       stack_pointer = pop_sp;
@@ -1031,11 +1035,12 @@ void genie_call_procedure (NODE_T * p, MOID_T * pr_mode, MOID_T * pproc, MOID_T 
       CHECK_TIME_LIMIT (p);
       if (DIMENSION (pr_mode) > 0) {
 /* With PARAMETERS. */
-        EXECUTE_UNIT (NEXT (NEXT (NEXT (entry))));
+        entry = NEXT (NEXT (NEXT (entry)));
       } else {
 /* Without PARAMETERS. */
-        EXECUTE_UNIT (NEXT (NEXT (entry)));
+        entry = NEXT (NEXT (entry));
       }
+      EXECUTE_UNIT (entry);
       CLOSE_FRAME;
       GENIE_DNS_STACK (p, SUB (pr_mode), frame_pointer, "procedure");
     } else {
@@ -1066,12 +1071,12 @@ PROPAGATOR_T genie_call (NODE_T * p)
   GENIE_GET (pr, A68_PROCEDURE, z, u);
   CHECK_INIT_GENERIC (p, (BYTE_T *) z, MOID (pr));
 /* Get arguments. */
-  if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A_FALSE) {
+  if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A68_FALSE) {
     NODE_T top_seq;
     NODE_T *seq = &top_seq;
     genie_argument (NEXT (pr), &seq);
     SEQUENCE (p) = SEQUENCE (&top_seq);
-    SEQUENCE_SET (p) = A_TRUE;
+    SEQUENCE_SET (p) = A68_TRUE;
   } else {
     NODE_T *q = SEQUENCE (p);
     for (; q != NULL; q = SEQUENCE (q)) {
@@ -1098,21 +1103,23 @@ static void genie_trimmer (NODE_T * p, BYTE_T * *ref_new, BYTE_T * *ref_old, int
       A68_INT k;
       A68_TUPLE *t;
       EXECUTE_UNIT (p);
-      POP_PRIMITIVE (p, &k, A68_INT);
+      POP_OBJECT (p, &k, A68_INT);
       t = (A68_TUPLE *) * ref_old;
       if (k.value < t->lower_bound || k.value > t->upper_bound) {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-        exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       (*offset) += t->span * (k.value - t->shift);
-      (*ref_old) += SIZE_OF (A68_TUPLE);
+      /*
+       * (*ref_old) += SIZE_OF (A68_TUPLE);
+       */
+      (*ref_old) += sizeof (A68_TUPLE);
     } else if (WHETHER (p, TRIMMER)) {
       A68_INT k;
-      A68_TUPLE *old_tup, *new_tup;
       NODE_T *q;
       int L, U, D;
-      old_tup = (A68_TUPLE *) * ref_old;
-      new_tup = (A68_TUPLE *) * ref_new;
+      A68_TUPLE *old_tup = (A68_TUPLE *) * ref_old;
+      A68_TUPLE *new_tup = (A68_TUPLE *) * ref_new;
 /* TRIMMER is (l:u@r) with all units optional or (empty). */
       q = SUB (p);
       if (q == NULL) {
@@ -1120,36 +1127,36 @@ static void genie_trimmer (NODE_T * p, BYTE_T * *ref_new, BYTE_T * *ref_old, int
         U = old_tup->upper_bound;
         D = 0;
       } else {
-        BOOL_T absent = A_TRUE;
+        BOOL_T absent = A68_TRUE;
 /* Lower index. */
         if (q != NULL && WHETHER (q, UNIT)) {
           EXECUTE_UNIT (q);
-          POP_PRIMITIVE (p, &k, A68_INT);
+          POP_OBJECT (p, &k, A68_INT);
           if (k.value < old_tup->lower_bound) {
-            diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-            exit_genie (p, A_RUNTIME_ERROR);
+            diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+            exit_genie (p, A68_RUNTIME_ERROR);
           }
           L = k.value;
           FORWARD (q);
-          absent = A_FALSE;
+          absent = A68_FALSE;
         } else {
           L = old_tup->lower_bound;
         }
         if (q != NULL && (WHETHER (q, COLON_SYMBOL) || WHETHER (q, DOTDOT_SYMBOL))) {
           FORWARD (q);
-          absent = A_FALSE;
+          absent = A68_FALSE;
         }
 /* Upper index. */
         if (q != NULL && WHETHER (q, UNIT)) {
           EXECUTE_UNIT (q);
-          POP_PRIMITIVE (p, &k, A68_INT);
+          POP_OBJECT (p, &k, A68_INT);
           if (k.value > old_tup->upper_bound) {
-            diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-            exit_genie (p, A_RUNTIME_ERROR);
+            diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+            exit_genie (p, A68_RUNTIME_ERROR);
           }
           U = k.value;
           FORWARD (q);
-          absent = 0;
+          absent = A68_FALSE;
         } else {
           U = old_tup->upper_bound;
         }
@@ -1159,19 +1166,19 @@ static void genie_trimmer (NODE_T * p, BYTE_T * *ref_new, BYTE_T * *ref_old, int
 /* Revised lower bound. */
         if (q != NULL && WHETHER (q, UNIT)) {
           EXECUTE_UNIT (q);
-          POP_PRIMITIVE (p, &k, A68_INT);
+          POP_OBJECT (p, &k, A68_INT);
           D = L - k.value;
           FORWARD (q);
         } else {
-          D = absent ? 0 : L - 1;
+          D = (absent ? 0 : L - 1);
         }
       }
       new_tup->lower_bound = L - D;
       new_tup->upper_bound = U - D;     /* (L - D) + (U - L) */
       new_tup->span = old_tup->span;
       new_tup->shift = old_tup->shift - D;
-      (*ref_old) += SIZE_OF (A68_TUPLE);
-      (*ref_new) += SIZE_OF (A68_TUPLE);
+      (*ref_old) += sizeof (A68_TUPLE);
+      (*ref_new) += sizeof (A68_TUPLE);
     } else {
       genie_trimmer (SUB (p), ref_new, ref_old, offset);
       genie_trimmer (NEXT (p), ref_new, ref_old, offset);
@@ -1199,10 +1206,10 @@ void genie_subscript (NODE_T * p, ADDR_T * ref_heap, int *sum, NODE_T ** seq)
         POP_ADDRESS (p, k, A68_INT);
         t = (A68_TUPLE *) HEAP_ADDRESS (*ref_heap);
         if (k->value < t->lower_bound || k->value > t->upper_bound) {
-          diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-          exit_genie (p, A_RUNTIME_ERROR);
+          diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+          exit_genie (p, A68_RUNTIME_ERROR);
         }
-        (*ref_heap) += SIZE_OF (A68_TUPLE);
+        (*ref_heap) += sizeof (A68_TUPLE);
         (*sum) += t->span * (k->value - t->shift);
         SEQUENCE (*seq) = p;
         (*seq) = p;
@@ -1247,8 +1254,8 @@ PROPAGATOR_T genie_slice_name_quick (NODE_T * p)
     EXECUTE_UNIT (q);
     stack_pointer = pop_sp;
     if (*k < t->lower_bound || *k > t->upper_bound) {
-      diagnostic_node (A_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
-      exit_genie (q, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
+      exit_genie (q, A68_RUNTIME_ERROR);
     }
     index += (t->span * (*k - t->shift));
   }
@@ -1274,6 +1281,7 @@ PROPAGATOR_T genie_slice (NODE_T * p)
   BOOL_T slice_of_name = WHETHER (MOID (SUB (p)), REF_SYMBOL);
   MOID_T *result_moid = slice_of_name ? SUB (MOID (p)) : MOID (p);
   NODE_T *indexer = NEXT_SUB (p);
+  A68_TRACE ("enter genie_slice", p);
   self.unit = genie_slice;
   self.source = p;
 /* Get row and save from sweeper. */
@@ -1282,10 +1290,11 @@ PROPAGATOR_T genie_slice (NODE_T * p)
 /* In case of slicing a REF [], we need the [] internally, so dereference. */
   if (slice_of_name) {
     A68_REF z;
-    POP (p, &z, SIZE_OF (A68_REF));
+    POP_REF (p, &z);
+    A68_PRINT_REF ("implicit deference", &z);
     CHECK_NIL (p, z, MOID (SUB (p)));
     scope = GET_REF_SCOPE (&z);
-    PUSH (p, ADDRESS (&z), SIZE_OF (A68_REF));
+    PUSH_REF (p, *(A68_REF *) ADDRESS (&z));
   }
 /* SLICING subscripts one element from an array. */
   if (ANNOTATION (indexer) == SLICE) {
@@ -1294,19 +1303,19 @@ PROPAGATOR_T genie_slice (NODE_T * p)
     ADDR_T ref_heap, address;
     int index;
 /* Get descriptor. */
-    POP (p, &z, SIZE_OF (A68_REF));
+    POP_REF (p, &z);
     CHECK_NIL (p, z, MOID (SUB (p)));
     x = (A68_ARRAY *) ADDRESS (&z);
 /* Get indexer. */
     ref_heap = REF_HANDLE (&z)->offset + SIZE_OF (A68_ARRAY);
     index = 0;
     UP_SWEEP_SEMA;
-    if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A_FALSE) {
+    if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A68_FALSE) {
       NODE_T top_seq;
       NODE_T *seq = &top_seq;
       genie_subscript (indexer, &ref_heap, &index, &seq);
       SEQUENCE (p) = SEQUENCE (&top_seq);
-      SEQUENCE_SET (p) = A_TRUE;
+      SEQUENCE_SET (p) = A68_TRUE;
     } else {
       NODE_T *q;
       for (q = SEQUENCE (p); q != NULL; q = SEQUENCE (q)) {
@@ -1315,10 +1324,10 @@ PROPAGATOR_T genie_slice (NODE_T * p)
         EXECUTE_UNIT (q);
         POP_ADDRESS (q, k, A68_INT);
         if (k->value < t->lower_bound || k->value > t->upper_bound) {
-          diagnostic_node (A_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
-          exit_genie (q, A_RUNTIME_ERROR);
+          diagnostic_node (A68_RUNTIME_ERROR, q, ERROR_INDEX_OUT_OF_BOUNDS);
+          exit_genie (q, A68_RUNTIME_ERROR);
         }
-        ref_heap += SIZE_OF (A68_TUPLE);
+        ref_heap += sizeof (A68_TUPLE);
         index += t->span * (k->value - t->shift);
       }
     }
@@ -1329,14 +1338,15 @@ PROPAGATOR_T genie_slice (NODE_T * p)
       A68_REF name = x->array;
       name.offset += address;
       SET_REF_SCOPE (&name, scope);
-      PUSH (p, &name, SIZE_OF (A68_REF));
-      if (SEQUENCE_SET (p) == A_TRUE) {
+      PUSH_REF (p, name);
+      if (SEQUENCE_SET (p) == A68_TRUE) {
         self.unit = genie_slice_name_quick;
         self.source = p;
       }
     } else {
       PUSH (p, ADDRESS (&(x->array)) + address, MOID_SIZE (result_moid));
     }
+    A68_TRACE ("exit genie_slice (slice)", p);
     return (self);
   }
 /* Trimming selects a subarray from an array. */
@@ -1349,7 +1359,7 @@ PROPAGATOR_T genie_slice (NODE_T * p)
     UP_SWEEP_SEMA;
     ref_desc_copy = heap_generator (p, MOID (p), SIZE_OF (A68_ARRAY) + DEFLEX (result_moid)->dimensions * SIZE_OF (A68_TUPLE));
 /* Get descriptor. */
-    POP (p, &z, SIZE_OF (A68_REF));
+    POP_REF (p, &z);
 /* Get indexer. */
     CHECK_NIL (p, z, MOID (SUB (p)));
     old_des = (A68_ARRAY *) ADDRESS (&z);
@@ -1371,9 +1381,10 @@ PROPAGATOR_T genie_slice (NODE_T * p)
       SET_REF_SCOPE (&ref_new, scope);
       PUSH_REF (p, ref_new);
     } else {
-      PUSH_ROW (p, ref_desc_copy);
+      PUSH_REF (p, ref_desc_copy);
     }
     DOWN_SWEEP_SEMA;
+    A68_TRACE ("exit genie_slice (trimmer)", p);
     return (self);
   } else {
     return (self);
@@ -1396,9 +1407,9 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
 /* INT denoter. */
     A68_INT z;
     NODE_T *s = WHETHER (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
-    if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     self.unit = genie_constant;
     z.status = INITIALISED_MASK | CONSTANT_MASK;
@@ -1409,9 +1420,9 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
 /* REAL denoter. */
     A68_REAL z;
     NODE_T *s = WHETHER (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
-    if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     z.status = INITIALISED_MASK | CONSTANT_MASK;
     self.unit = genie_constant;
@@ -1425,9 +1436,9 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     int size = get_mp_size (moid);
     NODE_T *number = (WHETHER (SUB (p), INT_DENOTER) ? SUB (p) : NEXT_SUB (p));
     STACK_MP (z, p, digits);
-    if (genie_string_to_value_internal (p, moid, SYMBOL (number), (BYTE_T *) z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, moid, SYMBOL (number), (BYTE_T *) z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     z[0] = INITIALISED_MASK | CONSTANT_MASK;
     self.unit = genie_constant;
@@ -1440,9 +1451,9 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     int size = get_mp_size (moid);
     NODE_T *number = (WHETHER (SUB (p), REAL_DENOTER) ? SUB (p) : NEXT_SUB (p));
     STACK_MP (z, p, digits);
-    if (genie_string_to_value_internal (p, moid, SYMBOL (number), (BYTE_T *) z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, moid, SYMBOL (number), (BYTE_T *) z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     z[0] = INITIALISED_MASK | CONSTANT_MASK;
     self.unit = genie_constant;
@@ -1452,9 +1463,9 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
 /* BITS denoter. */
     A68_BITS z;
     NODE_T *s = WHETHER (SUB (p), SHORTETY) ? NEXT_SUB (p) : SUB (p);
-    if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, moid, SYMBOL (s), (BYTE_T *) & z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     self.unit = genie_constant;
     z.status = INITIALISED_MASK | CONSTANT_MASK;
@@ -1468,9 +1479,9 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
     int size = get_mp_size (moid);
     NODE_T *number = (WHETHER (SUB (p), BITS_DENOTER) ? SUB (p) : NEXT_SUB (p));
     STACK_MP (z, p, digits);
-    if (genie_string_to_value_internal (p, moid, SYMBOL (number), (BYTE_T *) z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, moid, SYMBOL (number), (BYTE_T *) z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, moid);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     z[0] = INITIALISED_MASK | CONSTANT_MASK;
     self.unit = genie_constant;
@@ -1534,7 +1545,7 @@ PROPAGATOR_T genie_identifier_standenv_proc (NODE_T * p)
   z.environ = 0;
   z.locale = NULL;
   z.proc_mode = MOID (p);
-  PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+  PUSH_PROCEDURE (p, z);
   return (p->genie.propagator);
 }
 
@@ -1585,9 +1596,11 @@ PROPAGATOR_T genie_identifier (NODE_T * p)
 PROPAGATOR_T genie_cast (NODE_T * p)
 {
   PROPAGATOR_T self;
+  A68_TRACE ("enter genie_cast", p);
   self.unit = genie_cast;
   self.source = p;
   EXECUTE_UNIT (NEXT_SUB (p));
+  A68_TRACE ("exit genie_cast", p);
   return (self);
 }
 
@@ -1605,10 +1618,10 @@ PROPAGATOR_T genie_assertion (NODE_T * p)
   if (MASK (p) & ASSERT_MASK) {
     A68_BOOL z;
     EXECUTE_UNIT (NEXT_SUB (p));
-    POP_PRIMITIVE (p, &z, A68_BOOL);
-    if (z.value == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FALSE_ASSERTION);
-      exit_genie (p, A_RUNTIME_ERROR);
+    POP_OBJECT (p, &z, A68_BOOL);
+    if (z.value == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FALSE_ASSERTION);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
   return (self);
@@ -1623,10 +1636,10 @@ PROPAGATOR_T genie_assertion (NODE_T * p)
 PROPAGATOR_T genie_format_text (NODE_T * p)
 {
   static PROPAGATOR_T self;
-  A68_FORMAT z = *(A68_FORMAT *) (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (p)->offset));
+  A68_FORMAT z = *(A68_FORMAT *) (FRAME_OBJECT (TAX (p)->offset));
   self.unit = genie_format_text;
   self.source = p;
-  PUSH (p, &z, SIZE_OF (A68_FORMAT));
+  PUSH_FORMAT (p, z);
   return (self);
 }
 
@@ -1682,6 +1695,7 @@ PROPAGATOR_T genie_selection (NODE_T * p)
   MOID_T *struct_mode = MOID (NEXT (selector)), *result_mode = MOID (selector);
   BOOL_T selection_of_name = (WHETHER (struct_mode, REF_SYMBOL));
   self.source = p;
+  self.unit = genie_selection;
   EXECUTE_UNIT (NEXT (selector));
 /* Multiple selections. */
   if (selection_of_name && (WHETHER (SUB (struct_mode), FLEX_SYMBOL) || WHETHER (SUB (struct_mode), ROW_SYMBOL))) {
@@ -1699,7 +1713,7 @@ PROPAGATOR_T genie_selection (NODE_T * p)
     ((A68_ARRAY *) ADDRESS (&row2))->field_offset += PACK (SUB (selector))->offset;
     row3 = heap_generator (selector, result_mode, SIZE_OF (A68_REF));
     *(A68_REF *) ADDRESS (&row3) = row2;
-    PUSH (selector, &row3, SIZE_OF (A68_REF));
+    PUSH_REF (selector, row3);
     self.unit = genie_selection;
     DOWN_SWEEP_SEMA;
     PROTECT_FROM_SWEEP_STACK (p);
@@ -1714,7 +1728,7 @@ PROPAGATOR_T genie_selection (NODE_T * p)
     MOVE (ADDRESS (&row2), (BYTE_T *) ADDRESS (row1), (unsigned) desc_size);
     MOID (((A68_ARRAY *) ADDRESS (&row2))) = SUB (result_mode);
     ((A68_ARRAY *) ADDRESS (&row2))->field_offset += PACK (SUB (selector))->offset;
-    PUSH (selector, &row2, SIZE_OF (A68_REF));
+    PUSH_REF (selector, row2);
     self.unit = genie_selection;
     DOWN_SWEEP_SEMA;
     PROTECT_FROM_SWEEP_STACK (p);
@@ -2015,9 +2029,9 @@ PROPAGATOR_T genie_identity_relation (NODE_T * p)
   self.unit = genie_identity_relation;
   self.source = p;
   EXECUTE_UNIT (lhs);
-  POP (p, &y, SIZE_OF (A68_REF));
+  POP_REF (p, &y);
   EXECUTE_UNIT (rhs);
-  POP (p, &x, SIZE_OF (A68_REF));
+  POP_REF (p, &x);
   if (WHETHER (NEXT_SUB (p), IS_SYMBOL)) {
     PUSH_PRIMITIVE (p, ADDRESS (&x) == ADDRESS (&y), A68_BOOL);
   } else {
@@ -2039,11 +2053,11 @@ PROPAGATOR_T genie_and_function (NODE_T * p)
   self.unit = genie_and_function;
   self.source = p;
   EXECUTE_UNIT (SUB (p));
-  POP_PRIMITIVE (p, &x, A68_BOOL);
-  if (x.value == A_TRUE) {
+  POP_OBJECT (p, &x, A68_BOOL);
+  if (x.value == A68_TRUE) {
     EXECUTE_UNIT (NEXT (NEXT (SUB (p))));
   } else {
-    PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
   }
   return (self);
 }
@@ -2061,11 +2075,11 @@ PROPAGATOR_T genie_or_function (NODE_T * p)
   self.unit = genie_or_function;
   self.source = p;
   EXECUTE_UNIT (SUB (p));
-  POP_PRIMITIVE (p, &x, A68_BOOL);
-  if (x.value == A_FALSE) {
+  POP_OBJECT (p, &x, A68_BOOL);
+  if (x.value == A68_FALSE) {
     EXECUTE_UNIT (NEXT (NEXT (SUB (p))));
   } else {
-    PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
   }
   return (self);
 }
@@ -2079,10 +2093,10 @@ PROPAGATOR_T genie_or_function (NODE_T * p)
 PROPAGATOR_T genie_routine_text (NODE_T * p)
 {
   static PROPAGATOR_T self;
-  A68_PROCEDURE z = *(A68_PROCEDURE *) (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (p)->offset));
+  A68_PROCEDURE z = *(A68_PROCEDURE *) (FRAME_OBJECT (TAX (p)->offset));
   self.unit = genie_routine_text;
   self.source = p;
-  PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+  PUSH_PROCEDURE (p, z);
   return (self);
 }
 
@@ -2100,7 +2114,7 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
      * skip. 
      */ ;
   } else if (u == MODE (INT)) {
-    PUSH_PRIMITIVE (p, (int) (rng_53_bit () * MAX_INT), A68_INT);
+    PUSH_PRIMITIVE (p, (int) (rng_53_bit () * A68_MAX_INT), A68_INT);
   } else if (u == MODE (REAL)) {
     PUSH_PRIMITIVE (p, rng_53_bit (), A68_REAL);
   } else if (u == MODE (BOOL)) {
@@ -2108,7 +2122,7 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
   } else if (u == MODE (CHAR)) {
     PUSH_PRIMITIVE (p, (char) (32 + 96 * rng_53_bit ()), A68_CHAR);
   } else if (u == MODE (BITS)) {
-    PUSH_PRIMITIVE (p, (unsigned) (rng_53_bit () * MAX_UNT), A68_BITS);
+    PUSH_PRIMITIVE (p, (unsigned) (rng_53_bit () * A68_MAX_UNT), A68_BITS);
   } else if (u == MODE (COMPLEX)) {
     PUSH_COMPLEX (p, rng_53_bit (), rng_53_bit ());
   } else if (u == MODE (BYTES)) {
@@ -2170,7 +2184,7 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     z.environ = 0;
     z.locale = NULL;
     z.proc_mode = u;
-    PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+    PUSH_PROCEDURE (p, z);
   } else {
 /* FORMAT etc. - what arbitrary FORMAT would mean anything at all? */
     BYTE_T *sp = STACK_TOP;
@@ -2209,7 +2223,7 @@ static void genie_jump (NODE_T * p)
   ADDR_T f = frame_pointer;
   jmp_buf *jump_stat;
 /* Find the stack frame this jump points to. */
-  BOOL_T found = A_FALSE;
+  BOOL_T found = A68_FALSE;
   while (f > 0 && !found) {
     found = (SYMBOL_TABLE (TAX (label)) == SYMBOL_TABLE (FRAME_TREE (f))) && FRAME_JUMP_STAT (f) != NULL;
     if (!found) {
@@ -2220,8 +2234,8 @@ static void genie_jump (NODE_T * p)
 #if defined HAVE_POSIX_THREADS
   if (PAR_LEVEL (p) > 0) {
     if (PAR_LEVEL (p) > PAR_LEVEL (FRAME_TREE (f)) && PAR_LEVEL (FRAME_TREE (f)) != 0) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_LABEL_IN_PAR_CLAUSE);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_LABEL_IN_PAR_CLAUSE);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     zap_all_threads (p, FRAME_JUMP_STAT (f), label);
   } else {
@@ -2244,6 +2258,7 @@ static void genie_jump (NODE_T * p)
 
 PROPAGATOR_T genie_unit (NODE_T * p)
 {
+  A68_TRACE ("enter genie_unit", p);
   if (p->genie.whether_coercion) {
     global_prop = genie_coercion (p);
   } else {
@@ -2368,6 +2383,7 @@ PROPAGATOR_T genie_unit (NODE_T * p)
       }
     }
   }
+  A68_TRACE ("exit genie_unit", p);
   p->genie.propagator = global_prop;
   return (global_prop);
 }
@@ -2380,14 +2396,14 @@ PROPAGATOR_T genie_unit (NODE_T * p)
 void genie_unit_trace (NODE_T * p)
 {
   if (sys_request_flag) {
-    single_step (p, A_TRUE, A_FALSE);
+    single_step (p, A68_TRUE, A68_FALSE);
   } else if (MASK (p) & BREAKPOINT_MASK) {
     if (INFO (p)->expr == NULL) {
-      sys_request_flag = A_FALSE;
-      single_step (p, A_FALSE, A_TRUE);
+      sys_request_flag = A68_FALSE;
+      single_step (p, A68_FALSE, A68_TRUE);
     } else if (breakpoint_expression (p)) {
-      sys_request_flag = A_FALSE;
-      single_step (p, A_FALSE, A_TRUE);
+      sys_request_flag = A68_FALSE;
+      single_step (p, A68_FALSE, A68_TRUE);
     }
   } else if (MASK (p) & TRACE_MASK) {
     where (STDOUT_FILENO, p);
@@ -2500,12 +2516,12 @@ void genie_serial_clause (NODE_T * p, jmp_buf * exit_buf)
 {
   if (SYMBOL_TABLE (p)->labels == NULL) {
 /* No labels in this clause. */
-    if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A_FALSE) {
+    if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A68_FALSE) {
       NODE_T top_seq;
       NODE_T *seq = &top_seq;
       genie_serial_units_no_label (SUB (p), stack_pointer, &seq);
       SEQUENCE (p) = SEQUENCE (&top_seq);
-      SEQUENCE_SET (p) = A_TRUE;
+      SEQUENCE_SET (p) = A68_TRUE;
       MASK (p) |= SERIAL_MASK;
       if (SEQUENCE (p) != NULL && SEQUENCE (SEQUENCE (p)) == NULL) {
         MASK (p) |= OPTIMAL_MASK;
@@ -2568,12 +2584,12 @@ void genie_serial_clause (NODE_T * p, jmp_buf * exit_buf)
 
 void genie_enquiry_clause (NODE_T * p)
 {
-  if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A_FALSE) {
+  if (SEQUENCE (p) == NULL && SEQUENCE_SET (p) == A68_FALSE) {
     NODE_T top_seq;
     NODE_T *seq = &top_seq;
     genie_serial_units_no_label (SUB (p), stack_pointer, &seq);
     SEQUENCE (p) = SEQUENCE (&top_seq);
-    SEQUENCE_SET (p) = A_TRUE;
+    SEQUENCE_SET (p) = A68_TRUE;
     if (SEQUENCE (p) != NULL && SEQUENCE (SEQUENCE (p)) == NULL) {
       MASK (p) |= OPTIMAL_MASK;
     }
@@ -2675,19 +2691,19 @@ PROPAGATOR_T genie_collateral (NODE_T * p)
 BOOL_T genie_int_case_unit (NODE_T * p, int k, int *count)
 {
   if (p == NULL) {
-    return (A_FALSE);
+    return (A68_FALSE);
   } else {
     if (WHETHER (p, UNIT)) {
       if (k == *count) {
         EXECUTE_UNIT_TRACE (p);
-        return (A_TRUE);
+        return (A68_TRUE);
       } else {
         (*count)++;
-        return (A_FALSE);
+        return (A68_FALSE);
       }
     } else {
       if (genie_int_case_unit (SUB (p), k, count) != 0) {
-        return (A_TRUE);
+        return (A68_TRUE);
       } else {
         return (genie_int_case_unit (NEXT (p), k, count));
       }
@@ -2705,7 +2721,7 @@ BOOL_T genie_int_case_unit (NODE_T * p, int k, int *count)
 BOOL_T genie_united_case_unit (NODE_T * p, MOID_T * m)
 {
   if (p == NULL) {
-    return (A_FALSE);
+    return (A68_FALSE);
   } else {
     if (WHETHER (p, SPECIFIER)) {
       MOID_T *spec_moid = MOID (NEXT (SUB (p)));
@@ -2717,27 +2733,27 @@ BOOL_T genie_united_case_unit (NODE_T * p, MOID_T * m)
           equal_modes = (m == spec_moid);
         }
       } else {
-        equal_modes = A_FALSE;
+        equal_modes = A68_FALSE;
       }
       if (equal_modes) {
         NODE_T *q = NEXT (NEXT (SUB (p)));
         OPEN_STATIC_FRAME (p);
         if (WHETHER (q, IDENTIFIER)) {
           if (WHETHER (spec_moid, UNION_SYMBOL)) {
-            COPY ((FRAME_OFFSET (FRAME_INFO_SIZE + TAX (q)->offset)), STACK_TOP, (unsigned) MOID_SIZE (spec_moid));
+            COPY ((FRAME_OBJECT (TAX (q)->offset)), STACK_TOP, (unsigned) MOID_SIZE (spec_moid));
           } else {
-            COPY ((FRAME_OFFSET (FRAME_INFO_SIZE + TAX (q)->offset)), STACK_OFFSET (SIZE_OF (A68_UNION)), (unsigned) MOID_SIZE (spec_moid));
+            COPY ((FRAME_OBJECT (TAX (q)->offset)), STACK_OFFSET (SIZE_OF (A68_UNION)), (unsigned) MOID_SIZE (spec_moid));
           }
         }
         EXECUTE_UNIT_TRACE (NEXT (NEXT (p)));
         CLOSE_FRAME;
-        return (A_TRUE);
+        return (A68_TRUE);
       } else {
-        return (A_FALSE);
+        return (A68_FALSE);
       }
     } else {
       if (genie_united_case_unit (SUB (p), m)) {
-        return (A_TRUE);
+        return (A68_TRUE);
       } else {
         return (genie_united_case_unit (NEXT (p), m));
       }
@@ -2759,7 +2775,7 @@ static void genie_identity_dec (NODE_T * p)
         MOID_T *source_moid = MOID (p);
         NODE_T *src = NEXT (NEXT (p));
         unsigned size = MOID_SIZE (source_moid);
-        BYTE_T *z = (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (p)->offset));
+        BYTE_T *z = (FRAME_OBJECT (TAX (p)->offset));
         ADDR_T pop_dns = FRAME_DYNAMIC_SCOPE (frame_pointer);
         FRAME_DYNAMIC_SCOPE (frame_pointer) = frame_pointer;
         EXECUTE_UNIT (src);
@@ -2819,7 +2835,7 @@ static void genie_variable_dec (NODE_T * p, NODE_T ** declarer, ADDR_T sp)
         MOID_T *ref_mode = MOID (p);
         TAG_T *tag = TAX (p);
         int leap = (HEAP (tag) == LOC_SYMBOL ? LOC_SYMBOL : HEAP_SYMBOL);
-        A68_REF *z = (A68_REF *) (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (p)->offset));
+        A68_REF *z = (A68_REF *) (FRAME_OBJECT (TAX (p)->offset));
         genie_generator_internal (*declarer, ref_mode, tag->body, leap, sp);
         POP_REF (p, z);
         if (NEXT (p) != NULL && WHETHER (NEXT (p), ASSIGN_SYMBOL)) {
@@ -2858,7 +2874,7 @@ static void genie_proc_variable_dec (NODE_T * p)
         MOID_T *ref_mode = MOID (p);
         TAG_T *tag = TAX (p);
         int leap = (HEAP (tag) == LOC_SYMBOL) ? LOC_SYMBOL : HEAP_SYMBOL;
-        A68_REF *z = (A68_REF *) (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (p)->offset));
+        A68_REF *z = (A68_REF *) (FRAME_OBJECT (TAX (p)->offset));
         genie_generator_internal (p, ref_mode, tag->body, leap, stack_pointer);
         POP_REF (p, z);
         if (NEXT (p) != NULL && WHETHER (NEXT (p), ASSIGN_SYMBOL)) {
@@ -2891,15 +2907,13 @@ static void genie_operator_dec (NODE_T * p)
     switch (ATTRIBUTE (p)) {
     case DEFINING_OPERATOR:
       {
-        MOID_T *source_moid = MOID (p);
-        unsigned size = MOID_SIZE (source_moid);
-        BYTE_T *z = (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (p)->offset));
+        A68_PROCEDURE *z = (A68_PROCEDURE *) (FRAME_OBJECT (TAX (p)->offset));
         ADDR_T pop_dns = FRAME_DYNAMIC_SCOPE (frame_pointer);
         FRAME_DYNAMIC_SCOPE (frame_pointer) = frame_pointer;
         EXECUTE_UNIT (NEXT (NEXT (p)));
-        GENIE_DNS_STACK (p, source_moid, frame_pointer, "operator-declaration");
+        GENIE_DNS_STACK (p, MOID (p), frame_pointer, "operator-declaration");
         FRAME_DYNAMIC_SCOPE (frame_pointer) = pop_dns;
-        POP (p, z, size);
+        POP_PROCEDURE (p, z);
         return;
       }
     default:
@@ -3047,7 +3061,7 @@ PROPAGATOR_T genie_int_case (volatile NODE_T * p)
 /* CASE or OUSE. */
   OPEN_STATIC_FRAME ((NODE_T *) SUB (q));
   ENQUIRY_CLAUSE (NEXT_SUB (q));
-  POP_PRIMITIVE (q, &k, A68_INT);
+  POP_OBJECT (q, &k, A68_INT);
 /* IN. */
   FORWARD (q);
   OPEN_STATIC_FRAME ((NODE_T *) SUB (q));
@@ -3095,7 +3109,7 @@ PROPAGATOR_T genie_int_case (volatile NODE_T * p)
 
 PROPAGATOR_T genie_united_case (volatile NODE_T * p)
 {
-  volatile BOOL_T found_unit = A_FALSE;
+  volatile BOOL_T found_unit = A68_FALSE;
   volatile MOID_T *um;
   volatile ADDR_T pop_sp;
   jmp_buf exit_buf;
@@ -3114,7 +3128,7 @@ PROPAGATOR_T genie_united_case (volatile NODE_T * p)
     found_unit = genie_united_case_unit (NEXT_SUB ((NODE_T *) q), (MOID_T *) um);
     CLOSE_FRAME;
   } else {
-    found_unit = A_FALSE;
+    found_unit = A68_FALSE;
   }
 /* OUT. */
   if (!found_unit) {
@@ -3166,7 +3180,7 @@ PROPAGATOR_T genie_conditional (volatile NODE_T * p)
   ENQUIRY_CLAUSE (NEXT_SUB (q));
   stack_pointer = pop_sp;
   FORWARD (q);
-  if (((A68_BOOL *) STACK_TOP)->value == A_TRUE) {
+  if (((A68_BOOL *) STACK_TOP)->value == A68_TRUE) {
 /* THEN. */
     OPEN_STATIC_FRAME ((NODE_T *) SUB (q));
     SERIAL_CLAUSE (NEXT_SUB (q));
@@ -3263,7 +3277,7 @@ PROPAGATOR_T genie_loop (volatile NODE_T * p)
     to_part = p;
     FORWARD (p);
   } else {
-    to = (by >= 0 ? MAX_INT : -MAX_INT);
+    to = (by >= 0 ? A68_MAX_INT : -A68_MAX_INT);
   }
   q = NEXT_SUB (p);
 /* Here the loop part starts.
@@ -3272,7 +3286,7 @@ PROPAGATOR_T genie_loop (volatile NODE_T * p)
   counter = from;
 /* Does the loop contain conditionals? */
   if (WHETHER (p, WHILE_PART)) {
-    conditional = A_TRUE;
+    conditional = A68_TRUE;
   } else if (WHETHER (p, DO_PART) || WHETHER (p, ALT_DO_PART)) {
     NODE_T *un_p = NEXT_SUB (p);
     if (WHETHER (un_p, SERIAL_CLAUSE)) {
@@ -3280,14 +3294,14 @@ PROPAGATOR_T genie_loop (volatile NODE_T * p)
     }
     conditional = (un_p != NULL && WHETHER (un_p, UNTIL_PART));
   } else {
-    conditional = A_FALSE;
+    conditional = A68_FALSE;
   }
   if (conditional) {
 /* [FOR ...] [WHILE ...] DO [...] [UNTIL ...] OD. */
     go_on = (by > 0 && counter <= to) || (by < 0 && counter >= to) || (by == 0);
     while (go_on) {
       if (for_part != NULL) {
-        A68_INT *z = (A68_INT *) (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (for_part)->offset));
+        A68_INT *z = (A68_INT *) (FRAME_OBJECT (TAX (for_part)->offset));
         z->status = INITIALISED_MASK;
         z->value = counter;
       }
@@ -3295,7 +3309,7 @@ PROPAGATOR_T genie_loop (volatile NODE_T * p)
       if (WHETHER (p, WHILE_PART)) {
         ENQUIRY_CLAUSE (q);
         stack_pointer = pop_sp;
-        go_on = ((A68_BOOL *) STACK_TOP)->value == A_TRUE;
+        go_on = ((A68_BOOL *) STACK_TOP)->value == A68_TRUE;
       }
       if (go_on) {
         volatile NODE_T *do_p = p, *un_p;
@@ -3318,7 +3332,7 @@ PROPAGATOR_T genie_loop (volatile NODE_T * p)
           stack_pointer = pop_sp;
           ENQUIRY_CLAUSE (v);
           stack_pointer = pop_sp;
-          go_on = ((A68_BOOL *) STACK_TOP)->value == A_FALSE;
+          go_on = ((A68_BOOL *) STACK_TOP)->value == A68_FALSE;
           CLOSE_FRAME;
         }
         if (WHETHER (p, WHILE_PART)) {
@@ -3345,7 +3359,7 @@ PROPAGATOR_T genie_loop (volatile NODE_T * p)
     go_on = (by > 0 && counter <= to) || (by < 0 && counter >= to) || (by == 0);
     while (go_on) {
       if (for_part != NULL) {
-        A68_INT *z = (A68_INT *) (FRAME_OFFSET (FRAME_INFO_SIZE + TAX (for_part)->offset));
+        A68_INT *z = (A68_INT *) (FRAME_OBJECT (TAX (for_part)->offset));
         z->status = INITIALISED_MASK;
         z->value = counter;
       }

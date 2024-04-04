@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -101,8 +101,8 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
   if (mask & TRANSIENT) {
     for (s = top; s != NULL; s = NEXT (s)) {
       if (s->tuple.transient & TRANSIENT) {
-        diagnostic_node (A_ERROR, s->where, ERROR_TRANSIENT_NAME);
-        s->where->error = A_TRUE;
+        diagnostic_node (A68_ERROR, s->where, ERROR_TRANSIENT_NAME);
+        s->where->error = A68_TRUE;
         errors++;
       }
     }
@@ -111,11 +111,11 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
     if (dest < s->tuple.level && !s->where->error) {
 /* Potential scope violations. */
       if (MOID (s->where) == NULL) {
-        diagnostic_node (A_WARNING, s->where, WARNING_SCOPE_STATIC_1, ATTRIBUTE (s->where));
+        diagnostic_node (A68_WARNING, s->where, WARNING_SCOPE_STATIC_1, ATTRIBUTE (s->where));
       } else {
-        diagnostic_node (A_WARNING, s->where, WARNING_SCOPE_STATIC_2, MOID (s->where), ATTRIBUTE (s->where));
+        diagnostic_node (A68_WARNING, s->where, WARNING_SCOPE_STATIC_2, MOID (s->where), ATTRIBUTE (s->where));
       }
-      s->where->error = A_TRUE;
+      s->where->error = A68_TRUE;
       errors++;
     }
   }
@@ -132,7 +132,7 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
 
 static BOOL_T scope_check_multiple (SCOPE_T * top, int mask, SCOPE_T * dest)
 {
-  BOOL_T no_err = A_TRUE;
+  BOOL_T no_err = A68_TRUE;
   for (; dest != NULL; dest = NEXT (dest)) {
     no_err &= scope_check (top, mask, dest->tuple.level);
   }
@@ -149,7 +149,7 @@ static void check_identifier_usage (TAG_T * t, NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, IDENTIFIER) && TAX (p) == t && ATTRIBUTE (MOID (t)) != PROC_SYMBOL) {
-      diagnostic_node (A_WARNING, p, WARNING_UNINITIALISED);
+      diagnostic_node (A68_WARNING, p, WARNING_UNINITIALISED);
     }
     check_identifier_usage (t, SUB (p));
   }
@@ -181,7 +181,7 @@ static TUPLE_T scope_find_youngest_outside (SCOPE_T * s, int treshold)
 
 static TUPLE_T scope_find_youngest (SCOPE_T * s)
 {
-  return (scope_find_youngest_outside (s, MAX_INT));
+  return (scope_find_youngest_outside (s, A68_MAX_INT));
 }
 
 /* Routines for determining scope of ROUTINE TEXT or FORMAT TEXT. */
@@ -203,7 +203,7 @@ static void get_declarer_elements (NODE_T * p, SCOPE_T ** r, BOOL_T no_ref)
         scope_add (r, p, scope_make_tuple (LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
       }
     } else if (WHETHER (p, REF_SYMBOL)) {
-      get_declarer_elements (NEXT (p), r, A_FALSE);
+      get_declarer_elements (NEXT (p), r, A68_FALSE);
     } else if (WHETHER (p, PROC_SYMBOL) || WHETHER (p, UNION_SYMBOL)) {
       ;
     } else {
@@ -240,7 +240,7 @@ static void gather_scopes_for_youngest (NODE_T * p, SCOPE_T ** s)
         scope_add (s, p, scope_make_tuple (LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
       }
     } else if (WHETHER (p, DECLARER)) {
-      get_declarer_elements (p, s, A_TRUE);
+      get_declarer_elements (p, s, A68_TRUE);
     } else {
       gather_scopes_for_youngest (SUB (p), s);
     }
@@ -276,13 +276,13 @@ static void bind_scope_to_tag (NODE_T * p)
     if (WHETHER (p, DEFINING_IDENTIFIER) && MOID (p) == MODE (FORMAT)) {
       if (WHETHER (NEXT (NEXT (p)), FORMAT_TEXT)) {
         TAX (p)->scope = TAX (NEXT (NEXT (p)))->youngest_environ;
-        TAX (p)->scope_assigned = A_TRUE;
+        TAX (p)->scope_assigned = A68_TRUE;
       }
       return;
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       if (WHETHER (NEXT (NEXT (p)), ROUTINE_TEXT)) {
         TAX (p)->scope = TAX (NEXT (NEXT (p)))->youngest_environ;
-        TAX (p)->scope_assigned = A_TRUE;
+        TAX (p)->scope_assigned = A68_TRUE;
       }
       return;
     } else {
@@ -370,7 +370,7 @@ static void scope_identity_declaration (NODE_T * p)
       z = scope_find_youngest (s).level;
       if (z < LEX_LEVEL (p)) {
         TAX (p)->scope = z;
-        TAX (p)->scope_assigned = A_TRUE;
+        TAX (p)->scope_assigned = A68_TRUE;
       }
     } else {
       scope_identity_declaration (SUB (p));
@@ -488,7 +488,7 @@ static BOOL_T whether_transient_row (MOID_T * m)
   if (WHETHER (m, REF_SYMBOL)) {
     return (WHETHER (SUB (m), FLEX_SYMBOL));
   } else {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 }
 
@@ -509,15 +509,15 @@ BOOL_T whether_coercion (NODE_T * p)
     case VOIDING:
     case PROCEDURING:
       {
-        return (A_TRUE);
+        return (A68_TRUE);
       }
     default:
       {
-        return (A_FALSE);
+        return (A68_FALSE);
       }
     }
   } else {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 }
 
@@ -673,9 +673,9 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
           scope_add (s, p, scope_make_tuple (LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
         }
       }
-    } else if (ATTRIBUTE (MOID (p)) == PROC_SYMBOL && TAX (p)->scope_assigned == A_TRUE) {
+    } else if (ATTRIBUTE (MOID (p)) == PROC_SYMBOL && TAX (p)->scope_assigned == A68_TRUE) {
       scope_add (s, p, scope_make_tuple (TAX (p)->scope, NOT_TRANSIENT));
-    } else if (MOID (p) == MODE (FORMAT) && TAX (p)->scope_assigned == A_TRUE) {
+    } else if (MOID (p) == MODE (FORMAT) && TAX (p)->scope_assigned == A68_TRUE) {
       scope_add (s, p, scope_make_tuple (TAX (p)->scope, NOT_TRANSIENT));
     }
   } else if (WHETHER (p, ENCLOSED_CLAUSE)) {
@@ -781,7 +781,7 @@ static void scope_serial_clause (NODE_T * p, SCOPE_T ** s, BOOL_T terminator)
 {
   if (p != NULL) {
     if (WHETHER (p, INITIALISER_SERIES)) {
-      scope_serial_clause (SUB (p), s, A_FALSE);
+      scope_serial_clause (SUB (p), s, A68_FALSE);
       scope_serial_clause (NEXT (p), s, terminator);
     } else if (WHETHER (p, DECLARATION_LIST)) {
       scope_declaration_list (SUB (p));
@@ -791,12 +791,12 @@ static void scope_serial_clause (NODE_T * p, SCOPE_T ** s, BOOL_T terminator)
       if (NEXT (p) != NULL) {
         int j = ATTRIBUTE (NEXT (p));
         if (j == EXIT_SYMBOL || j == END_SYMBOL || j == CLOSE_SYMBOL) {
-          scope_serial_clause (SUB (p), s, A_TRUE);
+          scope_serial_clause (SUB (p), s, A68_TRUE);
         } else {
-          scope_serial_clause (SUB (p), s, A_FALSE);
+          scope_serial_clause (SUB (p), s, A68_FALSE);
         }
       } else {
-        scope_serial_clause (SUB (p), s, A_TRUE);
+        scope_serial_clause (SUB (p), s, A68_TRUE);
       }
       scope_serial_clause (NEXT (p), s, terminator);
     } else if (WHETHER (p, LABELED_UNIT)) {
@@ -821,7 +821,7 @@ static void scope_closed_clause (NODE_T * p, SCOPE_T ** s)
 {
   if (p != NULL) {
     if (WHETHER (p, SERIAL_CLAUSE)) {
-      scope_serial_clause (p, s, A_TRUE);
+      scope_serial_clause (p, s, A68_TRUE);
     } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, BEGIN_SYMBOL)) {
       scope_closed_clause (NEXT (p), s);
     }
@@ -851,12 +851,12 @@ static void scope_collateral_clause (NODE_T * p, SCOPE_T ** s)
 
 static void scope_conditional_clause (NODE_T * p, SCOPE_T ** s)
 {
-  scope_serial_clause (NEXT_SUB (p), NULL, A_TRUE);
+  scope_serial_clause (NEXT_SUB (p), NULL, A68_TRUE);
   FORWARD (p);
-  scope_serial_clause (NEXT_SUB (p), s, A_TRUE);
+  scope_serial_clause (NEXT_SUB (p), s, A68_TRUE);
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, ELSE_PART) || WHETHER (p, CHOICE)) {
-      scope_serial_clause (NEXT_SUB (p), s, A_TRUE);
+      scope_serial_clause (NEXT_SUB (p), s, A68_TRUE);
     } else if (WHETHER (p, ELIF_PART) || WHETHER (p, BRIEF_ELIF_IF_PART)) {
       scope_conditional_clause (SUB (p), s);
     }
@@ -872,13 +872,13 @@ static void scope_conditional_clause (NODE_T * p, SCOPE_T ** s)
 static void scope_case_clause (NODE_T * p, SCOPE_T ** s)
 {
   SCOPE_T *n = NULL;
-  scope_serial_clause (NEXT_SUB (p), &n, A_TRUE);
+  scope_serial_clause (NEXT_SUB (p), &n, A68_TRUE);
   scope_check (n, NOT_TRANSIENT, LEX_LEVEL (p));
   FORWARD (p);
   scope_statement_list (NEXT_SUB (p), s);
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, OUT_PART) || WHETHER (p, CHOICE)) {
-      scope_serial_clause (NEXT_SUB (p), s, A_TRUE);
+      scope_serial_clause (NEXT_SUB (p), s, A68_TRUE);
     } else if (WHETHER (p, INTEGER_OUT_PART) || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
       scope_case_clause (SUB (p), s);
     } else if (WHETHER (p, UNITED_OUSE_PART) || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
@@ -901,18 +901,18 @@ static void scope_loop_clause (NODE_T * p)
       scope_statement (NEXT_SUB (p), NULL);
       scope_loop_clause (NEXT (p));
     } else if (WHETHER (p, WHILE_PART)) {
-      scope_serial_clause (NEXT_SUB (p), NULL, A_TRUE);
+      scope_serial_clause (NEXT_SUB (p), NULL, A68_TRUE);
       scope_loop_clause (NEXT (p));
     } else if (WHETHER (p, DO_PART) || WHETHER (p, ALT_DO_PART)) {
       NODE_T *do_p = NEXT_SUB (p), *un_p;
       if (WHETHER (do_p, SERIAL_CLAUSE)) {
-        scope_serial_clause (do_p, NULL, A_TRUE);
+        scope_serial_clause (do_p, NULL, A68_TRUE);
         un_p = NEXT (do_p);
       } else {
         un_p = do_p;
       }
       if (un_p != NULL && WHETHER (un_p, UNTIL_PART)) {
-        scope_serial_clause (NEXT_SUB (un_p), NULL, A_TRUE);
+        scope_serial_clause (NEXT_SUB (un_p), NULL, A68_TRUE);
       }
     }
   }

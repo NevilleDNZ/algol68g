@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -125,7 +125,7 @@ void state_version (FILE_T f)
   snprintf (output_line, BUFFER_SIZE, "PostgreSQL libpq %s\n", A68_PG_VERSION);
   io_write_string (f, output_line);
 #endif
-  snprintf (output_line, BUFFER_SIZE, "Alignment %d bytes\n", ALIGNMENT);
+  snprintf (output_line, BUFFER_SIZE, "Alignment %d bytes\n", A68_ALIGNMENT);
   io_write_string (f, output_line);
   default_mem_sizes ();
   snprintf (output_line, BUFFER_SIZE, "Default frame stack size: %ld kB\n", frame_stack_size / KILOBYTE);
@@ -273,7 +273,7 @@ int main (int argc, char *argv[])
     for (argcc = 1; argcc < argc; argcc++) {
       add_option_list (&(a68_prog.options.list), argv[argcc], NULL);
     }
-    if (!set_options (&a68_prog, a68_prog.options.list, A_TRUE)) {
+    if (!set_options (&a68_prog, a68_prog.options.list, A68_TRUE)) {
       a68g_exit (EXIT_FAILURE);
     }
 /* Attention for -version. */
@@ -340,19 +340,19 @@ static void init_before_tokeniser (void)
 static void compiler_interpreter (void)
 {
   int k, len;
-  BOOL_T path_set = A_FALSE;
-  tree_listing_safe = A_FALSE;
-  cross_reference_safe = A_FALSE;
-  moid_listing_safe = A_FALSE;
+  BOOL_T path_set = A68_FALSE;
+  tree_listing_safe = A68_FALSE;
+  cross_reference_safe = A68_FALSE;
+  moid_listing_safe = A68_FALSE;
   old_postulate = NULL;
   error_tag = (TAG_T *) new_tag;
 /* File set-up. */
   SCAN_ERROR (a68_prog.files.generic_name == NULL, NULL, NULL, ERROR_NO_INPUT_FILE);
   a68_prog.files.source.name = new_string (a68_prog.files.generic_name);
-  a68_prog.files.source.opened = A_FALSE;
-  a68_prog.files.listing.opened = A_FALSE;
-  a68_prog.files.source.writemood = A_FALSE;
-  a68_prog.files.listing.writemood = A_TRUE;
+  a68_prog.files.source.opened = A68_FALSE;
+  a68_prog.files.listing.opened = A68_FALSE;
+  a68_prog.files.source.writemood = A68_FALSE;
+  a68_prog.files.listing.writemood = A68_TRUE;
 /*
 Open the source file. Open it for binary reading for systems that require so (Win32).
 Accept various silent extensions.
@@ -372,8 +372,8 @@ Accept various silent extensions.
   }
 /* Isolate the path name. */
   a68_prog.files.path = new_string (a68_prog.files.generic_name);
-  path_set = A_FALSE;
-  for (k = strlen (a68_prog.files.path); k >= 0 && path_set == A_FALSE; k--) {
+  path_set = A68_FALSE;
+  for (k = strlen (a68_prog.files.path); k >= 0 && path_set == A68_FALSE; k--) {
 #if defined HAVE_WIN32
     char delim = '\\';
 #else
@@ -381,10 +381,10 @@ Accept various silent extensions.
 #endif
     if (a68_prog.files.path[k] == delim) {
       a68_prog.files.path[k + 1] = NULL_CHAR;
-      path_set = A_TRUE;
+      path_set = A68_TRUE;
     }
   }
-  if (path_set == A_FALSE) {
+  if (path_set == A68_FALSE) {
     a68_prog.files.path[0] = NULL_CHAR;
   }
 /* Listing file. */
@@ -394,7 +394,7 @@ Accept various silent extensions.
   bufcat (a68_prog.files.listing.name, LISTING_EXTENSION, len);
 /* Tokeniser. */
   if (!setjmp (exit_compilation)) {
-    a68_prog.files.source.opened = A_TRUE;
+    a68_prog.files.source.opened = A68_TRUE;
     announce_phase ("initialiser");
     init_before_tokeniser ();
     if (error_count == 0) {
@@ -406,7 +406,7 @@ Accept various silent extensions.
       announce_phase ("tokeniser");
       ok = lexical_analyzer (&a68_prog);
       if (!ok || errno != 0) {
-        diagnostics_to_terminal (a68_prog.top_line, A_ALL_DIAGNOSTICS);
+        diagnostics_to_terminal (a68_prog.top_line, A68_ALL_DIAGNOSTICS);
         return;
       }
 /* Maybe the program asks for more memory through a PRAGMAT. We restart. */
@@ -417,13 +417,13 @@ Accept various silent extensions.
         ok = lexical_analyzer (&a68_prog);
       }
       if (!ok || errno != 0) {
-        diagnostics_to_terminal (a68_prog.top_line, A_ALL_DIAGNOSTICS);
+        diagnostics_to_terminal (a68_prog.top_line, A68_ALL_DIAGNOSTICS);
         return;
       }
       close (a68_prog.files.source.fd);
-      a68_prog.files.source.opened = A_FALSE;
+      a68_prog.files.source.opened = A68_FALSE;
       prune_echoes (&a68_prog, a68_prog.options.list);
-      tree_listing_safe = A_TRUE;
+      tree_listing_safe = A68_TRUE;
     }
 /* Final initialisations. */
     if (error_count == 0) {
@@ -491,7 +491,7 @@ Accept various silent extensions.
     }
 /* Symbol table builder. */
     if (error_count == 0) {
-      moid_listing_safe = A_TRUE;
+      moid_listing_safe = A68_TRUE;
       announce_phase ("symbol table builder");
       collect_taxes (a68_prog.top_node);
     }
@@ -502,7 +502,7 @@ Accept various silent extensions.
     }
 /* Mode checker. */
     if (error_count == 0) {
-      cross_reference_safe = A_TRUE;
+      cross_reference_safe = A68_TRUE;
       announce_phase ("mode checker");
       mode_checker (a68_prog.top_node);
       maintain_mode_table (a68_prog.top_node);
@@ -552,8 +552,8 @@ Accept various silent extensions.
   /*
    * Interpreter. 
    */
-  diagnostics_to_terminal (a68_prog.top_line, A_ALL_DIAGNOSTICS);
-  if (error_count == 0 && (a68_prog.options.check_only ? a68_prog.options.run : A_TRUE)) {
+  diagnostics_to_terminal (a68_prog.top_line, A68_ALL_DIAGNOSTICS);
+  if (error_count == 0 && (a68_prog.options.check_only ? a68_prog.options.run : A68_TRUE)) {
     announce_phase ("genie");
     genie (&a68_prog);
   }
@@ -561,9 +561,9 @@ Accept various silent extensions.
   if (a68_prog.options.moid_listing || a68_prog.options.tree_listing || a68_prog.options.source_listing || a68_prog.options.statistics_listing) {
     a68_prog.files.listing.fd = open (a68_prog.files.listing.name, O_WRONLY | O_CREAT | O_TRUNC, A68_PROTECTION);
     ABNORMAL_END (a68_prog.files.listing.fd == -1, "cannot open listing file", NULL);
-    a68_prog.files.listing.opened = A_TRUE;
+    a68_prog.files.listing.opened = A68_TRUE;
   } else {
-    a68_prog.files.listing.opened = A_FALSE;
+    a68_prog.files.listing.opened = A68_FALSE;
   }
 /* Write listing. */
   if (a68_prog.files.listing.opened) {
@@ -571,7 +571,7 @@ Accept various silent extensions.
     source_listing (&a68_prog);
     write_listing (&a68_prog);
     close (a68_prog.files.listing.fd);
-    a68_prog.files.listing.opened = A_FALSE;
+    a68_prog.files.listing.opened = A68_FALSE;
   }
 }
 

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -40,7 +40,7 @@ void genie_char_in_string (NODE_T * p)
   int k, len;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pos);
-  POP_PRIMITIVE (p, &c, A68_CHAR);
+  POP_OBJECT (p, &c, A68_CHAR);
   reset_transput_buffer (PATTERN_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_str);
   len = get_transput_buffer_index (PATTERN_BUFFER);
@@ -51,11 +51,11 @@ void genie_char_in_string (NODE_T * p)
       STATUS (&pos) = INITIALISED_MASK;
       VALUE (&pos) = k + 1;
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
-      PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
+      PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
       return;
     }
   }
-  PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
+  PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
 }
 
 /*!
@@ -72,7 +72,7 @@ void genie_last_char_in_string (NODE_T * p)
   int k, len;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pos);
-  POP_PRIMITIVE (p, &c, A68_CHAR);
+  POP_OBJECT (p, &c, A68_CHAR);
   reset_transput_buffer (PATTERN_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_str);
   len = get_transput_buffer_index (PATTERN_BUFFER);
@@ -83,11 +83,11 @@ void genie_last_char_in_string (NODE_T * p)
       STATUS (&pos) = INITIALISED_MASK;
       VALUE (&pos) = k + 1;
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
-      PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
+      PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
       return;
     }
   }
-  PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
+  PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
 }
 
 /*!
@@ -115,9 +115,9 @@ void genie_string_in_string (NODE_T * p)
       VALUE (&pos) = 1 + (int) get_transput_buffer_index (STRING_BUFFER) - (int) strlen (q);
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
     }
-    PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
   } else {
-    PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
   }
 }
 

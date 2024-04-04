@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -617,13 +617,13 @@ void genie_atan2_real (NODE_T * p)
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);
   RESET_ERRNO;
   if (x->value == 0.0 && y->value == 0.0) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (LONG_REAL), NULL);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (LONG_REAL), NULL);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   x->value = a68g_atan2 (y->value, x->value);
   if (errno != 0) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH_EXCEPTION);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_MATH_EXCEPTION);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 

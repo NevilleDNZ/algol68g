@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -70,7 +70,7 @@ static int mon_errors = 0;
 #define TOP_MODE (m_stack[m_sp - 1])
 #define LOGOUT_STRING "exit"
 
-BOOL_T in_monitor = A_FALSE;
+BOOL_T in_monitor = A68_FALSE;
 
 static int tabs = 0;
 static int max_row_elems = MAX_ROW_ELEMS;
@@ -97,16 +97,16 @@ static BOOL_T confirm_exit (void)
     cmd[k] = TO_LOWER (cmd[k]);
   }
   if (strcmp (cmd, "y") == 0) {
-    return (A_TRUE);
+    return (A68_TRUE);
   }
   if (strcmp (cmd, "yes") == 0) {
-    return (A_TRUE);
+    return (A68_TRUE);
   }
   if (strcmp (cmd, "n") == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   if (strcmp (cmd, "no") == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   return (confirm_exit ());
 }
@@ -177,7 +177,7 @@ static void scan_sym (FILE_T f, NODE_T * p)
     symbol = add_token (&top_token, buffer)->text;
     return;
   } else if (expr[pos] == QUOTE_CHAR) {
-    BOOL_T cont = A_TRUE;
+    BOOL_T cont = A68_TRUE;
     pos++;
     while (cont) {
       while (expr[pos] != QUOTE_CHAR) {
@@ -186,7 +186,7 @@ static void scan_sym (FILE_T f, NODE_T * p)
       if (expr[++pos] == QUOTE_CHAR) {
         buffer[k++] = QUOTE_CHAR;
       } else {
-        cont = A_FALSE;
+        cont = A68_FALSE;
       }
     }
     buffer[k] = NULL_CHAR;
@@ -376,7 +376,7 @@ static void deref (NODE_T * p, int k, int context)
 {
   while (deref_condition (k, context)) {
     A68_REF z;
-    POP (p, &z, SIZE_OF (A68_REF));
+    POP_REF (p, &z);
     CHECK_NIL (p, z, m_stack[k]);
     CHECK_INIT (p, INITIALISED (&z), m_stack[k]);
     m_stack[k] = SUB (m_stack[k]);
@@ -391,7 +391,7 @@ static void deref (NODE_T * p, int k, int context)
 static MOID_T *search_mode (int refs, int leng, char *indy)
 {
   MOID_LIST_T *l = top_moid_list;
-  MOID_T *z = A_FALSE;
+  MOID_T *z = A68_FALSE;
   for (l = top_moid_list; l != NULL; FORWARD (l)) {
     MOID_T *m = MOID (l);
     if (NODE (m) != NULL) {
@@ -499,7 +499,7 @@ static void search_identifier (FILE_T f, NODE_T * p, ADDR_T link, char *sym)
           z.environ = 0;
           z.locale = NULL;
           z.proc_mode = MOID (i);
-          PUSH (p, &z, SIZE_OF (A68_PROCEDURE));
+          PUSH_PROCEDURE (p, z);
         } else {
           (i->procedure) (p);
         }
@@ -563,12 +563,12 @@ static void selection (FILE_T f, NODE_T * p, char *field)
   PARSE_CHECK (f, p, MAX_PRIORITY + 1);
   deref (p, m_sp - 1, WEAK);
   if (WHETHER (TOP_MODE, REF_SYMBOL)) {
-    name = A_TRUE;
+    name = A68_TRUE;
     u = PACK (NAME (TOP_MODE));
     moid = SUB (m_stack[--m_sp]);
     v = PACK (moid);
   } else {
-    name = A_FALSE;
+    name = A68_FALSE;
     moid = m_stack[--m_sp];
     u = PACK (moid);
     v = PACK (moid);
@@ -615,7 +615,7 @@ static void call (FILE_T f, NODE_T * p, int depth)
     monitor_error ("procedure mode error", moid_to_string (proc, MOID_WIDTH));
   }
   QUIT_ON_ERROR;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   args = m_sp;
   top_sp = stack_pointer;
   if (attr == OPEN_SYMBOL) {
@@ -657,12 +657,12 @@ static void slice (FILE_T f, NODE_T * p, int depth)
   QUIT_ON_ERROR;
   deref (p, m_sp - 1, WEAK);
   if (WHETHER (TOP_MODE, REF_SYMBOL)) {
-    name = A_TRUE;
+    name = A68_TRUE;
     res = NAME (TOP_MODE);
     deref (p, m_sp - 1, STRONG);
     moid = m_stack[--m_sp];
   } else {
-    name = A_FALSE;
+    name = A68_FALSE;
     moid = m_stack[--m_sp];
     res = SUB (moid);
   }
@@ -696,7 +696,7 @@ static void slice (FILE_T f, NODE_T * p, int depth)
     monitor_error ("slice index count error", NULL);
   }
   QUIT_ON_ERROR;
-  for (k = 0, index = 0; k < dim; k++, ref_heap -= SIZE_OF (A68_TUPLE), m_sp--) {
+  for (k = 0, index = 0; k < dim; k++, ref_heap -= sizeof (A68_TUPLE), m_sp--) {
     A68_TUPLE *t = (A68_TUPLE *) HEAP_ADDRESS (ref_heap);
     A68_INT i;
     deref (p, m_sp - 1, MEEK);
@@ -704,10 +704,10 @@ static void slice (FILE_T f, NODE_T * p, int depth)
       monitor_error ("indexer mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
     QUIT_ON_ERROR;
-    POP_PRIMITIVE (p, &i, A68_INT);
+    POP_OBJECT (p, &i, A68_INT);
     if (i.value < t->lower_bound || i.value > t->upper_bound) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     QUIT_ON_ERROR;
     index += t->span * (i.value - t->shift);
@@ -899,9 +899,9 @@ static void parse (FILE_T f, NODE_T * p, int depth)
       int digits = get_mp_digits (m);
       MP_DIGIT_T *z;
       STACK_MP (z, p, digits);
-      if (genie_string_to_value_internal (p, m, symbol, (BYTE_T *) z) == A_FALSE) {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
-        exit_genie (p, A_RUNTIME_ERROR);
+      if (genie_string_to_value_internal (p, m, symbol, (BYTE_T *) z) == A68_FALSE) {
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       z[0] = INITIALISED_MASK | CONSTANT_MASK;
       push_mode (f, m);
@@ -911,27 +911,27 @@ static void parse (FILE_T f, NODE_T * p, int depth)
     }
   } else if (attr == INT_DENOTER) {
     A68_INT z;
-    if (genie_string_to_value_internal (p, MODE (INT), symbol, (BYTE_T *) & z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (INT));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, MODE (INT), symbol, (BYTE_T *) & z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (INT));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     PUSH_PRIMITIVE (p, VALUE (&z), A68_INT);
     push_mode (f, MODE (INT));
     SCAN_CHECK (f, p);
   } else if (attr == REAL_DENOTER) {
     A68_REAL z;
-    if (genie_string_to_value_internal (p, MODE (REAL), symbol, (BYTE_T *) & z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (REAL));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, MODE (REAL), symbol, (BYTE_T *) & z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (REAL));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     PUSH_PRIMITIVE (p, VALUE (&z), A68_REAL);
     push_mode (f, MODE (REAL));
     SCAN_CHECK (f, p);
   } else if (attr == BITS_DENOTER) {
     A68_BITS z;
-    if (genie_string_to_value_internal (p, MODE (BITS), symbol, (BYTE_T *) & z) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (BITS));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, MODE (BITS), symbol, (BYTE_T *) & z) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (BITS));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     PUSH_PRIMITIVE (p, VALUE (&z), A68_BITS);
     push_mode (f, MODE (BITS));
@@ -953,11 +953,11 @@ static void parse (FILE_T f, NODE_T * p, int depth)
     }
     SCAN_CHECK (f, p);
   } else if (attr == TRUE_SYMBOL) {
-    PUSH_PRIMITIVE (p, A_TRUE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_TRUE, A68_BOOL);
     push_mode (f, MODE (BOOL));
     SCAN_CHECK (f, p);
   } else if (attr == FALSE_SYMBOL) {
-    PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
     push_mode (f, MODE (BOOL));
     SCAN_CHECK (f, p);
   } else if (attr == NIL_SYMBOL) {
@@ -980,7 +980,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
       monitor_error ("cast argument mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
     QUIT_ON_ERROR;
-    POP_PRIMITIVE (p, &k, A68_INT);
+    POP_OBJECT (p, &k, A68_INT);
     PUSH_PRIMITIVE (p, k.value, A68_REAL);
     TOP_MODE = MODE (REAL);
   } else if (attr == IDENTIFIER) {
@@ -997,7 +997,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
     }
     moid = TOP_MODE;
     QUIT_ON_ERROR;
-    if (check_initialisation (p, STACK_ADDRESS (old_sp), moid, NULL) == A_FALSE) {
+    if (check_initialisation (p, STACK_ADDRESS (old_sp), moid, NULL) == A68_FALSE) {
       monitor_error ("cannot process value of mode", moid_to_string (moid, MOID_WIDTH));
     }
   } else if (attr == OPEN_SYMBOL) {
@@ -1117,49 +1117,49 @@ static int argval (char *num, char **rest)
 
 static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T * result)
 {
-  BOOL_T initialised = A_FALSE, recognised = A_FALSE;
+  BOOL_T initialised = A68_FALSE, recognised = A68_FALSE;
   switch (q->short_id) {
   case MODE_NO_CHECK:
   case UNION_SYMBOL:
     {
-      initialised = A_TRUE;
-      recognised = A_TRUE;
+      initialised = A68_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case REF_SYMBOL:
     {
       A68_REF *z = (A68_REF *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case PROC_SYMBOL:
     {
       A68_PROCEDURE *z = (A68_PROCEDURE *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_INT:
     {
       A68_INT *z = (A68_INT *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_REAL:
     {
       A68_REAL *z = (A68_REAL *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_COMPLEX:
     {
       A68_REAL *r = (A68_REAL *) w;
-      A68_REAL *i = &r[1];
+      A68_REAL *i = (A68_REAL *) (w + SIZE_OF (A68_REAL));
       initialised = (INITIALISED (r) && INITIALISED (i));
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_LONG_INT:
@@ -1168,7 +1168,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
     {
       MP_DIGIT_T *z = (MP_DIGIT_T *) w;
       initialised = (int) z[0] & INITIALISED_MASK;
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_LONGLONG_INT:
@@ -1177,7 +1177,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
     {
       MP_DIGIT_T *z = (MP_DIGIT_T *) w;
       initialised = (int) z[0] & INITIALISED_MASK;
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_LONG_COMPLEX:
@@ -1185,7 +1185,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
       MP_DIGIT_T *r = (MP_DIGIT_T *) w;
       MP_DIGIT_T *i = (MP_DIGIT_T *) (w + size_long_mp ());
       initialised = ((int) r[0] & INITIALISED_MASK) && ((int) i[0] & INITIALISED_MASK);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_LONGLONG_COMPLEX:
@@ -1193,56 +1193,56 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
       MP_DIGIT_T *r = (MP_DIGIT_T *) w;
       MP_DIGIT_T *i = (MP_DIGIT_T *) (w + size_long_mp ());
       initialised = ((int) r[0] & INITIALISED_MASK) && ((int) i[0] & INITIALISED_MASK);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_BOOL:
     {
       A68_BOOL *z = (A68_BOOL *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_CHAR:
     {
       A68_CHAR *z = (A68_CHAR *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_BITS:
     {
       A68_BITS *z = (A68_BITS *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_BYTES:
     {
       A68_BYTES *z = (A68_BYTES *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_LONG_BYTES:
     {
       A68_LONG_BYTES *z = (A68_LONG_BYTES *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_FILE:
     {
       A68_FILE *z = (A68_FILE *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_FORMAT:
     {
       A68_FORMAT *z = (A68_FORMAT *) w;
       initialised = INITIALISED (z);
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   case MODE_PIPE:
@@ -1251,14 +1251,14 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
       A68_REF *write = (A68_REF *) (w + SIZE_OF (A68_REF));
       A68_INT *pid = (A68_INT *) (w + 2 * SIZE_OF (A68_REF));
       initialised = (INITIALISED (read) && INITIALISED (write) && INITIALISED (pid));
-      recognised = A_TRUE;
+      recognised = A68_TRUE;
       break;
     }
   }
   if (result == NULL) {
-    if (recognised == A_TRUE && initialised == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, q);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (recognised == A68_TRUE && initialised == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, q);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
   } else {
     *result = initialised;
@@ -1364,7 +1364,7 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
       WRITE (f, output_line);
       if (get_row_size (tup, arr->dimensions) != 0) {
         BYTE_T *base_addr = ADDRESS (&arr->array);
-        BOOL_T done = A_FALSE;
+        BOOL_T done = A68_FALSE;
         initialise_internal_index (tup, arr->dimensions);
         while (!done && ++count <= (max_row_elems + 1)) {
           if (count > max_row_elems) {
@@ -1513,7 +1513,7 @@ void show_stack_frame (FILE_T f, NODE_T * p, ADDR_T link)
 
 void where (FILE_T f, NODE_T * p)
 {
-  write_source_line (f, LINE (p), p, A_FALSE);
+  write_source_line (f, LINE (p), p, A68_NO_DIAGNOSTICS);
 }
 
 /*!
@@ -1531,14 +1531,14 @@ static void list (FILE_T f, NODE_T * p, int n, int m)
       SOURCE_LINE_T *l = INFO (p)->module->top_line;
       for (; l != NULL; l = NEXT (l)) {
         if (l->number > 0 && abs (r->number - l->number) <= n) {
-          write_source_line (f, l, NULL, A_TRUE);
+          write_source_line (f, l, NULL, A68_TRUE);
         }
       }
     } else {
       SOURCE_LINE_T *l = INFO (p)->module->top_line;
       for (; l != NULL; l = NEXT (l)) {
         if (l->number > 0 && l->number >= n && l->number <= m) {
-          write_source_line (f, l, NULL, A_TRUE);
+          write_source_line (f, l, NULL, A68_TRUE);
         }
       }
     }
@@ -1733,7 +1733,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
   mon_errors = 0;
   errno = 0;
   if (strlen (cmd) == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   while (IS_SPACE (cmd[strlen (cmd) - 1])) {
     cmd[strlen (cmd) - 1] = NULL_CHAR;
@@ -1745,9 +1745,9 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     } else if (k == 0) {
       stack_trace (STDOUT_FILENO, frame_pointer, 3);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "Continue", NULL_CHAR)) {
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (match_string (cmd, "DO", BLANK_CHAR) || match_string (cmd, "EXEC", BLANK_CHAR)) {
     char *sym = cmd;
     while (!IS_SPACE (sym[0]) && sym[0] != NULL_CHAR) {
@@ -1760,13 +1760,13 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       snprintf (output_line, BUFFER_SIZE, "return code %d", system (sym));
       WRITELN (STDOUT_FILENO, output_line);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "ELems", BLANK_CHAR)) {
     int k = argval (cmd, NULL);
     if (k > 0) {
       max_row_elems = k;
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "Evaluate", BLANK_CHAR) || match_string (cmd, "X", BLANK_CHAR)) {
     char *sym = cmd;
     while (!IS_SPACE (sym[0]) && sym[0] != NULL_CHAR) {
@@ -1780,7 +1780,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       evaluate (STDOUT_FILENO, p, sym);
       if (mon_errors == 0 && m_sp > 0) {
         MOID_T *res;
-        BOOL_T cont = A_TRUE;
+        BOOL_T cont = A68_TRUE;
         while (cont) {
           res = m_stack[0];
           WRITELN (STDOUT_FILENO, "(");
@@ -1799,7 +1799,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       stack_pointer = old_sp;
       m_sp = 0;
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "EXamine", BLANK_CHAR)) {
     char *sym = cmd;
     while (!IS_SPACE (sym[0]) && sym[0] != NULL_CHAR) {
@@ -1811,15 +1811,15 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     if (sym[0] != NULL_CHAR) {
       examine_stack (STDOUT_FILENO, frame_pointer, add_token (&top_token, sym)->text);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "EXIt", NULL_CHAR) || match_string (cmd, "HX", NULL_CHAR) || match_string (cmd, "Quit", NULL_CHAR) || strcmp (cmd, LOGOUT_STRING) == 0) {
     if (confirm_exit ()) {
-      exit_genie (p, A_RUNTIME_ERROR + A_FORCE_QUIT);
+      exit_genie (p, A68_RUNTIME_ERROR + A68_FORCE_QUIT);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "Frame", NULL_CHAR)) {
     stack_dump (STDOUT_FILENO, frame_pointer, 1);
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "HEAp", BLANK_CHAR)) {
     int top = argval (cmd, NULL);
     if (top <= 0) {
@@ -1841,13 +1841,13 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
 #else
     show_heap (STDOUT_FILENO, p, busy_handles, top, 20);
 #endif
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "HELp", NULL_CHAR)) {
     genie_help (STDOUT_FILENO);
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "HT", NULL_CHAR)) {
-    halt_typing = A_TRUE;
-    return (A_TRUE);
+    halt_typing = A68_TRUE;
+    return (A68_TRUE);
   } else if (match_string (cmd, "Breakpoint", BLANK_CHAR)) {
     char *expr = NULL;
     int k = argval (cmd, &expr);
@@ -1855,11 +1855,11 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       while (expr[0] != NULL_CHAR && IS_SPACE (expr[0])) {
         expr++;
       }
-      breakpoints (INFO (p)->module->top_node, A_TRUE, k, new_string (expr));
+      breakpoints (INFO (p)->module->top_node, A68_TRUE, k, new_string (expr));
     } else if (k == 0) {
-      breakpoints (INFO (p)->module->top_node, A_FALSE, 0, NULL);
+      breakpoints (INFO (p)->module->top_node, A68_FALSE, 0, NULL);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "List", BLANK_CHAR)) {
     char *where;
     int n = argval (cmd, &where);
@@ -1873,7 +1873,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     } else if (n > 0 && m > 0 && n <= m) {
       list (STDOUT_FILENO, p, n, m);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "PROmpt", BLANK_CHAR)) {
     char *sym = cmd;
     while (!IS_SPACE (sym[0]) && sym[0] != NULL_CHAR) {
@@ -1891,9 +1891,9 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       }
       bufcpy (prompt, sym, BUFFER_SIZE);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "Resume", NULL_CHAR)) {
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (match_string (cmd, "STAck", BLANK_CHAR)) {
     int k = argval (cmd, NULL);
     if (k > 0) {
@@ -1901,19 +1901,19 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     } else if (k == 0) {
       stack_dump (STDOUT_FILENO, frame_pointer, 3);
     }
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "STEp", NULL_CHAR)) {
-    sys_request_flag = A_TRUE;
-    return (A_TRUE);
+    sys_request_flag = A68_TRUE;
+    return (A68_TRUE);
   } else if (match_string (cmd, "Next", NULL_CHAR)) {
-    sys_request_flag = A_TRUE;
-    return (A_TRUE);
+    sys_request_flag = A68_TRUE;
+    return (A68_TRUE);
   } else if (match_string (cmd, "Where", NULL_CHAR)) {
     where (STDOUT_FILENO, p);
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (strcmp (cmd, "?") == 0) {
     genie_help (STDOUT_FILENO);
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (match_string (cmd, "Sizes", BLANK_CHAR)) {
     snprintf (output_line, BUFFER_SIZE, "Frame stack pointer=%d available=%d", frame_pointer, frame_stack_size - frame_pointer);
     WRITELN (STDOUT_FILENO, output_line);
@@ -1923,12 +1923,12 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     WRITELN (STDOUT_FILENO, output_line);
     snprintf (output_line, BUFFER_SIZE, "Garbage collections=%d", garbage_collects);
     WRITELN (STDOUT_FILENO, output_line);
-    return (A_FALSE);
+    return (A68_FALSE);
   } else if (strlen (cmd) == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   } else {
     monitor_error ("unrecognised command", NULL);
-    return (A_FALSE);
+    return (A68_FALSE);
   }
 }
 
@@ -1936,7 +1936,7 @@ BOOL_T breakpoint_expression (NODE_T * p)
 {
 /* Check whether this is a conditional breakpoint. */
   ADDR_T top_sp = stack_pointer;
-  volatile BOOL_T res = A_FALSE;
+  volatile BOOL_T res = A68_FALSE;
   mon_errors = 0;
   if (INFO (p)->expr != NULL) {
     evaluate (STDOUT_FILENO, p, INFO (p)->expr);
@@ -1945,8 +1945,8 @@ BOOL_T breakpoint_expression (NODE_T * p)
     }
     if (TOP_MODE == MODE (BOOL)) {
       A68_BOOL z;
-      POP_PRIMITIVE (p, &z, A68_BOOL);
-      res = (STATUS (&z) == INITIALISED_MASK && VALUE (&z) == A_TRUE);
+      POP_OBJECT (p, &z, A68_BOOL);
+      res = (STATUS (&z) == INITIALISED_MASK && VALUE (&z) == A68_TRUE);
     } else {
       monitor_error ("breakpoint expression mode error", moid_to_string (TOP_MODE, MOID_WIDTH));
     }
@@ -1962,19 +1962,19 @@ BOOL_T breakpoint_expression (NODE_T * p)
 
 void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
 {
-  volatile BOOL_T do_cmd = A_TRUE;
+  volatile BOOL_T do_cmd = A68_TRUE;
   ADDR_T top_sp = stack_pointer;
 #if defined HAVE_CURSES
   genie_curses_end (NULL);
 #endif
-  in_monitor = A_TRUE;
-  sys_request_flag = A_FALSE;
+  in_monitor = A68_TRUE;
+  sys_request_flag = A68_FALSE;
   UP_SWEEP_SEMA;
   if (sigint) {
     WRITE (STDOUT_FILENO, NEWLINE_STRING);
     where (STDOUT_FILENO, p);
     if (confirm_exit ()) {
-      exit_genie (p, A_RUNTIME_ERROR + A_FORCE_QUIT);
+      exit_genie (p, A68_RUNTIME_ERROR + A68_FORCE_QUIT);
     }
   }
   if (breakpoint) {
@@ -2000,7 +2000,7 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
     do_cmd = !single_stepper (p, cmd);
   }
   stack_pointer = top_sp;
-  in_monitor = A_FALSE;
+  in_monitor = A68_FALSE;
   DOWN_SWEEP_SEMA;
 }
 
@@ -2011,7 +2011,7 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
 
 void genie_debug (NODE_T * p)
 {
-  single_step (p, A_FALSE, A_FALSE);
+  single_step (p, A68_FALSE, A68_FALSE);
 }
 
 /*!
@@ -2022,7 +2022,7 @@ void genie_debug (NODE_T * p)
 void genie_break (NODE_T * p)
 {
   (void) p;
-  sys_request_flag = A_TRUE;
+  sys_request_flag = A68_TRUE;
 }
 
 /*!
@@ -2042,17 +2042,17 @@ void genie_evaluate (NODE_T * p)
   reset_transput_buffer (UNFORMATTED_BUFFER);
   add_a_string_transput_buffer (p, UNFORMATTED_BUFFER, (BYTE_T *) & z);
 /* Evaluate in the monitor. */
-  in_monitor = A_TRUE;
+  in_monitor = A68_TRUE;
   mon_errors = 0;
   evaluate (STDOUT_FILENO, p, get_transput_buffer (UNFORMATTED_BUFFER));
-  in_monitor = A_FALSE;
+  in_monitor = A68_FALSE;
   if (m_sp != 1) {
     monitor_error ("invalid expression", NULL);
   }
   z = empty_string (p);
   if (mon_errors == 0) {
     MOID_T *res;
-    BOOL_T cont = A_TRUE;
+    BOOL_T cont = A68_TRUE;
     while (cont) {
       res = TOP_MODE;
       cont = (WHETHER (res, REF_SYMBOL) && !IS_NIL (*(A68_REF *) STACK_ADDRESS (top_sp)));

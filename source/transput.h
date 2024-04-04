@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -26,10 +26,10 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define TRANSPUT_BUFFER_SIZE 	BUFFER_SIZE
 #define ITEM_NOT_USED		(-1)
-#define EMBEDDED_FORMAT 	A_TRUE
-#define NOT_EMBEDDED_FORMAT     A_FALSE
-#define WANT_PATTERN    	A_TRUE
-#define SKIP_PATTERN    	A_FALSE
+#define EMBEDDED_FORMAT 	A68_TRUE
+#define NOT_EMBEDDED_FORMAT     A68_FALSE
+#define WANT_PATTERN    	A68_TRUE
+#define SKIP_PATTERN    	A68_FALSE
 
 #define IS_NIL_FORMAT(f) ((f)->body == NULL && (f)->environ == 0)
 #define NON_TERM(p) (find_non_terminal (top_non_terminal, ATTRIBUTE (p)))
@@ -58,6 +58,7 @@ extern GENIE_PROCEDURE genie_compressible;
 extern GENIE_PROCEDURE genie_create;
 extern GENIE_PROCEDURE genie_draw_possible;
 extern GENIE_PROCEDURE genie_erase;
+extern GENIE_PROCEDURE genie_real;
 extern GENIE_PROCEDURE genie_error_char;
 extern GENIE_PROCEDURE genie_establish;
 extern GENIE_PROCEDURE genie_exp_char;
@@ -118,6 +119,7 @@ extern GENIE_PROCEDURE genie_read_longlong_int;
 extern GENIE_PROCEDURE genie_read_longlong_real;
 extern GENIE_PROCEDURE genie_read_real;
 extern GENIE_PROCEDURE genie_read_string;
+extern GENIE_PROCEDURE genie_reidf_possible;
 extern GENIE_PROCEDURE genie_reset;
 extern GENIE_PROCEDURE genie_reset_possible;
 extern GENIE_PROCEDURE genie_set_possible;
@@ -185,7 +187,7 @@ extern void enlarge_transput_buffer (NODE_T *, int, int);
 extern void format_error (NODE_T *, A68_REF);
 extern void genie_read_standard (NODE_T *, MOID_T *, BYTE_T *, A68_REF);
 extern void genie_string_to_value (NODE_T *, MOID_T *, BYTE_T *, A68_REF);
-extern void genie_value_to_string (NODE_T *, MOID_T *, BYTE_T *);
+extern void genie_value_to_string (NODE_T *, MOID_T *, BYTE_T *, int);
 extern void genie_write_standard (NODE_T *, MOID_T *, BYTE_T *, A68_REF);
 extern void genie_write_string_from_stack (NODE_T * p, A68_REF);
 extern void on_event_handler (NODE_T *, A68_PROCEDURE, A68_REF);
