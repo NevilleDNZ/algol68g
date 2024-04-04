@@ -1,3 +1,9 @@
+Version 2.4.1, June 2012
+* Fixes issue in transput library.
+* Fixes issue in garbage collector.
+* Documentation updates.
+* Better distribution lay-out.
+
 Version 2.4, June 2012
 * Adds pretty-printer.
 * Simplified garbage collector.

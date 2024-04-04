@@ -1734,8 +1734,8 @@ static void constant_folder (NODE_T * p, FILE_T out, int phase)
       POP_OBJECT (p, &im, A68_REAL);
       POP_OBJECT (p, &re, A68_REAL);
       indentf (out, snprintf (line, SNPRINTF_SIZE, "A68_COMPLEX %s = {", acc));
-      undentf (out, snprintf (line, SNPRINTF_SIZE, "{INITIALISED_MASK, %.*g}", REAL_WIDTH, VALUE (&re)));
-      undentf (out, snprintf (line, SNPRINTF_SIZE, ", {INITIALISED_MASK, %.*g}", REAL_WIDTH, VALUE (&im)));
+      undentf (out, snprintf (line, SNPRINTF_SIZE, "{INIT_MASK, %.*g}", REAL_WIDTH, VALUE (&re)));
+      undentf (out, snprintf (line, SNPRINTF_SIZE, ", {INIT_MASK, %.*g}", REAL_WIDTH, VALUE (&im)));
       undent (out, "};\n");
       ABEND (stack_pointer > 0, "stack not empty", NO_TEXT);
     } else if (LONG_MODE (MOID (p))) {
@@ -1746,7 +1746,7 @@ static void constant_folder (NODE_T * p, FILE_T out, int phase)
       stack_pointer = 0;
       push_unit (p);
       POP (p, &z, MOID_SIZE (MOID (p)));
-      indentf (out, snprintf (line, SNPRINTF_SIZE, "A68_LONG %s = {INITIALISED_MASK, %.0f", acc, z[1]));
+      indentf (out, snprintf (line, SNPRINTF_SIZE, "A68_LONG %s = {INIT_MASK, %.0f", acc, z[1]));
       for (k = 1; k <= LONG_MP_DIGITS; k ++) {
         undentf (out, snprintf (line, SNPRINTF_SIZE, ", %.0f", z[k + 1]));
       } 
@@ -2154,7 +2154,7 @@ static void inline_denotation (NODE_T * p, FILE_T out, int phase)
     if (genie_string_to_value_internal (p, MOID (p), NSYMBOL (s), (BYTE_T *) & z) == A68_FALSE) {
       diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_IN_DENOTATION, MODE (INT));
     }
-    indentf (out, snprintf (line, SNPRINTF_SIZE, "A68_LONG %s = {INITIALISED_MASK, %.0f", acc, z[1]));
+    indentf (out, snprintf (line, SNPRINTF_SIZE, "A68_LONG %s = {INIT_MASK, %.0f", acc, z[1]));
     for (k = 1; k <= LONG_MP_DIGITS; k ++) {
       undentf (out, snprintf (line, SNPRINTF_SIZE, ", %.0f", z[k + 1]));
     } 
@@ -2237,8 +2237,8 @@ static void inline_widening (NODE_T * p, FILE_T out, int phase)
       inline_unit (SUB (p), out, L_DECLARE);
     } else if (phase == L_EXECUTE) {
       inline_unit (SUB (p), out, L_EXECUTE);
-      indentf (out, snprintf (line, SNPRINTF_SIZE, "STATUS_RE (%s) = INITIALISED_MASK;\n", acc));
-      indentf (out, snprintf (line, SNPRINTF_SIZE, "STATUS_IM (%s) = INITIALISED_MASK;\n", acc));
+      indentf (out, snprintf (line, SNPRINTF_SIZE, "STATUS_RE (%s) = INIT_MASK;\n", acc));
+      indentf (out, snprintf (line, SNPRINTF_SIZE, "STATUS_IM (%s) = INIT_MASK;\n", acc));
       indentf (out, snprintf (line, SNPRINTF_SIZE, "RE (%s) = (double) (", acc));
       inline_unit (SUB (p), out, L_YIELD);
       undent (out, ");\n");
@@ -3519,7 +3519,7 @@ static void compile_push (NODE_T * p, FILE_T out) {
 
 static void compile_assign (NODE_T * p, FILE_T out, char * dst) {
   if (primitive_mode (MOID (p))) {
-    indentf (out, snprintf (line, SNPRINTF_SIZE, "_S_ (%s) = INITIALISED_MASK;\n", dst));
+    indentf (out, snprintf (line, SNPRINTF_SIZE, "_S_ (%s) = INIT_MASK;\n", dst));
     indentf (out, snprintf (line, SNPRINTF_SIZE, "_V_ (%s) = ", dst));
     inline_unit (p, out, L_YIELD);
     undent (out, ";\n");
@@ -3924,7 +3924,7 @@ static void inline_arguments (NODE_T * p, FILE_T out, int phase, int * size)
       indentf (out, snprintf (line, SNPRINTF_SIZE, "%s = (%s *) FRAME_OBJECT (%d);\n", arg, inline_mode (MOID (p)), *size));
       (*size) += MOID_SIZE (MOID (p));
     } else if (phase == L_YIELD && primitive_mode (MOID (p))) {
-      indentf (out, snprintf (line, SNPRINTF_SIZE, "_S_ (%s) = INITIALISED_MASK;\n", arg));
+      indentf (out, snprintf (line, SNPRINTF_SIZE, "_S_ (%s) = INIT_MASK;\n", arg));
       indentf (out, snprintf (line, SNPRINTF_SIZE, "_V_ (%s) = ", arg));
       inline_unit (p, out, L_YIELD);
       undent (out, ";\n");
@@ -5269,7 +5269,7 @@ static char * compile_loop_clause (NODE_T * p, FILE_T out, int compose_fun)
     indent (out, "/* PREEMPTIVE_GC; */\n");
   }
   if (for_part != NO_NODE) {
-    indentf (out, snprintf (line, SNPRINTF_SIZE, "_S_ (%s) = INITIALISED_MASK;\n", z));
+    indentf (out, snprintf (line, SNPRINTF_SIZE, "_S_ (%s) = INIT_MASK;\n", z));
     indentf (out, snprintf (line, SNPRINTF_SIZE, "_V_ (%s) = %s;\n", z, idf));
   }
   units = decs = 0;

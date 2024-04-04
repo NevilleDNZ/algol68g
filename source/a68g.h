@@ -407,6 +407,7 @@ extern int a68g_snprintf (char *, size_t, char *, ...);
 /* Various forms of NIL */
 
 #define NO_ARRAY ((A68_ARRAY *) NULL)
+#define NO_A68_REF ((A68_REF *) NULL)
 #define NO_BOOK ((BOOK_T *) NULL)
 #define NO_BOOL ((BOOL_T *) NULL)
 #define NO_BYTE ((BYTE_T *) NULL)
@@ -454,7 +455,7 @@ extern int a68g_snprintf (char *, size_t, char *, ...);
 #define IN_HEAP_MASK ((STATUS_MASK) 0x00000001)
 #define IN_FRAME_MASK ((STATUS_MASK) 0x00000002)
 #define IN_STACK_MASK ((STATUS_MASK) 0x00000004)
-#define INITIALISED_MASK ((STATUS_MASK) 0x00000010)
+#define INIT_MASK ((STATUS_MASK) 0x00000010)
 #define CONSTANT_MASK ((STATUS_MASK) 0x00000020)
 #define BLOCK_GC_MASK ((STATUS_MASK) 0x00000040)
 #define COOKIE_MASK ((STATUS_MASK) 0x00000100)
@@ -1200,7 +1201,7 @@ struct A68_BOOL
 
 struct A68_CHAR
 {
-  BYTE_T status;
+  STATUS_MASK status;
   int value;
 };
 
@@ -2049,7 +2050,7 @@ still is sufficient overhead to make it to the next check.
 
 #define FRAME_ADDRESS(n) ((BYTE_T *) &(stack_segment[n]))
 #define FACT(n) ((ACTIVATION_RECORD *) FRAME_ADDRESS (n))
-#define FRAME_CLEAR(m) FILL_ALIGNED ((BYTE_T *) FRAME_OFFSET (FRAME_INFO_SIZE), 0, (m))
+#define FRAME_CLEAR(m) FILL ((BYTE_T *) FRAME_OFFSET (FRAME_INFO_SIZE), 0, (m))
 #define FRAME_BLOCKS(n) (BLOCKS (FACT (n)))
 #define FRAME_DYNAMIC_LINK(n) (DYNAMIC_LINK (FACT (n)))
 #define FRAME_DNS(n) (DYNAMIC_SCOPE (FACT (n)))
@@ -2321,7 +2322,7 @@ qualifier to a pointer. This is safe here.
 
 #define PUSH_PRIMITIVE(p, z, mode) {\
   mode *_x_ = (mode *) STACK_TOP;\
-  STATUS (_x_) = INITIALISED_MASK;\
+  STATUS (_x_) = INIT_MASK;\
   VALUE (_x_) = (z);\
   INCREMENT_STACK_POINTER ((p), ALIGNED_SIZE_OF (mode));\
   }
@@ -2329,7 +2330,7 @@ qualifier to a pointer. This is safe here.
 #define PUSH_PRIMAL(p, z, m) {\
   A68_##m *_x_ = (A68_##m *) STACK_TOP;\
   int _size_ = ALIGNED_SIZE_OF (A68_##m);\
-  STATUS (_x_) = INITIALISED_MASK;\
+  STATUS (_x_) = INIT_MASK;\
   VALUE (_x_) = (z);\
   INCREMENT_STACK_POINTER ((p), _size_);\
   }
@@ -2356,14 +2357,14 @@ qualifier to a pointer. This is safe here.
 
 #define PUSH_BYTES(p, k) {\
   A68_BYTES *_z_ = (A68_BYTES *) STACK_TOP;\
-  STATUS (_z_) = INITIALISED_MASK;\
+  STATUS (_z_) = INIT_MASK;\
   strncpy (VALUE (_z_), k, BYTES_WIDTH);\
   INCREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (A68_BYTES));\
   }
 
 #define PUSH_LONG_BYTES(p, k) {\
   A68_LONG_BYTES *_z_ = (A68_LONG_BYTES *) STACK_TOP;\
-  STATUS (_z_) = INITIALISED_MASK;\
+  STATUS (_z_) = INIT_MASK;\
   strncpy (VALUE (_z_), k, LONG_BYTES_WIDTH);\
   INCREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (A68_LONG_BYTES));\
   }
@@ -2377,7 +2378,7 @@ qualifier to a pointer. This is safe here.
 
 #define PUSH_UNION(p, z) {\
   A68_UNION *_x_ = (A68_UNION *) STACK_TOP;\
-  STATUS (_x_) = INITIALISED_MASK;\
+  STATUS (_x_) = INIT_MASK;\
   VALUE (_x_) = (z);\
   INCREMENT_STACK_POINTER ((p), ALIGNED_SIZE_OF (A68_UNION));\
   }
@@ -2390,7 +2391,7 @@ qualifier to a pointer. This is safe here.
 
 /* Interpreter macros */
 
-#define INITIALISED(z) ((BOOL_T) (STATUS (z) & INITIALISED_MASK))
+#define INITIALISED(z) ((BOOL_T) (STATUS (z) & INIT_MASK))
 #define LHS_MODE(p) (MOID (PACK (MOID (p))))
 #define RHS_MODE(p) (MOID (NEXT (PACK (MOID (p)))))
 
@@ -2426,7 +2427,7 @@ qualifier to a pointer. This is safe here.
 
 #define SET_MP_ZERO(z, digits) {\
   MP_T *_m_d = &MP_DIGIT ((z), 1); int _m_k = digits;\
-  MP_STATUS (z) = (MP_T) INITIALISED_MASK;\
+  MP_STATUS (z) = (MP_T) INIT_MASK;\
   MP_EXPONENT (z) = 0.0;\
   while (_m_k--) {*_m_d++ = 0.0;}\
   }
@@ -2466,38 +2467,38 @@ qualifier to a pointer. This is safe here.
 #define a68g_arg_complex(/* A68_REAL * */ z) atan2 (IM (z), RE (z))
 
 #define a68g_i_complex(/* A68_REAL * */ z, /* double */ re, im) {\
-  STATUS_RE (z) = INITIALISED_MASK;\
-  STATUS_IM (z) = INITIALISED_MASK;\
+  STATUS_RE (z) = INIT_MASK;\
+  STATUS_IM (z) = INIT_MASK;\
   RE (z) = re;\
   IM (z) = im;}
 
 #define a68g_minus_complex(/* A68_REAL * */ z, x) {\
-  STATUS_RE (z) = INITIALISED_MASK;\
-  STATUS_IM (z) = INITIALISED_MASK;\
+  STATUS_RE (z) = INIT_MASK;\
+  STATUS_IM (z) = INIT_MASK;\
   RE (z) = -RE (x);\
   IM (z) = -IM (x);}
 
 #define a68g_conj_complex(/* A68_REAL * */ z, x) {\
-  STATUS_RE (z) = INITIALISED_MASK;\
-  STATUS_IM (z) = INITIALISED_MASK;\
+  STATUS_RE (z) = INIT_MASK;\
+  STATUS_IM (z) = INIT_MASK;\
   RE (z) = RE (x);\
   IM (z) = -IM (x);}
 
 #define a68g_add_complex(/* A68_REAL * */ z, x, y) {\
-  STATUS_RE (z) = INITIALISED_MASK;\
-  STATUS_IM (z) = INITIALISED_MASK;\
+  STATUS_RE (z) = INIT_MASK;\
+  STATUS_IM (z) = INIT_MASK;\
   RE (z) = RE (x) + RE (y);\
   IM (z) = IM (x) + IM (y);}
 
 #define a68g_sub_complex(/* A68_REAL * */ z, x, y) {\
-  STATUS_RE (z) = INITIALISED_MASK;\
-  STATUS_IM (z) = INITIALISED_MASK;\
+  STATUS_RE (z) = INIT_MASK;\
+  STATUS_IM (z) = INIT_MASK;\
   RE (z) = RE (x) - RE (y);\
   IM (z) = IM (x) - IM (y);}
 
 #define a68g_mul_complex(/* A68_REAL * */ z, x, y) {\
-  STATUS_RE (z) = INITIALISED_MASK;\
-  STATUS_IM (z) = INITIALISED_MASK;\
+  STATUS_RE (z) = INIT_MASK;\
+  STATUS_IM (z) = INIT_MASK;\
   RE (z) = RE (x) * RE (y) - IM (x) * IM (y);\
   IM (z) = IM (x) * RE (y) + RE (x) * IM (y);}
 
@@ -2907,7 +2908,6 @@ extern void fill_symbol_table_outer (NODE_T *, TABLE_T *);
 extern void finalise_symbol_table_setup (NODE_T *, int);
 extern void format_error (NODE_T *, A68_REF, char *);
 extern void free_file_entries (void);
-extern void free_file_entry (NODE_T *, int);
 extern void free_genie_heap (NODE_T *);
 extern void free_postulate_list (POSTULATE_T *, POSTULATE_T *);
 extern void gc_heap (NODE_T *, ADDR_T);

@@ -554,7 +554,7 @@ static void search_identifier (FILE_T f, NODE_T * p, ADDR_T a68g_link, char *sym
       if (strcmp (NSYMBOL (NODE (i)), sym) == 0) {
         if (IS (MOID (i), PROC_SYMBOL)) {
           static A68_PROCEDURE z;
-          STATUS (&z) = (STATUS_MASK) (INITIALISED_MASK | STANDENV_PROC_MASK);
+          STATUS (&z) = (STATUS_MASK) (INIT_MASK | STANDENV_PROC_MASK);
           PROCEDURE (&(BODY (&z))) = PROCEDURE (i);
           ENVIRON (&z) = 0;
           LOCALE (&z) = NO_HANDLE;
@@ -987,7 +987,7 @@ static void parse (FILE_T f, NODE_T * p, int depth)
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTATION, m);
         exit_genie (p, A68_RUNTIME_ERROR);
       }
-      z[0] = (MP_T) (INITIALISED_MASK | CONSTANT_MASK);
+      z[0] = (MP_T) (INIT_MASK | CONSTANT_MASK);
       push_mode (f, m);
       SCAN_CHECK (f, p);
     } else {
@@ -1266,7 +1266,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
   case MODE_LONG_BITS:
     {
       MP_T *z = (MP_T *) w;
-      initialised = (BOOL_T) ((unsigned) z[0] & INITIALISED_MASK);
+      initialised = (BOOL_T) ((unsigned) z[0] & INIT_MASK);
       recognised = A68_TRUE;
       break;
     }
@@ -1275,7 +1275,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
   case MODE_LONGLONG_BITS:
     {
       MP_T *z = (MP_T *) w;
-      initialised = (BOOL_T) ((unsigned) z[0] & INITIALISED_MASK);
+      initialised = (BOOL_T) ((unsigned) z[0] & INIT_MASK);
       recognised = A68_TRUE;
       break;
     }
@@ -1283,7 +1283,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
     {
       MP_T *r = (MP_T *) w;
       MP_T *i = (MP_T *) (w + size_long_mp ());
-      initialised = (BOOL_T) (((unsigned) r[0] & INITIALISED_MASK) && ((unsigned) i[0] & INITIALISED_MASK));
+      initialised = (BOOL_T) (((unsigned) r[0] & INIT_MASK) && ((unsigned) i[0] & INIT_MASK));
       recognised = A68_TRUE;
       break;
     }
@@ -1291,7 +1291,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
     {
       MP_T *r = (MP_T *) w;
       MP_T *i = (MP_T *) (w + size_long_mp ());
-      initialised = (BOOL_T) (((unsigned) r[0] & INITIALISED_MASK) && ((unsigned) i[0] & INITIALISED_MASK));
+      initialised = (BOOL_T) (((unsigned) r[0] & INIT_MASK) && ((unsigned) i[0] & INIT_MASK));
       recognised = A68_TRUE;
       break;
     }
@@ -2307,7 +2307,7 @@ static BOOL_T evaluate_breakpoint_expression (NODE_T * p)
     } else if (TOP_MODE == MODE (BOOL)) {
       A68_BOOL z;
       POP_OBJECT (p, &z, A68_BOOL);
-      res = (BOOL_T) (STATUS (&z) == INITIALISED_MASK && VALUE (&z) == A68_TRUE);
+      res = (BOOL_T) (STATUS (&z) == INIT_MASK && VALUE (&z) == A68_TRUE);
     } else {
       monitor_error ("deleted invalid breakpoint expression yielding mode", moid_to_string (TOP_MODE, MOID_WIDTH, NO_NODE));
       if (EXPR (INFO (p)) != NO_TEXT) {
@@ -2345,7 +2345,7 @@ static BOOL_T evaluate_watchpoint_expression (NODE_T * p)
     if (TOP_MODE == MODE (BOOL)) {
       A68_BOOL z;
       POP_OBJECT (p, &z, A68_BOOL);
-      res = (BOOL_T) (STATUS (&z) == INITIALISED_MASK && VALUE (&z) == A68_TRUE);
+      res = (BOOL_T) (STATUS (&z) == INIT_MASK && VALUE (&z) == A68_TRUE);
     } else {
       monitor_error ("deleted invalid watchpoint expression yielding mode", moid_to_string (TOP_MODE, MOID_WIDTH, NO_NODE));
       if (watchpoint_expression != NO_TEXT) {
