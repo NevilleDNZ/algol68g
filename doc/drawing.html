@@ -1,7 +1,7 @@
 <!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie</title>
+<title>Algol 68 Genie - An Algol 68 Interpreter</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -30,7 +30,7 @@ pre {font-size: 10pt; font-family: "courier new", monospace;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-<b>Documentation for Algol 68 Genie Mark 11.1</b>
+<b>Documentation for Algol 68 Genie Mark 12</b>
 </small>
 </td>
 </table>
@@ -116,7 +116,7 @@ close (window);
 <dt><code>PROC make device = (REF FILE file, STRING type, STRING params) BOOL</code>
 <dd>Sets parameters for plotter <code>file</code>. Parameter <code>type</code> sets the plotter type. Algol68G supports <code>"X"</code> for <code>X Window System</code>, <code>"ps"</code> for <code>postscript, "gif"</code> for <code>pseudo graphical interface format</code> and <code>pnm</code> for <code>portable any-map format</code>. 
 <p>
-<code>X</code> plotters in Algol68G are only available with UNIX/Linux/MacOS X.
+<code>X</code> plotters in Algol68G are only available with UNIX/Linux/Mac OS X.
 <p>
 <code>X</code> plotters write graphics to an <code>X</code> Window System display rather than to an output stream. Error messages from libplot are written to the Algol68G log file. A runtime error results if the plotter could not be opened. Argument <code>params</code> is interpreted as an image size. For <code>X, gif</code> and <code>pnm</code> the syntax reads "<code>x pixels</code> x <code>y pixels</code>", for instance "<code>500</code>x<code>500</code>". For <code>postscript</code>, image size is the size of the page on which the graphics display will be positioned. Any ISO page size in the range "a0" - "a4" or ANSI page size in the range "a" - "e" may be specified. Recognised aliases are "letter" for "a" and "tabloid" for "b". Other valid page sizes are "legal", "ledger", and "b5". The graphics display will be a square region centred on the specified page and occupying its full width, with allowance being made for margins.
 <br>
@@ -177,7 +177,8 @@ In the preceding patterns, each hyphen stands for one line thickness. This is th
 <br>
 <dt><code>PROC draw background colour name = (REF FILE file, STRING name) VOID</code>
 <br><code>PROC draw background color name = (REF FILE file, STRING name) VOID</code>
-<dd>Sets the background colour for plotter <code>file</code>'s graphics display. Argument <code>name</code> is a case insensitive string. Accepted names are essentially those supported by recent revisions of the <code>X</code> Window System. Its effect is that when the draw erase procedure is called for this plotter, its display will be filled with the specified colour.
+<dd>Sets the background colour for plotter <code>file</code>'s graphics display. Argument <code>name</code> is a case insensitive string. 
+A list of available colour names can be found in an <a href="colours.html">appendix</a>.
 <br>
 <br>
 <dt><code>PROC draw colour = (REF FILE file, REAL red, green, blue) VOID</code>
@@ -187,7 +188,8 @@ In the preceding patterns, each hyphen stands for one line thickness. This is th
 <br>
 <dt><code>PROC draw colour name = (REF FILE file, STRING name) VOID</code>
 <br><code>PROC draw color name = (REF FILE file, STRING name) VOID</code>
-<dd>Sets the foreground colour for plotter <code>file</code>'s graphics display. Argument <code>name</code> is a case insensitive string. Accepted names are essentially those supported by recent revisions of the <code>X</code> Window System.
+<dd>Sets the foreground colour for plotter <code>file</code>'s graphics display. Argument <code>name</code> is a case insensitive string. 
+A list of available colour names can be found in an <a href="colours.html">appendix</a>.
 </dl>
 
 <h3><a name="drawdraw"></a>Drawing objects</h3>
@@ -241,7 +243,7 @@ This example program can be found <a href="mandelbrot.a68.html">here</a>.
 <td>
 <small>
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11.1 (March 2008)
+Algol 68 Genie Mark 12 (May 2008)
 </small>
 </td>
 </tr>

@@ -1,4 +1,4 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 11.1)
+ALGOL68G - ALGOL 68 GENIE (MARK 11)
 
 Algol68G is a nearly fully featured implementation of Algol 68 as defined by 
 the Revised Report.
@@ -24,12 +24,11 @@ This distribution contains following files and directories:
 
 * COPYING                     License information (GNU GPL).
 * READ_ME                     This file.
+* a68g.ps                     Postscript version of the manual page.
+* a68g.pdf                    PDF version of the manual page.
 * configure                   Shell script to generate a makefile.
 * demo                        Sample Algol 68 programs.
 * doc                         Directory with documentation.
-  * doc/algol.html            File to point browser at.
-  * doc/a68g.ps               Postscript version of the manual page.
-  * doc/a68g.pdf              PDF version of the manual page.
 * foreign	              Directory with third party source code.
 * source                      Directory with source files.
 * win32                       Directory with Win32 executable.

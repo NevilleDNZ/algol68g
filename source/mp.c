@@ -124,6 +124,7 @@ using the source code provided. See the GNU General Public License for details.
 
 #include "algol68g.h"
 #include "genie.h"
+#include "inline.h"
 #include "gsl.h"
 #include "mp.h"
 
@@ -210,9 +211,11 @@ int longlong_mp_digits ()
 
 int get_mp_digits (MOID_T * m)
 {
-  if (m == MODE (LONG_INT) || m == MODE (LONG_REAL) || m == MODE (LONG_COMPLEX) || m == MODE (LONG_BITS)) {
+  if (m == MODE (LONG_INT) || m == MODE (LONG_REAL)
+      || m == MODE (LONG_COMPLEX) || m == MODE (LONG_BITS)) {
     return (long_mp_digits ());
-  } else if (m == MODE (LONGLONG_INT) || m == MODE (LONGLONG_REAL) || m == MODE (LONGLONG_COMPLEX) || m == MODE (LONGLONG_BITS)) {
+  } else if (m == MODE (LONGLONG_INT) || m == MODE (LONGLONG_REAL)
+             || m == MODE (LONGLONG_COMPLEX) || m == MODE (LONGLONG_BITS)) {
     return (longlong_mp_digits ());
   }
   return (0);
@@ -226,9 +229,11 @@ int get_mp_digits (MOID_T * m)
 
 int get_mp_size (MOID_T * m)
 {
-  if (m == MODE (LONG_INT) || m == MODE (LONG_REAL) || m == MODE (LONG_COMPLEX) || m == MODE (LONG_BITS)) {
+  if (m == MODE (LONG_INT) || m == MODE (LONG_REAL)
+      || m == MODE (LONG_COMPLEX) || m == MODE (LONG_BITS)) {
     return (size_long_mp ());
-  } else if (m == MODE (LONGLONG_INT) || m == MODE (LONGLONG_REAL) || m == MODE (LONGLONG_COMPLEX) || m == MODE (LONGLONG_BITS)) {
+  } else if (m == MODE (LONGLONG_INT) || m == MODE (LONGLONG_REAL)
+             || m == MODE (LONGLONG_COMPLEX) || m == MODE (LONGLONG_BITS)) {
     return (size_longlong_mp ());
   }
   return (0);
@@ -349,7 +354,7 @@ MP_DIGIT_T *set_mp_short (MP_DIGIT_T * z, MP_DIGIT_T x, int x_expo, int digits)
 
 /*!
 \brief test whether x = y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param x
 \param y
 \param digits precision as number of MP_DIGITs
@@ -425,7 +430,7 @@ static MP_DIGIT_T *align_mp (MP_DIGIT_T * z, int *expo, int digits)
 
 /*!
 \brief transform string into multi-precision number
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param s
 \param digits precision as number of MP_DIGITs
@@ -501,7 +506,7 @@ MP_DIGIT_T *string_to_mp (NODE_T * p, MP_DIGIT_T * z, char *s, int digits)
 
 /*!
 \brief convert integer to multi-precison number
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param k
 \param digits precision as number of MP_DIGITs
@@ -531,7 +536,7 @@ MP_DIGIT_T *int_to_mp (NODE_T * p, MP_DIGIT_T * z, int k, int digits)
 
 /*!
 \brief convert unsigned to multi-precison number
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param k
 \param digits precision as number of MP_DIGITs
@@ -557,7 +562,7 @@ MP_DIGIT_T *unsigned_to_mp (NODE_T * p, MP_DIGIT_T * z, unsigned k, int digits)
 
 /*!
 \brief convert multi-precision number to integer
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param digits precision as number of MP_DIGITs
 \return result z
@@ -599,7 +604,7 @@ could be wider than 2 ** 52.
 
 /*!
 \brief convert multi-precision number to unsigned
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param digits precision as number of MP_DIGITs
 \return result z
@@ -636,7 +641,7 @@ could be wider than 2 ** 52.
 
 /*!
 \brief convert double to multi-precison number
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -699,7 +704,7 @@ MP_DIGIT_T *real_to_mp (NODE_T * p, MP_DIGIT_T * z, double x, int digits)
 
 /*!
 \brief convert multi-precision number to double
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param digits precision as number of MP_DIGITs
 \return result z
@@ -726,7 +731,7 @@ double mp_to_real (NODE_T * p, MP_DIGIT_T * z, int digits)
 
 /*!
 \brief convert z to a row of unsigned in the stack
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param m
 \return result z
@@ -775,7 +780,7 @@ unsigned *stack_mp_bits (NODE_T * p, MP_DIGIT_T * z, MOID_T * m)
 
 /*!
 \brief whether LONG BITS value is in range
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \param m
 **/
@@ -791,7 +796,7 @@ void check_long_bits_value (NODE_T * p, MP_DIGIT_T * u, MOID_T * m)
 
 /*!
 \brief convert row of unsigned to LONG BITS
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param u
 \param row
 \param m
@@ -915,7 +920,7 @@ static void round_mp (MP_DIGIT_T * z, MP_DIGIT_T * w, int digits)
 
 /*!
 \brief truncate at decimal point
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z result
 \param x argument
 \param digits precision as number of MP_DIGITs
@@ -940,7 +945,7 @@ void trunc_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief shorten and round
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z result
 \param digits precision as number of MP_DIGITs
 \param x
@@ -977,7 +982,7 @@ MP_DIGIT_T *shorten_mp (NODE_T * p, MP_DIGIT_T * z, int digits, MP_DIGIT_T * x, 
 
 /*!
 \brief lengthen x and assign to z
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param digits precision as number of MP_DIGITs_z
 \param x
@@ -1004,7 +1009,7 @@ MP_DIGIT_T *lengthen_mp (NODE_T * p, MP_DIGIT_T * z, int digits_z, MP_DIGIT_T * 
 
 /*!
 \brief set z to the sum of positive x and positive y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1079,7 +1084,7 @@ MP_DIGIT_T *add_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y, 
 
 /*!
 \brief set z to the difference of positive x and positive y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1191,7 +1196,7 @@ MP_DIGIT_T *sub_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y, 
 
 /*!
 \brief set z to the difference of positive x and positive y, FOR COMPILER ONLY
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1288,7 +1293,7 @@ MP_DIGIT_T *sub_pos_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T *
 
 /*!
 \brief set z to the product of x and y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1353,7 +1358,7 @@ MP_DIGIT_T *mul_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y, 
 
 /*!
 \brief set z to the quotient of x and y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1453,7 +1458,7 @@ guesses without separate correction steps.
 
 /*!
 \brief set z to the integer quotient of x and y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1485,7 +1490,7 @@ MP_DIGIT_T *over_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y,
 
 /*!
 \brief set z to x mod y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1519,7 +1524,7 @@ MP_DIGIT_T *mod_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y, 
 
 /*!
 \brief set z to the product of x and digit y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1557,7 +1562,7 @@ MP_DIGIT_T *mul_mp_digit (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T
 
 /*!
 \brief set z to x/2
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -1593,7 +1598,7 @@ MP_DIGIT_T *half_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to the quotient of x and digit y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1664,7 +1669,7 @@ MP_DIGIT_T *div_mp_digit (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T
 
 /*!
 \brief set z to the integer quotient of x and y
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1694,7 +1699,7 @@ MP_DIGIT_T *over_mp_digit (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_
 
 /*!
 \brief set z to the reciprocal of x
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -1719,7 +1724,7 @@ MP_DIGIT_T *rec_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to x ** n
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param n
@@ -1806,7 +1811,7 @@ static BOOL_T eps_mp (MP_DIGIT_T * z, int digits)
 
 /*!
 \brief set z to sqrt (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -1868,7 +1873,7 @@ MP_DIGIT_T *sqrt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to curt (x), the cube root
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -1933,7 +1938,7 @@ MP_DIGIT_T *curt_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to sqrt (x^2 + y^2)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -1979,7 +1984,7 @@ MP_DIGIT_T *hypot_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y
 
 /*!
 \brief set z to exp (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2068,7 +2073,7 @@ MP_DIGIT_T *exp_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to exp (x) - 1, assuming x to be close to 0
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2145,7 +2150,7 @@ MP_DIGIT_T *expm1_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief ln scale with digits precision
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param digits precision as number of MP_DIGITs
 \return result z
@@ -2174,7 +2179,7 @@ MP_DIGIT_T *mp_ln_scale (NODE_T * p, MP_DIGIT_T * z, int digits)
 
 /*!
 \brief ln 10 with digits precision
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param digits precision as number of MP_DIGITs
 \return result z
@@ -2203,7 +2208,7 @@ MP_DIGIT_T *mp_ln_10 (NODE_T * p, MP_DIGIT_T * z, int digits)
 
 /*!
 \brief set z to ln (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2303,7 +2308,7 @@ MP_DIGIT_T *ln_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to log (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2327,7 +2332,7 @@ MP_DIGIT_T *log_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set sh and ch to sinh (z) and cosh (z) respectively
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param sh
 \param ch
 \param z
@@ -2347,7 +2352,8 @@ MP_DIGIT_T *hyp_mp (NODE_T * p, MP_DIGIT_T * sh, MP_DIGIT_T * ch, MP_DIGIT_T * z
   rec_mp (p, y_g, x_g, digits);
   add_mp (p, ch, x_g, y_g, digits);
 /* Avoid cancellation for sinh. */
-  if ((MP_DIGIT (x_g, 1) == 1 && MP_DIGIT (x_g, 2) == 0) || (MP_DIGIT (y_g, 1) == 1 && MP_DIGIT (y_g, 2) == 0)) {
+  if ((MP_DIGIT (x_g, 1) == 1 && MP_DIGIT (x_g, 2) == 0)
+      || (MP_DIGIT (y_g, 1) == 1 && MP_DIGIT (y_g, 2) == 0)) {
     expm1_mp (p, x_g, z_g, digits);
     MP_DIGIT (z_g, 1) = -MP_DIGIT (z_g, 1);
     expm1_mp (p, y_g, z_g, digits);
@@ -2361,7 +2367,7 @@ MP_DIGIT_T *hyp_mp (NODE_T * p, MP_DIGIT_T * sh, MP_DIGIT_T * ch, MP_DIGIT_T * z
 
 /*!
 \brief set z to sinh (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2385,7 +2391,7 @@ MP_DIGIT_T *sinh_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to asinh (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2429,7 +2435,7 @@ MP_DIGIT_T *asinh_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to cosh (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2453,7 +2459,7 @@ MP_DIGIT_T *cosh_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to acosh (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2488,7 +2494,7 @@ MP_DIGIT_T *acosh_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to tanh (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2513,7 +2519,7 @@ MP_DIGIT_T *tanh_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to atanh (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2542,7 +2548,7 @@ MP_DIGIT_T *atanh_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief return pi with digits precision, using Borwein & Borwein AGM
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param api
 \param mult
 \param digits precision as number of MP_DIGITs
@@ -2628,7 +2634,7 @@ MP_DIGIT_T *mp_pi (NODE_T * p, MP_DIGIT_T * api, int mult, int digits)
 
 /*!
 \brief set z to sin (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2740,7 +2746,7 @@ MP_DIGIT_T *sin_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to cos (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2772,7 +2778,7 @@ Compute x mod 2 pi before subtracting to avoid cancellation.
 
 /*!
 \brief set z to tan (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2825,7 +2831,7 @@ MP_DIGIT_T *tan_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to arcsin (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2868,7 +2874,7 @@ MP_DIGIT_T *asin_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to arccos (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2915,7 +2921,7 @@ MP_DIGIT_T *acos_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to arctan (x)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param digits precision as number of MP_DIGITs
@@ -2941,7 +2947,9 @@ MP_DIGIT_T *atan_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
     MP_DIGIT (x_g, 1) = -MP_DIGIT (x_g, 1);
   }
 /* For larger arguments we use atan(x) = pi/2 - atan(1/x) */
-  flip = ((MP_EXPONENT (x_g) > 0) || (MP_EXPONENT (x_g) == 0 && MP_DIGIT (x_g, 1) > 1)) && (MP_DIGIT (x_g, 1) != 0);
+  flip = ((MP_EXPONENT (x_g) > 0)
+          || (MP_EXPONENT (x_g) == 0 && MP_DIGIT (x_g, 1) > 1))
+    && (MP_DIGIT (x_g, 1) != 0);
   if (flip) {
     rec_mp (p, x_g, x_g, digits_g);
   }
@@ -3017,7 +3025,7 @@ MP_DIGIT_T *atan_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, int digits)
 
 /*!
 \brief set z to atan2 (x, y)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param z
 \param x
 \param y
@@ -3059,7 +3067,7 @@ MP_DIGIT_T *atan2_mp (NODE_T * p, MP_DIGIT_T * z, MP_DIGIT_T * x, MP_DIGIT_T * y
 
 /*!
 \brief set a I b to a I b * c I d
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param a
 \param b
 \param c
@@ -3099,7 +3107,7 @@ MP_DIGIT_T *cmul_mp (NODE_T * p, MP_DIGIT_T * a, MP_DIGIT_T * b, MP_DIGIT_T * c,
 
 /*!
 \brief set a I b to a I b / c I d
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param a
 \param b
 \param c
@@ -3154,7 +3162,7 @@ MP_DIGIT_T *cdiv_mp (NODE_T * p, MP_DIGIT_T * a, MP_DIGIT_T * b, MP_DIGIT_T * c,
 
 /*!
 \brief set r I i to sqrt (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3230,7 +3238,7 @@ MP_DIGIT_T *csqrt_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to exp(r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3260,7 +3268,7 @@ MP_DIGIT_T *cexp_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to ln (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3296,7 +3304,7 @@ MP_DIGIT_T *cln_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to sin (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3334,7 +3342,7 @@ MP_DIGIT_T *csin_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to cos (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3373,7 +3381,7 @@ MP_DIGIT_T *ccos_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to tan (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3406,7 +3414,7 @@ MP_DIGIT_T *ctan_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to asin (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3458,7 +3466,7 @@ MP_DIGIT_T *casin_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to acos (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs
@@ -3511,7 +3519,7 @@ MP_DIGIT_T *cacos_mp (NODE_T * p, MP_DIGIT_T * r, MP_DIGIT_T * i, int digits)
 
 /*!
 \brief set r I i to atan (r I i)
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param r
 \param i
 \param digits precision as number of MP_DIGITs

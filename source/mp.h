@@ -95,7 +95,7 @@ enum
 #define TEST_MP_INIT(p, z, m) {\
   if (! ((int) z[0] & INITIALISED_MASK)) {\
     diagnostic_node (A68_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE, (m));\
-    exit_genie ((p), 1);\
+    exit_genie ((p), A68_RUNTIME_ERROR);\
   }}
 
 #define CHECK_MP_EXPONENT(p, z) {\
@@ -103,7 +103,7 @@ enum
   if (expo > MAX_MP_EXPONENT || (expo == MAX_MP_EXPONENT && ABS (MP_DIGIT (z, 1)) > 1.0)) {\
       errno = ERANGE;\
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_MP_OUT_OF_BOUNDS, NULL);\
-      exit_genie (p, 1);\
+      exit_genie (p, A68_RUNTIME_ERROR);\
   }}
 
 #define SET_MP_ZERO(z, digits) {\

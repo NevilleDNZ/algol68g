@@ -84,7 +84,7 @@ static void pretty_diag (FILE_T f, char *p)
 {
   int pos, line_width = (f == STDOUT_FILENO ? term_width : MAX_LINE_WIDTH);
   if (a68c_diags) {
-    io_write_string (f, "++++ ");
+    WRITE (f, "++++ ");
     pos = 5;
   } else {
     pos = 1;
@@ -104,19 +104,19 @@ static void pretty_diag (FILE_T f, char *p)
     }
     if ((pos + k) >= line_width) {
       if (a68c_diags) {
-        io_write_string (f, "\n     ");
+        WRITE (f, "\n     ");
         pos = 5;
       } else {
-        io_write_string (f, NEWLINE_STRING);
+        WRITE (f, NEWLINE_STRING);
         pos = 1;
       }
     }
     for (; k > 0; k--, p++, pos++) {
-      io_write_string (f, char_to_str (p[0]));
+      WRITE (f, char_to_str (p[0]));
     }
   }
   for (; p[0] == BLANK_CHAR; p++, pos++) {
-    io_write_string (f, char_to_str (p[0]));
+    WRITE (f, char_to_str (p[0]));
   }
 }
 
@@ -226,19 +226,19 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
 /* Print line number */
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
-    if (p->number == 0) {
+    if (NUMBER (p) == 0) {
       snprintf (output_line, BUFFER_SIZE, "     ");
     } else {
-      snprintf (output_line, BUFFER_SIZE, "%-4d ", p->number % 10000);
+      snprintf (output_line, BUFFER_SIZE, "%-4d ", NUMBER (p) % 10000);
     }
   } else {
-    if (p->number == 0) {
+    if (NUMBER (p) == 0) {
       snprintf (output_line, BUFFER_SIZE, "\n     ");
     } else {
-      snprintf (output_line, BUFFER_SIZE, "\n%-4d ", p->number % 10000);
+      snprintf (output_line, BUFFER_SIZE, "\n%-4d ", NUMBER (p) % 10000);
     }
   }
-  io_write_string (f, output_line);
+  WRITE (f, output_line);
 /* Pretty print line */
   c = c0 = p->string;
   col = 1;
@@ -285,7 +285,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
     }
     if (!line_ended && (pos + len) <= line_width) {
 /* Still room - print a character */
-      io_write_string (f, output_line);
+      WRITE (f, output_line);
       pos += len;
       c = new_pos;
     } else {
@@ -308,13 +308,13 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
         DIAGNOSTIC_T *d;
         char *c1;
         int col_2 = 1;
-        io_write_string (f, "\n     ");
+        WRITE (f, "\n     ");
         for (c1 = c0; c1 != c; c1++) {
           int k = 0, diags_at_this_pos = 0;
           for (d = p->diagnostics; d != NULL; FORWARD (d)) {
             if (c1 == diag_pos (p, d)) {
               diags_at_this_pos++;
-              k = d->number;
+              k = NUMBER (d);
             }
           }
           if (y == A68_TRUE && c1 == where_pos (p, where)) {
@@ -347,16 +347,16 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
               col_2++;
             }
           }
-          io_write_string (f, output_line);
+          WRITE (f, output_line);
         }
       }
 /* Resume pretty printing of line */
       if (!line_ended) {
         continuations++;
         snprintf (output_line, BUFFER_SIZE, "\n.%1d   ", continuations);
-        io_write_string (f, output_line);
+        WRITE (f, output_line);
         if (continuations >= 9) {
-          io_write_string (f, "...");
+          WRITE (f, "...");
           line_ended = A68_TRUE;
         } else {
           c0 = c;
@@ -373,11 +373,11 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, int diag)
       for (d = p->diagnostics; d != NULL; FORWARD (d)) {
         if (diag == A68_RUNTIME_ERROR) {
           if (WHETHER (d, A68_RUNTIME_ERROR)) {
-            io_write_string (f, NEWLINE_STRING);
+            WRITE (f, NEWLINE_STRING);
             pretty_diag (f, d->text);
           }
         } else {
-          io_write_string (f, NEWLINE_STRING);
+          WRITE (f, NEWLINE_STRING);
           pretty_diag (f, d->text);
         }
       }
@@ -399,7 +399,8 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
       DIAGNOSTIC_T *d = p->diagnostics;
       for (; d != NULL; FORWARD (d)) {
         if (what == A68_ALL_DIAGNOSTICS) {
-          z |= (WHETHER (d, A68_WARNING) || WHETHER (d, A68_ERROR) || WHETHER (d, A68_SYNTAX_ERROR));
+          z |= (WHETHER (d, A68_WARNING) || WHETHER (d, A68_ERROR)
+                || WHETHER (d, A68_SYNTAX_ERROR));
         } else if (what == A68_RUNTIME_ERROR) {
           z |= (WHETHER (d, A68_RUNTIME_ERROR));
         }
@@ -508,7 +509,7 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
   if (line == NULL && p != NULL) {
     line = LINE (p);
   }
-  while (line != NULL && line->number == 0) {
+  while (line != NULL && NUMBER (line) == 0) {
     line = NEXT (line);
   }
   if (line == NULL) {
@@ -520,7 +521,7 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
     k++;
   }
   if (gnu_diags) {
-    snprintf (a, BUFFER_SIZE, "%s: %d: %s: %s (%x)", line->filename, line->number, st, b, k);
+    snprintf (a, BUFFER_SIZE, "%s: %d: %s: %s (%x)", line->filename, NUMBER (line), st, b, k);
   } else {
     if (p != NULL) {
       NODE_T *n;
@@ -569,7 +570,7 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
   msg->where = p;
   msg->line = line;
   msg->symbol = pos;
-  msg->number = k;
+  NUMBER (msg) = k;
   NEXT (msg) = NULL;
 }
 
@@ -653,13 +654,13 @@ Z quoted string literal.
       SOURCE_LINE_T *a = va_arg (args, SOURCE_LINE_T *);\
       char d[SMALL_BUFFER_SIZE];\
       ABNORMAL_END (a == NULL, "NULL source line in error", NULL);\
-      if (a->number == 0) {\
+      if (NUMBER (a) == 0) {\
 	bufcat (b, "in standard environment", BUFFER_SIZE);\
       } else {\
-        if (p != NULL && a->number == LINE (p)->number) {\
+        if (p != NULL && NUMBER (a) == LINE_NUMBER (p)) {\
           snprintf (d, SMALL_BUFFER_SIZE, "in this line");\
 	} else {\
-          snprintf (d, SMALL_BUFFER_SIZE, "in line %d", a->number);\
+          snprintf (d, SMALL_BUFFER_SIZE, "in line %d", NUMBER (a));\
         }\
 	bufcat (b, d, BUFFER_SIZE);\
       }\
@@ -679,7 +680,7 @@ Z quoted string literal.
 	bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
       }\
     } else if (t[0] == 'N') {\
-      bufcat (b, "NIL value of mode ", BUFFER_SIZE);\
+      bufcat (b, "NIL name of mode ", BUFFER_SIZE);\
       moid = va_arg (args, MOID_T *);\
       if (moid != NULL) {\
 	bufcat (b, moid_to_string (moid, MOID_ERROR_WIDTH), BUFFER_SIZE);\
@@ -715,7 +716,8 @@ Z quoted string literal.
     } else if (t[0] == 'X') {\
       int att = va_arg (args, int);\
       char z[BUFFER_SIZE];\
-      snprintf (z, BUFFER_SIZE, "\"%s\"", find_keyword_from_attribute (top_keyword, att)->text);\
+      /* snprintf (z, BUFFER_SIZE, "\"%s\"", find_keyword_from_attribute (top_keyword, att)->text); */\
+      non_terminal_string (z, att);\
       bufcat (b, new_string (z), BUFFER_SIZE);\
     } else if (t[0] == 'Y') {\
       char *str = va_arg (args, char *);\
@@ -737,7 +739,7 @@ Z quoted string literal.
 /*!
 \brief give a diagnostic message
 \param sev severity
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param str message string
 \param ... various arguments needed by special symbols in str
 **/
@@ -805,7 +807,7 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
 /*!
 \brief give a diagnostic message
 \param sev severity
-\param p position in syntax tree, should not be NULL
+\param p position in tree
 \param str message string
 \param ... various arguments needed by special symbols in str
 **/

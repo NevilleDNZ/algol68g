@@ -27,6 +27,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 /*
 Static scope checker. 
+Also a little preparation for the monitor:
+- indicates UNITs that can be interrupted.
 */
 
 typedef struct TUPLE_T TUPLE_T;
@@ -45,8 +47,8 @@ struct SCOPE_T
   SCOPE_T *next;
 };
 
-#define NOT_TRANSIENT 0x0
-#define TRANSIENT 0x1
+enum
+{ NOT_TRANSIENT = 0, TRANSIENT };
 
 static void gather_scopes_for_youngest (NODE_T *, SCOPE_T **);
 static void scope_statement (NODE_T *, SCOPE_T **);
@@ -72,7 +74,7 @@ static TUPLE_T scope_make_tuple (int e, int t)
 /*!
 \brief link scope information into the list
 \param sl
-\param p
+\param p position in tree
 \param tup
 **/
 
@@ -144,7 +146,7 @@ static BOOL_T scope_check_multiple (SCOPE_T * top, int mask, SCOPE_T * dest)
 /*!
 \brief check_identifier_usage
 \param t
-\param p
+\param p position in tree
 **/
 
 static void check_identifier_usage (TAG_T * t, NODE_T * p)
@@ -190,7 +192,7 @@ static TUPLE_T scope_find_youngest (SCOPE_T * s)
 
 /*!
 \brief get_declarer_elements
-\param p
+\param p position in tree
 \param r
 \param no_ref
 **/
@@ -217,14 +219,15 @@ static void get_declarer_elements (NODE_T * p, SCOPE_T ** r, BOOL_T no_ref)
 
 /*!
 \brief gather_scopes_for_youngest
-\param p
+\param p position in tree
 \param s
 **/
 
 static void gather_scopes_for_youngest (NODE_T * p, SCOPE_T ** s)
 {
   for (; p != NULL; FORWARD (p)) {
-    if ((WHETHER (p, ROUTINE_TEXT) || WHETHER (p, FORMAT_TEXT)) && (TAX (p)->youngest_environ == PRIMAL_SCOPE)) {
+    if ((WHETHER (p, ROUTINE_TEXT) || WHETHER (p, FORMAT_TEXT))
+        && (TAX (p)->youngest_environ == PRIMAL_SCOPE)) {
       SCOPE_T *t = NULL;
       gather_scopes_for_youngest (SUB (p), &t);
       TAX (p)->youngest_environ = scope_find_youngest_outside (t, LEX_LEVEL (p)).level;
@@ -251,7 +254,7 @@ static void gather_scopes_for_youngest (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief get_youngest_environs
-\param p
+\param p position in tree
 **/
 
 static void get_youngest_environs (NODE_T * p)
@@ -269,7 +272,7 @@ static void get_youngest_environs (NODE_T * p)
 
 /*!
 \brief bind_scope_to_tag
-\param p
+\param p position in tree
 **/
 
 static void bind_scope_to_tag (NODE_T * p)
@@ -295,13 +298,14 @@ static void bind_scope_to_tag (NODE_T * p)
 
 /*!
 \brief bind_scope_to_tags
-\param p
+\param p position in tree
 **/
 
 static void bind_scope_to_tags (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, PROCEDURE_DECLARATION) || WHETHER (p, IDENTITY_DECLARATION)) {
+    if (WHETHER (p, PROCEDURE_DECLARATION)
+        || WHETHER (p, IDENTITY_DECLARATION)) {
       bind_scope_to_tag (SUB (p));
     } else {
       bind_scope_to_tags (SUB (p));
@@ -311,7 +315,7 @@ static void bind_scope_to_tags (NODE_T * p)
 
 /*!
 \brief scope_bounds
-\param p
+\param p position in tree
 **/
 
 static void scope_bounds (NODE_T * p)
@@ -327,7 +331,7 @@ static void scope_bounds (NODE_T * p)
 
 /*!
 \brief scope_declarer
-\param p
+\param p position in tree
 **/
 
 static void scope_declarer (NODE_T * p)
@@ -350,17 +354,14 @@ static void scope_declarer (NODE_T * p)
 
 /*!
 \brief scope_identity_declaration
-\param p
+\param p position in tree
 **/
 
 static void scope_identity_declaration (NODE_T * p)
 {
-  if (p != NULL) {
-    if (WHETHER (p, IDENTITY_DECLARATION)) {
-      ;
-    } else if (WHETHER (p, DECLARER)) {
-      scope_identity_declaration (NEXT (p));
-    } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
+  for (; p != NULL; FORWARD (p)) {
+    scope_identity_declaration (SUB (p));
+    if (WHETHER (p, DEFINING_IDENTIFIER)) {
       NODE_T *unit = NEXT (NEXT (p));
       SCOPE_T *s = NULL;
       int z = PRIMAL_SCOPE;
@@ -374,26 +375,23 @@ static void scope_identity_declaration (NODE_T * p)
         TAX (p)->scope = z;
         TAX (p)->scope_assigned = A68_TRUE;
       }
-    } else {
-      scope_identity_declaration (SUB (p));
-      scope_identity_declaration (NEXT (p));
+      MASK (unit) |= INTERRUPTIBLE_MASK;
+      return;
     }
   }
 }
 
 /*!
 \brief scope_variable_declaration
-\param p
+\param p position in tree
 **/
 
 static void scope_variable_declaration (NODE_T * p)
 {
-  if (p != NULL) {
-    if (WHETHER (p, VARIABLE_DECLARATION)) {
-      ;
-    } else if (WHETHER (p, DECLARER)) {
+  for (; p != NULL; FORWARD (p)) {
+    scope_variable_declaration (SUB (p));
+    if (WHETHER (p, DECLARER)) {
       scope_declarer (SUB (p));
-      scope_variable_declaration (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       if (whether (p, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
         NODE_T *unit = NEXT (NEXT (p));
@@ -401,41 +399,36 @@ static void scope_variable_declaration (NODE_T * p)
         check_identifier_usage (TAX (p), unit);
         scope_statement (unit, &s);
         scope_check (s, TRANSIENT, LEX_LEVEL (p));
+        MASK (unit) |= INTERRUPTIBLE_MASK;
+        return;
       }
-    } else {
-      scope_variable_declaration (SUB (p));
-      scope_variable_declaration (NEXT (p));
     }
   }
 }
 
 /*!
 \brief scope_procedure_declaration
-\param p
+\param p position in tree
 **/
 
 static void scope_procedure_declaration (NODE_T * p)
 {
-  if (p != NULL) {
-    if (WHETHER (p, PROCEDURE_DECLARATION) || WHETHER (p, PROCEDURE_VARIABLE_DECLARATION) || WHETHER (p, BRIEF_OPERATOR_DECLARATION) || WHETHER (p, OPERATOR_DECLARATION)) {
-      ;
-    } else if (WHETHER (p, DEFINING_IDENTIFIER) || WHETHER (p, DEFINING_OPERATOR)) {
+  for (; p != NULL; FORWARD (p)) {
+    scope_procedure_declaration (SUB (p));
+    if (WHETHER (p, DEFINING_IDENTIFIER) || WHETHER (p, DEFINING_OPERATOR)) {
+      NODE_T *unit = NEXT (NEXT (p));
       SCOPE_T *s = NULL;
-/*
-	  scope_routine_text (NEXT (NEXT (p)), &s);
-*/
-      scope_statement (NEXT (NEXT (p)), &s);
+      scope_statement (unit, &s);
       scope_check (s, NOT_TRANSIENT, LEX_LEVEL (p));
-    } else {
-      scope_procedure_declaration (SUB (p));
-      scope_procedure_declaration (NEXT (p));
+      MASK (unit) |= INTERRUPTIBLE_MASK;
+      return;
     }
   }
 }
 
 /*!
 \brief scope_declaration_list
-\param p
+\param p position in tree
 **/
 
 static void scope_declaration_list (NODE_T * p)
@@ -464,7 +457,7 @@ static void scope_declaration_list (NODE_T * p)
 
 /*!
 \brief scope_arguments
-\param p
+\param p position in tree
 **/
 
 static void scope_arguments (NODE_T * p)
@@ -496,7 +489,7 @@ static BOOL_T whether_transient_row (MOID_T * m)
 
 /*!
 \brief whether_coercion
-\param p
+\param p position in tree
 **/
 
 BOOL_T whether_coercion (NODE_T * p)
@@ -525,7 +518,7 @@ BOOL_T whether_coercion (NODE_T * p)
 
 /*!
 \brief scope_coercion
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -561,7 +554,7 @@ static void scope_coercion (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_format_text
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -596,7 +589,7 @@ static BOOL_T whether_transient_selection (MOID_T * m)
 
 /*!
 \brief scope_operand
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -613,7 +606,7 @@ static void scope_operand (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_formula
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -633,7 +626,7 @@ static void scope_formula (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_routine_text
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -650,7 +643,7 @@ static void scope_routine_text (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_statement
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -658,7 +651,8 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
 {
   if (whether_coercion (p)) {
     scope_coercion (p, s);
-  } else if (WHETHER (p, PRIMARY) || WHETHER (p, SECONDARY) || WHETHER (p, TERTIARY) || WHETHER (p, UNIT)) {
+  } else if (WHETHER (p, PRIMARY) || WHETHER (p, SECONDARY)
+             || WHETHER (p, TERTIARY) || WHETHER (p, UNIT)) {
     scope_statement (SUB (p), s);
   } else if (WHETHER (p, DENOTER) || WHETHER (p, NIHIL)) {
     scope_add (s, p, scope_make_tuple (PRIMAL_SCOPE, NOT_TRANSIENT));
@@ -677,7 +671,8 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
       }
     } else if (ATTRIBUTE (MOID (p)) == PROC_SYMBOL && TAX (p)->scope_assigned == A68_TRUE) {
       scope_add (s, p, scope_make_tuple (TAX (p)->scope, NOT_TRANSIENT));
-    } else if (MOID (p) == MODE (FORMAT) && TAX (p)->scope_assigned == A68_TRUE) {
+    } else if (MOID (p) == MODE (FORMAT)
+               && TAX (p)->scope_assigned == A68_TRUE) {
       scope_add (s, p, scope_make_tuple (TAX (p)->scope, NOT_TRANSIENT));
     }
   } else if (WHETHER (p, ENCLOSED_CLAUSE)) {
@@ -783,7 +778,8 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
     scope_add (s, p, scope_make_tuple (scope_find_youngest (nd).level, NOT_TRANSIENT));
   } else if (WHETHER (p, ROUTINE_TEXT)) {
     scope_routine_text (p, s);
-  } else if (WHETHER (p, IDENTITY_RELATION) || WHETHER (p, AND_FUNCTION) || WHETHER (p, OR_FUNCTION)) {
+  } else if (WHETHER (p, IDENTITY_RELATION) || WHETHER (p, AND_FUNCTION)
+             || WHETHER (p, OR_FUNCTION)) {
     SCOPE_T *n = NULL;
     scope_statement (SUB (p), &n);
     scope_statement (NEXT (NEXT_SUB (p)), &n);
@@ -799,7 +795,7 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_statement_list
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -807,6 +803,7 @@ static void scope_statement_list (NODE_T * p, SCOPE_T ** s)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, UNIT)) {
+      MASK (p) |= INTERRUPTIBLE_MASK;
       scope_statement (p, s);
     } else {
       scope_statement_list (SUB (p), s);
@@ -816,7 +813,7 @@ static void scope_statement_list (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_serial_clause
-\param p
+\param p position in tree
 \param s
 \param terminator
 **/
@@ -829,7 +826,8 @@ static void scope_serial_clause (NODE_T * p, SCOPE_T ** s, BOOL_T terminator)
       scope_serial_clause (NEXT (p), s, terminator);
     } else if (WHETHER (p, DECLARATION_LIST)) {
       scope_declaration_list (SUB (p));
-    } else if (WHETHER (p, LABEL) || WHETHER (p, SEMI_SYMBOL) || WHETHER (p, EXIT_SYMBOL)) {
+    } else if (WHETHER (p, LABEL) || WHETHER (p, SEMI_SYMBOL)
+               || WHETHER (p, EXIT_SYMBOL)) {
       scope_serial_clause (NEXT (p), s, terminator);
     } else if (WHETHER (p, SERIAL_CLAUSE) || WHETHER (p, ENQUIRY_CLAUSE)) {
       if (NEXT (p) != NULL) {
@@ -846,6 +844,7 @@ static void scope_serial_clause (NODE_T * p, SCOPE_T ** s, BOOL_T terminator)
     } else if (WHETHER (p, LABELED_UNIT)) {
       scope_serial_clause (SUB (p), s, terminator);
     } else if (WHETHER (p, UNIT)) {
+      MASK (p) |= INTERRUPTIBLE_MASK;
       if (terminator) {
         scope_statement (p, s);
       } else {
@@ -857,7 +856,7 @@ static void scope_serial_clause (NODE_T * p, SCOPE_T ** s, BOOL_T terminator)
 
 /*!
 \brief scope_closed_clause
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -874,14 +873,15 @@ static void scope_closed_clause (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_collateral_clause
-\param p
+\param p position in tree
 \param s
 **/
 
 static void scope_collateral_clause (NODE_T * p, SCOPE_T ** s)
 {
   if (p != NULL) {
-    if (!(whether (p, BEGIN_SYMBOL, END_SYMBOL, 0) || whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0))) {
+    if (!(whether (p, BEGIN_SYMBOL, END_SYMBOL, 0)
+          || whether (p, OPEN_SYMBOL, CLOSE_SYMBOL, 0))) {
       scope_statement_list (p, s);
     }
   }
@@ -889,7 +889,7 @@ static void scope_collateral_clause (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_conditional_clause
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -909,7 +909,7 @@ static void scope_conditional_clause (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_case_clause
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -923,9 +923,11 @@ static void scope_case_clause (NODE_T * p, SCOPE_T ** s)
   if ((FORWARD (p)) != NULL) {
     if (WHETHER (p, OUT_PART) || WHETHER (p, CHOICE)) {
       scope_serial_clause (NEXT_SUB (p), s, A68_TRUE);
-    } else if (WHETHER (p, INTEGER_OUT_PART) || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
+    } else if (WHETHER (p, INTEGER_OUT_PART)
+               || WHETHER (p, BRIEF_INTEGER_OUSE_PART)) {
       scope_case_clause (SUB (p), s);
-    } else if (WHETHER (p, UNITED_OUSE_PART) || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
+    } else if (WHETHER (p, UNITED_OUSE_PART)
+               || WHETHER (p, BRIEF_UNITED_OUSE_PART)) {
       scope_case_clause (SUB (p), s);
     }
   }
@@ -933,7 +935,7 @@ static void scope_case_clause (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_loop_clause
-\param p
+\param p position in tree
 **/
 
 static void scope_loop_clause (NODE_T * p)
@@ -941,7 +943,8 @@ static void scope_loop_clause (NODE_T * p)
   if (p != NULL) {
     if (WHETHER (p, FOR_PART)) {
       scope_loop_clause (NEXT (p));
-    } else if (WHETHER (p, FROM_PART) || WHETHER (p, BY_PART) || WHETHER (p, TO_PART)) {
+    } else if (WHETHER (p, FROM_PART) || WHETHER (p, BY_PART)
+               || WHETHER (p, TO_PART)) {
       scope_statement (NEXT_SUB (p), NULL);
       scope_loop_clause (NEXT (p));
     } else if (WHETHER (p, WHILE_PART)) {
@@ -964,7 +967,7 @@ static void scope_loop_clause (NODE_T * p)
 
 /*!
 \brief scope_enclosed_clause
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -978,7 +981,8 @@ static void scope_enclosed_clause (NODE_T * p, SCOPE_T ** s)
     scope_collateral_clause (SUB (p), s);
   } else if (WHETHER (p, CONDITIONAL_CLAUSE)) {
     scope_conditional_clause (SUB (p), s);
-  } else if (WHETHER (p, INTEGER_CASE_CLAUSE) || WHETHER (p, UNITED_CASE_CLAUSE)) {
+  } else if (WHETHER (p, INTEGER_CASE_CLAUSE)
+             || WHETHER (p, UNITED_CASE_CLAUSE)) {
     scope_case_clause (SUB (p), s);
   } else if (WHETHER (p, LOOP_CLAUSE)) {
     scope_loop_clause (SUB (p));
@@ -987,7 +991,7 @@ static void scope_enclosed_clause (NODE_T * p, SCOPE_T ** s)
 
 /*!
 \brief scope_checker
-\param p
+\param p position in tree
 **/
 
 void scope_checker (NODE_T * p)

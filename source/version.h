@@ -1,17 +1,10 @@
-/* ./source/version.h generated on Mon Mar  3 22:34:48 CET 2008 by marcel. */
-
-#if ! defined A68G_VERSION_H
-#define A68G_VERSION_H
-
+/* ./source/version.h generated on Mon May  5 08:56:18 EST 2008 by ndempsey. */
 #define A68G_NAME "a68g"
-#define REVISION "Mark 11.1"
-#define RELEASE_DATE "released March 2008"
+#define REVISION "Mark 12"
+#define RELEASE_DATE "released May 2008"
 #define RELEASE_YEAR "2008"
-#define OS_NAME ""
-#define USERID ""
-#define GCC_VERSION ""
-#define A68_LIBPLOT_VERSION ""
-#define A68_GSL_VERSION ""
-#define A68_PG_VERSION ""
-
-#endif
+#define OS_NAME "Linux 2.6.23.15-80.fc7"
+#define CONFIGURE_DATE "Monday  5 May 2008 08:56"
+#define CONFIGURE_OPTIONS "--threads"
+#define USERID "ndempsey"
+#define GCC_VERSION "4.1.2"

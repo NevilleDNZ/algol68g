@@ -24,6 +24,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #include "algol68g.h"
 #include "genie.h"
+#include "inline.h"
 
 static BOOL_T is_vowel (char);
 static BOOL_T is_consonant (char);
@@ -59,10 +60,12 @@ static BOOL_T is_consonant (char ch)
 
 static char *codas[] = {
   "BT", "CH", "CHS", "CHT", "CHTS", "CT", "CTS", "D", "DS", "DST",
-  "DT", "F", "FD", "FDS", "FDST", "FDT", "FS", "FST", "FT", "FTS", "FTST", "G", "GD",
+  "DT", "F", "FD", "FDS", "FDST", "FDT", "FS", "FST", "FT", "FTS", "FTST",
+  "G", "GD",
   "GDS", "GDST", "GDT", "GS", "GST", "GT", "H", "K", "KS", "KST", "KT",
   "KTS", "KTST", "L", "LD", "LDS", "LDST", "LDT", "LF", "LFD", "LFS", "LFT",
-  "LG", "LGD", "LGT", "LK", "LKS", "LKT", "LM", "LMD", "LMS", "LMT", "LP", "LPS",
+  "LG", "LGD", "LGT", "LK", "LKS", "LKT", "LM", "LMD", "LMS", "LMT", "LP",
+  "LPS",
   "LPT", "LS", "LSD", "LST", "LT", "LTS",
   "LTST", "M", "MBT", "MBTS", "MD", "MDS", "MDST", "MDT", "MF",
   "MP", "MPT", "MPTS", "MPTST", "MS", "MST", "MT", "N",
@@ -214,7 +217,8 @@ static BOOL_T remove_extra_coda (char *str)
 {
   int len;
   while (*str != NULL_CHAR) {
-    if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1]) && str[2] != '+' && str[2] != NULL_CHAR) {
+    if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1])
+        && str[2] != '+' && str[2] != NULL_CHAR) {
       for (len = 2; str[len] != NULL_CHAR && str[len] != '+'; len++);
       memmove (str + 1, str + len, strlen (str + len) + 1);
       return (A68_TRUE);

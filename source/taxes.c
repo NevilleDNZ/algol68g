@@ -34,14 +34,14 @@ static void tax_format_texts (NODE_T *);
 
 /*!
 \brief check portability of sub tree
-\param p
+\param p position in tree
 **/
 
 void portcheck (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     portcheck (SUB (p));
-    if (p->info->module->options.portcheck) {
+    if (MODULE (INFO (p))->options.portcheck) {
       if (WHETHER (p, INDICANT) && MOID (p) != NULL) {
         PORTCHECK_TAX (p, MOID (p)->portable);
         MOID (p)->portable = A68_TRUE;
@@ -146,7 +146,7 @@ We can only map routines blessed by "whether_mappable_routine", so there is no
 
 /*!
 \brief bind identifier tags to the symbol table
-\param p
+\param p position in tree
 **/
 
 static void bind_identifier_tag_to_symbol_table (NODE_T * p)
@@ -157,7 +157,8 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
       if (z != NULL) {
         MOID (p) = MOID (z);
-      } else if ((z = find_tag_global (SYMBOL_TABLE (p), LABEL, SYMBOL (p))) != NULL) {
+      } else if ((z = find_tag_global (SYMBOL_TABLE (p), LABEL, SYMBOL (p)))
+                 != NULL) {
         /*
          * skip. 
          */ ;
@@ -178,7 +179,7 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
 
 /*!
 \brief bind indicant tags to the symbol table
-\param p
+\param p position in tree
 \return
 **/
 
@@ -201,7 +202,7 @@ static void bind_indicant_tag_to_symbol_table (NODE_T * p)
 
 /*!
 \brief enter specifier identifiers in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_specifiers (NODE_T * p)
@@ -216,7 +217,7 @@ static void tax_specifiers (NODE_T * p)
 
 /*!
 \brief enter specifier identifiers in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_specifier_list (NODE_T * p)
@@ -242,7 +243,7 @@ static void tax_specifier_list (NODE_T * p)
 
 /*!
 \brief enter parameter identifiers in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_parameters (NODE_T * p)
@@ -259,7 +260,7 @@ static void tax_parameters (NODE_T * p)
 
 /*!
 \brief enter parameter identifiers in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_parameter_list (NODE_T * p)
@@ -288,7 +289,7 @@ static void tax_parameter_list (NODE_T * p)
 
 /*!
 \brief enter FOR identifiers in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_for_identifiers (NODE_T * p)
@@ -305,7 +306,7 @@ static void tax_for_identifiers (NODE_T * p)
 
 /*!
 \brief enter routine texts in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_routine_texts (NODE_T * p)
@@ -323,7 +324,7 @@ static void tax_routine_texts (NODE_T * p)
 
 /*!
 \brief enter format texts in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_format_texts (NODE_T * p)
@@ -346,7 +347,7 @@ static void tax_format_texts (NODE_T * p)
 
 /*!
 \brief enter FORMAT pictures in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_pictures (NODE_T * p)
@@ -361,7 +362,7 @@ static void tax_pictures (NODE_T * p)
 
 /*!
 \brief enter generators in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_generators (NODE_T * p)
@@ -370,7 +371,8 @@ static void tax_generators (NODE_T * p)
     tax_generators (SUB (p));
     if (WHETHER (p, GENERATOR)) {
       if (WHETHER (SUB (p), LOC_SYMBOL)) {
-        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))), GENERATOR);
+        TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))),
+                            GENERATOR);
         HEAP (z) = LOC_SYMBOL;
         z->use = A68_TRUE;
         TAX (p) = z;
@@ -381,7 +383,7 @@ static void tax_generators (NODE_T * p)
 
 /*!
 \brief consistency check on fields in structured modes
-\param p
+\param p position in tree
 \return
 **/
 
@@ -418,7 +420,7 @@ static void structure_fields_test (NODE_T * p)
 
 /*!
 \brief incestuous union test
-\param p
+\param p position in tree
 \return
 **/
 
@@ -453,7 +455,8 @@ static void incestuous_union_test (NODE_T * p)
 /* Discard unions with firmly related subsets. */
           for (s = PACK (m); s != NULL && x; FORWARD (s)) {
             MOID_T *n = depref_completely (MOID (s));
-            if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, NO_DEFLEXING)) {
+            if (WHETHER (n, UNION_SYMBOL)
+                && whether_subset (n, m, NO_DEFLEXING)) {
               SOID_T z;
               make_soid (&z, NO_SORT, n, 0);
               diagnostic_node (A68_ERROR, p, ERROR_SUBSET_RELATED, m, n);
@@ -504,7 +507,7 @@ static TAG_T *find_firmly_related_op (SYMBOL_TABLE_T * c, char *n, MOID_T * l, M
 
 /*!
 \brief check for firmly related operators in this range
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -531,7 +534,7 @@ static void test_firmly_related_ops_local (NODE_T * p, TAG_T * s)
 
 /*!
 \brief find firmly related operators in this program
-\param p
+\param p position in tree
 **/
 
 static void test_firmly_related_ops (NODE_T * p)
@@ -549,7 +552,7 @@ static void test_firmly_related_ops (NODE_T * p)
 
 /*!
 \brief driver for the processing of TAXes
-\param p
+\param p position in tree
 **/
 
 void collect_taxes (NODE_T * p)
@@ -591,7 +594,7 @@ static void already_declared (NODE_T * n, int a)
 \param a
 \param n
 \param m
-\param p
+\param p position in tree
 \return
 **/
 
@@ -736,7 +739,7 @@ TAG_T *find_tag_local (SYMBOL_TABLE_T * table, int a, char *name)
 
 /*!
 \brief whether context specifies HEAP or LOC for an identifier
-\param p
+\param p position in tree
 \return
 **/
 
@@ -758,7 +761,7 @@ static int tab_qualifier (NODE_T * p)
 
 /*!
 \brief enter identity declarations in the symbol table
-\param p
+\param p position in tree
 \param m
 \param access
 **/
@@ -793,7 +796,7 @@ static void tax_identity_dec (NODE_T * p, MOID_T ** m)
 
 /*!
 \brief enter variable declarations in the symbol table
-\param p
+\param p position in tree
 \param q
 \param m
 \param access
@@ -823,9 +826,9 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (*m), GENERATOR);
         HEAP (z) = LOC_SYMBOL;
         z->use = A68_TRUE;
-        entry->body = z;
+        BODY (entry) = z;
       } else {
-        entry->body = NULL;
+        BODY (entry) = NULL;
       }
       MOID (entry) = *m;
       tax_variable_dec (NEXT (p), q, m);
@@ -837,7 +840,7 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
 
 /*!
 \brief enter proc variable declarations in the symbol table
-\param p
+\param p position in tree
 \param q
 \param access
 **/
@@ -863,9 +866,9 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
                             GENERATOR);
         HEAP (z) = LOC_SYMBOL;
         z->use = A68_TRUE;
-        entry->body = z;
+        BODY (entry) = z;
       } else {
-        entry->body = NULL;
+        BODY (entry) = NULL;
       }
       tax_proc_variable_dec (NEXT (p), q);
     } else {
@@ -876,7 +879,7 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
 
 /*!
 \brief enter proc declarations in the symbol table
-\param p
+\param p position in tree
 \param access
 **/
 
@@ -904,7 +907,7 @@ static void tax_proc_dec (NODE_T * p)
 
 /*!
 \brief count number of operands in operator parameter list
-\param p
+\param p position in tree
 \return
 **/
 
@@ -925,7 +928,7 @@ static int count_operands (NODE_T * p)
 
 /*!
 \brief check operator dec
-\param p
+\param p position in tree
 **/
 
 static void check_operator_dec (NODE_T * p)
@@ -949,7 +952,7 @@ static void check_operator_dec (NODE_T * p)
 
 /*!
 \brief enter operator declarations in the symbol table
-\param p
+\param p position in tree
 \param m
 \param access
 **/
@@ -987,7 +990,7 @@ static void tax_op_dec (NODE_T * p, MOID_T ** m)
 
 /*!
 \brief enter brief operator declarations in the symbol table
-\param p
+\param p position in tree
 \param access
 **/
 
@@ -1019,7 +1022,7 @@ static void tax_brief_op_dec (NODE_T * p)
 
 /*!
 \brief enter priority declarations in the symbol table
-\param p
+\param p position in tree
 \param access
 **/
 
@@ -1048,7 +1051,7 @@ static void tax_prio_dec (NODE_T * p)
 
 /*!
 \brief enter TAXes in the symbol table
-\param p
+\param p position in tree
 **/
 
 static void tax_tags (NODE_T * p)
@@ -1078,7 +1081,7 @@ static void tax_tags (NODE_T * p)
 
 /*!
 \brief reset symbol table nest count
-\param p
+\param p position in tree
 \return
 **/
 
@@ -1094,7 +1097,7 @@ void reset_symbol_table_nest_count (NODE_T * p)
 
 /*!
 \brief bind routines in symbol table to the tree
-\param p
+\param p position in tree
 \return
 **/
 
@@ -1111,7 +1114,7 @@ void bind_routine_tags_to_tree (NODE_T * p)
 
 /*!
 \brief bind formats in symbol table to tree
-\param p
+\param p position in tree
 **/
 
 void bind_format_tags_to_tree (NODE_T * p)
@@ -1128,8 +1131,30 @@ void bind_format_tags_to_tree (NODE_T * p)
 }
 
 /*!
+\brief fill outer level of symbol table
+\param p position in tree
+\param s
+**/
+
+void fill_symbol_table_outer (NODE_T * p, SYMBOL_TABLE_T * s)
+{
+  for (; p != NULL; FORWARD (p)) {
+    if (SYMBOL_TABLE (p) != NULL) {
+      OUTER (SYMBOL_TABLE (p)) = s;
+    }
+    if (SUB (p) != NULL && ATTRIBUTE (p) == ROUTINE_TEXT) {
+      fill_symbol_table_outer (SUB (p), SYMBOL_TABLE (SUB (p)));
+    } else if (SUB (p) != NULL && ATTRIBUTE (p) == FORMAT_TEXT) {
+      fill_symbol_table_outer (SUB (p), SYMBOL_TABLE (SUB (p)));
+    } else {
+      fill_symbol_table_outer (SUB (p), s);
+    }
+  }
+}
+
+/*!
 \brief flood branch in tree with local symbol table "s"
-\param p
+\param p position in tree
 \param s
 **/
 
@@ -1149,7 +1174,7 @@ static void flood_with_symbol_table_restricted (NODE_T * p, SYMBOL_TABLE_T * s)
 
 /*!
 \brief final structure of symbol table after parsing
-\param p
+\param p position in tree
 \param l
 **/
 
@@ -1203,7 +1228,7 @@ void finalise_symbol_table_setup (NODE_T * p, int l)
 
 /*!
 \brief first structure of symbol table for parsing
-\param p
+\param p position in tree
 **/
 
 void preliminary_symbol_table_setup (NODE_T * p)
@@ -1219,7 +1244,10 @@ void preliminary_symbol_table_setup (NODE_T * p)
   for (q = p; q != NULL && !not_a_for_range; FORWARD (q)) {
     if (SUB (q) != NULL) {
 /* BEGIN ... END, CODE ... EDOC, DEF ... FED, DO ... OD, $ ... $, { ... } are ranges. */
-      if (WHETHER (q, BEGIN_SYMBOL) || WHETHER (q, DO_SYMBOL) || WHETHER (q, ALT_DO_SYMBOL) || WHETHER (q, FORMAT_DELIMITER_SYMBOL) || WHETHER (q, ACCO_SYMBOL)) {
+      if (WHETHER (q, BEGIN_SYMBOL) || WHETHER (q, DO_SYMBOL)
+          || WHETHER (q, ALT_DO_SYMBOL)
+          || WHETHER (q, FORMAT_DELIMITER_SYMBOL)
+          || WHETHER (q, ACCO_SYMBOL)) {
         SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
         preliminary_symbol_table_setup (SUB (q));
       }
@@ -1327,7 +1355,8 @@ void preliminary_symbol_table_setup (NODE_T * p)
         NODE_T *r = q;
         SYMBOL_TABLE (NEXT (q)) = NULL;
         for (; r != NULL && SYMBOL_TABLE (NEXT (q)) == NULL; r = NEXT (r)) {
-          if ((WHETHER (r, WHILE_SYMBOL) || WHETHER (r, ALT_DO_SYMBOL)) && (NEXT (q) != NULL && SUB (r) != NULL)) {
+          if ((WHETHER (r, WHILE_SYMBOL)
+               || WHETHER (r, ALT_DO_SYMBOL)) && (NEXT (q) != NULL && SUB (r) != NULL)) {
             SYMBOL_TABLE (NEXT (q)) = SYMBOL_TABLE (SUB (r));
             NEXT (q)->do_od_part = SUB (r);
           }
@@ -1357,7 +1386,7 @@ static void mark_mode (MOID_T * m)
 
 /*!
 \brief traverse tree and mark modes as used
-\param p
+\param p position in tree
 **/
 
 void mark_moids (NODE_T * p)
@@ -1372,7 +1401,7 @@ void mark_moids (NODE_T * p)
 
 /*!
 \brief mark various tags as used
-\param p
+\param p position in tree
 \return
 **/
 
@@ -1425,14 +1454,15 @@ static void unused (TAG_T * s)
 
 /*!
 \brief driver for traversing tree and warn for unused tags
-\param p
+\param p position in tree
 **/
 
 void warn_for_unused_tags (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
-    if (SUB (p) != NULL && LINE (p)->number != 0) {
-      if (whether_new_lexical_level (p) && ATTRIBUTE (SYMBOL_TABLE (SUB (p))) != ENVIRON_SYMBOL) {
+    if (SUB (p) != NULL && LINE_NUMBER (p) != 0) {
+      if (whether_new_lexical_level (p)
+          && ATTRIBUTE (SYMBOL_TABLE (SUB (p))) != ENVIRON_SYMBOL) {
         unused (SYMBOL_TABLE (SUB (p))->operators);
         unused (PRIO (SYMBOL_TABLE (SUB (p))));
         unused (SYMBOL_TABLE (SUB (p))->identifiers);
@@ -1444,8 +1474,27 @@ void warn_for_unused_tags (NODE_T * p)
 }
 
 /*!
+\brief warn if tags are used between threads
+\param p position in tree
+**/
+
+void warn_tags_threads (NODE_T * p)
+{
+  for (; p != NULL; FORWARD (p)) {
+    warn_tags_threads (SUB (p));
+    if (WHETHER (p, IDENTIFIER) || WHETHER (p, OPERATOR)) {
+      int plev_def = PAR_LEVEL (NODE (TAX (p)));
+      int plev_app = PAR_LEVEL (p);
+      if (plev_def != 0 && plev_def != plev_app) {
+        diagnostic_node (A68_WARNING, p, WARNING_DEFINED_IN_OTHER_THREAD);
+      }
+    }
+  }
+}
+
+/*!
 \brief jumps from procs
-\param p
+\param p position in tree
 **/
 
 void jumps_from_procs (NODE_T * p)
@@ -1456,17 +1505,11 @@ void jumps_from_procs (NODE_T * p)
       if (WHETHER (u, GOTO_SYMBOL)) {
         u = NEXT (u);
       }
-      if (u->info->PROCEDURE_NUMBER != NODE (TAX (u))->info->PROCEDURE_NUMBER) {
-        PRIO (TAX (u)) = EXTERN_LABEL;
-      }
       TAX (u)->use = A68_TRUE;
     } else if (WHETHER (p, JUMP)) {
       NODE_T *u = SUB (p);
       if (WHETHER (u, GOTO_SYMBOL)) {
         u = NEXT (u);
-      }
-      if (u->info->PROCEDURE_NUMBER != NODE (TAX (u))->info->PROCEDURE_NUMBER) {
-        PRIO (TAX (u)) = EXTERN_LABEL;
       }
       TAX (u)->use = A68_TRUE;
     } else {
@@ -1487,7 +1530,7 @@ static ADDR_T assign_offset_tags (TAG_T * t, ADDR_T base)
   ADDR_T sum = base;
   for (; t != NULL; FORWARD (t)) {
     t->size = moid_size (MOID (t));
-    if (t->value == NULL) {
+    if (VALUE (t) == NULL) {
       t->offset = sum;
       sum += t->size;
     }
@@ -1510,7 +1553,7 @@ void assign_offsets_table (SYMBOL_TABLE_T * c)
 
 /*!
 \brief assign offsets
-\param p
+\param p position in tree
 **/
 
 void assign_offsets (NODE_T * p)

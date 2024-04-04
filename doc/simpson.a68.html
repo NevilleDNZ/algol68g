@@ -1,7 +1,7 @@
 <!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie</title>
+<title>Algol 68 Genie - An Algol 68 Interpreter</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -30,7 +30,7 @@ pre {font-size: 10pt; font-family: "courier new", monospace;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-<b>Documentation for Algol 68 Genie Mark 11.1</b>
+<b>Documentation for Algol 68 Genie Mark 12</b>
 </small>
 </td>
 </table>
@@ -86,7 +86,7 @@ COMMENT
 	   adaptive (a, m, b, f(a), f(m), f(b), epsilon)
      END;
 
-# Integrate for phi = pi / 4. Partial parametrisation is an Algol68G extension. #
+# Integrate for phi = pi / 4. Partial parametrization is an Algol68G extension. #
 
 PROC p z = (DOUBLE r, phi) DOUBLE: long exp (- r) * long cos (phi);
 print ({SHORTEN simpson (0, 1, p z(, pi / 4), small real), space, {1 - exp (- 1)} * cos (pi / 4)})
@@ -124,7 +124,7 @@ SKIP
 <td>
 <small>
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11.1 (March 2008)
+Algol 68 Genie Mark 12 (May 2008)
 </small>
 </td>
 </tr>

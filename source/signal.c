@@ -63,12 +63,9 @@ static void sigint_handler (int i)
 {
   (void) i;
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
-  if (!(sys_request_flag || in_monitor)) {
-    sys_request_flag = A68_TRUE;
-  } else {
-/*
-    a68g_exit (EXIT_FAILURE);
-*/
+  if (!((MASK (a68_prog.top_node) & BREAKPOINT_INTERRUPT_MASK) || in_monitor)) {
+    MASK (a68_prog.top_node) |= BREAKPOINT_INTERRUPT_MASK;
+    genie_break (a68_prog.top_node);
   }
 }
 
