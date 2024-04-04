@@ -1,0 +1,19 @@
+03.01.2011 - 2.1.0
+Macro-ised various RTS functions for INT, REAL and COMPLEX.
+
+01.01.2011 - 2.1.0
+Fixed bug reported by Andy Walker (caused by errno checking at EXECUTE_UNIT_TRACE).
+
+28.12.2010 - 2.1.0
+Made the upgraded package run on MacOS X.
+
+23.12.2010 - 2.1.0
+Made the upgraded package run on FreeBSD.
+
+22.12.2010 - 2.1.0
+Made the upgraded package run on Linux.
+
+21.12.2010 - 2.1.0
+Finished upgrading to the GNU build system.
+
+[Before release 2.1.0 there is no ChangeLog record]
