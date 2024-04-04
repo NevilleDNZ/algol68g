@@ -752,33 +752,35 @@ a68g_CPPFLAGS = -I$(top_srcdir)/src/include @CURSES_CFLAGS@
 TESTS_ENVIRONMENT = ./a68g
 TESTS = \
 	./src/test-set/01-ackermann.a68\
-	./src/test-set/02-chaos.a68\
-	./src/test-set/03-decision.a68\
-	./src/test-set/04-digits.a68\
-	./src/test-set/05-end-of-time.a68\
-	./src/test-set/06-fft.a68\
-	./src/test-set/07-fft-par.a68\
-	./src/test-set/08-fibonacci-grammar.a68\
-	./src/test-set/09-formula-manipulation.a68\
-	./src/test-set/10-gammainc.a68\
-	./src/test-set/11-guldens.a68\
-	./src/test-set/12-hamming.a68\
-	./src/test-set/13-hilbert-matrix.a68\
-	./src/test-set/14-lisp.a68\
-	./src/test-set/15-mandelbrot.a68\
-	./src/test-set/16-mastermind.a68\
-	./src/test-set/17-math.a68\
-	./src/test-set/18-matrix.a68\
-	./src/test-set/19-procedures.a68\
-	./src/test-set/20-pseudo-switch.a68\
-	./src/test-set/21-queens.a68\
-	./src/test-set/22-quicksort.a68\
-	./src/test-set/23-rationals.a68\
-	./src/test-set/24-semana-santa.a68\
-	./src/test-set/25-tukey.a68\
-	./src/test-set/26-whetstones.a68\
-	./src/test-set/27-www.a68\
-	./src/test-set/28-zeroin.a68
+	./src/test-set/02-all-parser.a68\
+	./src/test-set/03-chaos.a68\
+	./src/test-set/04-decision.a68\
+	./src/test-set/05-digits.a68\
+	./src/test-set/06-end-of-time.a68\
+	./src/test-set/07-fft.a68\
+	./src/test-set/08-fft-par.a68\
+	./src/test-set/09-fibonacci-grammar.a68\
+	./src/test-set/10-formula-manipulation.a68\
+	./src/test-set/11-gammainc.a68\
+	./src/test-set/12-guldens.a68\
+	./src/test-set/13-hamming.a68\
+	./src/test-set/14-hilbert-matrix.a68\
+	./src/test-set/15-lisp.a68\
+	./src/test-set/16-mandelbrot.a68\
+	./src/test-set/17-mastermind.a68\
+	./src/test-set/18-math.a68\
+	./src/test-set/19-matrix.a68\
+	./src/test-set/20-pebbles.a68\
+	./src/test-set/21-procedures.a68\
+	./src/test-set/22-pseudo-switch.a68\
+	./src/test-set/23-queens.a68\
+	./src/test-set/24-quicksort.a68\
+	./src/test-set/25-rationals.a68\
+	./src/test-set/26-semana-santa.a68\
+	./src/test-set/27-tukey.a68\
+	./src/test-set/28-whetstones.a68\
+	./src/test-set/29-www.a68\
+	./src/test-set/30-zeroin.a68
 
 @EXPORT_DYNAMIC_FALSE@a68g_LDFLAGS = 
 @EXPORT_DYNAMIC_TRUE@a68g_LDFLAGS = -Wl,--export-dynamic

@@ -603,7 +603,7 @@ MP_T *double_int_to_mp (NODE_T * p, MP_T * z, DOUBLE_NUM_T k, int digs)
 DOUBLE_NUM_T mp_to_double_int (NODE_T * p, MP_T * z, int digs)
 {
 // This routines looks a lot like "strtol". 
-  int j, expo = (int) MP_EXPONENT (z);
+  int expo = (int) MP_EXPONENT (z);
   DOUBLE_NUM_T sum, weight;
   set_lw (sum, 0);
   set_lw (weight, 1);
@@ -616,7 +616,7 @@ DOUBLE_NUM_T mp_to_double_int (NODE_T * p, MP_T * z, int digs)
   if (negative) {
     MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
   }
-  for (j = 1 + expo; j >= 1; j--) {
+  for (int j = 1 + expo; j >= 1; j--) {
     DOUBLE_NUM_T term, digit, radix;
     set_lw (digit, (MP_INT_T) MP_DIGIT (z, j));
     term = double_umul (p, M_LONG_INT, digit, weight);
@@ -689,13 +689,13 @@ DOUBLE_T mp_to_double (NODE_T * p, MP_T * z, int digs)
     DOUBLE_T weight = ten_up_double ((int) (MP_EXPONENT (z) * LOG_MP_RADIX));
     int lim = MIN (digs, MP_MAX_DIGITS);
     DOUBLE_T terms[1 + MP_MAX_DIGITS];
-    for (unt k = 1; k <= lim; k++) {
+    for (int k = 1; k <= lim; k++) {
       terms[k] = ABS (MP_DIGIT (z, k)) * weight;
       weight /= MP_RADIX;
     }
 // Sum terms from small to large.
     DOUBLE_T sum = 0;
-    for (unt k = lim; k >= 1; k--) {
+    for (int k = lim; k >= 1; k--) {
       sum += terms[k];
     }
     CHECK_DOUBLE_REAL (p, sum);

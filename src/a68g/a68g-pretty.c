@@ -81,8 +81,7 @@ void put_ch (char ch)
 
 void put_pragment (NODE_T * p)
 {
-  char *txt = NPRAGMENT (p);
-  for (; txt != NO_TEXT && txt[0] != NULL_CHAR; txt++) {
+  for (char *txt = NPRAGMENT (p); txt != NO_TEXT && txt[0] != NULL_CHAR; txt++) {
     if (txt[0] == NEWLINE_CHAR) {
       put_nl ();
     } else {

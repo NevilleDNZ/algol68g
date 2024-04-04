@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for identifiers.
 
 #include "a68g.h"
 #include "a68g-genie.h"

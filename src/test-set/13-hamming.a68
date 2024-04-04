@@ -31,7 +31,7 @@ PROC hamming number = (INT n) UNT: # The n-th Hamming number #
          OP +:= = (REF SERIES s, UNT elem) VOID:
             # Extend a series by one element, only keep the elements you need #
             (INT lwb = (i MIN j) MIN k, upb = UPB s;
-             sweep heap; # If the GC is botched, a68g will sigsegv #
+             sweep heap;
              REF SERIES new s = HEAP FLEX [lwb : upb + 1] UNT;
              (new s[lwb : upb] := s[lwb : upb], new s[upb + 1] := elem);
              s := new s

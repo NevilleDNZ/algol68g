@@ -54,9 +54,9 @@ BOOL_T is_refinement_terminator (NODE_T * p)
 
 void get_refinements (void)
 {
-  NODE_T *p = TOP_NODE (&A68_JOB);
   TOP_REFINEMENT (&A68_JOB) = NO_REFINEMENT;
 // First look where the prelude ends.
+  NODE_T *p = TOP_NODE (&A68_JOB);
   while (p != NO_NODE && IN_PRELUDE (p)) {
     FORWARD (p);
   }
@@ -70,12 +70,11 @@ void get_refinements (void)
 // Apparently this is code with refinements.
   FORWARD (p);
   if (p == NO_NODE || IN_PRELUDE (p)) {
-// Ok, we accept a program without refinements as well.
+// A program without refinements.
     return;
   }
   while (p != NO_NODE && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, STOP)) {
-    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space ((size_t) SIZE_ALIGNED (REFINEMENT_T)), *x;
-    BOOL_T exists;
+    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space ((size_t) SIZE_ALIGNED (REFINEMENT_T));
     NEXT (new_one) = NO_REFINEMENT;
     NAME (new_one) = NSYMBOL (p);
     APPLICATIONS (new_one) = 0;
@@ -101,8 +100,8 @@ void get_refinements (void)
       FORWARD (p);
     }
 // Do we already have one by this name.
-    x = TOP_REFINEMENT (&A68_JOB);
-    exists = A68_FALSE;
+    REFINEMENT_T *x = TOP_REFINEMENT (&A68_JOB);
+    BOOL_T exists = A68_FALSE;
     while (x != NO_REFINEMENT && !exists) {
       if (NAME (x) == NAME (new_one)) {
         diagnostic (A68_SYNTAX_ERROR, NODE_DEFINED (new_one), ERROR_REFINEMENT_DEFINED);
@@ -125,20 +124,18 @@ void get_refinements (void)
 
 void put_refinements (void)
 {
-  REFINEMENT_T *x;
-  NODE_T *p, *point;
 // If there are no refinements, there's little to do.
   if (TOP_REFINEMENT (&A68_JOB) == NO_REFINEMENT) {
     return;
   }
 // Initialisation.
-  x = TOP_REFINEMENT (&A68_JOB);
+  REFINEMENT_T *x = TOP_REFINEMENT (&A68_JOB);
   while (x != NO_REFINEMENT) {
     APPLICATIONS (x) = 0;
     FORWARD (x);
   }
 // Before we introduce infinite loops, find where closing-prelude starts.
-  p = TOP_NODE (&A68_JOB);
+  NODE_T *p = TOP_NODE (&A68_JOB);
   while (p != NO_NODE && IN_PRELUDE (p)) {
     FORWARD (p);
   }
@@ -146,7 +143,7 @@ void put_refinements (void)
     FORWARD (p);
   }
   ABEND (p == NO_NODE, ERROR_INTERNAL_CONSISTENCY, __func__);
-  point = p;
+  NODE_T *point = p;
 // We need to substitute until the first point.
   p = TOP_NODE (&A68_JOB);
   while (p != NO_NODE && ATTRIBUTE (p) != POINT_SYMBOL) {

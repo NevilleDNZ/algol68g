@@ -276,10 +276,9 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int flags, mode_t permi
   if (!IS_NIL (STRING (file))) {
     if (writing) {
       A68_REF z = *DEREF (A68_REF, &STRING (file));
-      A68_ARRAY *a;
-      A68_TUPLE *t;
-      GET_DESCRIPTOR (a, t, &z);
-      UPB (t) = LWB (t) - 1;
+      A68_ARRAY *arr; A68_TUPLE *tup;
+      GET_DESCRIPTOR (arr, tup, &z);
+      UPB (tup) = LWB (tup) - 1;
     }
 // Associated file.
     TRANSPUT_BUFFER (file) = get_unblocked_transput_buffer (p);
@@ -488,18 +487,18 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
   }
   if (m == M_LONG_BITS) {
     A68_LONG_BITS *z = (A68_LONG_BITS *) item;
-    int rc = A68_TRUE;
+    int ret = A68_TRUE;
     DOUBLE_NUM_T b;
     set_lw (b, 0x0);
     if (a[0] == FLIP_CHAR || a[0] == FLOP_CHAR) {
 // [] BOOL denotation is "TTFFFFTFT ...".
       if (strlen (a) > (size_t) LONG_BITS_WIDTH) {
         errno = ERANGE;
-        rc = A68_FALSE;
+        ret = A68_FALSE;
       } else {
-        int j = (int) strlen (a) - 1, n = 1;
+        int n = 1;
         UNSIGNED_T k = 0x1;
-        for (; j >= 0; j--) {
+        for (int j = (int) strlen (a) - 1; j >= 0; j--) {
           if (a[j] == FLIP_CHAR) {
             if (n <= LONG_BITS_WIDTH / 2) {
               LW (b) |= k;
@@ -507,7 +506,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
               HW (b) |= k;
             }
           } else if (a[j] != FLOP_CHAR) {
-            rc = A68_FALSE;
+            ret = A68_FALSE;
           }
           k <<= 1;
         }
@@ -517,7 +516,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
 // BITS denotation.
       VALUE (z) = double_strtou (p, a);
     }
-    return rc;
+    return ret;
   }
 #else
   if (m == M_LONG_BITS || m == M_LONG_LONG_BITS) {
@@ -531,10 +530,9 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
         errno = ERANGE;
         status = A68_FALSE;
       } else {
-        int j;
         MP_T *w = lit_mp (p, 1, 0, digits);
         SET_MP_ZERO (z, digits);
-        for (j = (int) strlen (a) - 1; j >= 0; j--) {
+        for (int j = (int) strlen (a) - 1; j >= 0; j--) {
           if (a[j] == FLIP_CHAR) {
             (void) add_mp (p, z, z, w, digits);
           } else if (a[j] != FLOP_CHAR) {
@@ -597,10 +595,9 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
         errno = ERANGE;
         status = A68_FALSE;
       } else {
-        int j = (int) strlen (a) - 1;
         UNSIGNED_T k = 0x1;
         VALUE (z) = 0;
-        for (; j >= 0; j--) {
+        for (int j = (int) strlen (a) - 1; j >= 0; j--) {
           if (a[j] == FLIP_CHAR) {
             VALUE (z) += k;
           } else if (a[j] != FLOP_CHAR) {
@@ -721,8 +718,7 @@ void genie_read_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_
     scan_string (p, term, ref_file);
     genie_string_to_value (p, mode, item, ref_file);
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       genie_read_standard (p, MOID (q), &item[OFFSET (q)], ref_file);
     }
   } else if (IS_UNION (mode)) {
@@ -894,11 +890,10 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
   if (moid == M_LONG_BITS) {
     A68_LONG_BITS *z = (A68_LONG_BITS *) item;
     char *s = stack_string (p, 8 + LONG_BITS_WIDTH);
-    int n = 0, w;
-    for (w = 0; w <= 1; w++) {
+    int n = 0;
+    for (int w = 0; w <= 1; w++) {
       UNSIGNED_T bit = D_SIGN;
-      int j;
-      for (j = 0; j < BITS_WIDTH; j++) {
+      for (int j = 0; j < BITS_WIDTH; j++) {
         if (w == 0) {
           s[n] = (char) ((HW (VALUE (z)) & bit) ? FLIP_CHAR : FLOP_CHAR);
         } else {
@@ -921,8 +916,7 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
     str[pos--] = NULL_CHAR;
     while (pos >= 0) {
       unt bit = 0x1;
-      int j;
-      for (j = 0; j < MP_BITS_BITS && pos >= 0; j++) {
+      for (int j = 0; j < MP_BITS_BITS && pos >= 0; j++) {
         str[pos--] = (char) ((row[word - 1] & bit) ? FLIP_CHAR : FLOP_CHAR);
         bit <<= 1;
       }
@@ -1068,8 +1062,7 @@ void genie_write_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref
     A68_UNION *z = (A68_UNION *) item;
     genie_write_standard (p, (MOID_T *) (VALUE (z)), &item[A68_UNION_SIZE], ref_file);
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
       genie_check_initialisation (p, elem, MOID (q));
       genie_write_standard (p, MOID (q), elem, ref_file);
@@ -1266,10 +1259,10 @@ void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF 
     ASSERT (io_read (FD (f), z, (size_t) SIZE (mode)) != -1);
     MP_STATUS (z) = (MP_T) INIT_MASK;
   } else if (mode == M_ROW_CHAR || mode == M_STRING) {
-    int len, k;
+    int len;
     ASSERT (io_read (FD (f), &(len), sizeof (len)) != -1);
     reset_transput_buffer (UNFORMATTED_BUFFER);
-    for (k = 0; k < len; k++) {
+    for (int k = 0; k < len; k++) {
       char ch;
       ASSERT (io_read (FD (f), &(ch), sizeof (char)) != -1);
       plusab_transput_buffer (p, UNFORMATTED_BUFFER, ch);
@@ -1283,8 +1276,7 @@ void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF 
     }
     genie_read_bin_standard (p, (MOID_T *) (VALUE (z)), &item[A68_UNION_SIZE], ref_file);
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       genie_read_bin_standard (p, MOID (q), &item[OFFSET (q)], ref_file);
     }
   } else if (IS_ROW (mode) || IS_FLEX (mode)) {
@@ -1441,8 +1433,7 @@ void genie_write_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF
     A68_UNION *z = (A68_UNION *) item;
     genie_write_bin_standard (p, (MOID_T *) (VALUE (z)), &item[A68_UNION_SIZE], ref_file);
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
       genie_check_initialisation (p, elem, MOID (q));
       genie_write_bin_standard (p, MOID (q), elem, ref_file);
@@ -1638,35 +1629,35 @@ char *bits (NODE_T * p)
   (void) error_chars (get_transput_buffer (EDIT_BUFFER), VALUE (&width));
 #else
   {
-    BOOL_T rc = A68_TRUE;
+    BOOL_T ret = A68_TRUE;
     if (mode == M_BOOL) {
       UNSIGNED_T z = VALUE ((A68_BOOL *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix (p, (UNSIGNED_T) z, radix, length);
+      ret = convert_radix (p, (UNSIGNED_T) z, radix, length);
     } else if (mode == M_CHAR) {
       INT_T z = VALUE ((A68_CHAR *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix (p, (UNSIGNED_T) z, radix, length);
+      ret = convert_radix (p, (UNSIGNED_T) z, radix, length);
     } else if (mode == M_INT) {
       INT_T z = VALUE ((A68_INT *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix (p, (UNSIGNED_T) z, radix, length);
+      ret = convert_radix (p, (UNSIGNED_T) z, radix, length);
     } else if (mode == M_REAL) {
 // A trick to copy a REAL into an unt without truncating
       UNSIGNED_T z;
       memcpy (&z, (void *) &VALUE ((A68_REAL *) (STACK_OFFSET (A68_UNION_SIZE))), 8);
-      rc = convert_radix (p, z, radix, length);
+      ret = convert_radix (p, z, radix, length);
     } else if (mode == M_BITS) {
       UNSIGNED_T z = VALUE ((A68_BITS *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix (p, (UNSIGNED_T) z, radix, length);
+      ret = convert_radix (p, (UNSIGNED_T) z, radix, length);
     } else if (mode == M_LONG_INT) {
       DOUBLE_NUM_T z = VALUE ((A68_LONG_INT *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix_double (p, z, radix, length);
+      ret = convert_radix_double (p, z, radix, length);
     } else if (mode == M_LONG_REAL) {
       DOUBLE_NUM_T z = VALUE ((A68_LONG_REAL *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix_double (p, z, radix, length);
+      ret = convert_radix_double (p, z, radix, length);
     } else if (mode == M_LONG_BITS) {
       DOUBLE_NUM_T z = VALUE ((A68_LONG_BITS *) (STACK_OFFSET (A68_UNION_SIZE)));
-      rc = convert_radix_double (p, z, radix, length);
+      ret = convert_radix_double (p, z, radix, length);
     }
-    if (rc == A68_FALSE) {
+    if (ret == A68_FALSE) {
       errno = EDOM;
       PRELUDE_ERROR (A68_TRUE, p, ERROR_OUT_OF_BOUNDS, mode);
     }
@@ -1919,8 +1910,8 @@ char *long_sub_fixed (NODE_T * p, MP_T * x, int digits, int width, int after)
   int strwid = 8 + before + after;
   char *str = stack_string (p, strwid);
   str[0] = NULL_CHAR;
-  int j, len = 0;
-  for (j = 0; j < before; j++) {
+  int len = 0;
+  for (int j = 0; j < before; j++) {
     char ch = (char) (len < LONG_LONG_REAL_WIDTH ? long_choose_dig (p, y, digits) : '0');
     (void) string_plusab_char (str, ch, strwid);
     len++;
@@ -1928,7 +1919,7 @@ char *long_sub_fixed (NODE_T * p, MP_T * x, int digits, int width, int after)
   if (after > 0) {
     (void) string_plusab_char (str, POINT_CHAR, strwid);
   }
-  for (j = 0; j < after; j++) {
+  for (int j = 0; j < after; j++) {
     char ch = (char) (len < LONG_LONG_REAL_WIDTH ? long_choose_dig (p, y, digits) : '0');
     (void) string_plusab_char (str, ch, strwid);
     len++;
@@ -2302,7 +2293,7 @@ void long_standardise (NODE_T * p, MP_T * y, int digits, int before, int after, 
 
 void standardise_double (DOUBLE_T * y, int before, int after, int *p)
 {
-//int j; g = 1.0q; for (j = 0; j < before; j++) { g *= 10.0q; }
+//int g = 1.0q; for (int j = 0; j < before; j++) { g *= 10.0q; }
   DOUBLE_T g = ten_up_double (before);
   DOUBLE_T h = g / 10.0q;
   while (*y >= g) {
@@ -2315,7 +2306,7 @@ void standardise_double (DOUBLE_T * y, int before, int after, int *p)
       (*p)--;
     }
   }
-//f = 1.0q; for (j = 0; j < after; j++) { f *= 0.1q; }
+//f = 1.0q; for (int j = 0; j < after; j++) { f *= 0.1q; }
   DOUBLE_T f = ten_up_double (-after);
   if (*y + 0.5q * f >= g) {
     *y = h;
@@ -2342,7 +2333,7 @@ void standardise (REAL_T * y, int before, int after, int *p)
 // This according RR, but for REAL the last digits are approximate.
 // A68G 3 uses DOUBLE precision version.
 //
-//int j; g = 1.0; for (j = 0; j < before; j++) { g *= 10.0; }
+//int g = 1.0; for (int j = 0; j < before; j++) { g *= 10.0; }
   REAL_T g = ten_up (before);
   REAL_T h = g / 10.0;
   while (*y >= g) {
@@ -2355,7 +2346,7 @@ void standardise (REAL_T * y, int before, int after, int *p)
       (*p)--;
     }
   }
-//f = 1.0; for (j = 0; j < after; j++) { f *= 0.1; }
+//f = 1.0; for (int j = 0; j < after; j++) { f *= 0.1; }
   REAL_T f = ten_up (-after);
   if (*y + 0.5 * f >= g) {
     *y = h;

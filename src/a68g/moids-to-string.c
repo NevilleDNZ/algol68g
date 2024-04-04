@@ -48,8 +48,7 @@ void add_to_moid_text (char *dst, char *str, int *w)
 TAG_T *find_indicant_global (TABLE_T * table, MOID_T * mode)
 {
   if (table != NO_TABLE) {
-    TAG_T *s;
-    for (s = INDICANTS (table); s != NO_TAG; FORWARD (s)) {
+    for (TAG_T *s = INDICANTS (table); s != NO_TAG; FORWARD (s)) {
       if (MOID (s) == mode) {
         return s;
       }

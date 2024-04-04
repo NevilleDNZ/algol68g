@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for assignations.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -98,7 +98,6 @@ PROP_T genie_assignation_constant (NODE_T * p)
 
 PROP_T genie_assignation_quick (NODE_T * p)
 {
-  PROP_T self;
   NODE_T *dst = SUB (p);
   NODE_T *src = NEXT_NEXT (dst);
   MOID_T *src_mode = SUB_MOID (dst);
@@ -117,6 +116,7 @@ PROP_T genie_assignation_quick (NODE_T * p)
   } else {
     COPY (ADDRESS (z), STACK_TOP, size);
   }
+  PROP_T self;
   UNIT (&self) = genie_assignation_quick;
   SOURCE (&self) = p;
   return self;

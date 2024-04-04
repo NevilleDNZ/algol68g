@@ -112,22 +112,22 @@ void genie_add_char (NODE_T * p)
 // Sum.
   A68_REF c = heap_generator (p, M_STRING, DESCRIPTOR_SIZE (1));
   A68_REF d = heap_generator_2 (p, M_STRING, 2, SIZE (M_CHAR));
-  A68_ARRAY *a_3; A68_TUPLE *t_3; BYTE_T *b_3;
-  GET_DESCRIPTOR (a_3, t_3, &c);
-  DIM (a_3) = 1;
-  MOID (a_3) = M_CHAR;
-  ELEM_SIZE (a_3) = SIZE (M_CHAR);
-  SLICE_OFFSET (a_3) = 0;
-  FIELD_OFFSET (a_3) = 0;
-  ARRAY (a_3) = d;
-  LWB (t_3) = 1;
-  UPB (t_3) = 2;
-  SHIFT (t_3) = LWB (t_3);
-  SPAN (t_3) = 1;
+  A68_ARRAY *arr_3; A68_TUPLE *tup_3; BYTE_T *str_3;
+  GET_DESCRIPTOR (arr_3, tup_3, &c);
+  DIM (arr_3) = 1;
+  MOID (arr_3) = M_CHAR;
+  ELEM_SIZE (arr_3) = SIZE (M_CHAR);
+  SLICE_OFFSET (arr_3) = 0;
+  FIELD_OFFSET (arr_3) = 0;
+  ARRAY (arr_3) = d;
+  LWB (tup_3) = 1;
+  UPB (tup_3) = 2;
+  SHIFT (tup_3) = LWB (tup_3);
+  SPAN (tup_3) = 1;
 // Add chars.
-  b_3 = DEREF (BYTE_T, &ARRAY (a_3));
-  MOVE ((BYTE_T *) & b_3[0], (BYTE_T *) & a, SIZE (M_CHAR));
-  MOVE ((BYTE_T *) & b_3[SIZE (M_CHAR)], (BYTE_T *) & b, SIZE (M_CHAR));
+  str_3 = DEREF (BYTE_T, &ARRAY (arr_3));
+  MOVE ((BYTE_T *) & str_3[0], (BYTE_T *) & a, SIZE (M_CHAR));
+  MOVE ((BYTE_T *) & str_3[SIZE (M_CHAR)], (BYTE_T *) & b, SIZE (M_CHAR));
   PUSH_REF (p, c);
 }
 
@@ -140,12 +140,12 @@ void genie_elem_string (NODE_T * p)
   CHECK_REF (p, z, M_STRING);
   A68_INT k;
   POP_OBJECT (p, &k, A68_INT);
-  A68_ARRAY *a; A68_TUPLE *t;
-  GET_DESCRIPTOR (a, t, &z);
-  PRELUDE_ERROR (VALUE (&k) < LWB (t), p, ERROR_INDEX_OUT_OF_BOUNDS, NO_TEXT);
-  PRELUDE_ERROR (VALUE (&k) > UPB (t), p, ERROR_INDEX_OUT_OF_BOUNDS, NO_TEXT);
-  BYTE_T *base = DEREF (BYTE_T, &(ARRAY (a)));
-  A68_CHAR *ch = (A68_CHAR *) & (base[INDEX_1_DIM (a, t, VALUE (&k))]);
+  A68_ARRAY *arr; A68_TUPLE *tup;
+  GET_DESCRIPTOR (arr, tup, &z);
+  PRELUDE_ERROR (VALUE (&k) < LWB (tup), p, ERROR_INDEX_OUT_OF_BOUNDS, NO_TEXT);
+  PRELUDE_ERROR (VALUE (&k) > UPB (tup), p, ERROR_INDEX_OUT_OF_BOUNDS, NO_TEXT);
+  BYTE_T *str = DEREF (BYTE_T, &(ARRAY (arr)));
+  A68_CHAR *ch = (A68_CHAR *) & (str[INDEX_1_DIM (arr, tup, VALUE (&k))]);
   PUSH_VALUE (p, VALUE (ch), A68_CHAR);
 }
 
@@ -157,48 +157,48 @@ void genie_add_string (NODE_T * p)
   A68_REF b;
   POP_REF (p, &b);
   CHECK_INIT (p, INITIALISED (&b), M_STRING);
-  A68_ARRAY *a_2; A68_TUPLE *t_2;
-  GET_DESCRIPTOR (a_2, t_2, &b);
-  int l_2 = ROW_SIZE (t_2);
+  A68_ARRAY *arr_2; A68_TUPLE *tup_2;
+  GET_DESCRIPTOR (arr_2, tup_2, &b);
+  int l_2 = ROW_SIZE (tup_2);
 // Left part.
   A68_REF a;
   POP_REF (p, &a);
   CHECK_REF (p, a, M_STRING);
-  A68_ARRAY *a_1; A68_TUPLE *t_1;
-  GET_DESCRIPTOR (a_1, t_1, &a);
-  int l_1 = ROW_SIZE (t_1);
+  A68_ARRAY *arr_1; A68_TUPLE *tup_1;
+  GET_DESCRIPTOR (arr_1, tup_1, &a);
+  int l_1 = ROW_SIZE (tup_1);
 // Sum.
   A68_REF ref_str = heap_generator (p, M_STRING, DESCRIPTOR_SIZE (1));
   A68_REF new_str = heap_generator_2 (p, M_STRING, l_1 + l_2, SIZE (M_CHAR));
 // Calculate again since garbage collector might have moved data.
-  GET_DESCRIPTOR (a_1, t_1, &a);
-  GET_DESCRIPTOR (a_2, t_2, &b);
-  A68_ARRAY *a_3; A68_TUPLE *t_3;
-  GET_DESCRIPTOR (a_3, t_3, &ref_str);
-  DIM (a_3) = 1;
-  MOID (a_3) = M_CHAR;
-  ELEM_SIZE (a_3) = SIZE (M_CHAR);
-  SLICE_OFFSET (a_3) = 0;
-  FIELD_OFFSET (a_3) = 0;
-  ARRAY (a_3) = new_str;
-  LWB (t_3) = 1;
-  UPB (t_3) = l_1 + l_2;
-  SHIFT (t_3) = LWB (t_3);
-  SPAN (t_3) = 1;
+  GET_DESCRIPTOR (arr_1, tup_1, &a);
+  GET_DESCRIPTOR (arr_2, tup_2, &b);
+  A68_ARRAY *arr_3; A68_TUPLE *tup_3;
+  GET_DESCRIPTOR (arr_3, tup_3, &ref_str);
+  DIM (arr_3) = 1;
+  MOID (arr_3) = M_CHAR;
+  ELEM_SIZE (arr_3) = SIZE (M_CHAR);
+  SLICE_OFFSET (arr_3) = 0;
+  FIELD_OFFSET (arr_3) = 0;
+  ARRAY (arr_3) = new_str;
+  LWB (tup_3) = 1;
+  UPB (tup_3) = l_1 + l_2;
+  SHIFT (tup_3) = LWB (tup_3);
+  SPAN (tup_3) = 1;
 // Add strings.
-  BYTE_T *b_3 = DEREF (BYTE_T, &ARRAY (a_3));
+  BYTE_T *str_3 = DEREF (BYTE_T, &ARRAY (arr_3));
   int m = 0;
-  if (ROW_SIZE (t_1) > 0) {
-    BYTE_T *b_1 = DEREF (BYTE_T, &ARRAY (a_1));
-    for (int k = LWB (t_1); k <= UPB (t_1); k++) {
-      MOVE ((BYTE_T *) & b_3[m], (BYTE_T *) & b_1[INDEX_1_DIM (a_1, t_1, k)], SIZE (M_CHAR));
+  if (ROW_SIZE (tup_1) > 0) {
+    BYTE_T *str_1 = DEREF (BYTE_T, &ARRAY (arr_1));
+    for (int k = LWB (tup_1); k <= UPB (tup_1); k++) {
+      MOVE ((BYTE_T *) & str_3[m], (BYTE_T *) & str_1[INDEX_1_DIM (arr_1, tup_1, k)], SIZE (M_CHAR));
       m += SIZE (M_CHAR);
     }
   }
-  if (ROW_SIZE (t_2) > 0) {
-    BYTE_T *b_2 = DEREF (BYTE_T, &ARRAY (a_2));
-    for (int k = LWB (t_2); k <= UPB (t_2); k++) {
-      MOVE ((BYTE_T *) & b_3[m], (BYTE_T *) & b_2[INDEX_1_DIM (a_2, t_2, k)], SIZE (M_CHAR));
+  if (ROW_SIZE (tup_2) > 0) {
+    BYTE_T *str_2 = DEREF (BYTE_T, &ARRAY (arr_2));
+    for (int k = LWB (tup_2); k <= UPB (tup_2); k++) {
+      MOVE ((BYTE_T *) & str_3[m], (BYTE_T *) & str_2[INDEX_1_DIM (arr_2, tup_2, k)], SIZE (M_CHAR));
       m += SIZE (M_CHAR);
     }
   }
@@ -249,12 +249,12 @@ void genie_times_int_char (NODE_T * p)
 // Make new string.
   A68_REF z, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (z, row, arr, tup, M_ROW_CHAR, M_CHAR, (int) (VALUE (&str_size)));
-  BYTE_T *base = ADDRESS (&row);
+  BYTE_T *str = ADDRESS (&row);
   for (int k = 0; k < VALUE (&str_size); k++) {
     A68_CHAR ch;
     STATUS (&ch) = INIT_MASK;
     VALUE (&ch) = VALUE (&a);
-    *(A68_CHAR *) & base[k * SIZE (M_CHAR)] = ch;
+    *(A68_CHAR *) & str[k * SIZE (M_CHAR)] = ch;
   }
   PUSH_REF (p, z);
 }
@@ -328,30 +328,30 @@ int string_difference (NODE_T * p)
   A68_REF row2;
   POP_REF (p, &row2);
   CHECK_INIT (p, INITIALISED (&row2), M_STRING);
-  A68_ARRAY *a_2; A68_TUPLE *t_2;
-  GET_DESCRIPTOR (a_2, t_2, &row2);
-  int s_2 = ROW_SIZE (t_2);
+  A68_ARRAY *arr_2; A68_TUPLE *tup_2;
+  GET_DESCRIPTOR (arr_2, tup_2, &row2);
+  int len_2 = ROW_SIZE (tup_2);
 //
   A68_REF row1;
   POP_REF (p, &row1);
   CHECK_INIT (p, INITIALISED (&row1), M_STRING);
-  A68_ARRAY *a_1; A68_TUPLE *t_1;
-  GET_DESCRIPTOR (a_1, t_1, &row1);
-  int s_1 = ROW_SIZE (t_1);
+  A68_ARRAY *arr_1; A68_TUPLE *tup_1;
+  GET_DESCRIPTOR (arr_1, tup_1, &row1);
+  int len_1 = ROW_SIZE (tup_1);
 // Compute string difference.
-  int size = (s_1 > s_2 ? s_1 : s_2), diff = 0;
-  BYTE_T *b_1 = (s_1 > 0 ? DEREF (BYTE_T, &ARRAY (a_1)) : NO_BYTE);
-  BYTE_T *b_2 = (s_2 > 0 ? DEREF (BYTE_T, &ARRAY (a_2)) : NO_BYTE);
+  int size = (len_1 > len_2 ? len_1 : len_2), diff = 0;
+  BYTE_T *str_1 = (len_1 > 0 ? DEREF (BYTE_T, &ARRAY (arr_1)) : NO_BYTE);
+  BYTE_T *str_2 = (len_2 > 0 ? DEREF (BYTE_T, &ARRAY (arr_2)) : NO_BYTE);
   for (int k = 0; k < size && diff == 0; k++) {
-    int a, b;
-    if (s_1 > 0 && k < s_1) {
-      A68_CHAR *ch = (A68_CHAR *) & b_1[INDEX_1_DIM (a_1, t_1, LWB (t_1) + k)];
+    int a = 0, b = 0;
+    if (len_1 > 0 && k < len_1) {
+      A68_CHAR *ch = (A68_CHAR *) & str_1[INDEX_1_DIM (arr_1, tup_1, LWB (tup_1) + k)];
       a = (int) VALUE (ch);
     } else {
       a = 0;
     }
-    if (s_2 > 0 && k < s_2) {
-      A68_CHAR *ch = (A68_CHAR *) & b_2[INDEX_1_DIM (a_2, t_2, LWB (t_2) + k)];
+    if (len_2 > 0 && k < len_2) {
+      A68_CHAR *ch = (A68_CHAR *) & str_2[INDEX_1_DIM (arr_2, tup_2, LWB (tup_2) + k)];
       b = (int) VALUE (ch);
     } else {
       b = 0;

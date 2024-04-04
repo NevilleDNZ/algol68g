@@ -77,14 +77,14 @@ void set_moid_sizes (MOID_T * z)
 #endif
   SIZE (M_LONG_LONG_REAL) = moid_size (M_LONG_LONG_REAL);
   DIGITS (M_LONG_LONG_REAL) = moid_digits (M_LONG_LONG_REAL);
-  SIZEC (M_LONG_COMPLEX) = SIZE (M_LONG_REAL);
-  SIZEC (M_REF_LONG_COMPLEX) = SIZE (M_LONG_REAL);
-  DIGITSC (M_LONG_COMPLEX) = DIGITS (M_LONG_REAL);
-  DIGITSC (M_REF_LONG_COMPLEX) = DIGITS (M_LONG_REAL);
-  SIZEC (M_LONG_LONG_COMPLEX) = SIZE (M_LONG_LONG_REAL);
-  SIZEC (M_REF_LONG_LONG_COMPLEX) = SIZE (M_LONG_LONG_REAL);
-  DIGITSC (M_LONG_LONG_COMPLEX) = DIGITS (M_LONG_LONG_REAL);
-  DIGITSC (M_REF_LONG_LONG_COMPLEX) = DIGITS (M_LONG_LONG_REAL);
+  SIZE_COMPL (M_LONG_COMPLEX) = SIZE (M_LONG_REAL);
+  SIZE_COMPL (M_REF_LONG_COMPLEX) = SIZE (M_LONG_REAL);
+  DIGITS_COMPL (M_LONG_COMPLEX) = DIGITS (M_LONG_REAL);
+  DIGITS_COMPL (M_REF_LONG_COMPLEX) = DIGITS (M_LONG_REAL);
+  SIZE_COMPL (M_LONG_LONG_COMPLEX) = SIZE (M_LONG_LONG_REAL);
+  SIZE_COMPL (M_REF_LONG_LONG_COMPLEX) = SIZE (M_LONG_LONG_REAL);
+  DIGITS_COMPL (M_LONG_LONG_COMPLEX) = DIGITS (M_LONG_LONG_REAL);
+  DIGITS_COMPL (M_REF_LONG_LONG_COMPLEX) = DIGITS (M_LONG_LONG_REAL);
 }
 
 //! @brief Moid size 2.
@@ -197,25 +197,22 @@ int moid_size_2 (MOID_T * p)
   } else if (IS_FLEX (p)) {
     return moid_size (SUB (p));
   } else if (IS_STRUCT (p)) {
-    PACK_T *z = PACK (p);
     int size = 0;
-    for (; z != NO_PACK; FORWARD (z)) {
+    for (PACK_T *z = PACK (p); z != NO_PACK; FORWARD (z)) {
       size += moid_size (MOID (z));
     }
     return size;
   } else if (IS_UNION (p)) {
-    PACK_T *z = PACK (p);
     int size = 0;
-    for (; z != NO_PACK; FORWARD (z)) {
+    for (PACK_T *z = PACK (p); z != NO_PACK; FORWARD (z)) {
       if (moid_size (MOID (z)) > size) {
         size = moid_size (MOID (z));
       }
     }
     return SIZE_ALIGNED (A68_UNION) + size;
   } else if (PACK (p) != NO_PACK) {
-    PACK_T *z = PACK (p);
     int size = 0;
-    for (; z != NO_PACK; FORWARD (z)) {
+    for (PACK_T *z = PACK (p); z != NO_PACK; FORWARD (z)) {
       size += moid_size (MOID (z));
     }
     return size;

@@ -114,18 +114,16 @@ void genie_matrix_complex_lu (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
   A68_REF ref_signum, ref_q;
-  gsl_permutation *q;
-  gsl_matrix_complex *u;
-  int sign;
-  A68_INT signum;
   POP_REF (p, &ref_signum);
   CHECK_REF (p, ref_signum, M_REF_INT);
   POP_REF (p, &ref_q);
   CHECK_REF (p, ref_q, M_REF_ROW_INT);
   PUSH_REF (p, *DEREF (A68_ROW, &ref_q));
-  q = pop_permutation (p, A68_FALSE);
-  u = pop_matrix_complex (p, A68_TRUE);
+  gsl_permutation *q = pop_permutation (p, A68_FALSE);
+  gsl_matrix_complex *u = pop_matrix_complex (p, A68_TRUE);
+  int sign;
   ASSERT_GSL (gsl_linalg_complex_LU_decomp (u, q, &sign));
+  A68_INT signum;
   VALUE (&signum) = sign;
   STATUS (&signum) = INIT_MASK;
   *DEREF (A68_INT, &ref_signum) = signum;
@@ -142,12 +140,10 @@ void genie_matrix_complex_lu (NODE_T * p)
 void genie_matrix_complex_lu_det (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
-  gsl_matrix_complex *lu;
   A68_INT signum;
-  gsl_complex det;
   POP_OBJECT (p, &signum, A68_INT);
-  lu = pop_matrix_complex (p, A68_TRUE);
-  det = gsl_linalg_complex_LU_det (lu, VALUE (&signum));
+  gsl_matrix_complex *lu = pop_matrix_complex (p, A68_TRUE);
+  gsl_complex det = gsl_linalg_complex_LU_det (lu, VALUE (&signum));
   PUSH_VALUE (p, GSL_REAL (det), A68_REAL);
   PUSH_VALUE (p, GSL_IMAG (det), A68_REAL);
   gsl_matrix_complex_free (lu);
@@ -159,11 +155,9 @@ void genie_matrix_complex_lu_det (NODE_T * p)
 void genie_matrix_complex_lu_inv (NODE_T * p)
 {
   gsl_error_handler_t *save_handler = gsl_set_error_handler (torrix_error_handler);
-  gsl_permutation *q;
-  gsl_matrix_complex *lu, *inv;
-  q = pop_permutation (p, A68_TRUE);
-  lu = pop_matrix_complex (p, A68_TRUE);
-  inv = gsl_matrix_complex_calloc (SIZE1 (lu), SIZE2 (lu));
+  gsl_permutation *q = pop_permutation (p, A68_TRUE);
+  gsl_matrix_complex *lu = pop_matrix_complex (p, A68_TRUE);
+  gsl_matrix_complex *inv = gsl_matrix_complex_calloc (SIZE1 (lu), SIZE2 (lu));
   ASSERT_GSL (gsl_linalg_complex_LU_invert (lu, q, inv));
   push_matrix_complex (p, inv);
   gsl_matrix_complex_free (lu);

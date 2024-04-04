@@ -47,9 +47,8 @@ PROP_T genie_cast (NODE_T * p)
 
 PROP_T genie_uniting (NODE_T * p)
 {
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   MOID_T *u = MOID (p), *v = MOID (SUB (p));
-  int size = SIZE (u);
   if (ATTRIBUTE (v) != UNION_SYMBOL) {
     MOID_T *w = unites_to (v, u);
     PUSH_UNION (p, (void *) w);
@@ -65,7 +64,7 @@ PROP_T genie_uniting (NODE_T * p)
       exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
-  A68_SP = sp + size;
+  A68_SP = pop_sp + SIZE (u);
   PROP_T self;
   UNIT (&self) = genie_uniting;
   SOURCE (&self) = p;
@@ -289,14 +288,14 @@ void genie_proceduring (NODE_T * p)
 
 PROP_T genie_dereferencing_quick (NODE_T * p)
 {
-  BYTE_T *stack_top = STACK_TOP;
-  A68_REF *z = (A68_REF *) stack_top;
+  BYTE_T *tos = STACK_TOP;
+  A68_REF *z = (A68_REF *) tos;
   ADDR_T pop_sp = A68_SP;
   GENIE_UNIT (SUB (p));
   A68_SP = pop_sp;
   CHECK_REF (p, *z, MOID (SUB (p)));
   PUSH (p, ADDRESS (z), SIZE (MOID (p)));
-  genie_check_initialisation (p, stack_top, MOID (p));
+  genie_check_initialisation (p, tos, MOID (p));
   return GPROP (p);
 }
 
@@ -305,11 +304,11 @@ PROP_T genie_dereferencing_quick (NODE_T * p)
 PROP_T genie_dereference_frame_identifier (NODE_T * p)
 {
   MOID_T *deref = SUB_MOID (p);
-  BYTE_T *stack_top = STACK_TOP;
+  BYTE_T *tos = STACK_TOP;
   A68_REF *z;
   FRAME_GET (z, A68_REF, p);
   PUSH (p, ADDRESS (z), SIZE (deref));
-  genie_check_initialisation (p, stack_top, deref);
+  genie_check_initialisation (p, tos, deref);
   return GPROP (p);
 }
 
@@ -318,12 +317,12 @@ PROP_T genie_dereference_frame_identifier (NODE_T * p)
 PROP_T genie_dereference_generic_identifier (NODE_T * p)
 {
   MOID_T *deref = SUB_MOID (p);
-  BYTE_T *stack_top = STACK_TOP;
+  BYTE_T *tos = STACK_TOP;
   A68_REF *z;
   FRAME_GET (z, A68_REF, p);
   CHECK_REF (p, *z, MOID (SUB (p)));
   PUSH (p, ADDRESS (z), SIZE (deref));
-  genie_check_initialisation (p, stack_top, deref);
+  genie_check_initialisation (p, tos, deref);
   return GPROP (p);
 }
 
@@ -334,8 +333,8 @@ PROP_T genie_dereference_slice_name_quick (NODE_T * p)
   MOID_T *ref_m = MOID (p); MOID_T *deref_m = SUB (ref_m);
   ADDR_T pop_sp = A68_SP;
 // Get REF [] and [].
-  BYTE_T *stack_top = STACK_TOP;
-  A68_REF *z = (A68_REF *) stack_top;
+  BYTE_T *tos = STACK_TOP;
+  A68_REF *z = (A68_REF *) tos;
   GENIE_UNIT (SUB (p));
   CHECK_REF (p, *z, ref_m);
   A68_ARRAY *arr; A68_TUPLE *tup;
@@ -357,7 +356,7 @@ PROP_T genie_dereference_slice_name_quick (NODE_T * p)
   }
 // Push element.
   PUSH (p, &((ADDRESS (&(ARRAY (arr))))[ROW_ELEMENT (arr, index)]), SIZE (deref_m));
-  genie_check_initialisation (p, stack_top, deref_m);
+  genie_check_initialisation (p, tos, deref_m);
   return GPROP (p);
 }
 
@@ -368,15 +367,15 @@ PROP_T genie_dereference_selection_name_quick (NODE_T * p)
   NODE_T *selector = SUB (p);
   MOID_T *struct_m = MOID (NEXT (selector));
   MOID_T *result_m = SUB_MOID (selector);
-  BYTE_T *stack_top = STACK_TOP;
-  A68_REF *z = (A68_REF *) stack_top;
+  BYTE_T *tos = STACK_TOP;
+  A68_REF *z = (A68_REF *) tos;
   ADDR_T pop_sp = A68_SP;
   GENIE_UNIT (NEXT (selector));
   CHECK_REF (selector, *z, struct_m);
   OFFSET (z) += OFFSET (NODE_PACK (SUB (selector)));
   A68_SP = pop_sp;
   PUSH (p, ADDRESS (z), SIZE (result_m));
-  genie_check_initialisation (p, stack_top, result_m);
+  genie_check_initialisation (p, tos, result_m);
   return GPROP (p);
 }
 

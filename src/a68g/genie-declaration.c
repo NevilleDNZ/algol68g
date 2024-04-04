@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for declarations.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -44,12 +44,12 @@ void genie_identity_dec (NODE_T * p)
       NODE_T *src = NEXT_NEXT (p);
       MOID_T *src_mode = MOID (p);
       unt size = (unt) SIZE (src_mode);
-      BYTE_T *stack_top = STACK_TOP;
+      BYTE_T *tos = STACK_TOP;
       ADDR_T pop_sp = A68_SP;
       ADDR_T pop_dns = FRAME_DNS (A68_FP);
       FRAME_DNS (A68_FP) = A68_FP;
       GENIE_UNIT_TRACE (src);
-      genie_check_initialisation (src, stack_top, src_mode);
+      genie_check_initialisation (src, tos, src_mode);
       STACK_DNS (src, src_mode, A68_FP);
       FRAME_DNS (A68_FP) = pop_dns;
 // Make a temporary REF to the object in the frame.

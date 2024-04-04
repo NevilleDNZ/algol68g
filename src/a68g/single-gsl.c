@@ -37,21 +37,19 @@
 #define PROC_RR_R(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x;\
-  int status;\
   POP_OPERAND_ADDRESS (p, x, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (& (VALUE (x)));\
+  int status = f (& (VALUE (x)));\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
 }
 
 #define PROC_R_R(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x;\
-  gsl_sf_result y;\
-  int status;\
   POP_OPERAND_ADDRESS (p, x, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), &y);\
+  gsl_sf_result y;\
+  int status = f (VALUE (x), &y);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&y);\
 }
@@ -59,11 +57,10 @@ void g (NODE_T *p) {\
 #define PROC_R_R_DBL(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x;\
-  gsl_sf_result y;\
-  int status;\
   POP_OPERAND_ADDRESS (p, x, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), GSL_PREC_DOUBLE, &y);\
+  gsl_sf_result y;\
+  int status = f (VALUE (x), GSL_PREC_DOUBLE, &y);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&y);\
 }
@@ -71,11 +68,10 @@ void g (NODE_T *p) {\
 #define PROC_I_R(p, g, f)\
 void g (NODE_T *p) {\
   A68_INT s;\
-  gsl_sf_result y;\
-  int status;\
   POP_OBJECT (p, &s, A68_INT);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (&s), &y);\
+  gsl_sf_result y;\
+  int status = f (VALUE (&s), &y);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   PUSH_VALUE (p, VAL (&y), A68_REAL);\
 }
@@ -83,39 +79,36 @@ void g (NODE_T *p) {\
 #define PROC_R_R_R(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x, *y;\
-  gsl_sf_result r;\
-  int status;\
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), VALUE (y),  &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (x), VALUE (y),  &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&r);\
 }
 
 #define PROC_I_R_R(p, g, f)\
 void g (NODE_T *p) {\
-  A68_INT s;\
   A68_REAL x;\
-  gsl_sf_result r;\
-  int status;\
   POP_OBJECT (p, &x, A68_REAL);\
+  A68_INT s;\
   POP_OBJECT (p, &s, A68_INT);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (&s), VALUE (&x), &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (&s), VALUE (&x), &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   PUSH_VALUE (p, VAL (&r), A68_REAL);\
 }
 
 #define PROC_I_R_R_REVERSED(p, g, f)\
 void g (NODE_T *p) {\
-  A68_INT s;\
   A68_REAL x;\
-  gsl_sf_result r;\
-  int status;\
   POP_OBJECT (p, &x, A68_REAL);\
+  A68_INT s;\
   POP_OBJECT (p, &s, A68_INT);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (&x), VALUE (&s), &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (&x), VALUE (&s), &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   PUSH_VALUE (p, VAL (&r), A68_REAL);\
 }
@@ -123,11 +116,10 @@ void g (NODE_T *p) {\
 #define PROC_R_R_R_DBL(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x, *y;\
-  gsl_sf_result r;\
-  int status;\
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), VALUE (y), GSL_PREC_DOUBLE, &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (x), VALUE (y), GSL_PREC_DOUBLE, &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&r);\
 }
@@ -135,27 +127,25 @@ void g (NODE_T *p) {\
 #define PROC_R_R_R_R(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x, *y, *z;\
-  gsl_sf_result r;\
-  int status;\
   POP_ADDRESS (p, z, A68_REAL);\
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), VALUE (y), VALUE (z),  &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (x), VALUE (y), VALUE (z),  &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&r);\
 }
 
 #define PROC_I_R_R_R(p, g, f)\
 void g (NODE_T *p) {\
-  A68_INT s;\
   A68_REAL x, y;\
-  gsl_sf_result r;\
-  int status;\
   POP_OBJECT (p, &y, A68_REAL);\
   POP_OBJECT (p, &x, A68_REAL);\
+  A68_INT s;\
   POP_OBJECT (p, &s, A68_INT);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (&s), VALUE (&x), VALUE (&y), &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (&s), VALUE (&x), VALUE (&y), &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   PUSH_VALUE (p, VAL (&r), A68_REAL);\
 }
@@ -163,12 +153,11 @@ void g (NODE_T *p) {\
 #define PROC_R_R_R_R_DBL(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x, *y, *z;\
-  gsl_sf_result r;\
-  int status;\
   POP_ADDRESS (p, z, A68_REAL);\
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), VALUE (y), VALUE (z), GSL_PREC_DOUBLE, &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (x), VALUE (y), VALUE (z), GSL_PREC_DOUBLE, &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&r);\
 }
@@ -176,13 +165,12 @@ void g (NODE_T *p) {\
 #define PROC_R_R_R_R_R_DBL(p, g, f)\
 void g (NODE_T *p) {\
   A68_REAL *x, *y, *z, *rho;\
-  gsl_sf_result r;\
-  int status;\
   POP_ADDRESS (p, rho, A68_REAL);\
   POP_ADDRESS (p, z, A68_REAL);\
   POP_OPERAND_ADDRESSES (p, x, y, A68_REAL);\
   (void) gsl_set_error_handler_off ();\
-  status = f (VALUE (x), VALUE (y), VALUE (z), VALUE (rho), GSL_PREC_DOUBLE, &r);\
+  gsl_sf_result r;\
+  int status = f (VALUE (x), VALUE (y), VALUE (z), VALUE (rho), GSL_PREC_DOUBLE, &r);\
   MATH_RTE (p, status != 0, M_REAL, (char *) gsl_strerror (status));\
   VALUE (x) = VAL (&r);\
 }

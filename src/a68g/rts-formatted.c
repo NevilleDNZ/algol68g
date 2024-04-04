@@ -309,10 +309,10 @@ void pattern_error (NODE_T * p, MOID_T * mode, int att)
 
 void unite_to_number (NODE_T * p, MOID_T * mode, BYTE_T * item)
 {
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   PUSH_UNION (p, mode);
   PUSH (p, item, (int) SIZE (mode));
-  A68_SP = sp + SIZE (M_NUMBER);
+  A68_SP = pop_sp + SIZE (M_NUMBER);
 }
 
 //! @brief Write a group of insertions.
@@ -337,20 +337,20 @@ void write_insertion (NODE_T * p, A68_REF ref_file, MOOD_T mood)
       if (mood & INSERTION_NORMAL) {
         add_string_transput_buffer (p, FORMATTED_BUFFER, NSYMBOL (p));
       } else if (mood & INSERTION_BLANK) {
-        int j, k = (int) strlen (NSYMBOL (p));
-        for (j = 1; j <= k; j++) {
+        int k = (int) strlen (NSYMBOL (p));
+        for (int j = 1; j <= k; j++) {
           plusab_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
         }
       }
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
+      int k = get_replicator_value (SUB (p), A68_TRUE);
       if (ATTRIBUTE (SUB_NEXT (p)) != FORMAT_ITEM_K) {
-        for (j = 1; j <= k; j++) {
+        for (int j = 1; j <= k; j++) {
           write_insertion (NEXT (p), ref_file, mood);
         }
       } else {
         int pos = get_transput_buffer_index (FORMATTED_BUFFER);
-        for (j = 1; j < (k - pos); j++) {
+        for (int j = 1; j < (k - pos); j++) {
           plusab_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
         }
       }
@@ -381,8 +381,8 @@ void write_string_pattern (NODE_T * p, MOID_T * mode, A68_REF ref_file, char **s
       }
       return;
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
-      for (j = 1; j <= k; j++) {
+      int k = get_replicator_value (SUB (p), A68_TRUE);
+      for (int j = 1; j <= k; j++) {
         write_string_pattern (NEXT (p), mode, ref_file, str);
       }
       return;
@@ -892,8 +892,8 @@ void count_zd_frames (NODE_T * p, int *z)
     if (IS (p, FORMAT_ITEM_D) || IS (p, FORMAT_ITEM_Z)) {
       (*z)++;
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
-      for (j = 1; j <= k; j++) {
+      int k = get_replicator_value (SUB (p), A68_TRUE);
+      for (int j = 1; j <= k; j++) {
         count_zd_frames (NEXT (p), z);
       }
       return;
@@ -934,8 +934,8 @@ void shift_sign (NODE_T * p, char **q)
     } else if (IS (p, FORMAT_ITEM_D)) {
       (*q) = NO_TEXT;
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
-      for (j = 1; j <= k; j++) {
+      int k = get_replicator_value (SUB (p), A68_TRUE);
+      for (int j = 1; j <= k; j++) {
         shift_sign (NEXT (p), q);
       }
       return;
@@ -1048,8 +1048,8 @@ void write_mould (NODE_T * p, A68_REF ref_file, int type, char **q, MOOD_T * moo
       }
 // Replicator.
       else if (IS (p, REPLICATOR)) {
-        int j, k = get_replicator_value (SUB (p), A68_TRUE);
-        for (j = 1; j <= k; j++) {
+        int k = get_replicator_value (SUB (p), A68_TRUE);
+        for (int j = 1; j <= k; j++) {
           write_mould (NEXT (p), ref_file, type, q, mood);
         }
         return;
@@ -1938,14 +1938,14 @@ void read_insertion (NODE_T * p, A68_REF ref_file)
         (void) read_single_char (p, ref_file);
       }
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
+      int k = get_replicator_value (SUB (p), A68_TRUE);
       if (ATTRIBUTE (SUB_NEXT (p)) != FORMAT_ITEM_K) {
-        for (j = 1; j <= k; j++) {
+        for (int j = 1; j <= k; j++) {
           read_insertion (NEXT (p), ref_file);
         }
       } else {
         int pos = get_transput_buffer_index (INPUT_BUFFER);
-        for (j = 1; j < (k - pos); j++) {
+        for (int j = 1; j < (k - pos); j++) {
           if (!END_OF_FILE (file)) {
             (void) read_single_char (p, ref_file);
           }
@@ -1969,8 +1969,8 @@ void read_string_pattern (NODE_T * p, MOID_T * m, A68_REF ref_file)
       plusab_transput_buffer (p, INPUT_BUFFER, BLANK_CHAR);
       return;
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
-      for (j = 1; j <= k; j++) {
+      int k = get_replicator_value (SUB (p), A68_TRUE);
+      for (int j = 1; j <= k; j++) {
         read_string_pattern (NEXT (p), m, ref_file);
       }
       return;
@@ -2065,8 +2065,8 @@ void read_sign_mould (NODE_T * p, MOID_T * m, A68_REF ref_file, int *sign)
     if (IS (p, INSERTION)) {
       read_insertion (SUB (p), ref_file);
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
-      for (j = 1; j <= k; j++) {
+      int k = get_replicator_value (SUB (p), A68_TRUE);
+      for (int j = 1; j <= k; j++) {
         read_sign_mould (NEXT (p), m, ref_file, sign);
       }
       return;                   // Leave this!
@@ -2121,11 +2121,11 @@ void read_integral_mould (NODE_T * p, MOID_T * m, A68_REF ref_file)
     if (IS (p, INSERTION)) {
       read_insertion (SUB (p), ref_file);
     } else if (IS (p, REPLICATOR)) {
-      int j, k = get_replicator_value (SUB (p), A68_TRUE);
-      for (j = 1; j <= k; j++) {
+      int k = get_replicator_value (SUB (p), A68_TRUE);
+      for (int j = 1; j <= k; j++) {
         read_integral_mould (NEXT (p), m, ref_file);
       }
-      return;                   // Leave this!
+      return; // Leave this!
     } else if (IS (p, FORMAT_ITEM_Z)) {
       int ch = read_single_char (p, ref_file);
       const char *digits = (m == M_BITS || m == M_LONG_BITS || m == M_LONG_LONG_BITS) ? BITS_DIGITS_BLANK : INT_DIGITS_BLANK;
@@ -2458,8 +2458,7 @@ void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_R
     A68_UNION *z = (A68_UNION *) item;
     genie_read_standard_format (p, (MOID_T *) (VALUE (z)), &item[A68_UNION_SIZE], ref_file, formats);
   } else if (IS_STRUCT (mode)) {
-    PACK_T *q = PACK (mode);
-    for (; q != NO_PACK; FORWARD (q)) {
+    for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
       genie_read_standard_format (p, MOID (q), elem, ref_file, formats);
     }

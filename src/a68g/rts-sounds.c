@@ -113,13 +113,12 @@ void test_bits_per_sample (NODE_T * p, unt bps)
 
 unt code_string (NODE_T * p, char *s, int n)
 {
-  unt v;
-  int k, m;
   if (n > MAX_BYTES) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, M_SOUND, "too long word length");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  for (k = 0, m = n - 1, v = 0; k < n; k++, m--) {
+  unt v = 0; int m = n - 1;
+  for (int k = 0; k < n; k++, m--) {
     v += ((unt) s[k]) * pow256[m];
   } return v;
 }
@@ -129,9 +128,8 @@ unt code_string (NODE_T * p, char *s, int n)
 char *code_unt (NODE_T * p, unt n)
 {
   static char text[MAX_BYTES + 1];
-  int k;
   (void) p;
-  for (k = 0; k < MAX_BYTES; k++) {
+  for (int k = 0; k < MAX_BYTES; k++) {
     char ch = (char) (n % 0x100);
     if (ch == NULL_CHAR) {
       ch = BLANK_CHAR;
@@ -359,9 +357,8 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
     z = read_riff_item (p, FD (f), 4, A68_BIG_ENDIAN);
     if (z == code_string (p, "fmt ", 4)) {
 // Read fmt chunk.
-      int k, skip;
       z = read_riff_item (p, FD (f), 4, A68_LITTLE_ENDIAN);
-      skip = (int) z - 0x10;    // Bytes to skip in extended wave format
+      int skip = (int) z - 0x10;    // Bytes to skip in extended wave format
       fmt_cat = read_riff_item (p, FD (f), 2, A68_LITTLE_ENDIAN);
       if (fmt_cat != WAVE_FORMAT_PCM) {
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL_STRING, M_SOUND, "category is not WAVE_FORMAT_PCM but", format_category (fmt_cat));
@@ -373,31 +370,28 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
       blockalign = read_riff_item (p, FD (f), 2, A68_LITTLE_ENDIAN);
       BITS_PER_SAMPLE (w) = read_riff_item (p, FD (f), 2, A68_LITTLE_ENDIAN);
       test_bits_per_sample (p, BITS_PER_SAMPLE (w));
-      for (k = 0; k < skip; k++) {
+      for (int k = 0; k < skip; k++) {
         z = read_riff_item (p, FD (f), 1, A68_LITTLE_ENDIAN);
       }
     } else if (z == code_string (p, "LIST", 4)) {
 // Skip a LIST chunk.
-      int k, skip;
       z = read_riff_item (p, FD (f), 4, A68_LITTLE_ENDIAN);
-      skip = (int) z;
-      for (k = 0; k < skip; k++) {
+      int skip = (int) z;
+      for (int k = 0; k < skip; k++) {
         z = read_riff_item (p, FD (f), 1, A68_LITTLE_ENDIAN);
       }
     } else if (z == code_string (p, "cue ", 4)) {
 // Skip a cue chunk.
-      int k, skip;
       z = read_riff_item (p, FD (f), 4, A68_LITTLE_ENDIAN);
-      skip = (int) z;
-      for (k = 0; k < skip; k++) {
+      int skip = (int) z;
+      for (int k = 0; k < skip; k++) {
         z = read_riff_item (p, FD (f), 1, A68_LITTLE_ENDIAN);
       }
     } else if (z == code_string (p, "fact", 4)) {
 // Skip a fact chunk.
-      int k, skip;
       z = read_riff_item (p, FD (f), 4, A68_LITTLE_ENDIAN);
-      skip = (int) z;
-      for (k = 0; k < skip; k++) {
+      int skip = (int) z;
+      for (int k = 0; k < skip; k++) {
         z = read_riff_item (p, FD (f), 1, A68_LITTLE_ENDIAN);
       }
     } else if (z == code_string (p, "data", 4)) {
@@ -427,23 +421,22 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
 
 void write_riff_item (NODE_T * p, FILE_T fd, unt z, int n, BOOL_T little)
 {
-  int k, r;
   unt char y[MAX_BYTES];
   if (n > MAX_BYTES) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, M_SOUND, "too long word length");
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  for (k = 0; k < n; k++) {
+  for (int k = 0; k < n; k++) {
     y[k] = (unt char) (z & 0xff);
     z >>= 8;
   }
   if (little) {
-    for (k = 0; k < n; k++) {
+    for (int k = 0; k < n; k++) {
       ASSERT (io_write (fd, &(y[k]), 1) != -1);
     }
   } else {
-    for (k = n - 1; k >= 0; k--) {
-      r = (int) io_write (fd, &(y[k]), 1);
+    for (int k = n - 1; k >= 0; k--) {
+      int r = (int) io_write (fd, &(y[k]), 1);
       if (r != 1) {
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, M_SOUND, "error while writing file");
         exit_genie (p, A68_RUNTIME_ERROR);

@@ -21,7 +21,7 @@
 
 //! @section Synopsis
 //!
-//! Interpreter driver.
+//! Interpreter routines for enclosed clauses.
 
 #include "a68g.h"
 #include "a68g-genie.h"
@@ -307,10 +307,9 @@ void genie_serial_clause (NODE_T * p, jmp_buf * exit_buf)
       }
     } else {
 // A linear list without labels.
-      NODE_T *q;
       ADDR_T pop_sp = A68_SP;
       STATUS_SET (p, SERIAL_CLAUSE);
-      for (q = SEQUENCE (p); q != NO_NODE; q = SEQUENCE (q)) {
+      for (NODE_T *q = SEQUENCE (p); q != NO_NODE; q = SEQUENCE (q)) {
         switch (ATTRIBUTE (q)) {
         case DECLARATION_LIST:
         case UNIT: {
@@ -360,11 +359,10 @@ void genie_enquiry_clause (NODE_T * p)
       STATUS_SET (p, OPTIMAL_MASK);
     }
   } else {
-// A linear list without labels (of course, it's an enquiry clause).
-    NODE_T *q;
+// A linear list without labels (enquiry clause).
     ADDR_T pop_sp = A68_SP;
     STATUS_SET (p, SERIAL_MASK);
-    for (q = SEQUENCE (p); q != NO_NODE; q = SEQUENCE (q)) {
+    for (NODE_T *q = SEQUENCE (p); q != NO_NODE; q = SEQUENCE (q)) {
       switch (ATTRIBUTE (q)) {
       case DECLARATION_LIST:
       case UNIT: {
@@ -409,26 +407,26 @@ PROP_T genie_collateral (NODE_T * p)
 // Row display.
     A68_REF new_display;
     int count = 0;
-    ADDR_T sp = A68_SP;
+    ADDR_T pop_sp = A68_SP;
     MOID_T *m = MOID (p);
     genie_collateral_units (SUB (p), &count);
 // [] AMODE vacuum.
     if (count == 0) {
-      A68_SP = sp;
+      A68_SP = pop_sp;
       INCREMENT_STACK_POINTER (p, A68_REF_SIZE);
-      *(A68_REF *) STACK_ADDRESS (sp) = empty_row (p, m);
+      *(A68_REF *) STACK_ADDRESS (pop_sp) = empty_row (p, m);
     } else if (DIM (DEFLEX (m)) == 1) {
 // [] AMODE display.
-      new_display = genie_make_row (p, SLICE (DEFLEX (m)), count, sp);
-      A68_SP = sp;
+      new_display = genie_make_row (p, SLICE (DEFLEX (m)), count, pop_sp);
+      A68_SP = pop_sp;
       INCREMENT_STACK_POINTER (p, A68_REF_SIZE);
-      *(A68_REF *) STACK_ADDRESS (sp) = new_display;
+      *(A68_REF *) STACK_ADDRESS (pop_sp) = new_display;
     } else {
 // [,,] AMODE display, we concatenate 1 + (n-1) to n dimensions.
-      new_display = genie_make_rowrow (p, m, count, sp);
-      A68_SP = sp;
+      new_display = genie_make_rowrow (p, m, count, pop_sp);
+      A68_SP = pop_sp;
       INCREMENT_STACK_POINTER (p, A68_REF_SIZE);
-      *(A68_REF *) STACK_ADDRESS (sp) = new_display;
+      *(A68_REF *) STACK_ADDRESS (pop_sp) = new_display;
     }
   }
   UNIT (&self) = genie_collateral;

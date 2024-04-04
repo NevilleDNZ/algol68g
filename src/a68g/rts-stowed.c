@@ -37,14 +37,14 @@
 // An A68G row is a reference to a descriptor in the heap:
 // 
 //                ...
-// A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements
-//                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension
+// A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements.
+//                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension.
 //                ...           |
 //                A68_TUPLE dim |
 //                ...           |
 //                ...           |
-//                Element 1 <---+   Element: Sequential row elements, in the heap
-//                ...                        Not always contiguous - trims!
+//                Element 1 <---+   Sequential row elements in the heap.
+//                ...
 //                Element n
 
 //! @brief Size of a row.
@@ -232,7 +232,7 @@ A68_REF empty_string (NODE_T * p)
 
 //! @brief Make [,, ..] MODE  from [, ..] MODE.
 
-A68_REF genie_make_rowrow (NODE_T *p, MOID_T * m_row, int len, ADDR_T sp)
+A68_REF genie_make_rowrow (NODE_T *p, MOID_T * m_row, int len, ADDR_T pop_sp)
 {
   MOID_T *m_deflex = IS_FLEX (m_row) ? SUB (m_row) : m_row;
   int old_dim = DIM (m_deflex) - 1;
@@ -263,11 +263,11 @@ A68_REF genie_make_rowrow (NODE_T *p, MOID_T * m_row, int len, ADDR_T sp)
   } else if (len > 0) {
     A68_ARRAY *tmp = NO_ARRAY;
 // Arrays in the stack must have equal bounds.
-    A68_REF row_0 = *(A68_REF *) STACK_ADDRESS (sp);
+    A68_REF row_0 = *(A68_REF *) STACK_ADDRESS (pop_sp);
     A68_TUPLE *tup_0;
     GET_DESCRIPTOR (tmp, tup_0, &row_0);
     for (int j = 1; j < len; j++) {
-      A68_REF row_j = *(A68_REF *) STACK_ADDRESS (sp + j * A68_REF_SIZE);
+      A68_REF row_j = *(A68_REF *) STACK_ADDRESS (pop_sp + j * A68_REF_SIZE);
       A68_TUPLE *tup_j;
       GET_DESCRIPTOR (tmp, tup_j, &row_j);
       for (int k = 0; k < old_dim; k++) {
@@ -279,7 +279,7 @@ A68_REF genie_make_rowrow (NODE_T *p, MOID_T * m_row, int len, ADDR_T sp)
     }
 // Fill descriptor of new row with info from (arbitrary) first one.
     A68_ARRAY *old_arr; A68_TUPLE *old_tup;
-    A68_REF old_row = *(A68_REF *) STACK_ADDRESS (sp);
+    A68_REF old_row = *(A68_REF *) STACK_ADDRESS (pop_sp);
     GET_DESCRIPTOR (tmp, old_tup, &old_row);
     int span = 1;
     for (int k = 0; k < old_dim; k++) {
@@ -297,7 +297,7 @@ A68_REF genie_make_rowrow (NODE_T *p, MOID_T * m_row, int len, ADDR_T sp)
     ARRAY (new_arr) = heap_generator_2 (p, m_row, len, span * ELEM_SIZE (new_arr));
     for (int j = 0; j < len; j++) {
 // Copy new[j,, ] := old[, ].
-      GET_DESCRIPTOR (old_arr, old_tup, (A68_REF *) STACK_ADDRESS (sp + j * A68_REF_SIZE));
+      GET_DESCRIPTOR (old_arr, old_tup, (A68_REF *) STACK_ADDRESS (pop_sp + j * A68_REF_SIZE));
       if (LWB (old_tup) > UPB (old_tup)) {
         A68_REF dst = ARRAY (new_arr);
         ADDR_T new_k = j * SPAN (new_tup) + calculate_internal_index (&new_tup[1], old_dim);
@@ -330,7 +330,7 @@ A68_REF genie_make_rowrow (NODE_T *p, MOID_T * m_row, int len, ADDR_T sp)
 
 //! @brief Make a row of 'len' objects that are in the stack.
 
-A68_REF genie_make_row (NODE_T * p, MOID_T * m_elem, int len, ADDR_T sp)
+A68_REF genie_make_row (NODE_T * p, MOID_T * m_elem, int len, ADDR_T pop_sp)
 {
   A68_REF new_row, new_arr; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (new_row, new_arr, arr, tup, MOID (p), m_elem, len);
@@ -338,7 +338,7 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * m_elem, int len, ADDR_T sp)
     A68_REF dst = new_arr, src;
     OFFSET (&dst) += k;
     STATUS (&src) = (STATUS_MASK_T) (INIT_MASK | IN_STACK_MASK);
-    OFFSET (&src) = sp + k;
+    OFFSET (&src) = pop_sp + k;
     REF_HANDLE (&src) = (A68_HANDLE *) & nil_handle;
     if (HAS_ROWS (m_elem)) {
       A68_REF clone = genie_clone (p, m_elem, (A68_REF *) & nil_ref, &src);
@@ -352,11 +352,11 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * m_elem, int len, ADDR_T sp)
 
 //! @brief Make REF [1 : 1] [] MODE from REF [] MODE.
 
-A68_REF genie_make_ref_row_of_row (NODE_T * p, MOID_T * m_dst, MOID_T * m_src, ADDR_T sp)
+A68_REF genie_make_ref_row_of_row (NODE_T * p, MOID_T * m_dst, MOID_T * m_src, ADDR_T pop_sp)
 {
   m_dst = DEFLEX (m_dst);
   m_src = DEFLEX (m_src);
-  A68_REF array = *(A68_REF *) STACK_ADDRESS (sp);
+  A68_REF array = *(A68_REF *) STACK_ADDRESS (pop_sp);
 // ROWING NIL yields NIL.
   if (IS_NIL (array)) {
     return nil_ref;
@@ -382,11 +382,11 @@ A68_REF genie_make_ref_row_of_row (NODE_T * p, MOID_T * m_dst, MOID_T * m_src, A
 
 //! @brief Make REF [1 : 1, ..] MODE from REF [..] MODE.
 
-A68_REF genie_make_ref_row_row (NODE_T * p, MOID_T * m_dst, MOID_T * m_src, ADDR_T sp)
+A68_REF genie_make_ref_row_row (NODE_T * p, MOID_T * m_dst, MOID_T * m_src, ADDR_T pop_sp)
 {
   m_dst = DEFLEX (m_dst);
   m_src = DEFLEX (m_src);
-  A68_REF name = *(A68_REF *) STACK_ADDRESS (sp);
+  A68_REF name = *(A68_REF *) STACK_ADDRESS (pop_sp);
 // ROWING NIL yields NIL.
   if (IS_NIL (name)) {
     return nil_ref;
@@ -422,11 +422,11 @@ A68_REF genie_make_ref_row_row (NODE_T * p, MOID_T * m_dst, MOID_T * m_src, ADDR
 
 PROP_T genie_rowing_row_row (NODE_T * p)
 {
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   GENIE_UNIT_NO_GC (SUB (p));
   STACK_DNS (p, MOID (SUB (p)), A68_FP);
-  A68_REF row = genie_make_rowrow (p, MOID (p), 1, sp);
-  A68_SP = sp;
+  A68_REF row = genie_make_rowrow (p, MOID (p), 1, pop_sp);
+  A68_SP = pop_sp;
   PUSH_REF (p, row);
   return GPROP (p);
 }
@@ -435,11 +435,11 @@ PROP_T genie_rowing_row_row (NODE_T * p)
 
 PROP_T genie_rowing_row_of_row (NODE_T * p)
 {
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   GENIE_UNIT_NO_GC (SUB (p));
   STACK_DNS (p, MOID (SUB (p)), A68_FP);
-  A68_REF row = genie_make_row (p, SLICE (MOID (p)), 1, sp);
-  A68_SP = sp;
+  A68_REF row = genie_make_row (p, SLICE (MOID (p)), 1, pop_sp);
+  A68_SP = pop_sp;
   PUSH_REF (p, row);
   return GPROP (p);
 }
@@ -448,12 +448,12 @@ PROP_T genie_rowing_row_of_row (NODE_T * p)
 
 PROP_T genie_rowing_ref_row_row (NODE_T * p)
 {
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   MOID_T *dst = MOID (p), *src = MOID (SUB (p));
   GENIE_UNIT_NO_GC (SUB (p));
   STACK_DNS (p, MOID (SUB (p)), A68_FP);
-  A68_SP = sp;
-  A68_REF name = genie_make_ref_row_row (p, dst, src, sp);
+  A68_SP = pop_sp;
+  A68_REF name = genie_make_ref_row_row (p, dst, src, pop_sp);
   PUSH_REF (p, name);
   return GPROP (p);
 }
@@ -462,12 +462,12 @@ PROP_T genie_rowing_ref_row_row (NODE_T * p)
 
 PROP_T genie_rowing_ref_row_of_row (NODE_T * p)
 {
-  ADDR_T sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   MOID_T *m_dst = MOID (p), *src = MOID (SUB (p));
   GENIE_UNIT_NO_GC (SUB (p));
   STACK_DNS (p, MOID (SUB (p)), A68_FP);
-  A68_SP = sp;
-  A68_REF name = genie_make_ref_row_of_row (p, m_dst, src, sp);
+  A68_SP = pop_sp;
+  A68_REF name = genie_make_ref_row_of_row (p, m_dst, src, pop_sp);
   PUSH_REF (p, name);
   return GPROP (p);
 }

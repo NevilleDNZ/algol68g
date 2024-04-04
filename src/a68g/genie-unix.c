@@ -106,7 +106,7 @@ void genie_utctime (NODE_T * p)
   if (time (&dt) == (time_t) - 1) {
     (void) empty_row (p, M_ROW_INT);
   } else {
-    ADDR_T sp = A68_SP;
+    ADDR_T pop_sp = A68_SP;
     struct tm *tod = gmtime (&dt);
     PUSH_VALUE (p, TM_YEAR (tod) + 1900, A68_INT);
     PUSH_VALUE (p, TM_MON (tod) + 1, A68_INT);
@@ -116,8 +116,8 @@ void genie_utctime (NODE_T * p)
     PUSH_VALUE (p, TM_SEC (tod), A68_INT);
     PUSH_VALUE (p, TM_WDAY (tod) + 1, A68_INT);
     PUSH_VALUE (p, TM_ISDST (tod), A68_INT);
-    A68_REF row = genie_make_row (p, M_INT, 8, sp);
-    A68_SP = sp;
+    A68_REF row = genie_make_row (p, M_INT, 8, pop_sp);
+    A68_SP = pop_sp;
     PUSH_REF (p, row);
   }
 }
@@ -130,7 +130,7 @@ void genie_localtime (NODE_T * p)
   if (time (&dt) == (time_t) - 1) {
     (void) empty_row (p, M_ROW_INT);
   } else {
-    ADDR_T sp = A68_SP;
+    ADDR_T pop_sp = A68_SP;
     struct tm *tod = localtime (&dt);
     PUSH_VALUE (p, TM_YEAR (tod) + 1900, A68_INT);
     PUSH_VALUE (p, TM_MON (tod) + 1, A68_INT);
@@ -140,8 +140,8 @@ void genie_localtime (NODE_T * p)
     PUSH_VALUE (p, TM_SEC (tod), A68_INT);
     PUSH_VALUE (p, TM_WDAY (tod) + 1, A68_INT);
     PUSH_VALUE (p, TM_ISDST (tod), A68_INT);
-    A68_REF row = genie_make_row (p, M_INT, 8, sp);
-    A68_SP = sp;
+    A68_REF row = genie_make_row (p, M_INT, 8, pop_sp);
+    A68_SP = pop_sp;
     PUSH_REF (p, row);
   }
 }
@@ -287,8 +287,8 @@ void genie_cd (NODE_T * p)
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
     exit_genie (p, A68_RUNTIME_ERROR);
   } else {
-    int rc = chdir (a_to_c_string (p, buffer, dir));
-    if (rc == 0) {
+    int ret = chdir (a_to_c_string (p, buffer, dir));
+    if (ret == 0) {
       PUSH_VALUE (p, 0, A68_INT);
     } else {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
