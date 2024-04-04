@@ -46,7 +46,7 @@ static char *brief_mode_string (MOID_T * p)
 \param z moid to print
 **/
 
-static void brief_mode_flat (FILE_T f, MOID_T * z)
+void brief_mode_flat (FILE_T f, MOID_T * z)
 {
   if (WHETHER (z, STANDARD) || WHETHER (z, INDICANT)) {
     int i = DIM (z);
@@ -204,7 +204,7 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
 {
   for (; s != NULL; FORWARD (s)) {
     NODE_T *where_tag = NODE (s);
-    if (where_tag != NULL && ((MASK (where_tag) & CROSS_REFERENCE_MASK))) {
+    if ((where_tag != NULL) && (STATUS_TEST (where_tag, CROSS_REFERENCE_MASK))) {
       WRITE (f, "\n     ");
       CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "t%06x ", (unsigned) NUMBER (s)) >= 0);
       WRITE (f, output_line);
@@ -447,7 +447,7 @@ static void tree_listing (FILE_T f, NODE_T * q, int x, SOURCE_LINE_T * l, BOOL_T
   for (; q != NULL; FORWARD (q)) {
     NODE_T *p = q;
     int k, dist;
-    if (((MASK (p) & TREE_MASK) || quick_form) && l == LINE (p)) {
+    if (((STATUS_TEST (p, TREE_MASK)) || quick_form) && l == LINE (p)) {
       if (*ld < 0) {
         *ld = x;
       }
@@ -477,8 +477,10 @@ static void tree_listing (FILE_T f, NODE_T * q, int x, SOURCE_LINE_T * l, BOOL_T
       if (TAX (p) != NULL) {
         CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, ", t%06x", (unsigned) NUMBER (TAX (p))) >= 0);
         WRITE (f, output_line);
+        CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, ", m%06x", (unsigned) NUMBER (MOID (TAX (p)))) >= 0);
+        WRITE (f, output_line);
       }
-      if (quick_form == A68_FALSE && propagator_name (PROPAGATOR (p).unit) != NULL) {
+      if (quick_form == A68_FALSE && GENIE (p) != NULL && propagator_name (PROPAGATOR (p).unit) != NULL) {
         CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, ", %s", propagator_name (PROPAGATOR (p).unit)) >= 0);
         WRITE (f, output_line);
       }
@@ -519,7 +521,7 @@ static int leaves_to_print (NODE_T * p, SOURCE_LINE_T * l, BOOL_T quick_form)
 {
   int z = 0;
   for (; p != NULL && z == 0; FORWARD (p)) {
-    if (l == LINE (p) && ((MASK (p) & TREE_MASK) || quick_form)) {
+    if (l == LINE (p) && ((STATUS_TEST (p, TREE_MASK)) || quick_form)) {
       z++;
     } else {
       z += leaves_to_print (SUB (p), l, quick_form);

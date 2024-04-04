@@ -59,7 +59,7 @@ PROPAGATOR_T genie_formula_plus_int_constant (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   UP_SWEEP_SEMA;
   GENIE_GET_UNIT_ADDRESS (u, A68_INT, i);
-  j = (A68_INT *) (((((v->genie).propagator).source)->genie).constant);
+  j = (A68_INT *) (GENIE (((GENIE (v)->propagator).source))->constant);
   TEST_INT_ADDITION (op, VALUE (i), VALUE (j));
   stack_pointer = pop_sp;
   PUSH_PRIMITIVE (p, VALUE (i) + VALUE (j), A68_INT);
@@ -101,7 +101,7 @@ PROPAGATOR_T genie_formula_minus_int_constant (NODE_T * p)
   ADDR_T pop_sp = stack_pointer;
   UP_SWEEP_SEMA;
   GENIE_GET_UNIT_ADDRESS (u, A68_INT, i);
-  j = (A68_INT *) (((((v->genie).propagator).source)->genie).constant);
+  j = (A68_INT *) (GENIE (((GENIE (v)->propagator).source))->constant);
   TEST_INT_ADDITION (op, VALUE (i), -VALUE (j));
   stack_pointer = pop_sp;
   PUSH_PRIMITIVE (p, VALUE (i) - VALUE (j), A68_INT);

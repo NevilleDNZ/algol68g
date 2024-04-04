@@ -644,7 +644,7 @@ Z quoted string literal.
     } else if (t[0] == 'H') {\
       char *a = va_arg (args, char *);\
       char d[SMALL_BUFFER_SIZE];\
-      CHECK_RETVAL (snprintf(d, (size_t) SMALL_BUFFER_SIZE, "'%c'", a[0]) >= 0);\
+      CHECK_RETVAL (snprintf(d, (size_t) SMALL_BUFFER_SIZE, "\"%c\"", a[0]) >= 0);\
       bufcat (b, d, BUFFER_SIZE);\
     } else if (t[0] == 'L') {\
       SOURCE_LINE_T *a = va_arg (args, SOURCE_LINE_T *);\

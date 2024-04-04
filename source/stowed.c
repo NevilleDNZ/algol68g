@@ -449,8 +449,7 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR
       if (WHETHER (elem_mode, STRUCT_SYMBOL)) {
         A68_REF new_one = genie_copy_stowed (src, p, elem_mode);
         MOVE (dst_a, ADDRESS (&new_one), MOID_SIZE (elem_mode));
-      } else if (WHETHER (elem_mode, FLEX_SYMBOL)
-                 || elem_mode == MODE (STRING)) {
+      } else if (WHETHER (elem_mode, FLEX_SYMBOL) || elem_mode == MODE (STRING)) {
         *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, DEFLEX (elem_mode));
       } else if (WHETHER (elem_mode, ROW_SYMBOL)) {
         *(A68_REF *) dst_a = genie_copy_stowed (*(A68_REF *) src_a, p, elem_mode);
@@ -713,7 +712,7 @@ static void genie_copy_union (NODE_T * p, BYTE_T * dst_a, BYTE_T * src_a, A68_RE
 
 A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
 {
-/* We need this complex routine ARRAY(&since)s are not always contiguous (trims). */
+/* We need this complex routine since arrays are not always contiguous (trims). */
   A68_REF new_row;
   A68_ARRAY *old_arr, *new_arr;
   A68_TUPLE *old_tup, *new_tup, *old_p, *new_p;
@@ -1002,8 +1001,7 @@ A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
         if (WHETHER (MOID (fields), STRUCT_SYMBOL)) {
 /* STRUCT (STRUCT (..) ..) */
           (void) genie_assign_stowed (old_field, &new_field, p, MOID (fields));
-        } else if (WHETHER (MOID (fields), FLEX_SYMBOL)
-                   || MOID (fields) == MODE (STRING)) {
+        } else if (WHETHER (MOID (fields), FLEX_SYMBOL) || MOID (fields) == MODE (STRING)) {
 /* STRUCT (FLEX [] A ..) */
           *(A68_REF *) dst_a = genie_copy_row (*(A68_REF *) src_a, p, MOID (fields));
         } else if (WHETHER (MOID (fields), ROW_SYMBOL)) {
@@ -1344,7 +1342,7 @@ PROPAGATOR_T genie_diagonal_function (NODE_T * p)
 }
 
 /*!
-\brief push description for transpose of square matrix
+\brief push description for transpose of matrix
 \param p position in tree
 \return a propagator for this action
 **/
@@ -1372,10 +1370,6 @@ PROPAGATOR_T genie_transpose_function (NODE_T * p)
   }
   POP_OBJECT (p, &row, A68_ROW);
   GET_DESCRIPTOR2 (arr, tup1, tup2, &row);
-  if (ROW_SIZE (tup1) != ROW_SIZE (tup2)) {
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_NO_SQUARE_MATRIX, m, NULL);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
   new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + 2 * ALIGNED_SIZE_OF (A68_TUPLE));
   new_arr = *arr;
   new_tup1 = *tup2;

@@ -1429,6 +1429,9 @@ static void indent_crlf (FILE_T f)
 
 static void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
 {
+  if (item == NULL || mode == NULL) {
+    return;
+  }
   if (WHETHER (mode, REF_SYMBOL)) {
     A68_REF *z = (A68_REF *) item;
     if (IS_NIL (*z)) {
@@ -1443,6 +1446,9 @@ static void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
         if (IS_IN_HEAP (z)) {
           CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "heap(%p)", ADDRESS (z)) >= 0);
           WRITE (STDOUT_FILENO, output_line);
+          tabs++;
+          show_item (f, p, ADDRESS (z), SUB (mode));
+          tabs--;
         } else if (IS_IN_FRAME (z)) {
           CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "frame(%d)", REF_OFFSET (z)) >= 0);
           WRITE (STDOUT_FILENO, output_line);
@@ -1505,7 +1511,7 @@ static void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
     PACK_T *q = PACK (mode);
     tabs++;
     for (; q != NULL; FORWARD (q)) {
-      BYTE_T *elem = &item[q->offset];
+      BYTE_T *elem = &item[OFFSET (q)];
       indent_crlf (f);
       CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "     %s \"%s\"", moid_to_string (MOID (q), MOID_WIDTH, NULL), TEXT (q)) >= 0);
       WRITE (STDOUT_FILENO, output_line);
@@ -1542,7 +1548,7 @@ static void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
           } else if (z != NULL && STATUS (z) & SKIP_PROCEDURE_MASK) {
             WRITE (STDOUT_FILENO, " skip procedure");
           } else if (z != NULL && (BODY (z).proc) != NULL) {
-            CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, " line %d, environ at frame(%d)", LINE_NUMBER ((NODE_T *) (BODY (z)).node), ENVIRON (z)) >= 0);
+            CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, " line %d, environ at frame(%d), locale %p", LINE_NUMBER ((NODE_T *) (BODY (z)).node), ENVIRON (z), (void *) LOCALE (z)) >= 0);
             WRITE (STDOUT_FILENO, output_line);
           } else {
             WRITE (STDOUT_FILENO, " cannot show value");
@@ -1588,8 +1594,8 @@ static void show_item (FILE_T f, NODE_T * p, BYTE_T * item, MOID_T * mode)
 
 static void show_frame_item (FILE_T f, NODE_T * p, ADDR_T a68g_link, TAG_T * q, int modif)
 {
-  ADDR_T addr = a68g_link + FRAME_INFO_SIZE + q->offset;
-  ADDR_T loc = FRAME_INFO_SIZE + q->offset;
+  ADDR_T addr = a68g_link + FRAME_INFO_SIZE + OFFSET (q);
+  ADDR_T loc = FRAME_INFO_SIZE + OFFSET (q);
   (void) p;
   indent_crlf (STDOUT_FILENO);
   if (modif != ANONYMOUS) {
@@ -1884,8 +1890,8 @@ void change_breakpoints (NODE_T * p, unsigned set, int num, BOOL_T * whether_set
   for (; p != NULL; FORWARD (p)) {
     change_breakpoints (SUB (p), set, num, whether_set, loc_expr);
     if (set == BREAKPOINT_MASK) {
-      if (LINE_NUMBER (p) == num && (MASK (p) & INTERRUPTIBLE_MASK) && num != 0) {
-        MASK (p) |= BREAKPOINT_MASK;
+      if (LINE_NUMBER (p) == num && (STATUS_TEST (p, INTERRUPTIBLE_MASK)) && num != 0) {
+        STATUS_SET (p, BREAKPOINT_MASK);
         if (INFO (p)->expr != NULL) {
           free (INFO (p)->expr);
         }
@@ -1893,8 +1899,8 @@ void change_breakpoints (NODE_T * p, unsigned set, int num, BOOL_T * whether_set
         *whether_set = A68_TRUE;
       }
     } else if (set == BREAKPOINT_TEMPORARY_MASK) {
-      if (LINE_NUMBER (p) == num && (MASK (p) & INTERRUPTIBLE_MASK) && num != 0) {
-        MASK (p) |= BREAKPOINT_TEMPORARY_MASK;
+      if (LINE_NUMBER (p) == num && (STATUS_TEST (p, INTERRUPTIBLE_MASK)) && num != 0) {
+        STATUS_SET (p, BREAKPOINT_TEMPORARY_MASK);
         if (INFO (p)->expr != NULL) {
           free (INFO (p)->expr);
         }
@@ -1903,13 +1909,13 @@ void change_breakpoints (NODE_T * p, unsigned set, int num, BOOL_T * whether_set
       }
     } else if (set == NULL_MASK) {
       if (LINE_NUMBER (p) != num) {
-        MASK (p) &= ~(BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK);
+        STATUS_CLEAR (p, (BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK));
         if (INFO (p)->expr == NULL) {
           free (INFO (p)->expr);
         }
         INFO (p)->expr = NULL;
       } else if (num == 0) {
-        MASK (p) &= ~(BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK);
+        STATUS_CLEAR (p, (BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK));
         if (INFO (p)->expr != NULL) {
           free (INFO (p)->expr);
         }
@@ -1929,7 +1935,7 @@ static void list_breakpoints (NODE_T * p, int *listed)
 {
   for (; p != NULL; FORWARD (p)) {
     list_breakpoints (SUB (p), listed);
-    if (MASK (p) & BREAKPOINT_MASK) {
+    if (STATUS_TEST (p, BREAKPOINT_MASK)) {
       (*listed)++;
       where (STDOUT_FILENO, p);
       if (INFO (p)->expr != NULL) {
@@ -2469,7 +2475,7 @@ void single_step (NODE_T * p, unsigned mask)
   UP_SWEEP_SEMA;
   break_proc_level = 0;
   change_masks (MODULE (INFO (p))->top_node, BREAKPOINT_INTERRUPT_MASK, A68_FALSE);
-  MASK (MODULE (INFO (p))->top_node) &= ~BREAKPOINT_INTERRUPT_MASK;
+  STATUS_CLEAR (MODULE (INFO (p))->top_node, BREAKPOINT_INTERRUPT_MASK);
   while (do_cmd) {
     char *cmd;
     stack_pointer = top_sp;

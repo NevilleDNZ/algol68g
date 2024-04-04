@@ -63,6 +63,11 @@ typedef unsigned STATUS_MASK;
 #endif
 #endif
 
+#if defined ENABLE_MACOSX
+#define __off_t off_t
+#define __pid_t pid_t
+#endif
+
 #if defined ENABLE_POSTGRESQL
 #include <libpq-fe.h>
 #endif
@@ -102,7 +107,7 @@ typedef unsigned __off_t;
 #define A68_FALSE ((BOOL_T) 0)
 #define TIME_FORMAT "%A %d-%b-%Y %H:%M:%S"
 
-#define A68_ALIGN_T int
+typedef int *A68_ALIGN_T;
 #define A68_ALIGNMENT ((int) (sizeof (A68_ALIGN_T)))
 #define A68_ALIGN(s) ((int) ((s) % A68_ALIGNMENT) == 0 ? (s) : ((s) + A68_ALIGNMENT - (s) % A68_ALIGNMENT))
 
@@ -167,6 +172,7 @@ typedef unsigned __off_t;
 #define NO_SWEEP_MASK 			0x00000040
 #define ROW_COLOUR_MASK 		0x00000080
 #define COOKIE_MASK 			0x00000100
+#define SCOPE_ERROR_MASK 		0x00000100
 #define ASSIGNED_MASK 			0x00000200
 #define ALLOCATED_MASK 			0x00000400
 #define STANDENV_PROC_MASK 		0x00000800
@@ -190,6 +196,7 @@ typedef unsigned __off_t;
 #define BREAKPOINT_INTERRUPT_MASK	0x08000000
 #define BREAKPOINT_WATCH_MASK		0x10000000
 #define BREAKPOINT_TRACE_MASK		0x20000000
+#define SEQUENCE_MASK                   0x40000000
 #define BREAKPOINT_ERROR_MASK		0xffffffff
 
 /*
@@ -231,20 +238,20 @@ typedef struct A68_REAL A68_REAL;
 typedef struct A68_TUPLE A68_TUPLE;
 typedef struct A68_SOUND A68_SOUND;
 
-typedef struct POSTULATE_T POSTULATE_T;
+typedef struct DIAGNOSTIC_T DIAGNOSTIC_T;
 typedef struct FILES_T FILES_T;
 typedef struct GENIE_INFO_T GENIE_INFO_T;
 typedef struct KEYWORD_T KEYWORD_T;
-typedef struct DIAGNOSTIC_T DIAGNOSTIC_T;
 typedef struct MODES_T MODES_T;
 typedef struct MODULE_T MODULE_T;
 typedef struct MOID_LIST_T MOID_LIST_T;
 typedef struct MOID_T MOID_T;
 typedef struct NODE_INFO_T NODE_INFO_T;
 typedef struct NODE_T NODE_T;
-typedef struct OPTIONS_T OPTIONS_T;
 typedef struct OPTION_LIST_T OPTION_LIST_T;
+typedef struct OPTIONS_T OPTIONS_T;
 typedef struct PACK_T PACK_T;
+typedef struct POSTULATE_T POSTULATE_T;
 typedef struct PRELUDE_T PRELUDE_T;
 typedef struct PROPAGATOR_T PROPAGATOR_T;
 typedef struct REFINEMENT_T REFINEMENT_T;
@@ -533,25 +540,15 @@ struct MOID_LIST_T
 
 struct NODE_T
 {
-  STATUS_MASK mask;
-  struct 
-  {
-    PROPAGATOR_T propagator;
-    BOOL_T whether_coercion, whether_new_lexical_level, seq_set;
-    int level, argsize, size;
-    NODE_T *parent, *seq;
-    BYTE_T *offset;
-    void *constant;
-  } genie;
-  MOID_T *type, *partial_proc, *partial_locale;
+  GENIE_INFO_T *genie;
+  int number, attribute, annotation, par_level;
+  MOID_T *type;
   NODE_INFO_T *info;
-  NODE_T *next, *previous, *sub, *do_od_part, *inits, *nest;
+  NODE_T *next, *previous, *sub, *sequence, *nest;
   PACK_T *pack;
-  REFINEMENT_T *refinement;
+  STATUS_MASK status;
   SYMBOL_TABLE_T *symbol_table;
-  TAG_T *tag, *protect_sweep;
-  int number, attribute, annotation, par_level, reduction;
-  BOOL_T need_dns, error;
+  TAG_T *tag;
 };
 
 struct NODE_INFO_T
@@ -560,6 +557,18 @@ struct NODE_INFO_T
   int PROCEDURE_LEVEL, priority;
   char *char_in_line, *symbol, *expr;
   SOURCE_LINE_T *line;
+};
+
+struct GENIE_INFO_T
+{
+  PROPAGATOR_T propagator;
+  MOID_T *partial_proc, *partial_locale;
+  BOOL_T whether_coercion, whether_new_lexical_level, need_dns;
+  int level, argsize, size;
+  NODE_T *parent;
+  BYTE_T *offset;
+  void *constant;
+  TAG_T *protect_sweep;
 };
 
 struct OPTION_LIST_T
@@ -633,12 +642,12 @@ struct SYMBOL_TABLE_T
   SYMBOL_TABLE_T *previous, *outer;
   TAG_T *identifiers, *operators, *priority, *indicants, *labels, *anonymous;
   MOID_T *moids;
-  NODE_T *jump_to, *inits;
+  NODE_T *jump_to, *sequence;
 };
 
 struct TAG_T
 {
-  STATUS_MASK mask;
+  STATUS_MASK status;
   SYMBOL_TABLE_T *symbol_table;
   MOID_T *type;
   NODE_T *node, *unit;
@@ -715,6 +724,7 @@ enum ATTRIBUTES
   CHAR_SYMBOL,
   CHOICE,
   CHOICE_PATTERN,
+  CLASS_SYMBOL,
   CLOSED_CLAUSE,
   CLOSE_SYMBOL,
   CODE_CLAUSE,
@@ -729,6 +739,7 @@ enum ATTRIBUTES
   COMPLEX_SYMBOL,
   COMPL_SYMBOL,
   CONDITIONAL_CLAUSE,
+  CONSTRUCT,
   DECLARATION_LIST,
   DECLARER,
   DEFINING_IDENTIFIER,
@@ -767,6 +778,7 @@ enum ATTRIBUTES
   FALSE_SYMBOL,
   FIELD,
   FIELD_IDENTIFIER,
+  FIELD_SELECTION,
   FILE_SYMBOL,
   FIRM,
   FI_SYMBOL,
@@ -895,6 +907,7 @@ enum ATTRIBUTES
   MODE_SYMBOL,
   MONADIC_FORMULA,
   MONAD_SEQUENCE,
+  NEW_SYMBOL,
   NIHIL,
   NIL_SYMBOL,
   NORMAL_IDENTIFIER,
@@ -967,6 +980,7 @@ enum ATTRIBUTES
   SOFT,
   SOME_CLAUSE,
   SOUND_SYMBOL,
+  SPECIFICATION,
   SPECIFIED_UNIT,
   SPECIFIED_UNIT_LIST,
   SPECIFIED_UNIT_UNIT,
@@ -1114,17 +1128,20 @@ enum
 #define FILE_DEREF(p) ((A68_FILE *) ADDRESS (p))
 #define FORWARD(p) ((p) = NEXT (p))
 #define FORMAT(p) ((p)->format)
-#define GENIE_INFO(p) ((p)->genie_info)
 #define HEAP(p) ((p)->heap)
+#define GENIE(p) ((p)->genie)
 #define INFO(p) ((p)->info)
 #define LESS(p) ((p)->less)
 #define LEX_LEVEL(p) (LEVEL (SYMBOL_TABLE (p)))
+#define TAG_LEX_LEVEL(p) (LEVEL (TAG_TABLE (p)))
 #define LEVEL(p) ((p)->level)
 #define LINE_NUMBER(p) (NUMBER (LINE (p)))
 #define LINE(p) ((p)->info->line)
 #define LOCALE(p) ((p)->locale)
 #define LWB(p) ((p)->lower_bound)
-#define MASK(p) ((p)->mask)
+#define STATUS_SET(p, q) {STATUS (p) |= (q);}
+#define STATUS_CLEAR(p, q) {STATUS (p) &= (~(q));}
+#define STATUS_TEST(p, q) ((STATUS (p) & (q)) != (unsigned) 0)
 #define MODE(p) (a68_modes.p)
 #define MODULE(p) ((p)->module)
 #define MOID(p) ((p)->type)
@@ -1140,15 +1157,15 @@ enum
 #define OFFSET(p) ((p)->offset)
 #define OUTER(p) ((p)->outer)
 #define PACK(p) ((p)->pack)
-#define PARENT(p) ((p)->genie.parent)
+#define NODE_PACK(p) ((p)->pack)
+#define PARENT(p) (GENIE (p)->parent)
 #define PAR_LEVEL(p) ((p)->par_level)
 #define POINTER(p) ((p)->pointer)
 #define PREVIOUS(p) ((p)->previous)
 #define PRIO(p) ((p)->priority)
-#define PROPAGATOR(p) (((p)->genie).propagator)
+#define PROPAGATOR(p) (GENIE (p)->propagator)
 #define ROWED(p) ((p)->rowed)
-#define SEQUENCE(p) ((p)->genie.seq)
-#define SEQUENCE_SET(p) ((p)->genie.seq_set)
+#define SEQUENCE(p) ((p)->sequence)
 #define SIZE(p) ((p)->size)
 #define SLICE(p) ((p)->slice)
 #define SORT(p) ((p)->sort)
@@ -1157,6 +1174,7 @@ enum
 #define SUB(p) ((p)->sub)
 #define SYMBOL(p) ((p)->info->symbol)
 #define SYMBOL_TABLE(p) ((p)->symbol_table)
+#define TAG_TABLE(p) ((p)->symbol_table)
 #define TAX(p) ((p)->tag)
 #define TEXT(p) ((p)->text)
 #define TRIM(p) ((p)->trim)
@@ -1192,11 +1210,12 @@ extern int garbage_collects;
 extern int stack_size;
 extern int symbol_table_count, mode_count;
 extern int term_width;
+extern int new_nodes, new_modes, new_postulates, new_node_infos, new_genie_infos;
 extern KEYWORD_T *top_keyword;
 extern MODES_T a68_modes;
 extern MODULE_T a68_prog;
 extern MOID_LIST_T *top_moid_list, *old_moid_list;
-extern POSTULATE_T *top_postulate, *old_postulate;
+extern POSTULATE_T *top_postulate, *top_postulate_list;
 extern SYMBOL_TABLE_T *stand_env;
 extern TAG_T *error_tag;
 extern TOKEN_T *top_token;
@@ -1210,11 +1229,11 @@ extern ADDR_T calculate_internal_index (A68_TUPLE *, int);
 extern BOOL_T increment_internal_index (A68_TUPLE *, int);
 extern BOOL_T lexical_analyzer (MODULE_T *);
 extern BOOL_T match_string (char *, char *, char);
-extern BOOL_T whether_modes_equivalent (MOID_T *, MOID_T *);
 extern BOOL_T set_options (MODULE_T *, OPTION_LIST_T *, BOOL_T);
 extern BOOL_T whether_coercion (NODE_T *);
 extern BOOL_T whether_firm (MOID_T *, MOID_T *);
 extern BOOL_T whether_modes_equal (MOID_T *, MOID_T *, int);
+extern BOOL_T whether_modes_equivalent (MOID_T *, MOID_T *);
 extern BOOL_T whether_new_lexical_level (NODE_T *);
 extern BOOL_T whether (NODE_T * p, ...);
 extern BOOL_T whether_one_of (NODE_T * p, ...);
@@ -1235,7 +1254,9 @@ extern char *read_string_from_tty (char *);
 extern char *standard_environ_proc_name (GENIE_PROCEDURE);
 extern double seconds (void);
 extern double ten_up (int);
+extern GENIE_INFO_T *new_genie_info (void);
 extern int count_pack_members (PACK_T *);
+extern int first_tag_global (SYMBOL_TABLE_T *, char *);
 extern int get_row_size (A68_TUPLE *, int);
 extern int grep_in_string (char *, char *, int *, int *);
 extern int heap_available (void);
@@ -1247,6 +1268,7 @@ extern MOID_T *add_mode (MOID_T **, int, int, NODE_T *, MOID_T *, PACK_T *);
 extern MOID_T *depref_completely (MOID_T *);
 extern MOID_T *new_moid (void);
 extern MOID_T *unites_to (MOID_T *, MOID_T *);
+extern NODE_INFO_T *new_node_info (void);
 extern NODE_T *new_node (void);
 extern NODE_T *some_node (char *);
 extern PACK_T *absorb_union_pack (PACK_T *, int *);
@@ -1288,6 +1310,7 @@ extern void bottom_up_parser (NODE_T *);
 extern void brief_moid_flat (FILE_T, MOID_T *);
 extern void bufcat (char *, char *, int);
 extern void bufcpy (char *, char *, int);
+extern void brief_mode_flat (FILE_T, MOID_T *);
 extern void check_parenthesis (NODE_T *);
 extern void coercion_inserter (NODE_T *);
 extern void collect_taxes (NODE_T *);
@@ -1303,6 +1326,7 @@ extern void dump_stowed (NODE_T *, FILE_T, void *, MOID_T *, int);
 extern void fill_symbol_table_outer (NODE_T *, SYMBOL_TABLE_T *);
 extern void finalise_symbol_table_setup (NODE_T *, int);
 extern void free_heap (void);
+extern void free_postulate_list (POSTULATE_T *, POSTULATE_T *);
 extern void free_postulates (void);
 extern void genie_init_heap (NODE_T *, MODULE_T *);
 extern void *get_heap_space (size_t);
@@ -1351,7 +1375,6 @@ extern void remove_file_type (char *);
 extern void renumber_nodes (NODE_T *, int *);
 extern void reset_max_simplout_size (void);
 extern void reset_moid_list (void);
-extern void reset_postulates (void);
 extern void reset_symbol_table_nest_count (NODE_T *);
 extern void scan_error (SOURCE_LINE_T *, char *, char *);
 extern void scope_checker (NODE_T *);
