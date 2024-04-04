@@ -1,11 +1,11 @@
 //! @file a68g-diagnostics.h
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -95,7 +95,7 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define ERROR_FILE_CANT_SET "cannot set file"
 #define ERROR_FILE_CLOSE "error while closing file"
 #define ERROR_FILE_ENDED "end of file reached"
-#define ERROR_FILE_INCLUDE_CTRL "control characters in include file"
+#define ERROR_FILE_INCLUDE_CTRL "invalid characters in include file"
 #define ERROR_FILE_LOCK "error while locking file"
 #define ERROR_FILE_NOT_OPEN "file is not open"
 #define ERROR_FILE_NO_TEMP "cannot create unique temporary file name"
@@ -103,7 +103,7 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define ERROR_FILE_RESET "error while resetting file"
 #define ERROR_FILE_SCRATCH "error while scratching file"
 #define ERROR_FILE_SET "error while setting file"
-#define ERROR_FILE_SOURCE_CTRL "control characters in source file"
+#define ERROR_FILE_SOURCE_CTRL "invalid characters in source file"
 #define ERROR_FILE_TRANSPUT "error transputting M value"
 #define ERROR_FILE_TRANSPUT_SIGN "error transputting sign in M value"
 #define ERROR_FILE_WRONG_MOOD "file is in Y mood"
@@ -153,7 +153,7 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define ERROR_NO_MONADIC "monadic operator S O has not been declared"
 #define ERROR_NO_NAME "M A does not yield a name"
 #define ERROR_NO_NAME_REQUIRED "context does not require a name"
-#define ERROR_NO_PARALLEL_CLAUSE "interpreter was compiled without support for the parallel-clause"
+#define ERROR_NO_PARALLEL_CLAUSE "interpreter was built without parallel-clause support"
 #define ERROR_NO_PRIORITY "S has no priority declaration"
 #define ERROR_IS_DIRECTORY "source file cannot be a directory"
 #define ERROR_NO_REGULAR_FILE "source is not a regular file"
@@ -171,18 +171,17 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define ERROR_OPERATOR_RELATED "M Z is firmly related to M Z"
 #define ERROR_OUT_OF_BOUNDS "M value out of bounds"
 #define ERROR_OUT_OF_CORE "insufficient memory"
-#define ERROR_OUT_OF_CORE_2G "insufficient memory - requesting over 2GB"
 #define ERROR_OVER_2G "requesting over 2GB"
 #define ERROR_PAGE_SIZE "error in page size"
 #define ERROR_PARALLEL_JUMP "jump into different thread"
 #define ERROR_PARALLEL_CANNOT_CREATE "cannot create thread"
-#define ERROR_PARALLEL_OUTSIDE "invalid outside a parallel clause"
+#define ERROR_PARALLEL_OUTSIDE "invalid outside a parallel-clause"
 #define ERROR_PARALLEL_OVERFLOW "too many parallel units (Y)"
 #define ERROR_PARENTHESIS "incorrect nesting, check for Y"
 #define ERROR_PARENTHESIS_2 "encountered X L but expected X, check for Y"
 #define ERROR_PRAGMENT "error in pragment"
 #define ERROR_HIGH_PRECISION "unsupported precision"
-#define ERROR_QUOTED_BOLD_TAG "error in quoted bold tag"
+#define ERROR_QUOTED_BOLD_TAG "error in quoted bold-tag"
 #define ERROR_REDEFINED_KEYWORD "attempt to redefine keyword Y in A"
 #define ERROR_REFINEMENT_APPLIED "refinement is applied more than once"
 #define ERROR_REFINEMENT_DEFINED "refinement already defined"
@@ -203,7 +202,7 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define ERROR_SUBSET_RELATED "M has firmly related subset M"
 #define ERROR_SYNTAX "detected in A"
 #define ERROR_SYNTAX_EXPECTED "expected A"
-#define ERROR_SYNTAX_MIXED_DECLARATION "possibly mixed identity and variable declaration"
+#define ERROR_SYNTAX_MIXED_DECLARATION "possibly mixed identity-declaration and variable-declaration"
 #define ERROR_SYNTAX_STRANGE_SEPARATOR "possibly a missing or erroneous separator nearby"
 #define ERROR_SYNTAX_STRANGE_TOKENS "possibly a missing or erroneous symbol nearby"
 #define ERROR_TIME_LIMIT_EXCEEDED "time limit exceeded"
@@ -223,7 +222,7 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define ERROR_UNTERMINATED_PRAGMENT "unterminated pragment"
 #define ERROR_UNTERMINATED_STRING "unterminated string"
 #define ERROR_UNWORTHY_CHARACTER "unworthy character"
-#define ERROR_VACUUM "this vacuum cannot have row elements (use a Y generator)"
+#define ERROR_VACUUM "vacuum cannot have row elements (use a Y generator)"
 #define INFO_APPROPRIATE_DECLARER "appropriate declarer"
 #define INFO_MISSING_KEYWORDS "missing or unmatched keyword"
 #define WARNING_EXTENSION "@ is an extension"
@@ -241,7 +240,7 @@ void write_source_line (FILE_T, LINE_T *, NODE_T *, int);
 #define WARNING_TAG_UNUSED "tag S is not used"
 #define WARNING_TRAILING "ignoring trailing character H in A"
 #define WARNING_UNDERFLOW "M constant underflow"
-#define WARNING_UNINITIALISED "identifier S might be used before being initialised"
+#define WARNING_UNINITIALISED "identifier S might be used uninitialised"
 #define WARNING_UNINTENDED "possibly unintended M A in M A"
 #define WARNING_VOIDED "value of M @ will be voided"
 #define WARNING_WIDENING_NOT_PORTABLE "implicit widening is not portable"

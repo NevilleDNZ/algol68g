@@ -189,36 +189,37 @@ TESTS_ENVIRONMENT=./a68g
 TESTS=\
 	./src/test-set/01-ackermann.a68\
 	./src/test-set/02-all-parser.a68\
-	./src/test-set/03-chaos.a68\
-	./src/test-set/04-decision.a68\
-	./src/test-set/05-digits.a68\
-	./src/test-set/06-end-of-time.a68\
-	./src/test-set/07-fft.a68\
-	./src/test-set/08-fft-par.a68\
-	./src/test-set/09-fibonacci-grammar.a68\
-	./src/test-set/10-formula-manipulation.a68\
-	./src/test-set/11-gammainc.a68\
-	./src/test-set/12-guldens.a68\
-	./src/test-set/13-hamming.a68\
-	./src/test-set/14-hilbert-matrix.a68\
-	./src/test-set/15-lisp.a68\
-	./src/test-set/16-mandelbrot.a68\
-	./src/test-set/17-mastermind.a68\
-	./src/test-set/18-math.a68\
-	./src/test-set/19-matrix.a68\
-	./src/test-set/20-pebbles.a68\
-	./src/test-set/21-procedures.a68\
-	./src/test-set/22-pseudo-switch.a68\
-	./src/test-set/23-queens.a68\
-	./src/test-set/24-quicksort.a68\
-	./src/test-set/25-rationals.a68\
-	./src/test-set/26-roman-decimal.a68\
-	./src/test-set/27-semana-santa.a68\
-	./src/test-set/28-tukey.a68\
-	./src/test-set/29-warshall.a68\
-	./src/test-set/30-whetstones.a68\
-	./src/test-set/31-www.a68\
-	./src/test-set/32-zeroin.a68
+	./src/test-set/03-arithmetic-derivative.a68\
+	./src/test-set/04-bulls-and-cows.a68\
+	./src/test-set/05-chaos.a68\
+	./src/test-set/06-decision.a68\
+	./src/test-set/07-digits.a68\
+	./src/test-set/08-end-of-time.a68\
+	./src/test-set/09-fft.a68\
+	./src/test-set/10-fft-par.a68\
+	./src/test-set/11-fibonacci-grammar.a68\
+	./src/test-set/12-formula-manipulation.a68\
+	./src/test-set/13-gammainc.a68\
+	./src/test-set/14-guldens.a68\
+	./src/test-set/15-hamming.a68\
+	./src/test-set/16-hilbert-matrix.a68\
+	./src/test-set/17-lisp.a68\
+	./src/test-set/18-mandelbrot.a68\
+	./src/test-set/19-math.a68\
+	./src/test-set/20-matrix.a68\
+	./src/test-set/21-pebbles.a68\
+	./src/test-set/22-procedures.a68\
+	./src/test-set/23-pseudo-switch.a68\
+	./src/test-set/24-queens.a68\
+	./src/test-set/25-quicksort.a68\
+	./src/test-set/26-rationals.a68\
+	./src/test-set/27-roman-decimal.a68\
+	./src/test-set/28-semana-santa.a68\
+	./src/test-set/29-tukey.a68\
+	./src/test-set/30-warshall.a68\
+	./src/test-set/31-whetstones.a68\
+	./src/test-set/32-www.a68\
+	./src/test-set/33-zeroin.a68
 if EXPORT_DYNAMIC
 a68g_LDFLAGS = -Wl,--export-dynamic
 else

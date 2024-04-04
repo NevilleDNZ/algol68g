@@ -1,11 +1,11 @@
 //! @file rts-mach.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -24,11 +24,9 @@
 //! Machine parameters.
 
 // These routines are variants/extensions of SLATEC routines.
-//
 // SLATEC Common Mathematical Library is a FORTRAN 77 library of general purpose
 // mathematical and statistical routines, developed at US Government research 
 // laboratories and therefore public domain software. 
-//
 // Repository: http://www.netlib.org/slatec/
 
 #include "a68g.h"
@@ -105,7 +103,6 @@ int a68g_i32mach (int i)
     case 16: {
 	return DBL_MAX_EXP;
       }
-//
     default: {
 	return 0;
       }
@@ -161,7 +158,6 @@ REAL_T a68g_r64mach (int i)
     case 9: {
         return DBL_MANT_DIG;
       }
-//
     default: {
 	return 0.0;
       }
@@ -191,7 +187,6 @@ INT_T a68g_i64mach (int i)
     case 9: {
 	return LLONG_MAX;
       }
-//
     default: {
 	return a68g_i32mach (i);
       }
@@ -247,7 +242,6 @@ DOUBLE_T a68g_r128mach (int i)
     case 9: {
         return FLT128_MANT_DIG;
       }
-//
     default: {
 	return 0.0;
       }

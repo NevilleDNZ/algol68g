@@ -13,12 +13,25 @@ COMMENT
 PR quiet regression PR
 
 COMMENT
-After the program published on rosettacode.org by Marcel van der Veer.
+
+@section Synopsis
+
+Compute regular (or Hamming) numbers.
+
+Regular numbers have prime factors 2, 3, and 5 only. These numbers appear in 
+several areas of mathematics and have different names in different areas of 
+study. They have for example a role in number theory and in computer science 
+where regular numbers are often called Hamming numbers, after Richard Hamming 
+who proposed the problem of finding algorithms for generating these numbers 
+in ascending order. This program is one such algorithm.
+
+After the program published on Rosetta Code by Marcel van der Veer.
+
 COMMENT
 
 PR precision=100 PR
  
-MODE SERIES = FLEX [1 : 0] UNT, # Initially, no elements #
+MODE SERIES = FLEX [0] UNT, # Initially, no elements #
      UNT = LONG LONG INT; # A 100-digit unsigned integer #
  
 PROC hamming number = (INT n) UNT: # The n-th Hamming number #
@@ -51,7 +64,7 @@ PROC hamming number = (INT n) UNT: # The n-th Hamming number #
  
 FOR k FROM 10 BY 10 TO 90
 DO print ((whole (k, 0), " = ", whole (hamming number (k), 0), new line))
-OD;
+OD
 
 CO Only for machines with ample RAM!
 

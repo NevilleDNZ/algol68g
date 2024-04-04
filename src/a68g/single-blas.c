@@ -1,11 +1,11 @@
 //! @file single-blas.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -48,9 +48,7 @@ void a68_dgemm (CBLAS_TRANSPOSE_t TransA, CBLAS_TRANSPOSE_t TransB,
                 double beta, gsl_matrix **C)
 {
 // Wrapper for gsl_blas_dgemm, allocates result matrix C if needed.
-//
 // GEMM from BLAS computes C := alpha * TransA (A) * TransB (B) + beta * C
-//
   if ((*C) == NO_REAL_MATRIX) {
     unt N = (TransA == SELF ? SIZE1 (A) : SIZE2 (A));
     unt M = (TransB == SELF ? SIZE2 (B) : SIZE1 (B));

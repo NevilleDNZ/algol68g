@@ -1,11 +1,11 @@
 //! @file rts-https.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -52,14 +52,12 @@ static size_t a68_curl_concat (void *data, size_t len, size_t n, void *buf)
   } else if (n == 0 || len == 0) {
     return 0;
   }
-//
   ABEND (len >= (2 * GIGABYTE) / n, ERROR_OUT_OF_CORE, NO_TEXT);
   size_t new_len = n * len;
   ABEND (new_len + 1 > 2 * GIGABYTE - ((DATA_T *) buf)->len, ERROR_OUT_OF_CORE, NO_TEXT);
   char *stale = ((DATA_T *) buf)->ref;
   ((DATA_T *) buf)->ref = malloc (((DATA_T *) buf)->len + new_len + 1);
   ABEND (((DATA_T *) buf)->ref == NO_TEXT, ERROR_OUT_OF_CORE, NO_TEXT);
-//
   if (stale != NO_TEXT) {
     MOVE (((DATA_T *) buf)->ref, stale, ((DATA_T *) buf)->len + 1);
     free (stale);

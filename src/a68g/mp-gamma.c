@@ -1,11 +1,11 @@
 //! @file mp-gamma.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -186,7 +186,6 @@ MP_T *inverfc_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Reference: 
 //   John L. Spouge. "Computation of the Gamma, Digamma, and Trigamma Functions". 
 //   SIAM Journal on Numerical Analysis. 31 (3) [1994]
-//
 // Spouge's algorithm sums terms of greatly varying magnitude.
 
 #define GAMMA_PRECISION(z) (2 * (z))

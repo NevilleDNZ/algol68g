@@ -1,0 +1,56 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Lagarias arithmetic derivate.
+
+Compute the Lagarias arithmetic derivative; a function defined for integers 
+based on prime factorization, an analogy of the product rule for the derivative 
+of a function in calculus. The function's relevance is in number-theoretic 
+conjectures like the twin prime conjecture, the prime triples conjecture, 
+and Goldbach's conjecture. 
+
+After the program published on Rosetta Code by Marcel van der Veer.
+
+COMMENT
+
+BEGIN PROC lagarias = (ZAHL n) ZAHL: # Lagarias arithmetic derivative #
+           IF n < 0
+           THEN -lagarias (-n)
+           ELIF n = 0 OR n = 1
+           THEN 0
+           ELIF PROC small pf = (ZAHL j, k) ZAHL: # Smallest prime factor #
+                     IF j MOD k = 0
+                     THEN k
+                     ELSE (k * k > j | j | small pf (j, k + 1))
+                     FI;
+                ZAHL spf = small pf (n, 2); 
+                ZAHL q = n OVER spf; 
+                q = 1
+           THEN 1
+           ELSE q * lagarias (spf) + spf * lagarias (q)
+           FI;
+
+      FOR n FROM -99 TO 100
+      DO print (("D(", whole (n, 0), ") = ", whole (lagarias (n), 0), new line))
+      OD;
+      new line (standout);
+      FOR n TO 20
+      DO ZAHL m = LONG 10 ^ n;
+         print (("D(", whole (m, 0), ") / 7 = ", whole (lagarias (m) % 7, 0), new line))
+      OD
+END

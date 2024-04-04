@@ -1,11 +1,11 @@
 //! @file a68g-genie.h
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -84,7 +84,6 @@
 // Macros for row-handling
 
 // An A68G row is a reference to a descriptor in the heap:
-//
 // A68_REF row -> A68_ARRAY ----+   ARRAY: Description of row, ref to elements.
 //                A68_TUPLE 1   |   TUPLE: Bounds, one for every dimension.
 //                ...           |

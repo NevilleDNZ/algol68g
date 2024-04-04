@@ -1,11 +1,11 @@
 //! @file mp-complex.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -420,7 +420,6 @@ MP_T *csinh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
   SET_MP_ZERO (u, gdigs);
   SET_MP_MINUS_ONE (v, gdigs);
   (void) cmul_mp (p, re, im, u, v, gdigs);
-//
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
@@ -440,7 +439,6 @@ MP_T *ccosh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
   SET_MP_ONE (v, gdigs);
   (void) cmul_mp (p, re, im, u, v, gdigs);
   (void) ccos_mp (p, re, im, gdigs);
-//
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
@@ -462,7 +460,6 @@ MP_T *ctanh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
   SET_MP_ZERO (re, gdigs);
   SET_MP_MINUS_ONE (im, gdigs);
   (void) cmul_mp (p, re, im, u, v, gdigs);
-//
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
@@ -484,7 +481,6 @@ MP_T *casinh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
   SET_MP_ZERO (u, gdigs);
   SET_MP_ONE (v, gdigs);
   (void) cmul_mp (p, re, im, u, v, gdigs);
-//
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
@@ -504,7 +500,6 @@ MP_T *cacosh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
   SET_MP_ZERO (u, gdigs);
   SET_MP_ONE (v, gdigs);
   (void) cmul_mp (p, re, im, u, v, gdigs);
-//
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;
@@ -526,7 +521,6 @@ MP_T *catanh_mp (NODE_T * p, MP_T * r, MP_T * i, int digs)
   SET_MP_ZERO (u, gdigs);
   SET_MP_ONE (v, gdigs);
   (void) cmul_mp (p, re, im, u, v, gdigs);
-//
   (void) shorten_mp (p, r, digs, re, gdigs);
   (void) shorten_mp (p, i, digs, im, gdigs);
   A68_SP = pop_sp;

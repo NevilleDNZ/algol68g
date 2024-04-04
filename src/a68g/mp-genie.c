@@ -1,11 +1,11 @@
 //! @file mp-misc.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -1334,7 +1334,6 @@ void genie_acscdg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, acscdg_mp);
 }
-
 
 //! @brief PROC (LONG REAL) LONG REAL long cotdg
 

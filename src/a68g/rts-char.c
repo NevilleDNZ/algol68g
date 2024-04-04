@@ -1,11 +1,11 @@
 //! @file rts-char.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -329,7 +329,6 @@ int string_difference (NODE_T * p)
   A68_ARRAY *arr_2; A68_TUPLE *tup_2;
   GET_DESCRIPTOR (arr_2, tup_2, &row2);
   int len_2 = ROW_SIZE (tup_2);
-//
   A68_REF row1;
   POP_REF (p, &row1);
   CHECK_INIT (p, INITIALISED (&row1), M_STRING);

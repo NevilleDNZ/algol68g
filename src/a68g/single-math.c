@@ -1,11 +1,11 @@
 //! @file single-math.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -24,7 +24,6 @@
 //! REAL math routines supplementing libc.
 
 // References:
-//
 //   M. Abramowitz and I. Stegun, Handbook of Mathematical Functions,
 //   Dover Publications, New York [1970]
 //   https://en.wikipedia.org/wiki/Abramowitz_and_Stegun

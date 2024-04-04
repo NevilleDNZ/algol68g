@@ -1,11 +1,11 @@
 //! @file a68g-common.h
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -105,7 +105,6 @@ struct UNIC_T
   char *fun;
 };
 
-//
 
 #define A68(z)         (common.z)
 #define A68_JOB        A68 (job)

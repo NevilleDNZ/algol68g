@@ -12,18 +12,50 @@ COMMENT
 
 PR quiet regression PR
 
-# The Ackermann function is a classic recursive example in computer science. #
+#
+ 
+@section Synopsis
 
-PROC ackermann = (INT m, n) INT:
+Ackermann function, a paradigm total computable function that is not primitive recursive. 
+
+All primitive recursive functions (that can also be computed iteratively) are total and 
+computable, but not all total computable functions are primitive recursive.
+
+This two-argument A(m, n) version is by Péter and Robinson (commonly called "the" Ackermann
+function) is a paradigm total computable function that is not primitive recursive. 
+
+The function f(n) = A(n, n) grows faster than any primitive recursive function, including 
+the exponential function, the factorial function, and multi- and superfactorial functions.
+
+The extremely deep recursion of this function is commonly used in testing programming language
+implementations.
+
+#
+
+PROC ack = (INT m, n) INT:
      IF m = 0
      THEN n + 1
-     ELIF n = 0
-     THEN ackermann (m - 1, 1)
-     ELSE ackermann (m - 1, ackermann (m, n - 1))
+     ELSE (n = 0 | ack (m - 1, 1) | ack (m - 1, ack (m, n - 1)))
      FI;
 
+PROC f = (INT n) INT: ack (n, n);
+
 FOR m TO 3 
-DO FOR n TO 4 
-   DO print ((whole (m, 0), blank, whole (n, 0), blank, whole (ackermann (m, n), 0), newline))
+DO print (("f(", whole (m, 0), ") = ", whole (f (m), 0), newline));
+   FOR n TO m 
+   DO print (("A(", whole (m, 0), ", ", whole (n, 0), ") = ", whole (ack (m, n), 0), newline))
    OD
 OD
+
+#
+Output:
+f(1) = 3
+A(1, 1) = 3
+f(2) = 7
+A(2, 1) = 5
+A(2, 2) = 7
+f(3) = 61
+A(3, 1) = 13
+A(3, 2) = 29
+A(3, 3) = 61
+#

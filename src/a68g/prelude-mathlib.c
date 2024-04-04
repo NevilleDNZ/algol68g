@@ -1,11 +1,11 @@
 //! @file prelude-mathlib.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -124,11 +124,9 @@ void stand_mathlib (void)
   a68_idf (A68_EXT, "rqnf", m, genie_R_qnf_real);
   a68_idf (A68_EXT, "rphyper", m, genie_R_phyper_real);
   a68_idf (A68_EXT, "rqhyper", m, genie_R_qhyper_real);
-//
   m = a68_proc (M_REAL, M_REAL, M_REAL, M_BOOL, NO_MOID);
   a68_idf (A68_EXT, "rdsignrank", m, genie_R_dsignrank_real);
   a68_idf (A68_EXT, "rdwilcox", m, genie_R_dwilcox_real);
-//
   m = a68_proc (M_REAL, M_REAL, M_REAL, M_BOOL, M_BOOL, NO_MOID);
   a68_idf (A68_EXT, "rpsignrank", m, genie_R_psignrank_real);
   a68_idf (A68_EXT, "rqsignrank", m, genie_R_qsignrank_real);
