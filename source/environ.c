@@ -5,7 +5,7 @@
 @section Copyright
 
 This file is part of Algol68G - an Algol 68 compiler-interpreter.
-Copyright 2001-2015 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright 2001-2016 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 @section License
 
@@ -17701,6 +17701,8 @@ Child redirects STDIN and STDOUT.
         c_to_a_string (p, get_transput_buffer (INPUT_BUFFER),
                           get_transput_buffer_index (INPUT_BUFFER));
     }
+    ASSERT (close (ptoc_fd[FD_WRITE]) == 0);
+    ASSERT (close (ctop_fd[FD_READ]) == 0);
     PUSH_PRIMITIVE (p, ret, A68_INT);
   }
 #endif /* defined HAVE_WIN32 */
@@ -17817,12 +17819,8 @@ int rgetchar (void)
 
 void genie_curses_start (NODE_T * p)
 {
-  errno = 0;
+  (void) p;
   init_curses ();
-  if (errno != 0) {
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CURSES);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
   a68g_curses_mode = A68_TRUE;
 }
 

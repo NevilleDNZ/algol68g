@@ -5,7 +5,7 @@
 @section Copyright
 
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright 2001-2015 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright 2001-2016 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 @section License
 
@@ -5665,7 +5665,7 @@ void colour_object (BYTE_T * item, MOID_T * m)
       if (!IS_NIL (*z)) {
         colour_object (ADDRESS (z), SUB (m));
       }
-      STATUS_CLEAR (REF_HANDLE (z), COOKIE_MASK);
+/*    STATUS_CLEAR (REF_HANDLE (z), COOKIE_MASK); */
     }
   } else if (IS (m, FLEX_SYMBOL) || IS (m, ROW_SYMBOL) || m == MODE (STRING)) {
 /* Claim the descriptor and the row itself */
@@ -5694,6 +5694,10 @@ void colour_object (BYTE_T * item, MOID_T * m)
 /* STRUCTures - colour fields */
     PACK_T *p = PACK (m);
     for (; p != NO_PACK; FORWARD (p)) {
+/*
+printf("\n> %s %s %d", PM(m), PM(MOID(p)), OFFSET(p));
+fflush(stdout);
+*/
       colour_object (&item[OFFSET (p)], MOID (p));
     }
   } else if (IS (m, UNION_SYMBOL)) {
@@ -5716,7 +5720,7 @@ void colour_object (BYTE_T * item, MOID_T * m)
         }
         u = &(u[SIZE (MODE (BOOL)) + SIZE (MOID (s))]);
       }
-      STATUS_CLEAR (LOCALE (z), COOKIE_MASK);
+/*    STATUS_CLEAR (LOCALE (z), COOKIE_MASK); */
     }
   } else if (m == MODE (SOUND)) {
 /* Claim the data of a SOUND object, that is in the heap */
