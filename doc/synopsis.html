@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -59,20 +60,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -113,7 +108,6 @@ On UNIX or Linux, Algol 68 Genie recognises next environment variables:
 </dl>
 </p>
 
-<br>
 <h3><a name="options"></a>Options</h3>
 <p>Options are passed to Algol68G either from the file <code>.a68grc</code> in the working directory, the <code>A68G_OPTIONS</code> environment variable, the command-line or through pragmats. Precedence is as follows: pragmats supersede command-line options, command-line options supersede options from <code>A68G_OPTIONS</code> that supersede options in <code>.a68grc</code>. 
 <p>
@@ -122,7 +116,7 @@ Options have syntax <code>-option [[=] value[suffix]]</code>
 Options are not case sensitive. In the list below, underlined letters denote letters mandatory for recognition. Listing options, tracing options and pragmat, -nopragmat, take their effect when they are encountered in a left-to-right pass of the program text, and can thus be used, for example, to generate a cross reference for a particular part of the user program. In integral arguments, suffix "k", "M" or "G" is accepted to specify 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
 </p>
 
-<h4><a name="optionone"></a>One-liners</h4>
+<h3><a name="optionone"></a>One-liners</h3>
 <dl compact>
 <dt><u>p</u>rint <i>unit</i>
 <dd><i>Command-line only</i>. Prints the value yielded by Algol 68 unit <i>unit</i>. In this way Algol68G can execute one-liners from the command-line. The one-liner is written in file <i>.a68g.x</i> in the working directory.
@@ -136,8 +130,7 @@ Options are not case sensitive. In the list below, underlined letters denote let
 </ul>
 </dl>
 
-<br>
-<h4><a name="optionmem"></a>Memory size</h4>
+<h3><a name="optionmem"></a>Memory size</h3>
 <p>Algol 68 relieves the programmer from managing memory, hence Algol68G manages allocation and de-allocation of heap space. However, if memory size were not bounded, Algol68G might claim all available memory before the garbage collector is called. Since this could impede overall system performance, memory size is bounded. 
 </p>
 <dl compact>
@@ -168,8 +161,7 @@ Options are not case sensitive. In the list below, underlined letters denote let
 </code></ul>
 </dl>
 
-<br>
-<h4><a name="optionlist"></a>Listing options</h4>
+<h3><a name="optionlist"></a>Listing options</h3>
 <dl compact>
 <dt><u>ext</u>ensive
 <dd>Generates extensive listing, including source listing, syntax tree, cross reference etcetera. This listing can be quite bulky.
@@ -192,7 +184,7 @@ Options are not case sensitive. In the list below, underlined letters denote let
 </dl>
 
 <br>
-<h4><a name="optionint"></a>Interpreter options</h4>
+<h3><a name="optionint"></a>Interpreter options</h3>
 <dl compact>
 <dt><u>mon</u>itor, <u>debug</u>
 <dd>Upon encountering a runtime error, instead of terminating execution, the <a href="#monitor">monitor</a> will be entered.
@@ -214,7 +206,7 @@ Options are not case sensitive. In the list below, underlined letters denote let
 </dl>
 
 <br>
-<h4><a name="optionmisc"></a>Miscellaneous options</h4>
+<h3><a name="optionmisc"></a>Miscellaneous options</h3>
 <dl compact>
 <dt><u>upper</u>stropping, <u>quote</u>stropping
 <dd>Sets the stropping mode. Upper stropping is the default. Quote stropping is implemented to let Algol68G scan vintage source code.
@@ -250,7 +242,6 @@ Options are not case sensitive. In the list below, underlined letters denote let
 <dd>Enables warning messages.
 </dl>
 
-<br>
 <h3><a name="monitor"></a>The monitor (debugger)</h3>
 
 <p>
@@ -303,13 +294,19 @@ If <i>0</i> is specified, the current stack frame will be the top of the frame s
 <dt><u>ht</u>
 <dd>Halts typing to standard output.
 
+<dt><u>rer</u>un, <u>res</u>tart 
+<dd>Restarts a program without resetting breakpoints.
+
+<dt><u>reset</u> 
+<dd>Restarts a program and resets breakpoints.
+
 <dt><u>rt</u>
 <dd>Resumes typing to standard output.
 
 <dt><u>l</u>ist <i>n</i> <i>m</i>
 <dd>If <i>m</i> is omitted, show <i>n</i> lines around the interrupted line 
 (default <i>n</i>=10).
-If <i>n</i> and <i>m</i> are supplied, show lines <i>n</i> upto <i>m</i>.
+If <i>n</i> and <i>m</i> are supplied, show lines <i>n</i> up to <i>m</i>.
 
 <dt><u>n</u>ext, <u>ste</u>p
 <dd>Resume execution until the next unit in the program that can be a breakpoint (coarse single-stepping). 
@@ -353,7 +350,7 @@ If <i>n</i> and <i>m</i> are supplied, show lines <i>n</i> upto <i>m</i>.
 
 </dl>
 
-<h4><a name="monexp"></a>Monitor expressions</h4>
+<h3><a name="monexp"></a>Monitor expressions</h3>
 <p>
 Monitor expressions provide basic means to do arithmetic in the monitor, and to change stored values.
 Monitor expression syntax is similar to Algol 68 syntax.
@@ -391,15 +388,19 @@ Important points are:
 </ul>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

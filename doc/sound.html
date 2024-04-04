@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -53,20 +54,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -81,8 +76,6 @@ The programmer can for example write an application to concatenate sound files, 
 Currently Algol 68 Genie supports linearly encoded PCM (for example used for CD audio).
 Should you wish to manipulate sound data in another format, then one option is to convert formats using a tool as for instance <a href="http://sox.sourceforge.net/">SoX</a>.
 </p>
-
-<br>
 
 <h3><a name="struct"></a>Data structure and access methods</h3>
 
@@ -128,12 +121,12 @@ Common values are 8000, 11025, 22050 or 44100.
 <br>
 <dt><code>PROC get sound = (SOUND s, INT channel, sample) INT</code>
 <dd>Returns the sample indexed by <var>channel</var> and <var>sample</var> of <var>s</var>.
-Note that under RIFF, samples with size upto 8 bits are normally unsigned while samples of larger size are signed.
+Note that under RIFF, samples with size up to 8 bits are normally unsigned while samples of larger size are signed.
 <br>
 <br>
 <dt><code>PROC set sound = (SOUND s, INT channel, sample, value) INT</code>
 <dd>Sets the sample indexed by <var>channel</var> and <var>sample</var> of <var>s</var> to <var>value</var>.
-Note that under RIFF, samples with size upto 8 bits are normally unsigned while samples of larger size are signed.
+Note that under RIFF, samples with size up to 8 bits are normally unsigned while samples of larger size are signed.
 </dl>
 
 <h3><a name="transput"></a>Transput of SOUND values</h3>
@@ -184,15 +177,19 @@ play sound (s)
 </pre>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

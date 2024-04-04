@@ -8,18 +8,19 @@
 a:link    {color: blue; text-decoration: underline;}
 a:visited {color: blue; text-decoration: underline;}
 a:active  {color: blue; text-decoration: underline;}
-p {font-size: 10pt; font-family: Arial,Helvetica;}
-u {font-size: 10pt; font-family: Arial,Helvetica;}
-dd {font-size: 10pt; font-family: Arial,Helvetica;}
-h1 {font-size: 16pt; font-family: Arial,Helvetica;}
-h2 {font-size: 14pt; font-family: Arial,Helvetica;}
-h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
-ul {font-size: 10pt; font-family: Arial,Helvetica;}
-body {font-size: 10pt; font-family: Arial,Helvetica;}
-code {font-size: 10pt; font-family: Courier;}
-pre {font-size: 10pt; font-family: Courier;}
+p {font-size: 10pt; font-family: arial, sans-serif;}
+u {font-size: 10pt; font-family: arial, sans-serif;}
+dd {font-size: 10pt; font-family: arial, sans-serif;}
+h1 {font-size: 14pt; font-family: arial, sans-serif;}
+h2 {font-size: 12pt; font-family: arial, sans-serif;}
+h3 {font-size: 10pt; font-family: arial, sans-serif;}
+h4 {font-size: 10pt; font-family: arial, sans-serif;}
+td {font-size: 10pt; font-family: arial, sans-serif;}
+ul {font-size: 10pt; font-family: arial, sans-serif;}
+body {font-size: 10pt; font-family: arial, sans-serif;}
+tt {font-size: 10pt; font-family: "courier new", monospace;}
+code {font-size: 10pt; font-family: "courier new", monospace;}
+pre {font-size: 10pt; font-family: "courier new", monospace;}
 </style>
 </head>
 
@@ -29,7 +30,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 11
+<b>Documentation for Algol 68 Genie Mark 11.1</b>
 </small>
 </td>
 </table>
@@ -61,20 +62,14 @@ Documentation for Algol 68 Genie Mark 11
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 11</b>
 <p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
+<a href="algol.html"><small><b>A68G Home</b></small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+<a href="contents.html"><small><b>Documentation</b></small></a><br>
 <p>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
+<a href="report_contents.html"><small><b>Revised Report</b></small></a>
+<p>
+<a href="algol.html#obtaining"><small><b>Downloads</b></small></a>
 </td>
 </tr>
 </table>
@@ -132,7 +127,7 @@ Routines in this chapter convert Algol 68 rows to objects compatible with vector
 
 <h3><a name="elementary"></a>Elementary operations on vectors and matrices</h3>
 
-<h4><a name="monad"></a>Monadic operators</h4>
+<h3><a name="monad"></a>Monadic operators</h3>
 
 <dl>
 <dt><code>OP + = ([] REAL u) [] REAL
@@ -183,7 +178,7 @@ whereas pseudo-operator <code>TRNSP</code> yields a descriptor without copying i
 <dd>Evaluates the inverse of square matrix <code>u</code> by <a href="#lu">LU decomposition</a>.
 </dl>
 
-<h4><a name="dyad"></a>Dyadic operators</h4>
+<h3><a name="dyad"></a>Dyadic operators</h3>
 
 <dl>
 <dt><code>OP = = ([] REAL u, [] REAL v) BOOL
@@ -311,7 +306,7 @@ addition, subtraction, multiplication and division have priority over a dyadic p
 <p>
 This paragraph describes routines for solving linear algebraic equations. These are intended for &ldquo;small&rdquo; linear equations where simple algorithms are acceptable. Should you be interested in solving large linear equations please refer to for instance LAPACK.
 
-<h4><a name="lu"></a>LU decomposition through Gaussian elimination</h4>
+<h3><a name="lu"></a>LU decomposition through Gaussian elimination</h3>
 <p>
 A square matrix has an LU decomposition into upper and lower triangular matrices P * A = L * U where A is a square matrix, P is a permutation matrix, L is a unit lower triangular matrix and U is an upper triangular matrix. For square matrices this decomposition can be used to convert the linear equation A * x = b into a pair of triangular equations (L * y = P * b, U * x = y), which can be solved by forward- and back-substitution.
 <p>
@@ -344,7 +339,7 @@ product of the diagonal elements of U and the sign of the row
 permutation <code>sign</code>.
 </dl>
 
-<h4><a name="svd"></a>Singular value decomposition</h4>
+<h3><a name="svd"></a>Singular value decomposition</h3>
 
 <p>
 A M * N matrix A has a singular value decomposition in the product of a M * N orthogonal matrix U, a N * N diagonal matrix S and the transpose of a N * N orthogonal square matrix V, such that A = U * S * V<sup>T</sup>. The singular values S<sub>ii</sub> are zero or positive, off-diagonal elements are zero.
@@ -359,12 +354,13 @@ Singular value decomposition has many practical applications. The ratio of the l
 <dd>This routine solves the system A * x = b using the singular value decomposition (<code>u</code>, <code>s</code>, <code>v</code>) of A computed by <code>svd decomp</code>. Only non-zero singular values are used in calculating the solution. The parts of the solution corresponding to singular values of zero are ignored. Other singular values can be edited out by setting them to zero before calling this routine. In the overdetermined case where A has more rows than columns the routine returns solution <code>x</code> which minimises ||A * x - b||<sup>2</sup>. 
 </dl>
 
-<h4><a name="qr"></a>QR decomposition</h4>
+<h3><a name="qr"></a>QR decomposition</h3>
 
 <p>
-A M * N matrix A has a decomposition into the product of an orthogonal M * M sqaure matrix Q, where Q<sup>T</sup> * Q = I, and an M * N right-triangular matrix R, such that A = Q * R. A linear equation A * x = b can be converted to the triangular equation R * x = Q<sup>T</sup> * b, which can be solved by back-substitution. 
+A M * N matrix A has a decomposition into the product of an orthogonal M * M square matrix Q, where Q<sup>T</sup> * Q = I, and an M * N right-triangular matrix R, such that A = Q * R. A linear equation A * x = b can be converted to the triangular equation R * x = Q<sup>T</sup> * b, which can be solved by back-substitution. 
 <p>
-QR decomposition can be used to determine an orthonormal basis for a set of vectors since the first N colums of Q form an orthonormal basis for the range of A.
+QR decomposition can be used to determine an orthonormal basis for a set of vectors since the first N 
+columns of Q form an orthonormal basis for the range of A.
 <dl>
 <dt><code>PROC qr decomp = ([, ] REAL a, REF [] REAL t) [, ] REAL</code>
 <dd>This routine factorises the M * N matrix <code>a</code> into the QR decomposition A = Q * R. The diagonal and upper triangular part of the returned matrix contain matrix R. The vector <code>t</code> and the columns of the lower triangular part of matrix <code>a</code> contain the Householder coefficients and Householder vectors which encode the orthogonal matrix Q. Vector <code>t</code> must have length min(M, N). Matrix Q is related to these components by Q = q<sub>k</sub> ... q<sub>2</sub>q<sub>1</sub> where q<sub>i</sub> = I - t<sub>i</sub> v<sub>i</sub> v<sub>i</sub><sup>T</sup> and v<sub>i</sub> is the Householder vector v<sub>i</sub> = (0, ..., 1, A(i + 1, i), A(i + 2, i), ..., A(m, i)) (this is the same scheme as used by LAPACK). The algorithm used to perform the decomposition is Householder QR (Golub and Van Loan, <i>Matrix Computations</i>, Algorithm 5.2.1). 
@@ -376,7 +372,7 @@ QR decomposition can be used to determine an orthonormal basis for a set of vect
 <dd>This routine finds the least squares solution to the overdetermined system A * x = b where M * N matrix <code>A</code> has more rows than columns, id est M > N. The least squares solution minimises the Euclidean norm of the residual ||A * x - b||<sup>2</sup>. The routine uses the QR decomposition of A into (<code>a</code>, <code>t</code>) computed by <code>qr decomp</code>.
 </dl>
 
-<h4><a name="ch"></a>Cholesky decomposition</h4>
+<h3><a name="ch"></a>Cholesky decomposition</h3>
 
 <p>A symmetric, positive definite square matrix A has a Cholesky decomposition into a product of a lower triangular matrix L and its transpose L<sup>T</sup>, A = L * L<sup>T</sup>. This is sometimes referred to as taking the square-root of a matrix. The Cholesky decomposition can only be carried out when all the eigenvalues of the matrix are positive. This decomposition can be used to convert the linear system A * x = b into a pair of triangular equations (L * y = b, L<sup>T</sup> * x = y), which can be solved by forward and back-substitution.
 
@@ -388,7 +384,7 @@ QR decomposition can be used to determine an orthonormal basis for a set of vect
 <dd>This routine solves the system A * x = b using the Cholesky decomposition of A into matrix <code>a</code> computed by <code>cholesky decomp</code>. 
 </dl>
 
-<h2><a name="fft"></a>Fourier transforms</h2>
+<h3><a name="fft"></a>Fourier transforms</h3>
 
 <p>
 This section describes mixed-radix fast Fourier transform (FFT) algorithms for complex data. The mixed-radix procedures work for FFTs of any length. They are a reimplementation of Paul Swarztrauber's <code>FFTPACK</code> library. 
@@ -441,15 +437,19 @@ that are equivalent. If <i>N</i> is odd, this central value does not appear, but
 </dl>
 
 <!-- Footer -->
-<hr color=#e0e0e0>
 <p>
+<div style="border: 1px solid red">
+<table cellpadding=6>
+<tr>
+<td>
 <small>
-Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 11 (November 2007)
+Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 11.1 (March 2008)
 </small>
-</p>
-<hr color=#e0e0e0>
-
+</td>
+</tr>
+</table>
+</div>
 </body>
 </html>
 

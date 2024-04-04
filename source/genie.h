@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -156,7 +156,12 @@ extern unsigned check_time_limit_count;
       exit_genie ((NODE_T *) p, A68_RUNTIME_ERROR);\
     }\
   } else if (sys_request_flag) {\
-    single_step ((NODE_T *) p, A68_TRUE, A68_FALSE);\
+    WRITE (STDOUT_FILENO, NEWLINE_STRING);\
+    where (STDOUT_FILENO, (NODE_T *) (p));\
+    if (do_confirm_exit && confirm_exit ()) {\
+      exit_genie ((NODE_T *) (p), A68_RUNTIME_ERROR + A68_FORCE_QUIT);\
+    }\
+    single_step ((NODE_T *) p, A68_FALSE);\
   } else if (m_trace_mood) {\
     where (STDOUT_FILENO, (NODE_T *) p);\
   }}
@@ -176,14 +181,19 @@ extern unsigned check_time_limit_count;
 #define EXECUTE_UNIT_TRACE(p) {\
   PROPAGATOR_T *prop = &((p)->genie.propagator);\
   if (sys_request_flag) {\
-    single_step ((p), A68_TRUE, A68_FALSE);\
+    WRITE (STDOUT_FILENO, NEWLINE_STRING);\
+    where (STDOUT_FILENO, (p));\
+    if (do_confirm_exit && confirm_exit ()) {\
+      exit_genie ((p), A68_RUNTIME_ERROR + A68_FORCE_QUIT);\
+    }\
+    single_step ((p), A68_FALSE);\
   } else if (MASK (p) & BREAKPOINT_MASK) {\
     if (INFO (p)->expr == NULL) {\
       sys_request_flag = A68_FALSE;\
-      single_step ((p), A68_FALSE, A68_TRUE);\
+      single_step ((p), A68_TRUE);\
     } else if (breakpoint_expression (p)) {\
       sys_request_flag = A68_FALSE;\
-      single_step ((p), A68_FALSE, A68_TRUE);\
+      single_step ((p), A68_TRUE);\
     }\
   } else if (MASK (p) & TRACE_MASK) {\
     where (STDOUT_FILENO, (p));\
@@ -562,6 +572,13 @@ returns: static link for stack frame at 'new_lex_lvl'.
   (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
   }
 
+#define POP_3_OPERAND_ADDRESSES(p, i, j, k, type) {\
+  DECREMENT_STACK_POINTER ((p), 2 * ALIGNED_SIZEOF (type));\
+  (k) = (type *) (STACK_OFFSET (ALIGNED_SIZEOF (type)));\
+  (j) = (type *) STACK_TOP;\
+  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
+  }
+
 #define PUSH_PRIMITIVE(p, z, mode) {\
   mode *_x_ = (mode *) STACK_TOP;\
   _x_->status = INITIALISED_MASK;\
@@ -663,7 +680,7 @@ extern A68_FORMAT nil_format;
 extern A68_HANDLE nil_handle, *free_handles, *busy_handles;
 extern A68_REF nil_ref;
 extern A68_REF stand_in, stand_out;
-extern BOOL_T in_monitor;
+extern BOOL_T in_monitor, do_confirm_exit;
 extern BYTE_T *frame_segment, *stack_segment, *heap_segment, *handle_segment;
 extern MOID_T *top_expr_moid;
 extern double cputime_0;
@@ -686,6 +703,7 @@ extern void genie_abend_thread (void);
 extern void zap_thread (NODE_T *, jmp_buf *, NODE_T *);
 #endif
 
+extern BOOL_T confirm_exit (void);
 extern int free_handle_count, max_handle_count;
 extern void sweep_heap (NODE_T *, ADDR_T);
 
@@ -839,6 +857,8 @@ extern GENIE_PROCEDURE genie_lengthen_real_to_long_mp;
 extern GENIE_PROCEDURE genie_lengthen_unsigned_to_long_mp;
 extern GENIE_PROCEDURE genie_level_int_sema;
 extern GENIE_PROCEDURE genie_level_sema_int;
+extern GENIE_PROCEDURE genie_lj_e_12_6;
+extern GENIE_PROCEDURE genie_lj_f_12_6;
 extern GENIE_PROCEDURE genie_ln_long_complex;
 extern GENIE_PROCEDURE genie_ln_long_mp;
 extern GENIE_PROCEDURE genie_ln_real;
@@ -1139,13 +1159,12 @@ extern void genie_serial_clause (NODE_T *, jmp_buf *);
 extern void genie_serial_units (NODE_T *, NODE_T **, jmp_buf *, int);
 extern void genie_subscript (NODE_T *, ADDR_T *, int *, NODE_T **);
 extern void genie_subscript_linear (NODE_T *, ADDR_T *, int *);
-extern void genie_unit_trace (NODE_T *);
 extern void init_rng (unsigned long);
 extern void initialise_frame (NODE_T *);
 extern void install_signal_handlers (void);
 extern void show_data_item (FILE_T, NODE_T *, MOID_T *, BYTE_T *);
 extern void show_frame (NODE_T *, FILE_T);
-extern void single_step (NODE_T *, BOOL_T, BOOL_T);
+extern void single_step (NODE_T *, BOOL_T);
 extern void stack_dump (FILE_T, ADDR_T, int, int *);
 extern void stack_dump_light (ADDR_T);
 extern void un_init_frame (NODE_T *);

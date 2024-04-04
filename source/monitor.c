@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -58,12 +58,6 @@ static int current_frame = 0;
   scan_sym((f), (p));\
   QUIT_ON_ERROR;
 
-#define WRITE(f, s) io_write_string ((f), (s));
-
-#define WRITELN(f, s)\
-  io_close_tty_line ();\
-  WRITE (f, s);
-
 #define MAX_ROW_ELEMS 24
 #define STACK_SIZE 3
 #define NO_VALUE " uninitialised value"
@@ -86,7 +80,7 @@ static void parse (FILE_T, NODE_T *, int);
 \return 
 */
 
-static BOOL_T confirm_exit (void)
+BOOL_T confirm_exit (void)
 {
   char *cmd;
   int k;
@@ -1837,6 +1831,10 @@ static void genie_help (FILE_T f)
   WRITELN (f, "   Show \"n\" lines around the interrupted line (default n=10)");
   WRITELN (f, "PROMPT s");
   WRITELN (f, "   Set prompt to \"s\"");
+  WRITELN (f, "RERUN, RESTART");
+  WRITELN (f, "   Restarts a program without resetting breakpoints");
+  WRITELN (f, "RESET");
+  WRITELN (f, "   Restarts a program and resets breakpoints");
   WRITELN (f, "RT");
   WRITELN (f, "   Resumes typing to standard output");
   WRITELN (f, "SIZES");
@@ -1878,6 +1876,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
     }
     return (A68_FALSE);
   } else if (match_string (cmd, "Continue", NULL_CHAR)) {
+    do_confirm_exit = A68_TRUE;
     return (A68_TRUE);
   } else if (match_string (cmd, "DO", BLANK_CHAR) || match_string (cmd, "EXEC", BLANK_CHAR)) {
     char *sym = cmd;
@@ -2042,7 +2041,19 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
       bufcpy (prompt, sym, BUFFER_SIZE);
     }
     return (A68_FALSE);
+  } else if (match_string (cmd, "RERun", NULL_CHAR) || match_string (cmd, "REStart", NULL_CHAR)) {
+    if (confirm_exit ()) {
+      exit_genie (p, A68_RERUN);
+    }
+    return (A68_FALSE);
+  } else if (match_string (cmd, "RESET", NULL_CHAR)) {
+    if (confirm_exit ()) {
+      breakpoints (INFO (p)->module->top_node, A68_FALSE, 0, NULL);
+      exit_genie (p, A68_RERUN);
+    }
+    return (A68_FALSE);
   } else if (match_string (cmd, "Resume", NULL_CHAR)) {
+    do_confirm_exit = A68_TRUE;
     return (A68_TRUE);
   } else if (match_string (cmd, "STAck", BLANK_CHAR)) {
     int k = argval (cmd, NULL);
@@ -2134,7 +2145,7 @@ BOOL_T breakpoint_expression (NODE_T * p)
 \param p
 **/
 
-void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
+void single_step (NODE_T * p, BOOL_T breakpoint)
 {
   volatile BOOL_T do_cmd = A68_TRUE;
   ADDR_T top_sp = stack_pointer;
@@ -2143,14 +2154,8 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
 #endif
   in_monitor = A68_TRUE;
   sys_request_flag = A68_FALSE;
+  do_confirm_exit = A68_FALSE;
   UP_SWEEP_SEMA;
-  if (sigint) {
-    WRITE (STDOUT_FILENO, NEWLINE_STRING);
-    where (STDOUT_FILENO, p);
-    if (confirm_exit ()) {
-      exit_genie (p, A68_RUNTIME_ERROR + A68_FORCE_QUIT);
-    }
-  }
   if (breakpoint) {
     if (INFO (p)->expr != NULL) {
       snprintf (output_line, BUFFER_SIZE, "\n++++ Breakpoint (%s)", INFO (p)->expr);
@@ -2185,7 +2190,7 @@ void single_step (NODE_T * p, BOOL_T sigint, BOOL_T breakpoint)
 
 void genie_debug (NODE_T * p)
 {
-  single_step (p, A68_FALSE, A68_FALSE);
+  single_step (p, A68_FALSE);
 }
 
 /*!

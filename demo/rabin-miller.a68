@@ -7,6 +7,7 @@ COMMENT
 
 INT max trials = 10, UNT p, m, pow := 2, INT b, MODE UNT = LONG LONG INT;
 
+print ("Enter a number to determine its primality: ");
 read (p);
 
 # Disect the number under test in form p = (2 ^ b) * m + 1 #

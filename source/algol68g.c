@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -74,7 +74,7 @@ void state_license (FILE_T f)
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
   }
-  snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, copyright %s J. Marcel van der Veer.\n", RELEASE_YEAR, REVISION);
+  snprintf (output_line, BUFFER_SIZE, "Algol 68 Genie %s, copyright 2001-%s J. Marcel van der Veer.\n", REVISION, RELEASE_YEAR);
   io_write_string (f, output_line);
   P ("Algol 68 Genie is free software covered by the GNU General Public License.");
   P ("There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.");
@@ -156,59 +156,59 @@ void online_help (FILE_T f)
   P ("");
   P ("Options that execute Algol 68 code from the command line:");
   P ("");
-  P ("   print unit                Print value yielded by Algol 68 unit \"unit\"");
-  P ("   execute unit              Execute Algol 68 unit \"unit\"");
+  P ("   -print unit                 Print value yielded by Algol 68 unit \"unit\"");
+  P ("   -execute unit               Execute Algol 68 unit \"unit\"");
   P ("");
   P ("Options to control the listing file:");
   P ("");
-  P ("   extensive                 Make extensive listing");
-  P ("   listing                   Make concise listing");
-  P ("   moids                     Make overview of moids in listing file");
-  P ("   preludelisting            Make a listing of preludes");
-  P ("   source, nosource          Switch listing of source lines in listing file on or off");
-  P ("   statistics                Print statistics in listing file");
-  P ("   tree, notree              Switch syntax tree listing in listing file on or off");
-  P ("   unused                    Make an overview of unused tags in the listing file");
-  P ("   xref, noxref              Switch cross reference in the listing file on or off");
+  P ("   -extensive                  Make extensive listing");
+  P ("   -listing                    Make concise listing");
+  P ("   -moids                      Make overview of moids in listing file");
+  P ("   -preludelisting             Make a listing of preludes");
+  P ("   -source, nosource           Switch listing of source lines in listing file on or off");
+  P ("   -statistics                 Print statistics in listing file");
+  P ("   -tree, -notree              Switch syntax tree listing in listing file on or off");
+  P ("   -unused                     Make an overview of unused tags in the listing file");
+  P ("   -xref, -noxref              Switch cross reference in the listing file on or off");
   P ("");
   P ("Interpreter options:");
   P ("");
-  P ("   assertions, noassertions  Switch elaboration of assertions on or off");
-  P ("   backtrace, nobacktrace    Switch stack backtracing in case of a runtime error");
-  P ("   precision number          Set precision for LONG LONG modes to \"number\" significant digits");
-  P ("   timelimit number          Interrupt the interpreter after \"number\" seconds");
-  P ("   trace, notrace            Switch tracing of a running program on or off");
+  P ("   -assertions, -noassertions  Switch elaboration of assertions on or off");
+  P ("   -backtrace, -nobacktrace    Switch stack backtracing in case of a runtime error");
+  P ("   -precision number           Set precision for LONG LONG modes to \"number\" significant digits");
+  P ("   -timelimit number           Interrupt the interpreter after \"number\" seconds");
+  P ("   -trace, -notrace            Switch tracing of a running program on or off");
   P ("");
   P ("Options to control the stropping regime:");
   P ("");
-  P ("   boldstropping             Set stropping mode to bold stropping");
-  P ("   quotestropping            Set stropping mode to quote stropping");
+  P ("   -boldstropping              Set stropping mode to bold stropping");
+  P ("   -quotestropping             Set stropping mode to quote stropping");
   P ("");
   P ("Options to control memory usage:");
   P ("");
-  P ("   heap number               Set heap size to \"number\"");
-  P ("   handles number            Set handle space size to \"number\"");
-  P ("   frame number              Set frame stack size to \"number\"");
-  P ("   stack number              Set expression stack size to \"number\"");
+  P ("   -heap number                Set heap size to \"number\"");
+  P ("   -handles number             Set handle space size to \"number\"");
+  P ("   -frame number               Set frame stack size to \"number\"");
+  P ("   -stack number               Set expression stack size to \"number\"");
   P ("");
   P ("Miscellaneous options:");
   P ("");
-  P ("   brackets                  Consider [ .. ] and { .. } as equivalent to ( .. )");
-  P ("   check, norun              Check syntax only, interpreter does not start");
-  P ("   run                       Override CHECK/NORUN options");
-  P ("   echo string               Echo \"string\" to standard output");
-  P ("   exit, --                  Ignore next options");
-  P ("   file string               Accept string as generic filename");
-  P ("   a68cdiagnostics           Give A68C style diagnostics");
-  P ("   gnudiagnostics            Give GNU style diagnostics");
-  P ("   vmsdiagnostics            Give VMS style diagnostics");
-  P ("   pedantic                  Equivalent to WARNINGS PORTCHECK");
-  P ("   portcheck, noportcheck    Switch portability warnings on or off");
-  P ("   pragmats, nopragmats      Switch elaboration of pragmat items on or off");
-  P ("   reductions                Print parser reductions");
-  P ("   verbose                   Inform on program actions");
-  P ("   version                   State version of the running copy");
-  P ("   warnings, nowarnings      Switch warning diagnostics on or off");
+  P ("   -brackets                   Consider [ .. ] and { .. } as equivalent to ( .. )");
+  P ("   -check, -norun              Check syntax only, interpreter does not start");
+  P ("   -run                        Override CHECK/NORUN options");
+  P ("   -echo string                Echo \"string\" to standard output");
+  P ("   -exit, --                   Ignore next options");
+  P ("   -file string                Accept string as generic filename");
+  P ("   -a68cdiagnostics            Give A68C style diagnostics");
+  P ("   -gnudiagnostics             Give GNU style diagnostics");
+  P ("   -vmsdiagnostics             Give VMS style diagnostics");
+  P ("   -pedantic                   Equivalent to WARNINGS PORTCHECK");
+  P ("   -portcheck, -noportcheck    Switch portability warnings on or off");
+  P ("   -pragmats, -nopragmats      Switch elaboration of pragmat items on or off");
+  P ("   -reductions                 Print parser reductions");
+  P ("   -verbose                    Inform on program actions");
+  P ("   -version                    State version of the running copy");
+  P ("   -warnings, -nowarnings      Switch warning diagnostics on or off");
 #undef P
 }
 
