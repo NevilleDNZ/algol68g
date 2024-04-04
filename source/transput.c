@@ -4896,18 +4896,17 @@ format text is at in the syntax tree.
 \param ref_file fat pointer to A68 file
 **/
 
-void format_error (NODE_T * p, A68_REF ref_file)
+void format_error (NODE_T * p, A68_REF ref_file, int diag)
 {
   A68_FILE *f = FILE_DEREF (&ref_file);
   A68_BOOL z;
   on_event_handler (p, f->format_error_mended, ref_file);
   POP_OBJECT (p, &z, A68_BOOL);
   if (VALUE (&z) == A68_FALSE) {
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_PICTURES);
+    diagnostic_node (A68_RUNTIME_ERROR, p, diag);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
-
 
 /*!
 \brief initialise processing of pictures
@@ -4941,11 +4940,18 @@ of times it can still be used.
 \param init whether to initialise collitems
 **/
 
-static void open_format_frame (A68_FILE * file, A68_FORMAT * fmt, BOOL_T embedded, BOOL_T init)
+static void open_format_frame (NODE_T * p, A68_REF ref_file, A68_FORMAT * fmt, BOOL_T embedded, BOOL_T init)
 {
 /* Open a new frame for the format text and save for return to embedding one. */
-  NODE_T *dollar = SUB (BODY (fmt));
+  A68_FILE *file = FILE_DEREF (&ref_file);
+  NODE_T *dollar;
   A68_FORMAT *save;
+/* Integrity check */
+  if ((STATUS (fmt) & SKIP_FORMAT_MASK) || (BODY (fmt) == NULL)) {
+    format_error (p, ref_file, ERROR_FORMAT_UNDEFINED);
+  }
+/* Ok, seems usable */
+  dollar = SUB (BODY (fmt));
   OPEN_PROC_FRAME (dollar, ENVIRON (fmt));
 /* Save old format. */
   save = (A68_FORMAT *) FRAME_LOCAL (frame_pointer, TAX (dollar)->offset);
@@ -4982,7 +4988,7 @@ format text calls "on format end".
 /* Restart format. */
       frame_pointer = file->frame_pointer;
       stack_pointer = file->stack_pointer;
-      open_format_frame (file, &FORMAT (file), NOT_EMBEDDED_FORMAT, A68_TRUE);
+      open_format_frame (p, ref_file, &FORMAT (file), NOT_EMBEDDED_FORMAT, A68_TRUE);
     }
     return (NOT_EMBEDDED_FORMAT);
   } else {
@@ -5055,7 +5061,7 @@ static NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
             A68_FILE *file = FILE_DEREF (&ref_file);
             EXECUTE_UNIT (NEXT_SUB (picture));
             POP_OBJECT (p, &z, A68_FORMAT);
-            open_format_frame (file, &z, EMBEDDED_FORMAT, A68_TRUE);
+            open_format_frame (p, ref_file, &z, EMBEDDED_FORMAT, A68_TRUE);
             pat = scan_format_pattern (SUB (BODY (&FORMAT (file))), ref_file);
             if (pat != NULL) {
               return (pat);
@@ -5073,13 +5079,13 @@ static NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
             ABNORMAL_END (A68_TRUE, "undetermined mood for insertion", NULL);
           }
           collitem->count = 0;  /* This insertion is now done. */
-        } else if (WHETHER (picture, REPLICATOR)
-                   || WHETHER (picture, COLLECTION)) {
+        } else if (WHETHER (picture, REPLICATOR) || WHETHER (picture, COLLECTION)) {
           BOOL_T go_on = A68_TRUE;
           NODE_T *select = NULL;
           if (collitem->count == ITEM_NOT_USED) {
             if (WHETHER (picture, REPLICATOR)) {
               collitem->count = get_replicator_value (SUB (p), A68_TRUE);
+              go_on = (collitem->count > 0);
               FORWARD (picture);
             } else {
               collitem->count = 1;
@@ -6561,7 +6567,7 @@ static void purge_format_write (NODE_T * p, A68_REF ref_file)
     NODE_T *dollar, *pat;
     A68_FORMAT *old_fmt;
     while ((pat = get_next_format_pattern (p, ref_file, SKIP_PATTERN)) != NULL) {
-      format_error (p, ref_file);
+      format_error (p, ref_file, ERROR_FORMAT_PICTURES);
     }
     file = FILE_DEREF (&ref_file);
     dollar = SUB (BODY (&FORMAT (file)));
@@ -6651,7 +6657,7 @@ void genie_write_file_format (NODE_T * p)
   file->stack_pointer = stack_pointer;
 /* Process [] SIMPLOUT. */
   if (BODY (&FORMAT (file)) != NULL) {
-    open_format_frame (file, &FORMAT (file), NOT_EMBEDDED_FORMAT, A68_FALSE);
+    open_format_frame (p, ref_file, &FORMAT (file), NOT_EMBEDDED_FORMAT, A68_FALSE);
   }
   formats = 0;
   base_address = ADDRESS (&(ARRAY (arr)));
@@ -6668,7 +6674,7 @@ void genie_write_file_format (NODE_T * p)
       formats++;
       frame_pointer = file->frame_pointer;
       stack_pointer = file->stack_pointer;
-      open_format_frame (file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A68_TRUE);
+      open_format_frame (p, ref_file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A68_TRUE);
     } else if (mode == MODE (PROC_REF_FILE_VOID)) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_UNDEFINED_TRANSPUT, MODE (PROC_REF_FILE_VOID));
       exit_genie (p, A68_RUNTIME_ERROR);
@@ -7132,8 +7138,7 @@ static void read_integral_mould (NODE_T * p, MOID_T * m, A68_REF ref_file)
       return;                   /* Leave this! */
     } else if (WHETHER (p, FORMAT_ITEM_Z)) {
       int ch = read_single_char (p, ref_file);
-      const char *digits = (m == MODE (BITS) || m == MODE (LONG_BITS)
-                            || m == MODE (LONGLONG_BITS)) ? BITS_DIGITS_BLANK : INT_DIGITS_BLANK;
+      const char *digits = (m == MODE (BITS) || m == MODE (LONG_BITS) || m == MODE (LONGLONG_BITS)) ? BITS_DIGITS_BLANK : INT_DIGITS_BLANK;
       if (expect (p, m, ref_file, digits, ch)) {
         add_char_transput_buffer (p, INPUT_BUFFER, (ch == BLANK_CHAR) ? '0' : ch);
       } else {
@@ -7141,8 +7146,7 @@ static void read_integral_mould (NODE_T * p, MOID_T * m, A68_REF ref_file)
       }
     } else if (WHETHER (p, FORMAT_ITEM_D)) {
       int ch = read_single_char (p, ref_file);
-      const char *digits = (m == MODE (BITS) || m == MODE (LONG_BITS)
-                            || m == MODE (LONGLONG_BITS)) ? BITS_DIGITS : INT_DIGITS;
+      const char *digits = (m == MODE (BITS) || m == MODE (LONG_BITS) || m == MODE (LONGLONG_BITS)) ? BITS_DIGITS : INT_DIGITS;
       if (expect (p, m, ref_file, digits, ch)) {
         add_char_transput_buffer (p, INPUT_BUFFER, ch);
       } else {
@@ -7526,7 +7530,7 @@ static void purge_format_read (NODE_T * p, A68_REF ref_file)
     }
 */
     while ((pat = get_next_format_pattern (p, ref_file, SKIP_PATTERN)) != NULL) {
-      format_error (p, ref_file);
+      format_error (p, ref_file, ERROR_FORMAT_PICTURES);
     }
     file = FILE_DEREF (&ref_file);
     dollar = SUB (BODY (&FORMAT (file)));
@@ -7616,7 +7620,7 @@ void genie_read_file_format (NODE_T * p)
   file->stack_pointer = stack_pointer;
 /* Process [] SIMPLIN. */
   if (BODY (&FORMAT (file)) != NULL) {
-    open_format_frame (file, &FORMAT (file), NOT_EMBEDDED_FORMAT, A68_FALSE);
+    open_format_frame (p, ref_file, &FORMAT (file), NOT_EMBEDDED_FORMAT, A68_FALSE);
   }
   formats = 0;
   base_address = ADDRESS (&(ARRAY (arr)));
@@ -7633,7 +7637,7 @@ void genie_read_file_format (NODE_T * p)
       formats++;
       frame_pointer = file->frame_pointer;
       stack_pointer = file->stack_pointer;
-      open_format_frame (file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A68_TRUE);
+      open_format_frame (p, ref_file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A68_TRUE);
     } else if (mode == MODE (PROC_REF_FILE_VOID)) {
       diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_UNDEFINED_TRANSPUT, MODE (PROC_REF_FILE_VOID));
       exit_genie (p, A68_RUNTIME_ERROR);

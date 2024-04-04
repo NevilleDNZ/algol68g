@@ -69,7 +69,7 @@ static void option_error (SOURCE_LINE_T * l, char *option, char *info)
 
 static char *strip_sign (char *p)
 {
-  while (p[0] == '-' || p[0] == '+' || p[0] == '/') {
+  while (p[0] == '-' || p[0] == '+') {
     p++;
   }
   return (new_string (p));

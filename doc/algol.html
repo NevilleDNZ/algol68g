@@ -30,7 +30,7 @@ pre {font-size: 10pt; font-family: "courier new", monospace;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-<b>Documentation for Algol 68 Genie Mark 14</b>
+<b>Documentation for Algol 68 Genie Mark 14.1</b>
 </small>
 </td>
 </table>
@@ -39,12 +39,11 @@ pre {font-size: 10pt; font-family: "courier new", monospace;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 14</h2>
+<h2>Algol 68 Genie Mark 14.1</h2>
 <h3>An Algol 68 interpreter</h3>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
 &middot;&nbsp;<a href="#obtaining">Obtaining Algol 68 Genie</a><br>
 &middot;&nbsp;<a href="#contact">Author and contact information</a><br>
-&middot;&nbsp;<a href="#history">Release history</a><br>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="algol68.gif">
@@ -98,7 +97,7 @@ The observations mentioned here are believed to be sufficient ground to preserve
 <td width=10%>
 </td>
 <td valign=centre>
-<img src=pooh_a68g.gif align=right>
+<img src=pooh_a68g.gif width=400 align=right>
 </td>
 </tr>
 </table>
@@ -107,7 +106,7 @@ The observations mentioned here are believed to be sufficient ground to preserve
 
 <h3><a name="obtaining"></a>Obtaining Algol 68 Genie</h3>
 <p>
-The current version of Algol 68 Genie is Mark 14, released in October 2008. You can download it from this page. Algol 68 Genie (Algol68G) is free software, distributed under GNU General Public License. Consult the <a href="http://www.gnu.org/licenses/">GNU General Public License</a> for details. The distribution of Algol 68 Genie Mark 14 contains revision 1.2 of the HTML translation of the Algol 68 Revised Report.
+The current version of Algol 68 Genie is Mark 14.1, released in November 2008. You can download it from this page. Algol 68 Genie (Algol68G) is free software, distributed under GNU General Public License. Consult the <a href="http://www.gnu.org/licenses/">GNU General Public License</a> for details. The distribution of Algol 68 Genie Mark 14.1 contains revision 1.2 of the HTML translation of the Algol 68 Revised Report. The user manual contains a release history.
 <p>
 <table border=1 cellspacing=6 cellpadding=6>
 <tr>
@@ -117,7 +116,7 @@ The current version of Algol 68 Genie is Mark 14, released in October 2008. You 
 </center>
 </td>
 <td>
-Download <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk14.tar.gz">Algol68G Mark 14</a>, a gzipped tar archive containing C source code and revision 1.2 of the HTML translation of the Algol 68 Revised Report.
+Download <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk14.1.tar.gz">Algol68G Mark 14.1</a>, a gzipped tar archive containing C source code and revision 1.2 of the HTML translation of the Algol 68 Revised Report.
 </td>
 </tr>
 <tr>
@@ -128,7 +127,7 @@ Download <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk14.tar.gz">Algol68G 
 </td>
 <td>
 Download the <a href="http://www.xs4all.nl/~jmvdveer/a68g-manual.pdf"><i>Algol 68 Genie User Manual</i></a>
-which is an informal introduction to Algol 68 and a manual for Algol68G Mark 14.
+which is an informal introduction to Algol 68 and a manual for Algol68G Mark 14.1.
 </td>
 </tr>
 <tr>
@@ -148,7 +147,7 @@ Read the on-line <a href="report_contents.html">Algol 68 Revised Report</a>.
 </center>
 </td>
 <td>
-Download a WIN32 executable for <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk14.win32.tar.gz">Algol68G Mark 14</a>.
+Download a WIN32 executable for <a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk14.1.win32.tar.gz">Algol68G Mark 14.1</a>.
 </td>
 </tr>
 <tr>
@@ -174,344 +173,19 @@ If you have a question or remark, or have found a bug, please send a note to
 
 <hr color=#e0e0e8>
 
-<h3><a name="history"></a>Release history</h3>
-<p>
-<table border="0" cellspacing="0" cellpadding=6>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-<b>Mark</b>
-</td>
-<td valign=top>
-<b>Date</b>
-</td>
-<td valign=top>
-<b>Changes</b>
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-14
-</td>
-<td valign=top>
-October 2008
-</td>
-<td valign=top>
-Adds first edition of <a href="a68g-manual.pdf"><i>Algol 68 Genie User Manual</i></a><br>
-Adds Revised Report (HTML translation 1.2) to the documentation<br>
-Adds option LINK to the monitor
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-13
-</td>
-<td valign=top>
-June 2008
-</td>
-<td valign=top>
-Adds procedures to interrogate files and directories<br>
-Adds various operators and procedures<br>
-Adds APROPOS to command-line options and monitor options
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-12
-</td>
-<td valign=top>
-May 2008
-</td>
-<td valign=top>
-Improves code for the parallel clause<br>
-Improves interpreter efficiency<br>
-Improves breakpoint commands in the monitor<br>
-Adds options UNTIL, FINISH and OUT to the monitor<br>
-Adds Revised Report (HTML translation 1.1) to the documentation
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-11.1
-</td>
-<td valign=top>
-March 2008
-</td>
-<td valign=top>
-Adds options RERUN, RESET and RESTART to monitor<br>
-Adds Revised Report (HTML translation 1.0) to the documentation
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-11
-</td>
-<td valign=top>
-November 2007
-</td>
-<td valign=top>
-Adds support for sound<br>
-Adds support for Fourier transforms<br>
-Adds pseudo-operator <code>DIAG</code><br>
-Adds pseudo-operator <code>TRNSP</code><br>
-Adds pseudo-operator <code>COL</code><br>
-Adds pseudo-operator <code>ROW</code><br>
-Improves diagnostics in formatted transput<br>
-Improves monitor
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-10.2
-</td>
-<td valign=top>
-April 2007
-</td>
-<td valign=top>
-Adds procedure <code>real</code><br>
-Adds format pattern <code>h</code><br>
-Adds operator <code>OP SET = (INT, L BITS) L BITS</code><br>
-Adds operator <code>OP CLEAR = (INT, L BITS) L BITS</code><br>
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-10.1
-</td>
-<td valign=top>
-December 2006
-</td>
-<td valign=top>
-Improves interpreter efficiency
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-10
-</td>
-<td valign=top>
-August 2006
-</td>
-<td valign=top>
-Adds basic linear algebra support<br>
-Adds procedures <code>arctan2</code>, <code>long arctan2</code> and <code>long long arctan2</code><br>
-Adds procedure <code>execve output</code><br>
-Improves diagnostics<br>
-Adds option [NO]BACKTRACE
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-9.2
-</td>
-<td valign=top>
-July 2006
-</td>
-<td valign=top>
-Adds typographical display features<br>
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-9.1
-</td>
-<td valign=top>
-May 2006
-</td>
-<td valign=top>
-64-bit safe interpreter<br>
-Improves monitor/debugger<br>
-Adds option MONITOR (or DEBUG)<br>
-Adds procedure <code>monitor</code> (or <code>debug</code>)
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-9
-</td>
-<td valign=top>
-March 2006
-</td>
-<td valign=top>
-Adds basic PostgreSQL support<br>
-Adds procedure <code>utc time</code> (UNIX)<br>
-Adds procedure <code>local time</code> (UNIX)<br>
-Improves diagnostic messages
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-8.1
-</td>
-<td valign=top>
-November 2005
-</td>
-<td valign=top>
-Adds procedure <code>sub in string</code> for substituting regular expressions in a string (UNIX)<br>
-Adds option <code>PORTCHECK</code> cf. standard hardware representation<br>
-Adds option <code>PEDANTIC</code><br>
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-8
-</td>
-<td valign=top>
-July 2005
-</td>
-<td valign=top>
-Adds procedure <code>http content</code> for fetching web page contents (UNIX)<br>
-Adds procedure <code>tcp request</code> for sending requests via TCP (UNIX)<br>
-Adds procedure <code>grep in string</code> for matching regular expressions in a string (UNIX)<br>
-Adds procedure <code>last char in string</code> to find last occurrence of a character in a string<br>
-Adds procedure <code>string in string</code> to find first occurrence of a string in a string<br>
-Adds keyword <code>UNTIL</code> to implement post-checked loop<br>
-Adds keyword <code>DOWNTO</code> to complement <code>TO</code><br>
-Adds keyword <code>ANDTH</code> as alternative for <code>ANDF</code> and keyword <code>OREL</code> as alternative for <code>ORF</code><br>
-Makes ~ a <code>SKIP</code> when used as a unit (cf. RR)
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-7
-</td>
-<td valign=top>
-May 2005
-</td>
-<td valign=top>
-Adds partial parametrization following C. H. Lindsey's proposal<br>
-Adds elementary and trigonometric functions for complex numbers, independent of GSL
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-6
-</td>
-<td valign=top>
-March 2005
-</td>
-<td valign=top>
-Adds parallel clause on platforms that support POSIX threads
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-5
-</td>
-<td valign=top>
-October 2004
-</td>
-<td valign=top>
-Improves interpreter efficiency<br>
-Adds transput on <code>STRING</code> as well as <code>FILE</code> and <code>PIPE</code><br>
-Adds dynamic scope checking<br>
-Adds basic preprocessor<br>
-Adds curses support
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-4
-</td>
-<td valign=top>
-June 2004
-</td>
-<td valign=top>
-Adds more GSL support<br>
-Adds modes <code>LONG BITS</code> and <code>LONG LONG BITS</code><br>
-Makes parser accept <code>( .. )</code> as alternative for <code>[ .. ]</code><br>
-Makes parser optionally treat <code>{ .. }</code>, <code>[ .. ]</code> and <code>( .. )</code> as equivalent<br>
-Makes parser accept loop clause as encloses clause<br>
-Makes mode checker accept <code>UNION</code> with components relates through deflexing<br>
-Changes to thread-safe plotutils interface<br>
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-3.2
-</td>
-<td valign=top>
-March 2004
-</td>
-<td valign=top>
-Adds overflow checks for primitive modes
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-3.1
-</td>
-<td valign=top>
-January 2004
-</td>
-<td valign=top>
-Adds optional system stack overflow handling to interpreter<br>
-Improves multiprecision library
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-3
-</td>
-<td valign=top>
-September 2003
-</td>
-<td valign=top>
-Adds formatted transput<br>
-Improves speed of multiprecision library
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-2
-</td>
-<td valign=top>
-March 2003
-</td>
-<td valign=top>
-Adds mode <code>BYTES</code> and <code>LONG BYTES</code><br>
-Adds mode <code>FORMAT</code> and parsing of <code>FORMAT</code> texts<br>
-Adds straightening in unformatted transput<br>
-Adds mode <code>PIPE</code> and <code>UNIX</code> support<br>
-Changes to UNIX system level IO
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-1
-</td>
-<td valign=top>
-November 2002
-</td>
-<td valign=top>
-&nbsp;
-</td>
-</tr>
-<tr bgcolor="#e0e0e8">
-<td valign=top>
-Beta releases
-</td>
-<td valign=top>
-From November 2001 onward
-</td>
-<td valign=top>
-&nbsp;
-</td>
-</tr>
-</table>
-
 <h3>
 Copyright notice
 </h3>
 
 <p style="font-size: 8pt; font-color: black;">
-The <i>Documentation for Algol 68 Genie Mark 14</i> is covered by the GNU Free Documentation License:
+The <i>Documentation for Algol 68 Genie Mark 14.1</i> is covered by the GNU Free Documentation License:
 <p style="font-size: 8pt; font-color: black;">
 <i>
 Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free Documentation License, Version 1.2 or any later version published by the Free Software Foundation; with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts. A copy of the license is included 
 in the section entitled <a href="license.html">GNU Free Documentation License</a>.
 </i>
 <p style="font-size: 8pt; font-color: black;">
-The copy of the <i>Revised Report on the Algorithmic Language Algol 68</i> that is in the distribution of Algol 68 Genie Mark 14 is <b>not</b> covered by the GNU Free Documentation License: <i>The Algol 68 Revised Report has been accepted by Working Group 2.1, reviewed by Technical Committee 2 on Programming and approved for publication by the General Assembly of The International Federation for Information Processing. Reproduction of the Report, for any purpose, but only of the whole text, is explicitly permitted without formality.</i>
+The copy of the <i>Revised Report on the Algorithmic Language Algol 68</i> that is in the distribution of Algol 68 Genie Mark 14.1 is <b>not</b> covered by the GNU Free Documentation License: <i>The Algol 68 Revised Report has been accepted by Working Group 2.1, reviewed by Technical Committee 2 on Programming and approved for publication by the General Assembly of The International Federation for Information Processing. Reproduction of the Report, for any purpose, but only of the whole text, is explicitly permitted without formality.</i>
 </i>
 
 <!-- Footer -->
@@ -522,7 +196,7 @@ The copy of the <i>Revised Report on the Algorithmic Language Algol 68</i> that 
 <td>
 <small>
 Copyright &copy; 2001-2008 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 14 (October 2008)
+Algol 68 Genie Mark 14.1 (November 2008)
 </small>
 </td>
 </tr>

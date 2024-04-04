@@ -632,7 +632,6 @@ static void stand_prelude (void)
   a68_op (A68_TRUE, "+", m, genie_idle);
   a68_op (A68_TRUE, "-", m, genie_minus_real);
   a68_op (A68_TRUE, "ABS", m, genie_abs_real);
-  a68_op (A68_TRUE, "NINT", m, genie_nint_real);
   m = a68_proc (MODE (INT), MODE (REAL), NULL);
   a68_op (A68_TRUE, "SIGN", m, genie_sign_real);
   a68_op (A68_TRUE, "ROUND", m, genie_round_real);
