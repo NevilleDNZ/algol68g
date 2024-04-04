@@ -122,6 +122,7 @@ int a68_isnan_real (REAL_T x)
   int status = (x != x);
   return status;
 #else
+  (void) x;
   return A68_FALSE;
 #endif
 }
@@ -237,7 +238,7 @@ REAL_T a68_x_up_n_real (REAL_T x, INT_T n)
       M *= M;
     }
   } while (bit <= n);
-  A68_OVERFLOW (!finite (P));
+  A68_OVERFLOW (!a68_finite_real (P));
   return P;
 }
 

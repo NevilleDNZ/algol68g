@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.3.24, configure.ac
+# Algol 68 Genie 3.4.1, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.3.24], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.4.1], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 # Check whether compiler supports $1 as a command-line option. 
@@ -59,7 +59,7 @@ case "$host" in
 #
 # MacOS.
 #
-*86-*-*darwin* | *86_64-*-*darwin*) 
+*86-*-*darwin* | *86_64-*-*darwin* | aarch64-*-*darwin*)
   AC_DEFINE(BUILD_BSD, 1, [Define this if DARWIN was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant]) 
   AC_MSG_RESULT([macOS])
@@ -184,12 +184,14 @@ else
 # from /usr/lib/rpm/redhat/macros
   CFLAGS="${CFLAGS:-$COPTFLAGS}" ; export CFLAGS
   LDFLAGS="${LDFLAGS:-$LDOPTFLAGS}" ; export LDFLAGS
+  A68G_AC_PROG_CC_CFLAGS([--std=c17])
   A68G_AC_PROG_CC_CFLAGS([-Wall])
   A68G_AC_PROG_CC_CFLAGS([-Wshadow])
   A68G_AC_PROG_CC_CFLAGS([-Wunused-variable])
   A68G_AC_PROG_CC_CFLAGS([-Wunused-parameter])
   A68G_AC_PROG_CC_CFLAGS([-Wno-long-long])
-  A68G_AC_PROG_CC_CFLAGS([-fno-diagnostics-color])
+  A68G_AC_PROG_CC_CFLAGS([-Wimplicit-function-declaration])
+# A68G_AC_PROG_CC_CFLAGS([-fno-diagnostics-color])
 #
 # Test on gcc capabilities.
 #

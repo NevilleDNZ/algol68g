@@ -1,4 +1,4 @@
-//! @file mp-misc.c
+//! @file mp-genie.c
 //! @author J. Marcel van der Veer
 
 //! @section Copyright

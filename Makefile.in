@@ -778,22 +778,23 @@ TESTS = \
 	./src/test-set/15-hamming.a68\
 	./src/test-set/16-hilbert-matrix.a68\
 	./src/test-set/17-lisp.a68\
-	./src/test-set/18-mandelbrot.a68\
-	./src/test-set/19-math.a68\
-	./src/test-set/20-matrix.a68\
-	./src/test-set/21-pebbles.a68\
-	./src/test-set/22-procedures.a68\
-	./src/test-set/23-pseudo-switch.a68\
-	./src/test-set/24-queens.a68\
-	./src/test-set/25-quicksort.a68\
-	./src/test-set/26-rationals.a68\
-	./src/test-set/27-roman-decimal.a68\
-	./src/test-set/28-semana-santa.a68\
-	./src/test-set/29-tukey.a68\
-	./src/test-set/30-warshall.a68\
-	./src/test-set/31-whetstones.a68\
-	./src/test-set/32-www.a68\
-	./src/test-set/33-zeroin.a68
+	./src/test-set/18-lucas-sequence.a68\
+	./src/test-set/19-mandelbrot.a68\
+	./src/test-set/20-math.a68\
+	./src/test-set/21-matrix.a68\
+	./src/test-set/22-pebbles.a68\
+	./src/test-set/23-procedures.a68\
+	./src/test-set/24-pseudo-switch.a68\
+	./src/test-set/25-queens.a68\
+	./src/test-set/26-quicksort.a68\
+	./src/test-set/27-rationals.a68\
+	./src/test-set/28-roman-decimal.a68\
+	./src/test-set/29-semana-santa.a68\
+	./src/test-set/30-tukey.a68\
+	./src/test-set/31-warshall.a68\
+	./src/test-set/32-whetstones.a68\
+	./src/test-set/33-www.a68\
+	./src/test-set/34-zeroin.a68
 
 @EXPORT_DYNAMIC_FALSE@a68g_LDFLAGS = 
 @EXPORT_DYNAMIC_TRUE@a68g_LDFLAGS = -Wl,--export-dynamic

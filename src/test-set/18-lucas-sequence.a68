@@ -1,0 +1,50 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+#
+
+@section Synopsis
+
+Lucas sequence and the golden ratio.
+
+The Lucas sequence has the same recursive relationship as the Fibonacci sequence. 
+The ratio of successive terms approaches the golden ratio, the terms themselves being 
+roundings of integer powers of the golden ratio. Two numbers are in the golden ratio
+if their ratio equals the ratio of their sum to the larger of the two numbers:
+
+  (a + b) / a = a / b, with a > b > 0.
+
+#
+
+CO Using refinements CO
+
+determine first generation;
+WHILE can represent next generation
+DO calculate next generation;
+   print next generation
+OD.
+
+   determine first generation:
+      LONG INT previous := 1, current := 3.
+
+   can represent next generation:
+      current <= long max int - previous.
+
+   calculate next generation:
+      LONG INT new = current + previous;
+      previous := current;
+      current := new.
+
+   print next generation:
+      print ((current, newline, previous, new line, current / previous, new line, new line)).
