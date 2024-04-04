@@ -6194,7 +6194,7 @@ void bottom_up_error_check (NODE_T * p)
   }
 }
 
-/* Next part rearranges the tree after the symbol tables are finished */
+/* Next part rearranges and checks the tree after the symbol tables are finished */
 
 /**
 @brief Transfer IDENTIFIER to JUMP where appropriate.
@@ -8204,6 +8204,8 @@ void portcheck (NODE_T * p)
       } else if (IS (p, OPERATOR)) {
         PORTCHECK_TAX (p, PORTABLE (TAX (p)));
         PORTABLE (TAX (p)) = A68_TRUE;
+      } else if (IS (p, ASSERTION)) {
+        diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_TAG_NOT_PORTABLE);\
       }
     }
   }
