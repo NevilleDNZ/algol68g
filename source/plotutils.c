@@ -916,7 +916,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
   device_type = (char *) ADDRESS (&(f->device.device));
   if (!strcmp (device_type, "X")) {
 #if defined X_DISPLAY_MISSING
-    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "no X display", "");
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "X plotter missing", "");
     exit_genie (p, A68_RUNTIME_ERROR);
 #else
 /*-----------------------------------------+
@@ -1100,6 +1100,10 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     f->device.y_coord = 0;
     return (f->device.plotter);
   } else if (!strcmp (device_type, "ps")) {
+#if defined POSTSCRIPT_MISSING
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "postscript plotter missing", "");
+    exit_genie (p, A68_RUNTIME_ERROR);
+#else
 /*------------------------------------+
 | Supported plotter type - Postscript |
 +------------------------------------*/
@@ -1145,6 +1149,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     f->device.x_coord = 0;
     f->device.y_coord = 0;
     return (f->device.plotter);
+#endif
   } else {
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unindentified plotter", device_type);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -1390,16 +1395,16 @@ void genie_draw_linestyle (NODE_T * p)
 
 void genie_draw_linewidth (NODE_T * p)
 {
-  A68_INT width;
+  A68_REAL width;
   A68_REF ref_file;
   A68_FILE *f;
   plPlotter *plotter;
-  POP_OBJECT (p, &width, A68_INT);
+  POP_OBJECT (p, &width, A68_REAL);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, MODE (REF_FILE));
   f = (A68_FILE *) ADDRESS (&ref_file);
   plotter = set_up_device (p, f);
-  pl_linewidth_r (plotter, (int) ((int) VALUE (&width) * f->device.window_y_size));
+  pl_linewidth_r (plotter, (VALUE (&width) * f->device.window_y_size));
 }
 
 /*!

@@ -21,12 +21,12 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="14"
+VERSION_NUMBER="14.1"
 REVISION="Mark $VERSION_NUMBER"
 RR_NUMBER="1.2"
-MONTH="October"
+MONTH="November"
 YEAR="2008"
-DATE=`date +"%A %e %B %Y %H:%M"`
+DATE=`date +"%e %B %Y %H:%M"`
 TIME_STAMP="$MONTH $YEAR"
 RELEASE_DATE="released $TIME_STAMP"
 PACKAGE="algol68g-mk$VERSION_NUMBER"
@@ -43,6 +43,9 @@ LOC_INC=$USR_LOC/include
 USR_CHK="./regression-mk$VERSION_NUMBER"
 USR_DOC="./doc"
 USR_DOC_TEMPLATES="$USR_DOC/templates"
+USR_MANUAL="./manual"
+USR_MANUAL_SOURCE="$USR_MANUAL/source"
+USR_MANUAL_TEMPLATES="$USR_MANUAL_SOURCE/templates"
 USR_SRC="./source"
 SQL_DIR=$USR_LOC/pgsql
 BUILD_FILE="$USR_SRC/$MAKEFILE"
@@ -66,6 +69,8 @@ OPENBSD=`uname -s | grep OpenBSD`
 anonymous=no
 build=no
 doc_opt=no
+tex_opt=no
+pdf_opt=no
 indent_opt=no
 ld_opt=
 opt=
@@ -114,6 +119,10 @@ do
 		dist_opt=;;
 	-docs | --docs)
 		doc_opt=;;
+	-man | --man)
+		tex_opt=;;
+	-pdf | --pdf)
+		pdf_opt=;;
 	-indent | --indent)
 		indent_opt=;;
 	-profile | --profile)
@@ -219,6 +228,45 @@ then
 	man a68g -M doc/ -t > a68g.ps
 	ps2pdf a68g.ps a68g.pdf
 	echo "generated documentation"
+	echo "$0 done"
+	exit
+fi
+#
+# Generate manual
+#
+if [ -z $tex_opt ]
+then
+	pushd .
+	cd $USR_MANUAL_TEMPLATES
+	echo "\Chapter{Manual page}{manpage}">a68g.man.tex
+	echo "\begin{Verbatim}[fontsize=\relsize{-1}, frame=single, numbers=left]">>a68g.man.tex
+	man a68g | col -bx >>a68g.man.tex
+	echo "\end{Verbatim}">>a68g.man.tex
+	for f in `echo *.tex`
+	do
+		echo $f
+		sed "s/REVISION/$REVISION/g" <$f | sed "s/VERSION_NUMBER/$VERSION_NUMBER/" | sed "s/TIME_STAMP/$TIME_STAMP/g" | sed "s/PACKAGE/$PACKAGE/g" | sed "s/RR_NUMBER/$RR_NUMBER/g" | sed "s/OS_VERSION/`uname -mrs`/g" | sed "s/GCC_VERSION/`gcc -dumpversion | sed '2,$d'`/g" > ../$f
+	done
+	popd
+	pushd .
+	cd $USR_MANUAL
+	make
+	popd
+	rm $USR_MANUAL_SOURCE/*.tex
+	echo "generated manual"
+	echo "$0 done"
+	exit
+fi
+#
+# Generate manual
+#
+if [ -z $pdf_opt ]
+then
+	pushd .
+	cd $USR_MANUAL
+	make pdf >& /dev/null
+	popd
+	echo "generated manual"
 	echo "$0 done"
 	exit
 fi

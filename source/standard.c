@@ -780,18 +780,6 @@ void genie_abs_real (NODE_T * p)
 }
 
 /*!
-\brief OP NINT = (REAL) REAL
-\param p position in tree
-**/
-
-void genie_nint_real (NODE_T * p)
-{
-  A68_REAL *x;
-  POP_OPERAND_ADDRESS (p, x, A68_REAL);
-  VALUE (x) = (VALUE (x) > 0.0 ? floor (VALUE (x)) : ceil (VALUE (x)));
-}
-
-/*!
 \brief OP ROUND = (REAL) INT
 \param p position in tree
 **/
@@ -1087,9 +1075,13 @@ void genie_entier_long_mp (NODE_T * p)
   } else {
     MP_DIGIT_T *y;
     STACK_MP (y, p, digits);
-    set_mp_short (y, (MP_DIGIT_T) 1, 0, digits);
+    MOVE_MP (y, z, digits);
     trunc_mp (p, z, z, digits);
-    sub_mp (p, z, z, y, digits);
+    sub_mp (p, y, y, z, digits);
+    if (MP_DIGIT (y, 1) != 0) {
+      set_mp_short (y, (MP_DIGIT_T) 1, 0, digits);
+      sub_mp (p, z, z, y, digits);
+    }
   }
   MP_STATUS (z) = INITIALISED_MASK;
   stack_pointer = pop_sp;

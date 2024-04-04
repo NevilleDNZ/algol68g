@@ -2428,9 +2428,11 @@ void genie_push_undefined (NODE_T * p, MOID_T * u)
     PUSH_PROCEDURE (p, z);
   } else {
 /* FORMAT etc. - what arbitrary FORMAT would mean anything at all? */
-    BYTE_T *sp = STACK_TOP;
-    INCREMENT_STACK_POINTER (p, MOID_SIZE (u));
-    FILL (sp, 0x00, (unsigned) MOID_SIZE (u));
+    A68_FORMAT z;
+    STATUS (&z) = INITIALISED_MASK | SKIP_FORMAT_MASK;
+    BODY (&z) = NULL;
+    ENVIRON (&z) = 0;
+    PUSH_FORMAT (p, z);
   }
 }
 

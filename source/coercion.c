@@ -336,6 +336,32 @@ static void absorb_series_pack (MOID_T ** p)
 }
 
 /*!
+\brief absorb nested series and united modes recursively
+\param p mode
+**/
+
+static void absorb_series_union_pack (MOID_T ** p)
+{
+  BOOL_T go_on;
+  do {
+    PACK_T *z = NULL, *t;
+    go_on = A68_FALSE;
+    for (t = PACK (*p); t != NULL; FORWARD (t)) {
+      if (MOID (t) != NULL && (WHETHER (MOID (t), SERIES_MODE) || WHETHER (MOID (t), UNION_SYMBOL))) {
+        PACK_T *s;
+        go_on = A68_TRUE;
+        for (s = PACK (MOID (t)); s != NULL; FORWARD (s)) {
+          add_mode_to_pack (&z, MOID (s), NULL, NODE (s));
+        }
+      } else {
+        add_mode_to_pack (&z, MOID (t), NULL, NODE (t));
+      }
+    }
+    PACK (*p) = z;
+  } while (go_on);
+}
+
+/*!
 \brief make SERIES (u, v)
 \param u mode 1
 \param v mode 2
@@ -438,8 +464,12 @@ static MOID_T *make_united_mode (MOID_T * m)
   } else if (ATTRIBUTE (m) != SERIES_MODE) {
     return (m);
   }
+/* Do not unite a single UNION. */
+  if (DIM (m) == 1 && WHETHER (MOID (PACK (m)), UNION_SYMBOL)) {
+    return (MOID (PACK (m)));
+  }
 /* Straighten the series. */
-  absorb_series_pack (&m);
+  absorb_series_union_pack (&m);
 /* Copy the series into a UNION. */
   u = new_moid ();
   ATTRIBUTE (u) = UNION_SYMBOL;
@@ -452,6 +482,7 @@ static MOID_T *make_united_mode (MOID_T * m)
 /* Absorb and contract the new UNION. */
   do {
     mods = 0;
+    absorb_series_union_pack (&u);
     DIM (u) = count_pack_members (PACK (u));
     PACK (u) = absorb_union_pack (PACK (u), &mods);
     contract_union (u, &mods);
@@ -648,7 +679,7 @@ static BOOL_T whether_proc_ref_file_void_or_format (MOID_T * p)
 \return same
 **/
 
-static BOOL_T whether_transput_mode (MOID_T * p)
+static BOOL_T whether_transput_mode (MOID_T * p, char rw)
 {
   if (p == MODE (INT)) {
     return (A68_TRUE);
@@ -681,18 +712,20 @@ static BOOL_T whether_transput_mode (MOID_T * p)
   } else if (p == MODE (ROW_CHAR)) {
     return (A68_TRUE);
   } else if (p == MODE (STRING)) {
-    return (A68_TRUE);          /* Not conform RR. */
+    return (A68_TRUE);
   } else if (p == MODE (SOUND)) {
     return (A68_TRUE);
   } else if (WHETHER (p, UNION_SYMBOL) || WHETHER (p, STRUCT_SYMBOL)) {
     PACK_T *q = PACK (p);
     BOOL_T k = A68_TRUE;
     for (; q != NULL && k; FORWARD (q)) {
-      k &= (whether_transput_mode (MOID (q)) || whether_proc_ref_file_void_or_format (MOID (q)));
+      k &= (whether_transput_mode (MOID (q), rw) || whether_proc_ref_file_void_or_format (MOID (q)));
     }
     return (k);
+  } else if (WHETHER (p, FLEX_SYMBOL)) {
+    return (rw == 'w' ? whether_transput_mode (SUB (p), rw) : A68_FALSE);
   } else if (WHETHER (p, ROW_SYMBOL)) {
-    return (whether_transput_mode (SUB (p)) || whether_proc_ref_file_void_or_format (SUB (p)));
+    return (whether_transput_mode (SUB (p), rw) || whether_proc_ref_file_void_or_format (SUB (p)));
   } else {
     return (A68_FALSE);
   }
@@ -709,7 +742,7 @@ static BOOL_T whether_printable_mode (MOID_T * p)
   if (whether_proc_ref_file_void_or_format (p)) {
     return (A68_TRUE);
   } else {
-    return (whether_transput_mode (p));
+    return (whether_transput_mode (p, 'w'));
   }
 }
 
@@ -724,7 +757,7 @@ static BOOL_T whether_readable_mode (MOID_T * p)
   if (whether_proc_ref_file_void_or_format (p)) {
     return (A68_TRUE);
   } else {
-    return (WHETHER (p, REF_SYMBOL) ? whether_transput_mode (SUB (p)) : A68_FALSE);
+    return (WHETHER (p, REF_SYMBOL) ? whether_transput_mode (SUB (p), 'r') : A68_FALSE);
   }
 }
 
@@ -2199,7 +2232,8 @@ static void mode_check_united_case_parts (SOID_LIST_T ** ry, NODE_T * p, SOID_T 
   make_soid (&enq_expct, STRONG, NULL, 0);
   mode_check_serial_units (NEXT_SUB (p), &enq_expct, &enq_yield, ENQUIRY_CLAUSE);
 /* Deduce the united mode from the enquiry clause. */
-  u = make_united_mode (MOID (&enq_yield));
+  u = depref_completely (MOID (&enq_yield));
+  u = make_united_mode (u);
   u = depref_completely (u);
 /* Also deduce the united mode from the specifiers. */
   v = new_moid ();

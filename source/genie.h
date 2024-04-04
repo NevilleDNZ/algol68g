@@ -358,7 +358,6 @@ extern GENIE_PROCEDURE genie_ne_real;
 extern GENIE_PROCEDURE genie_ne_string;
 extern GENIE_PROCEDURE genie_new_sound;
 extern GENIE_PROCEDURE genie_next_random;
-extern GENIE_PROCEDURE genie_nint_real;
 extern GENIE_PROCEDURE genie_not_bits;
 extern GENIE_PROCEDURE genie_not_bool;
 extern GENIE_PROCEDURE genie_not_long_mp;

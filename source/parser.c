@@ -4199,7 +4199,7 @@ void bottom_up_error_check (NODE_T * p)
     if (WHETHER (p, BOOLEAN_PATTERN)) {
       int k = 0;
       count_pictures (SUB (p), &k);
-      if (! (k == 0 || k == 2)) {
+      if (!(k == 0 || k == 2)) {
         diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_FORMAT_PICTURE_NUMBER, ATTRIBUTE (p), NULL);
       }
     } else {
