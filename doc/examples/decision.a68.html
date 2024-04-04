@@ -1,0 +1,69 @@
+<html>
+<body bgcolor="black">
+<font color="lime">
+<pre>
+CO Paradigm for building decision trees in Algol 68.
+   We wrote programs like this for ALGOL68C on TOPS-20 and VM/CMS.
+CO
+
+PR norun PR
+
+BEGIN # Q&A game #
+
+      CELL library := get answer("give an initial answer");
+      
+      DO guess object(library)
+      UNTIL ~ put question("again")
+      OD;
+
+      # Data structure #
+
+      MODE CELL = UNION (STRING, FORK), 
+           FORK = STRUCT (STRING text, REF CELL has, hasnt);
+
+      OP TEXT  = (FORK d) STRING: text OF d,
+         HAS   = (FORK d) REF CELL: has OF d,
+         HASNT = (FORK d) REF CELL: hasnt OF d;
+
+      PROC new fork = (STRING text, CELL has, hasnt) FORK:
+           (HEAP STRING := text, HEAP CELL := has, HEAP CELL := hasnt);
+
+      # Guessing and extending library #
+
+      PROC guess object = (REF CELL sub lib) VOID: # How to guess an object #
+           CASE sub lib
+           IN (STRING s): (put question(s) | ~ | sub lib := learn(s)),
+              (FORK d):   guess object((put question(TEXT d) | HAS d | HASNT d))
+           ESAC;
+
+      PROC learn = (STRING guess) CELL: # Introduce new cell in tree #
+           IF STRING answer = get answer("what is the answer"),
+                     question = get answer("what distinguishes " + answer);
+              put question("does " + question + " apply to " + answer)
+           THEN new fork(question, answer, guess)
+           ELSE new fork(question, guess, answer)
+           FI;
+
+      # Interaction #
+
+      PROC get answer = (STRING prompt) STRING:
+           BEGIN STRING s; 
+                 printf(($gl$, prompt)); 
+                 readf(($gl$, s)); 
+                 s
+           END;
+                
+      PROC put question = (STRING question) BOOL:
+           IF STRING s = get answer(question);
+              UPB s > 0
+           THEN s[1] = "y" ORF s[1] = "Y"
+           ELSE put question (question)
+           FI;
+
+      SKIP
+
+END
+</pre>
+</font>
+</body>
+</html>

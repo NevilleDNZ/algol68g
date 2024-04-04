@@ -1,34 +1,39 @@
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*!
+\file algol68g.h
+\brief
+**/
+
+/*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      */
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
 
 #ifndef A68G_ALGOL68G_H
 #define A68G_ALGOL68G_H
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Includes needed by most files.                                                */
+/* Includes needed by most files. */
 
-#include "a68g_config.h"
+#include "config.h"
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <float.h>
 #include <limits.h>
 
-#if defined PRE_MACOS_X && defined HAVE_IEEE_754
+#if defined PRE_MACOS_X_VERSION && defined HAVE_IEEE_754
 #include <fp.h>
 #else
 #include <math.h>
@@ -43,8 +48,11 @@ Includes needed by most files.                                                */
 #include <string.h>
 #include <time.h>
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-System dependencies.                                                          */
+#ifdef HAVE_POSIX_THREADS
+#include <pthread.h>
+#endif
+
+/* System dependencies. */
 
 #ifdef HAVE_UNIX
 #include <fcntl.h>
@@ -66,7 +74,7 @@ typedef size_t ssize_t;
 #undef _environ
 #endif
 
-#ifdef PRE_MACOS_X
+#ifdef PRE_MACOS_X_VERSION
 #define ssize_t size_t
 #define STDIN_FILENO 1
 #define STDOUT_FILENO 2
@@ -100,12 +108,11 @@ typedef size_t ssize_t;
 #include <plot.h>
 #endif
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Constants.                                                                    */
+/* Constants.      							*/
 
 #define A68G_NAME "a68g"
-#define REVISION "Mark 4"
-#define RELEASE_DATE "June 2004"
+#define REVISION "Mark 8"
+#define RELEASE_DATE "released July 2005"
 
 #define KILOBYTE (1024L)
 #define MEGABYTE (KILOBYTE * KILOBYTE)
@@ -116,39 +123,49 @@ Constants.                                                                    */
 #define A_TRUE 1
 #define A_FALSE 0
 #define TIME_FORMAT "%A %d-%b-%Y %H:%M:%S"
-#define CMS_LINE_SIZE (KILOBYTE)
 
 #define SIZE_OF(p) ((int) sizeof (p))
 
-#define BUFFER_SIZE (KILOBYTE)	/* BUFFER_SIZE exceeds actual requirements */
+#define BUFFER_SIZE (KILOBYTE)		/* BUFFER_SIZE exceeds actual requirements. */
 #define MAX_ERRORS 8
-#define MAX_PRIORITY 9		/* Algol 68 requirement */
-#define MIN_MEM_SIZE (64 * KILOBYTE)	/* Stack, heap blocks not smaller than this in kB */
+#define MAX_PRIORITY 9			/* Algol 68 requirement. */
+#define MIN_MEM_SIZE (256 * KILOBYTE)	/* Stack, heap blocks not smaller than this in kB. */
 
 
-#define BYTES_WIDTH 64		/* More useful than the usual 4 */
-#define LONG_BYTES_WIDTH 256	/* More useful than the usual 8 */
+#define BYTES_WIDTH 32		/* More useful than the usual 4. */
+#define LONG_BYTES_WIDTH 64	/* More useful than the usual 8. */
 
 #define A_READ_ACCESS (O_RDONLY)
 #define A_WRITE_ACCESS (O_WRONLY | O_CREAT | O_TRUNC)
-#define A68_PROTECTION (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)	/* -rw-r--r-- */
+#define A68_PROTECTION (S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)	/* -rw-r--r--*/
 
 #define MAX_INT 	(INT_MAX)
+#define MIN_INT 	(INT_MIN)
 #define MAX_UNT 	(UINT_MAX)
-#define MAX_BITS 	(UINT_MAX)
-#define FLIP_CHAR 	'T'
-#define FLOP_CHAR 	'F'
-#define ERROR_CHAR 	'*'
-#define EXPONENT_CHAR 	'E'
-#define RADIX_CHAR 	'R'
-#define BLANK_CHAR 	' '
-#define A68G_PI		3.1415926535897932384626433832795029L	/* pi */
+#define MAX_BITS	(UINT_MAX)
+#define FLIP_CHAR       'T'
+#define FLOP_CHAR       'F'
+#define ERROR_CHAR      '*'
+#define EXPONENT_CHAR   'E'
+#define RADIX_CHAR      'R'
+#define BLANK_CHAR      ' '
+#define NEWLINE_CHAR	'\n'
+#define FORMFEED_CHAR	'\f'
+#define NULL_CHAR	'\0'
+#define TAB_CHAR	'\t'
+#define CR_CHAR		'\r'
+
+#define A68G_PI 	3.1415926535897932384626433832795029L	/* pi*/
+
+#define MONADS  	"%^&+-~!?"
+#define NOMADS  	"></=*"
 
 #define PRIMAL_SCOPE 0
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Some (necessary) macros to overcome the ambiguity in having signed or unsigned 
-char on various systems. PDP-11s and IBM 370s are still haunting us with this.*/
+/*
+Some (necessary) macros to overcome the ambiguity in having signed or unsigned
+char on various systems. PDP-11s and IBM 370s are still haunting us with this.
+*/
 
 #define IS_CNTRL(c) iscntrl ((unsigned char) (c))
 #define IS_DIGIT(c) isdigit ((unsigned char) (c))
@@ -161,15 +178,13 @@ char on various systems. PDP-11s and IBM 370s are still haunting us with this.*/
 #define TO_UCHAR(c) ((c) >= 0 ? (int) (c) : (int) (UCHAR_MAX + (int) (c) + 1))
 #define TO_UPPER(c) toupper ((unsigned char) (c))
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Type definitions.                                                             */
+/* Type definitions. */
 
 typedef int ADDR_T, FILE_T;
 typedef unsigned char BYTE_T, BOOL_T;
 typedef unsigned STATUS_MASK;
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Algol 68 type definitions.                                                    */
+/* Algol 68 type definitions. */
 
 typedef struct A68_ARRAY A68_ARRAY;
 typedef struct A68_BITS A68_BITS;
@@ -215,7 +230,7 @@ struct A68_HANDLE
 {
   STATUS_MASK status;
   ADDR_T offset;
-  int size, number;
+  int size;
   MOID_T *type;
   A68_HANDLE *next, *previous;
 };
@@ -260,15 +275,15 @@ struct A68_REF
 {
   STATUS_MASK status;
   BYTE_T *segment;
-  ADDR_T offset;
+  ADDR_T offset, scope;
   A68_HANDLE *handle;
 };
 
 struct A68_FORMAT
 {
   STATUS_MASK status;
-  NODE_T *top;
-  A68_REF environ;
+  NODE_T *body;
+  ADDR_T environ;
 };
 
 struct A68_POINTER
@@ -279,8 +294,11 @@ struct A68_POINTER
 
 struct A68_PROCEDURE
 {
-  A68_POINTER body;
-  A68_REF environ;
+  STATUS_MASK status;
+  void *body;
+  A68_REF locale;
+  MOID_T *proc_mode;
+  ADDR_T environ;
 };
 
 struct A68_TUPLE
@@ -300,21 +318,21 @@ struct A68_ARRAY
 struct A68_CHANNEL
 {
   STATUS_MASK status;
-  BOOL_T reset, set, get, put, bin, draw;
+  BOOL_T reset, set, get, put, bin, draw, compress;
 };
 
 struct A68_FILE
 {
   STATUS_MASK status;
-  A68_REF identification, terminator;
+  A68_REF identification, terminator, string;
   A68_CHANNEL channel;
   FILE_T fd;
-  int transput_buffer;
+  int transput_buffer, strpos;
   A68_FORMAT format;
   BOOL_T read_mood, write_mood, char_mood, draw_mood, opened, open_exclusive, eof, tmp_file;
   A68_PROCEDURE file_end_mended, page_end_mended, line_end_mended, value_error_mended, open_error_mended, transput_error_mended, format_end_mended, format_error_mended;
-  ADDR_T frame_pointer, stack_pointer;	/* Since formats open frames */
-/* Next is for GNU plot */
+  ADDR_T frame_pointer, stack_pointer;	/* Since formats open frames*/
+/* Next is for GNU plot*/
   struct
   {
     FILE *stream;
@@ -324,7 +342,7 @@ struct A68_FILE
 #endif
     BOOL_T device_made, device_opened;
     A68_REF device, page_size;
-    int device_handle /* deprecated */ , window_x_size, window_y_size;
+    int device_handle /* deprecated*/ , window_x_size, window_y_size;
     double x_coord, y_coord, red, green, blue;
   }
   device;
@@ -336,8 +354,7 @@ struct A68_COLLITEM
   int count;
 };
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Internal type definitions.                                                    */
+/* Internal type definitions. */
 
 typedef PROPAGATOR_T PROPAGATOR_PROCEDURE (NODE_T *);
 typedef void GENIE_PROCEDURE (NODE_T *);
@@ -359,10 +376,11 @@ struct PROPAGATOR_T
 
 struct SOURCE_LINE_T
 {
-  char *string;
+  char *string, *filename;
   MESSAGE_T *messages;
   int number, print_status, min_level, max_level, min_proc_level, max_proc_level;
   BOOL_T list;
+  MODULE_T *module;
   NODE_T *top_node;
   SOURCE_LINE_T *next, *previous;
 };
@@ -395,7 +413,7 @@ struct TAG_T
   NODE_T *node, *unit;
   char *value;
   GENIE_PROCEDURE *procedure;
-  BOOL_T scope_assigned, use, in_proc, stand_env_proc, loc_assigned, loc_procedure;
+  BOOL_T scope_assigned, use, in_proc, stand_env_proc, loc_assigned;
   int priority, heap, access, scope, size, youngest_environ;
   ADDR_T offset;
   TAG_T *next, *body;
@@ -403,12 +421,12 @@ struct TAG_T
 
 struct SYMBOL_TABLE_T
 {
-  int level, nest, attribute /* MAIN, PRELUDE_T */ ;
+  int level, nest, attribute /* MAIN, PRELUDE_T*/ ;
   char *environ;
   BOOL_T empty_table, initialise_frame, initialise_anon, proc_ops;
   ADDR_T ap_increment;
   SYMBOL_TABLE_T *previous;
-  TAG_T *identifiers, *operators, *priority, *indicants, *labels, *local_identifiers, *local_operators, *anonymous;
+  TAG_T *identifiers, *operators, *priority, *indicants, *labels, *anonymous;
   MOID_T *moids;
   NODE_T *jump_to, *inits;
 };
@@ -442,7 +460,6 @@ struct MOID_LIST_T
 struct NODE_INFO_T
 {
   MODULE_T *module;
-  STATUS_MASK mask;
   int PROCEDURE_LEVEL, PROCEDURE_NUMBER, priority;
   char *char_in_line, *symbol;
   SOURCE_LINE_T *line;
@@ -452,26 +469,26 @@ struct GENIE_INFO_T
 {
   PROPAGATOR_T propagator;
   BOOL_T whether_coercion, whether_new_lexical_level, seq_set;
-  int level;
+  int level, argsize;
   NODE_T *parent, *seq;
-  char *function_name;
   BYTE_T *offset;
   void *constant;
 };
 
 struct NODE_T
 {
+  STATUS_MASK mask;
   GENIE_INFO_T genie;
   MESSAGE_T *msg;
-  MOID_T *type;
+  MOID_T *type, *partial_proc, *partial_locale;
   NODE_INFO_T *info;
   NODE_T *next, *previous, *sub, *do_od_part, *inits;
   PACK_T *pack;
   REFINEMENT_T *refinement;
   SYMBOL_TABLE_T *symbol_table;
   TAG_T *tag, *protect_sweep;
-  int attribute, annotation;
-  BOOL_T error;
+  int attribute, annotation, par_level;
+  BOOL_T dns, error;
 };
 
 struct POSTULATE_T
@@ -508,7 +525,7 @@ struct A68_STREAM
 
 struct FILES_T
 {
-  char *generic_name;
+  char *path, *generic_name;
   struct A68_STREAM source, listing;
 };
 
@@ -517,6 +534,7 @@ struct OPTION_LIST_T
   char *str;
   int scan;
   BOOL_T processed;
+  SOURCE_LINE_T *line;
   OPTION_LIST_T *next;
 };
 
@@ -524,17 +542,25 @@ struct OPTIONS_T
 {
   OPTION_LIST_T *list;
   BOOL_T source_listing, standard_prelude_listing, tree_listing, verbose, version, cross_reference, check_only, statistics_listing, pragmat_sema, moid_listing, no_warnings, unused, trace, regression_test, stropping, brackets, reductions;
-  int time_limit;
+  int time_limit, run;
   STATUS_MASK nodemask;
 };
 
 struct MODES_T
 {
-  MOID_T *UNDEFINED, *ERROR, *HIP, *ROWS, *VACUUM, *C_STRING, *COLLITEM, *VOID, *INT, *REAL, *BOOL, *CHAR, *BITS, *BYTES, *REF_INT, *REF_REAL, *REF_BOOL, *REF_CHAR, *REF_BITS, *REF_BYTES, *ROW_REAL, *ROWROW_REAL, *ROW_BITS, *ROW_LONG_BITS, *ROW_LONGLONG_BITS, *REF_ROW_REAL, *REF_ROWROW_REAL, *ROW_CHAR, *ROW_ROW_CHAR, *STRING, *ROW_STRING, *NUMBER, *REF_ROW_CHAR, *REF_STRING, *PROC_ROW_CHAR, *PROC_STRING, *PROC_VOID, *PROC_REF_FILE_BOOL, *PROC_REF_FILE_VOID, *SIMPLIN, *SIMPLOUT, *ROW_SIMPLIN,
-    *ROW_SIMPLOUT, *CHANNEL, *FILE, *REF_FILE, *ROW_BOOL, *ROW_INT, *FORMAT, *REF_FORMAT,
-/* Multiple precision */
-   *LONG_INT, *REF_LONG_INT, *LONGLONG_INT, *REF_LONGLONG_INT, *LONG_REAL, *REF_LONG_REAL, *LONGLONG_REAL, *REF_LONGLONG_REAL, *COMPLEX, *REF_COMPLEX, *LONG_COMPLEX, *REF_LONG_COMPLEX, *LONGLONG_COMPLEX, *REF_LONGLONG_COMPLEX, *COMPL, *REF_COMPL, *LONG_COMPL, *REF_LONG_COMPL, *LONGLONG_COMPL, *REF_LONGLONG_COMPL, *LONG_BITS, *REF_LONG_BITS, *LONGLONG_BITS, *REF_LONGLONG_BITS, *LONG_BYTES, *REF_LONG_BYTES,
-/* Other */
+  MOID_T *UNDEFINED, *ERROR, *HIP, *ROWS, *VACUUM, *C_STRING, *COLLITEM,
+    *SEMA, *VOID, *INT, *REAL, *BOOL, *CHAR, *BITS, *BYTES, *REF_INT,
+    *REF_REAL, *REF_BOOL, *REF_CHAR, *REF_BITS, *REF_BYTES, *ROW_REAL,
+    *ROWROW_REAL, *ROW_BITS, *ROW_LONG_BITS, *ROW_LONGLONG_BITS,
+    *REF_ROW_REAL, *REF_ROWROW_REAL, *ROW_CHAR, *ROW_ROW_CHAR, *STRING,
+    *ROW_STRING, *NUMBER, *REF_ROW_CHAR, *REF_STRING, *PROC_ROW_CHAR,
+    *PROC_STRING, *PROC_VOID, *PROC_REF_FILE_BOOL, *PROC_REF_FILE_VOID, *SIMPLIN, *SIMPLOUT, *ROW_SIMPLIN, *ROW_SIMPLOUT, *CHANNEL, *FILE, *REF_FILE, *ROW_BOOL, *ROW_INT, *FORMAT, *REF_FORMAT,
+/* Multiple precision*/
+   *LONG_INT, *REF_LONG_INT, *LONGLONG_INT, *REF_LONGLONG_INT, *LONG_REAL,
+    *REF_LONG_REAL, *LONGLONG_REAL, *REF_LONGLONG_REAL, *COMPLEX,
+    *REF_COMPLEX, *LONG_COMPLEX, *REF_LONG_COMPLEX, *LONGLONG_COMPLEX,
+    *REF_LONGLONG_COMPLEX, *COMPL, *REF_COMPL, *LONG_COMPL, *REF_LONG_COMPL, *LONGLONG_COMPL, *REF_LONGLONG_COMPL, *LONG_BITS, *REF_LONG_BITS, *LONGLONG_BITS, *REF_LONGLONG_BITS, *LONG_BYTES, *REF_LONG_BYTES,
+/* Other*/
    *PIPE, *REF_PIPE, *REF_REF_FILE;
 };
 
@@ -547,98 +573,377 @@ struct MODULE_T
   NODE_T *top_node;
 };
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Internal constants.                                                           */
+/* Internal constants. */
 
 enum
 {
-  BOLD_STROPPING = 1, QUOTE_STROPPING
+  UPPER_STROPPING = 1, QUOTE_STROPPING
 };
 
 enum
 {
-  NULL_MASK = 0x0000,
-  INITIALISED_MASK = 0x0001,
-  NO_SWEEP_MASK = 0x0002,
-  COOKIE_MASK = 0x0004,
-  ROW_COLOUR_MASK = 0x0008,
-  CONSTANT_MASK = 0x0100,
-  ASSIGNED_MASK = 0x0200,
-  ALLOCATED_MASK = 0x0400,
-  STANDENV_PROCEDURE_MASK = 0x0800,
-  COLOUR_MASK = 0x1000,
-  PROCEDURE_MASK = 0x2000,
-  OPTIMAL_MASK = 0x4000
-};
-
-enum
-{
-  CROSS_REFERENCE_MASK = 0x10L,
-  TREE_MASK = 0x20L,
-  CODE_MASK = 0x40L,
-  SYNTAX_TREE_MASK = 0x100L,
-  SOURCE_MASK = 0x200L,
-  TRACE_MASK = 0x1000L,
-  ASSERT_MASK = 0x2000L
+  NULL_MASK 			= 0x00000000L,
+  INITIALISED_MASK 		= 0x00000001L,
+  NO_SWEEP_MASK 		= 0x00000002L,
+  COOKIE_MASK 			= 0x00000004L,
+  ROW_COLOUR_MASK 		= 0x00000008L,
+  CONSTANT_MASK 		= 0x00000010L,
+  ASSIGNED_MASK 		= 0x00000020L,
+  ALLOCATED_MASK 		= 0x00000040L,
+  STANDENV_PROCEDURE_MASK 	= 0x00000080L,
+  COLOUR_MASK 			= 0x00000100L,
+  PROCEDURE_MASK 		= 0x00000200L,
+  OPTIMAL_MASK 			= 0x00000400L,
+  SERIAL_MASK 			= 0x00000800L,
+  CROSS_REFERENCE_MASK 		= 0x00001000L,
+  TREE_MASK 			= 0x00002000L,
+  CODE_MASK 			= 0x00004000L,
+  SYNTAX_TREE_MASK 		= 0x00008000L,
+  SOURCE_MASK 			= 0x00010000L,
+  TRACE_MASK 			= 0x00020000L,
+  ASSERT_MASK 			= 0x00040000L,
+  BREAKPOINT_MASK 		= 0x00080000L,
+  SKIP_PROCEDURE_MASK  		= 0x00100000L,
+  PARTIAL_CALL_MASK		= 0x00200000L
 };
 
 enum MODE_ATTRIBUTES
 {
-  MODE_NO_CHECK, MODE_INT, MODE_LONG_INT, MODE_LONGLONG_INT, MODE_REAL, MODE_LONG_REAL,
-  MODE_LONGLONG_REAL, MODE_COMPLEX, MODE_LONG_COMPLEX, MODE_LONGLONG_COMPLEX, MODE_BOOL, MODE_CHAR,
-  MODE_BITS, MODE_LONG_BITS, MODE_LONGLONG_BITS, MODE_BYTES, MODE_LONG_BYTES, MODE_FILE, MODE_FORMAT,
+  MODE_NO_CHECK,
+  MODE_INT,
+  MODE_LONG_INT,
+  MODE_LONGLONG_INT,
+  MODE_REAL,
+  MODE_LONG_REAL,
+  MODE_LONGLONG_REAL,
+  MODE_COMPLEX,
+  MODE_LONG_COMPLEX,
+  MODE_LONGLONG_COMPLEX,
+  MODE_BOOL,
+  MODE_CHAR,
+  MODE_BITS,
+  MODE_LONG_BITS,
+  MODE_LONGLONG_BITS,
+  MODE_BYTES,
+  MODE_LONG_BYTES,
+  MODE_FILE,
+  MODE_FORMAT,
   MODE_PIPE
 };
 
 enum ATTRIBUTES
 {
-  ACCESS = 1, ACCO_SYMBOL, ALT_DO_PART, ALT_DO_SYMBOL, ALT_EQUALS_SYMBOL, ALT_FORMAL_BOUNDS_LIST,
-  ANDF_SYMBOL, AND_FUNCTION, ARGUMENT, ARGUMENT_LIST, ASSERT_SYMBOL, ASSERTION, ASSIGNATION, ASSIGN_SYMBOL,
-  ASSIGN_TO_SYMBOL, AT_SYMBOL, BEGIN_SYMBOL, BITS_DENOTER, BITS_PATTERN, BITS_SYMBOL,
-  BOLD_COMMENT_SYMBOL, BOLD_PRAGMAT_SYMBOL, BOLD_TAG, BOOLEAN_PATTERN, BOOL_SYMBOL, BOUND, BOUNDS,
-  BOUNDS_LIST, BRIEF_ELIF_IF_PART, BRIEF_INTEGER_OUSE_PART, BRIEF_OPERATOR_DECLARATION,
-  BRIEF_UNITED_OUSE_PART, BUS_SYMBOL, BY_PART, BY_SYMBOL, BYTES_SYMBOL, CALL, CASE_PART, CASE_SYMBOL, CAST,
-  CHANNEL_SYMBOL, CHAR_SYMBOL, CHOICE, CHOICE_PATTERN, CLOSED_CLAUSE, CLOSE_SYMBOL, CODE_CLAUSE,
-  CODE_SYMBOL, COLLATERAL_CLAUSE, COLLECTION, COLON_SYMBOL, COMMA_SYMBOL, COMPLEX_PATTERN,
-  COMPLEX_SYMBOL, COMPL_SYMBOL, CONDITIONAL_CLAUSE, DECLARATION_LIST, DECLARER, DEFINING_IDENTIFIER,
-  DEFINING_INDICANT, DEFINING_OPERATOR, DEF_SYMBOL, DENOTER, DEPROCEDURING, DEREFERENCING,
-  DOTDOT_SYMBOL, DO_PART, DO_SYMBOL, DYNAMIC_REPLICATOR, EDOC_SYMBOL, ELIF_IF_PART, ELIF_PART,
-  ELIF_SYMBOL, ELSE_BAR_SYMBOL, ELSE_OPEN_PART, ELSE_PART, ELSE_SYMBOL, EMPTY_SYMBOL, ENCLOSED_CLAUSE,
-  END_SYMBOL, ENQUIRY_CLAUSE, ENVIRON_NAME, ENVIRON_SYMBOL, EQUALS_SYMBOL, ERROR, ESAC_SYMBOL,
-  EXIT_SYMBOL, EXPONENT_FRAME, EXPORT_CLAUSE, FALSE_SYMBOL, FED_SYMBOL, FIELD_IDENTIFIER, FILE_SYMBOL,
-  FI_SYMBOL, FLEX_SYMBOL, FORMAL_BOUNDS, FORMAL_BOUNDS_LIST, FORMAL_DECLARERS, FORMAL_DECLARERS_LIST,
-  FORMAT_A_FRAME, FORMAT_DELIMITER_SYMBOL, FORMAT_D_FRAME, FORMAT_E_FRAME,
-  FORMAT_ITEM_ESCAPE, FORMAT_ITEM_A, FORMAT_ITEM_B,
-  FORMAT_ITEM_C, FORMAT_ITEM_CLOSE, FORMAT_ITEM_D, FORMAT_ITEM_E, FORMAT_ITEM_F, FORMAT_ITEM_G,
-  FORMAT_ITEM_H, FORMAT_ITEM_I, FORMAT_ITEM_J, FORMAT_ITEM_K, FORMAT_ITEM_L, FORMAT_ITEM_M,
-  FORMAT_ITEM_MINUS, FORMAT_ITEM_N, FORMAT_ITEM_O, FORMAT_ITEM_OPEN, FORMAT_ITEM_P, FORMAT_ITEM_PLUS,
-  FORMAT_ITEM_POINT, FORMAT_ITEM_Q, FORMAT_ITEM_R, FORMAT_ITEM_S, FORMAT_ITEM_T, FORMAT_ITEM_U,
-  FORMAT_ITEM_V, FORMAT_ITEM_W, FORMAT_ITEM_X, FORMAT_ITEM_Y, FORMAT_ITEM_Z, FORMAT_I_FRAME,
-  FORMAT_PATTERN, FORMAT_POINT_FRAME, FORMAT_SYMBOL, FORMAT_TEXT, FORMAT_Z_FRAME,
-  INTEGRAL_C_PATTERN, FLOAT_C_PATTERN, FIXED_C_PATTERN, STRING_C_PATTERN, FORMULA, FOR_PART,
-  FOR_SYMBOL, FROM_PART, FROM_SYMBOL, GENERAL_PATTERN, GENERATOR, GOTO_SYMBOL, GO_SYMBOL, HEAP_SYMBOL,
-  IDENTIFIER, IDENTITY_DECLARATION, IDENTITY_RELATION, IF_PART, IF_SYMBOL, GENERIC_ARGUMENT, GENERIC_ARGUMENT_LIST,
-  INDICANT, INITIALISER_SERIES, INSERTION, INTEGER_CASE_CLAUSE, INTEGER_CHOICE_CLAUSE, INTEGER_IN_PART,
-  INTEGER_OUT_PART, INTEGRAL_MOULD, INTEGRAL_PATTERN, INT_DENOTER, INT_SYMBOL, IN_SYMBOL, IN_TYPE_MODE,
-  ISNT_SYMBOL, IS_SYMBOL, JUMP, LABEL, LABELED_UNIT, LABEL_IDENTIFIER, LABEL_SEQUENCE, LITERAL,
-  LOC_SYMBOL, LONGETY, LONG_SYMBOL, LOOP_CLAUSE, MAIN_SYMBOL, MODE_DECLARATION, MODE_SYMBOL,
-  MONADIC_FORMULA, MONAD_SEQUENCE, NIHIL, NIL_SYMBOL, OCCA_SYMBOL, OD_SYMBOL, OF_SYMBOL, OPEN_PART,
-  OPEN_SYMBOL, OPERATOR, OPERATOR_DECLARATION, OPERATOR_PLAN, OP_SYMBOL, ORF_SYMBOL, OR_FUNCTION,
-  OUSE_CASE_PART, OUSE_SYMBOL, OUT_PART, OUT_SYMBOL, OUT_TYPE_MODE, PARALLEL_CLAUSE, PARAMETER,
-  PARAMETER_LIST, PARAMETER_PACK, PARTICULAR_PROGRAM, PAR_SYMBOL, PATTERN, PICTURE, PICTURE_LIST,
-  PIPE_SYMBOL, POINT_SYMBOL, POSTLUDE_SYMBOL, SEMA_SYMBOL, PRELUDE_SYMBOL, PRIMARY, PRIORITY,
-  PRIORITY_DECLARATION, PRIO_SYMBOL, PRIVATE_SYMBOL, PROCEDURE_DECLARATION,
-  PROCEDURE_VARIABLE_DECLARATION, PROCEDURING, PROC_SYMBOL, PUBLIC_SYMBOL, QUALIFIER, RADIX_FRAME,
-  REAL_DENOTER, REAL_PATTERN, REAL_SYMBOL, REF_SYMBOL, REPLICATOR, ROUTINE_TEXT, ROUTINE_UNIT,
-  ROWING, ROWS_SYMBOL, ROW_CHAR_DENOTER, ROW_SYMBOL, SECONDARY, SELECTION, SELECTOR, SEMI_SYMBOL,
-  SERIAL_CLAUSE, SERIES_MODE, SHORTETY, SHORT_SYMBOL, SIGN_MOULD, SKIP, SKIP_SYMBOL, SLICE, SOME_CLAUSE,
-  SPECIFIED_UNIT, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_UNIT, SPECIFIER, STANDARD, STATIC_REPLICATOR,
-  STOWED_MODE, STRING_PATTERN, STRING_SYMBOL, STRUCTURED_FIELD, STRUCTURED_FIELD_LIST, STRUCTURE_PACK,
-  STRUCT_SYMBOL, STYLE_II_COMMENT_SYMBOL, STYLE_I_COMMENT_SYMBOL, STYLE_I_PRAGMAT_SYMBOL, SUB_SYMBOL,
-  SUB_UNIT, TERTIARY, THEN_BAR_SYMBOL, THEN_PART, THEN_SYMBOL, TO_PART, TO_SYMBOL, TRIMMER, TRUE_SYMBOL,
-  UNION_DECLARER_LIST, UNION_PACK, UNION_SYMBOL, UNIT, UNITED_CASE_CLAUSE, UNITED_CHOICE, UNITED_IN_PART,
-  UNITED_OUSE_PART, UNITING, UNIT_LIST, UNIT_SERIES, VARIABLE_DECLARATION, VOIDING, VOID_SYMBOL,
-  WHILE_PART, WHILE_SYMBOL, WIDENING, WILDCARD
+  ACCESS = 1,
+  ACCO_SYMBOL,
+  ALT_DO_PART,
+  ALT_DO_SYMBOL,
+  ALT_EQUALS_SYMBOL,
+  ALT_FORMAL_BOUNDS_LIST,
+  ANDF_SYMBOL,
+  ANDTH_SYMBOL,
+  AND_FUNCTION,
+  ARGUMENT,
+  ARGUMENT_LIST,
+  ASSERT_SYMBOL,
+  ASSERTION,
+  ASSIGNATION,
+  ASSIGN_SYMBOL,
+  ASSIGN_TO_SYMBOL,
+  AT_SYMBOL,
+  BEGIN_SYMBOL,
+  BITS_DENOTER,
+  BITS_PATTERN,
+  BITS_SYMBOL,
+  BOLD_COMMENT_SYMBOL,
+  BOLD_PRAGMAT_SYMBOL,
+  BOLD_TAG,
+  BOOLEAN_PATTERN,
+  BOOL_SYMBOL,
+  BOUND,
+  BOUNDS,
+  BOUNDS_LIST,
+  BRIEF_ELIF_IF_PART,
+  BRIEF_INTEGER_OUSE_PART,
+  BRIEF_OPERATOR_DECLARATION,
+  BRIEF_UNITED_OUSE_PART,
+  BUS_SYMBOL,
+  BY_PART,
+  BY_SYMBOL,
+  BYTES_SYMBOL,
+  CALL,
+  CASE_PART,
+  CASE_SYMBOL,
+  CAST,
+  CHANNEL_SYMBOL,
+  CHAR_SYMBOL,
+  CHOICE,
+  CHOICE_PATTERN,
+  CLOSED_CLAUSE,
+  CLOSE_SYMBOL,
+  CODE_CLAUSE,
+  CODE_SYMBOL,
+  COLLATERAL_CLAUSE,
+  COLLECTION,
+  COLON_SYMBOL,
+  COMMA_SYMBOL,
+  COMPLEX_PATTERN,
+  COMPLEX_SYMBOL,
+  COMPL_SYMBOL,
+  CONDITIONAL_CLAUSE,
+  DECLARATION_LIST,
+  DECLARER,
+  DEFINING_IDENTIFIER,
+  DEFINING_INDICANT,
+  DEFINING_OPERATOR,
+  DEF_SYMBOL,
+  DENOTER,
+  DEPROCEDURING,
+  DEREFERENCING,
+  DOTDOT_SYMBOL,
+  DO_PART,
+  DO_SYMBOL,
+  DOWNTO_SYMBOL,
+  DYNAMIC_REPLICATOR,
+  EDOC_SYMBOL,
+  ELIF_IF_PART,
+  ELIF_PART,
+  ELIF_SYMBOL,
+  ELSE_BAR_SYMBOL,
+  ELSE_OPEN_PART,
+  ELSE_PART,
+  ELSE_SYMBOL,
+  ELSF_SYMBOL,
+  EMPTY_SYMBOL,
+  ENCLOSED_CLAUSE,
+  END_SYMBOL,
+  ENQUIRY_CLAUSE,
+  ENVIRON_NAME,
+  ENVIRON_SYMBOL,
+  EQUALS_SYMBOL,
+  ERROR,
+  ESAC_SYMBOL,
+  EXIT_SYMBOL,
+  EXPONENT_FRAME,
+  EXPORT_CLAUSE,
+  FALSE_SYMBOL,
+  FED_SYMBOL,
+  FIELD_IDENTIFIER,
+  FILE_SYMBOL,
+  FI_SYMBOL,
+  FLEX_SYMBOL,
+  FORMAL_BOUNDS,
+  FORMAL_BOUNDS_LIST,
+  FORMAL_DECLARERS,
+  FORMAL_DECLARERS_LIST,
+  FORMAT_A_FRAME,
+  FORMAT_DELIMITER_SYMBOL,
+  FORMAT_D_FRAME,
+  FORMAT_E_FRAME,
+  FORMAT_ITEM_ESCAPE,
+  FORMAT_ITEM_A,
+  FORMAT_ITEM_B,
+  FORMAT_ITEM_C,
+  FORMAT_ITEM_CLOSE,
+  FORMAT_ITEM_D,
+  FORMAT_ITEM_E,
+  FORMAT_ITEM_F,
+  FORMAT_ITEM_G,
+  FORMAT_ITEM_H,
+  FORMAT_ITEM_I,
+  FORMAT_ITEM_J,
+  FORMAT_ITEM_K,
+  FORMAT_ITEM_L,
+  FORMAT_ITEM_M,
+  FORMAT_ITEM_MINUS,
+  FORMAT_ITEM_N,
+  FORMAT_ITEM_O,
+  FORMAT_ITEM_OPEN,
+  FORMAT_ITEM_P,
+  FORMAT_ITEM_PLUS,
+  FORMAT_ITEM_POINT,
+  FORMAT_ITEM_Q,
+  FORMAT_ITEM_R,
+  FORMAT_ITEM_S,
+  FORMAT_ITEM_T,
+  FORMAT_ITEM_U,
+  FORMAT_ITEM_V,
+  FORMAT_ITEM_W,
+  FORMAT_ITEM_X,
+  FORMAT_ITEM_Y,
+  FORMAT_ITEM_Z,
+  FORMAT_I_FRAME,
+  FORMAT_PATTERN,
+  FORMAT_POINT_FRAME,
+  FORMAT_SYMBOL,
+  FORMAT_TEXT,
+  FORMAT_Z_FRAME,
+  INTEGRAL_C_PATTERN,
+  FLOAT_C_PATTERN,
+  FIXED_C_PATTERN,
+  STRING_C_PATTERN,
+  FORMULA,
+  FOR_PART,
+  FOR_SYMBOL,
+  FROM_PART,
+  FROM_SYMBOL,
+  GENERAL_PATTERN,
+  GENERATOR,
+  GOTO_SYMBOL,
+  GO_SYMBOL,
+  HEAP_SYMBOL,
+  IDENTIFIER,
+  IDENTITY_DECLARATION,
+  IDENTITY_RELATION,
+  IF_PART,
+  IF_SYMBOL,
+  GENERIC_ARGUMENT,
+  GENERIC_ARGUMENT_LIST,
+  INDICANT,
+  INITIALISER_SERIES,
+  INSERTION,
+  INTEGER_CASE_CLAUSE,
+  INTEGER_CHOICE_CLAUSE,
+  INTEGER_IN_PART,
+  INTEGER_OUT_PART,
+  INTEGRAL_MOULD,
+  INTEGRAL_PATTERN,
+  INT_DENOTER,
+  INT_SYMBOL,
+  IN_SYMBOL,
+  IN_TYPE_MODE,
+  ISNT_SYMBOL,
+  IS_SYMBOL,
+  JUMP,
+  LABEL,
+  LABELED_UNIT,
+  LABEL_IDENTIFIER,
+  LABEL_SEQUENCE,
+  LITERAL,
+  LOC_SYMBOL,
+  LONGETY,
+  LONG_SYMBOL,
+  LOOP_CLAUSE,
+  MAIN_SYMBOL,
+  MODE_DECLARATION,
+  MODE_SYMBOL,
+  MONADIC_FORMULA,
+  MONAD_SEQUENCE,
+  NIHIL,
+  NIL_SYMBOL,
+  OCCA_SYMBOL,
+  OD_SYMBOL,
+  OF_SYMBOL,
+  OPEN_PART,
+  OPEN_SYMBOL,
+  OPERATOR,
+  OPERATOR_DECLARATION,
+  OPERATOR_PLAN,
+  OP_SYMBOL,
+  OREL_SYMBOL,
+  ORF_SYMBOL,
+  OR_FUNCTION,
+  OUSE_CASE_PART,
+  OUSE_SYMBOL,
+  OUT_PART,
+  OUT_SYMBOL,
+  OUT_TYPE_MODE,
+  PARALLEL_CLAUSE,
+  PARAMETER,
+  PARAMETER_LIST,
+  PARAMETER_PACK,
+  PARTICULAR_PROGRAM,
+  PAR_SYMBOL,
+  PATTERN,
+  PICTURE,
+  PICTURE_LIST,
+  PIPE_SYMBOL,
+  POINT_SYMBOL,
+  POSTLUDE_SYMBOL,
+  SEMA_SYMBOL,
+  PRELUDE_SYMBOL,
+  PRIMARY,
+  PRIORITY,
+  PRIORITY_DECLARATION,
+  PRIO_SYMBOL,
+  PRIVATE_SYMBOL,
+  PROCEDURE_DECLARATION,
+  PROCEDURE_VARIABLE_DECLARATION,
+  PROCEDURING,
+  PROC_SYMBOL,
+  PUBLIC_SYMBOL,
+  QUALIFIER,
+  RADIX_FRAME,
+  REAL_DENOTER,
+  REAL_PATTERN,
+  REAL_SYMBOL,
+  REF_SYMBOL,
+  REPLICATOR,
+  ROUTINE_TEXT,
+  ROUTINE_UNIT,
+  ROWING,
+  ROWS_SYMBOL,
+  ROW_CHAR_DENOTER,
+  ROW_SYMBOL,
+  SECONDARY,
+  SELECTION,
+  SELECTOR,
+  SEMI_SYMBOL,
+  SERIAL_CLAUSE,
+  SERIES_MODE,
+  SHORTETY,
+  SHORT_SYMBOL,
+  SIGN_MOULD,
+  SKIP,
+  SKIP_SYMBOL,
+  SLICE,
+  SOME_CLAUSE,
+  SPECIFIED_UNIT,
+  SPECIFIED_UNIT_LIST,
+  SPECIFIED_UNIT_UNIT,
+  SPECIFIER,
+  STANDARD,
+  STATIC_REPLICATOR,
+  STOWED_MODE,
+  STRING_PATTERN,
+  STRING_SYMBOL,
+  STRUCTURED_FIELD,
+  STRUCTURED_FIELD_LIST,
+  STRUCTURE_PACK,
+  STRUCT_SYMBOL,
+  STYLE_II_COMMENT_SYMBOL,
+  STYLE_I_COMMENT_SYMBOL,
+  STYLE_I_PRAGMAT_SYMBOL,
+  SUB_SYMBOL,
+  SUB_UNIT,
+  TERTIARY,
+  THEF_SYMBOL,
+  THEN_BAR_SYMBOL,
+  THEN_PART,
+  THEN_SYMBOL,
+  TO_PART,
+  TO_SYMBOL,
+  TRIMMER,
+  TRUE_SYMBOL,
+  UNTIL_PART,
+  UNTIL_SYMBOL,
+  UNION_DECLARER_LIST,
+  UNION_PACK,
+  UNION_SYMBOL,
+  UNIT,
+  UNITED_CASE_CLAUSE,
+  UNITED_CHOICE,
+  UNITED_IN_PART,
+  UNITED_OUSE_PART,
+  UNITING,
+  UNIT_LIST,
+  UNIT_SERIES,
+  VARIABLE_DECLARATION,
+  VOIDING,
+  VOID_SYMBOL,
+  WHILE_PART,
+  WHILE_SYMBOL,
+  WIDENING,
+  WILDCARD
 };
 
 enum
@@ -658,26 +963,66 @@ enum
 { NOT_PRINTED, TO_PRINT, PRINTED };
 
 enum
-{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_ALL_DIAGNOSTICS };
+{ A_ERROR = 1, A_SYNTAX_ERROR, A_WARNING, A_RUNTIME_ERROR, A_ALL_DIAGNOSTICS, FORCE_DIAGNOSTIC = 128 };
 
 enum
 { NO_DEFLEXING = 1, SAFE_DEFLEXING, ALIAS_DEFLEXING, FORCE_DEFLEXING };
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-Macros.                                                                       */
+/* Macros. */
 
-#define MOVE memmove
+#define ABS(n) ((n) >= 0 ? (n) : -(n))
+
+#define SIGN(n) ((n) == 0 ? 0 : ((n) > 0 ? 1 : -1))
+
+#define COPY(d, s, n) {\
+  int m_k = (n); BYTE_T *m_u = (BYTE_T *) (d), *m_v = (BYTE_T *) (s);\
+  while (m_k--) {*m_u++ = *m_v++;}}
+
+#define FILL(d, s, n) {\
+   int m_k = (n); BYTE_T *m_u = (BYTE_T *) (d), m_v = (BYTE_T) (s);\
+   while (m_k--) {*m_u++ = m_v;}}
+
+#define MOVE(d, s, n) {\
+  int m_k = (int) (n); BYTE_T *m_d = (BYTE_T *) (d), *m_s = (BYTE_T *) (s);\
+  if (m_s < m_d) {\
+    m_d += m_k; m_s += m_k;\
+    while (m_k--) {*(--m_d) = *(--m_s);}\
+  } else {\
+    while (m_k--) {*(m_d++) = *(m_s++);}\
+  }}
+
+#define ABNORMAL_END(p, reason, info) {\
+  if (p) {\
+    sprintf (output_line, "\nabnormal end: %s: %d: %s", __FILE__, __LINE__, reason);\
+    if (info != NULL) {\
+      strcat (output_line, ", ");\
+      strcat (output_line, info);\
+    }\
+    if (errno != 0) {\
+      strcat (output_line, " (");\
+      strcat (output_line, ERROR_SPECIFICATION);\
+      strcat (output_line, ")");\
+    }\
+    io_close_tty_line ();\
+    io_write_string (STDOUT_FILENO, output_line);\
+    a68g_exit (EXIT_FAILURE);\
+  }}
+
+#define RESET_ERRNO {errno = 0;}
+
 #define A68_UNION A68_POINTER
 #define UNION_OFFSET (SIZE_OF (A68_UNION))
 
-#define ACCESSING_NIL_ERROR "accessing N value"
-#define CANNOT_COERCE_ERROR "M cannot be coerced to M C"
+/* Miscellaneous misery. */
+
+#define ACCESSING_NIL_ERROR "attempt to access N"
+#define CANNOT_COERCE_ERROR "M cannot be coerced to M in C context"
 #define CHANNEL_DOES_NOT "channel does not allow Y"
-#define DIFFERENT_BOUNDS "rows have different bounds"
-#define DIVISION_BY_ZERO_ERROR "M division by zero"
-#define EMPTY_VALUE_ERROR "accessing uninitialised M value"
-#define EMPTY_VALUE_ERROR_FROM "accessing uninitialised M value in @"
-#define END_WITH_DECLARATION_ERROR "clause cannot end with a declaration"
+#define DIFFERENT_BOUNDS "source row and destination row have different bounds"
+#define DIVISION_BY_ZERO_ERROR "attempt at M division by zero"
+#define EMPTY_VALUE_ERROR "attempt to use uninitialised M value"
+#define EMPTY_VALUE_ERROR_FROM (EMPTY_VALUE_ERROR)
+#define END_WITH_DECLARATION_ERROR "clause cannot end with a declaration - it must yield a value"
 #define ERROR_IN_DENOTER "error in M denoter"
 #define ERROR_SPECIFICATION (errno == 0 ? NULL : strerror (errno))
 #define EXPECTED "Y expected"
@@ -705,15 +1050,17 @@ Macros.                                                                       */
 #define DEFLEX(p) (DEFLEXED (p) != NULL ? DEFLEXED(p) : (p))
 #define DEFLEXED(p) ((p)->deflexed_mode)
 #define DIMENSION(p) ((p)->dimensions)
+#define DNS(p) ((p)->dns)
 #define ENVIRON(p) ((p)->environ)
 #define EQUIVALENT(p) ((p)->equivalent_mode)
 #define EXIT_COMPILATION longjmp(exit_compilation, 1)
 #define FILE_DEREF(p) ((A68_FILE *) ADDRESS (p))
-#define GENIE_INFO_T(p) ((p)->genie_info)
+#define FORWARD(p) ((p) = NEXT (p))
+#define GENIE_INFO(p) ((p)->genie_info)
 #define HEAP(p) ((p)->heap)
 #define LEX_LEVEL(p) (SYMBOL_TABLE (p)->level)
 #define LINE(p) ((p)->info->line)
-#define MASK(p) ((p)->info->mask)
+#define MASK(p) ((p)->mask)
 #define MODE(p) (a68_modes.p)
 #define MOID(p) ((p)->type)
 #define MULTIPLE(p) ((p)->multiple_mode)
@@ -724,12 +1071,14 @@ Macros.                                                                       */
 #define NUMBER(p) ((p)->number)
 #define PACK(p) ((p)->pack)
 #define PARENT(p) ((p)->genie.parent)
+#define PAR_LEVEL(p) ((p)->par_level)
 #define PREVIOUS(p) ((p)->previous)
 #define PRIO(p) ((p)->priority)
 #define SEQUENCE(p) ((p)->genie.seq)
 #define SEQUENCE_SET(p) ((p)->genie.seq_set)
 #define SLICE(p) ((p)->slice)
 #define SORT(p) ((p)->sort)
+#define STATUS(p) ((p)->status)
 #define SUB(p) ((p)->sub)
 #define SUB_NEXT(p) (SUB (NEXT (p)))
 #define SYMBOL(p) ((p)->info->symbol)
@@ -737,16 +1086,18 @@ Macros.                                                                       */
 #define TAX(p) ((p)->tag)
 #define TEXT(p) ((p)->text)
 #define TRIM(p) ((p)->trim)
-#define VALUE(p) (TAX(p)->value)
+#define VALUE(p) ((p)->value)
 #define WHETHER(p, s) (ATTRIBUTE (p) == (s))
 #define WHETHER_NOT(p, s) (ATTRIBUTE (p) != (s))
+#define WHETHER_LITERALLY(p, s) (strcmp (SYMBOL (p), s) == 0)
 
-#define ALIGN_T int
-#define ALIGNMENT SIZE_OF (ALIGN_T)
+#define ALIGN_T void *
+#define ALIGNMENT (SIZE_OF (ALIGN_T))
 #define ALIGN(s) ((s) % ALIGNMENT != 0 ? (s) + ALIGNMENT - (s) % ALIGNMENT : (s))
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-External definitions.                                                         */
+#define SCAN_ERROR(c, u, txt) if (c) {scan_error (u, txt);}
+
+/* External definitions. */
 
 extern ADDR_T fixed_heap_pointer, temp_heap_pointer;
 extern BOOL_T gnu_diags;
@@ -765,8 +1116,12 @@ extern TOKEN_T *top_token;
 extern char output_line[], edit_line[], input_line[];
 extern double begin_of_time;
 extern double garbage_seconds;
+extern double a68g_acosh (double);
+extern double a68g_asinh (double);
+extern double a68g_atanh (double);
+extern double a68g_hypot (double, double);
+extern double a68g_log1p (double);
 extern int error_count, warning_count, run_time_error_count;
-extern int frame_stack_size, expr_stack_size, heap_size, handle_pool_size;
 extern int garbage_collects;
 extern int source_scan;
 extern int stack_size;
@@ -831,14 +1186,16 @@ extern int whether_identifier_or_label_global (SYMBOL_TABLE_T *, char *);
 extern size_t io_read_string (FILE_T, char *, size_t);
 extern ssize_t io_read (FILE_T, void *, size_t);
 extern ssize_t io_write (FILE_T, const void *, size_t);
+extern ssize_t io_read_conv (FILE_T, void *, size_t);
+extern ssize_t io_write_conv (FILE_T, const void *, size_t);
 extern void *get_heap_space (size_t);
 extern void a68g_exit (int);
-extern void abend (BOOL_T, const char *, const char *);
 extern void make_postulate (POSTULATE_T **, MOID_T *, MOID_T *);
 extern void add_mode_to_pack (PACK_T **, MOID_T *, char *, NODE_T *);
+extern void add_mode_to_pack_end (PACK_T **, MOID_T *, char *, NODE_T *);
 extern void add_moid_list (MOID_LIST_T **, SYMBOL_TABLE_T *);
 extern void add_moid_moid_list (NODE_T *, MOID_LIST_T **);
-extern void add_option_list (OPTION_LIST_T **, char *);
+extern void add_option_list (OPTION_LIST_T **, char *, SOURCE_LINE_T *);
 extern void add_single_moid_to_list (MOID_LIST_T **, MOID_T *, SYMBOL_TABLE_T *);
 extern void assign_offsets (NODE_T *);
 extern void assign_offsets_packs (MOID_LIST_T *);
@@ -875,7 +1232,7 @@ extern void init_tty (void);
 extern void initialise_internal_index (A68_TUPLE *, int);
 extern void io_close_tty_line (void);
 extern void io_write_string (FILE_T, const char *);
-extern void isolate_options (MODULE_T *, char *);
+extern void isolate_options (MODULE_T *, char *, SOURCE_LINE_T *);
 extern void jumps_from_procs (NODE_T * p);
 extern void low_core_alert (void);
 extern void maintain_mode_table (NODE_T *);
@@ -885,13 +1242,14 @@ extern void make_standard_environ (void);
 extern void make_sub (NODE_T *, NODE_T *, int);
 extern void mark_auxilliary (NODE_T *);
 extern void mark_moids (NODE_T *);
+extern void math_rte (NODE_T *, BOOL_T, MOID_T *, const char *);
 extern void mode_checker (NODE_T *);
 extern void msg (int, int, NODE_T *, SOID_T *, SOID_T *, char *);
 extern void number_proc_levels (NODE_T *, int);
 extern void number_procs (NODE_T *, int *);
 extern void preliminary_symbol_table_setup (NODE_T *);
 extern void protect_from_sweep (NODE_T *);
-extern void protect_sweep_handle (A68_REF *);
+extern void PROTECT_SWEEP_HANDLE (A68_REF *);
 extern void prune_echoes (MODULE_T *, OPTION_LIST_T *);
 extern void put_refinements (MODULE_T *);
 extern void read_rc_options (MODULE_T *);
@@ -903,8 +1261,10 @@ extern void reset_postulates (void);
 extern void reset_max_simplout_size (void);
 extern void reset_moid_list ();
 extern void reset_symbol_table_nest_count (NODE_T *);
+extern void scan_error (SOURCE_LINE_T *, char *);
 extern void scope_checker (NODE_T *);
 extern void set_moid_sizes (MOID_LIST_T *);
+extern void set_par_level (NODE_T *, int);
 extern void set_up_mode_table (NODE_T *);
 extern void set_up_tables ();
 extern void source_listing (MODULE_T *);
@@ -912,7 +1272,7 @@ extern void substitute_brackets (NODE_T *);
 extern void tie_label_to_serial (NODE_T *);
 extern void tie_label_to_unit (NODE_T *);
 extern void top_down_parser (NODE_T *);
-extern void unprotect_sweep_handle (A68_REF *);
+extern void UNPROTECT_SWEEP_HANDLE (A68_REF *);
 extern void victal_checker (NODE_T *);
 extern void warn_for_unused_tags (NODE_T *);
 extern void where (FILE_T, NODE_T *);

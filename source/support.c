@@ -1,19 +1,26 @@
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*!
+\file support.c
+\brief small utility routines
+*/
+
+/*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      */
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
 
 #include "algol68g.h"
 #include "genie.h"
@@ -32,99 +39,101 @@ POSTULATE_T *top_postulate, *old_postulate;
 KEYWORD_T *top_keyword;
 TOKEN_T *top_token;
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-low_core_alert: give an error upon getting low on core.                       */
+/*!
+\brief give an error upon getting low on core
+\return
+**/
 
-void
-low_core_alert (void)
+void low_core_alert (void)
 {
-  abend (A_TRUE, OUT_OF_CORE, NULL);
+  ABNORMAL_END (A_TRUE, OUT_OF_CORE, NULL);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-*/
+/*!
+\brief get_fixed_heap_space
+\param s
+\return
+**/
 
-BYTE_T *
-get_fixed_heap_space (size_t s)
+BYTE_T *get_fixed_heap_space (size_t s)
 {
   BYTE_T *z = HEAP_ADDRESS (fixed_heap_pointer);
   s = ALIGN (s);
   fixed_heap_pointer += s;
-  if (fixed_heap_pointer >= temp_heap_pointer)
-    {
-      low_core_alert ();
-    }
+  if (fixed_heap_pointer >= temp_heap_pointer) {
+    low_core_alert ();
+  }
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-*/
+/*!
+\brief get_temp_heap_space
+\param s
+\return
+**/
 
-BYTE_T *
-get_temp_heap_space (size_t s)
+BYTE_T *get_temp_heap_space (size_t s)
 {
   s = ALIGN (s);
   temp_heap_pointer -= s;
-  if (temp_heap_pointer <= fixed_heap_pointer)
-    {
-      low_core_alert ();
-    }
+  if (temp_heap_pointer <= fixed_heap_pointer) {
+    low_core_alert ();
+  }
   return (HEAP_ADDRESS (temp_heap_pointer));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-get_stack_size: get size of stack segment.                                    */
+/*!
+\brief get size of stack segment
+**/
 
-void
-get_stack_size (void)
+void get_stack_size (void)
 {
 #if defined HAVE_UNIX && !defined WIN32_VERSION
   struct rlimit limits;
-  errno = 0;
-  abend (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0), "getrlimit fails", NULL);
+  RESET_ERRNO;
+  ABNORMAL_END (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0), "getrlimit fails", NULL);
   stack_size = (int) (limits.rlim_cur < limits.rlim_max ? limits.rlim_cur : limits.rlim_max);
-/* A heuristic in case getrlimit yields extreme numbers: the frame stack is 
-   assumed to fill at a rate comparable to the C stack, so the C stack needs 
-   not be larger than the frame stack. This may not be true.                  */
-  if (stack_size < KILOBYTE || (stack_size > 96 * MEGABYTE && stack_size > frame_stack_size))
-    {
-      stack_size = frame_stack_size;
-    }
-#elif defined PRE_MACOS_X
+/* A heuristic in case getrlimit yields extreme numbers: the frame stack is
+   assumed to fill at a rate comparable to the C stack, so the C stack needs
+   not be larger than the frame stack. This may not be true. */
+  if (stack_size < KILOBYTE || (stack_size > 96 * MEGABYTE && stack_size > frame_stack_size)) {
+    stack_size = frame_stack_size;
+  }
+#elif defined PRE_MACOS_X_VERSION
   stack_size = StackSpace ();
 #elif defined WIN32_VERSION
   stack_size = MEGABYTE;
 #else
   stack_size = 0;		/* No stack check. */
 #endif
+  stack_limit = (stack_size > (128 * KILOBYTE) ? (stack_size - storage_overhead) : stack_size / 2);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-digit_to_char: get int value from digit.                                      */
+/*!
+\brief get int value from digit
+\param i
+\return
+**/
 
-char
-digit_to_char (int i)
+char digit_to_char (int i)
 {
   char *z = "0123456789abcdefghijklmnopqrstuvwxyz";
-  if (i >= 0 && i < (int) strlen (z))
-    {
-      return (z[i]);
-    }
-  else
-    {
-      return ('*');
-    }
+  if (i >= 0 && i < (int) strlen (z)) {
+    return (z[i]);
+  } else {
+    return ('*');
+  }
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_node_info: ibid.                                                          */
+/*!
+\brief new_node_info
+\return
+**/
 
-NODE_INFO_T *
-new_node_info (void)
+NODE_INFO_T *new_node_info (void)
 {
   NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space (SIZE_OF (NODE_INFO_T));
   z->module = NULL;
-  z->mask = 0;
   z->PROCEDURE_LEVEL = 0;
   z->PROCEDURE_NUMBER = 0;
   z->char_in_line = NULL;
@@ -133,16 +142,19 @@ new_node_info (void)
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_node: ibid.                                                               */
+/*!
+\brief new_node
+\return
+**/
 
-NODE_T *
-new_node (void)
+NODE_T *new_node (void)
 {
   NODE_T *z = (NODE_T *) get_fixed_heap_space (SIZE_OF (NODE_T));
+  z->mask = 0;
   z->info = new_node_info ();
   z->attribute = 0;
   z->annotation = 0;
+  DNS (z) = A_FALSE;
   z->error = A_FALSE;
   z->genie.propagator.unit = NULL;
   z->genie.propagator.source = NULL;
@@ -151,8 +163,10 @@ new_node (void)
   z->genie.seq = NULL;
   z->genie.seq_set = A_FALSE;
   z->genie.parent = NULL;
-  z->genie.function_name = NULL;
   z->genie.constant = NULL;
+  z->genie.argsize = 0;
+  z->partial_proc = NULL;
+  z->partial_locale = NULL;
   SYMBOL_TABLE (z) = NULL;
   MOID (z) = NULL;
   NEXT (z) = NULL;
@@ -166,11 +180,13 @@ new_node (void)
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_symbol_table: ibid.                                                       */
+/*!
+\brief new_symbol_table
+\param p
+\return
+**/
 
-SYMBOL_TABLE_T *
-new_symbol_table (SYMBOL_TABLE_T * p)
+SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
 {
   SYMBOL_TABLE_T *z = (SYMBOL_TABLE_T *) get_fixed_heap_space (SIZE_OF (SYMBOL_TABLE_T));
   z->level = symbol_table_count++;
@@ -188,8 +204,6 @@ new_symbol_table (SYMBOL_TABLE_T * p)
   PRIO (z) = NULL;
   z->indicants = NULL;
   z->labels = NULL;
-  z->local_identifiers = NULL;
-  z->local_operators = NULL;
   z->anonymous = NULL;
   z->moids = NULL;
   z->jump_to = NULL;
@@ -197,11 +211,12 @@ new_symbol_table (SYMBOL_TABLE_T * p)
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_moid: ibid.                                                               */
+/*!
+\brief new_moid
+\return
+**/
 
-MOID_T *
-new_moid ()
+MOID_T *new_moid ()
 {
   MOID_T *z = (MOID_T *) get_fixed_heap_space (SIZE_OF (MOID_T));
   z->attribute = 0;
@@ -227,11 +242,12 @@ new_moid ()
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_pack: ibid.                                                               */
+/*!
+\brief new_pack
+\return
+**/
 
-PACK_T *
-new_pack ()
+PACK_T *new_pack ()
 {
   PACK_T *z = (PACK_T *) get_fixed_heap_space (SIZE_OF (PACK_T));
   MOID (z) = NULL;
@@ -244,11 +260,12 @@ new_pack ()
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_tag: ibid.                                                                */
+/*!
+\brief new_tag
+\return
+**/
 
-TAG_T *
-new_tag ()
+TAG_T *new_tag ()
 {
   TAG_T *z = (TAG_T *) get_fixed_heap_space (SIZE_OF (TAG_T));
   SYMBOL_TABLE (z) = NULL;
@@ -267,22 +284,23 @@ new_tag ()
   z->access = 0;
   z->size = 0;
   z->offset = 0;
-  z->youngest_environ = 0;
+  z->youngest_environ = PRIMAL_SCOPE;
   z->loc_assigned = A_FALSE;
-  z->loc_procedure = A_FALSE;
   NEXT (z) = NULL;
   z->body = NULL;
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_source_line: ibid.                                                        */
+/*!
+\brief new_source_line
+\return
+**/
 
-SOURCE_LINE_T *
-new_source_line ()
+SOURCE_LINE_T *new_source_line ()
 {
   SOURCE_LINE_T *z = (SOURCE_LINE_T *) get_fixed_heap_space (SIZE_OF (SOURCE_LINE_T));
   z->string = NULL;
+  z->filename = NULL;
   z->messages = NULL;
   z->number = 0;
   z->print_status = 0;
@@ -292,16 +310,20 @@ new_source_line ()
   z->max_proc_level = 0;
   z->list = A_FALSE;
   z->top_node = NULL;
+  z->module = NULL;
   NEXT (z) = NULL;
   PREVIOUS (z) = NULL;
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-make_special_mode: introduce a special, internal mode.                        */
+/*!
+\brief make special, internal mode
+\param n
+\param m
+\return
+**/
 
-void
-make_special_mode (MOID_T ** n, int m)
+void make_special_mode (MOID_T ** n, int m)
 {
   (*n) = new_moid ();
   (*n)->attribute = 0;
@@ -313,137 +335,114 @@ make_special_mode (MOID_T ** n, int m)
   (*n)->slice = NULL;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-add_module: future expansion
+/*!
+\brief whether x matches c; case insensitive
+\param string
+\param string to match, leading '-' or caps in c are mandatory
+\param alt string terminator other than '\0'
+\return
+**/
 
-void
-add_module (MODULE_CHAIN ** top, MODULE_T this)
-{
-  MODULE_CHAIN *new_one = (MODULE_CHAIN *) get_heap_space (SIZE_OF (MODULE_CHAIN));
-  new_one->module = this;
-  NEXT(new_one) = *top;
-  *top = new_one;
-}
-
-*/
-
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-match_string: whether x matches c; case insensitive. 
-x: string.
-c: string to match, leading '-' or caps in c are mandatory.                   */
-
-BOOL_T
-match_string (char *x, char *c, char alt)
+BOOL_T match_string (char *x, char *c, char alt)
 {
   BOOL_T match = A_TRUE;
-  while ((IS_UPPER (c[0]) || IS_DIGIT (c[0]) || c[0] == '-') && match)
-    {
-      match &= (TO_LOWER (x[0]) == TO_LOWER ((c++)[0]));
-      if (x[0] != '\0')
-	{
-	  x++;
-	}
+  while ((IS_UPPER (c[0]) || IS_DIGIT (c[0]) || c[0] == '-') && match) {
+    match &= (TO_LOWER (x[0]) == TO_LOWER ((c++)[0]));
+    if (x[0] != '\0') {
+      x++;
     }
-  while (x[0] != '\0' && x[0] != alt && c[0] != '\0' && match)
-    {
-      match &= (TO_LOWER ((x++)[0]) == TO_LOWER ((c++)[0]));
-    }
+  }
+  while (x[0] != '\0' && x[0] != alt && c[0] != '\0' && match) {
+    match &= (TO_LOWER ((x++)[0]) == TO_LOWER ((c++)[0]));
+  }
   return (match ? (x[0] == '\0' || x[0] == alt) : A_FALSE);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-whether: whether attributes whether in subsequent nodes.                          */
+/*!
+\brief whether attributes match in subsequent nodes
+\param p
+\return
+**/
 
-BOOL_T
-whether (NODE_T * p, ...)
+BOOL_T whether (NODE_T * p, ...)
 {
   va_list vl;
   int a;
   va_start (vl, p);
   while ((a = va_arg (vl, int)) != 0)
-    {
-      if (p != NULL && (a == WILDCARD || (a >= 0 ? a == ATTRIBUTE (p) : -a != ATTRIBUTE (p))))
-	{
-	  p = NEXT (p);
-	}
-      else
-	{
-	  va_end (vl);
-	  return (A_FALSE);
-	}
+  {
+    if (p != NULL && (a == WILDCARD || (a >= 0 ? a == ATTRIBUTE (p) : -a != ATTRIBUTE (p)))) {
+      p = NEXT (p);
+    } else {
+      va_end (vl);
+      return (A_FALSE);
     }
+  }
   va_end (vl);
   return (A_TRUE);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-make_sub: isolate nodes p-q making p a branch to p-q.                         */
+/*!
+\brief isolate nodes p-q making p a branch to p-q
+\param p
+\param q
+\param t
+\return
+**/
 
-void
-make_sub (NODE_T * p, NODE_T * q, int t)
+void make_sub (NODE_T * p, NODE_T * q, int t)
 {
   NODE_T *z = new_node ();
-  abend (p == NULL || q == NULL, INTERNAL_ERROR, "make_sub");
+  ABNORMAL_END (p == NULL || q == NULL, INTERNAL_ERROR, "make_sub");
   MOVE (z, p, SIZE_OF (NODE_T));
   PREVIOUS (z) = NULL;
-  if (p == q)
-    {
-      NEXT (z) = NULL;
+  if (p == q) {
+    NEXT (z) = NULL;
+  } else {
+    if (NEXT (p) != NULL) {
+      PREVIOUS (NEXT (p)) = z;
     }
-  else
-    {
-      if (NEXT (p) != NULL)
-	{
-	  PREVIOUS (NEXT (p)) = z;
-	}
-      NEXT (p) = NEXT (q);
-      if (NEXT (p) != NULL)
-	{
-	  PREVIOUS (NEXT (p)) = p;
-	}
-      NEXT (q) = NULL;
+    NEXT (p) = NEXT (q);
+    if (NEXT (p) != NULL) {
+      PREVIOUS (NEXT (p)) = p;
     }
+    NEXT (q) = NULL;
+  }
   SUB (p) = z;
   ATTRIBUTE (p) = t;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-find_level: find symbol table at level 'i'.                                   */
+/*!
+\brief find symbol table at level 'i'
+\param n
+\param i
+\return
+**/
 
-SYMBOL_TABLE_T *
-find_level (NODE_T * n, int i)
+SYMBOL_TABLE_T *find_level (NODE_T * n, int i)
 {
-  if (n == NULL)
-    {
+  if (n == NULL) {
+    return (NULL);
+  } else {
+    SYMBOL_TABLE_T *s = SYMBOL_TABLE (n);
+    if (s != NULL && s->level == i) {
+      return (s);
+    } else if ((s = find_level (SUB (n), i)) != NULL) {
+      return (s);
+    } else if ((s = find_level (NEXT (n), i)) != NULL) {
+      return (s);
+    } else {
       return (NULL);
     }
-  else
-    {
-      SYMBOL_TABLE_T *s = SYMBOL_TABLE (n);
-      if (s != NULL && s->level == i)
-	{
-	  return (s);
-	}
-      else if ((s = find_level (SUB (n), i)) != NULL)
-	{
-	  return (s);
-	}
-      else if ((s = find_level (NEXT (n), i)) != NULL)
-	{
-	  return (s);
-	}
-      else
-	{
-	  return (NULL);
-	}
-    }
+  }
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-seconds: time versus arbitrary origin.                                        */
+/*!
+\brief time versus arbitrary origin
+\return
+**/
 
-double
-seconds ()
+double seconds ()
 {
 #ifdef HAVE_UNIX_CLOCK
   struct rusage rus;
@@ -454,131 +453,138 @@ seconds ()
 #endif
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-whether_new_lexical_level: whether 'p' is top of lexical level.                    */
+/*!
+\brief whether 'p' is top of lexical level
+\param p
+\return
+**/
 
-BOOL_T
-whether_new_lexical_level (NODE_T * p)
+BOOL_T whether_new_lexical_level (NODE_T * p)
 {
-  switch (ATTRIBUTE (p))
+  switch (ATTRIBUTE (p)) {
+  case ALT_DO_PART:
+  case BRIEF_ELIF_IF_PART:
+  case BRIEF_INTEGER_OUSE_PART:
+  case BRIEF_UNITED_OUSE_PART:
+  case CHOICE:
+  case CLOSED_CLAUSE:
+  case CONDITIONAL_CLAUSE:
+  case DO_PART:
+  case ELIF_PART:
+  case ELSE_PART:
+  case EXPORT_CLAUSE:
+  case FORMAT_TEXT:
+  case INTEGER_CASE_CLAUSE:
+  case INTEGER_CHOICE_CLAUSE:
+  case INTEGER_IN_PART:
+  case INTEGER_OUT_PART:
+  case OUT_PART:
+  case ROUTINE_TEXT:
+  case SPECIFIED_UNIT:
+  case THEN_PART:
+  case UNTIL_PART:
+  case UNITED_CASE_CLAUSE:
+  case UNITED_CHOICE:
+  case UNITED_IN_PART:
+  case UNITED_OUSE_PART:
+  case WHILE_PART:
     {
-      {
-    case ALT_DO_PART:
-    case BRIEF_ELIF_IF_PART:
-    case BRIEF_INTEGER_OUSE_PART:
-    case BRIEF_UNITED_OUSE_PART:
-    case CHOICE:
-    case CLOSED_CLAUSE:
-    case CONDITIONAL_CLAUSE:
-    case DO_PART:
-    case ELIF_PART:
-    case ELSE_PART:
-    case EXPORT_CLAUSE:
-    case FORMAT_TEXT:
-    case INTEGER_CASE_CLAUSE:
-    case INTEGER_CHOICE_CLAUSE:
-    case INTEGER_IN_PART:
-    case INTEGER_OUT_PART:
-    case OUT_PART:
-    case ROUTINE_TEXT:
-    case SPECIFIED_UNIT:
-    case THEN_PART:
-    case UNITED_CASE_CLAUSE:
-    case UNITED_CHOICE:
-    case UNITED_IN_PART:
-    case UNITED_OUSE_PART:
-    case WHILE_PART:
-	return (A_TRUE);
-      }
-    default:
-      {
-	return (A_FALSE);
-      }
+      return (A_TRUE);
     }
+  default:
+    {
+      return (A_FALSE);
+    }
+  }
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-some_node: return some node.                                                  */
+/*!
+\brief some_node
+\param t
+\return
+**/
 
-NODE_T *
-some_node (char *t)
+NODE_T *some_node (char *t)
 {
   NODE_T *z = new_node ();
   SYMBOL (z) = t;
   return (z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-init_postulates: initialise use of elems-lists.                               */
+/*!
+\brief initialise use of elem-lists
+**/
 
-void
-init_postulates ()
+void init_postulates ()
 {
   top_postulate = NULL;
   old_postulate = NULL;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-reset_postulates: make old elem-list available for new use.                   */
+/*!
+\brief make old elem-list available for new use
+**/
 
-void
-reset_postulates ()
+void reset_postulates ()
 {
   old_postulate = top_postulate;
   top_postulate = NULL;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-make_postulate: add elements to elem-list.                                          */
+/*!
+\brief add elements to elem-list
+\param p
+\param a
+\param b
+**/
 
-void
-make_postulate (POSTULATE_T ** p, MOID_T * a, MOID_T * b)
+void make_postulate (POSTULATE_T ** p, MOID_T * a, MOID_T * b)
 {
   POSTULATE_T *new_one;
-  if (old_postulate != NULL)
-    {
-      new_one = old_postulate;
-      old_postulate = NEXT (old_postulate);
-    }
-  else
-    {
-      new_one = (POSTULATE_T *) get_temp_heap_space (SIZE_OF (POSTULATE_T));
-    }
+  if (old_postulate != NULL) {
+    new_one = old_postulate;
+    old_postulate = NEXT (old_postulate);
+  } else {
+    new_one = (POSTULATE_T *) get_temp_heap_space (SIZE_OF (POSTULATE_T));
+  }
   new_one->a = a;
   new_one->b = b;
   NEXT (new_one) = *p;
   *p = new_one;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-whether_postulated_pair: where elements are in the list.                                    */
+/*!
+\brief where elements are in the list
+\param p
+\param a
+\param b
+\return
+**/
 
-POSTULATE_T *
-whether_postulated_pair (POSTULATE_T * p, MOID_T * a, MOID_T * b)
+POSTULATE_T *whether_postulated_pair (POSTULATE_T * p, MOID_T * a, MOID_T * b)
 {
-  for (; p != NULL; p = NEXT (p))
-    {
-      if (p->a == a && p->b == b)
-	{
-	  return (p);
-	}
+  for (; p != NULL; p = NEXT (p)) {
+    if (p->a == a && p->b == b) {
+      return (p);
     }
+  }
   return (NULL);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-whether_postulated: where element is in the list.                                     */
+/*!
+\brief where element is in the list
+\param p
+\param a
+\return
+**/
 
-POSTULATE_T *
-whether_postulated (POSTULATE_T * p, MOID_T * a)
+POSTULATE_T *whether_postulated (POSTULATE_T * p, MOID_T * a)
 {
-  for (; p != NULL; p = NEXT (p))
-    {
-      if (p->a == a)
-	{
-	  return (p);
-	}
+  for (; p != NULL; p = NEXT (p)) {
+    if (p->a == a) {
+      return (p);
     }
+  }
   return (NULL);
 }
 
@@ -587,25 +593,24 @@ whether_postulated (POSTULATE_T * p, MOID_T * a)
 | Control of C heap |
 +------------------*/
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-discard_heap: ibid.                                                           */
+/*!
+\brief discard_heap
+**/
 
-void
-discard_heap (void)
+void discard_heap (void)
 {
-  if (heap_segment != NULL)
-    {
-      free (heap_segment);
-    }
+  if (heap_segment != NULL) {
+    free (heap_segment);
+  }
   fixed_heap_pointer = 0;
   temp_heap_pointer = 0;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-init_heap: initialise C and A68 heap management.                              */
+/*!
+\brief initialise C and A68 heap management
+**/
 
-void
-init_heap (void)
+void init_heap (void)
 {
   int heap_a_size = ALIGN (heap_size);
   int handle_a_size = ALIGN (handle_pool_size);
@@ -613,203 +618,193 @@ init_heap (void)
   int expr_a_size = ALIGN (expr_stack_size);
   int total_size = heap_a_size + handle_a_size + frame_a_size + expr_a_size;
   BYTE_T *core = (BYTE_T *) malloc ((size_t) total_size);
-  if (core == NULL)
-    {
-      low_core_alert ();
-    }
+  if (core == NULL) {
+    low_core_alert ();
+  }
   heap_segment = &core[0];
   handle_segment = &heap_segment[heap_a_size];
   frame_segment = &handle_segment[handle_a_size];
   stack_segment = &frame_segment[frame_a_size];
-  fixed_heap_pointer = sizeof (ADDR_T);
+  fixed_heap_pointer = ALIGNMENT;
   temp_heap_pointer = total_size;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-free_heap: actions when closing the heap.                                     */
+/*!
+\brief actions when closing the heap
+**/
 
-void
-free_heap (void)
+void free_heap (void)
 {
   return;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-get_heap_space: return pointer to block of "s" bytes.                         */
+/*!
+\brief return pointer to block of "s" bytes
+\param s
+\return
+**/
 
-void *
-get_heap_space (size_t s)
+void *get_heap_space (size_t s)
 {
   char *z = (char *) malloc (ALIGN (s));
-  if (z == NULL)
-    {
-      low_core_alert ();
-    }
+  if (z == NULL) {
+    low_core_alert ();
+  }
   return ((void *) z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_string: make a new copy of "t".                                           */
+/*!
+\brief make a new copy of "t"
+\param t
+\return
+**/
 
-char *
-new_string (char *t)
+char *new_string (char *t)
 {
   char *z = (char *) get_heap_space ((size_t) (strlen (t) + 1));
   return (strcpy (z, t));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-new_fixed_string: make a new copy of "t".                                     */
+/*!
+\brief make a new copy of "t"
+\param t
+\return
+**/
 
-char *
-new_fixed_string (char *t)
+char *new_fixed_string (char *t)
 {
   char *z = (char *) get_fixed_heap_space ((size_t) (strlen (t) + 1));
   return (strcpy (z, t));
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-add_token: add token to the token tree, iterative version.                    */
+/*!
+\brief add token to the token tree
+\param p
+\param t
+\return
+**/
 
-TOKEN_T *
-add_token (TOKEN_T ** p, char *t)
+TOKEN_T *add_token (TOKEN_T ** p, char *t)
 {
   char *z = new_fixed_string (t);
-  while (*p != NULL)
-    {
-      int k = strcmp (z, (*p)->text);
-      if (k < 0)
-	{
-	  p = &(*p)->less;
-	}
-      else if (k > 0)
-	{
-	  p = &(*p)->more;
-	}
-      else
-	{
-	  return (*p);
-	}
+  while (*p != NULL) {
+    int k = strcmp (z, (*p)->text);
+    if (k < 0) {
+      p = &(*p)->less;
+    } else if (k > 0) {
+      p = &(*p)->more;
+    } else {
+      return (*p);
     }
+  }
   *p = (TOKEN_T *) get_fixed_heap_space (SIZE_OF (TOKEN_T));
   (*p)->text = z;
   (*p)->less = (*p)->more = NULL;
   return (*p);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-find_token: find token in the token tree, iterative version.                  */
+/*!
+\brief find token in the token tree
+\param p
+\param t
+\return
+**/
 
-TOKEN_T *
-find_token (TOKEN_T ** p, char *t)
+TOKEN_T *find_token (TOKEN_T ** p, char *t)
 {
-  while (*p != NULL)
-    {
-      int k = strcmp (t, (*p)->text);
-      if (k < 0)
-	{
-	  p = &(*p)->less;
-	}
-      else if (k > 0)
-	{
-	  p = &(*p)->more;
-	}
-      else
-	{
-	  return (*p);
-	}
+  while (*p != NULL) {
+    int k = strcmp (t, (*p)->text);
+    if (k < 0) {
+      p = &(*p)->less;
+    } else if (k > 0) {
+      p = &(*p)->more;
+    } else {
+      return (*p);
     }
+  }
   return (NULL);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-add_keyword: add keyword to the tree, iterative version.                      */
+/*!
+\brief add keyword to the tree
+\param p
+\param a
+\param t
+**/
 
-static void
-add_keyword (KEYWORD_T ** p, int a, char *t)
+static void add_keyword (KEYWORD_T ** p, int a, char *t)
 {
-  while (*p != NULL)
-    {
-      int k = strcmp (t, (*p)->text);
-      if (k < 0)
-	{
-	  p = &(*p)->less;
-	}
-      else
-	{
-	  p = &(*p)->more;
-	}
+  while (*p != NULL) {
+    int k = strcmp (t, (*p)->text);
+    if (k < 0) {
+      p = &(*p)->less;
+    } else {
+      p = &(*p)->more;
     }
+  }
   *p = (KEYWORD_T *) get_fixed_heap_space (SIZE_OF (KEYWORD_T));
   (*p)->attribute = a;
   (*p)->text = t;
   (*p)->less = (*p)->more = NULL;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-find_keyword: find keyword in the tree, iterative version.                    */
+/*!
+\brief find keyword in the tree
+\param p
+\param t
+\return
+**/
 
-KEYWORD_T *
-find_keyword (KEYWORD_T * p, char *t)
+KEYWORD_T *find_keyword (KEYWORD_T * p, char *t)
 {
-  while (p != NULL)
-    {
-      int k = strcmp (t, p->text);
-      if (k < 0)
-	{
-	  p = p->less;
-	}
-      else if (k > 0)
-	{
-	  p = p->more;
-	}
-      else
-	{
-	  return (p);
-	}
+  while (p != NULL) {
+    int k = strcmp (t, p->text);
+    if (k < 0) {
+      p = p->less;
+    } else if (k > 0) {
+      p = p->more;
+    } else {
+      return (p);
     }
+  }
   return (NULL);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-find_keyword_from_attribute: find keyword in the tree, iterative version.     */
+/*!
+\brief find keyword in the tree
+\param p
+\param a
+\return
+**/
 
-KEYWORD_T *
-find_keyword_from_attribute (KEYWORD_T * p, int a)
+KEYWORD_T *find_keyword_from_attribute (KEYWORD_T * p, int a)
 {
-  if (p == NULL)
-    {
+  if (p == NULL) {
+    return (NULL);
+  } else if (a == ATTRIBUTE (p)) {
+    return (p);
+  } else {
+    KEYWORD_T *z;
+    if ((z = find_keyword_from_attribute (p->less, a)) != NULL) {
+      return (z);
+    } else if ((z = find_keyword_from_attribute (p->more, a)) != NULL) {
+      return (z);
+    } else {
       return (NULL);
     }
-  else if (a == ATTRIBUTE (p))
-    {
-      return (p);
-    }
-  else
-    {
-      KEYWORD_T *z;
-      if ((z = find_keyword_from_attribute (p->less, a)) != NULL)
-	{
-	  return (z);
-	}
-      else if ((z = find_keyword_from_attribute (p->more, a)) != NULL)
-	{
-	  return (z);
-	}
-      else
-	{
-	  return (NULL);
-	}
-    }
+  }
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-set_up_tables: make tables of keywords and non-terminals.                     */
+/*!
+\brief make tables of keywords and non-terminals
+\return
+**/
 
-void
-set_up_tables ()
+void set_up_tables ()
 {
-/* Entries are randomised to balance the tree */
+/* Entries are randomised to balance the tree. */
+  add_keyword (&top_keyword, THEF_SYMBOL, "THEF");
+  add_keyword (&top_keyword, ELSF_SYMBOL, "ELSF");
   add_keyword (&top_keyword, POINT_SYMBOL, ".");
   add_keyword (&top_keyword, ACCO_SYMBOL, "{");
   add_keyword (&top_keyword, OCCA_SYMBOL, "}");
@@ -838,6 +833,8 @@ set_up_tables ()
   add_keyword (&top_keyword, PROC_SYMBOL, "PROC");
   add_keyword (&top_keyword, FOR_SYMBOL, "FOR");
   add_keyword (&top_keyword, GOTO_SYMBOL, "GOTO");
+  add_keyword (&top_keyword, ANDTH_SYMBOL, "ANDTH");
+  add_keyword (&top_keyword, OREL_SYMBOL, "OREL");
   add_keyword (&top_keyword, WHILE_SYMBOL, "WHILE");
   add_keyword (&top_keyword, IS_SYMBOL, ":=:");
   add_keyword (&top_keyword, ASSIGN_TO_SYMBOL, "=:");
@@ -893,6 +890,8 @@ set_up_tables ()
   add_keyword (&top_keyword, VOID_SYMBOL, "VOID");
   add_keyword (&top_keyword, BITS_SYMBOL, "BITS");
   add_keyword (&top_keyword, ELSE_SYMBOL, "ELSE");
+  add_keyword (&top_keyword, DOWNTO_SYMBOL, "DOWNTO");
+  add_keyword (&top_keyword, UNTIL_SYMBOL, "UNTIL");
   add_keyword (&top_keyword, EXIT_SYMBOL, "EXIT");
   add_keyword (&top_keyword, HEAP_SYMBOL, "HEAP");
   add_keyword (&top_keyword, INT_SYMBOL, "INT");
@@ -906,8 +905,7 @@ set_up_tables ()
   add_keyword (&top_keyword, FORMAT_DELIMITER_SYMBOL, "$");
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-A list of 10 ^ 2 ^ n for conversion purposes on IEEE 754 platforms.           */
+/* A list of 10 ^ 2 ^ n for conversion purposes on IEEE 754 platforms. */
 
 #define MAX_DOUBLE_EXPO 511
 
@@ -915,27 +913,134 @@ static double pow_10[] = {
   10.0, 100.0, 1.0e4, 1.0e8, 1.0e16, 1.0e32, 1.0e64, 1.0e128, 1.0e256
 };
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-ten_to_the_power: return 10 ** expo.
-This way appears sufficiently accurate.                                       */
+/*!
+\brief return 10 ** expo
+\param expo
+\return
+**/
 
-double
-ten_to_the_power (int expo)
+double ten_to_the_power (int expo)
 {
+/* This way appears sufficiently accurate. */
   double dbl_expo, *dep;
   BOOL_T neg_expo;
   dbl_expo = 1;
-  if ((neg_expo = expo < 0) == A_TRUE)
-    {
-      expo = -expo;
+  if ((neg_expo = expo < 0) == A_TRUE) {
+    expo = -expo;
+  }
+  ABNORMAL_END (expo > MAX_DOUBLE_EXPO, "exponent too large", "in multiprecision library");
+  for (dep = pow_10; expo != 0; expo >>= 1, dep++) {
+    if (expo & 0x1) {
+      dbl_expo *= *dep;
     }
-  abend (expo > MAX_DOUBLE_EXPO, "exponent too large", "in multiprecision library");
-  for (dep = pow_10; expo != 0; expo >>= 1, dep++)
-    {
-      if (expo & 0x1)
-	{
-	  dbl_expo *= *dep;
-	}
-    }
+  }
   return (neg_expo ? 1 / dbl_expo : dbl_expo);
+}
+
+/*!
+\brief sqrt (x^2 + y^2) that does not needlessly overflow
+\param x
+\param y
+\return
+**/
+
+double a68g_hypot (double x, double y)
+{
+  double xabs = ABS (x), yabs = ABS (y);
+  double min, max;
+  if (xabs < yabs) {
+    min = xabs;
+    max = yabs;
+  } else {
+    min = yabs;
+    max = xabs;
+  }
+  if (min == 0.0) {
+    return (max);
+  } else {
+    double u = min / max;
+    return (max * sqrt (1.0 + u * u));
+  }
+}
+
+/*!
+\brief log (1 + x) with anti-cancellation for IEEE 754
+\param x
+\return
+**/
+
+double a68g_log1p (double x)
+{
+  volatile double y;
+  y = 1 + x;
+  return log (y) - ((y - 1) - x) / y;	/* cancel errors with IEEE arithmetic. */
+}
+
+/*!
+\brief inverse hyperbolic sine
+\param x
+\return
+**/
+
+double a68g_asinh (double x)
+{
+  double a = ABS (x), s = (x < 0.0 ? -1.0 : 1.0);
+  if (a > 1.0 / sqrt (DBL_EPSILON)) {
+    return (s * (log (a) + log (2.0)));
+  } else if (a > 2.0) {
+    return (s * log (2.0 * a + 1.0 / (a + sqrt (a * a + 1.0))));
+  } else if (a > sqrt (DBL_EPSILON)) {
+    double a2 = a * a;
+    return (s * log1p (a + a2 / (1.0 + sqrt (1.0 + a2))));
+  } else {
+    return (x);
+  }
+}
+
+/*!
+\brief inverse hyperbolic cosine
+\param x
+\return
+**/
+
+double a68g_acosh (double x)
+{
+  if (x > 1.0 / sqrt (DBL_EPSILON)) {
+    return (log (x) + log (2.0));
+  } else if (x > 2.0) {
+    return (log (2.0 * x - 1.0 / (sqrt (x * x - 1.0) + x)));
+  } else if (x > 1.0) {
+    double t = x - 1.0;
+    return (log1p (t + sqrt (2.0 * t + t * t)));
+  } else if (x == 1.0) {
+    return (0.0);
+  } else {
+    errno = EDOM;
+    return (0.0);
+  }
+}
+
+/*!
+\brief inverse hyperbolic tangent
+\param x
+\return
+**/
+
+double a68g_atanh (double x)
+{
+  double a = ABS (x);
+  double s = (x < 0 ? -1 : 1);
+  if (a > 1.0) {
+    errno = EDOM;
+    return (0.0);
+  } else if (a == 1.0) {
+    errno = EDOM;
+    return (0.0);
+  } else if (a >= 0.5) {
+    return (s * 0.5 * log1p (2 * a / (1.0 - a)));
+  } else if (a > DBL_EPSILON) {
+    return (s * 0.5 * log1p (2.0 * a + 2.0 * a * a / (1.0 - a)));
+  } else {
+    return (x);
+  }
 }

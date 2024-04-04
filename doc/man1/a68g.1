@@ -1,8 +1,8 @@
-.Dd June 2004
+.Dd July 2005
 .Dt A68G 1
 .
 .Sh NAME
-a68g \- algol 68 genie, an algol 68 subset interpreter
+a68g \- Algol 68 Genie, an algol 68 interpreter
 .
 .Sh SYNOPSIS
 a68g
@@ -18,12 +18,13 @@ a68g
 .Op Fl heap Ar number
 .Op Fl listing
 .Op Fl moids
-.Op Fl nowarnings
+.Op Fl overhead Ar number
 .Op Fl pragmats | Fl nopragmats
 .Op Fl precision Ar number
 .Op Fl preludelisting
 .Op Fl print Ar unit
 .Op Fl reductions
+.Op Fl run
 .Op Fl source | Fl nosource
 .Op Fl stack Ar number
 .Op Fl statistics
@@ -34,11 +35,13 @@ a68g
 .Op Fl unused
 .Op Fl verbose
 .Op Fl version
+.Op Fl warnings | Fl nowarnings
 .Op Fl xref | Fl noxref
 .Ar filename
 .
 .Sh DESCRIPTION
-This is a fairly fully featured Algol 68 interpreter.
+Algol 68 Genie (a68g) is an Algol 68 interpreter.
+The interpreter offers many runtime checks and is therefore pedantic rather than fast.
 .
 .Sh OPTIONS
 Options are passed to a68g either from the file .a68g.rc in the 
@@ -61,9 +64,6 @@ for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
 .
 .It Fl Assertions | Fl NOAssertions
 Control elaboration of assertions.
-.
-.It Fl BOLDStropping
-Use bold stropping, which is the default stropping regime.
 .
 .It Fl BRackets
 Consider [ .. ] and { .. } as being equivalent to ( .. ).
@@ -108,8 +108,8 @@ Generate a concise listing.
 .It Fl MOIDS
 Generate an overview of modes in the listing file.
 .
-.It Fl NOWarnings
-Suppress warning messages.
+.It Fl OVERHEAD Ar number
+Set overhead for stack checking.
 .
 .It Fl PRagmats | Fl NOPRagmats
 Control elaboration of pragmats.
@@ -126,11 +126,14 @@ Generate a listing of preludes.
 Print the value yielded by the Algol 68 unit.
 In this way one-liners can be executed from the command line.
 .
-.It Fl QUOTEStropping
+.It Fl QUOTEstropping
 Use quote stropping.
 .
 .It Fl REDuctions
 Print reductions made by the parser.
+.
+.It Fl RUN
+Override the norun option.
 .
 .It Fl SOURCE | Fl NOSOURCE
 Control the listing of source lines in the listing file.
@@ -157,11 +160,17 @@ Control listing of the syntax tree in the listing file.
 .It Fl UNUSED
 Generate an overview of unused tags in the listing file.
 .
+.It Fl UPPERstropping
+Use upper stropping, which is the default stropping regime.
+.
 .It Fl VERBose
 Use verbose mode.
 .
 .It Fl Version
 Print the version of the running image of a68g.
+.
+.It Fl Warnings | Fl NOWarnings
+Enable warning messages or suppress suppressible warning messages.
 .
 .It Fl Xref | Fl NOXref
 Control generation of a cross-reference in the listing file.
@@ -170,4 +179,4 @@ Control generation of a cross-reference in the listing file.
 .
 .Sh AUTHOR
 Author of Algol68G is Marcel van der Veer <algol68g@xs4all.nl>.
-First version of this man page was made by Sian Leitch <sian@sleitch.nildram.co.uk>.
+First version of this man page was made by Sian Leitch.
