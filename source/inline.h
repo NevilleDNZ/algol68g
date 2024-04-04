@@ -59,8 +59,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 #define FRAME_GET(dest, cast, p) {\
   ADDR_T _m_z;\
-  FOLLOW_STATIC_LINK (_m_z, (p)->genie.level);\
-  (dest) = (cast *) & ((p)->genie.offset[_m_z]);\
+  FOLLOW_STATIC_LINK (_m_z, GENIE (p)->level);\
+  (dest) = (cast *) & ((GENIE (p)->offset)[_m_z]);\
   }
 
 /* Macros for row-handling. */
@@ -122,12 +122,10 @@ extern unsigned check_time_limit_count;
 
 #define EXECUTE_UNIT_TRACE(p) {\
   PROPAGATOR_T *_prop_ = &PROPAGATOR (p);\
-  if (MASK (p) & (BREAKPOINT_MASK | \
-                  BREAKPOINT_TEMPORARY_MASK | \
-                  BREAKPOINT_INTERRUPT_MASK | \
-                  BREAKPOINT_WATCH_MASK | \
-                  BREAKPOINT_TRACE_MASK)) {\
-    single_step ((p), MASK (p));\
+  if (STATUS_TEST (p, (BREAKPOINT_MASK | BREAKPOINT_TEMPORARY_MASK | \
+      BREAKPOINT_INTERRUPT_MASK | BREAKPOINT_WATCH_MASK | \
+      BREAKPOINT_TRACE_MASK))) {\
+    single_step ((p), STATUS (p));\
   }\
   last_unit = p;\
   (void) (*(_prop_->unit)) (_prop_->source);\
@@ -142,7 +140,7 @@ This saves a push/pop pair.
   PROPAGATOR_T *_prop_go_ = &PROPAGATOR (p);\
   NODE_T *src2 = _prop_go_->source;\
   last_unit = (p);\
-  if (_prop_go_->unit == genie_loc_identifier) {\
+  if (_prop_go_->unit == genie_frame_identifier) {\
     BYTE_T *x;\
     FRAME_GET (x, BYTE_T, src2);\
     (z) = (CAST_T *) x;\
@@ -156,20 +154,27 @@ This saves a push/pop pair.
   PROPAGATOR_T *_prop_eui_ = &PROPAGATOR (p);\
   NODE_T *src1 = _prop_eui_->source;\
   last_unit = (p);\
-  if (_prop_eui_->unit == genie_dereference_loc_identifier) {\
+  if (_prop_eui_->unit == genie_dereference_frame_identifier) {\
     A68_REF *_z_eui_;\
     MOID_T *deref = SUB (MOID (src1));\
     int _size_eui_ = MOID_SIZE (deref);\
     FRAME_GET (_z_eui_, A68_REF, src1);\
-    CHECK_REF ((p), *_z_eui_, MOID (src1));\
     PUSH_ALIGNED (p, ADDRESS (_z_eui_), _size_eui_);\
     CHECK_INIT_GENERIC ((p), STACK_OFFSET (-_size_eui_), deref);\
-  } else if (_prop_eui_->unit == genie_loc_identifier) {\
+  } else if (_prop_eui_->unit == genie_frame_identifier) {\
     BYTE_T *x;\
     FRAME_GET (x, BYTE_T, src1);\
     PUSH_ALIGNED ((p), x, MOID_SIZE (MOID (src1)));\
   } else if (_prop_eui_->unit == genie_constant) {\
-    PUSH_ALIGNED ((p), src1->genie.constant, src1->genie.size);\
+    PUSH_ALIGNED ((p), GENIE (src1)->constant, GENIE (src1)->size);\
+  } else if (_prop_eui_->unit == genie_dereference_generic_identifier) {\
+    A68_REF *_z_eui_;\
+    MOID_T *deref = SUB (MOID (src1));\
+    int _size_eui_ = MOID_SIZE (deref);\
+    FRAME_GET (_z_eui_, A68_REF, src1);\
+    CHECK_REF (p, *_z_eui_, MOID (src1));\
+    PUSH_ALIGNED ((p), ADDRESS (_z_eui_), _size_eui_);\
+    CHECK_INIT_GENERIC ((p), STACK_OFFSET (-_size_eui_), deref);\
   } else {\
     EXECUTE_UNIT (p);\
   }}
@@ -178,17 +183,23 @@ This saves a push/pop pair.
   PROPAGATOR_T *_prop_gua_ = &PROPAGATOR (p);\
   NODE_T *src0 = _prop_gua_->source;\
   last_unit = (p);\
-  if (_prop_gua_->unit == genie_dereference_loc_identifier) {\
+  if (_prop_gua_->unit == genie_dereference_frame_identifier) {\
+    A68_REF *_z_gua_;\
+    MOID_T *deref = SUB (MOID (src0));\
+    FRAME_GET (_z_gua_, A68_REF, src0);\
+    dst = (cast *) (ADDRESS (_z_gua_));\
+    CHECK_INIT_GENERIC ((p), dst, deref);\
+  } else if (_prop_gua_->unit == genie_frame_identifier) {\
+    FRAME_GET (dst, cast, src0);\
+  } else if (_prop_gua_->unit == genie_constant) {\
+    dst = (cast *) (GENIE (src0)->constant);\
+  } else if (_prop_gua_->unit == genie_dereference_generic_identifier) {\
     A68_REF *_z_gua_;\
     MOID_T *deref = SUB (MOID (src0));\
     FRAME_GET (_z_gua_, A68_REF, src0);\
     CHECK_REF ((p), *_z_gua_, MOID (src0));\
     dst = (cast *) (ADDRESS (_z_gua_));\
     CHECK_INIT_GENERIC ((p), dst, deref);\
-  } else if (_prop_gua_->unit == genie_loc_identifier) {\
-    FRAME_GET (dst, cast, src0);\
-  } else if (_prop_gua_->unit == genie_constant) {\
-    dst = (cast *) (src0->genie.constant);\
   } else {\
     dst = (cast *) (STACK_TOP);\
     EXECUTE_UNIT (p);\
@@ -204,8 +215,8 @@ This saves a push/pop pair.
   }
 
 #define PROTECT_FROM_SWEEP_STACK(p)\
-  if ((p)->protect_sweep != NULL) {\
-    *(A68_REF *) FRAME_LOCAL (frame_pointer, (p)->protect_sweep->offset) =\
+  if (GENIE (p)->protect_sweep != NULL) {\
+    *(A68_REF *) FRAME_LOCAL (frame_pointer, GENIE (p)->protect_sweep->offset) =\
     *(A68_REF *) (STACK_OFFSET (- ALIGNED_SIZE_OF (A68_REF)));\
   }
 
@@ -221,8 +232,8 @@ extern int block_heap_compacter;
 #define UP_SWEEP_SEMA {block_heap_compacter++;}
 #define DOWN_SWEEP_SEMA {block_heap_compacter--;}
 
-#define PROTECT_SWEEP_HANDLE(z) { if (IS_IN_HEAP (z)) {(REF_HANDLE(z))->status |= NO_SWEEP_MASK;} }
-#define UNPROTECT_SWEEP_HANDLE(z) { if (IS_IN_HEAP (z)) {(REF_HANDLE (z))->status &= ~NO_SWEEP_MASK;} }
+#define PROTECT_SWEEP_HANDLE(z) { if (IS_IN_HEAP (z)) {STATUS_SET (REF_HANDLE(z), NO_SWEEP_MASK);} }
+#define UNPROTECT_SWEEP_HANDLE(z) { if (IS_IN_HEAP (z)) {STATUS_CLEAR (REF_HANDLE (z), NO_SWEEP_MASK);} }
 
 /* Tests for objects of mode INT. */
 

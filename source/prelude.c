@@ -51,7 +51,7 @@ static void add_stand_env (BOOL_T portable, int a, NODE_T * n, char *c, MOID_T *
   INFO (n)->PROCEDURE_LEVEL = 0;
   new_one->use = A68_FALSE;
   HEAP (new_one) = HEAP_SYMBOL;
-  SYMBOL_TABLE (new_one) = stand_env;
+  TAG_TABLE (new_one) = stand_env;
   NODE (new_one) = n;
   VALUE (new_one) = (c != NULL ? add_token (&top_token, c)->text : NULL);
   PRIO (new_one) = p;

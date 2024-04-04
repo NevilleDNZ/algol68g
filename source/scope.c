@@ -104,20 +104,20 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
     for (s = top; s != NULL; FORWARD (s)) {
       if (s->tuple.transient & TRANSIENT) {
         diagnostic_node (A68_ERROR, s->where, ERROR_TRANSIENT_NAME);
-        s->where->error = A68_TRUE;
+        STATUS_SET (s->where, SCOPE_ERROR_MASK);
         errors++;
       }
     }
   }
   for (s = top; s != NULL; FORWARD (s)) {
-    if (dest < s->tuple.level && !s->where->error) {
+    if (dest < s->tuple.level && ! STATUS_TEST (s->where, SCOPE_ERROR_MASK)) {
 /* Potential scope violations. */
       if (MOID (s->where) == NULL) {
         diagnostic_node (A68_WARNING, s->where, WARNING_SCOPE_STATIC_1, ATTRIBUTE (s->where));
       } else {
         diagnostic_node (A68_WARNING, s->where, WARNING_SCOPE_STATIC_2, MOID (s->where), ATTRIBUTE (s->where));
       }
-      s->where->error = A68_TRUE;
+      STATUS_SET (s->where, SCOPE_ERROR_MASK);
       errors++;
     }
   }
@@ -202,7 +202,7 @@ static void get_declarer_elements (NODE_T * p, SCOPE_T ** r, BOOL_T no_ref)
       gather_scopes_for_youngest (SUB (p), r);
     } else if (WHETHER (p, INDICANT)) {
       if (MOID (p) != NULL && TAX (p) != NULL && MOID (p)->has_rows && no_ref) {
-        scope_add (r, p, scope_make_tuple (LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
+        scope_add (r, p, scope_make_tuple (TAG_LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
       }
     } else if (WHETHER (p, REF_SYMBOL)) {
       get_declarer_elements (NEXT (p), r, A68_FALSE);
@@ -239,8 +239,8 @@ static void gather_scopes_for_youngest (NODE_T * p, SCOPE_T ** s)
         (*s) = t;
       }
     } else if (whether_one_of (p, IDENTIFIER, OPERATOR, NULL_ATTRIBUTE)) {
-      if (TAX (p) != NULL && LEX_LEVEL (TAX (p)) != PRIMAL_SCOPE) {
-        scope_add (s, p, scope_make_tuple (LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
+      if (TAX (p) != NULL && TAG_LEX_LEVEL (TAX (p)) != PRIMAL_SCOPE) {
+        scope_add (s, p, scope_make_tuple (TAG_LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
       }
     } else if (WHETHER (p, DECLARER)) {
       get_declarer_elements (p, s, A68_TRUE);
@@ -372,7 +372,7 @@ static void scope_identity_declaration (NODE_T * p)
         TAX (p)->scope = z;
         TAX (p)->scope_assigned = A68_TRUE;
       }
-      MASK (unit) |= INTERRUPTIBLE_MASK;
+      STATUS_SET (unit, INTERRUPTIBLE_MASK);
       return;
     }
   }
@@ -396,7 +396,7 @@ static void scope_variable_declaration (NODE_T * p)
         check_identifier_usage (TAX (p), unit);
         scope_statement (unit, &s);
         (void) scope_check (s, TRANSIENT, LEX_LEVEL (p));
-        MASK (unit) |= INTERRUPTIBLE_MASK;
+        STATUS_SET (unit, INTERRUPTIBLE_MASK);
         return;
       }
     }
@@ -417,7 +417,7 @@ static void scope_procedure_declaration (NODE_T * p)
       SCOPE_T *s = NULL;
       scope_statement (unit, &s);
       (void) scope_check (s, NOT_TRANSIENT, LEX_LEVEL (p));
-      MASK (unit) |= INTERRUPTIBLE_MASK;
+      STATUS_SET (unit, INTERRUPTIBLE_MASK);
       return;
     }
   }
@@ -541,7 +541,7 @@ static void scope_coercion (NODE_T * p, SCOPE_T ** s)
       if (WHETHER (q, GOTO_SYMBOL)) {
         FORWARD (q);
       }
-      scope_add (s, q, scope_make_tuple (LEX_LEVEL (TAX (q)), NOT_TRANSIENT));
+      scope_add (s, q, scope_make_tuple (TAG_LEX_LEVEL (TAX (q)), NOT_TRANSIENT));
     } else {
       scope_coercion (SUB (p), s);
     }
@@ -657,14 +657,14 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
   } else if (WHETHER (p, IDENTIFIER)) {
     if (WHETHER (MOID (p), REF_SYMBOL)) {
       if (PRIO (TAX (p)) == PARAMETER_IDENTIFIER) {
-        scope_add (s, p, scope_make_tuple (LEX_LEVEL (TAX (p)) - 1, NOT_TRANSIENT));
+        scope_add (s, p, scope_make_tuple (TAG_LEX_LEVEL (TAX (p)) - 1, NOT_TRANSIENT));
       } else {
         if (HEAP (TAX (p)) == HEAP_SYMBOL) {
           scope_add (s, p, scope_make_tuple (PRIMAL_SCOPE, NOT_TRANSIENT));
         } else if (TAX (p)->scope_assigned) {
           scope_add (s, p, scope_make_tuple (TAX (p)->scope, NOT_TRANSIENT));
         } else {
-          scope_add (s, p, scope_make_tuple (LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
+          scope_add (s, p, scope_make_tuple (TAG_LEX_LEVEL (TAX (p)), NOT_TRANSIENT));
         }
       }
     } else if (ATTRIBUTE (MOID (p)) == PROC_SYMBOL && TAX (p)->scope_assigned == A68_TRUE) {
@@ -702,11 +702,18 @@ static void scope_statement (NODE_T * p, SCOPE_T ** s)
     scope_format_text (SUB (p), &x);
     scope_add (s, p, scope_find_youngest (x));
   } else if (WHETHER (p, CAST)) {
-/*    scope_enclosed_clause (SUB (NEXT_SUB (p)), &s); */
     SCOPE_T *x = NULL;
     scope_enclosed_clause (SUB (NEXT_SUB (p)), &x);
     (void) scope_check (x, NOT_TRANSIENT, LEX_LEVEL (p));
     scope_add (s, p, scope_find_youngest (x));
+  } else if (WHETHER (p, FIELD_SELECTION)) {
+    SCOPE_T *ns = NULL;
+    scope_statement (SUB (p), &ns);
+    (void) scope_check (ns, NOT_TRANSIENT, LEX_LEVEL (p));
+    if (whether_transient_selection (MOID (SUB (p)))) {
+      scope_add (s, p, scope_make_tuple (LEX_LEVEL (p), TRANSIENT));
+    }
+    scope_add (s, p, scope_find_youngest (ns));
   } else if (WHETHER (p, SELECTION)) {
     SCOPE_T *ns = NULL;
     scope_statement (NEXT_SUB (p), &ns);
@@ -799,7 +806,7 @@ static void scope_statement_list (NODE_T * p, SCOPE_T ** s)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, UNIT)) {
-      MASK (p) |= INTERRUPTIBLE_MASK;
+      STATUS_SET (p, INTERRUPTIBLE_MASK);
       scope_statement (p, s);
     } else {
       scope_statement_list (SUB (p), s);
@@ -839,7 +846,7 @@ static void scope_serial_clause (NODE_T * p, SCOPE_T ** s, BOOL_T terminator)
     } else if (WHETHER (p, LABELED_UNIT)) {
       scope_serial_clause (SUB (p), s, terminator);
     } else if (WHETHER (p, UNIT)) {
-      MASK (p) |= INTERRUPTIBLE_MASK;
+      STATUS_SET (p, INTERRUPTIBLE_MASK);
       if (terminator) {
         scope_statement (p, s);
       } else {

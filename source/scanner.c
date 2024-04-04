@@ -61,6 +61,141 @@ static char *scan_buf;
 static int max_scan_buf_length, source_file_size;
 static BOOL_T stop_scanner = A68_FALSE, read_error = A68_FALSE, no_preprocessing = A68_FALSE;
 
+
+/*!
+\brief add keyword to the tree
+\param p top keyword
+\param a attribute
+\param t keyword text
+**/
+
+static void add_keyword (KEYWORD_T ** p, int a, char *t)
+{
+  while (*p != NULL) {
+    int k = strcmp (t, TEXT (*p));
+    if (k < 0) {
+      p = &LESS (*p);
+    } else {
+      p = &MORE (*p);
+    }
+  }
+  *p = (KEYWORD_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (KEYWORD_T));
+  ATTRIBUTE (*p) = a;
+  TEXT (*p) = t;
+  LESS (*p) = MORE (*p) = NULL;
+}
+
+/*!
+\brief make tables of keywords and non-terminals
+**/
+
+void set_up_tables (void)
+{
+/* Entries are randomised to balance the tree. */
+  add_keyword (&top_keyword, CLASS_SYMBOL, "CLASS");
+  add_keyword (&top_keyword, NEW_SYMBOL, "NEW");
+  add_keyword (&top_keyword, DIAGONAL_SYMBOL, "DIAG");
+  add_keyword (&top_keyword, TRANSPOSE_SYMBOL, "TRNSP");
+  add_keyword (&top_keyword, ROW_SYMBOL, "ROW");
+  add_keyword (&top_keyword, COLUMN_SYMBOL, "COL");
+  add_keyword (&top_keyword, ROW_ASSIGN_SYMBOL, "::=");
+  add_keyword (&top_keyword, SOUND_SYMBOL, "SOUND");
+  add_keyword (&top_keyword, ANDF_SYMBOL, "THEF");
+  add_keyword (&top_keyword, ORF_SYMBOL, "ELSF");
+  add_keyword (&top_keyword, POINT_SYMBOL, ".");
+  add_keyword (&top_keyword, ACCO_SYMBOL, "{");
+  add_keyword (&top_keyword, OCCA_SYMBOL, "}");
+  add_keyword (&top_keyword, CODE_SYMBOL, "CODE");
+  add_keyword (&top_keyword, EDOC_SYMBOL, "EDOC");
+  add_keyword (&top_keyword, ENVIRON_SYMBOL, "ENVIRON");
+  add_keyword (&top_keyword, COLON_SYMBOL, ":");
+  add_keyword (&top_keyword, THEN_BAR_SYMBOL, "|");
+  add_keyword (&top_keyword, SUB_SYMBOL, "[");
+  add_keyword (&top_keyword, BY_SYMBOL, "BY");
+  add_keyword (&top_keyword, OP_SYMBOL, "OP");
+  add_keyword (&top_keyword, COMMA_SYMBOL, ",");
+  add_keyword (&top_keyword, AT_SYMBOL, "AT");
+  add_keyword (&top_keyword, PRIO_SYMBOL, "PRIO");
+  add_keyword (&top_keyword, STYLE_I_COMMENT_SYMBOL, "CO");
+  add_keyword (&top_keyword, END_SYMBOL, "END");
+  add_keyword (&top_keyword, GO_SYMBOL, "GO");
+  add_keyword (&top_keyword, TO_SYMBOL, "TO");
+  add_keyword (&top_keyword, ELSE_BAR_SYMBOL, "|:");
+  add_keyword (&top_keyword, THEN_SYMBOL, "THEN");
+  add_keyword (&top_keyword, TRUE_SYMBOL, "TRUE");
+  add_keyword (&top_keyword, PROC_SYMBOL, "PROC");
+  add_keyword (&top_keyword, FOR_SYMBOL, "FOR");
+  add_keyword (&top_keyword, GOTO_SYMBOL, "GOTO");
+  add_keyword (&top_keyword, ANDF_SYMBOL, "ANDTH");
+  add_keyword (&top_keyword, ORF_SYMBOL, "OREL");
+  add_keyword (&top_keyword, WHILE_SYMBOL, "WHILE");
+  add_keyword (&top_keyword, IS_SYMBOL, ":=:");
+  add_keyword (&top_keyword, ASSIGN_TO_SYMBOL, "=:");
+  add_keyword (&top_keyword, COMPLEX_SYMBOL, "COMPLEX");
+  add_keyword (&top_keyword, COMPL_SYMBOL, "COMPL");
+  add_keyword (&top_keyword, FROM_SYMBOL, "FROM");
+  add_keyword (&top_keyword, BOLD_PRAGMAT_SYMBOL, "PRAGMAT");
+  add_keyword (&top_keyword, BOLD_COMMENT_SYMBOL, "COMMENT");
+  add_keyword (&top_keyword, DO_SYMBOL, "DO");
+  add_keyword (&top_keyword, STYLE_II_COMMENT_SYMBOL, "#");
+  add_keyword (&top_keyword, CASE_SYMBOL, "CASE");
+  add_keyword (&top_keyword, LOC_SYMBOL, "LOC");
+  add_keyword (&top_keyword, CHAR_SYMBOL, "CHAR");
+  add_keyword (&top_keyword, ISNT_SYMBOL, ":/=:");
+  add_keyword (&top_keyword, REF_SYMBOL, "REF");
+  add_keyword (&top_keyword, NIL_SYMBOL, "NIL");
+  add_keyword (&top_keyword, ASSIGN_SYMBOL, ":=");
+  add_keyword (&top_keyword, FI_SYMBOL, "FI");
+  add_keyword (&top_keyword, FILE_SYMBOL, "FILE");
+  add_keyword (&top_keyword, PAR_SYMBOL, "PAR");
+  add_keyword (&top_keyword, ASSERT_SYMBOL, "ASSERT");
+  add_keyword (&top_keyword, OUSE_SYMBOL, "OUSE");
+  add_keyword (&top_keyword, IN_SYMBOL, "IN");
+  add_keyword (&top_keyword, LONG_SYMBOL, "LONG");
+  add_keyword (&top_keyword, SEMI_SYMBOL, ";");
+  add_keyword (&top_keyword, EMPTY_SYMBOL, "EMPTY");
+  add_keyword (&top_keyword, MODE_SYMBOL, "MODE");
+  add_keyword (&top_keyword, IF_SYMBOL, "IF");
+  add_keyword (&top_keyword, OD_SYMBOL, "OD");
+  add_keyword (&top_keyword, OF_SYMBOL, "OF");
+  add_keyword (&top_keyword, STRUCT_SYMBOL, "STRUCT");
+  add_keyword (&top_keyword, STYLE_I_PRAGMAT_SYMBOL, "PR");
+  add_keyword (&top_keyword, BUS_SYMBOL, "]");
+  add_keyword (&top_keyword, SKIP_SYMBOL, "SKIP");
+  add_keyword (&top_keyword, SHORT_SYMBOL, "SHORT");
+  add_keyword (&top_keyword, IS_SYMBOL, "IS");
+  add_keyword (&top_keyword, ESAC_SYMBOL, "ESAC");
+  add_keyword (&top_keyword, CHANNEL_SYMBOL, "CHANNEL");
+  add_keyword (&top_keyword, ANDF_SYMBOL, "ANDF");
+  add_keyword (&top_keyword, ORF_SYMBOL, "ORF");
+  add_keyword (&top_keyword, REAL_SYMBOL, "REAL");
+  add_keyword (&top_keyword, STRING_SYMBOL, "STRING");
+  add_keyword (&top_keyword, BOOL_SYMBOL, "BOOL");
+  add_keyword (&top_keyword, ISNT_SYMBOL, "ISNT");
+  add_keyword (&top_keyword, FALSE_SYMBOL, "FALSE");
+  add_keyword (&top_keyword, UNION_SYMBOL, "UNION");
+  add_keyword (&top_keyword, OUT_SYMBOL, "OUT");
+  add_keyword (&top_keyword, OPEN_SYMBOL, "(");
+  add_keyword (&top_keyword, BEGIN_SYMBOL, "BEGIN");
+  add_keyword (&top_keyword, FLEX_SYMBOL, "FLEX");
+  add_keyword (&top_keyword, VOID_SYMBOL, "VOID");
+  add_keyword (&top_keyword, BITS_SYMBOL, "BITS");
+  add_keyword (&top_keyword, ELSE_SYMBOL, "ELSE");
+  add_keyword (&top_keyword, DOWNTO_SYMBOL, "DOWNTO");
+  add_keyword (&top_keyword, UNTIL_SYMBOL, "UNTIL");
+  add_keyword (&top_keyword, EXIT_SYMBOL, "EXIT");
+  add_keyword (&top_keyword, HEAP_SYMBOL, "HEAP");
+  add_keyword (&top_keyword, INT_SYMBOL, "INT");
+  add_keyword (&top_keyword, BYTES_SYMBOL, "BYTES");
+  add_keyword (&top_keyword, PIPE_SYMBOL, "PIPE");
+  add_keyword (&top_keyword, FORMAT_SYMBOL, "FORMAT");
+  add_keyword (&top_keyword, SEMA_SYMBOL, "SEMA");
+  add_keyword (&top_keyword, CLOSE_SYMBOL, ")");
+  add_keyword (&top_keyword, AT_SYMBOL, "@");
+  add_keyword (&top_keyword, ELIF_SYMBOL, "ELIF");
+  add_keyword (&top_keyword, FORMAT_DELIMITER_SYMBOL, "$");
+}
+
 /*!
 \brief save scanner state, for character look-ahead
 \param module
@@ -1499,9 +1634,18 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
       KEYWORD_T *kw = find_keyword (top_keyword, scan_buf);
       char *c = NULL;
       BOOL_T make_node = A68_TRUE;
+      char *trailing = NULL;
       if (!(kw != NULL && att != ROW_CHAR_DENOTATION)) {
         if (att == IDENTIFIER) {
           make_lower_case (scan_buf);
+        }
+        if (att != ROW_CHAR_DENOTATION && att != LITERAL) {
+          int len = (int) strlen (scan_buf);
+          while (len >= 1 && scan_buf[len - 1] == '_') {
+            trailing = "_";
+            scan_buf[len - 1] = NULL_CHAR;
+            len--;
+          }
         }
         c = add_token (&top_token, scan_buf)->text;
       } else {
@@ -1537,7 +1681,30 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
 /* Add token to the tree. */
       if (make_node) {
         NODE_T *q = new_node ();
-        MASK (q) = module->options.nodemask;
+        INFO (q) = new_node_info ();
+        switch (att) {
+          case ASSIGN_SYMBOL:
+          case END_SYMBOL:
+          case ESAC_SYMBOL:
+          case OD_SYMBOL:
+          case OF_SYMBOL:
+          case FI_SYMBOL:
+          case CLOSE_SYMBOL:
+          case BUS_SYMBOL:
+          case COLON_SYMBOL:
+          case COMMA_SYMBOL:
+          case DOTDOT_SYMBOL:
+          case SEMI_SYMBOL: 
+          {
+            GENIE (q) = NULL;
+            break;
+          }
+          default: {
+            GENIE (q) = new_genie_info ();
+            break;
+          }
+        }
+        STATUS (q) = module->options.nodemask;
         LINE (q) = *start_l;
         INFO (q)->char_in_line = *start_c;
         PRIO (INFO (q)) = 0;
@@ -1562,6 +1729,9 @@ static void tokenise_source (MODULE_T * module, NODE_T ** root, int level, BOOL_
           module->top_node = q;
         }
         *root = q;
+        if (trailing != NULL) {
+          diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, q, WARNING_TRAILING, trailing, att);
+        }
       }
 /* 
 Redirection in tokenising formats. The scanner is a recursive-descent type as
@@ -1573,9 +1743,7 @@ to know when it scans a format text and when not.
         tokenise_source (module, root, level + 1, A68_TRUE, l, s, start_l, start_c);
       } else if (in_format && open_embedded_clause (att)) {
         NODE_T *z = PREVIOUS (*root);
-        if (z != NULL && (WHETHER (z, FORMAT_ITEM_N) || WHETHER (z, FORMAT_ITEM_G)
-                          || WHETHER (z, FORMAT_ITEM_H)
-                          || WHETHER (z, FORMAT_ITEM_F))) {
+        if (z != NULL && (WHETHER (z, FORMAT_ITEM_N) || WHETHER (z, FORMAT_ITEM_G) || WHETHER (z, FORMAT_ITEM_H) || WHETHER (z, FORMAT_ITEM_F))) {
           tokenise_source (module, root, level, A68_FALSE, l, s, start_l, start_c);
         } else if (att == OPEN_SYMBOL) {
           ATTRIBUTE (*root) = FORMAT_OPEN_SYMBOL;

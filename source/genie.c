@@ -98,9 +98,9 @@ void change_masks (NODE_T * p, unsigned mask, BOOL_T set)
     change_masks (SUB (p), mask, set);
     if (LINE_NUMBER (p) > 0) {
       if (set == A68_TRUE) {
-        MASK (p) |= mask;
+        STATUS_SET (p, mask);
       } else {
-        MASK (p) &= ~mask;
+        STATUS_CLEAR (p, mask);
       }
     }
   }
@@ -236,7 +236,9 @@ become prone to the heap sweeper.
 */
   for (; p != NULL; FORWARD (p)) {
     protect_from_sweep (SUB (p));
-    p->protect_sweep = NULL;
+    if (GENIE (p) != NULL) {
+      GENIE (p)->protect_sweep = NULL;
+    }
 /*
 Catch all constructs that give vulnerable intermediate results on the stack.
 Units do not apply, casts work through their enclosed-clauses, denotations are
@@ -247,7 +249,7 @@ protected and identifiers protect themselves.
     case MONADIC_FORMULA:
     case GENERATOR:
 /*  case ENCLOSED_CLAUSE: */
-    case PARALLEL_CLAUSE:
+/*  case PARALLEL_CLAUSE: */
     case CLOSED_CLAUSE:
     case COLLATERAL_CLAUSE:
     case CONDITIONAL_CLAUSE:
@@ -258,6 +260,7 @@ protected and identifiers protect themselves.
     case CALL:
     case SLICE:
     case SELECTION:
+    case FIELD_SELECTION:
     case DEPROCEDURING:
     case ROWING:
     case WIDENING:
@@ -265,7 +268,7 @@ protected and identifiers protect themselves.
         MOID_T *m = MOID (p);
         if (m != NULL && (WHETHER (m, REF_SYMBOL) || WHETHER (DEFLEX (m), ROW_SYMBOL))) {
           TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m, PROTECT_FROM_SWEEP);
-          p->protect_sweep = z;
+          GENIE (p)->protect_sweep = z;
           HEAP (z) = HEAP_SYMBOL;
           USE (z) = A68_TRUE;
         }
@@ -364,26 +367,30 @@ static BOOL_T genie_empty_table (SYMBOL_TABLE_T * t)
 void genie_preprocess (NODE_T * p, int *max_lev)
 {
   for (; p != NULL; FORWARD (p)) {
-    if (MASK (p) & BREAKPOINT_MASK) {
-      if (!(MASK (p) & INTERRUPTIBLE_MASK)) {
-        MASK (p) &= ~BREAKPOINT_MASK;
+    if (STATUS_TEST (p, BREAKPOINT_MASK)) {
+      if (!(STATUS_TEST (p, INTERRUPTIBLE_MASK))) {
+        STATUS_CLEAR (p, BREAKPOINT_MASK);
       }
     }
-    p->genie.whether_coercion = whether_coercion (p);
-    p->genie.whether_new_lexical_level = whether_new_lexical_level (p);
-    PROPAGATOR (p).unit = genie_unit;
-    PROPAGATOR (p).source = p;
+    if (GENIE (p) != NULL) {
+      GENIE (p)->whether_coercion = whether_coercion (p);
+      GENIE (p)->whether_new_lexical_level = whether_new_lexical_level (p);
+      PROPAGATOR (p).unit = genie_unit;
+      PROPAGATOR (p).source = p;
+    }
     if (MOID (p) != NULL) {
       MOID (p)->size = moid_size (MOID (p));
       MOID (p)->short_id = mode_attribute (MOID (p));
-      if (WHETHER (MOID (p), REF_SYMBOL)) {
-        p->need_dns = A68_TRUE;
-      } else if (WHETHER (MOID (p), PROC_SYMBOL)) {
-        p->need_dns = A68_TRUE;
-      } else if (WHETHER (MOID (p), UNION_SYMBOL)) {
-        p->need_dns = A68_TRUE;
-      } else if (WHETHER (MOID (p), FORMAT_SYMBOL)) {
-        p->need_dns = A68_TRUE;
+      if (GENIE (p) != NULL) {
+        if (WHETHER (MOID (p), REF_SYMBOL)) {
+          GENIE (p)->need_dns = A68_TRUE;
+        } else if (WHETHER (MOID (p), PROC_SYMBOL)) {
+          GENIE (p)->need_dns = A68_TRUE;
+        } else if (WHETHER (MOID (p), UNION_SYMBOL)) {
+          GENIE (p)->need_dns = A68_TRUE;
+        } else if (WHETHER (MOID (p), FORMAT_SYMBOL)) {
+          GENIE (p)->need_dns = A68_TRUE;
+        }
       }
     }
     if (SYMBOL_TABLE (p) != NULL) {
@@ -400,23 +407,25 @@ void genie_preprocess (NODE_T * p, int *max_lev)
     } else if (WHETHER (p, DEFINING_IDENTIFIER)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL && SYMBOL_TABLE (NODE (q)) != NULL) {
-        p->genie.level = LEX_LEVEL (NODE (q));
+        LEVEL (GENIE (p)) = LEX_LEVEL (NODE (q));
       }
     } else if (WHETHER (p, IDENTIFIER)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL && SYMBOL_TABLE (NODE (q)) != NULL) {
-        p->genie.level = LEX_LEVEL (NODE (q));
-        p->genie.offset = &stack_segment[FRAME_INFO_SIZE + q->offset];
+        LEVEL (GENIE (p)) = LEX_LEVEL (NODE (q));
+        OFFSET (GENIE (p)) = &stack_segment[FRAME_INFO_SIZE + OFFSET (q)];
       }
     } else if (WHETHER (p, OPERATOR)) {
       TAG_T *q = TAX (p);
       if (q != NULL && NODE (q) != NULL && SYMBOL_TABLE (NODE (q)) != NULL) {
-        p->genie.level = LEX_LEVEL (NODE (q));
-        p->genie.offset = &stack_segment[FRAME_INFO_SIZE + q->offset];
+        LEVEL (GENIE (p)) = LEX_LEVEL (NODE (q));
+        OFFSET (GENIE (p)) = &stack_segment[FRAME_INFO_SIZE + OFFSET (q)];
       }
     }
     if (SUB (p) != NULL) {
-      PARENT (SUB (p)) = p;
+      if (GENIE (p) != NULL) {
+        PARENT (SUB (p)) = p;
+      }
       genie_preprocess (SUB (p), max_lev);
     }
   }
@@ -448,9 +457,9 @@ void free_genie_heap (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     free_genie_heap (SUB (p));
-    if (p->genie.constant != NULL) {
-      free (p->genie.constant);
-      p->genie.constant = NULL;
+    if (GENIE (p) != NULL && GENIE (p)->constant != NULL) {
+      free (GENIE (p)->constant);
+      GENIE (p)->constant = NULL;
     }
   }
 }
