@@ -44,6 +44,17 @@ static void sigttin_handler (int i)
 }
 
 /*!
+\brief signal broken pipe
+\param i
+**/
+
+static void sigpipe_handler (int i)
+{
+  (void) i;
+  ABNORMAL_END (A68_TRUE, "forked process has broken the pipe", NULL);
+}
+
+/*!
 \brief raise SYSREQUEST so you get to a monitor
 \param i
 **/
@@ -69,7 +80,8 @@ void install_signal_handlers (void)
 {
   ABNORMAL_END (signal (SIGINT, sigint_handler) == SIG_ERR, "cannot install SIGINT handler", NULL);
   ABNORMAL_END (signal (SIGSEGV, sigsegv_handler) == SIG_ERR, "cannot install SIGSEGV handler", NULL);
-#if ! defined HAVE_WIN32
+#if ! defined ENABLE_WIN32
+  ABNORMAL_END (signal (SIGPIPE, sigpipe_handler) == SIG_ERR, "cannot install SIGPIPE handler", NULL);
   ABNORMAL_END (signal (SIGTTIN, sigttin_handler) == SIG_ERR, "cannot install SIGTTIN handler", NULL);
 #endif
 }

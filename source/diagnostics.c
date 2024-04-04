@@ -24,7 +24,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
-#if defined HAVE_CURSES
+#if defined ENABLE_CURSES
 #include <curses.h>
 #endif
 
@@ -492,7 +492,7 @@ static void write_diagnostic (int sev, char *b)
 static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev, char *b)
 {
 /* Add diagnostic and choose GNU style or non-GNU style. */
-  DIAGNOSTIC_T *msg = (DIAGNOSTIC_T *) get_heap_space (SIZE_OF (DIAGNOSTIC_T));
+  DIAGNOSTIC_T *msg = (DIAGNOSTIC_T *) get_heap_space (ALIGNED_SIZEOF (DIAGNOSTIC_T));
   DIAGNOSTIC_T **ref_msg;
   char a[BUFFER_SIZE], st[SMALL_BUFFER_SIZE], nst[BUFFER_SIZE];
   int k = 1;
@@ -558,7 +558,7 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
       snprintf (a, BUFFER_SIZE, "(%x) %s. %s.", k, st, b);
     }
   }
-  msg = (DIAGNOSTIC_T *) get_heap_space (SIZE_OF (DIAGNOSTIC_T));
+  msg = (DIAGNOSTIC_T *) get_heap_space (ALIGNED_SIZEOF (DIAGNOSTIC_T));
   *ref_msg = msg;
   ATTRIBUTE (msg) = sev;
   if (nst[0] != NULL_CHAR) {

@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 10.2
+Documentation for Algol 68 Genie Mark 11
 </small>
 </td>
 </table>
@@ -64,7 +64,9 @@ Documentation for Algol 68 Genie Mark 10.2
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.2</b>
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
 &nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -72,15 +74,7 @@ Documentation for Algol 68 Genie Mark 10.2
 &nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
-<p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
@@ -129,7 +123,8 @@ This manual contains an <a href="syntax.html">Algol68G syntax summary</a> for qu
 <li>On systems that support them, <a href="extensions.html#envunix">UNIX extensions</a> that allow e.g. for executing child processes that communicate through pipes, matching regular expressions or fetching web page contents.
 <li>Procedures for <a href="drawing.html">drawing</a> using the GNU Plotting Utilities.
 <li>Various extra <a href="numerical.html">numerical procedures</a>, many of which from the GNU Scientific Library.
-<li>Basic <a href="torrix.html">linear algebra procedures</a> from the GNU Scientific Library.
+<li>Basic <a href="torrix.html">linear algebra and Fourier transform procedures</a> from the GNU Scientific Library.
+<li>Support for <a href="sound.html">WAVE/PCM</a> sound format.
 <li>Support for <a href="http://www.postgresql.org">PostgreSQL</a>, an open-source relational database management system, enabling client applications in Algol 68.
 <li>Format texts, straightening and <a href="#fmtio">formatted transput</a>. 
 Transput routines work generically on files, (dynamic) strings and UNIX pipes.
@@ -142,18 +137,47 @@ Transput routines work generically on files, (dynamic) strings and UNIX pipes.
 <ul>
 <li>Implementation of C.H. Lindsey's <a href="#params">partial parametrisation proposal</a>, which allows for currying in Algol 68, giving it a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
 <li>A simple <a href="#refine">refinement preprocessor</a> to facilitate top-down program construction.
-<li>Implementation of pseudo-operators <code>ANDF</code> and <code>ORF</code> (or their respective alternatives <code>ANDTH</code> and <code>OREL</code>), defined as
+<li>Implementation of pseudo-operators <code>ANDF</code> and <code>ORF</code> (or their respective alternatives <code>THEF, ANDTH</code> and <code>OREL</code>).
+The syntactic position of those pseudo-operator expressions is a boolean-unit, the same as an identity relation. 
+These pseudo-operators are defined as:
 <br>
 <ul>
 <pre>
-tertiary 1 ANDF tertiary 2:
-  IF tertiary 1 THEN tertiary 2 ELSE FALSE FI
+meek-boolean-tertiary 1 ANDF meek-boolean-tertiary 2:
+  IF meek-boolean-tertiary 1 THEN meek-boolean-tertiary 2 ELSE FALSE FI
 
-tertiary 1 ORF tertiary 2:
-  IF tertiary 1 THEN TRUE ELSE tertiary 2 FI
+meek-boolean-tertiary 1 ORF meek-boolean-tertiary 2:
+  IF meek-boolean-tertiary 1 THEN TRUE ELSE meek-boolean-tertiary 2 FI
 </pre>
 </ul>
-The syntactic position of those pseudo-operator expressions is a boolean-unit, the same as an identity relation. The tertiaries are meek-boolean-tertiaries.
+<li>Implementation of pseudo-operators <code>TRNSP</code>, <code>DIAG</code>, <code>COL</code> and <code>ROW</code> as described by [Torrix 1977]. 
+Torrix implements these symbols as operators, A68G's pseudo-operator implementation is more general as it works on rows or rowrows of any mode. 
+The syntactic position of these pseudo-operator expressions is a tertiary, the same level as a formula.
+Next list compiles the definitions of these pseudo-operators, where the meek-integral-tertiary yields value <var>k</var>, the weak-rowrow-tertiary yields value <var>a</var> and the weak-row-tertiary yields value <var>u</var>.
+The pseudo-operator expressions yield a row(row) in case <var>a</var> is a rowrow or <var>u</var> is a row.
+The pseudo-operator expressions yield a reference-to-row(row) in case <var>a</var> is a reference-to-rowrow or <var>u</var> is a reference-to-row.
+<p>
+<dl>
+<dt><code>TRNSP weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>a[i, j] = (TRNSP a)[j, i]</code> for valid <var>i</var> and <var>j</var>. 
+<br>It is guaranteed that <code>a[i, j] IS (TRNSP a)[j, i]</code> in case <var>a</var> is a reference-to-rowrow.
+<dt><code>meek-integral-tertiary DIAG weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>a[i, i + k] = (k DIAG a)[i]</code> for valid <var>i</var> and <var>k</var>.
+<br>It is guaranteed that <code>a[i, i + k] IS (k DIAG a)[i]</code> in case <var>a</var> is a reference-to-rowrow.
+<dt><code>DIAG weak-tertiary</code>
+<dd>Equivalent to <code>0 DIAG weak-tertiary</code>.
+<dt><code>meek-integral-tertiary COL weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>u[i] = (k COL u)[i, k]</code> for valid <var>i</var>.
+<br>It is guaranteed that <code>u[i] IS (k COL u)[i, k]</code> in case <var>u</var> is a reference-to-row.
+<dt><code>COL weak-tertiary</code>
+<dd>Equivalent to <code>1 COL weak-tertiary</code>.
+<dt><code>meek-integral-tertiary ROW weak-tertiary</code>
+<dd>Constructs, without copying, a descriptor such that <code>u[i] = (k ROW u)[k, i]</code> for valid <var>i</var>.
+<br>It is guaranteed that <code>u[i] IS (k COL u)[k, i]</code> in case <var>u</var> is a reference-to-row.
+<dt><code>ROW weak-tertiary</code>
+<dd>Equivalent to <code>1 ROW weak-tertiary</code>.
+</dl>
+<br>
 <li>Implementation of <code>DOWNTO</code> with comparable function as <code>TO</code> in loop clauses; <code>DOWNTO</code> <i>decreases</i>, whereas <code>TO</code> <i>increases</i>, the loop counter by the value of the (implicit) by-part. 
 For example
 <pre>
@@ -477,7 +501,12 @@ When this event routine returns <code>FALSE</code> (the default routine always r
 <pre>
 on format error (f, (REF FILE g) BOOL: TRUE)
 </pre>
-<li><code>SIMPLIN</code> and <code>SIMPLOUT</code> are generic for both formatted and unformatted transput. Therefore <code>SIMPLIN</code> and <code>SIMPLOUT</code> include both mode <code>FORMAT</code> and <code>PROC (REF FILE) VOID</code>. Unformatted transput routines <code>read, print, write, get</code> and <code>put</code> ignore eventual <code>FORMAT</code> arguments. Formatted transput routines <code>readf, printf, writef, getf</code> and <code>putf</code> ignore eventual <code>PROC (REF FILE) VOID</code> arguments.
+<li><code>SIMPLIN</code> and <code>SIMPLOUT</code> are generic for both formatted and unformatted transput. Therefore <code>SIMPLIN</code> and <code>SIMPLOUT</code> include both mode <code>FORMAT</code> and <code>PROC (REF FILE) VOID</code>. 
+If a transput procedure encounters a value whose transput is not defined by that procedure, a runtime error occurs. For example,
+<pre>
+print (($l$, 1))
+</pre>
+generates a runtime error since <code>print</code> cannot handle a value of mode <code>FORMAT</code>.
 <li>Insertion <i>x</i> has the same effect as insertion <i>q</i>; both call <code>space</code>.
 <li>Insertion <i>y</i> is not implemented since <code>backspace</code> is not implemented (see <a href="#genio">Transput in general</a>). Consequently, insertion <i>k</i> can only move forward.
 <li>When a sign is shifted in a sign-mould, any character output by literal insertions in that sign-mould is replaced with a space as well, starting from the first z-frame until the sign is put.
@@ -573,12 +602,11 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 <p>The speed of the interpreter will of course depend on platform and application. Algol68G first constructs a syntax tree for a program whereafter the interpreter "executes" this syntax tree, therefore interpreter speed is relatively good. As to have a measure of speed Algol68G was rated with the Whetstone benchmark. Next table compiles approximate ratings for Algol68G and for some legacy machines (which ran <a href="resources.html#implementations">Algol 68 implementations</a>). 
 <p>
 <table border=0 cellspacing=0 cellpadding=6>
-<tr><td bgcolor=#f0f0f0><b>System</b></td><td bgcolor="#f0f0f0"><b>MWhets</b></td><td bgcolor="#f0f0f0"><b>Remarks</b></td></tr>
-<tr><td bgcolor=#f0f0f0>VAX 11/785</td><td bgcolor="#f0f0f0">1</td><td bgcolor="#f0f0f0">FORTRAN</td>
-<tr><td bgcolor=#f0f0f0>CYBER 205<br>Cray-1A<br></td><td bgcolor="#f0f0f0">12 (Scalar)</td><td bgcolor="#f0f0f0">FORTRAN</td></tr>
-<tr><td bgcolor=#f0f0f0>PowerPC G4 (1.3 GHz)</td><td bgcolor="#f0f0f0">11</td><td bgcolor="#f0f0f0">Algol68G/MacOS X/gcc</td></tr>
-<tr><td bgcolor=#f0f0f0>Pentium 4 (3 GHz)</td><td bgcolor="#f0f0f0">31</td><td bgcolor="#f0f0f0">Algol68G/OpenBSD/gcc</td></tr>
-<tr><td bgcolor=#f0f0f0>Pentium 4 (3 GHz)</td><td bgcolor="#f0f0f0">820</td><td bgcolor="#f0f0f0">C/OpenBSD/gcc</td></tr>
+<tr><td bgcolor=#e0e0e0><b>System</b></td><td bgcolor="#e0e0e0"><b>MWhets</b></td><td bgcolor="#e0e0e0"><b>Remarks</b></td></tr>
+<tr><td bgcolor=#e0e0e0>VAX 11/785</td><td bgcolor="#e0e0e0">1</td><td bgcolor="#e0e0e0">FORTRAN</td>
+<tr><td bgcolor=#e0e0e0>CYBER 205<br>Cray-1A<br></td><td bgcolor="#e0e0e0">12 (Scalar)</td><td bgcolor="#e0e0e0">FORTRAN</td></tr>
+<tr><td bgcolor=#e0e0e0>Pentium 4 (3 GHz)</td><td bgcolor="#e0e0e0">33</td><td bgcolor="#e0e0e0">Algol68G/OpenBSD/gcc</td></tr>
+<tr><td bgcolor=#e0e0e0>Pentium 4 (3 GHz)</td><td bgcolor="#e0e0e0">820</td><td bgcolor="#e0e0e0">C/OpenBSD/gcc</td></tr>
 </table>
 <p>From above data one could conclude that Algol68G on a 3 GHz Pentium runs the Whetstone test roughly as fast as C on a 100 MHz Pentium. However Algol68G offers many runtime checks while the compiled C code offered none, therefore this speed comparison overrates the speed of compiled C code by a factor of probably 2-3. 
 </p>
@@ -604,14 +632,14 @@ It is possible to switch the preprocessor on or off. The preprocessor is default
 </table>
 
 <!-- Footer -->
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.2 (April 2007)
+Algol 68 Genie Mark 11 (November 2007)
 </small>
 </p>
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 
 </body>
 </html>

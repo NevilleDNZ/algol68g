@@ -185,6 +185,8 @@ static void stand_moids (void)
   a68_mode (0, "PIPE", &MODE (PIPE));
   a68_mode (0, "FORMAT", &MODE (FORMAT));
   a68_mode (0, "SEMA", &MODE (SEMA));
+  a68_mode (0, "SOUND", &MODE (SOUND));
+  MODE (SOUND)->has_rows = A68_TRUE;
 /* ROWS. */
   add_mode (&stand_env->moids, ROWS_SYMBOL, 0, NULL, NULL, NULL);
   MODE (ROWS) = stand_env->moids;
@@ -231,6 +233,8 @@ static void stand_moids (void)
   MODE (REF_FILE) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (REF_FILE), NULL);
   MODE (REF_REF_FILE) = stand_env->moids;
+  add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (SOUND), NULL);
+  MODE (REF_SOUND) = stand_env->moids;
 /* [] INT. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (INT), NULL);
   stand_env->moids->has_rows = A68_TRUE;
@@ -1450,7 +1454,7 @@ static void stand_prelude (void)
   a68_idf (A68_FALSE, "carccos", m, genie_arccos_complex);
   a68_idf (A68_FALSE, "complexarctan", m, genie_arctan_complex);
   a68_idf (A68_FALSE, "carctan", m, genie_arctan_complex);
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
   a68_idf (A68_FALSE, "complexsinh", m, genie_sinh_complex);
   a68_idf (A68_FALSE, "csinh", m, genie_sinh_complex);
   a68_idf (A68_FALSE, "complexcosh", m, genie_cosh_complex);
@@ -1508,6 +1512,18 @@ static void stand_prelude (void)
   a68_idf (A68_FALSE, "qcacos", m, genie_acos_long_complex);
   a68_idf (A68_FALSE, "longlongcomplexarctan", m, genie_atan_long_complex);
   a68_idf (A68_FALSE, "qcatan", m, genie_atan_long_complex);
+/* SOUND/RIFF procs. */
+  m = a68_proc (MODE (SOUND), MODE (INT), MODE (INT), MODE (INT), MODE (INT), NULL);
+  a68_idf (A68_FALSE, "newsound", m, genie_new_sound);
+  m = a68_proc (MODE (INT), MODE (SOUND), MODE (INT), MODE (INT), NULL);
+  a68_idf (A68_FALSE, "getsound", m, genie_get_sound);
+  m = a68_proc (MODE (VOID), MODE (SOUND), MODE (INT), MODE (INT), MODE (INT), NULL);
+  a68_idf (A68_FALSE, "setsound", m, genie_set_sound);
+  m = a68_proc (MODE (INT), MODE (SOUND), NULL);
+  a68_op (A68_FALSE, "RESOLUTION", m, genie_sound_resolution);
+  a68_op (A68_FALSE, "CHANNELS", m, genie_sound_channels);
+  a68_op (A68_FALSE, "RATE", m, genie_sound_rate);
+  a68_op (A68_FALSE, "SAMPLES", m, genie_sound_samples);
 }
 
 static void stand_transput (void)
@@ -1687,7 +1703,7 @@ static void stand_transput (void)
 
 static void stand_extensions (void)
 {
-#if defined HAVE_PLOTUTILS
+#if defined ENABLE_GRAPHICS
 /* Drawing. */
   m = a68_proc (MODE (BOOL), MODE (REF_FILE), MODE (STRING), MODE (STRING), NULL);
   a68_idf (A68_FALSE, "drawdevice", m, genie_make_device);
@@ -1733,7 +1749,7 @@ static void stand_extensions (void)
   a68_idf (A68_FALSE, "drawbackgroundcolorname", m, genie_draw_background_colour_name);
   a68_idf (A68_FALSE, "drawbackgroundcolourname", m, genie_draw_background_colour_name);
 #endif
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
   a68_idf (A68_FALSE, "cgsspeedoflight", MODE (REAL), genie_cgs_speed_of_light);
   a68_idf (A68_FALSE, "cgsgravitationalconstant", MODE (REAL), genie_cgs_gravitational_constant);
   a68_idf (A68_FALSE, "cgsplanckconstant", MODE (REAL), genie_cgs_planck_constant_h);
@@ -2115,12 +2131,10 @@ static void stand_extensions (void)
   a68_op (A68_FALSE, "NORM", m, genie_vector_norm);
   m = a68_proc (MODE (REAL), MODE (ROW_COMPLEX), NULL);
   a68_op (A68_FALSE, "NORM", m, genie_vector_complex_norm);
-#if defined HAVE_GSL
   m = a68_proc (MODE (ROWROW_REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
   a68_op (A68_FALSE, "DYAD", m, genie_vector_dyad);
   m = a68_proc (MODE (ROWROW_COMPLEX), MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
   a68_op (A68_FALSE, "DYAD", m, genie_vector_complex_dyad);
-#endif
 /* LU decomposition. */
   m = a68_proc (MODE (ROWROW_REAL), MODE (ROWROW_REAL), MODE (REF_ROW_INT), MODE (REF_INT), NULL);
   a68_idf (A68_FALSE, "ludecomp", m, genie_matrix_lu);
@@ -2155,7 +2169,20 @@ static void stand_extensions (void)
   a68_idf (A68_FALSE, "choleskydecomp", m, genie_matrix_ch);
   m = a68_proc (MODE (ROW_REAL), MODE (ROWROW_REAL), MODE (ROW_REAL), NULL);
   a68_idf (A68_FALSE, "choleskysolve", m, genie_matrix_ch_solve);
+/* FFT */
+  m = a68_proc (MODE (ROW_INT), MODE (INT), NULL);
+  a68_idf (A68_FALSE, "primefactors", m, genie_prime_factors);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_COMPLEX), NULL);
+  a68_idf (A68_FALSE, "fftcomplexforward", m, genie_fft_complex_forward);
+  a68_idf (A68_FALSE, "fftcomplexbackward", m, genie_fft_complex_backward);
+  a68_idf (A68_FALSE, "fftcomplexinverse", m, genie_fft_complex_inverse);
+  m = a68_proc (MODE (ROW_COMPLEX), MODE (ROW_REAL), NULL);
+  a68_idf (A68_FALSE, "fftforward", m, genie_fft_forward);
+  m = a68_proc (MODE (ROW_REAL), MODE (ROW_COMPLEX), NULL);
+  a68_idf (A68_FALSE, "fftbackward", m, genie_fft_backward);
+  a68_idf (A68_FALSE, "fftinverse", m, genie_fft_inverse);
 #endif
+/* UNIX things */
   m = proc_int;
   a68_idf (A68_FALSE, "argc", m, genie_argc);
   a68_idf (A68_FALSE, "errno", m, genie_errno);
@@ -2183,18 +2210,18 @@ static void stand_extensions (void)
   m = a68_proc (MODE (ROW_INT), NULL);
   a68_idf (A68_FALSE, "utctime", m, genie_utctime);
   a68_idf (A68_FALSE, "localtime", m, genie_localtime);
-#if defined HAVE_HTTP
+#if defined ENABLE_HTTP
   m = a68_proc (MODE (INT), MODE (REF_STRING), MODE (STRING), MODE (STRING), MODE (INT), NULL);
   a68_idf (A68_FALSE, "httpcontent", m, genie_http_content);
   a68_idf (A68_FALSE, "tcprequest", m, genie_tcp_request);
 #endif
-#if defined HAVE_REGEX
+#if defined ENABLE_REGEX
   m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_INT), MODE (REF_INT), NULL);
   a68_idf (A68_FALSE, "grepinstring", m, genie_grep_in_string);
   m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_STRING), NULL);
   a68_idf (A68_FALSE, "subinstring", m, genie_sub_in_string);
 #endif
-#if defined HAVE_CURSES
+#if defined ENABLE_CURSES
   m = proc_void;
   a68_idf (A68_FALSE, "cursesstart", m, genie_curses_start);
   a68_idf (A68_FALSE, "cursesend", m, genie_curses_end);
@@ -2210,7 +2237,7 @@ static void stand_extensions (void)
   a68_idf (A68_FALSE, "curseslines", m, genie_curses_lines);
   a68_idf (A68_FALSE, "cursescolumns", m, genie_curses_columns);
 #endif
-#if defined HAVE_POSTGRESQL
+#if defined ENABLE_POSTGRESQL
   m = a68_proc (MODE (INT), MODE (REF_FILE), MODE (STRING), MODE (REF_STRING), NULL);
   a68_idf (A68_FALSE, "pqconnectdb", m, genie_pq_connectdb);
   m = a68_proc (MODE (INT), MODE (REF_FILE), NULL);

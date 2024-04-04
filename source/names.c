@@ -29,14 +29,15 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 static char *attribute_names[WILDCARD + 1] = {
   NULL,
+  "A68_PATTERN",
   "ACCO_SYMBOL",
   "ALT_DO_PART",
   "ALT_DO_SYMBOL",
   "ALT_EQUALS_SYMBOL",
   "ALT_FORMAL_BOUNDS_LIST",
   "ANDF_SYMBOL",
-  "ANDTH_SYMBOL",
   "AND_FUNCTION",
+  "ANDTH_SYMBOL",
   "ARGUMENT",
   "ARGUMENT_LIST",
   "ASSERTION",
@@ -62,9 +63,9 @@ static char *attribute_names[WILDCARD + 1] = {
   "BRIEF_OPERATOR_DECLARATION",
   "BRIEF_UNITED_OUSE_PART",
   "BUS_SYMBOL",
-  "BYTES_SYMBOL",
   "BY_PART",
   "BY_SYMBOL",
+  "BYTES_SYMBOL",
   "CALL",
   "CASE_PART",
   "CASE_SYMBOL",
@@ -80,6 +81,8 @@ static char *attribute_names[WILDCARD + 1] = {
   "COLLATERAL_CLAUSE",
   "COLLECTION",
   "COLON_SYMBOL",
+  "COLUMN_FUNCTION",
+  "COLUMN_SYMBOL",
   "COMMA_SYMBOL",
   "COMPLEX_PATTERN",
   "COMPLEX_SYMBOL",
@@ -93,10 +96,12 @@ static char *attribute_names[WILDCARD + 1] = {
   "DENOTER",
   "DEPROCEDURING",
   "DEREFERENCING",
-  "DOTDOT_SYMBOL",
-  "DOWNTO_SYMBOL",
+  "DIAGONAL_FUNCTION",
+  "DIAGONAL_SYMBOL",
   "DO_PART",
   "DO_SYMBOL",
+  "DOTDOT_SYMBOL",
+  "DOWNTO_SYMBOL",
   "DYNAMIC_REPLICATOR",
   "EDOC_SYMBOL",
   "ELIF_IF_PART",
@@ -106,7 +111,6 @@ static char *attribute_names[WILDCARD + 1] = {
   "ELSE_OPEN_PART",
   "ELSE_PART",
   "ELSE_SYMBOL",
-  "ELSF_SYMBOL",
   "EMPTY_SYMBOL",
   "ENCLOSED_CLAUSE",
   "END_SYMBOL",
@@ -121,8 +125,8 @@ static char *attribute_names[WILDCARD + 1] = {
   "FALSE_SYMBOL",
   "FIELD_IDENTIFIER",
   "FILE_SYMBOL",
-  "FIXED_C_PATTERN",
   "FI_SYMBOL",
+  "FIXED_C_PATTERN",
   "FLEX_SYMBOL",
   "FLOAT_C_PATTERN",
   "FORMAL_BOUNDS",
@@ -133,6 +137,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "FORMAT_DELIMITER_SYMBOL",
   "FORMAT_D_FRAME",
   "FORMAT_E_FRAME",
+  "FORMAT_I_FRAME",
   "FORMAT_ITEM_A",
   "FORMAT_ITEM_B",
   "FORMAT_ITEM_C",
@@ -165,7 +170,6 @@ static char *attribute_names[WILDCARD + 1] = {
   "FORMAT_ITEM_X",
   "FORMAT_ITEM_Y",
   "FORMAT_ITEM_Z",
-  "FORMAT_I_FRAME",
   "FORMAT_PATTERN",
   "FORMAT_POINT_FRAME",
   "FORMAT_SYMBOL",
@@ -180,8 +184,8 @@ static char *attribute_names[WILDCARD + 1] = {
   "GENERATOR",
   "GENERIC_ARGUMENT",
   "GENERIC_ARGUMENT_LIST",
-  "GOTO_SYMBOL",
   "GO_SYMBOL",
+  "GOTO_SYMBOL",
   "HEAP_SYMBOL",
   "IDENTIFIER",
   "IDENTITY_DECLARATION",
@@ -191,6 +195,8 @@ static char *attribute_names[WILDCARD + 1] = {
   "INDICANT",
   "INITIALISER_SERIES",
   "INSERTION",
+  "IN_SYMBOL",
+  "INT_DENOTER",
   "INTEGER_CASE_CLAUSE",
   "INTEGER_CHOICE_CLAUSE",
   "INTEGER_IN_PART",
@@ -198,9 +204,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "INTEGRAL_C_PATTERN",
   "INTEGRAL_MOULD",
   "INTEGRAL_PATTERN",
-  "INT_DENOTER",
   "INT_SYMBOL",
-  "IN_SYMBOL",
   "IN_TYPE_MODE",
   "ISNT_SYMBOL",
   "IS_SYMBOL",
@@ -242,9 +246,8 @@ static char *attribute_names[WILDCARD + 1] = {
   "PARAMETER",
   "PARAMETER_LIST",
   "PARAMETER_PACK",
-  "PARTICULAR_PROGRAM",
   "PAR_SYMBOL",
-  "PATTERN",
+  "PARTICULAR_PROGRAM",
   "PICTURE",
   "PICTURE_LIST",
   "PIPE_SYMBOL",
@@ -266,9 +269,12 @@ static char *attribute_names[WILDCARD + 1] = {
   "REPLICATOR",
   "ROUTINE_TEXT",
   "ROUTINE_UNIT",
+  "ROW_ASSIGNATION",
+  "ROW_ASSIGN_SYMBOL",
+  "ROW_CHAR_DENOTER",
+  "ROW_FUNCTION",
   "ROWING",
   "ROWS_SYMBOL",
-  "ROW_CHAR_DENOTER",
   "ROW_SYMBOL",
   "SECONDARY",
   "SELECTION",
@@ -284,6 +290,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "SKIP_SYMBOL",
   "SLICE",
   "SOME_CLAUSE",
+  "SOUND_SYMBOL",
   "SPECIFIED_UNIT",
   "SPECIFIED_UNIT_LIST",
   "SPECIFIED_UNIT_UNIT",
@@ -294,22 +301,23 @@ static char *attribute_names[WILDCARD + 1] = {
   "STRING_C_PATTERN",
   "STRING_PATTERN",
   "STRING_SYMBOL",
+  "STRUCT_SYMBOL",
   "STRUCTURED_FIELD",
   "STRUCTURED_FIELD_LIST",
   "STRUCTURE_PACK",
-  "STRUCT_SYMBOL",
-  "STYLE_II_COMMENT_SYMBOL",
   "STYLE_I_COMMENT_SYMBOL",
+  "STYLE_II_COMMENT_SYMBOL",
   "STYLE_I_PRAGMAT_SYMBOL",
   "SUB_SYMBOL",
   "SUB_UNIT",
   "TERTIARY",
-  "THEF_SYMBOL",
   "THEN_BAR_SYMBOL",
   "THEN_PART",
   "THEN_SYMBOL",
   "TO_PART",
   "TO_SYMBOL",
+  "TRANSPOSE_FUNCTION",
+  "TRANSPOSE_SYMBOL",
   "TRIMMER",
   "TRUE_SYMBOL",
   "UNION_DECLARER_LIST",
@@ -384,108 +392,171 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
 {
   if (p == genie_and_function) {
     return ("genie_and_function");
-  } else if (p == genie_assertion) {
+  }
+  if (p == genie_assertion) {
     return ("genie_assertion");
-  } else if (p == genie_assignation) {
+  }
+  if (p == genie_assignation) {
     return ("genie_assignation");
-  } else if (p == genie_call) {
+  }
+  if (p == genie_call) {
     return ("genie_call");
-  } else if (p == genie_cast) {
+  }
+  if (p == genie_cast) {
     return ("genie_cast");
-  } else if (p == (PROPAGATOR_PROCEDURE *) genie_closed) {
+  }
+  if (p == (PROPAGATOR_PROCEDURE *) genie_closed) {
     return ("genie_closed");
-  } else if (p == genie_coercion) {
+  }
+  if (p == genie_coercion) {
     return ("genie_coercion");
-  } else if (p == genie_collateral) {
+  }
+  if (p == genie_collateral) {
     return ("genie_collateral");
-  } else if (p == (PROPAGATOR_PROCEDURE *) genie_conditional) {
+  }
+  if (p == genie_column_function) {
+    return ("genie_column_function");
+  }
+  if (p == (PROPAGATOR_PROCEDURE *) genie_conditional) {
     return ("genie_conditional");
-  } else if (p == genie_constant) {
+  }
+  if (p == genie_constant) {
     return ("genie_constant");
-  } else if (p == genie_denoter) {
+  }
+  if (p == genie_denoter) {
     return ("genie_denoter");
-  } else if (p == genie_deproceduring) {
+  }
+  if (p == genie_deproceduring) {
     return ("genie_deproceduring");
-  } else if (p == genie_dereference_loc_identifier) {
+  }
+  if (p == genie_dereference_loc_identifier) {
     return ("genie_dereference_loc_identifier");
-  } else if (p == genie_dereference_slice_name_quick) {
+  }
+  if (p == genie_dereference_slice_name_quick) {
     return ("genie_dereference_slice_name_quick");
-  } else if (p == genie_dereferencing) {
+  }
+  if (p == genie_dereferencing) {
     return ("genie_dereferencing");
-  } else if (p == genie_dereferencing_quick) {
+  }
+  if (p == genie_dereferencing_quick) {
     return ("genie_dereferencing_quick");
-  } else if (p == genie_dyadic) {
+  }
+  if (p == genie_diagonal_function) {
+    return ("genie_diagonal_function");
+  }
+  if (p == genie_dyadic) {
     return ("genie_dyadic");
-  } else if (p == genie_dyadic_quick) {
+  }
+  if (p == genie_dyadic_quick) {
     return ("genie_dyadic_quick");
-  } else if (p == (PROPAGATOR_PROCEDURE *) genie_enclosed) {
+  }
+  if (p == (PROPAGATOR_PROCEDURE *) genie_enclosed) {
     return ("genie_enclosed");
-  } else if (p == genie_format_text) {
+  }
+  if (p == genie_format_text) {
     return ("genie_format_text");
-  } else if (p == genie_formula) {
+  }
+  if (p == genie_formula) {
     return ("genie_formula");
-  } else if (p == genie_generator) {
+  }
+  if (p == genie_generator) {
     return ("genie_generator");
-  } else if (p == genie_identifier) {
+  }
+  if (p == genie_identifier) {
     return ("genie_identifier");
-  } else if (p == genie_identifier_standenv) {
+  }
+  if (p == genie_identifier_standenv) {
     return ("genie_identifier_standenv");
-  } else if (p == genie_identifier_standenv_proc) {
+  }
+  if (p == genie_identifier_standenv_proc) {
     return ("genie_identifier_standenv_proc");
-  } else if (p == genie_identity_relation) {
+  }
+  if (p == genie_identity_relation) {
     return ("genie_identity_relation");
-  } else if (p == (PROPAGATOR_PROCEDURE *) genie_int_case) {
+  }
+  if (p == (PROPAGATOR_PROCEDURE *) genie_int_case) {
     return ("genie_int_case");
-  } else if (p == genie_loc_identifier) {
+  }
+  if (p == genie_loc_identifier) {
     return ("genie_loc_identifier");
-  } else if (p == (PROPAGATOR_PROCEDURE *) genie_loop) {
+  }
+  if (p == (PROPAGATOR_PROCEDURE *) genie_loop) {
     return ("genie_loop");
-  } else if (p == genie_monadic) {
+  }
+  if (p == genie_monadic) {
     return ("genie_monadic");
-  } else if (p == genie_nihil) {
+  }
+  if (p == genie_nihil) {
     return ("genie_nihil");
-  } else if (p == genie_or_function) {
+  }
+  if (p == genie_or_function) {
     return ("genie_or_function");
-  } else if (p == genie_parallel) {
+  }
+  if (p == genie_parallel) {
     return ("genie_parallel");
-  } else if (p == genie_routine_text) {
+  }
+  if (p == genie_routine_text) {
     return ("genie_routine_text");
-  } else if (p == genie_rowing) {
+  }
+  if (p == genie_row_function) {
+    return ("genie_row_function");
+  }
+  if (p == genie_rowing) {
     return ("genie_rowing");
-  } else if (p == genie_rowing_ref_row_of_row) {
+  }
+  if (p == genie_rowing_ref_row_of_row) {
     return ("genie_rowing_ref_row_of_row");
-  } else if (p == genie_rowing_ref_row_row) {
+  }
+  if (p == genie_rowing_ref_row_row) {
     return ("genie_rowing_ref_row_row");
-  } else if (p == genie_rowing_row_of_row) {
+  }
+  if (p == genie_rowing_row_of_row) {
     return ("genie_rowing_row_of_row");
-  } else if (p == genie_rowing_row_row) {
+  }
+  if (p == genie_rowing_row_row) {
     return ("genie_rowing_row_row");
-  } else if (p == genie_selection) {
-    return ("genie_selection");
-  } else if (p == genie_selection_name) {
+  }
+  if (p == genie_selection_name) {
     return ("genie_selection_name");
-  } else if (p == genie_selection_value) {
+  }
+  if (p == genie_selection) {
+    return ("genie_selection");
+  }
+  if (p == genie_selection_value) {
     return ("genie_selection_value");
-  } else if (p == genie_skip) {
+  }
+  if (p == genie_skip) {
     return ("genie_skip");
-  } else if (p == genie_slice) {
-    return ("genie_slice");
-  } else if (p == genie_slice_name_quick) {
+  }
+  if (p == genie_slice_name_quick) {
     return ("genie_slice_name_quick");
-  } else if (p == genie_unit) {
-    return ("");
-  } else if (p == (PROPAGATOR_PROCEDURE *) genie_united_case) {
+  }
+  if (p == genie_slice) {
+    return ("genie_slice");
+  }
+  if (p == genie_transpose_function) {
+    return ("genie_transpose_function");
+  }
+  if (p == (PROPAGATOR_PROCEDURE *) genie_united_case) {
     return ("genie_united_case");
-  } else if (p == genie_uniting) {
+  }
+  if (p == genie_uniting) {
     return ("genie_uniting");
-  } else if (p == genie_voiding) {
-    return ("genie_voiding");
-  } else if (p == genie_voiding_assignation) {
+  }
+  if (p == genie_unit) {
+    return ("genie_unit");
+  }
+  if (p == genie_voiding_assignation) {
     return ("genie_voiding_assignation");
-  } else if (p == genie_widening) {
-    return ("genie_widening");
-  } else if (p == genie_widening_int_to_real) {
+  }
+  if (p == genie_voiding) {
+    return ("genie_voiding");
+  }
+  if (p == genie_widening_int_to_real) {
     return ("genie_widening_int_to_real");
-  } else
-    return ("");
+  }
+  if (p == genie_widening) {
+    return ("genie_widening");
+  }
+  return (NULL);
 }

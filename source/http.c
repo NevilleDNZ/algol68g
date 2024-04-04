@@ -25,13 +25,12 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "genie.h"
 #include "transput.h"
 
-#if defined HAVE_HTTP
+#if defined ENABLE_HTTP
 
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <sys/time.h>
 
 #define PROTOCOL "tcp"
 #define SERVICE "http"
@@ -90,7 +89,7 @@ void genie_http_content (NODE_T * p)
   if (port_number.value == 0) {
     socket_address.sin_port = service_address->s_port;
   } else {
-    socket_address.sin_port = htons ((u_short) port_number.value);
+    socket_address.sin_port = htons ((unsigned short) port_number.value);
     if (socket_address.sin_port == 0) {
       PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
       return;
@@ -112,7 +111,7 @@ void genie_http_content (NODE_T * p)
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
-  conn = connect (socket_id, (const struct sockaddr *) &socket_address, SIZE_OF (socket_address));
+  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZEOF (socket_address));
   if (conn < 0) {
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
@@ -219,7 +218,7 @@ void genie_tcp_request (NODE_T * p)
   if (port_number.value == 0) {
     socket_address.sin_port = service_address->s_port;
   } else {
-    socket_address.sin_port = htons ((u_short) port_number.value);
+    socket_address.sin_port = htons ((unsigned short) port_number.value);
     if (socket_address.sin_port == 0) {
       PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
       return;
@@ -241,7 +240,7 @@ void genie_tcp_request (NODE_T * p)
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
-  conn = connect (socket_id, (const struct sockaddr *) &socket_address, SIZE_OF (socket_address));
+  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZEOF (socket_address));
   if (conn < 0) {
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);

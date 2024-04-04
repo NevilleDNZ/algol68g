@@ -33,23 +33,24 @@ registers and stack for each concurrent unit.
 #include "genie.h"
 #include "mp.h"
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 typedef struct STACK STACK;
 
-struct STACK {
+struct STACK
+{
   ADDR_T cur_ptr, ini_ptr;
   BYTE_T *swap, *start;
   int bytes;
 };
 
-int parallel_clauses = 0;
+int par_clause_depth = 0;
 pthread_t main_thread_id = 0;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static ADDR_T fp0, sp0;
 
 /*
-Set an upper limit for threads.
+Set an upper limit for number of threads.
 Don't copy POSIX_THREAD_THREADS_MAX since it may be ULONG_MAX.
 */
 
@@ -67,7 +68,8 @@ Don't copy POSIX_THREAD_THREADS_MAX since it may be ULONG_MAX.
 
 typedef struct A68_CONTEXT A68_CONTEXT;
 
-struct A68_CONTEXT {
+struct A68_CONTEXT
+{
   pthread_t id;
   STACK stack, frame;
   NODE_T *unit;
@@ -91,17 +93,17 @@ static jmp_buf *jump_buffer;
 static NODE_T *jump_label;
 
 /*!
-\brief count parallel_clauses
+\brief count par_clause_depth
 **/
 
-void count_parallel_clauses (NODE_T * p)
+void count_par_clauses (NODE_T * p)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, PARALLEL_CLAUSE)) {
-      parallel_clauses++;
+      par_clause_depth++;
     }
-    count_parallel_clauses (SUB (p));
+    count_par_clauses (SUB (p));
   }
 #else
   (void) p;
@@ -114,9 +116,9 @@ void count_parallel_clauses (NODE_T * p)
 \return TRUE if in main thread or FALSE otherwise
 **/
 
-BOOL_T is_main_thread (void)
+BOOL_T main_thread_is_active (void)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   return (main_thread_id == pthread_self ());
 #else
   ABNORMAL_END (A68_TRUE, ERROR_REQUIRE_THREADS, NULL);
@@ -130,7 +132,7 @@ BOOL_T is_main_thread (void)
 
 void genie_abend_thread (void)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   save_stacks (pthread_self ());
   pthread_mutex_unlock (&mutex);
   pthread_exit (NULL);
@@ -147,13 +149,13 @@ void genie_abend_thread (void)
 \param label
 **/
 
-void zap_all_threads (NODE_T * p, jmp_buf * jump_stat, NODE_T * label)
+void zap_thread (NODE_T * p, jmp_buf * jump_stat, NODE_T * label)
 {
   (void) p;
   zapped = A68_TRUE;
   jump_buffer = jump_stat;
   jump_label = label;
-  if (!is_main_thread ()) {
+  if (!main_thread_is_active ()) {
     genie_abend_thread ();
   }
 }
@@ -177,7 +179,7 @@ void set_par_level (NODE_T * p, int n)
   }
 }
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief save this thread and try to start another
@@ -190,14 +192,16 @@ static void try_change_thread (NODE_T * p)
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_OUTSIDE);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
+/* Release the mutex so another thread can take it up ... */
   save_stacks (pthread_self ());
   pthread_mutex_unlock (&mutex);
+/* ... Nobody? Take it up again yourself! */
   pthread_mutex_lock (&mutex);
   restore_stacks (pthread_self ());
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief thread id to context index
@@ -218,7 +222,7 @@ static int get_index (pthread_t id)
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief save a stack, only allocate if a block is too small
@@ -254,7 +258,7 @@ static void save (STACK * s, BYTE_T * start, int size)
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief restore a stack
@@ -269,7 +273,7 @@ static void restore (STACK * s)
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief store the stacks of threads
@@ -281,24 +285,24 @@ static void save_stacks (pthread_t t)
 {
   ADDR_T p, q, u, v;
   int k = get_index (t);
-/* Store stack pointers.						*/
+/* Store stack pointers. */
   context[k].frame.cur_ptr = frame_pointer;
   context[k].stack.cur_ptr = stack_pointer;
-/* Swap out evaluation stack.   					*/
+/* Swap out evaluation stack. */
   p = context[k].stack.cur_ptr;
   q = context[k].stack.ini_ptr;
   save (&(context[k].stack), STACK_ADDRESS (q), p - q);
-/* Swap out frame stack.						*/
+/* Swap out frame stack. */
   p = context[k].frame.cur_ptr;
   q = context[k].frame.ini_ptr;
   u = p + FRAME_SIZE (p);
   v = q + FRAME_SIZE (q);
+/* Consider the embedding thread. */
   save (&(context[k].frame), FRAME_ADDRESS (v), u - v);
-/* Consider the embedding thread.       				*/
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief restore stacks of thread
@@ -311,19 +315,19 @@ static void restore_stacks (pthread_t t)
     genie_abend_thread ();
   } else {
     int k = get_index (t);
-/* Restore stack pointers.      					*/
+/* Restore stack pointers. */
     get_stack_size ();
     system_stack_offset = context[k].thread_stack_offset;
     frame_pointer = context[k].frame.cur_ptr;
     stack_pointer = context[k].stack.cur_ptr;
-/* Restore stacks.      						*/
+/* Restore stacks. */
     restore (&(context[k].stack));
     restore (&(context[k].frame));
   }
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief does system stack grow up or down?
@@ -344,7 +348,7 @@ static int stack_direction (BYTE_T * lwb)
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief execute one unit from a PAR clause
@@ -368,7 +372,7 @@ static void *start_unit (void *arg)
 }
 #endif
 
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief execute parallel units
@@ -381,14 +385,14 @@ static void genie_parallel_units (NODE_T * p)
     if (WHETHER (p, UNIT)) {
       pthread_t new_id;
       pthread_attr_t new_at;
-      ssize_t ss;
+      size_t ss;
       BYTE_T stack_offset;
-/* Set up a thread for this unit.       				*/
+/* Set up a thread for this unit. */
       if (condex >= THREAD_MAX) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_OVERFLOW);
         exit_genie (p, A68_RUNTIME_ERROR);
       }
-/* Fill out a context for this thread.  				*/
+/* Fill out a context for this thread. */
       context[condex].unit = p;
       context[condex].stack_used = SYSTEM_STACK_USED;
       context[condex].thread_stack_offset = NULL;
@@ -402,12 +406,12 @@ static void genie_parallel_units (NODE_T * p)
       context[condex].frame.start = NULL;
       context[condex].stack.bytes = 0;
       context[condex].frame.bytes = 0;
-/* Create the actual thread.    					*/
+/* Create the actual thread. */
       RESET_ERRNO;
       pthread_attr_init (&new_at);
       pthread_attr_setstacksize (&new_at, stack_size);
       pthread_attr_getstacksize (&new_at, &ss);
-      ABNORMAL_END (ss != stack_size, "cannot set thread stack size", NULL);
+      ABNORMAL_END ((size_t) ss != (size_t) stack_size, "cannot set thread stack size", NULL);
       pthread_create (&new_id, &new_at, start_unit, NULL);
       if (errno != 0) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_CREATE);
@@ -431,7 +435,7 @@ static void genie_parallel_units (NODE_T * p)
 
 PROPAGATOR_T genie_parallel (NODE_T * p)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   PROPAGATOR_T self;
   int j;
   ADDR_T stack_s = 0, frame_s = 0;
@@ -447,18 +451,18 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
     fp0 = frame_s = frame_pointer;
     system_stack_offset_s = system_stack_offset;
   }
-/* Claim the engine if in the outermost PAR level.      		*/
+/* Claim the engine if in the outermost PAR level. */
   if (!save_in_par_clause) {
     pthread_mutex_lock (&mutex);
     condex = 0;
   }
-/* Spawn the units (they remain inactive when we blocked the engine).*/
+/* Spawn the units. */
   genie_parallel_units (SUB (p));
-/* Free the engine if in the outermost PAR level.       		*/
+/* Free the engine if in the outermost PAR level. */
   if (!save_in_par_clause) {
     pthread_mutex_unlock (&mutex);
   }
-/* Join the other threads if in the outermost PAR level.		*/
+/* Join the other threads if in the outermost PAR level. */
   if (!save_in_par_clause) {
     for (j = 0; j < condex; j++) {
       RESET_ERRNO;
@@ -488,8 +492,8 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
   }
   DOWN_SWEEP_SEMA;
   in_par_clause = save_in_par_clause;
-  if (is_main_thread () && zapped) {
-/* Beam us up, Scotty!  						*/
+  if (main_thread_is_active () && zapped) {
+/* Beam us up, Scotty! */
     SYMBOL_TABLE (TAX (jump_label))->jump_to = TAX (jump_label)->unit;
     longjmp (*(jump_buffer), 1);
   }
@@ -511,11 +515,11 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
 
 void genie_level_sema_int (NODE_T * p)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   A68_INT k;
   A68_REF s;
   POP_OBJECT (p, &k, A68_INT);
-  s = heap_generator (p, MODE (INT), SIZE_OF (A68_INT));
+  s = heap_generator (p, MODE (INT), ALIGNED_SIZEOF (A68_INT));
   *(A68_INT *) ADDRESS (&s) = k;
   PUSH_REF (p, s);
 #else
@@ -532,7 +536,7 @@ void genie_level_sema_int (NODE_T * p)
 
 void genie_level_int_sema (NODE_T * p)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   A68_REF s;
   POP_REF (p, &s);
   CHECK_INIT (p, INITIALISED (&s), MODE (SEMA));
@@ -550,7 +554,7 @@ void genie_level_int_sema (NODE_T * p)
 
 void genie_up_sema (NODE_T * p)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   A68_REF s;
   POP_REF (p, &s);
   CHECK_INIT (p, INITIALISED (&s), MODE (SEMA));
@@ -568,7 +572,7 @@ void genie_up_sema (NODE_T * p)
 
 void genie_down_sema (NODE_T * p)
 {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
   A68_REF s;
   A68_INT *k;
   BOOL_T cont = A68_TRUE;

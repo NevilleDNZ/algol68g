@@ -25,7 +25,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "genie.h"
 #include "mp.h"
 
-enum { PUT_IN_THIS_LEVEL, PUT_IN_PARENT_LEVEL };
+enum
+{ PUT_IN_THIS_LEVEL, PUT_IN_PARENT_LEVEL };
 
 static MOID_T *get_mode_from_declarer (NODE_T *, int);
 BOOL_T check_yin_yang (NODE_T *, MOID_T *, BOOL_T, BOOL_T);
@@ -48,28 +49,29 @@ static POSTULATE_T *postulates;
 
 MOID_T *add_mode (MOID_T ** z, int att, int dimensions, NODE_T * node, MOID_T * sub, PACK_T * pack)
 {
-  MOID_T *x = new_moid ();
-  x->in_standard_environ = (z == &(stand_env->moids));
-  x->use = A68_FALSE;
-  x->size = 0;
-  NUMBER (x) = mode_count++;
-  ATTRIBUTE (x) = att;
-  DIMENSION (x) = dimensions;
-  NODE (x) = node;
-  x->well_formed = A68_TRUE;
-  x->has_rows = (att == ROW_SYMBOL);
-  SUB (x) = sub;
-  PACK (x) = pack;
-  NEXT (x) = *z;
-  EQUIVALENT (x) = NULL;
-  SLICE (x) = NULL;
-  DEFLEXED (x) = NULL;
-  NAME (x) = NULL;
-  MULTIPLE (x) = NULL;
-  TRIM (x) = NULL;
+  MOID_T *new_mode = new_moid ();
+  new_mode->in_standard_environ = (z == &(stand_env->moids));
+  new_mode->use = A68_FALSE;
+  new_mode->size = 0;
+  NUMBER (new_mode) = mode_count++;
+  ATTRIBUTE (new_mode) = att;
+  DIMENSION (new_mode) = dimensions;
+  NODE (new_mode) = node;
+  new_mode->well_formed = A68_TRUE;
+  new_mode->has_rows = (att == ROW_SYMBOL);
+  SUB (new_mode) = sub;
+  PACK (new_mode) = pack;
+  NEXT (new_mode) = *z;
+  EQUIVALENT (new_mode) = NULL;
+  SLICE (new_mode) = NULL;
+  DEFLEXED (new_mode) = NULL;
+  NAME (new_mode) = NULL;
+  MULTIPLE (new_mode) = NULL;
+  TRIM (new_mode) = NULL;
+  ROWED (new_mode) = NULL;
 /* Link to chain and exit. */
-  *z = x;
-  return (x);
+  *z = new_mode;
+  return (new_mode);
 }
 
 /*!
@@ -123,7 +125,7 @@ void add_single_moid_to_list (MOID_LIST_T ** p, MOID_T * q, SYMBOL_TABLE_T * c)
 {
   MOID_LIST_T *m;
   if (old_moid_list == NULL) {
-    m = (MOID_LIST_T *) get_fixed_heap_space (SIZE_OF (MOID_LIST_T));
+    m = (MOID_LIST_T *) get_fixed_heap_space (ALIGNED_SIZEOF (MOID_LIST_T));
   } else {
     m = old_moid_list;
     old_moid_list = NEXT (old_moid_list);
@@ -1346,6 +1348,7 @@ static void track_equivalent_one_moid (MOID_T * q)
   track_equivalent_modes (&NAME (q));
   track_equivalent_modes (&SLICE (q));
   track_equivalent_modes (&TRIM (q));
+  track_equivalent_modes (&ROWED (q));
   for (p = PACK (q); p != NULL; FORWARD (p)) {
     track_equivalent_modes (&MOID (p));
   }
@@ -1406,17 +1409,94 @@ static void track_equivalent_tree (NODE_T * p)
 
 static void track_equivalent_standard_modes (void)
 {
+  track_equivalent_modes (&MODE (BITS));
+  track_equivalent_modes (&MODE (BOOL));
+  track_equivalent_modes (&MODE (BYTES));
+  track_equivalent_modes (&MODE (CHANNEL));
+  track_equivalent_modes (&MODE (CHAR));
+  track_equivalent_modes (&MODE (COLLITEM));
+  track_equivalent_modes (&MODE (COMPL));
   track_equivalent_modes (&MODE (COMPLEX));
-  track_equivalent_modes (&MODE (REF_COMPLEX));
+  track_equivalent_modes (&MODE (C_STRING));
+  track_equivalent_modes (&MODE (ERROR));
+  track_equivalent_modes (&MODE (FILE));
+  track_equivalent_modes (&MODE (FORMAT));
+  track_equivalent_modes (&MODE (HIP));
+  track_equivalent_modes (&MODE (INT));
+  track_equivalent_modes (&MODE (LONG_BITS));
+  track_equivalent_modes (&MODE (LONG_BYTES));
+  track_equivalent_modes (&MODE (LONG_COMPL));
   track_equivalent_modes (&MODE (LONG_COMPLEX));
-  track_equivalent_modes (&MODE (REF_LONG_COMPLEX));
+  track_equivalent_modes (&MODE (LONG_INT));
+  track_equivalent_modes (&MODE (LONGLONG_BITS));
+  track_equivalent_modes (&MODE (LONGLONG_COMPL));
   track_equivalent_modes (&MODE (LONGLONG_COMPLEX));
-  track_equivalent_modes (&MODE (REF_LONGLONG_COMPLEX));
-  track_equivalent_modes (&MODE (REF_ROW_CHAR));
-  track_equivalent_modes (&MODE (REF_STRING));
-  track_equivalent_modes (&MODE (STRING));
-  track_equivalent_modes (&MODE (REF_PIPE));
+  track_equivalent_modes (&MODE (LONGLONG_INT));
+  track_equivalent_modes (&MODE (LONGLONG_REAL));
+  track_equivalent_modes (&MODE (LONG_REAL));
+  track_equivalent_modes (&MODE (NUMBER));
   track_equivalent_modes (&MODE (PIPE));
+  track_equivalent_modes (&MODE (PROC_REF_FILE_BOOL));
+  track_equivalent_modes (&MODE (PROC_REF_FILE_VOID));
+  track_equivalent_modes (&MODE (PROC_ROW_CHAR));
+  track_equivalent_modes (&MODE (PROC_STRING));
+  track_equivalent_modes (&MODE (PROC_VOID));
+  track_equivalent_modes (&MODE (REAL));
+  track_equivalent_modes (&MODE (REF_BITS));
+  track_equivalent_modes (&MODE (REF_BOOL));
+  track_equivalent_modes (&MODE (REF_BYTES));
+  track_equivalent_modes (&MODE (REF_CHAR));
+  track_equivalent_modes (&MODE (REF_COMPL));
+  track_equivalent_modes (&MODE (REF_COMPLEX));
+  track_equivalent_modes (&MODE (REF_FILE));
+  track_equivalent_modes (&MODE (REF_FORMAT));
+  track_equivalent_modes (&MODE (REF_INT));
+  track_equivalent_modes (&MODE (REF_LONG_BITS));
+  track_equivalent_modes (&MODE (REF_LONG_BYTES));
+  track_equivalent_modes (&MODE (REF_LONG_COMPL));
+  track_equivalent_modes (&MODE (REF_LONG_COMPLEX));
+  track_equivalent_modes (&MODE (REF_LONG_INT));
+  track_equivalent_modes (&MODE (REF_LONGLONG_BITS));
+  track_equivalent_modes (&MODE (REF_LONGLONG_COMPL));
+  track_equivalent_modes (&MODE (REF_LONGLONG_COMPLEX));
+  track_equivalent_modes (&MODE (REF_LONGLONG_INT));
+  track_equivalent_modes (&MODE (REF_LONGLONG_REAL));
+  track_equivalent_modes (&MODE (REF_LONG_REAL));
+  track_equivalent_modes (&MODE (REF_PIPE));
+  track_equivalent_modes (&MODE (REF_REAL));
+  track_equivalent_modes (&MODE (REF_REF_FILE));
+  track_equivalent_modes (&MODE (REF_ROW_CHAR));
+  track_equivalent_modes (&MODE (REF_ROW_COMPLEX));
+  track_equivalent_modes (&MODE (REF_ROW_INT));
+  track_equivalent_modes (&MODE (REF_ROW_REAL));
+  track_equivalent_modes (&MODE (REF_ROWROW_COMPLEX));
+  track_equivalent_modes (&MODE (REF_ROWROW_REAL));
+  track_equivalent_modes (&MODE (REF_SOUND));
+  track_equivalent_modes (&MODE (REF_STRING));
+  track_equivalent_modes (&MODE (ROW_BITS));
+  track_equivalent_modes (&MODE (ROW_BOOL));
+  track_equivalent_modes (&MODE (ROW_CHAR));
+  track_equivalent_modes (&MODE (ROW_COMPLEX));
+  track_equivalent_modes (&MODE (ROW_INT));
+  track_equivalent_modes (&MODE (ROW_LONG_BITS));
+  track_equivalent_modes (&MODE (ROW_LONGLONG_BITS));
+  track_equivalent_modes (&MODE (ROW_REAL));
+  track_equivalent_modes (&MODE (ROW_ROW_CHAR));
+  track_equivalent_modes (&MODE (ROWROW_COMPLEX));
+  track_equivalent_modes (&MODE (ROWROW_REAL));
+  track_equivalent_modes (&MODE (ROWS));
+  track_equivalent_modes (&MODE (ROW_SIMPLIN));
+  track_equivalent_modes (&MODE (ROW_SIMPLOUT));
+  track_equivalent_modes (&MODE (ROW_STRING));
+  track_equivalent_modes (&MODE (SEMA));
+  track_equivalent_modes (&MODE (SIMPLIN));
+  track_equivalent_modes (&MODE (SIMPLOUT));
+  track_equivalent_modes (&MODE (SOUND));
+  track_equivalent_modes (&MODE (SOUND_DATA));
+  track_equivalent_modes (&MODE (STRING));
+  track_equivalent_modes (&MODE (UNDEFINED));
+  track_equivalent_modes (&MODE (VACUUM));
+  track_equivalent_modes (&MODE (VOID));
 }
 
 /*
@@ -1482,7 +1562,7 @@ static MOID_T *make_name_row (MOID_T * m, MOID_T ** p)
 \param modifications
 **/
 
-static void make_structured_names (NODE_T * p, int *modifications)
+static void make_stowed_names (NODE_T * p, int *modifications)
 {
   for (; p != NULL; FORWARD (p)) {
 /* Dive into lexical levels. */
@@ -1512,7 +1592,7 @@ static void make_structured_names (NODE_T * p, int *modifications)
         }
       }
     }
-    make_structured_names (SUB (p), modifications);
+    make_stowed_names (SUB (p), modifications);
   }
 }
 
@@ -1844,6 +1924,42 @@ static void make_deflexed_modes (NODE_T * p, int *modifications)
 }
 
 /*!
+\brief make extra rows local
+\param top_node
+**/
+
+static void make_extra_rows_local (SYMBOL_TABLE_T * s)
+{
+  MOID_T *m, **top = &(s->moids);
+  for (m = s->moids; m != NULL; FORWARD (m)) {
+    if (ATTRIBUTE (m) == ROW_SYMBOL && DIMENSION (m) > 0 && SUB (m) != NULL) {
+      (void) add_row (top, DIMENSION (m) + 1, SUB (m), NODE (m));
+    } else if (ATTRIBUTE (m) == REF_SYMBOL && ATTRIBUTE (SUB (m)) == ROW_SYMBOL) {
+      MOID_T *y, *z;
+      z = add_row (top, DIMENSION (SUB (m)) + 1, SUB (SUB (m)), NODE (SUB (m)));
+      y = add_mode (top, REF_SYMBOL, 0, NODE (m), z, NULL);
+      NAME (y) = m;
+    }
+  }
+}
+
+/*!
+\brief make extra rows
+\param top_node
+**/
+
+static void make_extra_rows (NODE_T * p)
+{
+  for (; p != NULL; FORWARD (p)) {
+/* Dive into lexical levels. */
+    if (SUB (p) != NULL && whether_new_lexical_level (p)) {
+      make_extra_rows_local (SYMBOL_TABLE (SUB (p)));
+    }
+    make_extra_rows (SUB (p));
+  }
+}
+
+/*!
 \brief whether mode has ref 2
 \param m
 \return TRUE or FALSE
@@ -1961,14 +2077,26 @@ static void mark_row_modes (NODE_T * p)
 \param start
 **/
 
-static void set_moid_attributes (MOID_LIST_T * start)
+static void set_moid_attributes (MOID_LIST_T * q)
 {
-  for (; start != NULL; start = NEXT (start)) {
-    if (!(MOID (start)->has_ref)) {
-      MOID (start)->has_ref = whether_mode_has_ref (MOID (start));
+  for (; q != NULL; FORWARD (q)) {
+    MOID_T *z = MOID (q);
+    if (z->has_ref == A68_FALSE) {
+      z->has_ref = whether_mode_has_ref (z);
     }
-    if (!(MOID (start)->has_flex)) {
-      MOID (start)->has_flex = whether_mode_has_flex (MOID (start));
+    if (z->has_flex == A68_FALSE) {
+      z->has_flex = whether_mode_has_flex (z);
+    }
+    if (WHETHER (z, ROW_SYMBOL) && SLICE (z) != NULL) {
+      ROWED (SLICE (z)) = z;
+      track_equivalent_modes (&(ROWED (SLICE (z))));
+    }
+    if (WHETHER (z, REF_SYMBOL)) {
+      MOID_T *y = SUB (z);
+      if (SLICE (y) != NULL && WHETHER (SLICE (y), ROW_SYMBOL) && NAME (z) != NULL) {
+        ROWED (NAME (z)) = z;
+        track_equivalent_modes (&(ROWED (NAME (z))));
+      }
     }
   }
 }
@@ -2003,7 +2131,7 @@ static int expand_contract_moids (NODE_T * top_node, int cycle_no)
     absorb_unions (top_node, &modifications);
     contract_unions (top_node, &modifications);
     make_multiple_modes (top_node, &modifications);
-    make_structured_names (top_node, &modifications);
+    make_stowed_names (top_node, &modifications);
     make_deflexed_modes (top_node, &modifications);
   }
 /* Calculate equivalent modes. */
@@ -2018,6 +2146,10 @@ static int expand_contract_moids (NODE_T * top_node, int cycle_no)
   moid_list_track_equivalent (stand_env->moids);
   contract_unions (top_node, &modifications);
   set_moid_attributes (top_moid_list);
+  track_equivalent_tree (top_node);
+  track_equivalent_tags (stand_env->indicants);
+  track_equivalent_tags (stand_env->identifiers);
+  track_equivalent_tags (stand_env->operators);
   set_moid_sizes (top_moid_list);
   return (modifications);
 }
@@ -2043,6 +2175,8 @@ void set_up_mode_table (NODE_T * top_node)
   reset_moid (top_node);
   get_mode_from_modes (top_node, 0);
   get_mode_from_proc_variable_declarations (top_node);
+  make_extra_rows_local (stand_env);
+  make_extra_rows (top_node);
 /* Tie MODE declarations to their respective a68_modes ... */
   bind_indicants_to_tags (top_node);
   bind_indicants_to_modes (top_node);
@@ -2143,47 +2277,49 @@ static int moid_size_2 (MOID_T * p)
   } else if (p == MODE (VOID)) {
     return (0);
   } else if (p == MODE (INT)) {
-    return (SIZE_OF (A68_INT));
+    return (ALIGNED_SIZEOF (A68_INT));
   } else if (p == MODE (LONG_INT)) {
     return ((int) size_long_mp ());
   } else if (p == MODE (LONGLONG_INT)) {
     return ((int) size_longlong_mp ());
   } else if (p == MODE (REAL)) {
-    return (SIZE_OF (A68_REAL));
+    return (ALIGNED_SIZEOF (A68_REAL));
   } else if (p == MODE (LONG_REAL)) {
     return ((int) size_long_mp ());
   } else if (p == MODE (LONGLONG_REAL)) {
     return ((int) size_longlong_mp ());
   } else if (p == MODE (BOOL)) {
-    return (SIZE_OF (A68_BOOL));
+    return (ALIGNED_SIZEOF (A68_BOOL));
   } else if (p == MODE (CHAR)) {
-    return (SIZE_OF (A68_CHAR));
+    return (ALIGNED_SIZEOF (A68_CHAR));
   } else if (p == MODE (ROW_CHAR)) {
-    return (SIZE_OF (A68_REF));
+    return (ALIGNED_SIZEOF (A68_REF));
   } else if (p == MODE (BITS)) {
-    return (SIZE_OF (A68_BITS));
+    return (ALIGNED_SIZEOF (A68_BITS));
   } else if (p == MODE (LONG_BITS)) {
     return ((int) size_long_mp ());
   } else if (p == MODE (LONGLONG_BITS)) {
     return ((int) size_longlong_mp ());
   } else if (p == MODE (BYTES)) {
-    return (SIZE_OF (A68_BYTES));
+    return (ALIGNED_SIZEOF (A68_BYTES));
   } else if (p == MODE (LONG_BYTES)) {
-    return (SIZE_OF (A68_LONG_BYTES));
+    return (ALIGNED_SIZEOF (A68_LONG_BYTES));
   } else if (p == MODE (FILE)) {
-    return (SIZE_OF (A68_FILE));
+    return (ALIGNED_SIZEOF (A68_FILE));
   } else if (p == MODE (CHANNEL)) {
-    return (SIZE_OF (A68_CHANNEL));
+    return (ALIGNED_SIZEOF (A68_CHANNEL));
   } else if (p == MODE (FORMAT)) {
-    return (SIZE_OF (A68_FORMAT));
+    return (ALIGNED_SIZEOF (A68_FORMAT));
   } else if (p == MODE (SEMA)) {
-    return (SIZE_OF (A68_REF));
+    return (ALIGNED_SIZEOF (A68_REF));
+  } else if (p == MODE (SOUND)) {
+    return (ALIGNED_SIZEOF (A68_SOUND));
   } else if (p == MODE (COLLITEM)) {
-    return (SIZE_OF (A68_COLLITEM));
+    return (ALIGNED_SIZEOF (A68_COLLITEM));
   } else if (p == MODE (NUMBER)) {
     int k = 0;
-    if (SIZE_OF (A68_INT) > k) {
-      k = SIZE_OF (A68_INT);
+    if (ALIGNED_SIZEOF (A68_INT) > k) {
+      k = ALIGNED_SIZEOF (A68_INT);
     }
     if ((int) size_long_mp () > k) {
       k = (int) size_long_mp ();
@@ -2191,8 +2327,8 @@ static int moid_size_2 (MOID_T * p)
     if ((int) size_longlong_mp () > k) {
       k = (int) size_longlong_mp ();
     }
-    if (SIZE_OF (A68_REAL) > k) {
-      k = SIZE_OF (A68_REAL);
+    if (ALIGNED_SIZEOF (A68_REAL) > k) {
+      k = ALIGNED_SIZEOF (A68_REAL);
     }
     if ((int) size_long_mp () > k) {
       k = (int) size_long_mp ();
@@ -2200,32 +2336,35 @@ static int moid_size_2 (MOID_T * p)
     if ((int) size_longlong_mp () > k) {
       k = (int) size_longlong_mp ();
     }
-    if (SIZE_OF (A68_REF) > k) {
-      k = SIZE_OF (A68_REF);
+    if (ALIGNED_SIZEOF (A68_REF) > k) {
+      k = ALIGNED_SIZEOF (A68_REF);
     }
-    return (SIZE_OF (A68_UNION) + k);
+    return (ALIGNED_SIZEOF (A68_UNION) + k);
   } else if (p == MODE (SIMPLIN)) {
     int k = 0;
-    if (SIZE_OF (A68_REF) > k) {
-      k = SIZE_OF (A68_REF);
+    if (ALIGNED_SIZEOF (A68_REF) > k) {
+      k = ALIGNED_SIZEOF (A68_REF);
     }
-    if (SIZE_OF (A68_FORMAT) > k) {
-      k = SIZE_OF (A68_FORMAT);
+    if (ALIGNED_SIZEOF (A68_FORMAT) > k) {
+      k = ALIGNED_SIZEOF (A68_FORMAT);
     }
-    if (SIZE_OF (A68_PROCEDURE) > k) {
-      k = SIZE_OF (A68_PROCEDURE);
+    if (ALIGNED_SIZEOF (A68_PROCEDURE) > k) {
+      k = ALIGNED_SIZEOF (A68_PROCEDURE);
     }
-    return (SIZE_OF (A68_UNION) + k);
+    if (ALIGNED_SIZEOF (A68_SOUND) > k) {
+      k = ALIGNED_SIZEOF (A68_SOUND);
+    }
+    return (ALIGNED_SIZEOF (A68_UNION) + k);
   } else if (p == MODE (SIMPLOUT)) {
-    return (SIZE_OF (A68_UNION) + max_simplout_size);
+    return (ALIGNED_SIZEOF (A68_UNION) + max_simplout_size);
   } else if (WHETHER (p, REF_SYMBOL)) {
-    return (SIZE_OF (A68_REF));
+    return (ALIGNED_SIZEOF (A68_REF));
   } else if (WHETHER (p, PROC_SYMBOL)) {
-    return (SIZE_OF (A68_PROCEDURE));
+    return (ALIGNED_SIZEOF (A68_PROCEDURE));
   } else if (WHETHER (p, ROW_SYMBOL) && p != MODE (ROWS)) {
-    return (SIZE_OF (A68_REF));
+    return (ALIGNED_SIZEOF (A68_REF));
   } else if (p == MODE (ROWS)) {
-    return (SIZE_OF (A68_UNION) + SIZE_OF (A68_REF));
+    return (ALIGNED_SIZEOF (A68_UNION) + ALIGNED_SIZEOF (A68_REF));
   } else if (WHETHER (p, FLEX_SYMBOL)) {
     return moid_size (SUB (p));
   } else if (WHETHER (p, STRUCT_SYMBOL)) {
@@ -2243,7 +2382,7 @@ static int moid_size_2 (MOID_T * p)
         size = moid_size (MOID (z));
       }
     }
-    return (SIZE_OF (A68_UNION) + size);
+    return (ALIGNED_SIZEOF (A68_UNION) + size);
   } else if (PACK (p) != NULL) {
     PACK_T *z = PACK (p);
     int size = 0;
@@ -2365,6 +2504,8 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w)
     moid_to_string_3 (b, "STRING", w);
   } else if (n == MODE (PIPE)) {
     moid_to_string_3 (b, "PIPE", w);
+  } else if (n == MODE (SOUND)) {
+    moid_to_string_3 (b, "SOUND", w);
   } else if (n == MODE (COLLITEM)) {
     moid_to_string_3 (b, "COLLITEM", w);
   } else if (WHETHER (n, IN_TYPE_MODE)) {

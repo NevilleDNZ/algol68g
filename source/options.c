@@ -62,14 +62,14 @@ static void option_error (SOURCE_LINE_T * l, char *option, char *info)
 }
 
 /*!
-\brief strip minus signs preceeding a string
+\brief strip minus preceeding a string
 \param p
 \return stripped string
 **/
 
-static char *strip_minus (char *p)
+static char *strip_sign (char *p)
 {
-  while (p[0] == '-' || p[0] == '+') {
+  while (p[0] == '-' || p[0] == '+' || p[0] == '/') {
     p++;
   }
   return (new_string (p));
@@ -85,7 +85,7 @@ static char *strip_minus (char *p)
 void add_option_list (OPTION_LIST_T ** l, char *str, SOURCE_LINE_T * line)
 {
   if (*l == NULL) {
-    *l = (OPTION_LIST_T *) get_heap_space (SIZE_OF (OPTION_LIST_T));
+    *l = (OPTION_LIST_T *) get_heap_space (ALIGNED_SIZEOF (OPTION_LIST_T));
     (*l)->scan = source_scan;
     (*l)->str = new_string (str);
     (*l)->processed = A68_FALSE;
@@ -103,7 +103,7 @@ void add_option_list (OPTION_LIST_T ** l, char *str, SOURCE_LINE_T * line)
 
 void init_options (MODULE_T * module)
 {
-  options = (OPTIONS_T *) malloc ((size_t) SIZE_OF (OPTIONS_T));
+  options = (OPTIONS_T *) malloc ((size_t) ALIGNED_SIZEOF (OPTIONS_T));
   module->options.list = NULL;
 }
 
@@ -135,7 +135,7 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
 {
   while (i != NULL) {
     if (i->scan == source_scan) {
-      char *p = strip_minus (i->str);
+      char *p = strip_sign (i->str);
 /* ECHO echoes a string. */
       if (eq (module, p, "ECHO")) {
         {
@@ -276,7 +276,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
     if (!(i->processed)) {
 /* Accept UNIX '-option [=] value' */
       BOOL_T minus_sign = ((i->str)[0] == '-');
-      char *p = strip_minus (i->str);
+      char *p = strip_sign (i->str);
       if (!minus_sign && cmd_line) {
 /* Item without '-'s is generic filename. */
         if (!name_set) {
@@ -436,11 +436,19 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
       else if (eq (module, p, "MONitor") || eq (module, p, "DEBUG")) {
         module->options.debug = A68_TRUE;
       }
+/* OPTIMISE attempts optimisations. */
+      else if (eq (module, p, "Optimise")) {
+        module->options.optimise = A68_TRUE;
+      }
+/* NOOPTIMISE skips optimisations. */
+      else if (eq (module, p, "NOOptimise")) {
+        module->options.optimise = A68_FALSE;
+      }
 /* REGRESSION is an option that sets preferences when running the Algol68G test suite. */
       else if (eq (module, p, "REGRESSION")) {
         module->options.regression_test = A68_TRUE;
         gnu_diags = A68_FALSE;
-        module->options.time_limit = 10;
+        module->options.time_limit = 30;
         term_width = MAX_LINE_WIDTH;
       }
 /* NOWARNINGS switches warnings off. */
@@ -644,6 +652,7 @@ void default_options (MODULE_T * module)
   module->options.debug = A68_FALSE;
   module->options.moid_listing = A68_FALSE;
   module->options.nodemask = ASSERT_MASK | SOURCE_MASK;
+  module->options.optimise = A68_FALSE;
   module->options.portcheck = A68_FALSE;
   module->options.pragmat_sema = A68_TRUE;
   module->options.reductions = A68_FALSE;

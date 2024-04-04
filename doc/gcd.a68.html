@@ -38,7 +38,7 @@ Documentation for Algol 68 Genie Mark 11
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Example: dining persons problem</h2>
+<h2>Example: Greatest common divisor</h2>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="algol68.gif">
@@ -72,66 +72,18 @@ Documentation for Algol 68 Genie Mark 11
 </table>
 
 <pre>
-# 
-Dining persons problem, analogous to the "dining philosophers problem".
 
-`N' persons sit at a round table with a bowl of spaghetti. 
-There are `N' forks, one between each pair of persons.
-To eat spaghetti, a person needs two forks, so not everybody can eat at
-the same time. This program synchronises their actions.
-#
+BEGIN OP GCD = (INT a, b) INT:
+         IF b = 0 
+         THEN ABS a
+         ELSE b GCD (a MOD b)
+         FI;
 
-MODE PERSON = INT;
+      PRIO GCD = 8;
 
-INT persons = 10, idle = 0, try = 1, eat = 2, meal tickets = 2;
-
-[persons] INT action, [persons] SEMA person;
-
-FOR i TO persons
-DO action[i] := idle;
-   person[i] := LEVEL 0
-OD;
-
-SEMA mutex = LEVEL 1; # to synchronise access to `action' #
-
-PROC put at table = (PERSON i) VOID:
-     IF i > 0
-     THEN PAR BEGIN put at table (i - 1),
-                    (PROC do eat  = (PERSON i) VOID: print ((i, " eats")),
-                          do idle = (PERSON i) VOID: print ((i, " is not eating"));
-                     TO meal tickets
-                     DO OP LEFT  = (PERSON i) PERSON: 1 + (i - 1) %* persons,
-                           RIGHT = (PERSON i) PERSON: 1 + (i + 1) %* persons;
-
-                        PROC try eat = (PERSON i) VOID:
-                             IF action[i] = try ANDF 
-                                (action[LEFT i] ~= eat ANDF action[RIGHT i] ~= eat)
-                             THEN action[i] := eat;
-                                  UP person[i]
-                             FI;
-
-                        do idle (i);
-                        # Try to eat #
-                        DOWN mutex;
-                        action[i] := try;
-                        try eat (i);
-                        UP mutex;
-                        # Eat when we can #
-                        DOWN person [i];
-                        do eat (i);
-                        # Stop eating #
-                        DOWN mutex;
-                        action[i] := idle;
-                        try eat (LEFT i);
-                        try eat (RIGHT i);
-                        UP mutex
-                     OD;
-                     do idle (i)
-                    )
-              END
-     FI;
-
-put at table (persons)
+      print ((read int GCD read int, new line))
+  
+END
 </pre>
 
 <!-- Footer -->

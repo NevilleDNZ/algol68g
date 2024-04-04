@@ -48,7 +48,6 @@ that has not been implemented here. */
 #include "algol68g.h"
 #include "environ.h"
 #include "genie.h"
-#include <ctype.h>
 
 #define STOP_CHAR 127
 
@@ -160,6 +159,7 @@ static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
 \brief skip string
 \param top
 \param ch
+\return
 **/
 
 static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
@@ -194,6 +194,7 @@ static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
 \param top
 \param ch
 \param delim
+\return
 **/
 
 static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
@@ -235,6 +236,7 @@ static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
 \param ch
 \param delim
 \param whitespace whether other pragmat items are allowed
+\return
 **/
 
 static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T whitespace)
@@ -481,8 +483,7 @@ been included will not be included a second time - it will be ignored.
           } else {
             SCAN_ERROR (A68_TRUE, start_l, start_c, ERROR_INCORRECT_FILENAME);
           }
-        }
-        while (v[0] != delim);
+        } while (v[0] != delim);
 /* Insist that the pragmat is closed properly. */
         v = &v[1];
         SCAN_ERROR (!skip_pragmat (&u, &v, pr_lim, A68_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
@@ -1306,6 +1307,11 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
           c = next_char (module, ref_l, ref_s, A68_FALSE);
         }
       }
+    } else if (c == ':') {
+      (sym++)[0] = c;
+      if ((c = next_char (module, ref_l, ref_s, A68_FALSE)) == '=') {
+        (sym++)[0] = c;
+      }
     }
     sym[0] = NULL_CHAR;
     *att = 0;
@@ -1656,7 +1662,7 @@ void get_refinements (MODULE_T * z)
     return;
   }
   while (p != NULL && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, 0)) {
-    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space (SIZE_OF (REFINEMENT_T)), *x;
+    REFINEMENT_T *new_one = (REFINEMENT_T *) get_fixed_heap_space (ALIGNED_SIZEOF (REFINEMENT_T)), *x;
     BOOL_T exists;
     NEXT (new_one) = NULL;
     new_one->name = SYMBOL (p);

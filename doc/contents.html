@@ -29,7 +29,7 @@ pre {font-size: 10pt; font-family: Courier;}
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
 <small>
-Documentation for Algol 68 Genie Mark 10.2
+Documentation for Algol 68 Genie Mark 11
 </small>
 </td>
 </table>
@@ -38,11 +38,11 @@ Documentation for Algol 68 Genie Mark 10.2
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 10.2</h2>
+<h2>Algol 68 Genie Mark 11</h2>
 <p>
 <address>J. Marcel van der Veer
 <br>
-April 2007
+November 2007
 </address>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
@@ -55,7 +55,9 @@ April 2007
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.2</b>
+<b>Algol68G Mark 11</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small><b>Contents</b></small></a><br>
 <p>
 &nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
@@ -63,15 +65,7 @@ April 2007
 &nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
 <p>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
-<p>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
@@ -90,7 +84,7 @@ April 2007
 <li><a href="algol.html#linkto">What libraries can Algol 68 Genie link to?</a>
 <li><a href="algol.html#contact">Author and contact information</a>
 <li><a href="algol.html#ack">Acknowledgements</a>
-<li><a href="algol.html#release">Release history</a>
+<li><a href="algol.html#history">Release history</a>
 </ul>
 
 <h3><a href="install.html">2. Installing Algol 68 Genie</a></h3>
@@ -140,7 +134,7 @@ April 2007
 <li><a href="extensions.html#curses">Curses support</a>
 </ul>
 
-<h3><a href="postgresql.html">7. PostgreSQL client routines</a></h3>
+<h3><a href="postgresql.html">7. PostgreSQL client procedures</a></h3>
 <ul>
 <li><a href="postgresql.html#pgconnect">Connecting to a server</a><br>
 <li><a href="postgresql.html#pgquery">Sending queries and retrieving results</a><br>
@@ -150,7 +144,7 @@ April 2007
 <li><a href="postgresql.html#pgcopyright">Copyright and license notice</a><br>
 </ul>
 
-<h3><a href="drawing.html">8. Drawing using the GNU Plotting Utilities</a></h3>
+<h3><a href="drawing.html">8. Graphical procedures</a></h3>
 <ul>
 <li><a href="drawing.html#drawsetup">Setting up a graphics device</a>
 <li><a href="drawing.html#drawcolour">Specifying colours</a>
@@ -159,7 +153,14 @@ April 2007
 <li><a href="drawing.html#mandelbrot">Example: Mandelbrot set</a>
 </ul>
 
-<h3><a href="numerical.html">9. Extra numerical procedures</a></h3>
+<h3><a href="sound.html">9. Sound procedures</a></h3>
+<ul>
+<li><a href="sound.html#struct">SOUND data structure and access methods</a><br>
+<li><a href="sound.html#transput">Transput of SOUND values</a><br>
+<li><a href="sound.html#play">Playing SOUND values</a><br>
+</ul>
+
+<h3><a href="numerical.html">10. Extra numerical procedures</a></h3>
 <ul>
 <li><a href="numerical.html#gslreal">REAL functions</a>
 <li><a href="numerical.html#gslcomplex">COMPLEX functions</a>
@@ -170,9 +171,9 @@ April 2007
 <li><a href="numerical.html#constants">Physical Constants</a>
 </ul>
 
-
-<h3><a href="torrix.html">10. Linear algebra using the GNU Scientific Library</a></h3>
+<h3><a href="torrix.html">11. Linear algebra and Fourier transforms</a></h3>
 <ul>
+<li><a href="torrix.html#extensions">Language extensions</a>
 <li><a href="torrix.html#elementary">Elementary operations on vectors and matrices</a>
 <ul>
 <li><a href="torrix.html#monad">Monadic operators</a>
@@ -185,9 +186,10 @@ April 2007
 <li><a href="torrix.html#qr">QR decomposition</a>
 <li><a href="torrix.html#ch">Cholesky decomposition</a>
 </ul>
+<li><a href="torrix.html#fft">Fourier transforms</a>
 </ul>
 
-<h3><a href="synopsis.html">11. Synopsis and options</a></h3>
+<h3><a href="synopsis.html">12. Synopsis and options</a></h3>
 <ul>
 <li><a href="synopsis.html#synopsis">Synopsis</a>
 <li><a href="synopsis.html#options">Options</a>
@@ -198,11 +200,11 @@ April 2007
 <li><a href="synopsis.html#optionint">Interpreter options</a>
 <li><a href="synopsis.html#optionmisc">Miscellaneous options</a>
 </ul>
-<li><a href="synopsis.html#monitor">The monitor</a>
+<li><a href="synopsis.html#monitor">The monitor (debugger)</a>
 <li><a href="synopsis.html#monexp">Monitor expressions</a>
 </ul>
 
-<h3><a href="syntax.html">12. Context-free syntax summary</a></h3>
+<h3><a href="syntax.html">13. Context-free syntax summary</a></h3>
 <ul>
 <li><a href="syntax.html#basic">Notions and notation</a>
 <li><a href="syntax.html#reserved">Reserved symbols</a>
@@ -224,7 +226,7 @@ April 2007
 <li><a href="syntax.html#refinements">Refinements</a>
 </ul>
 
-<h3><a href="environ.html">13. The standard environment</a></h3>
+<h3><a href="environ.html">14. The standard environment</a></h3>
 <ul>
 <li><a href="environ.html#envenq">Enquiries</a>
 <li><a href="environ.html#envmath">Math constants</a>
@@ -239,7 +241,7 @@ April 2007
 <li><a href="environ.html#envmisc">Miscellaneous</a>
 </ul>
 
-<h3><a href="license.html">14. GNU Free Documentation License</a></h3>
+<h3><a href="license.html">15. GNU Free Documentation License</a></h3>
 
 <p style="font-size: 8pt;">
 <font color=black>
@@ -251,14 +253,14 @@ Back-Cover Texts. A copy of the license is included in the section entitled
 </p>
 
 <!-- Footer -->
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 <p>
 <small>
 Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.2 (April 2007)
+Algol 68 Genie Mark 11 (November 2007)
 </small>
 </p>
-<hr color=#f0f0f0>
+<hr color=#e0e0e0>
 
 </body>
 </html>

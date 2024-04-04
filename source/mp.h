@@ -78,7 +78,7 @@ enum
 #define MP_EXPONENT(z) ((z)[1])
 #define MP_DIGIT(z, n) ((z)[(n) + 1])
 
-#define SIZE_MP(digits) ((2 + digits) * SIZE_OF (MP_DIGIT_T))
+#define SIZE_MP(digits) ((2 + digits) * ALIGNED_SIZEOF (MP_DIGIT_T))
 
 #define IS_ZERO_MP(z) (MP_DIGIT (z, 1) == (MP_DIGIT_T) 0)
 

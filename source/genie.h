@@ -67,17 +67,22 @@ struct ACTIVATION_RECORD
   NODE_T *node;
   jmp_buf *jump_stat;
   BOOL_T proc_frame;
+  int frame_no;
+#if defined ENABLE_PAR_CLAUSE
+  pthread_t thread_id;
+#endif
 };
 
 #define FRAME_ADDRESS(n) ((BYTE_T *) &frame_segment[n])
-#define FRAME_CLEAR(m) FILL ((BYTE_T *) FRAME_OFFSET (FRAME_INFO_SIZE), 0, (m))
+#define FRAME_CLEAR(m) FILL_ALIGNED ((BYTE_T *) FRAME_OFFSET (FRAME_INFO_SIZE), 0, (m))
 #define FRAME_DYNAMIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_link)
 #define FRAME_DYNAMIC_SCOPE(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_scope)
 #define FRAME_INCREMENT(n) (SYMBOL_TABLE (FRAME_TREE(n))->ap_increment)
-#define FRAME_INFO_SIZE (A68_ALIGN (SIZE_OF (ACTIVATION_RECORD)))
+#define FRAME_INFO_SIZE (A68_ALIGN (ALIGNED_SIZEOF (ACTIVATION_RECORD)))
 #define FRAME_JUMP_STAT(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->jump_stat)
 #define FRAME_LEXICAL_LEVEL(n) (SYMBOL_TABLE (FRAME_TREE(n))->level)
 #define FRAME_LOCAL(n, m) (FRAME_ADDRESS ((n) + FRAME_INFO_SIZE + (m)))
+#define FRAME_NUMBER(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->frame_no)
 #define FRAME_OBJECT(n) (FRAME_OFFSET (FRAME_INFO_SIZE + (n)))
 #define FRAME_OFFSET(n) (FRAME_ADDRESS (frame_pointer + (n)))
 #define FRAME_PROC_FRAME(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->proc_frame)
@@ -85,6 +90,10 @@ struct ACTIVATION_RECORD
 #define FRAME_STATIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->static_link)
 #define FRAME_TOP (FRAME_OFFSET (0))
 #define FRAME_TREE(n) (NODE ((ACTIVATION_RECORD *) FRAME_ADDRESS(n)))
+
+#if defined ENABLE_PAR_CLAUSE
+#define FRAME_THREAD_ID(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->thread_id)
+#endif
 
 #define FOLLOW_STATIC_LINK(dest, l) {\
   if ((l) == global_level && global_pointer > 0) {\
@@ -107,27 +116,32 @@ struct ACTIVATION_RECORD
 
 #define GET_DESCRIPTOR(a, t, p)\
   a = (A68_ARRAY *) ADDRESS (p);\
-  t = (A68_TUPLE *) & (((BYTE_T *) (a)) [SIZE_OF (A68_ARRAY)]);
+  t = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZEOF (A68_ARRAY)]);
+
+#define GET_DESCRIPTOR2(a, t1, t2, p)\
+  a = (A68_ARRAY *) ADDRESS (p);\
+  t1 = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZEOF (A68_ARRAY)]);\
+  t2 = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZEOF (A68_ARRAY) + sizeof (A68_TUPLE)]);
 
 #define PUT_DESCRIPTOR(a, t1, p) {\
   BYTE_T *a_p = ADDRESS (p);\
   *(A68_ARRAY *) a_p = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_OF (A68_ARRAY)]) = (t1);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZEOF (A68_ARRAY)]) = (t1);\
   }
 
 #define PUT_DESCRIPTOR2(a, t1, t2, p) {\
   /* ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL); */\
   BYTE_T *a_p = ADDRESS (p);\
   *(A68_ARRAY *) a_p = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_OF (A68_ARRAY)]) = (t1);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [SIZE_OF (A68_ARRAY) + sizeof (A68_TUPLE)]) = (t2);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZEOF (A68_ARRAY)]) = (t1);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZEOF (A68_ARRAY) + sizeof (A68_TUPLE)]) = (t2);\
   }
 
 #define ROW_SIZE(t) (((t)->upper_bound >= (t)->lower_bound) ? ((t)->upper_bound - (t)->lower_bound + 1) : 0)
 
 #define ROW_ELEMENT(a, k) (((ADDR_T) k + (a)->slice_offset) * (a)->elem_size + (a)->field_offset)
 
-#define INDEX_1_DIM(a, t, k) ROW_ELEMENT (a, ((t)->span * ((int) k - (t)->shift)))
+#define INDEX_1_DIM(a, t, k) ROW_ELEMENT (a, ((t)->span * (int) k - (t)->shift))
 
 /* Macros for execution. */
 
@@ -156,7 +170,7 @@ extern unsigned check_time_limit_count;
 #define EXECUTE_UNIT(p) {\
   PROPAGATOR_T *prop = &((p)->genie.propagator);\
   last_unit = p;\
-  prop->unit (prop->source);\
+  (void) prop->unit (prop->source);\
   }
 
 #define EXECUTE_UNIT_TRACE(p) {\
@@ -175,7 +189,7 @@ extern unsigned check_time_limit_count;
     where (STDOUT_FILENO, (p));\
   }\
   last_unit = p;\
-  prop->unit (prop->source);\
+  (void) (prop->unit (prop->source));\
   }
 
 /* Macro's for the garbage collector. */
@@ -190,7 +204,7 @@ extern unsigned check_time_limit_count;
 #define PROTECT_FROM_SWEEP_STACK(p)\
   if ((p)->protect_sweep != NULL) {\
     *(A68_REF *) FRAME_LOCAL (frame_pointer, (p)->protect_sweep->offset) =\
-    *(A68_REF *) (STACK_OFFSET (- SIZE_OF (A68_REF)));\
+    *(A68_REF *) (STACK_OFFSET (- ALIGNED_SIZEOF (A68_REF)));\
   }
 
 #define PREEMPTIVE_SWEEP {\
@@ -210,7 +224,7 @@ extern int block_heap_compacter;
 
 /* Tests for objects of mode INT. */
 
-#if defined HAVE_IEEE_754
+#if defined ENABLE_IEEE_754
 #if INT_MAX == 2147483647
 #define TEST_INT_ADDITION(p, i, j) {\
   double _sum_ = (double) (i) + (double) (j);\
@@ -241,7 +255,7 @@ extern int block_heap_compacter;
 
 /* Tests for objects of mode REAL. */
 
-#if defined HAVE_IEEE_754
+#if defined ENABLE_IEEE_754
 #define NOT_A_REAL(x) (!finite (x))
 #define TEST_REAL_REPRESENTATION(p, u)\
   if (NOT_A_REAL (u)) {\
@@ -253,7 +267,7 @@ extern int block_heap_compacter;
 #define TEST_REAL_REPRESENTATION(p, u) {;}
 #endif
 
-#if defined HAVE_IEEE_754
+#if defined ENABLE_IEEE_754
 #define TEST_COMPLEX_REPRESENTATION(p, u, v)\
   if (NOT_A_REAL (u) || NOT_A_REAL (v)) {\
     errno = ERANGE;\
@@ -264,7 +278,7 @@ extern int block_heap_compacter;
 #define TEST_COMPLEX_REPRESENTATION(p, u, v) {;}
 #endif
 
-#if defined HAVE_IEEE_754
+#if defined ENABLE_IEEE_754
 #define TEST_TIMES_OVERFLOW_REAL(p, u, v) {;}
 #else
 #define TEST_TIMES_OVERFLOW_REAL(p, u, v)\
@@ -286,7 +300,7 @@ still is sufficient overhead to make it to the next check.
 
 #define TOO_COMPLEX "program too complex"
 
-#if defined HAVE_SYSTEM_STACK_CHECK
+#if defined ENABLE_SYS_STACK_CHECK
 #define SYSTEM_STACK_USED (ABS ((int) system_stack_offset - (int) &stack_offset))
 #define LOW_STACK_ALERT(p) {\
   BYTE_T stack_offset;\
@@ -340,13 +354,36 @@ returns: static link for stack frame at 'new_lex_lvl'.
     (dest) = frame_pointer;\
   }}
 
+#if defined ENABLE_PAR_CLAUSE
 #define OPEN_STATIC_FRAME(p) {\
   ADDR_T dynamic_link = frame_pointer, static_link;\
   ACTIVATION_RECORD *act;\
-  /* LOW_STACK_ALERT (p); */\
   STATIC_LINK_FOR_FRAME (static_link, LEX_LEVEL (p));\
   frame_pointer += FRAME_SIZE (dynamic_link);\
   act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
+  act->frame_no = FRAME_NUMBER (dynamic_link) + 1;\
+  act->static_link = static_link;\
+  act->dynamic_link = dynamic_link;\
+  act->dynamic_scope = frame_pointer;\
+  act->node = p;\
+  act->jump_stat = NULL;\
+  act->proc_frame = A68_FALSE;\
+  act->thread_id = pthread_self ();\
+  FRAME_CLEAR (SYMBOL_TABLE (p)->ap_increment);\
+  if (LEX_LEVEL (p) == global_level) {\
+    global_pointer = frame_pointer;\
+  }\
+  if (SYMBOL_TABLE (p)->initialise_frame) {\
+    initialise_frame (p);\
+  }}
+#else
+#define OPEN_STATIC_FRAME(p) {\
+  ADDR_T dynamic_link = frame_pointer, static_link;\
+  ACTIVATION_RECORD *act;\
+  STATIC_LINK_FOR_FRAME (static_link, LEX_LEVEL (p));\
+  frame_pointer += FRAME_SIZE (dynamic_link);\
+  act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
+  act->frame_no = FRAME_NUMBER (dynamic_link) + 1;\
   act->static_link = static_link;\
   act->dynamic_link = dynamic_link;\
   act->dynamic_scope = frame_pointer;\
@@ -360,7 +397,9 @@ returns: static link for stack frame at 'new_lex_lvl'.
   if (SYMBOL_TABLE (p)->initialise_frame) {\
     initialise_frame (p);\
   }}
+#endif
 
+#if defined ENABLE_PAR_CLAUSE
 #define OPEN_PROC_FRAME(p, environ) {\
   ADDR_T dynamic_link = frame_pointer, static_link;\
   ACTIVATION_RECORD *act;\
@@ -372,6 +411,34 @@ returns: static link for stack frame at 'new_lex_lvl'.
   }\
   frame_pointer += FRAME_SIZE (dynamic_link);\
   act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
+  act->frame_no = FRAME_NUMBER (dynamic_link) + 1;\
+  act->static_link = static_link;\
+  act->dynamic_link = dynamic_link;\
+  act->dynamic_scope = frame_pointer;\
+  act->node = p;\
+  act->jump_stat = NULL;\
+  act->proc_frame = A68_TRUE;\
+  act->thread_id = pthread_self ();\
+  FRAME_CLEAR (SYMBOL_TABLE (p)->ap_increment);\
+  if (LEX_LEVEL (p) == global_level) {\
+    global_pointer = frame_pointer;\
+  }\
+  if (SYMBOL_TABLE (p)->initialise_frame) {\
+    initialise_frame (p);\
+  }}
+#else
+#define OPEN_PROC_FRAME(p, environ) {\
+  ADDR_T dynamic_link = frame_pointer, static_link;\
+  ACTIVATION_RECORD *act;\
+  LOW_STACK_ALERT (p);\
+  static_link = (environ > 0 ? environ : frame_pointer);\
+  if (frame_pointer < static_link) {\
+    diagnostic_node (A68_RUNTIME_ERROR, (p), ERROR_SCOPE_DYNAMIC_0);\
+    exit_genie (p, A68_RUNTIME_ERROR);\
+  }\
+  frame_pointer += FRAME_SIZE (dynamic_link);\
+  act = (ACTIVATION_RECORD *) FRAME_ADDRESS (frame_pointer);\
+  act->frame_no = FRAME_NUMBER (dynamic_link) + 1;\
   act->static_link = static_link;\
   act->dynamic_link = dynamic_link;\
   act->dynamic_scope = frame_pointer;\
@@ -385,6 +452,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
   if (SYMBOL_TABLE (p)->initialise_frame) {\
     initialise_frame (p);\
   }}
+#endif
 
 #define CLOSE_FRAME {\
   frame_pointer = FRAME_DYNAMIC_LINK (frame_pointer);\
@@ -422,7 +490,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
     }\
   case MODE_COMPLEX: {\
       A68_REAL *_r_ = (A68_REAL *) (w);\
-      A68_REAL *_i_ = (A68_REAL *) ((w) + SIZE_OF (A68_REAL));\
+      A68_REAL *_i_ = (A68_REAL *) ((w) + ALIGNED_SIZEOF (A68_REAL));\
       CHECK_INIT ((p), INITIALISED (_r_), (q));\
       CHECK_INIT ((p), INITIALISED (_i_), (q));\
       break;\
@@ -462,41 +530,52 @@ returns: static link for stack frame at 'new_lex_lvl'.
   COPY (sp, (BYTE_T *) (addr), (unsigned) (size));\
   }
 
+#define PUSH_ALIGNED(p, addr, size) {\
+  BYTE_T *sp = STACK_TOP;\
+  INCREMENT_STACK_POINTER ((p), (size));\
+  COPY_ALIGNED (sp, (BYTE_T *) (addr), (unsigned) (size));\
+  }
+
 #define POP(p, addr, size) {\
   DECREMENT_STACK_POINTER((p), (size));\
   COPY ((BYTE_T *) (addr), STACK_TOP, (unsigned) (size));\
   }
 
+#define POP_ALIGNED(p, addr, size) {\
+  DECREMENT_STACK_POINTER((p), (size));\
+  COPY_ALIGNED ((BYTE_T *) (addr), STACK_TOP, (unsigned) (size));\
+  }
+
 #define POP_ADDRESS(p, addr, type) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (type));\
+  DECREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (type));\
   (addr) = (type *) STACK_TOP;\
   }
 
 #define POP_OPERAND_ADDRESS(p, i, type) {\
   (void) (p);\
-  (i) = (type *) (STACK_OFFSET (-SIZE_OF (type)));\
+  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
   }
 
 #define POP_OPERAND_ADDRESSES(p, i, j, type) {\
-  DECREMENT_STACK_POINTER ((p), SIZE_OF (type));\
+  DECREMENT_STACK_POINTER ((p), ALIGNED_SIZEOF (type));\
   (j) = (type *) STACK_TOP;\
-  (i) = (type *) (STACK_OFFSET (-SIZE_OF (type)));\
+  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
   }
 
 #define PUSH_PRIMITIVE(p, z, mode) {\
   mode *_x_ = (mode *) STACK_TOP;\
   _x_->status = INITIALISED_MASK;\
   _x_->value = (z);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (mode));\
+  INCREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (mode));\
   }
 
 #define PUSH_OBJECT(p, z, mode) {\
   *(mode *) STACK_TOP = (z);\
-  INCREMENT_STACK_POINTER (p, SIZE_OF (mode));\
+  INCREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (mode));\
   }
 
 #define POP_OBJECT(p, z, mode) {\
-  DECREMENT_STACK_POINTER((p), SIZE_OF (mode));\
+  DECREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (mode));\
   (*(z)) = *((mode *) STACK_TOP);\
   }
 
@@ -514,14 +593,14 @@ returns: static link for stack frame at 'new_lex_lvl'.
   A68_BYTES *_z_ = (A68_BYTES *) STACK_TOP;\
   _z_->status = INITIALISED_MASK;\
   strncpy (_z_->value, k, BYTES_WIDTH);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_BYTES));\
+  INCREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (A68_BYTES));\
   }
 
 #define PUSH_LONG_BYTES(p, k) {\
   A68_LONG_BYTES *_z_ = (A68_LONG_BYTES *) STACK_TOP;\
   _z_->status = INITIALISED_MASK;\
   strncpy (_z_->value, k, LONG_BYTES_WIDTH);\
-  INCREMENT_STACK_POINTER((p), SIZE_OF (A68_LONG_BYTES));\
+  INCREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (A68_LONG_BYTES));\
   }
 
 #define PUSH_REF(p, z) PUSH_OBJECT (p, z, A68_REF)
@@ -543,7 +622,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
 
 #undef A68_DEBUG
 
-#ifdef A68_DEBUG
+#if defined A68_DEBUG
 #define A68_TRACE(txt, p) {\
   BYTE_T stack_offset;\
   snprintf (output_line, BUFFER_SIZE, "\n\n++++ \"%s\" file=\"%s\" line=%d level=%d node=%p attr=\"%s\"",\
@@ -558,7 +637,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
 #define A68_TRACE(txt, p) /* skip */
 #endif
 
-#ifdef A68_DEBUG
+#if defined A68_DEBUG
 #define A68_PRINT_REF(txt, z) {\
   snprintf (output_line, BUFFER_SIZE, "\n\n++++ \"%s\" file=\"%s\" line=%d", txt, __FILE__, __LINE__);\
   io_write_string (STDOUT_FILENO, output_line);\
@@ -597,14 +676,14 @@ extern int storage_overhead;
 
 /* External symbols. */
 
-#if defined HAVE_POSIX_THREADS
-extern int parallel_clauses;
+#if defined ENABLE_PAR_CLAUSE
+extern int par_clause_depth;
 extern pthread_t main_thread_id;
 extern BOOL_T in_par_clause;
-extern BOOL_T is_main_thread (void);
-extern void count_parallel_clauses (NODE_T *);
+extern BOOL_T main_thread_is_active (void);
+extern void count_par_clauses (NODE_T *);
 extern void genie_abend_thread (void);
-extern void zap_all_threads (NODE_T *, jmp_buf *, NODE_T *);
+extern void zap_thread (NODE_T *, jmp_buf *, NODE_T *);
 #endif
 
 extern int free_handle_count, max_handle_count;
@@ -643,10 +722,10 @@ extern GENIE_PROCEDURE genie_arg_complex;
 extern GENIE_PROCEDURE genie_arg_long_complex;
 extern GENIE_PROCEDURE genie_asin_long_complex;
 extern GENIE_PROCEDURE genie_asin_long_mp;
+extern GENIE_PROCEDURE genie_atan2_long_mp;
 extern GENIE_PROCEDURE genie_atan2_real;
 extern GENIE_PROCEDURE genie_atan_long_complex;
 extern GENIE_PROCEDURE genie_atan_long_mp;
-extern GENIE_PROCEDURE genie_atan2_long_mp;
 extern GENIE_PROCEDURE genie_bin_int;
 extern GENIE_PROCEDURE genie_bin_long_mp;
 extern GENIE_PROCEDURE genie_bits_lengths;
@@ -654,12 +733,14 @@ extern GENIE_PROCEDURE genie_bits_pack;
 extern GENIE_PROCEDURE genie_bits_shorths;
 extern GENIE_PROCEDURE genie_bits_width;
 extern GENIE_PROCEDURE genie_break;
-extern GENIE_PROCEDURE genie_debug;
 extern GENIE_PROCEDURE genie_bytes_lengths;
 extern GENIE_PROCEDURE genie_bytes_shorths;
 extern GENIE_PROCEDURE genie_bytes_width;
 extern GENIE_PROCEDURE genie_bytespack;
 extern GENIE_PROCEDURE genie_char_in_string;
+extern GENIE_PROCEDURE genie_clear_bits;
+extern GENIE_PROCEDURE genie_clear_long_bits;
+extern GENIE_PROCEDURE genie_clear_longlong_bits;
 extern GENIE_PROCEDURE genie_complex_lengths;
 extern GENIE_PROCEDURE genie_complex_shorths;
 extern GENIE_PROCEDURE genie_conj_complex;
@@ -671,6 +752,7 @@ extern GENIE_PROCEDURE genie_cosh_long_mp;
 extern GENIE_PROCEDURE genie_cputime;
 extern GENIE_PROCEDURE genie_curt_long_mp;
 extern GENIE_PROCEDURE genie_curt_real;
+extern GENIE_PROCEDURE genie_debug;
 extern GENIE_PROCEDURE genie_div_complex;
 extern GENIE_PROCEDURE genie_div_int;
 extern GENIE_PROCEDURE genie_div_long_complex;
@@ -679,22 +761,17 @@ extern GENIE_PROCEDURE genie_div_real;
 extern GENIE_PROCEDURE genie_divab_complex;
 extern GENIE_PROCEDURE genie_divab_long_complex;
 extern GENIE_PROCEDURE genie_divab_long_mp;
+extern GENIE_PROCEDURE genie_divab_real;
 extern GENIE_PROCEDURE genie_down_sema;
 extern GENIE_PROCEDURE genie_dyad_elems;
 extern GENIE_PROCEDURE genie_dyad_lwb;
 extern GENIE_PROCEDURE genie_dyad_upb;
 extern GENIE_PROCEDURE genie_elem_bits;
-extern GENIE_PROCEDURE genie_set_bits;
-extern GENIE_PROCEDURE genie_clear_bits;
 extern GENIE_PROCEDURE genie_elem_bytes;
 extern GENIE_PROCEDURE genie_elem_long_bits;
-extern GENIE_PROCEDURE genie_elem_long_bytes;
 extern GENIE_PROCEDURE genie_elem_long_bits;
+extern GENIE_PROCEDURE genie_elem_long_bytes;
 extern GENIE_PROCEDURE genie_elem_longlong_bits;
-extern GENIE_PROCEDURE genie_set_long_bits;
-extern GENIE_PROCEDURE genie_set_longlong_bits;
-extern GENIE_PROCEDURE genie_clear_long_bits;
-extern GENIE_PROCEDURE genie_clear_longlong_bits;
 extern GENIE_PROCEDURE genie_elem_string;
 extern GENIE_PROCEDURE genie_entier_long_mp;
 extern GENIE_PROCEDURE genie_entier_real;
@@ -726,6 +803,7 @@ extern GENIE_PROCEDURE genie_ge_long_bytes;
 extern GENIE_PROCEDURE genie_ge_long_mp;
 extern GENIE_PROCEDURE genie_ge_real;
 extern GENIE_PROCEDURE genie_ge_string;
+extern GENIE_PROCEDURE genie_get_sound;
 extern GENIE_PROCEDURE genie_gt_bits;
 extern GENIE_PROCEDURE genie_gt_bytes;
 extern GENIE_PROCEDURE genie_gt_char;
@@ -835,6 +913,7 @@ extern GENIE_PROCEDURE genie_ne_long_complex;
 extern GENIE_PROCEDURE genie_ne_long_mp;
 extern GENIE_PROCEDURE genie_ne_real;
 extern GENIE_PROCEDURE genie_ne_string;
+extern GENIE_PROCEDURE genie_new_sound;
 extern GENIE_PROCEDURE genie_next_random;
 extern GENIE_PROCEDURE genie_nint_real;
 extern GENIE_PROCEDURE genie_not_bits;
@@ -850,7 +929,6 @@ extern GENIE_PROCEDURE genie_over_int;
 extern GENIE_PROCEDURE genie_over_long_mp;
 extern GENIE_PROCEDURE genie_overab_int;
 extern GENIE_PROCEDURE genie_overab_long_mp;
-extern GENIE_PROCEDURE genie_divab_real;
 extern GENIE_PROCEDURE genie_pi;
 extern GENIE_PROCEDURE genie_pi_long_mp;
 extern GENIE_PROCEDURE genie_plusab_bytes;
@@ -884,6 +962,10 @@ extern GENIE_PROCEDURE genie_repr_char;
 extern GENIE_PROCEDURE genie_round_long_mp;
 extern GENIE_PROCEDURE genie_round_real;
 extern GENIE_PROCEDURE genie_seconds;
+extern GENIE_PROCEDURE genie_set_bits;
+extern GENIE_PROCEDURE genie_set_long_bits;
+extern GENIE_PROCEDURE genie_set_longlong_bits;
+extern GENIE_PROCEDURE genie_set_sound;
 extern GENIE_PROCEDURE genie_shl_bits;
 extern GENIE_PROCEDURE genie_shl_long_mp;
 extern GENIE_PROCEDURE genie_shorten_bytes;
@@ -947,6 +1029,10 @@ extern GENIE_PROCEDURE genie_vector_times_scalar;
 extern GENIE_PROCEDURE genie_xor_bits;
 extern GENIE_PROCEDURE genie_xor_bool;
 extern GENIE_PROCEDURE genie_xor_long_mp;
+extern GENIE_PROCEDURE genie_sound_samples;
+extern GENIE_PROCEDURE genie_sound_rate;
+extern GENIE_PROCEDURE genie_sound_channels;
+extern GENIE_PROCEDURE genie_sound_resolution;
 
 extern PROPAGATOR_T genie_and_function (NODE_T *p);
 extern PROPAGATOR_T genie_assertion (NODE_T *p);
@@ -956,6 +1042,7 @@ extern PROPAGATOR_T genie_cast (NODE_T *p);
 extern PROPAGATOR_T genie_closed (volatile NODE_T *p);
 extern PROPAGATOR_T genie_coercion (NODE_T *p);
 extern PROPAGATOR_T genie_collateral (NODE_T *p);
+extern PROPAGATOR_T genie_column_function (NODE_T *p);
 extern PROPAGATOR_T genie_conditional (volatile NODE_T *p);
 extern PROPAGATOR_T genie_constant (NODE_T *p);
 extern PROPAGATOR_T genie_denoter (NODE_T *p);
@@ -964,6 +1051,7 @@ extern PROPAGATOR_T genie_dereference_loc_identifier (NODE_T *p);
 extern PROPAGATOR_T genie_dereference_slice_name_quick (NODE_T *p);
 extern PROPAGATOR_T genie_dereferencing (NODE_T *p);
 extern PROPAGATOR_T genie_dereferencing_quick (NODE_T *p);
+extern PROPAGATOR_T genie_diagonal_function (NODE_T *p);
 extern PROPAGATOR_T genie_dyadic (NODE_T *p);
 extern PROPAGATOR_T genie_dyadic_quick (NODE_T *p);
 extern PROPAGATOR_T genie_enclosed (volatile NODE_T *p);
@@ -982,24 +1070,26 @@ extern PROPAGATOR_T genie_nihil (NODE_T *p);
 extern PROPAGATOR_T genie_or_function (NODE_T *p);
 extern PROPAGATOR_T genie_parallel (NODE_T *p);
 extern PROPAGATOR_T genie_routine_text (NODE_T *p);
+extern PROPAGATOR_T genie_row_function (NODE_T *p);
 extern PROPAGATOR_T genie_rowing (NODE_T *p);
 extern PROPAGATOR_T genie_rowing_ref_row_of_row (NODE_T *p);
 extern PROPAGATOR_T genie_rowing_ref_row_row (NODE_T *p);
 extern PROPAGATOR_T genie_rowing_row_of_row (NODE_T *p);
 extern PROPAGATOR_T genie_rowing_row_row (NODE_T *p);
-extern PROPAGATOR_T genie_selection (NODE_T *p);
 extern PROPAGATOR_T genie_selection_name (NODE_T *p);
+extern PROPAGATOR_T genie_selection (NODE_T *p);
 extern PROPAGATOR_T genie_selection_value (NODE_T *p);
 extern PROPAGATOR_T genie_skip (NODE_T *p);
-extern PROPAGATOR_T genie_slice (NODE_T *p);
 extern PROPAGATOR_T genie_slice_name_quick (NODE_T *p);
-extern PROPAGATOR_T genie_unit (NODE_T *p);
+extern PROPAGATOR_T genie_slice (NODE_T *p);
+extern PROPAGATOR_T genie_transpose_function (NODE_T *p);
 extern PROPAGATOR_T genie_united_case (volatile NODE_T *p);
 extern PROPAGATOR_T genie_uniting (NODE_T *p);
-extern PROPAGATOR_T genie_voiding (NODE_T *p);
+extern PROPAGATOR_T genie_unit (NODE_T *p);
 extern PROPAGATOR_T genie_voiding_assignation (NODE_T *p);
-extern PROPAGATOR_T genie_widening (NODE_T *p);
+extern PROPAGATOR_T genie_voiding (NODE_T *p);
 extern PROPAGATOR_T genie_widening_int_to_real (NODE_T *p);
+extern PROPAGATOR_T genie_widening (NODE_T *p);
 
 extern A68_REF c_string_to_row_char (NODE_T *, char *, int);
 extern A68_REF c_to_a_string (NODE_T *, char *);
@@ -1035,6 +1125,7 @@ extern void genie (MODULE_T *);
 extern void genie_call_operator (NODE_T *, ADDR_T);
 extern void genie_call_procedure (NODE_T *, MOID_T *, MOID_T *, MOID_T *, A68_PROCEDURE *, ADDR_T, ADDR_T);
 extern void genie_check_initialisation (NODE_T *, BYTE_T *, MOID_T *);
+extern void genie_copy_sound (NODE_T *, BYTE_T *, BYTE_T *);
 extern void genie_declaration (NODE_T *);
 extern void genie_dump_frames ();
 extern void genie_enquiry_clause (NODE_T *);
@@ -1044,7 +1135,6 @@ extern void genie_generator_internal (NODE_T *, MOID_T *, TAG_T *, LEAP_T, ADDR_
 extern void genie_init_lib (NODE_T *);
 extern void genie_prepare_declarer (NODE_T *);
 extern void genie_push_undefined (NODE_T *, MOID_T *);
-extern void genie_revise_lower_bound (NODE_T *, A68_REF, A68_REF);
 extern void genie_serial_clause (NODE_T *, jmp_buf *);
 extern void genie_serial_units (NODE_T *, NODE_T **, jmp_buf *, int);
 extern void genie_subscript (NODE_T *, ADDR_T *, int *, NODE_T **);
@@ -1055,9 +1145,8 @@ extern void initialise_frame (NODE_T *);
 extern void install_signal_handlers (void);
 extern void show_data_item (FILE_T, NODE_T *, MOID_T *, BYTE_T *);
 extern void show_frame (NODE_T *, FILE_T);
-extern void show_stack_frame (FILE_T, NODE_T *, ADDR_T);
 extern void single_step (NODE_T *, BOOL_T, BOOL_T);
-extern void stack_dump (FILE_T, ADDR_T, int);
+extern void stack_dump (FILE_T, ADDR_T, int, int *);
 extern void stack_dump_light (ADDR_T);
 extern void un_init_frame (NODE_T *);
 extern void where (FILE_T, NODE_T *);
@@ -1078,17 +1167,17 @@ extern void genie_reset_errno (NODE_T *);
 extern void genie_strerror (NODE_T *);
 extern void genie_waitpid (NODE_T *);
 
-#if defined HAVE_HTTP
+#if defined ENABLE_HTTP
 extern void genie_http_content (NODE_T *);
 extern void genie_tcp_request (NODE_T *);
 #endif
 
-#if defined HAVE_REGEX
+#if defined ENABLE_REGEX
 extern void genie_grep_in_string (NODE_T *);
 extern void genie_sub_in_string (NODE_T *);
 #endif
 
-#if defined HAVE_CURSES
+#if defined ENABLE_CURSES
 extern BOOL_T curses_active;
 extern void genie_curses_clear (NODE_T *);
 extern void genie_curses_columns (NODE_T *);
@@ -1101,7 +1190,7 @@ extern void genie_curses_refresh (NODE_T *);
 extern void genie_curses_start (NODE_T *);
 #endif
 
-#if defined HAVE_POSTGRESQL
+#if defined ENABLE_POSTGRESQL
 extern void genie_pq_backendpid (NODE_T *);
 extern void genie_pq_cmdstatus (NODE_T *);
 extern void genie_pq_cmdtuples (NODE_T *);

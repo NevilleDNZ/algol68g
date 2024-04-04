@@ -21,7 +21,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-
 /*
 This file contains a hand-coded parser for Algol 68.
 
@@ -47,7 +46,7 @@ These are the phases:
      such constructs later on.
 
  (5) The bottom-up parser does not check VICTAL correctness of declarers. This
-     is done separately. Also structure of a FORMAT_TEXT is checked separately.
+     is done separately. Also structure of a format text is checked separately.
 */
 
 #include "algol68g.h"
@@ -140,17 +139,25 @@ void substitute_brackets (NODE_T * p)
     substitute_brackets (SUB (p));
     switch (ATTRIBUTE (p)) {
     case ACCO_SYMBOL:
-      ATTRIBUTE (p) = OPEN_SYMBOL;
-      break;
+      {
+        ATTRIBUTE (p) = OPEN_SYMBOL;
+        break;
+      }
     case OCCA_SYMBOL:
-      ATTRIBUTE (p) = CLOSE_SYMBOL;
-      break;
+      {
+        ATTRIBUTE (p) = CLOSE_SYMBOL;
+        break;
+      }
     case SUB_SYMBOL:
-      ATTRIBUTE (p) = OPEN_SYMBOL;
-      break;
+      {
+        ATTRIBUTE (p) = OPEN_SYMBOL;
+        break;
+      }
     case BUS_SYMBOL:
-      ATTRIBUTE (p) = CLOSE_SYMBOL;
-      break;
+      {
+        ATTRIBUTE (p) = CLOSE_SYMBOL;
+        break;
+      }
     }
   }
 }
@@ -187,7 +194,7 @@ static int whether_unit_terminator (NODE_T * p)
     }
   default:
     {
-      return (0);
+      return (NULL_ATTRIBUTE);
     }
   }
 }
@@ -213,7 +220,7 @@ static BOOL_T whether_loop_keyword (NODE_T * p)
     }
   default:
     {
-      return (0);
+      return (NULL_ATTRIBUTE);
     }
   }
 }
@@ -251,7 +258,7 @@ static int whether_semicolon_less (NODE_T * p)
     }
   default:
     {
-      return (0);
+      return (NULL_ATTRIBUTE);
     }
   }
 }
@@ -289,6 +296,8 @@ static BOOL_T dont_mark_here (NODE_T * p)
 {
   switch (ATTRIBUTE (p)) {
   case ACCO_SYMBOL:
+  case ALT_DO_SYMBOL:
+  case ALT_EQUALS_SYMBOL:
   case ANDF_SYMBOL:
   case ANDTH_SYMBOL:
   case ASSERT_SYMBOL:
@@ -301,25 +310,26 @@ static BOOL_T dont_mark_here (NODE_T * p)
   case BOLD_PRAGMAT_SYMBOL:
   case BOOL_SYMBOL:
   case BUS_SYMBOL:
-  case BYTES_SYMBOL:
   case BY_SYMBOL:
+  case BYTES_SYMBOL:
   case CASE_SYMBOL:
   case CHANNEL_SYMBOL:
   case CHAR_SYMBOL:
   case CLOSE_SYMBOL:
   case CODE_SYMBOL:
   case COLON_SYMBOL:
+  case COLUMN_SYMBOL:
   case COMMA_SYMBOL:
   case COMPLEX_SYMBOL:
   case COMPL_SYMBOL:
+  case DIAGONAL_SYMBOL:
+  case DO_SYMBOL:
   case DOTDOT_SYMBOL:
   case DOWNTO_SYMBOL:
-  case DO_SYMBOL:
   case EDOC_SYMBOL:
   case ELIF_SYMBOL:
   case ELSE_BAR_SYMBOL:
   case ELSE_SYMBOL:
-  case ELSF_SYMBOL:
   case EMPTY_SYMBOL:
   case END_SYMBOL:
   case ENVIRON_SYMBOL:
@@ -334,12 +344,12 @@ static BOOL_T dont_mark_here (NODE_T * p)
   case FORMAT_SYMBOL:
   case FOR_SYMBOL:
   case FROM_SYMBOL:
-  case GOTO_SYMBOL:
   case GO_SYMBOL:
+  case GOTO_SYMBOL:
   case HEAP_SYMBOL:
   case IF_SYMBOL:
-  case INT_SYMBOL:
   case IN_SYMBOL:
+  case INT_SYMBOL:
   case ISNT_SYMBOL:
   case IS_SYMBOL:
   case LOC_SYMBOL:
@@ -363,22 +373,24 @@ static BOOL_T dont_mark_here (NODE_T * p)
   case PROC_SYMBOL:
   case REAL_SYMBOL:
   case REF_SYMBOL:
+  case ROW_ASSIGN_SYMBOL:
   case ROWS_SYMBOL:
   case ROW_SYMBOL:
   case SEMA_SYMBOL:
   case SEMI_SYMBOL:
   case SHORT_SYMBOL:
   case SKIP_SYMBOL:
+  case SOUND_SYMBOL:
   case STRING_SYMBOL:
   case STRUCT_SYMBOL:
-  case STYLE_II_COMMENT_SYMBOL:
   case STYLE_I_COMMENT_SYMBOL:
+  case STYLE_II_COMMENT_SYMBOL:
   case STYLE_I_PRAGMAT_SYMBOL:
   case SUB_SYMBOL:
-  case THEF_SYMBOL:
   case THEN_BAR_SYMBOL:
   case THEN_SYMBOL:
   case TO_SYMBOL:
+  case TRANSPOSE_SYMBOL:
   case TRUE_SYMBOL:
   case UNION_SYMBOL:
   case UNTIL_SYMBOL:
@@ -782,7 +794,7 @@ static int whether_loop_cast_formula (NODE_T * p)
     }
     return (p != NULL && whether (p, UNION_SYMBOL, OPEN_SYMBOL, 0) ? k : 0);
   }
-  return (0);
+  return (NULL_ATTRIBUTE);
 }
 
 /*!
@@ -847,8 +859,7 @@ static NODE_T *top_down_skip_loop_series (NODE_T * p)
     if (z) {
       FORWARD (p);
     }
-  }
-  while (!(p == NULL || !z));
+  } while (!(p == NULL || !z));
   return (p);
 }
 
@@ -1436,6 +1447,16 @@ Filling in gives one format for such construct; this helps later passes.
 }
 
 /*!
+\brief diagnose extensions
+\param p position in syntax tree, should not be NULL
+**/
+
+static void a68_extension (NODE_T * p)
+{
+  diagnostic_node (A68_WARNING, p, WARNING_EXTENSION, NULL);
+}
+
+/*!
 \brief diagnose for not-supported features
 \param p position in syntax tree, should not be NULL
 **/
@@ -1455,7 +1476,7 @@ static void empty_clause (NODE_T * p)
   diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_CLAUSE_WITHOUT_VALUE);
 }
 
-#if ! defined HAVE_POSIX_THREADS
+#if ! defined ENABLE_PAR_CLAUSE
 
 /*!
 \brief diagnose for parallel clause
@@ -1516,7 +1537,8 @@ static void f (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
   NODE_T *head = p, *tail = NULL;
   va_start (list, z);
   result = va_arg (list, int);
-  while ((arg = va_arg (list, int)) != 0) {
+  while ((arg = va_arg (list, int)) != 0)
+  {
 /* WILDCARD matches any Algol68G non terminal, but no keyword. */
     if (p != NULL && (arg == WILDCARD ? non_terminal_string (edit_line, ATTRIBUTE (p)) != NULL : arg == ATTRIBUTE (p))) {
       tail = p;
@@ -1586,7 +1608,7 @@ static void reduce_particular_program (NODE_T * p)
   }
 /* Determine the encompassing enclosed clause. */
   for (q = p; q != NULL; FORWARD (q)) {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
     f (q, NULL, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
 #else
     f (q, par_clause, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
@@ -1947,6 +1969,7 @@ static void reduce_indicants (NODE_T * p)
     f (q, NULL, NULL, INDICANT, CHANNEL_SYMBOL, 0);
     f (q, NULL, NULL, INDICANT, SEMA_SYMBOL, 0);
     f (q, NULL, NULL, INDICANT, PIPE_SYMBOL, 0);
+    f (q, NULL, NULL, INDICANT, SOUND_SYMBOL, 0);
   }
 }
 
@@ -2017,7 +2040,7 @@ static BOOL_T whether_formal_bounds (NODE_T * p)
     case IDENTIFIER:
     case OPERATOR:
       return (whether_formal_bounds (SUB (p))
-          && whether_formal_bounds (NEXT (p)));
+              && whether_formal_bounds (NEXT (p)));
     default:
       return (A68_FALSE);
     }
@@ -2321,7 +2344,7 @@ static void reduce_primary_bits (NODE_T * p, int expect)
     }
   }
   for (q = p; q != NULL; FORWARD (q)) {
-#if defined HAVE_POSIX_THREADS
+#if defined ENABLE_PAR_CLAUSE
     f (q, NULL, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
 #else
     f (q, par_clause, NULL, PARALLEL_CLAUSE, PAR_SYMBOL, COLLATERAL_CLAUSE, 0);
@@ -2716,9 +2739,8 @@ static void reduce_secondaries (NODE_T * p)
   z = A68_TRUE;
   while (z) {
     z = A68_FALSE;
-    q = p;
-    while (NEXT (q) != NULL) {
-      FORWARD (q);
+    for (q = p; NEXT (q) != NULL; FORWARD (q)) {
+      ;
     }
     for (; q != NULL; q = PREVIOUS (q)) {
       f (q, NULL, &z, SELECTION, SELECTOR, SECONDARY, 0);
@@ -2819,8 +2841,7 @@ static NODE_T *reduce_dyadic (NODE_T * p, int u)
         if (z) {
           FORWARD (q);
         }
-      }
-      while (z);
+      } while (z);
       f (q, NULL, NULL, MONADIC_FORMULA, OPERATOR, SECONDARY, 0);
       while (q != p) {
         q = PREVIOUS (q);
@@ -2846,21 +2867,41 @@ static NODE_T *reduce_dyadic (NODE_T * p, int u)
 static void reduce_tertiaries (NODE_T * p)
 {
   NODE_T *q;
+  BOOL_T z;
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, TERTIARY, NIHIL, 0);
     f (q, NULL, NULL, FORMULA, MONADIC_FORMULA, 0);
     f (q, NULL, NULL, TERTIARY, FORMULA, 0);
     f (q, NULL, NULL, TERTIARY, SECONDARY, 0);
   }
+  z = A68_TRUE;
+  while (z) {
+    z = A68_FALSE;
+    for (q = p; q != NULL; FORWARD (q)) {
+      f (q, NULL, &z, TRANSPOSE_FUNCTION, TRANSPOSE_SYMBOL, TERTIARY, 0);
+      f (q, NULL, &z, DIAGONAL_FUNCTION, TERTIARY, DIAGONAL_SYMBOL, TERTIARY, 0);
+      f (q, NULL, &z, DIAGONAL_FUNCTION, DIAGONAL_SYMBOL, TERTIARY, 0);
+      f (q, NULL, &z, COLUMN_FUNCTION, TERTIARY, COLUMN_SYMBOL, TERTIARY, 0);
+      f (q, NULL, &z, COLUMN_FUNCTION, COLUMN_SYMBOL, TERTIARY, 0);
+      f (q, NULL, &z, ROW_FUNCTION, TERTIARY, ROW_SYMBOL, TERTIARY, 0);
+      f (q, NULL, &z, ROW_FUNCTION, ROW_SYMBOL, TERTIARY, 0);
+    }
+    for (q = p; q != NULL; FORWARD (q)) {
+      f (q, a68_extension, &z, TERTIARY, TRANSPOSE_FUNCTION, 0);
+      f (q, a68_extension, &z, TERTIARY, DIAGONAL_FUNCTION, 0);
+      f (q, a68_extension, &z, TERTIARY, COLUMN_FUNCTION, 0);
+      f (q, a68_extension, &z, TERTIARY, ROW_FUNCTION, 0);
+    }
+  }
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, IDENTITY_RELATION, TERTIARY, IS_SYMBOL, TERTIARY, 0);
     f (q, NULL, NULL, IDENTITY_RELATION, TERTIARY, ISNT_SYMBOL, TERTIARY, 0);
   }
   for (q = p; q != NULL; FORWARD (q)) {
-    f (q, NULL, NULL, AND_FUNCTION, TERTIARY, ANDF_SYMBOL, TERTIARY, 0);
-    f (q, NULL, NULL, AND_FUNCTION, TERTIARY, ANDTH_SYMBOL, TERTIARY, 0);
-    f (q, NULL, NULL, OR_FUNCTION, TERTIARY, ORF_SYMBOL, TERTIARY, 0);
-    f (q, NULL, NULL, OR_FUNCTION, TERTIARY, OREL_SYMBOL, TERTIARY, 0);
+    f (q, a68_extension, NULL, AND_FUNCTION, TERTIARY, ANDF_SYMBOL, TERTIARY, 0);
+    f (q, a68_extension, NULL, AND_FUNCTION, TERTIARY, ANDTH_SYMBOL, TERTIARY, 0);
+    f (q, a68_extension, NULL, OR_FUNCTION, TERTIARY, ORF_SYMBOL, TERTIARY, 0);
+    f (q, a68_extension, NULL, OR_FUNCTION, TERTIARY, OREL_SYMBOL, TERTIARY, 0);
   }
 }
 
@@ -2897,8 +2938,7 @@ static void reduce_basic_declarations (NODE_T * p)
       f (q, NULL, &z, BRIEF_OPERATOR_DECLARATION, BRIEF_OPERATOR_DECLARATION, COMMA_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, ROUTINE_TEXT, 0);
 /* Errors. WILDCARD catches TERTIARY which catches IDENTIFIER. */
       f (q, missing_symbol, &z, PROCEDURE_DECLARATION, PROCEDURE_DECLARATION, COMMA_SYMBOL, WILDCARD, ROUTINE_TEXT, 0);
-    }
-    while (z);
+    } while (z);
   }
 }
 
@@ -2990,8 +3030,7 @@ static void reduce_generic_arguments (NODE_T * p)
     f (q, NULL, &z, GENERIC_ARGUMENT_LIST, GENERIC_ARGUMENT_LIST, COMMA_SYMBOL, TRIMMER, 0);
     f (q, missing_separator, &z, GENERIC_ARGUMENT_LIST, GENERIC_ARGUMENT_LIST, UNIT, 0);
     f (q, missing_separator, &z, GENERIC_ARGUMENT_LIST, GENERIC_ARGUMENT_LIST, TRIMMER, 0);
-  }
-  while (z);
+  } while (z);
 }
 
 /*!
@@ -3021,8 +3060,7 @@ static void reduce_bounds (NODE_T * p)
     f (q, NULL, &z, ALT_FORMAL_BOUNDS_LIST, FORMAL_BOUNDS_LIST, DOTDOT_SYMBOL, 0);
     f (q, NULL, &z, FORMAL_BOUNDS_LIST, ALT_FORMAL_BOUNDS_LIST, COMMA_SYMBOL, 0);
     f (q, missing_separator, &z, BOUNDS_LIST, BOUNDS_LIST, BOUND, 0);
-  }
-  while (z);
+  } while (z);
 }
 
 /*!
@@ -3040,8 +3078,7 @@ static void reduce_arguments (NODE_T * p)
       z = A68_FALSE;
       f (q, NULL, &z, ARGUMENT_LIST, ARGUMENT_LIST, COMMA_SYMBOL, UNIT, 0);
       f (q, missing_separator, &z, ARGUMENT_LIST, ARGUMENT_LIST, UNIT, 0);
-    }
-    while (z);
+    } while (z);
   }
 }
 
@@ -3069,8 +3106,7 @@ static void reduce_declaration_lists (NODE_T * p)
       if (!whether (q, VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, 0)) {
         f (q, NULL, &z, VARIABLE_DECLARATION, VARIABLE_DECLARATION, COMMA_SYMBOL, DEFINING_IDENTIFIER, 0);
       }
-    }
-    while (z);
+    } while (z);
   }
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, OPERATOR_DECLARATION, OPERATOR_PLAN, DEFINING_OPERATOR, EQUALS_SYMBOL, UNIT, 0);
@@ -3080,8 +3116,7 @@ static void reduce_declaration_lists (NODE_T * p)
     do {
       z = A68_FALSE;
       f (q, NULL, &z, OPERATOR_DECLARATION, OPERATOR_DECLARATION, COMMA_SYMBOL, DEFINING_OPERATOR, EQUALS_SYMBOL, UNIT, 0);
-    }
-    while (z);
+    } while (z);
   }
   for (q = p; q != NULL; FORWARD (q)) {
     f (q, NULL, NULL, DECLARATION_LIST, MODE_DECLARATION, 0);
@@ -3099,8 +3134,7 @@ static void reduce_declaration_lists (NODE_T * p)
     do {
       z = A68_FALSE;
       f (q, NULL, &z, DECLARATION_LIST, DECLARATION_LIST, COMMA_SYMBOL, DECLARATION_LIST, 0);
-    }
-    while (z);
+    } while (z);
   }
 }
 
@@ -3193,8 +3227,7 @@ static void reduce_serial_clauses (NODE_T * p)
         f (q, missing_separator, &z, SERIAL_CLAUSE, INITIALISER_SERIES, LABELED_UNIT, 0);
         f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
       }
-    }
-    while (z);
+    } while (z);
   }
 }
 
@@ -3223,8 +3256,7 @@ static void reduce_enquiry_clauses (NODE_T * p)
         f (q, missing_separator, &z, ENQUIRY_CLAUSE, INITIALISER_SERIES, UNIT, 0);
         f (q, missing_separator, &z, INITIALISER_SERIES, INITIALISER_SERIES, DECLARATION_LIST, 0);
       }
-    }
-    while (z);
+    } while (z);
   }
 }
 
@@ -3244,8 +3276,7 @@ static void reduce_collateral_clauses (NODE_T * p)
         z = A68_FALSE;
         f (q, NULL, &z, UNIT_LIST, UNIT_LIST, COMMA_SYMBOL, UNIT, 0);
         f (q, missing_separator, &z, UNIT_LIST, UNIT_LIST, UNIT, 0);
-      }
-      while (z);
+      } while (z);
     } else if (WHETHER (q, SPECIFIED_UNIT)) {
       BOOL_T z;
       f (q, NULL, NULL, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT, 0);
@@ -3253,8 +3284,7 @@ static void reduce_collateral_clauses (NODE_T * p)
         z = A68_FALSE;
         f (q, NULL, &z, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_LIST, COMMA_SYMBOL, SPECIFIED_UNIT, 0);
         f (q, missing_separator, &z, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT_LIST, SPECIFIED_UNIT, 0);
-      }
-      while (z);
+      } while (z);
     }
   }
 }
@@ -3726,8 +3756,7 @@ static void extract_indicants (NODE_T * p)
         } else {
           z = A68_FALSE;
         }
-      }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+      } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
       FORWARD (q);
     }
@@ -3808,8 +3837,7 @@ static void extract_priorities (NODE_T * p)
         } else {
           z = A68_FALSE;
         }
-      }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+      } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
       FORWARD (q);
     }
@@ -3872,8 +3900,7 @@ static void extract_operators (NODE_T * p)
           } else {
             z = A68_FALSE;
           }
-        }
-        while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+        } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
       }
     }
   }
@@ -3928,8 +3955,7 @@ static void extract_identities (NODE_T * p)
         } else {
           z = A68_FALSE;
         }
-      }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+      } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
       FORWARD (q);
     }
@@ -3961,8 +3987,7 @@ static void extract_variables (NODE_T * p)
         } else {
           z = A68_FALSE;
         }
-      }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+      } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
       FORWARD (q);
     }
@@ -3998,8 +4023,7 @@ static void extract_proc_identities (NODE_T * p)
         } else {
           z = A68_FALSE;
         }
-      }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+      } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
       FORWARD (q);
     }
@@ -4033,8 +4057,7 @@ static void extract_proc_variables (NODE_T * p)
         } else {
           z = A68_FALSE;
         }
-      }
-      while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
+      } while (z && q != NULL && WHETHER (q, COMMA_SYMBOL));
     } else {
       FORWARD (q);
     }
@@ -4271,7 +4294,7 @@ static void victal_check_mode_dec (NODE_T * p)
       victal_check_mode_dec (SUB (p));
       victal_check_mode_dec (NEXT (p));
     } else if (WHETHER (p, MODE_SYMBOL) || WHETHER (p, DEFINING_INDICANT)
-        || WHETHER (p, EQUALS_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
+               || WHETHER (p, EQUALS_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_mode_dec (NEXT (p));
     } else if (WHETHER (p, DECLARER)) {
       if (!victal_check_declarer (p, ACTUAL_DECLARER_MARK)) {
@@ -4293,7 +4316,7 @@ static void victal_check_variable_dec (NODE_T * p)
       victal_check_variable_dec (SUB (p));
       victal_check_variable_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER) || WHETHER (p, ASSIGN_SYMBOL)
-        || WHETHER (p, COMMA_SYMBOL)) {
+               || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_variable_dec (NEXT (p));
     } else if (WHETHER (p, UNIT)) {
       victal_checker (SUB (p));
@@ -4318,7 +4341,7 @@ static void victal_check_identity_dec (NODE_T * p)
       victal_check_identity_dec (SUB (p));
       victal_check_identity_dec (NEXT (p));
     } else if (WHETHER (p, DEFINING_IDENTIFIER) || WHETHER (p, EQUALS_SYMBOL)
-        || WHETHER (p, COMMA_SYMBOL)) {
+               || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_identity_dec (NEXT (p));
     } else if (WHETHER (p, UNIT)) {
       victal_checker (SUB (p));
@@ -4391,7 +4414,7 @@ static void victal_check_structure_pack (NODE_T * p, int x, BOOL_T * z)
     } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)) {
       victal_check_structure_pack (NEXT (p), x, z);
     } else if (WHETHER (p, STRUCTURED_FIELD_LIST)
-        || WHETHER (p, STRUCTURED_FIELD)) {
+               || WHETHER (p, STRUCTURED_FIELD)) {
       victal_check_structure_pack (NEXT (p), x, z);
       victal_check_structure_pack (SUB (p), x, z);
     } else if (WHETHER (p, DECLARER)) {
@@ -4413,7 +4436,7 @@ static void victal_check_union_pack (NODE_T * p, int x, BOOL_T * z)
     if (WHETHER (p, UNION_PACK)) {
       victal_check_union_pack (SUB (p), x, z);
     } else if (WHETHER (p, OPEN_SYMBOL) || WHETHER (p, COMMA_SYMBOL)
-        || WHETHER (p, VOID_SYMBOL)) {
+               || WHETHER (p, VOID_SYMBOL)) {
       victal_check_union_pack (NEXT (p), x, z);
     } else if (WHETHER (p, UNION_DECLARER_LIST)) {
       victal_check_union_pack (NEXT (p), x, z);
@@ -4440,7 +4463,7 @@ static BOOL_T victal_check_declarer (NODE_T * p, int x)
   } else if (WHETHER (p, LONGETY) || WHETHER (p, SHORTETY)) {
     return (A68_TRUE);
   } else if (WHETHER (p, VOID_SYMBOL) || WHETHER (p, INDICANT)
-      || WHETHER (p, STANDARD)) {
+             || WHETHER (p, STANDARD)) {
     return (A68_TRUE);
   } else if (WHETHER (p, REF_SYMBOL)) {
     return (victal_check_declarer (NEXT (p), VIRTUAL_DECLARER_MARK));

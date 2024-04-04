@@ -32,7 +32,7 @@ routines in this file will give a runtime error when called. You can also choose
 to not have them defined in "prelude.c"
 */
 
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
 #include <gsl/gsl_complex.h>
 #include <gsl/gsl_complex_math.h>
 #include <gsl/gsl_const.h>
@@ -44,249 +44,244 @@ to not have them defined in "prelude.c"
 double inverf (double);
 double inverfc (double);
 
-#if defined HAVE_GSL
-A68_ENV_REAL (genie_cgs_acre, GSL_CONST_CGS_ACRE);
-A68_ENV_REAL (genie_cgs_angstrom, GSL_CONST_CGS_ANGSTROM);
-A68_ENV_REAL (genie_cgs_astronomical_unit, GSL_CONST_CGS_ASTRONOMICAL_UNIT);
-A68_ENV_REAL (genie_cgs_bar, GSL_CONST_CGS_BAR);
-A68_ENV_REAL (genie_cgs_barn, GSL_CONST_CGS_BARN);
-A68_ENV_REAL (genie_cgs_bohr_magneton, GSL_CONST_CGS_BOHR_MAGNETON);
-A68_ENV_REAL (genie_cgs_bohr_radius, GSL_CONST_CGS_BOHR_RADIUS);
-A68_ENV_REAL (genie_cgs_boltzmann, GSL_CONST_CGS_BOLTZMANN);
-A68_ENV_REAL (genie_cgs_btu, GSL_CONST_CGS_BTU);
-A68_ENV_REAL (genie_cgs_calorie, GSL_CONST_CGS_CALORIE);
-A68_ENV_REAL (genie_cgs_canadian_gallon, GSL_CONST_CGS_CANADIAN_GALLON);
-A68_ENV_REAL (genie_cgs_carat, GSL_CONST_CGS_CARAT);
-A68_ENV_REAL (genie_cgs_cup, GSL_CONST_CGS_CUP);
-A68_ENV_REAL (genie_cgs_curie, GSL_CONST_CGS_CURIE);
-A68_ENV_REAL (genie_cgs_day, GSL_CONST_CGS_DAY);
-A68_ENV_REAL (genie_cgs_dyne, GSL_CONST_CGS_DYNE);
-A68_ENV_REAL (genie_cgs_electron_charge, GSL_CONST_CGS_ELECTRON_CHARGE);
-A68_ENV_REAL (genie_cgs_electron_magnetic_moment, GSL_CONST_CGS_ELECTRON_MAGNETIC_MOMENT);
-A68_ENV_REAL (genie_cgs_electron_volt, GSL_CONST_CGS_ELECTRON_VOLT);
-A68_ENV_REAL (genie_cgs_erg, GSL_CONST_CGS_ERG);
-A68_ENV_REAL (genie_cgs_faraday, GSL_CONST_CGS_FARADAY);
-A68_ENV_REAL (genie_cgs_fathom, GSL_CONST_CGS_FATHOM);
-A68_ENV_REAL (genie_cgs_fluid_ounce, GSL_CONST_CGS_FLUID_OUNCE);
-A68_ENV_REAL (genie_cgs_foot, GSL_CONST_CGS_FOOT);
-A68_ENV_REAL (genie_cgs_footcandle, GSL_CONST_CGS_FOOTCANDLE);
-A68_ENV_REAL (genie_cgs_footlambert, GSL_CONST_CGS_FOOTLAMBERT);
-A68_ENV_REAL (genie_cgs_gauss, GSL_CONST_CGS_GAUSS);
-A68_ENV_REAL (genie_cgs_gram_force, GSL_CONST_CGS_GRAM_FORCE);
-A68_ENV_REAL (genie_cgs_grav_accel, GSL_CONST_CGS_GRAV_ACCEL);
-A68_ENV_REAL (genie_cgs_gravitational_constant, GSL_CONST_CGS_GRAVITATIONAL_CONSTANT);
-A68_ENV_REAL (genie_cgs_hectare, GSL_CONST_CGS_HECTARE);
-A68_ENV_REAL (genie_cgs_horsepower, GSL_CONST_CGS_HORSEPOWER);
-A68_ENV_REAL (genie_cgs_hour, GSL_CONST_CGS_HOUR);
-A68_ENV_REAL (genie_cgs_inch, GSL_CONST_CGS_INCH);
-A68_ENV_REAL (genie_cgs_inch_of_mercury, GSL_CONST_CGS_INCH_OF_MERCURY);
-A68_ENV_REAL (genie_cgs_inch_of_water, GSL_CONST_CGS_INCH_OF_WATER);
-A68_ENV_REAL (genie_cgs_joule, GSL_CONST_CGS_JOULE);
-A68_ENV_REAL (genie_cgs_kilometers_per_hour, GSL_CONST_CGS_KILOMETERS_PER_HOUR);
-A68_ENV_REAL (genie_cgs_kilopound_force, GSL_CONST_CGS_KILOPOUND_FORCE);
-A68_ENV_REAL (genie_cgs_knot, GSL_CONST_CGS_KNOT);
-A68_ENV_REAL (genie_cgs_lambert, GSL_CONST_CGS_LAMBERT);
-A68_ENV_REAL (genie_cgs_light_year, GSL_CONST_CGS_LIGHT_YEAR);
-A68_ENV_REAL (genie_cgs_liter, GSL_CONST_CGS_LITER);
-A68_ENV_REAL (genie_cgs_lumen, GSL_CONST_CGS_LUMEN);
-A68_ENV_REAL (genie_cgs_lux, GSL_CONST_CGS_LUX);
-A68_ENV_REAL (genie_cgs_mass_electron, GSL_CONST_CGS_MASS_ELECTRON);
-A68_ENV_REAL (genie_cgs_mass_muon, GSL_CONST_CGS_MASS_MUON);
-A68_ENV_REAL (genie_cgs_mass_neutron, GSL_CONST_CGS_MASS_NEUTRON);
-A68_ENV_REAL (genie_cgs_mass_proton, GSL_CONST_CGS_MASS_PROTON);
-A68_ENV_REAL (genie_cgs_meter_of_mercury, GSL_CONST_CGS_METER_OF_MERCURY);
-A68_ENV_REAL (genie_cgs_metric_ton, GSL_CONST_CGS_METRIC_TON);
-A68_ENV_REAL (genie_cgs_micron, GSL_CONST_CGS_MICRON);
-A68_ENV_REAL (genie_cgs_mil, GSL_CONST_CGS_MIL);
-A68_ENV_REAL (genie_cgs_mile, GSL_CONST_CGS_MILE);
-A68_ENV_REAL (genie_cgs_miles_per_hour, GSL_CONST_CGS_MILES_PER_HOUR);
-A68_ENV_REAL (genie_cgs_minute, GSL_CONST_CGS_MINUTE);
-A68_ENV_REAL (genie_cgs_molar_gas, GSL_CONST_CGS_MOLAR_GAS);
-A68_ENV_REAL (genie_cgs_nautical_mile, GSL_CONST_CGS_NAUTICAL_MILE);
-A68_ENV_REAL (genie_cgs_newton, GSL_CONST_CGS_NEWTON);
-A68_ENV_REAL (genie_cgs_nuclear_magneton, GSL_CONST_CGS_NUCLEAR_MAGNETON);
-A68_ENV_REAL (genie_cgs_ounce_mass, GSL_CONST_CGS_OUNCE_MASS);
-A68_ENV_REAL (genie_cgs_parsec, GSL_CONST_CGS_PARSEC);
-A68_ENV_REAL (genie_cgs_phot, GSL_CONST_CGS_PHOT);
-A68_ENV_REAL (genie_cgs_pint, GSL_CONST_CGS_PINT);
-A68_ENV_REAL (genie_cgs_planck_constant_h, 6.6260693e-27);
-A68_ENV_REAL (genie_cgs_planck_constant_hbar, 6.6260693e-27 / (2 * A68G_PI));
-A68_ENV_REAL (genie_cgs_point, GSL_CONST_CGS_POINT);
-A68_ENV_REAL (genie_cgs_poise, GSL_CONST_CGS_POISE);
-A68_ENV_REAL (genie_cgs_pound_force, GSL_CONST_CGS_POUND_FORCE);
-A68_ENV_REAL (genie_cgs_pound_mass, GSL_CONST_CGS_POUND_MASS);
-A68_ENV_REAL (genie_cgs_poundal, GSL_CONST_CGS_POUNDAL);
-A68_ENV_REAL (genie_cgs_proton_magnetic_moment, GSL_CONST_CGS_PROTON_MAGNETIC_MOMENT);
-A68_ENV_REAL (genie_cgs_psi, GSL_CONST_CGS_PSI);
-A68_ENV_REAL (genie_cgs_quart, GSL_CONST_CGS_QUART);
-A68_ENV_REAL (genie_cgs_rad, GSL_CONST_CGS_RAD);
-A68_ENV_REAL (genie_cgs_roentgen, GSL_CONST_CGS_ROENTGEN);
-A68_ENV_REAL (genie_cgs_rydberg, GSL_CONST_CGS_RYDBERG);
-A68_ENV_REAL (genie_cgs_solar_mass, GSL_CONST_CGS_SOLAR_MASS);
-A68_ENV_REAL (genie_cgs_speed_of_light, GSL_CONST_CGS_SPEED_OF_LIGHT);
-A68_ENV_REAL (genie_cgs_standard_gas_volume, GSL_CONST_CGS_STANDARD_GAS_VOLUME);
-A68_ENV_REAL (genie_cgs_std_atmosphere, GSL_CONST_CGS_STD_ATMOSPHERE);
-A68_ENV_REAL (genie_cgs_stilb, GSL_CONST_CGS_STILB);
-A68_ENV_REAL (genie_cgs_stokes, GSL_CONST_CGS_STOKES);
-A68_ENV_REAL (genie_cgs_tablespoon, GSL_CONST_CGS_TABLESPOON);
-A68_ENV_REAL (genie_cgs_teaspoon, GSL_CONST_CGS_TEASPOON);
-A68_ENV_REAL (genie_cgs_texpoint, GSL_CONST_CGS_TEXPOINT);
-A68_ENV_REAL (genie_cgs_therm, GSL_CONST_CGS_THERM);
-A68_ENV_REAL (genie_cgs_ton, GSL_CONST_CGS_TON);
-A68_ENV_REAL (genie_cgs_torr, GSL_CONST_CGS_TORR);
-A68_ENV_REAL (genie_cgs_troy_ounce, GSL_CONST_CGS_TROY_OUNCE);
-A68_ENV_REAL (genie_cgs_uk_gallon, GSL_CONST_CGS_UK_GALLON);
-A68_ENV_REAL (genie_cgs_uk_ton, GSL_CONST_CGS_UK_TON);
-A68_ENV_REAL (genie_cgs_unified_atomic_mass, GSL_CONST_CGS_UNIFIED_ATOMIC_MASS);
-A68_ENV_REAL (genie_cgs_us_gallon, GSL_CONST_CGS_US_GALLON);
-A68_ENV_REAL (genie_cgs_week, GSL_CONST_CGS_WEEK);
-A68_ENV_REAL (genie_cgs_yard, GSL_CONST_CGS_YARD);
-A68_ENV_REAL (genie_mks_acre, GSL_CONST_MKS_ACRE);
-A68_ENV_REAL (genie_mks_angstrom, GSL_CONST_MKS_ANGSTROM);
-A68_ENV_REAL (genie_mks_astronomical_unit, GSL_CONST_MKS_ASTRONOMICAL_UNIT);
-A68_ENV_REAL (genie_mks_bar, GSL_CONST_MKS_BAR);
-A68_ENV_REAL (genie_mks_barn, GSL_CONST_MKS_BARN);
-A68_ENV_REAL (genie_mks_bohr_magneton, GSL_CONST_MKS_BOHR_MAGNETON);
-A68_ENV_REAL (genie_mks_bohr_radius, GSL_CONST_MKS_BOHR_RADIUS);
-A68_ENV_REAL (genie_mks_boltzmann, GSL_CONST_MKS_BOLTZMANN);
-A68_ENV_REAL (genie_mks_btu, GSL_CONST_MKS_BTU);
-A68_ENV_REAL (genie_mks_calorie, GSL_CONST_MKS_CALORIE);
-A68_ENV_REAL (genie_mks_canadian_gallon, GSL_CONST_MKS_CANADIAN_GALLON);
-A68_ENV_REAL (genie_mks_carat, GSL_CONST_MKS_CARAT);
-A68_ENV_REAL (genie_mks_cup, GSL_CONST_MKS_CUP);
-A68_ENV_REAL (genie_mks_curie, GSL_CONST_MKS_CURIE);
-A68_ENV_REAL (genie_mks_day, GSL_CONST_MKS_DAY);
-A68_ENV_REAL (genie_mks_dyne, GSL_CONST_MKS_DYNE);
-A68_ENV_REAL (genie_mks_electron_charge, GSL_CONST_MKS_ELECTRON_CHARGE);
-A68_ENV_REAL (genie_mks_electron_magnetic_moment, GSL_CONST_MKS_ELECTRON_MAGNETIC_MOMENT);
-A68_ENV_REAL (genie_mks_electron_volt, GSL_CONST_MKS_ELECTRON_VOLT);
-A68_ENV_REAL (genie_mks_erg, GSL_CONST_MKS_ERG);
-A68_ENV_REAL (genie_mks_faraday, GSL_CONST_MKS_FARADAY);
-A68_ENV_REAL (genie_mks_fathom, GSL_CONST_MKS_FATHOM);
-A68_ENV_REAL (genie_mks_fluid_ounce, GSL_CONST_MKS_FLUID_OUNCE);
-A68_ENV_REAL (genie_mks_foot, GSL_CONST_MKS_FOOT);
-A68_ENV_REAL (genie_mks_footcandle, GSL_CONST_MKS_FOOTCANDLE);
-A68_ENV_REAL (genie_mks_footlambert, GSL_CONST_MKS_FOOTLAMBERT);
-A68_ENV_REAL (genie_mks_gauss, GSL_CONST_MKS_GAUSS);
-A68_ENV_REAL (genie_mks_gram_force, GSL_CONST_MKS_GRAM_FORCE);
-A68_ENV_REAL (genie_mks_grav_accel, GSL_CONST_MKS_GRAV_ACCEL);
-A68_ENV_REAL (genie_mks_gravitational_constant, GSL_CONST_MKS_GRAVITATIONAL_CONSTANT);
-A68_ENV_REAL (genie_mks_hectare, GSL_CONST_MKS_HECTARE);
-A68_ENV_REAL (genie_mks_horsepower, GSL_CONST_MKS_HORSEPOWER);
-A68_ENV_REAL (genie_mks_hour, GSL_CONST_MKS_HOUR);
-A68_ENV_REAL (genie_mks_inch, GSL_CONST_MKS_INCH);
-A68_ENV_REAL (genie_mks_inch_of_mercury, GSL_CONST_MKS_INCH_OF_MERCURY);
-A68_ENV_REAL (genie_mks_inch_of_water, GSL_CONST_MKS_INCH_OF_WATER);
-A68_ENV_REAL (genie_mks_joule, GSL_CONST_MKS_JOULE);
-A68_ENV_REAL (genie_mks_kilometers_per_hour, GSL_CONST_MKS_KILOMETERS_PER_HOUR);
-A68_ENV_REAL (genie_mks_kilopound_force, GSL_CONST_MKS_KILOPOUND_FORCE);
-A68_ENV_REAL (genie_mks_knot, GSL_CONST_MKS_KNOT);
-A68_ENV_REAL (genie_mks_lambert, GSL_CONST_MKS_LAMBERT);
-A68_ENV_REAL (genie_mks_light_year, GSL_CONST_MKS_LIGHT_YEAR);
-A68_ENV_REAL (genie_mks_liter, GSL_CONST_MKS_LITER);
-A68_ENV_REAL (genie_mks_lumen, GSL_CONST_MKS_LUMEN);
-A68_ENV_REAL (genie_mks_lux, GSL_CONST_MKS_LUX);
-A68_ENV_REAL (genie_mks_mass_electron, GSL_CONST_MKS_MASS_ELECTRON);
-A68_ENV_REAL (genie_mks_mass_muon, GSL_CONST_MKS_MASS_MUON);
-A68_ENV_REAL (genie_mks_mass_neutron, GSL_CONST_MKS_MASS_NEUTRON);
-A68_ENV_REAL (genie_mks_mass_proton, GSL_CONST_MKS_MASS_PROTON);
-A68_ENV_REAL (genie_mks_meter_of_mercury, GSL_CONST_MKS_METER_OF_MERCURY);
-A68_ENV_REAL (genie_mks_metric_ton, GSL_CONST_MKS_METRIC_TON);
-A68_ENV_REAL (genie_mks_micron, GSL_CONST_MKS_MICRON);
-A68_ENV_REAL (genie_mks_mil, GSL_CONST_MKS_MIL);
-A68_ENV_REAL (genie_mks_mile, GSL_CONST_MKS_MILE);
-A68_ENV_REAL (genie_mks_miles_per_hour, GSL_CONST_MKS_MILES_PER_HOUR);
-A68_ENV_REAL (genie_mks_minute, GSL_CONST_MKS_MINUTE);
-A68_ENV_REAL (genie_mks_molar_gas, GSL_CONST_MKS_MOLAR_GAS);
-A68_ENV_REAL (genie_mks_nautical_mile, GSL_CONST_MKS_NAUTICAL_MILE);
-A68_ENV_REAL (genie_mks_newton, GSL_CONST_MKS_NEWTON);
-A68_ENV_REAL (genie_mks_nuclear_magneton, GSL_CONST_MKS_NUCLEAR_MAGNETON);
-A68_ENV_REAL (genie_mks_ounce_mass, GSL_CONST_MKS_OUNCE_MASS);
-A68_ENV_REAL (genie_mks_parsec, GSL_CONST_MKS_PARSEC);
-A68_ENV_REAL (genie_mks_phot, GSL_CONST_MKS_PHOT);
-A68_ENV_REAL (genie_mks_pint, GSL_CONST_MKS_PINT);
-A68_ENV_REAL (genie_mks_planck_constant_h, 6.6260693e-34);
-A68_ENV_REAL (genie_mks_planck_constant_hbar, 6.6260693e-34 / (2 * A68G_PI));
-A68_ENV_REAL (genie_mks_point, GSL_CONST_MKS_POINT);
-A68_ENV_REAL (genie_mks_poise, GSL_CONST_MKS_POISE);
-A68_ENV_REAL (genie_mks_pound_force, GSL_CONST_MKS_POUND_FORCE);
-A68_ENV_REAL (genie_mks_pound_mass, GSL_CONST_MKS_POUND_MASS);
-A68_ENV_REAL (genie_mks_poundal, GSL_CONST_MKS_POUNDAL);
-A68_ENV_REAL (genie_mks_proton_magnetic_moment, GSL_CONST_MKS_PROTON_MAGNETIC_MOMENT);
-A68_ENV_REAL (genie_mks_psi, GSL_CONST_MKS_PSI);
-A68_ENV_REAL (genie_mks_quart, GSL_CONST_MKS_QUART);
-A68_ENV_REAL (genie_mks_rad, GSL_CONST_MKS_RAD);
-A68_ENV_REAL (genie_mks_roentgen, GSL_CONST_MKS_ROENTGEN);
-A68_ENV_REAL (genie_mks_rydberg, GSL_CONST_MKS_RYDBERG);
-A68_ENV_REAL (genie_mks_solar_mass, GSL_CONST_MKS_SOLAR_MASS);
-A68_ENV_REAL (genie_mks_speed_of_light, GSL_CONST_MKS_SPEED_OF_LIGHT);
-A68_ENV_REAL (genie_mks_standard_gas_volume, GSL_CONST_MKS_STANDARD_GAS_VOLUME);
-A68_ENV_REAL (genie_mks_std_atmosphere, GSL_CONST_MKS_STD_ATMOSPHERE);
-A68_ENV_REAL (genie_mks_stilb, GSL_CONST_MKS_STILB);
-A68_ENV_REAL (genie_mks_stokes, GSL_CONST_MKS_STOKES);
-A68_ENV_REAL (genie_mks_tablespoon, GSL_CONST_MKS_TABLESPOON);
-A68_ENV_REAL (genie_mks_teaspoon, GSL_CONST_MKS_TEASPOON);
-A68_ENV_REAL (genie_mks_texpoint, GSL_CONST_MKS_TEXPOINT);
-A68_ENV_REAL (genie_mks_therm, GSL_CONST_MKS_THERM);
-A68_ENV_REAL (genie_mks_ton, GSL_CONST_MKS_TON);
-A68_ENV_REAL (genie_mks_torr, GSL_CONST_MKS_TORR);
-A68_ENV_REAL (genie_mks_troy_ounce, GSL_CONST_MKS_TROY_OUNCE);
-A68_ENV_REAL (genie_mks_uk_gallon, GSL_CONST_MKS_UK_GALLON);
-A68_ENV_REAL (genie_mks_uk_ton, GSL_CONST_MKS_UK_TON);
-A68_ENV_REAL (genie_mks_unified_atomic_mass, GSL_CONST_MKS_UNIFIED_ATOMIC_MASS);
-A68_ENV_REAL (genie_mks_us_gallon, GSL_CONST_MKS_US_GALLON);
-A68_ENV_REAL (genie_mks_vacuum_permeability, GSL_CONST_MKS_VACUUM_PERMEABILITY);
-A68_ENV_REAL (genie_mks_vacuum_permittivity, GSL_CONST_MKS_VACUUM_PERMITTIVITY);
-A68_ENV_REAL (genie_mks_week, GSL_CONST_MKS_WEEK);
-A68_ENV_REAL (genie_mks_yard, GSL_CONST_MKS_YARD);
-A68_ENV_REAL (genie_num_atto, GSL_CONST_NUM_ATTO);
-A68_ENV_REAL (genie_num_avogadro, GSL_CONST_NUM_AVOGADRO);
-A68_ENV_REAL (genie_num_exa, GSL_CONST_NUM_EXA);
-A68_ENV_REAL (genie_num_femto, GSL_CONST_NUM_FEMTO);
-A68_ENV_REAL (genie_num_fine_structure, GSL_CONST_NUM_FINE_STRUCTURE);
-A68_ENV_REAL (genie_num_giga, GSL_CONST_NUM_GIGA);
-A68_ENV_REAL (genie_num_kilo, GSL_CONST_NUM_KILO);
-A68_ENV_REAL (genie_num_mega, GSL_CONST_NUM_MEGA);
-A68_ENV_REAL (genie_num_micro, GSL_CONST_NUM_MICRO);
-A68_ENV_REAL (genie_num_milli, GSL_CONST_NUM_MILLI);
-A68_ENV_REAL (genie_num_nano, GSL_CONST_NUM_NANO);
-A68_ENV_REAL (genie_num_peta, GSL_CONST_NUM_PETA);
-A68_ENV_REAL (genie_num_pico, GSL_CONST_NUM_PICO);
-A68_ENV_REAL (genie_num_tera, GSL_CONST_NUM_TERA);
-A68_ENV_REAL (genie_num_yocto, GSL_CONST_NUM_YOCTO);
-A68_ENV_REAL (genie_num_yotta, GSL_CONST_NUM_YOTTA);
-A68_ENV_REAL (genie_num_zepto, GSL_CONST_NUM_ZEPTO);
-A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
+#if defined ENABLE_NUMERICAL
+A68_ENV_REAL (genie_cgs_acre, GSL_CONST_CGS_ACRE)
+  A68_ENV_REAL (genie_cgs_angstrom, GSL_CONST_CGS_ANGSTROM)
+  A68_ENV_REAL (genie_cgs_astronomical_unit, GSL_CONST_CGS_ASTRONOMICAL_UNIT)
+  A68_ENV_REAL (genie_cgs_bar, GSL_CONST_CGS_BAR)
+  A68_ENV_REAL (genie_cgs_barn, GSL_CONST_CGS_BARN)
+  A68_ENV_REAL (genie_cgs_bohr_magneton, GSL_CONST_CGS_BOHR_MAGNETON)
+  A68_ENV_REAL (genie_cgs_bohr_radius, GSL_CONST_CGS_BOHR_RADIUS)
+  A68_ENV_REAL (genie_cgs_boltzmann, GSL_CONST_CGS_BOLTZMANN)
+  A68_ENV_REAL (genie_cgs_btu, GSL_CONST_CGS_BTU)
+  A68_ENV_REAL (genie_cgs_calorie, GSL_CONST_CGS_CALORIE)
+  A68_ENV_REAL (genie_cgs_canadian_gallon, GSL_CONST_CGS_CANADIAN_GALLON)
+  A68_ENV_REAL (genie_cgs_carat, GSL_CONST_CGS_CARAT)
+  A68_ENV_REAL (genie_cgs_cup, GSL_CONST_CGS_CUP)
+  A68_ENV_REAL (genie_cgs_curie, GSL_CONST_CGS_CURIE)
+  A68_ENV_REAL (genie_cgs_day, GSL_CONST_CGS_DAY)
+  A68_ENV_REAL (genie_cgs_dyne, GSL_CONST_CGS_DYNE)
+  A68_ENV_REAL (genie_cgs_electron_charge, GSL_CONST_CGS_ELECTRON_CHARGE)
+  A68_ENV_REAL (genie_cgs_electron_magnetic_moment, GSL_CONST_CGS_ELECTRON_MAGNETIC_MOMENT)
+  A68_ENV_REAL (genie_cgs_electron_volt, GSL_CONST_CGS_ELECTRON_VOLT)
+  A68_ENV_REAL (genie_cgs_erg, GSL_CONST_CGS_ERG)
+  A68_ENV_REAL (genie_cgs_faraday, GSL_CONST_CGS_FARADAY)
+  A68_ENV_REAL (genie_cgs_fathom, GSL_CONST_CGS_FATHOM)
+  A68_ENV_REAL (genie_cgs_fluid_ounce, GSL_CONST_CGS_FLUID_OUNCE)
+  A68_ENV_REAL (genie_cgs_foot, GSL_CONST_CGS_FOOT)
+  A68_ENV_REAL (genie_cgs_footcandle, GSL_CONST_CGS_FOOTCANDLE)
+  A68_ENV_REAL (genie_cgs_footlambert, GSL_CONST_CGS_FOOTLAMBERT)
+  A68_ENV_REAL (genie_cgs_gauss, GSL_CONST_CGS_GAUSS)
+  A68_ENV_REAL (genie_cgs_gram_force, GSL_CONST_CGS_GRAM_FORCE)
+  A68_ENV_REAL (genie_cgs_grav_accel, GSL_CONST_CGS_GRAV_ACCEL)
+  A68_ENV_REAL (genie_cgs_gravitational_constant, GSL_CONST_CGS_GRAVITATIONAL_CONSTANT)
+  A68_ENV_REAL (genie_cgs_hectare, GSL_CONST_CGS_HECTARE)
+  A68_ENV_REAL (genie_cgs_horsepower, GSL_CONST_CGS_HORSEPOWER)
+  A68_ENV_REAL (genie_cgs_hour, GSL_CONST_CGS_HOUR)
+  A68_ENV_REAL (genie_cgs_inch, GSL_CONST_CGS_INCH)
+  A68_ENV_REAL (genie_cgs_inch_of_mercury, GSL_CONST_CGS_INCH_OF_MERCURY)
+  A68_ENV_REAL (genie_cgs_inch_of_water, GSL_CONST_CGS_INCH_OF_WATER)
+  A68_ENV_REAL (genie_cgs_joule, GSL_CONST_CGS_JOULE)
+  A68_ENV_REAL (genie_cgs_kilometers_per_hour, GSL_CONST_CGS_KILOMETERS_PER_HOUR)
+  A68_ENV_REAL (genie_cgs_kilopound_force, GSL_CONST_CGS_KILOPOUND_FORCE)
+  A68_ENV_REAL (genie_cgs_knot, GSL_CONST_CGS_KNOT)
+  A68_ENV_REAL (genie_cgs_lambert, GSL_CONST_CGS_LAMBERT)
+  A68_ENV_REAL (genie_cgs_light_year, GSL_CONST_CGS_LIGHT_YEAR)
+  A68_ENV_REAL (genie_cgs_liter, GSL_CONST_CGS_LITER)
+  A68_ENV_REAL (genie_cgs_lumen, GSL_CONST_CGS_LUMEN)
+  A68_ENV_REAL (genie_cgs_lux, GSL_CONST_CGS_LUX)
+  A68_ENV_REAL (genie_cgs_mass_electron, GSL_CONST_CGS_MASS_ELECTRON)
+  A68_ENV_REAL (genie_cgs_mass_muon, GSL_CONST_CGS_MASS_MUON)
+  A68_ENV_REAL (genie_cgs_mass_neutron, GSL_CONST_CGS_MASS_NEUTRON)
+  A68_ENV_REAL (genie_cgs_mass_proton, GSL_CONST_CGS_MASS_PROTON)
+  A68_ENV_REAL (genie_cgs_meter_of_mercury, GSL_CONST_CGS_METER_OF_MERCURY)
+  A68_ENV_REAL (genie_cgs_metric_ton, GSL_CONST_CGS_METRIC_TON)
+  A68_ENV_REAL (genie_cgs_micron, GSL_CONST_CGS_MICRON)
+  A68_ENV_REAL (genie_cgs_mil, GSL_CONST_CGS_MIL)
+  A68_ENV_REAL (genie_cgs_mile, GSL_CONST_CGS_MILE)
+  A68_ENV_REAL (genie_cgs_miles_per_hour, GSL_CONST_CGS_MILES_PER_HOUR)
+  A68_ENV_REAL (genie_cgs_minute, GSL_CONST_CGS_MINUTE)
+  A68_ENV_REAL (genie_cgs_molar_gas, GSL_CONST_CGS_MOLAR_GAS)
+  A68_ENV_REAL (genie_cgs_nautical_mile, GSL_CONST_CGS_NAUTICAL_MILE)
+  A68_ENV_REAL (genie_cgs_newton, GSL_CONST_CGS_NEWTON)
+  A68_ENV_REAL (genie_cgs_nuclear_magneton, GSL_CONST_CGS_NUCLEAR_MAGNETON)
+  A68_ENV_REAL (genie_cgs_ounce_mass, GSL_CONST_CGS_OUNCE_MASS)
+  A68_ENV_REAL (genie_cgs_parsec, GSL_CONST_CGS_PARSEC)
+  A68_ENV_REAL (genie_cgs_phot, GSL_CONST_CGS_PHOT)
+  A68_ENV_REAL (genie_cgs_pint, GSL_CONST_CGS_PINT)
+  A68_ENV_REAL (genie_cgs_planck_constant_h, 6.6260693e-27)
+  A68_ENV_REAL (genie_cgs_planck_constant_hbar, 6.6260693e-27 / (2 * A68G_PI))
+  A68_ENV_REAL (genie_cgs_point, GSL_CONST_CGS_POINT)
+  A68_ENV_REAL (genie_cgs_poise, GSL_CONST_CGS_POISE)
+  A68_ENV_REAL (genie_cgs_pound_force, GSL_CONST_CGS_POUND_FORCE)
+  A68_ENV_REAL (genie_cgs_pound_mass, GSL_CONST_CGS_POUND_MASS)
+  A68_ENV_REAL (genie_cgs_poundal, GSL_CONST_CGS_POUNDAL)
+  A68_ENV_REAL (genie_cgs_proton_magnetic_moment, GSL_CONST_CGS_PROTON_MAGNETIC_MOMENT)
+  A68_ENV_REAL (genie_cgs_psi, GSL_CONST_CGS_PSI)
+  A68_ENV_REAL (genie_cgs_quart, GSL_CONST_CGS_QUART)
+  A68_ENV_REAL (genie_cgs_rad, GSL_CONST_CGS_RAD)
+  A68_ENV_REAL (genie_cgs_roentgen, GSL_CONST_CGS_ROENTGEN)
+  A68_ENV_REAL (genie_cgs_rydberg, GSL_CONST_CGS_RYDBERG)
+  A68_ENV_REAL (genie_cgs_solar_mass, GSL_CONST_CGS_SOLAR_MASS)
+  A68_ENV_REAL (genie_cgs_speed_of_light, GSL_CONST_CGS_SPEED_OF_LIGHT)
+  A68_ENV_REAL (genie_cgs_standard_gas_volume, GSL_CONST_CGS_STANDARD_GAS_VOLUME)
+  A68_ENV_REAL (genie_cgs_std_atmosphere, GSL_CONST_CGS_STD_ATMOSPHERE)
+  A68_ENV_REAL (genie_cgs_stilb, GSL_CONST_CGS_STILB)
+  A68_ENV_REAL (genie_cgs_stokes, GSL_CONST_CGS_STOKES)
+  A68_ENV_REAL (genie_cgs_tablespoon, GSL_CONST_CGS_TABLESPOON)
+  A68_ENV_REAL (genie_cgs_teaspoon, GSL_CONST_CGS_TEASPOON)
+  A68_ENV_REAL (genie_cgs_texpoint, GSL_CONST_CGS_TEXPOINT)
+  A68_ENV_REAL (genie_cgs_therm, GSL_CONST_CGS_THERM)
+  A68_ENV_REAL (genie_cgs_ton, GSL_CONST_CGS_TON)
+  A68_ENV_REAL (genie_cgs_torr, GSL_CONST_CGS_TORR)
+  A68_ENV_REAL (genie_cgs_troy_ounce, GSL_CONST_CGS_TROY_OUNCE)
+  A68_ENV_REAL (genie_cgs_uk_gallon, GSL_CONST_CGS_UK_GALLON)
+  A68_ENV_REAL (genie_cgs_uk_ton, GSL_CONST_CGS_UK_TON)
+  A68_ENV_REAL (genie_cgs_unified_atomic_mass, GSL_CONST_CGS_UNIFIED_ATOMIC_MASS)
+  A68_ENV_REAL (genie_cgs_us_gallon, GSL_CONST_CGS_US_GALLON)
+  A68_ENV_REAL (genie_cgs_week, GSL_CONST_CGS_WEEK)
+  A68_ENV_REAL (genie_cgs_yard, GSL_CONST_CGS_YARD)
+  A68_ENV_REAL (genie_mks_acre, GSL_CONST_MKS_ACRE)
+  A68_ENV_REAL (genie_mks_angstrom, GSL_CONST_MKS_ANGSTROM)
+  A68_ENV_REAL (genie_mks_astronomical_unit, GSL_CONST_MKS_ASTRONOMICAL_UNIT)
+  A68_ENV_REAL (genie_mks_bar, GSL_CONST_MKS_BAR)
+  A68_ENV_REAL (genie_mks_barn, GSL_CONST_MKS_BARN)
+  A68_ENV_REAL (genie_mks_bohr_magneton, GSL_CONST_MKS_BOHR_MAGNETON)
+  A68_ENV_REAL (genie_mks_bohr_radius, GSL_CONST_MKS_BOHR_RADIUS)
+  A68_ENV_REAL (genie_mks_boltzmann, GSL_CONST_MKS_BOLTZMANN)
+  A68_ENV_REAL (genie_mks_btu, GSL_CONST_MKS_BTU)
+  A68_ENV_REAL (genie_mks_calorie, GSL_CONST_MKS_CALORIE)
+  A68_ENV_REAL (genie_mks_canadian_gallon, GSL_CONST_MKS_CANADIAN_GALLON)
+  A68_ENV_REAL (genie_mks_carat, GSL_CONST_MKS_CARAT)
+  A68_ENV_REAL (genie_mks_cup, GSL_CONST_MKS_CUP)
+  A68_ENV_REAL (genie_mks_curie, GSL_CONST_MKS_CURIE)
+  A68_ENV_REAL (genie_mks_day, GSL_CONST_MKS_DAY)
+  A68_ENV_REAL (genie_mks_dyne, GSL_CONST_MKS_DYNE)
+  A68_ENV_REAL (genie_mks_electron_charge, GSL_CONST_MKS_ELECTRON_CHARGE)
+  A68_ENV_REAL (genie_mks_electron_magnetic_moment, GSL_CONST_MKS_ELECTRON_MAGNETIC_MOMENT)
+  A68_ENV_REAL (genie_mks_electron_volt, GSL_CONST_MKS_ELECTRON_VOLT)
+  A68_ENV_REAL (genie_mks_erg, GSL_CONST_MKS_ERG)
+  A68_ENV_REAL (genie_mks_faraday, GSL_CONST_MKS_FARADAY)
+  A68_ENV_REAL (genie_mks_fathom, GSL_CONST_MKS_FATHOM)
+  A68_ENV_REAL (genie_mks_fluid_ounce, GSL_CONST_MKS_FLUID_OUNCE)
+  A68_ENV_REAL (genie_mks_foot, GSL_CONST_MKS_FOOT)
+  A68_ENV_REAL (genie_mks_footcandle, GSL_CONST_MKS_FOOTCANDLE)
+  A68_ENV_REAL (genie_mks_footlambert, GSL_CONST_MKS_FOOTLAMBERT)
+  A68_ENV_REAL (genie_mks_gauss, GSL_CONST_MKS_GAUSS)
+  A68_ENV_REAL (genie_mks_gram_force, GSL_CONST_MKS_GRAM_FORCE)
+  A68_ENV_REAL (genie_mks_grav_accel, GSL_CONST_MKS_GRAV_ACCEL)
+  A68_ENV_REAL (genie_mks_gravitational_constant, GSL_CONST_MKS_GRAVITATIONAL_CONSTANT)
+  A68_ENV_REAL (genie_mks_hectare, GSL_CONST_MKS_HECTARE)
+  A68_ENV_REAL (genie_mks_horsepower, GSL_CONST_MKS_HORSEPOWER)
+  A68_ENV_REAL (genie_mks_hour, GSL_CONST_MKS_HOUR)
+  A68_ENV_REAL (genie_mks_inch, GSL_CONST_MKS_INCH)
+  A68_ENV_REAL (genie_mks_inch_of_mercury, GSL_CONST_MKS_INCH_OF_MERCURY)
+  A68_ENV_REAL (genie_mks_inch_of_water, GSL_CONST_MKS_INCH_OF_WATER)
+  A68_ENV_REAL (genie_mks_joule, GSL_CONST_MKS_JOULE)
+  A68_ENV_REAL (genie_mks_kilometers_per_hour, GSL_CONST_MKS_KILOMETERS_PER_HOUR)
+  A68_ENV_REAL (genie_mks_kilopound_force, GSL_CONST_MKS_KILOPOUND_FORCE)
+  A68_ENV_REAL (genie_mks_knot, GSL_CONST_MKS_KNOT)
+  A68_ENV_REAL (genie_mks_lambert, GSL_CONST_MKS_LAMBERT)
+  A68_ENV_REAL (genie_mks_light_year, GSL_CONST_MKS_LIGHT_YEAR)
+  A68_ENV_REAL (genie_mks_liter, GSL_CONST_MKS_LITER)
+  A68_ENV_REAL (genie_mks_lumen, GSL_CONST_MKS_LUMEN)
+  A68_ENV_REAL (genie_mks_lux, GSL_CONST_MKS_LUX)
+  A68_ENV_REAL (genie_mks_mass_electron, GSL_CONST_MKS_MASS_ELECTRON)
+  A68_ENV_REAL (genie_mks_mass_muon, GSL_CONST_MKS_MASS_MUON)
+  A68_ENV_REAL (genie_mks_mass_neutron, GSL_CONST_MKS_MASS_NEUTRON)
+  A68_ENV_REAL (genie_mks_mass_proton, GSL_CONST_MKS_MASS_PROTON)
+  A68_ENV_REAL (genie_mks_meter_of_mercury, GSL_CONST_MKS_METER_OF_MERCURY)
+  A68_ENV_REAL (genie_mks_metric_ton, GSL_CONST_MKS_METRIC_TON)
+  A68_ENV_REAL (genie_mks_micron, GSL_CONST_MKS_MICRON)
+  A68_ENV_REAL (genie_mks_mil, GSL_CONST_MKS_MIL)
+  A68_ENV_REAL (genie_mks_mile, GSL_CONST_MKS_MILE)
+  A68_ENV_REAL (genie_mks_miles_per_hour, GSL_CONST_MKS_MILES_PER_HOUR)
+  A68_ENV_REAL (genie_mks_minute, GSL_CONST_MKS_MINUTE)
+  A68_ENV_REAL (genie_mks_molar_gas, GSL_CONST_MKS_MOLAR_GAS)
+  A68_ENV_REAL (genie_mks_nautical_mile, GSL_CONST_MKS_NAUTICAL_MILE)
+  A68_ENV_REAL (genie_mks_newton, GSL_CONST_MKS_NEWTON)
+  A68_ENV_REAL (genie_mks_nuclear_magneton, GSL_CONST_MKS_NUCLEAR_MAGNETON)
+  A68_ENV_REAL (genie_mks_ounce_mass, GSL_CONST_MKS_OUNCE_MASS)
+  A68_ENV_REAL (genie_mks_parsec, GSL_CONST_MKS_PARSEC)
+  A68_ENV_REAL (genie_mks_phot, GSL_CONST_MKS_PHOT)
+  A68_ENV_REAL (genie_mks_pint, GSL_CONST_MKS_PINT)
+  A68_ENV_REAL (genie_mks_planck_constant_h, 6.6260693e-34)
+  A68_ENV_REAL (genie_mks_planck_constant_hbar, 6.6260693e-34 / (2 * A68G_PI))
+  A68_ENV_REAL (genie_mks_point, GSL_CONST_MKS_POINT)
+  A68_ENV_REAL (genie_mks_poise, GSL_CONST_MKS_POISE)
+  A68_ENV_REAL (genie_mks_pound_force, GSL_CONST_MKS_POUND_FORCE)
+  A68_ENV_REAL (genie_mks_pound_mass, GSL_CONST_MKS_POUND_MASS)
+  A68_ENV_REAL (genie_mks_poundal, GSL_CONST_MKS_POUNDAL)
+  A68_ENV_REAL (genie_mks_proton_magnetic_moment, GSL_CONST_MKS_PROTON_MAGNETIC_MOMENT)
+  A68_ENV_REAL (genie_mks_psi, GSL_CONST_MKS_PSI)
+  A68_ENV_REAL (genie_mks_quart, GSL_CONST_MKS_QUART)
+  A68_ENV_REAL (genie_mks_rad, GSL_CONST_MKS_RAD)
+  A68_ENV_REAL (genie_mks_roentgen, GSL_CONST_MKS_ROENTGEN)
+  A68_ENV_REAL (genie_mks_rydberg, GSL_CONST_MKS_RYDBERG)
+  A68_ENV_REAL (genie_mks_solar_mass, GSL_CONST_MKS_SOLAR_MASS)
+  A68_ENV_REAL (genie_mks_speed_of_light, GSL_CONST_MKS_SPEED_OF_LIGHT)
+  A68_ENV_REAL (genie_mks_standard_gas_volume, GSL_CONST_MKS_STANDARD_GAS_VOLUME)
+  A68_ENV_REAL (genie_mks_std_atmosphere, GSL_CONST_MKS_STD_ATMOSPHERE)
+  A68_ENV_REAL (genie_mks_stilb, GSL_CONST_MKS_STILB)
+  A68_ENV_REAL (genie_mks_stokes, GSL_CONST_MKS_STOKES)
+  A68_ENV_REAL (genie_mks_tablespoon, GSL_CONST_MKS_TABLESPOON)
+  A68_ENV_REAL (genie_mks_teaspoon, GSL_CONST_MKS_TEASPOON)
+  A68_ENV_REAL (genie_mks_texpoint, GSL_CONST_MKS_TEXPOINT)
+  A68_ENV_REAL (genie_mks_therm, GSL_CONST_MKS_THERM)
+  A68_ENV_REAL (genie_mks_ton, GSL_CONST_MKS_TON)
+  A68_ENV_REAL (genie_mks_torr, GSL_CONST_MKS_TORR)
+  A68_ENV_REAL (genie_mks_troy_ounce, GSL_CONST_MKS_TROY_OUNCE)
+  A68_ENV_REAL (genie_mks_uk_gallon, GSL_CONST_MKS_UK_GALLON)
+  A68_ENV_REAL (genie_mks_uk_ton, GSL_CONST_MKS_UK_TON)
+  A68_ENV_REAL (genie_mks_unified_atomic_mass, GSL_CONST_MKS_UNIFIED_ATOMIC_MASS)
+  A68_ENV_REAL (genie_mks_us_gallon, GSL_CONST_MKS_US_GALLON)
+  A68_ENV_REAL (genie_mks_vacuum_permeability, GSL_CONST_MKS_VACUUM_PERMEABILITY)
+  A68_ENV_REAL (genie_mks_vacuum_permittivity, GSL_CONST_MKS_VACUUM_PERMITTIVITY)
+  A68_ENV_REAL (genie_mks_week, GSL_CONST_MKS_WEEK)
+  A68_ENV_REAL (genie_mks_yard, GSL_CONST_MKS_YARD)
+  A68_ENV_REAL (genie_num_atto, GSL_CONST_NUM_ATTO)
+  A68_ENV_REAL (genie_num_avogadro, GSL_CONST_NUM_AVOGADRO)
+  A68_ENV_REAL (genie_num_exa, GSL_CONST_NUM_EXA)
+  A68_ENV_REAL (genie_num_femto, GSL_CONST_NUM_FEMTO)
+  A68_ENV_REAL (genie_num_fine_structure, GSL_CONST_NUM_FINE_STRUCTURE)
+  A68_ENV_REAL (genie_num_giga, GSL_CONST_NUM_GIGA)
+  A68_ENV_REAL (genie_num_kilo, GSL_CONST_NUM_KILO)
+  A68_ENV_REAL (genie_num_mega, GSL_CONST_NUM_MEGA)
+  A68_ENV_REAL (genie_num_micro, GSL_CONST_NUM_MICRO)
+  A68_ENV_REAL (genie_num_milli, GSL_CONST_NUM_MILLI)
+  A68_ENV_REAL (genie_num_nano, GSL_CONST_NUM_NANO)
+  A68_ENV_REAL (genie_num_peta, GSL_CONST_NUM_PETA)
+  A68_ENV_REAL (genie_num_pico, GSL_CONST_NUM_PICO)
+  A68_ENV_REAL (genie_num_tera, GSL_CONST_NUM_TERA)
+  A68_ENV_REAL (genie_num_yocto, GSL_CONST_NUM_YOCTO)
+  A68_ENV_REAL (genie_num_yotta, GSL_CONST_NUM_YOTTA)
+  A68_ENV_REAL (genie_num_zepto, GSL_CONST_NUM_ZEPTO)
+  A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA)
 #endif
-
 /* Macros. */
-
 #define C_FUNCTION(p, f)\
   A68_REAL *x;\
   POP_OPERAND_ADDRESS (p, x, A68_REAL);\
   RESET_ERRNO;\
   x->value = f (x->value);\
   math_rte (p, errno != 0, MODE (REAL), NULL);
-
 #define OWN_FUNCTION(p, f)\
   A68_REAL *x;\
   POP_OPERAND_ADDRESS (p, x, A68_REAL);\
   RESET_ERRNO;\
   x->value = f (p, x->value);\
   math_rte (p, errno != 0, MODE (REAL), NULL);
-
 #define GSL_FUNCTION(p, f)\
   A68_REAL *x;\
   POP_OPERAND_ADDRESS (p, x, A68_REAL);\
   RESET_ERRNO;\
   x->value = f (x->value);\
   math_rte (p, errno != 0, MODE (REAL), NULL);
-
 #define GSL_COMPLEX_FUNCTION(f)\
   gsl_complex x, z;\
   A68_REAL *rex, *imx;\
-  imx = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));\
-  rex = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));\
+  imx = (A68_REAL *) (STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL)));\
+  rex = (A68_REAL *) (STACK_OFFSET (-2 * ALIGNED_SIZEOF (A68_REAL)));\
   GSL_SET_COMPLEX (&x, rex->value, imx->value);\
   (void) gsl_set_error_handler_off ();\
   RESET_ERRNO;\
@@ -294,7 +289,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   math_rte (p, errno != 0, MODE (COMPLEX), NULL);\
   imx->value = GSL_IMAG(z);\
   rex->value = GSL_REAL(z)
-
 #define GSL_1_FUNCTION(p, f)\
   A68_REAL *x;\
   gsl_sf_result y;\
@@ -304,7 +298,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, &y);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = y.val
-
 #define GSL_2_FUNCTION(p, f)\
   A68_REAL *x, *y;\
   gsl_sf_result r;\
@@ -314,7 +307,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, y->value, &r);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
-
 #define GSL_2_INT_FUNCTION(p, f)\
   A68_REAL *x, *y;\
   gsl_sf_result r;\
@@ -324,7 +316,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f ((int) x->value, y->value, &r);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
-
 #define GSL_3_FUNCTION(p, f)\
   A68_REAL *x, *y, *z;\
   gsl_sf_result r;\
@@ -335,7 +326,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, y->value, z->value,  &r);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
-
 #define GSL_1D_FUNCTION(p, f)\
   A68_REAL *x;\
   gsl_sf_result y;\
@@ -345,7 +335,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, GSL_PREC_DOUBLE, &y);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = y.val
-
 #define GSL_2D_FUNCTION(p, f)\
   A68_REAL *x, *y;\
   gsl_sf_result r;\
@@ -355,7 +344,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, y->value, GSL_PREC_DOUBLE, &r);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
-
 #define GSL_3D_FUNCTION(p, f)\
   A68_REAL *x, *y, *z;\
   gsl_sf_result r;\
@@ -366,7 +354,6 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, y->value, z->value, GSL_PREC_DOUBLE, &r);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
-
 #define GSL_4D_FUNCTION(p, f)\
   A68_REAL *x, *y, *z, *rho;\
   gsl_sf_result r;\
@@ -378,14 +365,12 @@ A68_ENV_REAL (genie_num_zetta, GSL_CONST_NUM_ZETTA);
   status = f (x->value, y->value, z->value, rho->value, GSL_PREC_DOUBLE, &r);\
   math_rte (p, status != 0, MODE (REAL), gsl_strerror (status));\
   x->value = r.val
-
 /*!
 \brief the cube root of x
 \param x
 \return
 **/
-
-double curt (double x)
+     double curt (double x)
 {
 #define CBRT2 1.2599210498948731647672;
 #define CBRT4 1.5874010519681994747517;
@@ -707,7 +692,7 @@ void genie_inverfc_real (NODE_T * p)
   C_FUNCTION (p, inverfc);
 }
 
-#if defined HAVE_GSL
+#if defined ENABLE_NUMERICAL
 
 /* "Special" functions - but what is so "special" about them? */
 
@@ -769,7 +754,7 @@ void genie_lngamma_real (NODE_T * p)
 void genie_factorial_real (NODE_T * p)
 {
 /* gsl_sf_fact reduces argument to int, hence we do gamma (x + 1) */
-  A68_REAL *x = (A68_REAL *) STACK_OFFSET (-SIZE_OF (A68_REAL));
+  A68_REAL *x = (A68_REAL *) STACK_OFFSET (-ALIGNED_SIZEOF (A68_REAL));
   x->value += 1.0;
   {
     GSL_1_FUNCTION (p, gsl_sf_gamma_e);
@@ -1110,7 +1095,8 @@ the online version of the latter contains corrections to the print version.
 #define LCG(n) ((69069UL * n) & 0xffffffffUL)
 #define TAUSWORTHE_MASK 0xffffffffUL
 
-typedef struct {
+typedef struct
+{
   unsigned long int z1, z2, z3, z4;
 } taus113_state_t;
 

@@ -126,8 +126,7 @@ We can only map routines blessed by "whether_mappable_routine", so there is no
       if (w != NULL && whether_mappable_routine (v)) {
         return (w);
       }
-    }
-    while (CAR (u, "short"));
+    } while (CAR (u, "short"));
   } else if (CAR (u, "long")) {
     do {
       char *v;
@@ -138,8 +137,7 @@ We can only map routines blessed by "whether_mappable_routine", so there is no
       if (w != NULL && whether_mappable_routine (v)) {
         return (w);
       }
-    }
-    while (CAR (u, "long"));
+    } while (CAR (u, "long"));
   }
   return (NULL);
 }
@@ -230,7 +228,7 @@ static void tax_specifier_list (NODE_T * p)
 /* skip. */ ;
     } else if (WHETHER (p, IDENTIFIER)) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, NULL,
-          SPECIFIER_IDENTIFIER);
+                          SPECIFIER_IDENTIFIER);
       HEAP (z) = LOC_SYMBOL;
     } else if (WHETHER (p, DECLARER)) {
       tax_specifiers (SUB (p));
@@ -334,12 +332,12 @@ static void tax_format_texts (NODE_T * p)
     tax_format_texts (SUB (p));
     if (WHETHER (p, FORMAT_TEXT)) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
-          FORMAT_TEXT);
+                          FORMAT_TEXT);
       TAX (p) = z;
       z->use = A68_TRUE;
     } else if (WHETHER (p, FORMAT_DELIMITER_SYMBOL) && NEXT (p) != NULL) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
-          FORMAT_IDENTIFIER);
+                          FORMAT_IDENTIFIER);
       TAX (p) = z;
       z->use = A68_TRUE;
     }
@@ -862,7 +860,7 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
       MOID (entry) = MOID (p);
       if (*q == LOC_SYMBOL) {
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (p)),
-            GENERATOR);
+                            GENERATOR);
         HEAP (z) = LOC_SYMBOL;
         z->use = A68_TRUE;
         entry->body = z;

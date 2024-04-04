@@ -38,7 +38,7 @@ Documentation for Algol 68 Genie Mark 11
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Example: dining persons problem</h2>
+<h2>Example: Band-pass filter for sound files</h2>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="algol68.gif">
@@ -72,66 +72,83 @@ Documentation for Algol 68 Genie Mark 11
 </table>
 
 <pre>
-# 
-Dining persons problem, analogous to the "dining philosophers problem".
+COMMENT
+  Band-pass filter for a sound file on a second-per-second basis using FFT.
+  Limitations:
+  (1) sound duration must be a whole number of seconds
+  (2) sample rate must be even
+COMMENT
 
-`N' persons sit at a round table with a bowl of spaghetti. 
-There are `N' forks, one between each pair of persons.
-To eat spaghetti, a person needs two forks, so not everybody can eat at
-the same time. This program synchronises their actions.
 #
-
-MODE PERSON = INT;
-
-INT persons = 10, idle = 0, try = 1, eat = 2, meal tickets = 2;
-
-[persons] INT action, [persons] SEMA person;
-
-FOR i TO persons
-DO action[i] := idle;
-   person[i] := LEVEL 0
+  Get the sound file. 
+#
+SOUND w, FILE in, out;
+print ((newline, "File: "));
+STRING fn = read string;
+open (in, fn + ".wav", standback channel);
+get bin (in, w);
+close (in);
+print ((newline, "rate=", RATE w));
+print ((newline, "samples=", SAMPLES w));
+print ((newline, "bits=", RESOLUTION w));
+print ((newline, "channels=", CHANNELS w));
+INT secs = SAMPLES w OVER RATE w;
+print ((newline, "duration=", secs));
+# If next number is large, FFT is inefficient. #
+print ((newline, "prime factors=", UPB prime factors (RATE w)));
+#
+  Get filter parameters. 
+#
+print ((newline, "low frequency: "));
+REAL low f = read real;
+print ((newline, "high frequency: "));
+REAL high f = read real;
+# 
+  Apply a band filter. 
+  Not the most efficient code, but obvious.
+#
+FOR i TO secs
+DO print ((newline, i, collections, garbage));
+   FOR j TO CHANNELS w
+   DO #
+        Get data for this second.
+      #
+      [RATE w] REAL samples;
+      FOR k TO RATE w
+      DO samples[k] := get sound (w, j, (i - 1) * RATE w + k)
+      OD;
+      # 
+        Forward transform to determine spectrum. 
+      #
+      [RATE w] COMPLEX spectrum := fft forward (samples);
+      # 
+        Apply filter.
+        Simplifications apply since the FFT is over one second,
+        hence N*dt=1 and the frequencies are whole numbers.
+      # 
+      FOR m TO RATE w OVER 2 + 1
+      DO # f2 is the corresponding negative frequency with f1. #
+         INT f1 = m, f2 = (f1 = 1 | 1 | RATE w - f1 + 2);
+         IF f1 < low f OR f1 > high f
+         THEN spectrum[f1] := spectrum[f2] := 0
+         FI
+      OD;
+      # 
+        Restore sample data for this second. 
+      #
+      samples := fft inverse (spectrum);
+      FOR k TO RATE w
+      DO set sound (w, j, (i - 1) * RATE w + k, ENTIER samples[k])
+      OD
+   OD
 OD;
+#
+  Put the filtered sound file. 
+#
+open (out, fn + ".fft.wav", standback channel);
+put bin (out, w);
+close (out)
 
-SEMA mutex = LEVEL 1; # to synchronise access to `action' #
-
-PROC put at table = (PERSON i) VOID:
-     IF i > 0
-     THEN PAR BEGIN put at table (i - 1),
-                    (PROC do eat  = (PERSON i) VOID: print ((i, " eats")),
-                          do idle = (PERSON i) VOID: print ((i, " is not eating"));
-                     TO meal tickets
-                     DO OP LEFT  = (PERSON i) PERSON: 1 + (i - 1) %* persons,
-                           RIGHT = (PERSON i) PERSON: 1 + (i + 1) %* persons;
-
-                        PROC try eat = (PERSON i) VOID:
-                             IF action[i] = try ANDF 
-                                (action[LEFT i] ~= eat ANDF action[RIGHT i] ~= eat)
-                             THEN action[i] := eat;
-                                  UP person[i]
-                             FI;
-
-                        do idle (i);
-                        # Try to eat #
-                        DOWN mutex;
-                        action[i] := try;
-                        try eat (i);
-                        UP mutex;
-                        # Eat when we can #
-                        DOWN person [i];
-                        do eat (i);
-                        # Stop eating #
-                        DOWN mutex;
-                        action[i] := idle;
-                        try eat (LEFT i);
-                        try eat (RIGHT i);
-                        UP mutex
-                     OD;
-                     do idle (i)
-                    )
-              END
-     FI;
-
-put at table (persons)
 </pre>
 
 <!-- Footer -->
