@@ -25,7 +25,7 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 /* Macros. */
 
-#define INITIALISED(z) ((z)->status & INITIALISED_MASK)
+#define INITIALISED(z) ((BOOL_T) ((z)->status & INITIALISED_MASK))
 
 #define BITS_WIDTH ((int) (1 + ceil (log (A68_MAX_INT) / log(2))))
 #define INT_WIDTH ((int) (1 + floor (log (A68_MAX_INT) / log (10))))
@@ -83,7 +83,7 @@ struct ACTIVATION_RECORD
 /* Stack manipulation. */
 
 #define STACK_ADDRESS(n) ((BYTE_T *) &(stack_segment[(n)]))
-#define STACK_OFFSET(n) (STACK_ADDRESS (stack_pointer + (n)))
+#define STACK_OFFSET(n) (STACK_ADDRESS (stack_pointer + (int) (n)))
 #define STACK_TOP (STACK_ADDRESS (stack_pointer))
 
 /* External symbols. */
@@ -603,7 +603,7 @@ extern void genie_call_procedure (NODE_T *, MOID_T *, MOID_T *, MOID_T *, A68_PR
 extern void genie_check_initialisation (NODE_T *, BYTE_T *, MOID_T *);
 extern void genie_copy_sound (NODE_T *, BYTE_T *, BYTE_T *);
 extern void genie_declaration (NODE_T *);
-extern void genie_dump_frames ();
+extern void genie_dump_frames (void);
 extern void genie_enquiry_clause (NODE_T *);
 extern void genie_f_and_becomes (NODE_T *, MOID_T *, GENIE_PROCEDURE *);
 extern void genie_generator_bounds (NODE_T *);

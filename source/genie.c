@@ -76,15 +76,15 @@ void genie_unimplemented (NODE_T * p)
 
 void genie_system (NODE_T * p)
 {
-  int ret_code, size;
+  int sys_ret_code, size;
   A68_REF cmd;
   A68_REF ref_z;
   POP_REF (p, &cmd);
   CHECK_INIT (p, INITIALISED (&cmd), MODE (STRING));
   size = 1 + a68_string_size (p, cmd);
   ref_z = heap_generator (p, MODE (C_STRING), 1 + size);
-  ret_code = system (a_to_c_string (p, (char *) ADDRESS (&ref_z), cmd));
-  PUSH_PRIMITIVE (p, ret_code, A68_INT);
+  sys_ret_code = system (a_to_c_string (p, (char *) ADDRESS (&ref_z), cmd));
+  PUSH_PRIMITIVE (p, sys_ret_code, A68_INT);
 }
 
 /*!
@@ -152,7 +152,7 @@ void genie_init_rng (void)
   if (time (&t) != -1) {
     struct tm *u = localtime (&t);
     int seed = u->tm_sec + 60 * (u->tm_min + 60 * u->tm_hour);
-    init_rng (seed);
+    init_rng ((long unsigned) seed);
   }
 }
 
@@ -338,7 +338,7 @@ static int mode_attribute (MOID_T * p)
 
 BOOL_T genie_no_user_symbols (SYMBOL_TABLE_T * t)
 {
-  return (t->identifiers == NULL && t->operators == NULL && PRIO (t) == NULL && t->indicants == NULL && t->labels == NULL);
+  return ((BOOL_T) (t->identifiers == NULL && t->operators == NULL && PRIO (t) == NULL && t->indicants == NULL && t->labels == NULL));
 }
 
 /*!
@@ -349,7 +349,7 @@ BOOL_T genie_no_user_symbols (SYMBOL_TABLE_T * t)
 
 static BOOL_T genie_empty_table (SYMBOL_TABLE_T * t)
 {
-  return (t->identifiers == NULL && t->operators == NULL && PRIO (t) == NULL && t->indicants == NULL && t->labels == NULL);
+  return ((BOOL_T) (t->identifiers == NULL && t->operators == NULL && PRIO (t) == NULL && t->indicants == NULL && t->labels == NULL));
 }
 
 /*!

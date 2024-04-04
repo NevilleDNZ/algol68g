@@ -47,7 +47,7 @@ static POSTULATE_T *postulates;
 MOID_T *add_mode (MOID_T ** z, int att, int dim, NODE_T * node, MOID_T * sub, PACK_T * pack)
 {
   MOID_T *new_mode = new_moid ();
-  new_mode->in_standard_environ = (z == &(stand_env->moids));
+  new_mode->in_standard_environ = (BOOL_T) (z == &(stand_env->moids));
   USE (new_mode) = A68_FALSE;
   SIZE (new_mode) = 0;
   NUMBER (new_mode) = mode_count++;
@@ -55,7 +55,7 @@ MOID_T *add_mode (MOID_T ** z, int att, int dim, NODE_T * node, MOID_T * sub, PA
   DIM (new_mode) = dim;
   NODE (new_mode) = node;
   new_mode->well_formed = A68_TRUE;
-  new_mode->has_rows = (att == ROW_SYMBOL);
+  new_mode->has_rows = (BOOL_T) (att == ROW_SYMBOL);
   SUB (new_mode) = sub;
   PACK (new_mode) = pack;
   NEXT (new_mode) = *z;
@@ -514,6 +514,10 @@ static MOID_T *get_mode_from_declarer (NODE_T * p)
         return (MOID (p));
       } else if (WHETHER (p, FLEX_SYMBOL)) {
         MOID_T *new_one = get_mode_from_declarer (NEXT (p));
+        if (new_one != MODE (ERROR) && WHETHER_NOT (new_one, FLEX_SYMBOL) && WHETHER_NOT (new_one, ROW_SYMBOL)) {
+          diagnostic_node (A68_ERROR, p, ERROR_FLEX_ROW, NULL);
+          new_one = MODE (ERROR);
+        }
         MOID (p) = add_mode (m, FLEX_SYMBOL, 0, NULL, new_one, NULL);
         SLICE (MOID (p)) = SLICE (new_one);
         return (MOID (p));
@@ -773,21 +777,6 @@ static void get_mode_from_proc_var_declarations_tree (NODE_T * p)
 /* Various routines to test modes. */
 
 /*!
-\brief test whether FLEX is followed by [] AMODE
-\param p position in tree
-**/
-
-static void check_flex_modes_tree (NODE_T * p)
-{
-  for (; p != NULL; FORWARD (p)) {
-    if (WHETHER (p, FLEX_SYMBOL) && WHETHER_NOT (MOID (NEXT (p)), ROW_SYMBOL)) {
-      diagnostic_node (A68_ERROR, p, ERROR_FLEX_ROW, NULL);
-    }
-    check_flex_modes_tree (SUB (p));
-  }
-}
-
-/*!
 \brief test whether a MODE shows VOID
 \param m moid under test
 \return same
@@ -1014,7 +1003,7 @@ static BOOL_T check_yin_yang_pack (NODE_T * p, PACK_T * s, BOOL_T yin, BOOL_T ya
 {
   BOOL_T good = A68_TRUE;
   for (; s != NULL && good; FORWARD (s)) {
-    good = (good && check_yin_yang (p, MOID (s), yin, yang));
+    good = (BOOL_T) (good && check_yin_yang (p, MOID (s), yin, yang));
   }
   return (good);
 }
@@ -1039,7 +1028,7 @@ BOOL_T check_yin_yang (NODE_T * def, MOID_T * dec, BOOL_T yin, BOOL_T yang)
       return (A68_TRUE);
     } else if (WHETHER (dec, INDICANT)) {
       if (SYMBOL (def) == SYMBOL (NODE (dec))) {
-        return (yin && yang);
+        return ((BOOL_T) (yin && yang));
       } else {
         TAG_T *s = SYMBOL_TABLE (def)->indicants;
         BOOL_T z = A68_TRUE;
@@ -1050,21 +1039,21 @@ BOOL_T check_yin_yang (NODE_T * def, MOID_T * dec, BOOL_T yin, BOOL_T yang)
             FORWARD (s);
           }
         }
-        return (s == NULL ? A68_TRUE : check_yin_yang (def, MOID (s), yin, yang));
+        return ((BOOL_T) (s == NULL ? A68_TRUE : check_yin_yang (def, MOID (s), yin, yang)));
       }
     } else if (WHETHER (dec, REF_SYMBOL)) {
-      return (yang ? A68_TRUE : check_yin_yang (def, SUB (dec), A68_TRUE, yang));
+      return ((BOOL_T) (yang ? A68_TRUE : check_yin_yang (def, SUB (dec), A68_TRUE, yang)));
     } else if (WHETHER (dec, FLEX_SYMBOL) || WHETHER (dec, ROW_SYMBOL)) {
-      return (check_yin_yang (def, SUB (dec), yin, yang));
+      return ((BOOL_T) (check_yin_yang (def, SUB (dec), yin, yang)));
     } else if (WHETHER (dec, STRUCT_SYMBOL)) {
-      return (yin ? A68_TRUE : check_yin_yang_pack (def, PACK (dec), yin, A68_TRUE));
+      return ((BOOL_T) (yin ? A68_TRUE : check_yin_yang_pack (def, PACK (dec), yin, A68_TRUE)));
     } else if (WHETHER (dec, UNION_SYMBOL)) {
-      return (check_yin_yang_pack (def, PACK (dec), yin, yang));
+      return ((BOOL_T) check_yin_yang_pack (def, PACK (dec), yin, yang));
     } else if (WHETHER (dec, PROC_SYMBOL)) {
       if (PACK (dec) != NULL) {
         return (A68_TRUE);
       } else {
-        return (yang ? A68_TRUE : check_yin_yang (def, SUB (dec), A68_TRUE, yang));
+        return ((BOOL_T) (yang ? A68_TRUE : check_yin_yang (def, SUB (dec), A68_TRUE, yang)));
       }
     } else {
       return (A68_FALSE);
@@ -1119,7 +1108,7 @@ static BOOL_T packs_equivalent (PACK_T * s, PACK_T * t)
       return (A68_FALSE);
     }
   }
-  return (s == NULL && t == NULL);
+  return ((BOOL_T) (s == NULL && t == NULL));
 }
 
 /*!
@@ -1138,7 +1127,7 @@ static BOOL_T united_moids_equivalent (PACK_T * s, PACK_T * t)
     for (; q != NULL && !f; FORWARD (q)) {
       f = whether_modes_equivalent (MOID (s), MOID (q));
     }
-    z = z && f;
+    z = (BOOL_T) (z && f);
   }
   return (z);
 }
@@ -1160,29 +1149,29 @@ BOOL_T whether_modes_equivalent (MOID_T * a, MOID_T * b)
   } else if (ATTRIBUTE (a) != ATTRIBUTE (b)) {
     return (A68_FALSE);
   } else if (WHETHER (a, STANDARD) && WHETHER (b, STANDARD)) {
-    return (a == b);
+    return ((BOOL_T) (a == b));
   } else if (EQUIVALENT (a) == b || EQUIVALENT (b) == a) {
     return (A68_TRUE);
   } else if (whether_postulated_pair (top_postulate, a, b) || whether_postulated_pair (top_postulate, b, a)) {
     return (A68_TRUE);
   } else if (WHETHER (a, INDICANT)) {
-    return (whether_modes_equivalent (EQUIVALENT (a), EQUIVALENT (b)));
+    return ((BOOL_T) whether_modes_equivalent (EQUIVALENT (a), EQUIVALENT (b)));
   } else {
     make_postulate (&top_postulate, a, b);
     if (WHETHER (a, REF_SYMBOL) || WHETHER (a, FLEX_SYMBOL)) {
-      return (whether_modes_equivalent (SUB (a), SUB (b)));
+      return ((BOOL_T) whether_modes_equivalent (SUB (a), SUB (b)));
     } else if (WHETHER (a, ROW_SYMBOL)) {
-      return (DIM (a) == DIM (b) && whether_modes_equivalent (SUB (a), SUB (b)));
+      return ((BOOL_T) (DIM (a) == DIM (b) && whether_modes_equivalent (SUB (a), SUB (b))));
     } else if (WHETHER (a, STRUCT_SYMBOL)) {
-      return (DIM (a) == DIM (b) && packs_equivalent (PACK (a), PACK (b)));
+      return ((BOOL_T) (DIM (a) == DIM (b) && packs_equivalent (PACK (a), PACK (b))));
     } else if (WHETHER (a, UNION_SYMBOL)) {
-      return (united_moids_equivalent (PACK (a), PACK (b)) && united_moids_equivalent (PACK (b), PACK (a)));
+      return ((BOOL_T) (united_moids_equivalent (PACK (a), PACK (b)) && united_moids_equivalent (PACK (b), PACK (a))));
     } else if (WHETHER (a, PROC_SYMBOL)) {
-      return (DIM (a) == DIM (b) && whether_modes_equivalent (SUB (a), SUB (b)) && packs_equivalent (PACK (a), PACK (b)));
+      return ((BOOL_T) (DIM (a) == DIM (b) && whether_modes_equivalent (SUB (a), SUB (b)) && packs_equivalent (PACK (a), PACK (b))));
     } else if (WHETHER (a, SERIES_MODE)) {
-      return (DIM (a) == DIM (b) && packs_equivalent (PACK (a), PACK (b)));
+      return ((BOOL_T) (DIM (a) == DIM (b) && packs_equivalent (PACK (a), PACK (b))));
     } else if (WHETHER (a, STOWED_MODE)) {
-      return (DIM (a) == DIM (b) && packs_equivalent (PACK (a), PACK (b)));
+      return ((BOOL_T) (DIM (a) == DIM (b) && packs_equivalent (PACK (a), PACK (b))));
     } else {
       return (A68_FALSE);
     }
@@ -2024,7 +2013,7 @@ static BOOL_T whether_mode_has_row (MOID_T * m)
     }
     return (k);
   } else {
-    return (m->has_rows || WHETHER (m, ROW_SYMBOL) || WHETHER (m, FLEX_SYMBOL));
+    return ((BOOL_T) (m->has_rows || WHETHER (m, ROW_SYMBOL) || WHETHER (m, FLEX_SYMBOL)));
   }
 }
 
@@ -2082,11 +2071,11 @@ static void set_moid_attributes (MOID_LIST_T * q)
 \param top_node top node in tree
 **/
 
-void get_moid_list (MOID_LIST_T ** top_moid_list, NODE_T * top_node)
+void get_moid_list (MOID_LIST_T ** loc_top_moid_list, NODE_T * top_node)
 {
   reset_moid_list ();
-  add_moids_from_table (top_moid_list, stand_env);
-  add_moids_from_table_tree (top_node, top_moid_list);
+  add_moids_from_table (loc_top_moid_list, stand_env);
+  add_moids_from_table_tree (top_node, loc_top_moid_list);
 }
 
 /*!
@@ -2171,7 +2160,6 @@ void set_up_mode_table (NODE_T * top_node)
 /* Set standard modes. */
       track_equivalent_standard_modes ();
 /* Postlude. */
-      check_flex_modes_tree (top_node);
       check_relation_to_void_tree (top_node);
       mark_row_modes_tree (top_node);
     }

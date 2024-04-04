@@ -29,6 +29,49 @@ static void tax_specifier_list (NODE_T *);
 static void tax_parameter_list (NODE_T *);
 static void tax_format_texts (NODE_T *);
 
+/*!
+\brief find a tag, searching symbol tables towards the root
+\param table symbol table to search
+\param a attribute of tag
+\param name name of tag
+\return type of tag, identifier or label or ...
+**/
+
+int first_tag_global (SYMBOL_TABLE_T * table, char *name)
+{
+  if (table != NULL) {
+    TAG_T *s = NULL;
+    for (s = table->identifiers; s != NULL; FORWARD (s)) {
+      if (SYMBOL (NODE (s)) == name) {
+        return (IDENTIFIER);
+      }
+    }
+    for (s = table->indicants; s != NULL; FORWARD (s)) {
+      if (SYMBOL (NODE (s)) == name) {
+        return (INDICANT);
+      }
+    }
+    for (s = table->labels; s != NULL; FORWARD (s)) {
+      if (SYMBOL (NODE (s)) == name) {
+        return (LABEL);
+      }
+    }
+    for (s = table->operators; s != NULL; FORWARD (s)) {
+      if (SYMBOL (NODE (s)) == name) {
+        return (OP_SYMBOL);
+      }
+    }
+    for (s = PRIO (table); s != NULL; FORWARD (s)) {
+      if (SYMBOL (NODE (s)) == name) {
+        return (PRIO_SYMBOL);
+      }
+    }
+    return (first_tag_global (PREVIOUS (table), name));
+  } else {
+    return (NULL_ATTRIBUTE);
+  }
+}
+
 #define PORTCHECK_TAX(p, q) {\
   if (q == A68_FALSE) {\
     diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_TAG_NOT_PORTABLE, NULL);\
@@ -155,21 +198,28 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
   for (; p != NULL; FORWARD (p)) {
     bind_identifier_tag_to_symbol_table (SUB (p));
     if (whether_one_of (p, IDENTIFIER, DEFINING_IDENTIFIER, NULL_ATTRIBUTE)) {
-      TAG_T *z = find_tag_global (SYMBOL_TABLE (p), IDENTIFIER, SYMBOL (p));
-      if (z != NULL) {
-        MOID (p) = MOID (z);
-      } else if ((z = find_tag_global (SYMBOL_TABLE (p), LABEL, SYMBOL (p))) != NULL) {
-        ;
-      } else if ((z = bind_lengthety_identifier (SYMBOL (p))) != NULL) {
-        MOID (p) = MOID (z);
-      } else {
+      int att = first_tag_global (SYMBOL_TABLE (p), SYMBOL (p));
+      if (att == NULL_ATTRIBUTE) {
+        (void) add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
         diagnostic_node (A68_ERROR, p, ERROR_UNDECLARED_TAG_1);
-        z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
         MOID (p) = MODE (ERROR);
-      }
-      TAX (p) = z;
-      if (WHETHER (p, DEFINING_IDENTIFIER)) {
-        NODE (z) = p;
+      } else {
+        TAG_T *z = find_tag_global (SYMBOL_TABLE (p), att, SYMBOL (p));
+        if (att == IDENTIFIER && z != NULL) {
+          MOID (p) = MOID (z);
+        } else if (att == LABEL && z != NULL) {
+          ;
+        } else if ((z = bind_lengthety_identifier (SYMBOL (p))) != NULL) {
+          MOID (p) = MOID (z);
+        } else {
+          diagnostic_node (A68_ERROR, p, ERROR_UNDECLARED_TAG_1);
+          z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
+          MOID (p) = MODE (ERROR);
+        }
+        TAX (p) = z;
+        if (WHETHER (p, DEFINING_IDENTIFIER)) {
+          NODE (z) = p;
+        }
       }
     }
   }

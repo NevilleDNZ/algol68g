@@ -109,19 +109,19 @@ extern unsigned check_time_limit_count;
   }}
 
 #define EXECUTE_UNIT_2(p, dest) {\
-  PROPAGATOR_T *prop = &PROPAGATOR (p);\
+  PROPAGATOR_T *_prop_ = &PROPAGATOR (p);\
   last_unit = p;\
-  dest = prop->unit (prop->source);\
+  dest = _prop_->unit (_prop_->source);\
   }
 
 #define EXECUTE_UNIT(p) {\
-  PROPAGATOR_T *prop = &PROPAGATOR (p);\
+  PROPAGATOR_T *_prop_ = &PROPAGATOR (p);\
   last_unit = p;\
-  (void) prop->unit (prop->source);\
+  (void) _prop_->unit (_prop_->source);\
   }
 
 #define EXECUTE_UNIT_TRACE(p) {\
-  PROPAGATOR_T *prop = &PROPAGATOR (p);\
+  PROPAGATOR_T *_prop_ = &PROPAGATOR (p);\
   if (MASK (p) & (BREAKPOINT_MASK | \
                   BREAKPOINT_TEMPORARY_MASK | \
                   BREAKPOINT_INTERRUPT_MASK | \
@@ -130,7 +130,7 @@ extern unsigned check_time_limit_count;
     single_step ((p), MASK (p));\
   }\
   last_unit = p;\
-  (void) (prop->unit (prop->source));\
+  (void) (_prop_->unit (_prop_->source));\
   }
 
 /* 
@@ -139,10 +139,10 @@ This saves a push/pop pair.
 */
 
 #define GENIE_GET_OPR(p, CAST_T, z, u) {\
-  PROPAGATOR_T *prop = &PROPAGATOR (p);\
-  NODE_T *src2 = prop->source;\
+  PROPAGATOR_T *_prop_go_ = &PROPAGATOR (p);\
+  NODE_T *src2 = _prop_go_->source;\
   last_unit = (p);\
-  if (prop->unit == genie_loc_identifier) {\
+  if (_prop_go_->unit == genie_loc_identifier) {\
     BYTE_T *x;\
     FRAME_GET (x, BYTE_T, src2);\
     (z) = (CAST_T *) x;\
@@ -153,41 +153,41 @@ This saves a push/pop pair.
   }}
 
 #define EXECUTE_UNIT_INLINE(p) {\
-  PROPAGATOR_T *prop = &PROPAGATOR (p);\
-  NODE_T *src1 = prop->source;\
+  PROPAGATOR_T *_prop_eui_ = &PROPAGATOR (p);\
+  NODE_T *src1 = _prop_eui_->source;\
   last_unit = (p);\
-  if (prop->unit == genie_dereference_loc_identifier) {\
-    A68_REF *z;\
+  if (_prop_eui_->unit == genie_dereference_loc_identifier) {\
+    A68_REF *_z_eui_;\
     MOID_T *deref = SUB (MOID (src1));\
-    unsigned size = MOID_SIZE (deref);\
-    FRAME_GET (z, A68_REF, src1);\
-    CHECK_REF ((p), *z, MOID (src1));\
-    PUSH_ALIGNED (p, ADDRESS (z), size);\
-    CHECK_INIT_GENERIC ((p), STACK_OFFSET (-size), deref);\
-  } else if (prop->unit == genie_loc_identifier) {\
+    int _size_eui_ = MOID_SIZE (deref);\
+    FRAME_GET (_z_eui_, A68_REF, src1);\
+    CHECK_REF ((p), *_z_eui_, MOID (src1));\
+    PUSH_ALIGNED (p, ADDRESS (_z_eui_), _size_eui_);\
+    CHECK_INIT_GENERIC ((p), STACK_OFFSET (-_size_eui_), deref);\
+  } else if (_prop_eui_->unit == genie_loc_identifier) {\
     BYTE_T *x;\
     FRAME_GET (x, BYTE_T, src1);\
     PUSH_ALIGNED ((p), x, MOID_SIZE (MOID (src1)));\
-  } else if (prop->unit == genie_constant) {\
+  } else if (_prop_eui_->unit == genie_constant) {\
     PUSH_ALIGNED ((p), src1->genie.constant, src1->genie.size);\
   } else {\
     EXECUTE_UNIT (p);\
   }}
 
 #define GENIE_GET_UNIT_ADDRESS(p, cast, dst) {\
-  PROPAGATOR_T *prop = &PROPAGATOR (p);\
-  NODE_T *src0 = prop->source;\
+  PROPAGATOR_T *_prop_gua_ = &PROPAGATOR (p);\
+  NODE_T *src0 = _prop_gua_->source;\
   last_unit = (p);\
-  if (prop->unit == genie_dereference_loc_identifier) {\
-    A68_REF *z;\
+  if (_prop_gua_->unit == genie_dereference_loc_identifier) {\
+    A68_REF *_z_gua_;\
     MOID_T *deref = SUB (MOID (src0));\
-    FRAME_GET (z, A68_REF, src0);\
-    CHECK_REF ((p), *z, MOID (src0));\
-    dst = (cast *) (ADDRESS (z));\
+    FRAME_GET (_z_gua_, A68_REF, src0);\
+    CHECK_REF ((p), *_z_gua_, MOID (src0));\
+    dst = (cast *) (ADDRESS (_z_gua_));\
     CHECK_INIT_GENERIC ((p), dst, deref);\
-  } else if (prop->unit == genie_loc_identifier) {\
+  } else if (_prop_gua_->unit == genie_loc_identifier) {\
     FRAME_GET (dst, cast, src0);\
-  } else if (prop->unit == genie_constant) {\
+  } else if (_prop_gua_->unit == genie_constant) {\
     dst = (cast *) (src0->genie.constant);\
   } else {\
     dst = (cast *) (STACK_TOP);\
@@ -534,7 +534,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
     exit_genie (p, A68_RUNTIME_ERROR);\
   }
 
-#define INCREMENT_STACK_POINTER(err, i) {stack_pointer += A68_ALIGN (i); (void) (err);}
+#define INCREMENT_STACK_POINTER(err, i) {stack_pointer += (ADDR_T) A68_ALIGN (i); (void) (err);}
 
 #define DECREMENT_STACK_POINTER(err, i) {\
   stack_pointer -= A68_ALIGN (i);\
@@ -542,29 +542,29 @@ returns: static link for stack frame at 'new_lex_lvl'.
   }
 
 #define PUSH(p, addr, size) {\
-  BYTE_T *sp = STACK_TOP;\
-  INCREMENT_STACK_POINTER ((p), (size));\
-  COPY (sp, (BYTE_T *) (addr), (unsigned) (size));\
+  BYTE_T *_sp_ = STACK_TOP;\
+  INCREMENT_STACK_POINTER ((p), (int) (size));\
+  COPY (_sp_, (BYTE_T *) (addr), (int) (size));\
   }
 
 #define PUSH_ALIGNED(p, addr, size) {\
-  BYTE_T *sp = STACK_TOP;\
-  INCREMENT_STACK_POINTER ((p), (size));\
-  COPY_ALIGNED (sp, (BYTE_T *) (addr), (unsigned) (size));\
+  BYTE_T *_sp_ = STACK_TOP;\
+  INCREMENT_STACK_POINTER ((p), (int) (size));\
+  COPY_ALIGNED (_sp_, (BYTE_T *) (addr), (int) (size));\
   }
 
 #define POP(p, addr, size) {\
-  DECREMENT_STACK_POINTER((p), (size));\
-  COPY ((BYTE_T *) (addr), STACK_TOP, (unsigned) (size));\
+  DECREMENT_STACK_POINTER((p), (int) (size));\
+  COPY ((BYTE_T *) (addr), STACK_TOP, (int) (size));\
   }
 
 #define POP_ALIGNED(p, addr, size) {\
-  DECREMENT_STACK_POINTER((p), (size));\
-  COPY_ALIGNED ((BYTE_T *) (addr), STACK_TOP, (unsigned) (size));\
+  DECREMENT_STACK_POINTER((p), (int) (size));\
+  COPY_ALIGNED ((BYTE_T *) (addr), STACK_TOP, (int) (size));\
   }
 
 #define POP_ADDRESS(p, addr, type) {\
-  DECREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (type));\
+  DECREMENT_STACK_POINTER((p), (int) ALIGNED_SIZE_OF (type));\
   (addr) = (type *) STACK_TOP;\
   }
 
@@ -574,13 +574,13 @@ returns: static link for stack frame at 'new_lex_lvl'.
   }
 
 #define POP_OPERAND_ADDRESSES(p, i, j, type) {\
-  DECREMENT_STACK_POINTER ((p), ALIGNED_SIZE_OF (type));\
+  DECREMENT_STACK_POINTER ((p), (int) ALIGNED_SIZE_OF (type));\
   (j) = (type *) STACK_TOP;\
   (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZE_OF (type)));\
   }
 
 #define POP_3_OPERAND_ADDRESSES(p, i, j, k, type) {\
-  DECREMENT_STACK_POINTER ((p), 2 * ALIGNED_SIZE_OF (type));\
+  DECREMENT_STACK_POINTER ((p), (int) (2 * ALIGNED_SIZE_OF (type)));\
   (k) = (type *) (STACK_OFFSET (ALIGNED_SIZE_OF (type)));\
   (j) = (type *) STACK_TOP;\
   (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZE_OF (type)));\

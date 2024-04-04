@@ -66,7 +66,7 @@ void *get_heap_space (size_t s)
 char *new_string (char *t)
 {
   int n = (int) (strlen (t) + 1);
-  char *z = (char *) get_heap_space (n);
+  char *z = (char *) get_heap_space ((size_t) n);
   bufcpy (z, t, n);
   return (z);
 }
@@ -80,7 +80,7 @@ char *new_string (char *t)
 char *new_fixed_string (char *t)
 {
   int n = (int) (strlen (t) + 1);
-  char *z = (char *) get_fixed_heap_space (n);
+  char *z = (char *) get_fixed_heap_space ((size_t) n);
   bufcpy (z, t, n);
   return (z);
 }
@@ -95,7 +95,7 @@ BYTE_T *get_fixed_heap_space (size_t s)
 {
   BYTE_T *z = HEAP_ADDRESS (fixed_heap_pointer);
   ABNORMAL_END (get_fixed_heap_allowed == A68_FALSE, ERROR_INTERNAL_CONSISTENCY, NULL);
-  fixed_heap_pointer += A68_ALIGN (s);
+  fixed_heap_pointer += A68_ALIGN ((int) s);
   ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
   ABNORMAL_END (((long) z) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   return (z);
@@ -110,7 +110,7 @@ BYTE_T *get_fixed_heap_space (size_t s)
 BYTE_T *get_temp_heap_space (size_t s)
 {
   BYTE_T *z;
-  temp_heap_pointer -= A68_ALIGN (s);
+  temp_heap_pointer -= A68_ALIGN ((int) s);
   ABNORMAL_END (fixed_heap_pointer >= temp_heap_pointer, ERROR_OUT_OF_CORE, NULL);
   z = HEAP_ADDRESS (temp_heap_pointer);
   ABNORMAL_END (((long) z) % A68_ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
@@ -395,18 +395,17 @@ void make_special_mode (MOID_T ** n, int m)
 
 BOOL_T match_string (char *x, char *c, char alt)
 {
-  BOOL_T match = A68_TRUE, ret;
+  BOOL_T match = A68_TRUE;
   while ((IS_UPPER (c[0]) || IS_DIGIT (c[0]) || c[0] == '-') && match) {
-    match &= (TO_LOWER (x[0]) == TO_LOWER ((c++)[0]));
+    match = (BOOL_T) (match & (TO_LOWER (x[0]) == TO_LOWER ((c++)[0])));
     if (!(x[0] == NULL_CHAR || x[0] == alt)) {
       x++;
     }
   }
   while (x[0] != NULL_CHAR && x[0] != alt && c[0] != NULL_CHAR && match) {
-    match &= (TO_LOWER ((x++)[0]) == TO_LOWER ((c++)[0]));
+    match = (BOOL_T) (match & (TO_LOWER ((x++)[0]) == TO_LOWER ((c++)[0])));
   }
-  ret = (match ? (x[0] == NULL_CHAR || x[0] == alt) : A68_FALSE);
-  return (ret);
+  return ((BOOL_T) (match ? (x[0] == NULL_CHAR || x[0] == alt) : A68_FALSE));
 }
 
 /*!
@@ -457,7 +456,7 @@ BOOL_T whether_one_of (NODE_T * p, ...)
     va_start (vl, p);
     while ((a = va_arg (vl, int)) != NULL_ATTRIBUTE)
     {
-      match |= (WHETHER (p, a));
+      match = (BOOL_T) (match | (BOOL_T) (WHETHER (p, a)));
     }
     va_end (vl);
     return (match);
@@ -957,7 +956,7 @@ double ten_up (int expo)
 {
 /* This way appears sufficiently accurate. */
   double dbl_expo = 1.0, *dep;
-  BOOL_T neg_expo = (expo < 0);
+  BOOL_T neg_expo = (BOOL_T) (expo < 0);
   if (neg_expo) {
     expo = -expo;
   }
@@ -998,13 +997,13 @@ double a68g_atan2 (double x, double y)
     errno = EDOM;
     return (0.0);
   } else {
-    BOOL_T flip = (y < 0.0);
+    BOOL_T flip = (BOOL_T) (y < 0.0);
     double z;
     y = ABS (y);
     if (x == 0.0) {
       z = A68G_PI / 2.0;
     } else {
-      BOOL_T flop = (x < 0.0);
+      BOOL_T flop = (BOOL_T) (x < 0.0);
       x = ABS (x);
       z = atan (y / x);
       if (flop) {
@@ -1228,16 +1227,16 @@ int grep_in_string (char *pat, char *str, int *start, int *end)
     regfree (&compiled);
     return (rc);
   }
-  nmatch = compiled.re_nsub;
+  nmatch = (int) (compiled.re_nsub);
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = malloc (nmatch * ALIGNED_SIZE_OF (regmatch_t));
+  matches = malloc ((size_t) (nmatch * ALIGNED_SIZE_OF (regmatch_t)));
   if (nmatch > 0 && matches == NULL) {
     regfree (&compiled);
     return (2);
   }
-  rc = regexec (&compiled, str, nmatch, matches, 0);
+  rc = regexec (&compiled, str, (size_t) nmatch, matches, 0);
   if (rc != 0) {
     regfree (&compiled);
     return (rc);

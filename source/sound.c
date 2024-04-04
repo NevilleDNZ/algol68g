@@ -463,7 +463,7 @@ void read_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
 /* Read data chunk */
       subchunk2size = read_riff_item (p, f->fd, 4, A68_LITTLE_ENDIAN);
       w->num_samples = subchunk2size / w->num_channels / A68_SOUND_BYTES (w);
-      w->data = heap_generator (p, MODE (SOUND_DATA), subchunk2size);
+      w->data = heap_generator (p, MODE (SOUND_DATA), (int) subchunk2size);
       r = io_read (f->fd, ADDRESS (&(w->data)), subchunk2size);
       if (r != (int) subchunk2size) {
         diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SOUND_INTERNAL, MODE (SOUND), "cannot read all of the data");
@@ -496,7 +496,7 @@ void write_riff_item (NODE_T * p, FILE_T fd, unsigned z, int n, BOOL_T little)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   for (k = 0; k < n; k++) {
-    y[k] = (z & 0xff);
+    y[k] = (unsigned char) (z & 0xff);
     z >>= 8;
   }
   if (little) {
@@ -525,7 +525,7 @@ void write_sound (NODE_T * p, A68_REF ref_file, A68_SOUND * w)
 {
   A68_FILE *f = FILE_DEREF (&ref_file);
   int r;
-  unsigned blockalign = w->num_channels * A68_SOUND_BYTES (w);
+  unsigned blockalign = w->num_channels * (unsigned) (A68_SOUND_BYTES (w));
   unsigned byterate = w->sample_rate * blockalign;
   unsigned subchunk2size = w->num_samples * blockalign;
   unsigned chunksize = 4 + (8 + 16) + (8 + subchunk2size);
@@ -566,10 +566,10 @@ void genie_new_sound (NODE_T * p)
   POP_OBJECT (p, &num_channels, A68_INT);
   POP_OBJECT (p, &sample_rate, A68_INT);
   POP_OBJECT (p, &bits_per_sample, A68_INT);
-  w.num_samples = VALUE (&num_samples);
-  w.num_channels = VALUE (&num_channels);
-  w.sample_rate = VALUE (&sample_rate);
-  w.bits_per_sample = VALUE (&bits_per_sample);
+  w.num_samples = (unsigned) (VALUE (&num_samples));
+  w.num_channels = (unsigned) (VALUE (&num_channels));
+  w.sample_rate = (unsigned) (VALUE (&sample_rate));
+  w.bits_per_sample = (unsigned) (VALUE (&bits_per_sample));
   test_bits_per_sample (p, w.bits_per_sample);
   w.data = heap_generator (p, MODE (SOUND_DATA), A68_SOUND_DATA_SIZE (&w));
   STATUS (&w) = INITIALISED_MASK;
@@ -603,12 +603,10 @@ void genie_get_sound (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   n = A68_SOUND_BYTES (&w);
-  d = &(ADDRESS (&(w.data))
-        [((VALUE (&sample) - 1) * w.num_channels + (VALUE (&channel) - 1)) * n]);
-
+  d = &(ADDRESS (&(w.data))[((VALUE (&sample) - 1) * (int) (w.num_channels) + (VALUE (&channel) - 1)) * n]);
 /* Convert from little-endian, irrespective from the platform we work on. */
   for (k = 0, z = 0, m = 0; k < n; k++) {
-    z += (d[k] * pow256[k]);
+    z += ((int) (d[k]) * (int) (pow256[k]));
     m = k;
   }
   PUSH_PRIMITIVE (p, (d[m] & 0x80 ? (n == 4 ? z : z - (int) pow256[m + 1]) : z), A68_INT);
@@ -642,8 +640,7 @@ void genie_set_sound (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   n = A68_SOUND_BYTES (&w);
-  d = &(ADDRESS (&(w.data))
-        [((VALUE (&sample) - 1) * w.num_channels + (VALUE (&channel) - 1)) * n]);
+  d = &(ADDRESS (&(w.data))[((VALUE (&sample) - 1) * (int) (w.num_channels) + (VALUE (&channel) - 1)) * n]);
 /* Convert to little-endian. */
   for (k = 0, z = VALUE (&value); k < n; k++) {
     d[k] = (BYTE_T) (z & 0xff);
@@ -660,7 +657,7 @@ void genie_sound_samples (NODE_T * p)
 {
   A68_SOUND w;
   POP_OBJECT (p, &w, A68_SOUND);
-  PUSH_PRIMITIVE (p, w.num_samples, A68_INT);
+  PUSH_PRIMITIVE (p, (int) (w.num_samples), A68_INT);
 }
 
 /*!
@@ -672,7 +669,7 @@ void genie_sound_rate (NODE_T * p)
 {
   A68_SOUND w;
   POP_OBJECT (p, &w, A68_SOUND);
-  PUSH_PRIMITIVE (p, w.sample_rate, A68_INT);
+  PUSH_PRIMITIVE (p, (int) (w.sample_rate), A68_INT);
 }
 
 /*!
@@ -684,7 +681,7 @@ void genie_sound_channels (NODE_T * p)
 {
   A68_SOUND w;
   POP_OBJECT (p, &w, A68_SOUND);
-  PUSH_PRIMITIVE (p, w.num_channels, A68_INT);
+  PUSH_PRIMITIVE (p, (int) (w.num_channels), A68_INT);
 }
 
 /*!
@@ -696,5 +693,5 @@ void genie_sound_resolution (NODE_T * p)
 {
   A68_SOUND w;
   POP_OBJECT (p, &w, A68_SOUND);
-  PUSH_PRIMITIVE (p, w.bits_per_sample, A68_INT);
+  PUSH_PRIMITIVE (p, (int) (w.bits_per_sample), A68_INT);
 }
