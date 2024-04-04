@@ -1,5 +1,5 @@
 bin_PROGRAMS =a68g
-a68g_SOURCES = a68g.c code.c environ.c genie.c gsl.c inet.c monitor.c mp.c plotutils.c postgresql.c syntax.c edit.c
+a68g_SOURCES = a68g.c code.c environ.c genie.c gsl.c inet.c monitor.c mp.c plotutils.c postgresql.c pretty.c syntax.c edit.c
 a68g_CFLAGS = -DBINDIR='"$(bindir)"' -DINCLUDEDIR='"$(includedir)"'
 TESTS_ENVIRONMENT=./a68g
 TESTS=check-01.a68 check-02.a68 check-03.a68 check-04.a68 check-05.a68 check-06.a68 check-07.a68 check-08.a68 check-09.a68
