@@ -941,7 +941,7 @@ static void check_operator_dec (NODE_T * p)
     diagnostic_node (A_SYNTAX_ERROR, p, ERROR_OPERAND_NUMBER);
     k = 0;
   }
-  if (k == 1 && strchr (NOMADS, *(SYMBOL (p))) != NULL) {
+  if (k == 1 && a68g_strchr (NOMADS, *(SYMBOL (p))) != NULL) {
     diagnostic_node (A_SYNTAX_ERROR, p, ERROR_OPERATOR_INVALID, NOMADS);
   } else if (k == 2 && !find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) {
     diagnostic_node (A_SYNTAX_ERROR, p, ERROR_DYADIC_PRIORITY);

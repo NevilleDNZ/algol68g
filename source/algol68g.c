@@ -38,14 +38,10 @@ detailed description of Algol68G.
 #include "genie.h"
 #include "mp.h"
 
-#ifdef PRE_MACOS_X_VERSION
-#include <console.h>		/* Vintage MacOS support. */
-#else
 #ifdef WIN32_VERSION
 #include <sys/time.h>
 #else
 #include <sys/times.h>
-#endif
 #endif
 
 #ifdef HAVE_UNIX
@@ -112,12 +108,6 @@ int main (int argc, char *argv[])
   global_argc = argc;
   global_argv = argv;
 #endif
-#ifdef PRE_MACOS_X_VERSION
-/* MacOS support is basic. */
-/* Get extra stack space, since 68k Macs have small stacks. */
-  SetApplLimit (GetApplLimit () - MAC_STACK_SIZE * KILOBYTE);
-  argc = ccommand (&argv);
-#endif
   system_stack_offset = &stack_offset;
   if (!setjmp (exit_compilation)) {
     init_tty ();
@@ -158,8 +148,7 @@ int main (int argc, char *argv[])
       get_stack_size ();
       compiler_interpreter ();
     }
-/* If we get here, we assume succesful execution. */
-    a68g_exit (EXIT_SUCCESS);
+    a68g_exit (error_count == 0 ? EXIT_SUCCESS : EXIT_FAILURE);
     return (EXIT_SUCCESS);
   } else {
     a68g_exit (EXIT_FAILURE);
@@ -255,12 +244,12 @@ Accept various silent extensions.
 #endif
 #endif
     if (a68_prog.files.path[k] == delim) {
-      a68_prog.files.path[k + 1] = '\0';
+      a68_prog.files.path[k + 1] = NULL_CHAR;
       path_set = A_TRUE;
     }
   }
   if (path_set == A_FALSE) {
-    a68_prog.files.path[0] = '\0';
+    a68_prog.files.path[0] = NULL_CHAR;
   }
 /* Listing file. */
   a68_prog.files.listing.name = (char *) get_heap_space (1 + strlen (a68_prog.files.source.name) + strlen (LISTING_EXTENSION));
@@ -427,11 +416,7 @@ Accept various silent extensions.
   }
 /* Setting up listing file. */
   if (a68_prog.options.moid_listing || a68_prog.options.tree_listing || a68_prog.options.source_listing || a68_prog.options.statistics_listing) {
-#ifdef PRE_MACOS_X_VERSION
-    a68_prog.files.listing.fd = open (a68_prog.files.listing.name, O_WRONLY | O_CREAT | O_TRUNC);
-#else
     a68_prog.files.listing.fd = open (a68_prog.files.listing.name, O_WRONLY | O_CREAT | O_TRUNC, A68_PROTECTION);
-#endif
     ABNORMAL_END (a68_prog.files.listing.fd == -1, "cannot open listing file", NULL);
     a68_prog.files.listing.opened = A_TRUE;
   } else {
@@ -484,7 +469,7 @@ static void state_version (FILE_T f)
   }
   sprintf (output_line, "++++ Algol 68 Genie %s, %s", REVISION, RELEASE_DATE);
   io_write_string (f, output_line);
-#if defined WIN32_VERSION || defined PRE_MACOS_X_VERSION || defined OS2_VERSION
+#if defined WIN32_VERSION
   return;
 #endif
   sprintf (output_line, "\n++++ Image \"%s\" compiled by %s on %s %s", A68G_NAME, USERID, __DATE__, __TIME__);

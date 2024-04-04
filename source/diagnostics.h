@@ -152,6 +152,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_UNDECLARED_TAG_1 "Tag S has not been declared properly in this range"
 #define ERROR_UNDECLARED_TAG_2 "Tag Z has not been declared properly in this range"
 #define ERROR_UNDETERMINDED_FILE_MOOD "file has undetermined mood"
+#define ERROR_UNSPECIFIED "unspecified error"
 #define ERROR_UNIMPLEMENTED_PRECISION "M precision is not implemented"
 #define ERROR_UNTERMINATED_COMMENT "unterminated comment"
 #define ERROR_UNTERMINATED_PRAGMAT "unterminated pragmat"

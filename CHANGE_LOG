@@ -1,7 +1,15 @@
 ALGOL68G - ALGOL 68 GENIE
 -------------------------
 
-February 2006		Mark 9
+April 2006		Mark 9.1
+			- 64-bit safe interpreter
+			- Improved monitor/debugger
+			- Added of option MONITOR (or DEBUG)
+			- Added procedure `monitor' (or `debug')
+			- Fixed `configure' bugs that occurs with Mark 9 on some platforms
+			- Fixed minor bugs
+
+March 2006		Mark 9
 			- Basic PostgreSQL support
 			- Improved diagnostic messages
 			- Added procedure `utc time' (UNIX)

@@ -566,6 +566,7 @@ static MOID_T *get_mode_from_declarer (NODE_T * p, int put_where)
 	}
 	new_one = get_mode_from_declarer (NEXT (p), put_where);
 	MOID (p) = add_mode (m, PROC_SYMBOL, count_pack_members (u), save, new_one, u);
+	MOID (save) = MOID (p);
 	return (MOID (p));
       } else {
 	return (NULL);
@@ -2467,7 +2468,7 @@ static void moid_to_string_2 (char *b, MOID_T * n, int w)
 char *moid_to_string (MOID_T * n, int w)
 {
   char a[BUFFER_SIZE];
-  a[0] = '\0';
+  a[0] = NULL_CHAR;
   if (w >= BUFFER_SIZE) {
     return (new_string (a));
   }

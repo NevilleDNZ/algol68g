@@ -27,14 +27,14 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9</small>
+<small>Documentation for Algol 68 Genie Mark 9.1</small>
 </td>
 </table>
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 9</h2>
+<h2>Algol 68 Genie Mark 9.1</h2>
 <h3>An Algol 68 interpreter</h3>
 <small>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
@@ -60,11 +60,12 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9</b></small>
+<small><b>Algol68G Mark 9.1</b></small>
 <br>
 &nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
 &nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
 &nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
 &nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
 &nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
@@ -77,7 +78,6 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 &nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
 <br>
 &nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
 &nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
 &nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
@@ -96,7 +96,7 @@ Algol 68 is a rather lean, orthogonal general-purpose programming language, that
 It can be used for executing Algol 68 programs or scripts when execution time is not of primary importance; Algol68G is pedantic rather than fast.
 <p>
 Algol68G is free software under the GNU General Public License.
-The current version is Mark 9, released in March 2006.
+The current version is Mark 9.1, released in April 2006.
 You can <a href="introduction.html#obtaining">download</a> it from this page.
 </p>
 
@@ -111,9 +111,9 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <ul>
 <li>
 Download 
-<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk9/algol68g-mk9.tar.gz">Algol68G Mark 9</a>, a gzipped tar archive containing C source code and documentation. <a href="install.html">Here</a> are instructions for installation of Algol68G on GNU/Linux.
+<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk9.1/algol68g-mk9.1.tar.gz">Algol68G Mark 9.1</a>, a gzipped tar archive containing C source code and documentation. <a href="install.html">Here</a> are instructions for installation of Algol68G on GNU/Linux.
 <br>
-Algol68G Mark 9 is regression-tested using a test set of more than 1100 programs. 
+Algol68G Mark 9.1 is regression-tested using a test set of more than 1100 programs. 
 <li>The <a href="#previous">Algol 68 Genie Mark 8.1 archive</a> 
 includes a Win32 executable</a> for Microsoft Windows, which is made available by Theo Vosse. 
 <br>
@@ -135,8 +135,9 @@ If you have a question or remark, or have found a bug, please send a note to
 <br>
 <h3><a name="previous"></a>Available previous releases</h3>
 <p>
-<li><a href="algol68g-mk8.1/doc/introduction.html"><small><b>Mark 8.1</b></small></a>
-<li><a href="algol68g-mk8/doc/introduction.html"><small><b>Mark 8</b></small></a>
+<li><a href="algol68g-mk9/doc/introduction.html"><small><b>Algol 68 Genie Mark 9</b></small></a>
+<li><a href="algol68g-mk8.1/doc/introduction.html"><small><b>Algol 68 Genie Mark 8.1</b></small></a>
+<li><a href="algol68g-mk8/doc/introduction.html"><small><b>Algol 68 Genie Mark 8</b></small></a>
 </p>
 
 <br>
@@ -152,6 +153,21 @@ If you have a question or remark, or have found a bug, please send a note to
 </td>
 <td valign=top>
 <b>Changes</b>
+</td>
+</tr>
+<tr bgcolor="#e8e8e8">
+<td valign=top>
+9.1
+</td>
+<td valign=top>
+April 2006
+</td>
+<td valign=top>
+64-bit safe interpreter<br>
+Improved monitor/debugger<br>
+Added of option MONITOR (or DEBUG)<br>
+Added procedure `monitor' (or `debug')<br>
+Fixed `configure' bugs that occur with Mark 9 on some platforms<br>
 </td>
 </tr>
 <tr bgcolor="#e8e8e8">
@@ -353,7 +369,7 @@ Algol 68 Genie is being developed on GNU/Linux.
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9 (March 2006)</small>
+<small>Documentation for Algol 68 Genie Mark 9.1 (April 2006)</small>
 </font>
 </td>
 </table>

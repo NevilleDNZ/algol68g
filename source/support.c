@@ -87,8 +87,6 @@ void get_stack_size (void)
   if (stack_size < KILOBYTE || (stack_size > 96 * MEGABYTE && stack_size > frame_stack_size)) {
     stack_size = frame_stack_size;
   }
-#elif defined PRE_MACOS_X_VERSION
-  stack_size = StackSpace ();
 #elif defined WIN32_VERSION
   stack_size = MEGABYTE;
 #else
@@ -324,7 +322,7 @@ void make_special_mode (MOID_T ** n, int m)
 \brief whether x matches c; case insensitive
 \param string
 \param string to match, leading '-' or caps in c are mandatory
-\param alt string terminator other than '\0'
+\param alt string terminator other than NULL_CHAR
 \return
 **/
 
@@ -333,14 +331,14 @@ BOOL_T match_string (char *x, char *c, char alt)
   BOOL_T match = A_TRUE;
   while ((IS_UPPER (c[0]) || IS_DIGIT (c[0]) || c[0] == '-') && match) {
     match &= (TO_LOWER (x[0]) == TO_LOWER ((c++)[0]));
-    if (x[0] != '\0') {
+    if (x[0] != NULL_CHAR) {
       x++;
     }
   }
-  while (x[0] != '\0' && x[0] != alt && c[0] != '\0' && match) {
+  while (x[0] != NULL_CHAR && x[0] != alt && c[0] != NULL_CHAR && match) {
     match &= (TO_LOWER ((x++)[0]) == TO_LOWER ((c++)[0]));
   }
-  return (match ? (x[0] == '\0' || x[0] == alt) : A_FALSE);
+  return (match ? (x[0] == NULL_CHAR || x[0] == alt) : A_FALSE);
 }
 
 /*!
@@ -1021,4 +1019,28 @@ double a68g_atanh (double x)
   } else {
     return (x);
   }
+}
+
+/*!
+\brief search first char in string
+\param str
+\param c
+\return char pos
+**/
+
+char *a68g_strchr (char *str, int c)
+{
+  return (strchr (str, c));
+}
+
+/*!
+\brief search last char in string
+\param str
+\param c
+\return char pos
+**/
+
+char *a68g_strrchr (char *str, int c)
+{
+  return (strrchr (str, c));
 }

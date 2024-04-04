@@ -21,9 +21,9 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="9"
+VERSION_NUMBER="9.1"
 REVISION="Mark $VERSION_NUMBER"
-TIME_STAMP="March 2006"
+TIME_STAMP="April 2006"
 RELEASE_DATE="released $TIME_STAMP"
 PACKAGE="algol68g-mk$VERSION_NUMBER"
 # Where does the system store things
@@ -50,6 +50,7 @@ POWERPC=`uname -a | grep powerpc`
 PPC=`uname -a | grep ppc`
 X86=`uname -a | grep [3456]86`
 echo "platform: $POWERPC $PPC $X86" 
+SED_JOIN="./sed_join"
 #
 # Option processing
 #
@@ -60,6 +61,7 @@ threads=no
 opt=
 ld_opt=
 doc_opt=no
+anonymus=no
 for arg in "$@"
 do
 # Handle option = value
@@ -80,6 +82,8 @@ do
 # Process current option
 	case "$arg"
 	in
+	-anonymus | --anonymus)
+		anonymus=;;
 	-b | --build)
 		build=yes ;;
 	-cc | --cc)
@@ -144,6 +148,7 @@ do
 -O3     		set optimisation level for compilation to -O3
 
 --build 		build target after configuring
+--docs			build documentation (development release only)
 --help  		print help and exit
 --version       	print version and exit
 --warn			give warning messages during compilation
@@ -167,10 +172,27 @@ if [	-z $doc_opt	]
 then
 	cd $USR_DOC_TEMPLATES
 	for f in `find . -name "*.html" -print`
-	do
-		sed "s/REVISION/$REVISION/g" < $f | sed "s/TIME_STAMP/$TIME_STAMP/g" - | sed "s/PACKAGE/$PACKAGE/g" - | sed "s/LINK_COLOUR/$LINK_COLOUR/g" - | sed "s/BACKGROUND_COLOUR/$BACKGROUND_COLOUR/g" - > ../$f
+	do sed "/<!-- Navigation bar -->/r navigation" < $f | sed "s/REVISION/$REVISION/g" - | sed "s/TIME_STAMP/$TIME_STAMP/g" - | sed "s/PACKAGE/$PACKAGE/g" - | sed "s/LINK_COLOUR/$LINK_COLOUR/g" - | sed "s/BACKGROUND_COLOUR/$BACKGROUND_COLOUR/g" - > ../$f
 	done
 	echo "generated documentation"
+	echo "$0 done"
+	exit
+fi
+#
+# Anonymus version header file
+#
+if [	-z $anonymus	]
+then
+	echo "/* $VERSION_FILE generated on `date` by $USERID. */" 1>$VERSION_FILE
+	echo "#define A68G_NAME \"$A68G_NAME\"" 1>>$VERSION_FILE
+	echo "#define REVISION \"$REVISION\"" 1>>$VERSION_FILE
+	echo "#define RELEASE_DATE \"$RELEASE_DATE\"" 1>>$VERSION_FILE
+	echo "#define USERID \"unknown\"" 1>>$VERSION_FILE
+	echo "#define GCC_VERSION \"unknown\"" 1>>$VERSION_FILE
+	echo "#define A68_LIBPLOT_VERSION \"unknown\"" 1>>$VERSION_FILE
+	echo "#define A68_GSL_VERSION \"unknown\"" 1>>$VERSION_FILE
+	echo "#define A68_PG_VERSION \"unknown\"" 1>>$VERSION_FILE
+	echo "generated anonymus version header"
 	echo "$0 done"
 	exit
 fi
@@ -300,6 +322,19 @@ then
 	exit 1
 fi
 #
+# SED scripts
+#
+cat >$SED_JOIN <<\_SED_JOIN_EOF
+:join
+{
+s/\.\/[a-z0-9]*\///
+s/\.c/.o/
+N
+s/\n/ /
+b join
+}
+_SED_JOIN_EOF
+#
 # Generate top level makefile
 #
 echo "# $MAKEFILE generated on `date` by $USERID." 1>$MAKEFILE
@@ -311,30 +346,27 @@ echo "USR_CHK=$USR_CHK" 1>>$MAKEFILE
 echo "man_dir=$man_dir" 1>>$MAKEFILE
 cat >>$MAKEFILE <<\_MAKE_EOF
 all a68g::
-	cd $(USR_SRC); $(MAKE) CPP_FLAGS="$(CPP_FLAGS)" CFLAGS="$(CFLAGS)" LD_FLAGS="$(LD_FLAGS)"; mv a68g ..; cd ..
-# For OS/2 uncomment next lines
-# a68g.exe:     a68g
-#       emxbind -b $(USR_SRC)/a68g
+	@cd $(USR_SRC); $(MAKE) CPP_FLAGS="$(CPP_FLAGS)" CFLAGS="$(CFLAGS)" LD_FLAGS="$(LD_FLAGS)"; mv a68g ..; cd ..
 install:	all
-	install -m 755 -s a68g $(USR_BIN)
-	install -m 644 doc/man1/a68g.1 $(man_dir)
+	@install -m 755 -s a68g $(USR_BIN)
+	@install -m 644 doc/man1/a68g.1 $(man_dir)
 uninstall:
-	rm -f $(USR_BIN)/a68g $(man_dir)/a68g.1
+	@rm -f $(USR_BIN)/a68g $(man_dir)/a68g.1
 depend:
-	cd $(USR_SRC); $(MAKE) depend; cd ..
+	@cd $(USR_SRC); $(MAKE) depend; cd ..
 regression:  all
-	cd $(USR_CHK); ./regression $(DIR); cd ..
+	@cd $(USR_CHK); ./regression $(DIR); cd ..
 clean:
-	cd $(USR_SRC); $(MAKE) clean; cd ..
-	for f in `find . -name "core" -print`; do rm -f $$f; done
+	@cd $(USR_SRC); $(MAKE) clean; cd ..
+	@for f in `find . -name "core" -print`; do rm -f $$f; done
 distclean mostlyclean maintainer-clean: clean
-	for f in `find . -name "makefile" -print`; do rm -f $$f; done
-	rm -f a68g .a68g.log .a68g.tmp .a68g.x .a68g.x.l
-	rm -f source/version.h
+	@for f in `find . -name "makefile" -print`; do rm -f $$f; done
+	@rm -f a68g .a68g.log .a68g.tmp .a68g.x .a68g.x.l
+	./configure -anonymus
 dist:   distclean
-	cd ..;tar -czf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
+	@cd ..;tar -czf $(PACKAGE_NAME).tar.gz $(PACKAGE_NAME)
 indent:
-	cd $(USR_SRC); $(MAKE) indent; cd ..
+	@cd $(USR_SRC); $(MAKE) indent; cd ..
 TAGS info dvi:
 	@echo "target not implemented"
 _MAKE_EOF
@@ -501,24 +533,28 @@ else
 	echo "STD_CFLAGS=-I\$(USR_INC)" 1>>$BUILD_FILE
 	echo "STD_LD_FLAGS=-L\$(USR_LIB)" 1>>$BUILD_FILE
 fi
-echo "HS=`find $USR_SRC -name "*.h" -printf "%f "`" 1>>$BUILD_FILE
-echo "CS=`find $USR_SRC -name "*.c" -printf "%f " | sed "s/\.c/\.o/g"`" 1>>$BUILD_FILE
+#
+# On some BSDs, find does not have -printf, so we use sed instead.
+#
+echo "HS=`find $USR_SRC -name '*.h' -print | sort | sed -f $SED_JOIN`" 1>>$BUILD_FILE
+echo "CS=`find $USR_SRC -name '*.c' -print | sort | sed -f $SED_JOIN`" 1>>$BUILD_FILE
 cat >>$BUILD_FILE <<\_BUILD_EOF
 FLAGS=$(CPPFLAGS) $(STD_CFLAGS) $(POSIX_THREADS_FLAG) $(PLOTUTILS_FLAG) $(GSL_FLAG) $(CURSES_FLAG) $(OS_FLAG) $(IEEE_754_FLAG) $(HTTP_FLAG) $(REGEX_FLAG) $(TERMINFO_FLAG) $(SQL_FLAG) $(CFLAGS)
 all:    a68g
 a68g:   $(CS)
-	$(CC) $(CS) $(CFLAGS) $(STD_LD_FLAGS) $(POSIX_THREADS_LIBS) $(PLOTUTILS_LIBS) $(GSL_LIBS) $(CURSES_LIBS) $(SQL_LIBS) -lm $(LD_FLAGS) -o a68g
+	@echo "building a68g ..."
+	@$(CC) $(CS) $(CFLAGS) $(STD_LD_FLAGS) $(POSIX_THREADS_LIBS) $(PLOTUTILS_LIBS) $(GSL_LIBS) $(CURSES_LIBS) $(SQL_LIBS) -lm $(LD_FLAGS) -o a68g
 $(CS): $(HS)
 .c.o:
-	$(CC) -c $(FLAGS) $<
+	@echo "compiling $< ..."
+	@$(CC) -c $(FLAGS) $<
 clean:
-	rm -f $(CS)
+	@rm -f $(CS)
 depend:
-	touch $(HS)
+	@touch $(HS)
 indent: clean
-	indent -l256 -br -ce -npsl *.c
-	rm -f *.c~
-	wc *.c *.h
+	@indent -l256 -br -ce -npsl *.c
+	@rm -f *.c~
 _BUILD_EOF
 echo "generated $BUILD_FILE"
 #
@@ -603,14 +639,14 @@ echo "#define RELEASE_DATE \"$RELEASE_DATE\"" 1>>$VERSION_FILE
 echo "#define USERID \"$USERID\"" 1>>$VERSION_FILE
 if [    $cc = gcc       ]
 then
-	echo "#define GCC_VERSION \"`gcc --version`\"" 1>>$VERSION_FILE
+	echo "#define GCC_VERSION \"`gcc -dumpversion | sed '2,$d'`\"" 1>>$VERSION_FILE
 fi
 if [ -f $USR_INC/plot.h ]
 then
-	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $USR_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $USR_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g'1>>$VERSION_FILE
 elif [ -f $LOC_INC/plot.h ]
 then
-	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $LOC_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g' 1>>$VERSION_FILE
+	echo "#define A68_LIBPLOT_VERSION \"`grep '#define PL_LIBPLOT_VER_STRING ' $LOC_INC/plot.h | sed 's/#define[A-Z_ ]*//'`\"" | sed 's/\"\"/\"/g'1>>$VERSION_FILE
 fi
 if [ -f $USR_INC/gsl/gsl_version.h ]
 then
@@ -652,5 +688,6 @@ then
 			exit 1 ;;
 	esac
 fi
+rm $SED_JOIN
 echo "$0 done"
 exit
