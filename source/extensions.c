@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -20,7 +20,6 @@ You should have received a copy of the GNU General Public License along with
 this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
-
 
 /*
 This code implements some UNIX/Linux related routines.
@@ -48,6 +47,62 @@ Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>.
 extern A68_REF tmp_to_a68_string (NODE_T *, char *);
 
 extern A68_CHANNEL stand_in_channel, stand_out_channel, stand_draw_channel, stand_back_channel, stand_error_channel;
+
+/*!
+\brief PROC [] INT utc time
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_utctime (NODE_T * p)
+{
+  time_t dt;
+  if (time (&dt) == (time_t) - 1) {
+    empty_row (p, MODE (ROW_INT));
+  } else {
+    A68_REF row;
+    ADDR_T sp = stack_pointer;
+    struct tm *tod = gmtime (&dt);
+    PUSH_INT (p, tod->tm_year + 1900);
+    PUSH_INT (p, tod->tm_mon + 1);
+    PUSH_INT (p, tod->tm_mday);
+    PUSH_INT (p, tod->tm_hour);
+    PUSH_INT (p, tod->tm_min);
+    PUSH_INT (p, tod->tm_sec);
+    PUSH_INT (p, tod->tm_wday + 1);
+    PUSH_INT (p, tod->tm_isdst);
+    row = genie_make_row (p, MODE (INT), 8, sp);
+    stack_pointer = sp;
+    PUSH_REF (p, row);
+  }
+}
+
+/*!
+\brief PROC [] INT local time
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_localtime (NODE_T * p)
+{
+  time_t dt;
+  if (time (&dt) == (time_t) - 1) {
+    empty_row (p, MODE (ROW_INT));
+  } else {
+    A68_REF row;
+    ADDR_T sp = stack_pointer;
+    struct tm *tod = localtime (&dt);
+    PUSH_INT (p, tod->tm_year + 1900);
+    PUSH_INT (p, tod->tm_mon + 1);
+    PUSH_INT (p, tod->tm_mday);
+    PUSH_INT (p, tod->tm_hour);
+    PUSH_INT (p, tod->tm_min);
+    PUSH_INT (p, tod->tm_sec);
+    PUSH_INT (p, tod->tm_wday + 1);
+    PUSH_INT (p, tod->tm_isdst);
+    row = genie_make_row (p, MODE (INT), 8, sp);
+    stack_pointer = sp;
+    PUSH_REF (p, row);
+  }
+}
 
 /*!
 \brief PROC INT argc
@@ -102,7 +157,7 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
       vec[k] = (char *) get_heap_space (1 + size);
       a_to_c_string (p, vec[k], *(A68_REF *) elem);
       if (k == VECTOR_SIZE - 1) {
-	diagnostic (A_RUNTIME_ERROR, p, "too many arguments");
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_TOO_MANY_ARGUMENTS);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
       if (strlen (vec[k]) > 0) {
@@ -275,7 +330,7 @@ void genie_execve (NODE_T * p)
   convert_string_vector (p, argv, a_args);
   convert_string_vector (p, envp, a_env);
   if (argv[0] == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, "argument is empty");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   ret = execve (prog, argv, envp);
@@ -317,7 +372,7 @@ void genie_execve_child (NODE_T * p)
     convert_string_vector (p, argv, a_args);
     convert_string_vector (p, envp, a_env);
     if (argv[0] == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "argument is empty");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     (void) execve (prog, argv, envp);
@@ -385,7 +440,7 @@ Return a PIPE that contains the descriptors for the parent.
     dup2 (ptoc_fd[FD_READ], STDIN_FILENO);
     dup2 (ctop_fd[FD_WRITE], STDOUT_FILENO);
     if (argv[0] == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, "argument is empty");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     (void) execve (prog, argv, envp);
@@ -624,4 +679,913 @@ void genie_curses_move (NODE_T * p)
   move (i.value, j.value);
 }
 
-#endif /* HAVE_CURSES. */
+#endif /* HAVE_CURSES */
+
+#ifdef HAVE_POSTGRESQL
+
+/*
+PostgreSQL libpq interface based on initial work by Jaap Boender. 
+Wraps "connection" and "result" objects in a FILE variable to support 
+multiple connections.
+
+Error codes:
+0	Success
+-1	No connection
+-2	No result
+-3	Other error
+*/
+
+#define LIBPQ_STRING "PostgreSQL libq"
+#define ERROR_NOT_CONNECTED "not connected to a database"
+#define ERROR_NO_QUERY_RESULT "no query result available"
+
+/*!
+\brief PROC pg connect db (REF FILE, STRING, REF STRING) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_connectdb (NODE_T * p)
+{
+  A68_REF ref_string, ref_file, ref_z, conninfo;
+  A68_FILE *file;
+  POP_REF (p, &ref_string);
+  TEST_NIL (p, ref_string, MODE (REF_STRING));
+  POP_REF (p, &conninfo);
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  if (ref_file.segment == heap_segment && ref_string.segment != heap_segment) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+    exit_genie (p, A_RUNTIME_ERROR);
+  } else if (ref_file.segment == frame_segment && ref_string.segment == frame_segment && ref_string.scope > ref_file.scope) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+/* Initialise the file. */
+  file = FILE_DEREF (&ref_file);
+  if (file->opened) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_ALREADY_OPEN);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  file->status = INITIALISED_MASK;
+  file->channel = associate_channel;
+  file->opened = A_TRUE;
+  file->open_exclusive = A_FALSE;
+  file->read_mood = A_FALSE;
+  file->write_mood = A_FALSE;
+  file->char_mood = A_FALSE;
+  file->draw_mood = A_FALSE;
+  file->tmp_file = A_FALSE;
+  if (((file->identification.status & INITIALISED_MASK) != 0) && !IS_NIL (file->identification)) {
+    UNPROTECT_SWEEP_HANDLE (&(file->identification));
+  }
+  file->identification = nil_ref;
+  file->terminator = nil_ref;
+  file->format = nil_format;
+  file->fd = -1;
+  if (((file->string.status & INITIALISED_MASK) != 0) && !IS_NIL (file->string)) {
+    UNPROTECT_SWEEP_HANDLE (&(file->string));
+  }
+  file->string = ref_string;
+  PROTECT_SWEEP_HANDLE (&(file->string));
+  file->strpos = 1;
+  file->device.stream = NULL;
+  set_default_mended_procedures (file);
+/* Establish a connection. */
+  ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, conninfo));
+  file->connection = PQconnectdb (a_to_c_string (p, (char *) ADDRESS (&ref_z), conninfo));
+  file->result = NULL;
+  if (file->connection == NULL) {
+    PUSH_INT (p, -3);
+  }
+  PQsetErrorVerbosity (file->connection, PQERRORS_DEFAULT);
+  if (PQstatus (file->connection) != CONNECTION_OK) {
+    PUSH_INT (p, -1);
+  } else {
+    PUSH_INT (p, 0);
+  }
+}
+
+/*!
+\brief PROC pq finish (REF FILE) VOID
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_finish (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result != NULL) {
+    PQclear (file->result);
+  }
+  PQfinish (file->connection);
+  file->connection = NULL;
+  file->result = NULL;
+  PUSH_INT (p, 0);
+}
+
+/*!
+\brief PROC pq reset (REF FILE) VOID
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_reset (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result != NULL) {
+    PQclear (file->result);
+  }
+  PQreset (file->connection);
+  PUSH_INT (p, 0);
+}
+
+/*!
+\brief PROC pq exec = (REF FILE, STRING) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_exec (NODE_T * p)
+{
+  A68_REF ref_z, query;
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP (p, &query, SIZE_OF (A68_REF));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result != NULL) {
+    PQclear (file->result);
+  }
+  ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, query));
+  file->result = PQexec (file->connection, a_to_c_string (p, (char *) ADDRESS (&ref_z), query));
+  if ((PQresultStatus (file->result) != PGRES_TUPLES_OK) && (PQresultStatus (file->result) != PGRES_COMMAND_OK)) {
+    PUSH_INT (p, -3);
+  } else {
+    PUSH_INT (p, 0);
+  }
+}
+
+/*!
+\brief PROC pq parameterstatus (REF FILE) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_parameterstatus (NODE_T * p)
+{
+  A68_REF ref_z, parameter;
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP (p, &parameter, SIZE_OF (A68_REF));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, parameter));
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, (char *) PQparameterStatus (file->connection, a_to_c_string (p, (char *) ADDRESS (&ref_z), parameter)));
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq cmdstatus (REF FILE) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_cmdstatus (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQcmdStatus (file->result));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq cmdtuples (REF FILE) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_cmdtuples (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQcmdTuples (file->result));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq ntuples (REF FILE) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_ntuples (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  PUSH_INT (p, (PQresultStatus (file->result)) == PGRES_TUPLES_OK ? PQntuples (file->result) : -3);
+}
+
+/*!
+\brief PROC pq nfields (REF FILE) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_nfields (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  PUSH_INT (p, (PQresultStatus (file->result)) == PGRES_TUPLES_OK ? PQnfields (file->result) : -3);
+}
+
+/*!
+\brief PROC pq fname (REF FILE, INT) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_fname (NODE_T * p)
+{
+  A68_INT index;
+  int upb;
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_INT (p, &index);
+  TEST_INIT (p, index, MODE (INT));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
+  if (index.value < 1 || index.value > upb) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQfname (file->result, index.value - 1));
+    file->strpos = 1;
+  }
+  PUSH_INT (p, 0);
+}
+
+/*!
+\brief PROC pq fnumber = (REF FILE, STRING) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_fnumber (NODE_T * p)
+{
+  A68_REF ref_z, name;
+  A68_REF ref_file;
+  A68_FILE *file;
+  int k;
+  POP (p, &name, SIZE_OF (A68_REF));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, name));
+  k = PQfnumber (file->result, a_to_c_string (p, (char *) ADDRESS (&ref_z), name));
+  if (k == -1) {
+    PUSH_INT (p, -3);
+  } else {
+    PUSH_INT (p, k + 1);
+  }
+}
+
+/*!
+\brief PROC pq fformat (REF FILE, INT) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_fformat (NODE_T * p)
+{
+  A68_INT index;
+  int upb;
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_INT (p, &index);
+  TEST_INIT (p, index, MODE (INT));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
+  if (index.value < 1 || index.value > upb) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  PUSH_INT (p, PQfformat (file->result, index.value - 1));
+}
+
+/*!
+\brief PROC pq getvalue (REF FILE, INT, INT) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_getvalue (NODE_T * p)
+{
+  A68_INT row, column;
+  char *str;
+  int upb;
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_INT (p, &column);
+  TEST_INIT (p, column, MODE (INT));
+  POP_INT (p, &row);
+  TEST_INIT (p, row, MODE (INT));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
+  if (column.value < 1 || column.value > upb) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQntuples (file->result) : 0);
+  if (row.value < 1 || row.value > upb) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  str = PQgetvalue (file->result, row.value - 1, column.value - 1);
+  if (str == NULL) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_NO_QUERY_RESULT);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, str);
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq getisnull (REF FILE, INT, INT) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_getisnull (NODE_T * p)
+{
+  A68_INT row, column;
+  int upb;
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_INT (p, &column);
+  TEST_INIT (p, column, MODE (INT));
+  POP_INT (p, &row);
+  TEST_INIT (p, row, MODE (INT));
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQnfields (file->result) : 0);
+  if (column.value < 1 || column.value > upb) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  upb = (PQresultStatus (file->result) == PGRES_TUPLES_OK ? PQntuples (file->result) : 0);
+  if (row.value < 1 || row.value > upb) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  PUSH_INT (p, PQgetisnull (file->result, row.value - 1, column.value - 1));
+}
+
+/*!
+\brief edit error message sting from libpq
+\param p position in syntax tree, should not be NULL
+**/
+
+static char *pq_edit (char *str)
+{
+  if (str == NULL) {
+    return ("");
+  } else {
+    static char edt[BUFFER_SIZE];
+    char *q;
+    int newlines = 0, len = strlen (str);
+    BOOL_T suppress_blank = A_FALSE;
+    q = edt;
+    while (len > 0 && str[len - 1] == '\n') {
+      str[len - 1] = '\0';
+      len = strlen (str);
+    }
+    while (str[0] != '\0') {
+      if (str[0] == '\r') {
+	str++;
+      } else if (str[0] == '\n') {
+	if (newlines++ == 0) {
+	  *(q++) = '.';
+	  *(q++) = ' ';
+	  *(q++) = '(';
+	} else {
+	  *(q++) = ' ';
+	}
+	suppress_blank = A_TRUE;
+	str++;
+      } else if (IS_SPACE (str[0])) {
+	if (suppress_blank) {
+	  str++;
+	} else {
+	  if (str[1] != '\n') {
+	    *(q++) = ' ';
+	  }
+	  str++;
+	  suppress_blank = A_TRUE;
+	}
+      } else {
+	*(q++) = *(str++);
+	suppress_blank = A_FALSE;
+      }
+    }
+    if (newlines > 0) {
+      *(q++) = ')';
+    }
+    q[0] = '\0';
+    return (edt);
+  }
+}
+
+/*!
+\brief PROC pq errormessage (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_errormessage (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    char str[BUFFER_SIZE];
+    int upb;
+    if (PQerrorMessage (file->connection) != NULL) {
+      strcpy (str, pq_edit (PQerrorMessage (file->connection)));
+      upb = strlen (str);
+      if (upb > 0 && str[upb - 1] == '\n') {
+	str[upb - 1] = '\0';
+      }
+    } else {
+      strcpy (str, "no error message available");
+    }
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, str);
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq resulterrormessage (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_resulterrormessage (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (file->result == NULL) {
+    PUSH_INT (p, -2);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    char str[BUFFER_SIZE];
+    int upb;
+    if (PQresultErrorMessage (file->result) != NULL) {
+      strcpy (str, pq_edit (PQresultErrorMessage (file->result)));
+      upb = strlen (str);
+      if (upb > 0 && str[upb - 1] == '\n') {
+	str[upb - 1] = '\0';
+      }
+    } else {
+      strcpy (str, "no error message available");
+    }
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, str);
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq db (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_db (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQdb (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq user (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_user (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQuser (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq pass (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_pass (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQpass (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq host (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_host (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQhost (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq port (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_port (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQport (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq tty (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_tty (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQtty (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq options (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_options (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, PQoptions (file->connection));
+    file->strpos = 1;
+    PUSH_INT (p, 0);
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq protocol version (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_protocolversion (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    PUSH_INT (p, PQprotocolVersion (file->connection));
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq server version (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_serverversion (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    PUSH_INT (p, PQserverVersion (file->connection));
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq socket (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_socket (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    PUSH_INT (p, PQsocket (file->connection));
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+/*!
+\brief PROC pq backend pid (REF FILE) INT 
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_pq_backendpid (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  TEST_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (file->connection == NULL) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  if (!IS_NIL (file->string)) {
+    PUSH_INT (p, PQbackendPID (file->connection));
+  } else {
+    PUSH_INT (p, -3);
+  }
+}
+
+#endif /* HAVE_POSTGRESQL */

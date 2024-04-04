@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -87,13 +87,14 @@ HAVE_IEEE_754 is ok for Pentiums.
 #ifdef WIN32_VERSION
 #define HAVE_CURSES 1
 #define HAVE_PLOTUTILS 1
+#define HAVE_UNIX 1
+#define HAVE_IEEE_754 1
 #undef HAVE_MODIFIABLE_X_TITLE
-#define HAVE_IEEE_754
-#define HAVE_UNIX
 #undef HAVE_UNIX_CLOCK
 #undef HAVE_POSIX_THREADS
 #undef HAVE_HTTP
 #undef HAVE_REGEX
+#undef HAVE_POSTGRESQL
 #endif
 
 /*
@@ -106,6 +107,7 @@ To select his modifications, define OS2_VERSION.			      i
 #endif
 
 #ifdef OS2_VERSION
+#define HAVE_IEEE_754
 #undef HAVE_CURSES
 #undef HAVE_GSL
 #undef HAVE_PLOTUTILS
@@ -114,12 +116,13 @@ To select his modifications, define OS2_VERSION.			      i
 #undef HAVE_POSIX_THREADS
 #undef HAVE_HTTP
 #undef HAVE_REGEX
+#undef HAVE_POSTGRESQL
 #endif
 
 /*
 What was to become Algol68G started as an Algol 68 subset implementation for
 desktop computers at the time (PC XT and Mac SE). A first version actually ran
-on a Mac SE (8 MHz 68000, 4 MB RAM). Mark 8 still compiles and runs on a 
+on a Mac SE (8 MHz 68000, 4 MB RAM). Mark 9 still compiles and runs on a 
 Performa 630 (68LC040).
 
 To compile on pre-MacOS X Macs, define PRE_MACOS_X_VERSION. When defining
@@ -133,6 +136,7 @@ particular system. HAVE_IEEE_754 is ok.
 
 #ifdef PRE_MACOS_X_VERSION
 #define MAC_STACK_SIZE 1024L
+#define HAVE_IEEE_754
 #undef HAVE_CURSES
 #undef HAVE_GSL
 #undef HAVE_PLOTUTILS
@@ -141,7 +145,7 @@ particular system. HAVE_IEEE_754 is ok.
 #undef HAVE_POSIX_THREADS
 #undef HAVE_HTTP
 #undef HAVE_REGEX
-#define HAVE_IEEE_754
+#undef HAVE_POSTGRESQL
 #endif
 
 #endif

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -33,6 +33,8 @@ registers and stack for each concurrent unit.
 #include "genie.h"
 #include "mp.h"
 
+#ifdef HAVE_POSIX_THREADS
+
 typedef struct STACK STACK;
 
 struct STACK
@@ -42,9 +44,8 @@ struct STACK
   int bytes;
 };
 
-#ifdef HAVE_POSIX_THREADS
-
-pthread_t main_id = 0;
+int parallel_clauses = 0;
+pthread_t main_thread_id = 0;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 static ADDR_T fp0, sp0;
 
@@ -91,8 +92,24 @@ static BOOL_T zapped = A_FALSE;
 static jmp_buf *jump_buffer;
 static NODE_T *jump_label;
 
+/*!
+\brief count parallel_clauses
+**/
 
-#define REQUIRE_POSIX_THREADS "parallel clause requires posix threads"
+void count_parallel_clauses (NODE_T * p)
+{
+#ifdef HAVE_POSIX_THREADS
+  for (; p != NULL; FORWARD (p)) {
+    if (WHETHER (p, PARALLEL_CLAUSE)) {
+      parallel_clauses++;
+    }
+    count_parallel_clauses (SUB (p));
+  }
+#else
+  (void) p;
+  ABNORMAL_END (A_TRUE, ERROR_REQUIRE_THREADS, NULL);
+#endif
+}
 
 /*!
 \brief whether we are in the main thread
@@ -102,9 +119,9 @@ static NODE_T *jump_label;
 BOOL_T is_main_thread (void)
 {
 #ifdef HAVE_POSIX_THREADS
-  return (main_id == pthread_self ());
+  return (main_thread_id == pthread_self ());
 #else
-  ABNORMAL_END (A_TRUE, REQUIRE_POSIX_THREADS, NULL);
+  ABNORMAL_END (A_TRUE, ERROR_REQUIRE_THREADS, NULL);
   return (A_FALSE);
 #endif
 }
@@ -120,7 +137,7 @@ void genie_abend_thread (void)
   pthread_mutex_unlock (&mutex);
   pthread_exit (NULL);
 #else
-  ABNORMAL_END (A_TRUE, REQUIRE_POSIX_THREADS, NULL);
+  ABNORMAL_END (A_TRUE, ERROR_REQUIRE_THREADS, NULL);
 #endif
 }
 
@@ -172,7 +189,7 @@ void set_par_level (NODE_T * p, int n)
 static void try_change_thread (NODE_T * p)
 {
   if (!in_par_clause) {
-    diagnostic (A_RUNTIME_ERROR, p, "not in a parallel clause");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_OUTSIDE);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   save_stacks (pthread_self ());
@@ -223,7 +240,7 @@ static void save (STACK * s, BYTE_T * start, int size)
 	free (s->swap);
       }
       z = (BYTE_T *) malloc ((size_t) size);
-      ABNORMAL_END (z == NULL, OUT_OF_CORE, NULL);
+      ABNORMAL_END (z == NULL, ERROR_OUT_OF_CORE, NULL);
     }
     s->start = start;
     s->bytes = size;
@@ -368,7 +385,7 @@ static void genie_parallel_units (NODE_T * p)
       BYTE_T stack_offset;
 /* Set up a thread for this unit.       				*/
       if (condex >= THREAD_MAX) {
-	diagnostic (A_RUNTIME_ERROR, p, "too many parallel units");
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_OVERFLOW);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
 /* Fill out a context for this thread.  				*/
@@ -389,7 +406,7 @@ static void genie_parallel_units (NODE_T * p)
       RESET_ERRNO;
       pthread_create (&new_id, NULL, start_unit, NULL);
       if (errno != 0) {
-	diagnostic (A_RUNTIME_ERROR, p, "cannot create thread");
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_CREATE);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
       context[condex].id = new_id;
@@ -443,7 +460,7 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
       RESET_ERRNO;
       pthread_join (context[j].id, NULL);
       if (errno != 0) {
-	diagnostic (A_RUNTIME_ERROR, p, "cannot join thread");
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_JOIN);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
     }
@@ -477,7 +494,7 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
   PROPAGATOR_T self;
   self.unit = genie_parallel;
   self.source = p;
-  diagnostic (A_RUNTIME_ERROR, p, REQUIRE_POSIX_THREADS);
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
   exit_genie (p, A_RUNTIME_ERROR);
   return (self);
 #endif
@@ -485,7 +502,7 @@ PROPAGATOR_T genie_parallel (NODE_T * p)
 
 #define CHECK_INIT(p, c, q)\
   if (!(c)) {\
-    diagnostic (A_RUNTIME_ERROR, (p), EMPTY_VALUE_ERROR_FROM, (q));\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE_FROM, (q));\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }
 
@@ -504,7 +521,7 @@ void genie_level_sema_int (NODE_T * p)
   *(A68_INT *) ADDRESS (&s) = k;
   PUSH_REF (p, s);
 #else
-  diagnostic (A_RUNTIME_ERROR, p, REQUIRE_POSIX_THREADS);
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
   exit_genie (p, A_RUNTIME_ERROR);
 #endif
 }
@@ -523,7 +540,7 @@ void genie_level_int_sema (NODE_T * p)
   CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
   PUSH_INT (p, ((A68_INT *) ADDRESS (&s))->value);
 #else
-  diagnostic (A_RUNTIME_ERROR, p, REQUIRE_POSIX_THREADS);
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
   exit_genie (p, A_RUNTIME_ERROR);
 #endif
 }
@@ -541,7 +558,7 @@ void genie_up_sema (NODE_T * p)
   CHECK_INIT (p, s.status & INITIALISED_MASK, MODE (SEMA));
   ((A68_INT *) ADDRESS (&s))->value++;
 #else
-  diagnostic (A_RUNTIME_ERROR, p, REQUIRE_POSIX_THREADS);
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
   exit_genie (p, A_RUNTIME_ERROR);
 #endif
 }
@@ -571,7 +588,7 @@ void genie_down_sema (NODE_T * p)
     }
   }
 #else
-  diagnostic (A_RUNTIME_ERROR, p, REQUIRE_POSIX_THREADS);
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_REQUIRE_THREADS);
   exit_genie (p, A_RUNTIME_ERROR);
 #endif
 }

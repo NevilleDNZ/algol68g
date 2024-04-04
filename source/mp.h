@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -94,15 +94,15 @@ enum
 
 #define TEST_MP_INIT(p, z, m) {\
   if (! ((int) z[0] & INITIALISED_MASK)) {\
-    diagnostic (A_RUNTIME_ERROR, (p), EMPTY_VALUE_ERROR, (m));\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE, (m));\
     exit_genie ((p), 1);\
   }}
 
-#define CHECK_MP_EXPONENT(p, z, str) {\
+#define CHECK_MP_EXPONENT(p, z) {\
   MP_DIGIT_T expo = fabs (MP_EXPONENT (z));\
   if (expo > MAX_MP_EXPONENT || (expo == MAX_MP_EXPONENT && ABS (MP_DIGIT (z, 1)) > 1.0)) {\
       errno = ERANGE;\
-      diagnostic (A_RUNTIME_ERROR, p, "multiprecision value out of bounds", NULL);\
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MP_OUT_OF_BOUNDS, NULL);\
       exit_genie (p, 1);\
   }}
 
@@ -117,7 +117,7 @@ enum
 #define STACK_MP(dest, p, digits) {\
   ADDR_T stack_mp_sp = stack_pointer;\
   if ((stack_pointer += SIZE_MP (digits)) > expr_stack_limit) {\
-    diagnostic (A_RUNTIME_ERROR, p, "imminent expression stack overflow");\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);\
     exit_genie (p, A_RUNTIME_ERROR);\
   }\
   dest = (MP_DIGIT_T *) STACK_ADDRESS (stack_mp_sp);\
@@ -133,16 +133,27 @@ extern MP_DIGIT_T *acosh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *add_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *asin_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *asinh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *atan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *atan2_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *atan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *atanh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *cacos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *casin_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *catan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *ccos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *cdiv_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *cexp_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *cln_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *cmul_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *cos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *cosh_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *csin_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *csqrt_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *ctan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *curt_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *div_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *div_mp_digit (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T, int);
-extern MP_DIGIT_T *expm1_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *exp_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
+extern MP_DIGIT_T *expm1_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *hyp_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *hypot_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 extern MP_DIGIT_T *int_to_mp (NODE_T *, MP_DIGIT_T *, int, int);
@@ -188,16 +199,5 @@ extern void long_standardise (NODE_T *, MP_DIGIT_T *, int, int, int, int *);
 extern void raw_write_mp (char *, MP_DIGIT_T *, int);
 extern void set_longlong_mp_digits (int);
 extern void trunc_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *cmul_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *cdiv_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *csqrt_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *cexp_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *cln_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *csin_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *ccos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *ctan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *casin_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *cacos_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
-extern MP_DIGIT_T *catan_mp (NODE_T *, MP_DIGIT_T *, MP_DIGIT_T *, int);
 
 #endif

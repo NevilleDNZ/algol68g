@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -103,7 +103,7 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
   if (mask & TRANSIENT) {
     for (s = top; s != NULL; s = NEXT (s)) {
       if (s->tuple.transient & TRANSIENT) {
-	diagnostic (A_ERROR, s->where, "attempt to store transient name");
+	diagnostic_node (A_ERROR, s->where, ERROR_TRANSIENT_NAME);
 	s->where->error = A_TRUE;
 	errors++;
       }
@@ -113,9 +113,9 @@ static BOOL_T scope_check (SCOPE_T * top, int mask, int dest)
     if (dest < s->tuple.level && !s->where->error) {
 /* Potential scope violations. */
       if (MOID (s->where) == NULL) {
-	diagnostic (A_WARNING, s->where, "value from A could be exported out of its scope", ATTRIBUTE (s->where));
+	diagnostic_node (A_WARNING, s->where, WARNING_SCOPE_STATIC_1, ATTRIBUTE (s->where));
       } else {
-	diagnostic (A_WARNING, s->where, "M value from A could be exported out of its scope", MOID (s->where), ATTRIBUTE (s->where));
+	diagnostic_node (A_WARNING, s->where, WARNING_SCOPE_STATIC_2, MOID (s->where), ATTRIBUTE (s->where));
       }
       s->where->error = A_TRUE;
       errors++;
@@ -151,7 +151,7 @@ static void check_identifier_usage (TAG_T * t, NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, IDENTIFIER) && TAX (p) == t && ATTRIBUTE (MOID (t)) != PROC_SYMBOL) {
-      diagnostic (A_WARNING, p, "identifier S might be used uninitialised");
+      diagnostic_node (A_WARNING, p, WARNING_UNINITIALISED);
     }
     check_identifier_usage (t, SUB (p));
   }
@@ -831,23 +831,6 @@ static void scope_closed_clause (NODE_T * p, SCOPE_T ** s)
 }
 
 /*!
-\brief scope_transport_clause
-\param p
-\param s
-**/
-
-static void scope_transport_clause (NODE_T * p, SCOPE_T ** s)
-{
-  if (p != NULL) {
-    if (WHETHER (p, SERIAL_CLAUSE)) {
-      scope_serial_clause (p, s, A_TRUE);
-    } else {
-      scope_transport_clause (NEXT (p), s);
-    }
-  }
-}
-
-/*!
 \brief scope_collateral_clause
 \param p
 \param s
@@ -957,10 +940,6 @@ static void scope_enclosed_clause (NODE_T * p, SCOPE_T ** s)
     scope_case_clause (SUB (p), s);
   } else if (WHETHER (p, LOOP_CLAUSE)) {
     scope_loop_clause (SUB (p));
-  } else if (WHETHER (p, CODE_CLAUSE)) {
-    scope_transport_clause (SUB (p), s);
-  } else if (WHETHER (p, EXPORT_CLAUSE)) {
-    scope_transport_clause (SUB (p), s);
   }
 }
 

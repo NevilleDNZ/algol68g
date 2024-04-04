@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -422,8 +422,12 @@ void genie (MODULE_T * module)
     genie_init_rng ();
   }
   io_close_tty_line ();
+#ifdef HAVE_POSIX_THREADS
+  parallel_clauses = 0;
+  count_parallel_clauses (module->top_node);
+#endif
   if (module->options.trace) {
-    sprintf (output_line, "%sgenie 1.0: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", BARS, frame_stack_size / 1024, expr_stack_size / 1024, heap_size / 1024, handle_pool_size / 1024);
+    sprintf (output_line, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", frame_stack_size / 1024, expr_stack_size / 1024, heap_size / 1024, handle_pool_size / 1024);
     io_write_string (STDOUT_FILENO, output_line);
   }
   install_signal_handlers ();
@@ -451,7 +455,7 @@ void genie (MODULE_T * module)
 /* Abnormal end of program. */
     if (ret_code == A_RUNTIME_ERROR) {
       if (module->files.listing.opened) {
-	sprintf (output_line, "\n%sstack traceback", BARS);
+	sprintf (output_line, "\n++++ Stack traceback");
 	io_write_string (module->files.listing.fd, output_line);
 	stack_dump (module->files.listing.fd, frame_pointer, 128);
       }
@@ -462,7 +466,7 @@ void genie (MODULE_T * module)
 /* Normal end of program. */
   diagnostics_to_terminal (module->top_line, A_RUNTIME_ERROR);
   if (module->options.trace) {
-    sprintf (output_line, "\n%sgenie finishes: %.2f seconds\n", BARS, seconds () - cputime_0);
+    sprintf (output_line, "\n++++ Genie finishes: %.2f seconds\n", seconds () - cputime_0);
     io_write_string (STDOUT_FILENO, output_line);
   }
 }

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -21,16 +21,16 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-
 /*
 This code handles options to Algol68G.
 
 Option syntax does not follow GNU standards.
 
 Options come from:
-  [1] A .rc file (normally a68g.rc).
-  [2] The command line. Those options overrule options from [1].
-  [3] Pragmat items. Those options overrule options from [1] and [2]. 
+  [1] A rc file (normally .a68grc).
+  [2] The A68G_OPTIONS environment variable overrules [1].
+  [3] Command line options overrule [2].
+  [4] Pragmat items overrule [3]. 
 */
 
 #include "algol68g.h"
@@ -38,7 +38,41 @@ Options come from:
 #include "mp.h"
 
 OPTIONS_T *options;
-BOOL_T gnu_diags;
+BOOL_T a68c_diags, gnu_diags, no_warnings;
+
+/*!
+\brief
+\param l
+\param option
+\return
+**/
+
+static void option_error (SOURCE_LINE_T * l, char *option, char *info)
+{
+  if (info != NULL) {
+    sprintf (edit_line, "while processing option \"%s\" (%s)", option, info);
+  } else {
+    sprintf (edit_line, "while processing option \"%s\"", option);
+  }
+  scan_error (l, NULL, edit_line);
+}
+
+/*!
+\brief
+\param l
+\param option
+\return
+**/
+
+static void option_unrecognised (SOURCE_LINE_T * l, char *option)
+{
+  char *c;
+  sprintf (edit_line, "unrecognised option \"%s\"", option);
+  for (c = edit_line; c[0] != '\0'; c++) {
+    c[0] = TO_LOWER (c[0]);
+  }
+  scan_error (l, NULL, edit_line);
+}
 
 /*!
 \brief strip minus signs preceeding a string
@@ -61,7 +95,7 @@ static char *strip_minus (char *p)
 
 static void online_help ()
 {
-  printf ("\nAlgol68G %s, Copyright (C) 2001-2005 J. Marcel van der Veer", REVISION);
+  printf ("\nAlgol68G %s, Copyright (C) 2001-2006 J. Marcel van der Veer", REVISION);
   printf ("\nAlgol68G comes with ABSOLUTELY NO WARRANTY;");
   printf ("\nSee the GNU General Public License for more details.");
   printf ("\n");
@@ -69,8 +103,8 @@ static void online_help ()
   printf ("\n");
   printf ("\nOptions that execute Algol 68 code from the command line:");
   printf ("\n");
-  printf ("\n   print unit                Print value yielded by Algol 68 unit `unit'");
-  printf ("\n   execute unit              Execute Algol 68 unit `unit'");
+  printf ("\n   print unit                Print value yielded by Algol 68 unit \"unit\"");
+  printf ("\n   execute unit              Execute Algol 68 unit \"unit\"");
   printf ("\n");
   printf ("\nOptions to control the listing file:");
   printf ("\n");
@@ -87,37 +121,40 @@ static void online_help ()
   printf ("\nInterpreter options:");
   printf ("\n");
   printf ("\n   assertions, noassertions  Switch on/off elaboration of assertions");
-  printf ("\n   precision number          Sets precision for LONG LONG modes to `number' significant digits");
-  printf ("\n   timelimit number          Interrupt the interpreter after `number' seconds");
+  printf ("\n   precision number          Sets precision for LONG LONG modes to \"number\" significant digits");
+  printf ("\n   timelimit number          Interrupt the interpreter after \"number\" seconds");
   printf ("\n   trace, notrace            Switch on/off tracing of a running program");
   printf ("\n");
   printf ("\nOptions to control the stropping regime:");
   printf ("\n");
-  printf ("\n   boldstropping             Set stropping mode to bold stropping (default)");
+  printf ("\n   boldstropping             Set stropping mode to bold stropping");
   printf ("\n   quotestropping            Set stropping mode to quote stropping");
   printf ("\n");
   printf ("\nOptions to control memory usage:");
   printf ("\n");
-  printf ("\n   heap number               Set heap size to `number'");
-  printf ("\n   handles number            Set handle space size to `number'");
-  printf ("\n   frame number              Set frame stack size to `number'");
-  printf ("\n   stack number              Set expression stack size to `number'");
+  printf ("\n   heap number               Set heap size to \"number\"");
+  printf ("\n   handles number            Set handle space size to \"number\"");
+  printf ("\n   frame number              Set frame stack size to \"number\"");
+  printf ("\n   stack number              Set expression stack size to \"number\"");
   printf ("\n");
   printf ("\nMiscellaneous options:");
   printf ("\n");
   printf ("\n   brackets                  Consider [ .. ] and { .. } as equivalent to ( .. )");
   printf ("\n   check, norun              Check syntax only, interpreter does not start");
-  printf ("\n   run                       Override the check/norun option");
-  printf ("\n   echo string               Echo `string' to standard output");
+  printf ("\n   run                       Override the CHECK/NORUN options");
+  printf ("\n   echo string               Echo \"string\" to standard output");
   printf ("\n   exit, --                  Ignore next options");
   printf ("\n   file string               Accept string as generic filename");
+  printf ("\n   a68cdiagnostics           Give A68C style diagnostics");
   printf ("\n   gnudiagnostics            Give GNU style diagnostics");
-  printf ("\n   nowarnings                Suppress warning messages");
+  printf ("\n   vmsdiagnostics            Give VMS style diagnostics");
+  printf ("\n   pedantic                  Equivalent to WARNINGS PORTCHECK");
+  printf ("\n   portcheck, noportcheck    Switch on/off portability warnings");
   printf ("\n   pragmats, nopragmats      Switch on/off elaboration of pragmat items");
   printf ("\n   reductions                Print parser reductions");
   printf ("\n   verbose                   Inform on program actions");
   printf ("\n   version                   State the version of the running copy");
-  printf ("\n   warnings                  Enable warning messages");
+  printf ("\n   warnings, nowarnings      Switch on/off warning diagnostics");
   printf ("\n");
   fflush (stdout);
 }
@@ -221,6 +258,8 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
 
 static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 {
+  SOURCE_LINE_T *start_l = (*i)->line;
+  char *start_c = (*i)->str;
   char *car = NULL, *num = NULL;
   int k, mult = 1;
   *error = A_FALSE;
@@ -241,8 +280,7 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   }
 /* Translate argument into integer. */
   if (*error) {
-    sprintf (edit_line, "syntax error in option `%s'", (*i)->str);
-    scan_error ((*i)->line, edit_line);
+    option_error (start_l, start_c, NULL);
     return (0);
   } else {
     char *postfix;
@@ -250,12 +288,10 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
     k = strtol (num, &postfix, 0);	/* Accept also octal and hex. */
     *error = (postfix == num);
     if (errno != 0 || *error) {
-      sprintf (edit_line, "syntax error in option `%s'", (*i)->str);
-      scan_error ((*i)->line, edit_line);
+      option_error (start_l, start_c, NULL);
       *error = A_TRUE;
     } else if (k < 0) {
-      sprintf (edit_line, "negative value in option `%s'", (*i)->str);
-      scan_error ((*i)->line, edit_line);
+      option_error (start_l, start_c, NULL);
       *error = A_TRUE;
     } else {
 /* Accept postfix multipliers: 32k, 64M, 1G. */
@@ -286,15 +322,13 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 	  }
 	default:
 	  {
-	    sprintf (edit_line, "syntax error in option `%s'", (*i)->str);
-	    scan_error ((*i)->line, edit_line);
+	    option_error (start_l, start_c, NULL);
 	    *error = A_TRUE;
 	    break;
 	  }
 	}
 	if (postfix[0] != '\0' && postfix[1] != '\0') {
-	  sprintf (edit_line, "syntax error in option `%s'", (*i)->str);
-	  scan_error ((*i)->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	  *error = A_TRUE;
 	}
       }
@@ -317,6 +351,8 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
   OPTION_LIST_T *j = i;
   RESET_ERRNO;
   while (i != NULL && go_on) {
+    SOURCE_LINE_T *start_l = i->line;
+    char *start_c = i->str;
     if (!(i->processed)) {
 /* Accept UNIX '-option [=] value' */
       BOOL_T minus_sign = ((i->str)[0] == '-');
@@ -327,8 +363,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	  module->files.generic_name = new_string (p);
 	  name_set = A_TRUE;
 	} else {
-	  sprintf (edit_line, "option `%s' attempts to reset filename `%s'", i->str, module->files.generic_name);
-	  scan_error (NULL, edit_line);
+	  option_error (NULL, start_c, NULL);
 	}
       }
 /* Preprocessor items stop option processing. */
@@ -360,12 +395,10 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	    module->files.generic_name = new_string (i->str);
 	    name_set = A_TRUE;
 	  } else {
-	    sprintf (edit_line, "option `%s' attempts to reset filename `%s'", i->str, module->files.generic_name);
-	    scan_error (i->line, edit_line);
+	    option_error (start_l, start_c, NULL);
 	  }
 	} else {
-	  sprintf (edit_line, "option `%s' expects a filename", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	}
       }
 /* HELP gives online help. */
@@ -387,8 +420,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 /* EXECUTE and PRINT execute their argument as Algol 68 text. */
       else if (eq (module, p, "Execute") || eq (module, p, "Print")) {
 	if (cmd_line == A_FALSE) {
-	  sprintf (edit_line, "option `%s' only valid from command line", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, "command line only");
 	} else if ((FORWARD (i)) != NULL) {
 	  BOOL_T error = A_FALSE;
 	  if (strcmp (i->str, "=") == 0) {
@@ -403,19 +435,17 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	    f = fopen (name, "w");
 	    ABNORMAL_END (f == NULL, "cannot open temp file", NULL);
 	    if (eq (module, p, "Execute")) {
-	      fprintf (f, "%s\n", i->str);
+	      fprintf (f, "(%s)\n", i->str);
 	    } else {
 	      fprintf (f, "(print ((%s)))\n", i->str);
 	    }
 	    fclose (f);
 	    module->files.generic_name = new_string (name);
 	  } else {
-	    sprintf (edit_line, "syntax error in option `%s'", i->str);
-	    scan_error (i->line, edit_line);
+	    option_error (start_l, start_c, NULL);
 	  }
 	} else {
-	  sprintf (edit_line, "syntax error in option `%s'", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	}
       }
 /* HEAP, HANDLES, STACK, FRAME and OVERHEAD  set core allocation. */
@@ -424,12 +454,10 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	int k = fetch_integral (p, &i, &error);
 /* Adjust size. */
 	if (error || errno > 0) {
-	  sprintf (edit_line, "syntax error in option `%s'", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	} else if (k > 0) {
 	  if (k < MIN_MEM_SIZE) {
-	    sprintf (edit_line, "invalid value in option `%s'", i->str);
-	    scan_error (i->line, edit_line);
+	    option_error (start_l, start_c, NULL);
 	    k = MIN_MEM_SIZE;
 	  }
 	  if (eq (module, p, "HEAP")) {
@@ -453,9 +481,20 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
       else if (eq (module, p, "REDuctions")) {
 	module->options.reductions = A_TRUE;
       }
-/* GNUDIAGNOSTIC gives GNU style diagnostics iso VMS style. */
+/* A68CDIAGNOSTIC gives A68C style diagnostics. */
+      else if (eq (module, p, "A68CDiagnostics")) {
+	a68c_diags = A_TRUE;
+	gnu_diags = A_FALSE;
+      }
+/* GNUDIAGNOSTIC gives GNU style diagnostics. */
       else if (eq (module, p, "GNUDiagnostics")) {
 	gnu_diags = A_TRUE;
+	a68c_diags = A_FALSE;
+      }
+/* VMSDIAGNOSTIC gives VMS style diagnostics. */
+      else if (eq (module, p, "VMSDiagnostics")) {
+	a68c_diags = A_FALSE;
+	gnu_diags = A_FALSE;
       }
 /* QUOTESTROPPING sets stropping to quote stropping. */
       else if (eq (module, p, "QUOTEstropping")) {
@@ -473,19 +512,32 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
       else if (eq (module, p, "RUN")) {
 	module->options.run = A_TRUE;
       }
-/* REGRESSION is an option that set preferences when running the Algol68G test suite. */
+/* REGRESSION is an option that sets preferences when running the Algol68G test suite. */
       else if (eq (module, p, "REGRESSION")) {
 	module->options.regression_test = A_TRUE;
 	gnu_diags = A_FALSE;
-	module->options.time_limit = 120;
+	module->options.time_limit = 90;
       }
 /* NOWARNINGS switches warnings off. */
       else if (eq (module, p, "NOWarnings")) {
-	module->options.no_warnings = A_TRUE;
+	no_warnings = A_TRUE;
       }
 /* WARNINGS switches warnings on. */
       else if (eq (module, p, "Warnings")) {
-	module->options.no_warnings = A_FALSE;
+	no_warnings = A_FALSE;
+      }
+/* NOPORTCHECK switches portcheck off. */
+      else if (eq (module, p, "NOPORTcheck")) {
+	module->options.portcheck = A_FALSE;
+      }
+/* PORTCHECK switches portcheck on. */
+      else if (eq (module, p, "PORTcheck")) {
+	module->options.portcheck = A_TRUE;
+      }
+/* PEDANTIC switches portcheck and warnings on. */
+      else if (eq (module, p, "PEDANTIC")) {
+	module->options.portcheck = A_TRUE;
+	no_warnings = A_FALSE;
       }
 /* PRAGMATS and NOPRAGMATS switch on/off pragmat processing. */
       else if (eq (module, p, "PRagmats")) {
@@ -575,8 +627,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	BOOL_T error = A_FALSE;
 	int k = fetch_integral (p, &i, &error);
 	if (error || errno > 0) {
-	  sprintf (edit_line, "syntax error in option `%s'", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	} else if (k > 1) {
 	  if (int_to_mp_digits (k) > long_mp_digits ()) {
 	    set_longlong_mp_digits (int_to_mp_digits (k));
@@ -585,12 +636,10 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	    while (int_to_mp_digits (k) <= long_mp_digits ()) {
 	      k++;
 	    }
-	    sprintf (edit_line, "value in option `%s' must exceed %d", i->str, long_mp_digits ());
-	    scan_error (i->line, edit_line);
+	    option_error (start_l, start_c, NULL);
 	  }
 	} else {
-	  sprintf (edit_line, "syntax error in option `%s'", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	}
       }
 /* BREAK and NOBREAK switch on/off tracing of the running program. */
@@ -611,18 +660,15 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 	BOOL_T error = A_FALSE;
 	int k = fetch_integral (p, &i, &error);
 	if (error || errno > 0) {
-	  sprintf (edit_line, "syntax error in option `%s'", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	} else if (k < 1) {
-	  sprintf (edit_line, "syntax error in option `%s'", i->str);
-	  scan_error (i->line, edit_line);
+	  option_error (start_l, start_c, NULL);
 	} else {
 	  module->options.time_limit = k;
 	}
       } else {
 /* Unrecognised. */
-	sprintf (edit_line, "unrecognised option `%s'", i->str);
-	scan_error (i->line, edit_line);
+	option_unrecognised (start_l, start_c);
       }
     }
 /* Go processing next item, if present. */
@@ -676,18 +722,26 @@ void default_options (MODULE_T * module)
   module->options.verbose = A_FALSE;
   module->options.version = A_FALSE;
   module->options.cross_reference = A_FALSE;
-  module->options.no_warnings = A_TRUE;
   module->options.unused = A_FALSE;
   module->options.pragmat_sema = A_TRUE;
   module->options.trace = A_FALSE;
   module->options.regression_test = A_FALSE;
-  module->options.nodemask = ASSERT_MASK;
+  module->options.nodemask = ASSERT_MASK | SOURCE_MASK;
   module->options.time_limit = 0;
   module->options.stropping = UPPER_STROPPING;
   module->options.brackets = A_FALSE;
   module->options.reductions = A_FALSE;
   module->options.run = A_FALSE;
+  module->options.portcheck = A_FALSE;
+#if defined WIN32_VERSION || defined PRE_MACOS_X_VERSION || defined OS2_VERSION
+  a68c_diags = A_FALSE;
+  gnu_diags = A_TRUE;
+  no_warnings = A_TRUE;
+#else
+  a68c_diags = A_TRUE;
   gnu_diags = A_FALSE;
+  no_warnings = A_TRUE;
+#endif
 }
 
 /*!
@@ -698,7 +752,7 @@ void default_options (MODULE_T * module)
 void read_rc_options (MODULE_T * module)
 {
   FILE *f;
-  char *name = (char *) get_heap_space (1 + strlen (A68G_NAME) + strlen (".rc"));
+  char *name = (char *) get_heap_space (2 + strlen (A68G_NAME) + strlen ("rc"));
   strcpy (name, ".");
   strcat (name, A68G_NAME);
   strcat (name, "rc");
@@ -720,6 +774,22 @@ void read_rc_options (MODULE_T * module)
 }
 
 /*!
+\brief read options from A68G_OPTIONS
+\param module
+**/
+
+void read_env_options (MODULE_T * module)
+{
+#ifdef HAVE_UNIX
+  if (getenv ("A68G_OPTIONS") != NULL) {
+    isolate_options (module, getenv ("A68G_OPTIONS"), NULL);
+    set_options (module, module->options.list, A_FALSE);
+    errno = 0;
+  }
+#endif
+}
+
+/*!
 \brief tokenise string 'p' that holds options
 \param module
 \param p
@@ -732,7 +802,7 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 /* 'q' points at first significant char in item .*/
   while (p[0] != '\0') {
 /* Skip white space ... */
-    while (p[0] == ' ' && p[0] != '\0') {
+    while ((p[0] == ' ' || p[0] == '\t' || p[0] == ',') && p[0] != '\0') {
       p++;
     }
 /* ... then tokenise an item. */
@@ -749,11 +819,10 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 	  p[0] = '\0';		/* p[0] was delimiter. */
 	  p++;
 	} else {
-	  scan_error (line, "unterminated string in option");
+	  scan_error (line, NULL, ERROR_UNTERMINATED_STRING);
 	}
-      } else
+      } else {
 /* Item is not a delimited string. */
-      {
 	q = p;
 /* Tokenise symbol and gather it in the option list for later processing.
    Skip '='s, we accept if someone writes -prec=60 -heap=8192. */
@@ -761,7 +830,7 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 	  p++;
 	} else {
 	  /* Skip item. */
-	  while (p[0] != ' ' && p[0] != '\0' && p[0] != '=') {
+	  while (p[0] != ' ' && p[0] != '\0' && p[0] != '=' && p[0] != ',') {
 	    p++;
 	  }
 	}

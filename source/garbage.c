@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -87,7 +87,6 @@ void genie_preemptive_sweep_heap (NODE_T * p)
 }
 
 /*!
-/*!
 \brief INT collections
 \param p
 **/
@@ -140,26 +139,24 @@ void genie_init_heap (NODE_T * p, MODULE_T * module)
   int k, max;
   (void) p;
   if (heap_segment == NULL) {
-    diagnostic (A_RUNTIME_ERROR, module->top_node, OUT_OF_CORE);
+    diagnostic_node (A_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
     exit_genie (module->top_node, 1);
   }
   if (handle_segment == NULL) {
-    diagnostic (A_RUNTIME_ERROR, module->top_node, OUT_OF_CORE);
+    diagnostic_node (A_RUNTIME_ERROR, module->top_node, ERROR_OUT_OF_CORE);
     exit_genie (module->top_node, 1);
   }
   block_heap_compacter = 0;
   garbage_seconds = 0;
   SET_MP_ZERO (garbage_total_freed, LONG_MP_DIGITS);
   garbage_collects = 0;
-  if (fixed_heap_pointer >= heap_size) {
-    low_core_alert ();
-  }
+  ABNORMAL_END (fixed_heap_pointer >= heap_size, ERROR_OUT_OF_CORE, NULL);
   heap_pointer = fixed_heap_pointer;
 /* Assign handle space. */
   z = (A68_HANDLE *) handle_segment;
   free_handles = z;
   busy_handles = NULL;
-  max = (int) handle_pool_size / SIZE_OF (A68_HANDLE);
+  max = (int) handle_pool_size / sizeof (A68_HANDLE);
   free_handle_count = max;
   max_handle_count = max;
   for (k = 0; k < max; k++) {
@@ -382,10 +379,11 @@ static void defragment_heap ()
     ;
   }
   for (; z != NULL; z = PREVIOUS (z)) {
-    MOVE (&heap_segment[heap_pointer], HEAP_ADDRESS (z->offset), (unsigned) z->size);
+    MOVE (HEAP_ADDRESS (heap_pointer), HEAP_ADDRESS (z->offset), (unsigned) z->size);
     z->status &= ~COLOUR_MASK;
     z->offset = heap_pointer;
-    heap_pointer += z->size;
+    heap_pointer += (z->size);
+    ABNORMAL_END (heap_pointer % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
   }
 }
 
@@ -423,7 +421,7 @@ void sweep_heap (NODE_T * p, ADDR_T fp)
 #if defined CLK_TCK
   } else {
 /* Add average value in case of slow clock. */
-    garbage_seconds += 0.5 / CLK_TCK;
+    garbage_seconds += ((1.0 / CLK_TCK) / 2.0);
 #endif
   }
 }
@@ -460,7 +458,7 @@ static A68_HANDLE *give_handle (NODE_T * p, MOID_T * a68m)
     if (free_handles != NULL) {
       return (give_handle (p, a68m));
     } else {
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_CORE);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
   }
@@ -478,7 +476,7 @@ static A68_HANDLE *give_handle (NODE_T * p, MOID_T * a68m)
 A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
 {
 /* Align. */
-  ABNORMAL_END (size < 0, INVALID_SIZE, NULL);
+  ABNORMAL_END (size < 0, ERROR_INVALID_SIZE, NULL);
   size = ALIGN (size);
 /* Now give it. */
   if (heap_available () >= size) {
@@ -496,6 +494,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
     z.offset = 0;
     z.scope = PRIMAL_SCOPE;
     z.handle = x;
+    ABNORMAL_END (((long) ADDRESS (&z)) % ALIGNMENT != 0, ERROR_ALIGNMENT, NULL);
     return (z);
   } else {
 /* No heap space. First sweep the heap. */
@@ -504,7 +503,7 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
       return (heap_generator (p, mode, size));
     } else {
 /* Still no heap space. We have to ABNORMAL_END. */
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_CORE);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
       exit_genie (p, A_RUNTIME_ERROR);
       return (nil_ref);
     }

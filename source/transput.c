@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -135,7 +135,7 @@ int get_unblocked_transput_buffer (NODE_T * p)
     }
   }
 /* Oops! */
-  diagnostic (A_RUNTIME_ERROR, p, "too many open files");
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_TOO_MANY_OPEN_FILES);
   exit_genie (p, A_RUNTIME_ERROR);
   return (-1);
 }
@@ -415,8 +415,9 @@ void genie_write_string_from_stack (NODE_T * p, A68_REF ref_file)
 char *stack_string (NODE_T * p, int size)
 {
   char *new_str = (char *) STACK_TOP;
-  if ((stack_pointer += ALIGN (size)) > expr_stack_limit) {
-    diagnostic (A_RUNTIME_ERROR, p, "imminent expression stack overflow");
+  INCREMENT_STACK_POINTER (p, size);
+  if (stack_pointer > expr_stack_limit) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   FILL (new_str, NULL_CHAR, size);
@@ -682,27 +683,48 @@ void set_default_mended_procedures (A68_FILE * f)
 \return
 **/
 
-static void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, BOOL_T rm, BOOL_T wm, BOOL_T cm)
+static void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, BOOL_T rm, BOOL_T wm, BOOL_T cm, char *env)
 {
   A68_FILE *f;
+  char *filename = (env == NULL ? NULL : getenv (env));
   *ref_file = heap_generator (p, MODE (REF_FILE), SIZE_OF (A68_FILE));
   PROTECT_SWEEP_HANDLE (ref_file);
   f = (A68_FILE *) ADDRESS (ref_file);
   f->status = INITIALISED_MASK;
-  f->identification = nil_ref;
   f->terminator = nil_ref;
   f->channel = c;
+#ifdef HAVE_UNIX
+  if (filename != NULL && strlen (filename) > 0) {
+    f->identification = heap_generator (p, MODE (C_STRING), 1 + strlen (filename));
+    PROTECT_SWEEP_HANDLE (&(f->identification));
+    strcpy ((char *) ADDRESS (&(f->identification)), filename);
+    f->fd = -1;
+    f->read_mood = A_FALSE;
+    f->write_mood = A_FALSE;
+    f->char_mood = A_FALSE;
+    f->draw_mood = A_FALSE;
+  } else {
+    f->identification = nil_ref;
+    f->fd = s;
+    f->read_mood = rm;
+    f->write_mood = wm;
+    f->char_mood = cm;
+    f->draw_mood = A_FALSE;
+  }
+#else
+  f->identification = nil_ref;
   f->fd = s;
+  f->read_mood = rm;
+  f->write_mood = wm;
+  f->char_mood = cm;
+  f->draw_mood = A_FALSE;
+#endif
   f->transput_buffer = get_unblocked_transput_buffer (p);
   reset_transput_buffer (f->transput_buffer);
   f->eof = A_FALSE;
   f->tmp_file = A_FALSE;
   f->opened = A_TRUE;
   f->open_exclusive = A_FALSE;
-  f->read_mood = rm;
-  f->write_mood = wm;
-  f->char_mood = cm;
-  f->draw_mood = A_FALSE;
   f->format = nil_format;
   f->string = nil_ref;
   f->strpos = 0;
@@ -730,10 +752,10 @@ void genie_init_transput (NODE_T * p)
   init_channel (&stand_draw_channel, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_TRUE);
 #endif
 /* Files. */
-  init_file (p, &stand_in, stand_in_channel, STDIN_FILENO, A_TRUE, A_FALSE, A_TRUE);
-  init_file (p, &stand_out, stand_out_channel, STDOUT_FILENO, A_FALSE, A_TRUE, A_TRUE);
-  init_file (p, &stand_back, stand_back_channel, -1, A_FALSE, A_FALSE, A_FALSE);
-  init_file (p, &stand_error, stand_error_channel, STDERR_FILENO, A_FALSE, A_TRUE, A_TRUE);
+  init_file (p, &stand_in, stand_in_channel, STDIN_FILENO, A_TRUE, A_FALSE, A_TRUE, "A68G_STANDIN");
+  init_file (p, &stand_out, stand_out_channel, STDOUT_FILENO, A_FALSE, A_TRUE, A_TRUE, "A68G_STANDOUT");
+  init_file (p, &stand_back, stand_back_channel, -1, A_FALSE, A_FALSE, A_FALSE, NULL);
+  init_file (p, &stand_error, stand_error_channel, STDERR_FILENO, A_FALSE, A_TRUE, A_TRUE, "A68G_STANDERROR");
 }
 
 /*!
@@ -986,7 +1008,7 @@ void genie_establish (NODE_T * p)
   file->draw_mood = A_FALSE;
   file->tmp_file = A_FALSE;
   if (!file->channel.put) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "putting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   size = a68_string_size (p, ref_iden);
@@ -1062,6 +1084,13 @@ void genie_associate (NODE_T * p)
   TEST_NIL (p, ref_string, MODE (REF_STRING));
   POP_REF (p, &ref_file);
   TEST_NIL (p, ref_file, MODE (REF_FILE));
+  if (ref_file.segment == heap_segment && ref_string.segment != heap_segment) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+    exit_genie (p, A_RUNTIME_ERROR);
+  } else if (ref_file.segment == frame_segment && ref_string.segment == frame_segment && ref_string.scope > ref_file.scope) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
   file = FILE_DEREF (&ref_file);
   file->status = INITIALISED_MASK;
   file->channel = associate_channel;
@@ -1071,6 +1100,7 @@ void genie_associate (NODE_T * p)
   file->write_mood = A_FALSE;
   file->char_mood = A_FALSE;
   file->draw_mood = A_FALSE;
+  file->tmp_file = A_FALSE;
   if (((file->identification.status & INITIALISED_MASK) != 0) && !IS_NIL (file->identification)) {
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
   }
@@ -1113,7 +1143,7 @@ void genie_close (NODE_T * p)
   }
 #endif
   if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while closing file");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_CLOSE);
     exit_genie (p, A_RUNTIME_ERROR);
   } else {
     file->fd = -1;
@@ -1128,7 +1158,7 @@ void genie_close (NODE_T * p)
       TEST_INIT (p, file->identification, MODE (ROWS));
       filename = (char *) ADDRESS (&(file->identification));
       if (remove (filename) != 0) {
-	diagnostic (A_RUNTIME_ERROR, p, "error while scratching file");
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
       UNPROTECT_SWEEP_HANDLE (&(file->identification));
@@ -1167,7 +1197,7 @@ void genie_lock (NODE_T * p)
   ABNORMAL_END (errno != 0, "cannot lock file", NULL);
 #endif
   if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while locking file");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_LOCK);
     exit_genie (p, A_RUNTIME_ERROR);
   } else {
     file->fd = -1;
@@ -1182,7 +1212,7 @@ void genie_lock (NODE_T * p)
       TEST_INIT (p, file->identification, MODE (ROWS));
       filename = (char *) ADDRESS (&(file->identification));
       if (remove (filename) != 0) {
-	diagnostic (A_RUNTIME_ERROR, p, "error while scratching file");
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
       UNPROTECT_SWEEP_HANDLE (&(file->identification));
@@ -1216,7 +1246,7 @@ void genie_erase (NODE_T * p)
   }
 #endif
   if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while scratching file");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
     exit_genie (p, A_RUNTIME_ERROR);
   } else {
     file->fd = -1;
@@ -1230,7 +1260,7 @@ void genie_erase (NODE_T * p)
     TEST_INIT (p, file->identification, MODE (ROWS));
     filename = (char *) ADDRESS (&(file->identification));
     if (remove (filename) != 0) {
-      diagnostic (A_RUNTIME_ERROR, p, "error while scratching file");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
@@ -1252,13 +1282,13 @@ void genie_reset (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!IS_NIL (file->string)) {
     file->strpos = 1;
   } else if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic (A_RUNTIME_ERROR, p, "error while resetting file");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_RESET);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   file->read_mood = A_FALSE;
@@ -1445,7 +1475,7 @@ void end_of_file_error (NODE_T * p, A68_REF ref_file)
   on_event_handler (p, FILE_DEREF (&ref_file)->file_end_mended, ref_file);
   POP_BOOL (p, &z);
   if (z.value == A_FALSE) {
-    diagnostic (A_RUNTIME_ERROR, p, "attempt to read past end of file");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_ENDED);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -1473,7 +1503,7 @@ void open_error (NODE_T * p, A68_REF ref_file, char *mode)
     } else {
       filename = "(NIL filename)";
     }
-    diagnostic (A_RUNTIME_ERROR, p, "cannot open Z for Y", filename, mode);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_CANNOT_OPEN_FOR, filename, mode);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -1495,7 +1525,7 @@ void value_error (NODE_T * p, MOID_T * m, A68_REF ref_file)
     on_event_handler (p, f->value_error_mended, ref_file);
     POP_BOOL (p, &z);
     if (z.value == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, "error transputting M value", m);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_TRANSPUT, m);
       exit_genie (p, A_RUNTIME_ERROR);
     }
   }
@@ -1514,7 +1544,7 @@ void transput_error (NODE_T * p, A68_REF ref_file, MOID_T * m)
   on_event_handler (p, FILE_DEREF (&ref_file)->transput_error_mended, ref_file);
   POP_BOOL (p, &z);
   if (z.value == A_FALSE) {
-    diagnostic (A_RUNTIME_ERROR, p, "cannot transput M", m);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_TRANSPUT, m);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -1592,11 +1622,11 @@ void genie_new_line (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->write_mood) {
@@ -1612,7 +1642,7 @@ void genie_new_line (NODE_T * p)
       go_on = (ch != '\n') && (ch != EOF) && !file->eof;
     }
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, "file has undetermined mood");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -1632,11 +1662,11 @@ void genie_new_page (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->write_mood) {
@@ -1652,7 +1682,7 @@ void genie_new_page (NODE_T * p)
       go_on = (ch != '\f') && (ch != EOF) && !file->eof;
     }
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, "file has undetermined mood");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -1671,11 +1701,11 @@ void genie_space (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->write_mood) {
@@ -1685,7 +1715,7 @@ void genie_space (NODE_T * p)
       (void) char_scanner (file);
     }
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, "file has undetermined mood");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -1965,7 +1995,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
 #undef TMP_SIZE
 #undef TRIALS
     if (good_file == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, "cannot create unique temporary file name");
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NO_TEMP);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     file->identification = heap_generator (p, MODE (C_STRING), 1 + strlen (filename));
@@ -2170,7 +2200,7 @@ static unsigned bits_to_int (NODE_T * p, char *a)
   base = a68g_strtoul (a, &radix, 10);
   if (radix != NULL && TO_UPPER (radix[0]) == RADIX_CHAR && errno == 0) {
     if (base < 2 || base > 16) {
-      diagnostic (A_RUNTIME_ERROR, p, "radix D must be 2 upto 16", base);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, base);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     bits = a68g_strtoul (&(radix[1]), &end, base);
@@ -2178,7 +2208,7 @@ static unsigned bits_to_int (NODE_T * p, char *a)
       return (bits);
     }
   }
-  diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (BITS));
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (BITS));
   exit_genie (p, A_RUNTIME_ERROR);
   return (0);
 }
@@ -2211,7 +2241,7 @@ static void long_bits_to_long_int (NODE_T * p, MP_DIGIT_T * z, char *a, MOID_T *
     SET_MP_ZERO (z, digits);
     set_mp_short (w, (MP_DIGIT_T) 1, 0, digits);
     if (base < 2 || base > 16) {
-      diagnostic (A_RUNTIME_ERROR, p, "radix D must be 2 upto 16", base);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, base);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     while ((--q) != radix) {
@@ -2220,7 +2250,7 @@ static void long_bits_to_long_int (NODE_T * p, MP_DIGIT_T * z, char *a, MOID_T *
 	mul_mp_digit (p, v, w, (MP_DIGIT_T) digit, digits);
 	add_mp (p, z, z, v, digits);
       } else {
-	diagnostic (A_RUNTIME_ERROR, p, "digit D is not in [0, D>", digit, base);
+	diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
 	exit_genie (p, A_RUNTIME_ERROR);
       }
       mul_mp_digit (p, w, w, (MP_DIGIT_T) base, digits);
@@ -2228,7 +2258,7 @@ static void long_bits_to_long_int (NODE_T * p, MP_DIGIT_T * z, char *a, MOID_T *
     check_long_bits_value (p, z, m);
     stack_pointer = pop_sp;
   } else {
-    diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -2471,7 +2501,7 @@ void genie_read_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_
   } else if (WHETHER (mode, UNION_SYMBOL)) {
     A68_POINTER *z = (A68_POINTER *) item;
     if (!(z->status | INITIALISED_MASK) || z->value == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, EMPTY_VALUE_ERROR, mode);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     genie_read_standard (p, (MOID_T *) (z->value), &item[SIZE_OF (A68_POINTER)], ref_file);
@@ -2536,19 +2566,19 @@ void genie_read_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "write");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "getting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
@@ -2565,7 +2595,7 @@ void genie_read_file (NODE_T * p)
     file->char_mood = A_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "binary");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Read. */
@@ -2787,19 +2817,19 @@ void genie_write_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "read");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "putting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
@@ -2816,7 +2846,7 @@ void genie_write_file (NODE_T * p)
     file->char_mood = A_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "binary");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   base_address = ADDRESS (&(arr->array));
@@ -2889,7 +2919,7 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
   } else if (WHETHER (mode, UNION_SYMBOL)) {
     A68_POINTER *z = (A68_POINTER *) item;
     if (!(z->status | INITIALISED_MASK) || z->value == NULL) {
-      diagnostic (A_RUNTIME_ERROR, p, EMPTY_VALUE_ERROR, mode);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
       exit_genie (p, A_RUNTIME_ERROR);
     }
     genie_read_bin_standard (p, (MOID_T *) (z->value), &item[SIZE_OF (A68_POINTER)], ref_file);
@@ -2922,6 +2952,84 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
 }
 
 /*!
+\brief PROC ([] SIMPLIN) VOID read bin
+\param p position in syntax tree, should not be NULL
+\return
+**/
+
+void genie_read_bin (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  A68_REF row;
+  A68_ARRAY *arr;
+  A68_TUPLE *tup;
+  BYTE_T *base_address;
+  int elems, k, elem_index;
+  POP_REF (p, &row);
+  TEST_INIT (p, row, MODE (ROW_SIMPLIN));
+  TEST_NIL (p, row, MODE (ROW_SIMPLIN));
+  GET_DESCRIPTOR (arr, tup, &row);
+  elems = ROW_SIZE (tup);
+  ref_file = stand_back;
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (!file->opened) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (file->draw_mood) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (file->write_mood) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!file->channel.get) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!file->channel.bin) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary getting");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!file->read_mood && !file->write_mood) {
+    if ((file->fd = open_physical_file (p, ref_file, A_READ_ACCESS | O_BINARY, 0)) == -1) {
+      open_error (p, ref_file, "binary getting");
+    }
+    file->draw_mood = A_FALSE;
+    file->read_mood = A_TRUE;
+    file->write_mood = A_FALSE;
+    file->char_mood = A_FALSE;
+  }
+  if (file->char_mood) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+/* Read. */
+  elem_index = 0;
+  base_address = ADDRESS (&(arr->array));
+  for (k = 0; k < elems; k++) {
+    A68_POINTER *z = (A68_POINTER *) & base_address[elem_index];
+    MOID_T *mode = (MOID_T *) (z->value);
+    BYTE_T *item = (BYTE_T *) & base_address[elem_index + SIZE_OF (A68_POINTER)];
+    if (mode == MODE (PROC_REF_FILE_VOID)) {
+      genie_call_proc_ref_file_void (p, ref_file, *(A68_PROCEDURE *) item);
+    } else if (mode == MODE (FORMAT)) {
+      /* ignore. */ ;
+    } else {
+      if (file->eof) {
+	end_of_file_error (p, ref_file);
+      }
+      TEST_NIL (p, *(A68_REF *) item, mode);
+      genie_read_bin_standard (p, SUB (mode), ADDRESS ((A68_REF *) item), ref_file);
+    }
+    elem_index += MOID_SIZE (MODE (SIMPLIN));
+  }
+}
+
+/*!
 \brief PROC (REF FILE, [] SIMPLIN) VOID get bin
 \param p position in syntax tree, should not be NULL
 \return
@@ -2947,23 +3055,23 @@ void genie_read_bin_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "write");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "getting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.bin) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "binary getting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary getting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
@@ -2976,7 +3084,7 @@ void genie_read_bin_file (NODE_T * p)
     file->char_mood = A_FALSE;
   }
   if (file->char_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "text");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Read. */
@@ -3069,6 +3177,77 @@ static void genie_write_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, 
 }
 
 /*!
+\brief PROC ([] SIMPLOUT) VOID write bin, print bin
+\param p position in syntax tree, should not be NULL
+\return
+**/
+
+void genie_write_bin (NODE_T * p)
+{
+  A68_REF ref_file, row;
+  A68_FILE *file;
+  A68_ARRAY *arr;
+  A68_TUPLE *tup;
+  BYTE_T *base_address;
+  int elems, k, elem_index;
+  POP_REF (p, &row);
+  TEST_INIT (p, row, MODE (ROW_SIMPLOUT));
+  TEST_NIL (p, row, MODE (ROW_SIMPLOUT));
+  GET_DESCRIPTOR (arr, tup, &row);
+  elems = ROW_SIZE (tup);
+  ref_file = stand_back;
+  file = FILE_DEREF (&ref_file);
+  TEST_INIT (p, *file, MODE (FILE));
+  if (!file->opened) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (file->draw_mood) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (file->read_mood) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!file->channel.put) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!file->channel.bin) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary putting");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  if (!file->read_mood && !file->write_mood) {
+    if ((file->fd = open_physical_file (p, ref_file, A_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == -1) {
+      open_error (p, ref_file, "binary putting");
+    }
+    file->draw_mood = A_FALSE;
+    file->read_mood = A_FALSE;
+    file->write_mood = A_TRUE;
+    file->char_mood = A_FALSE;
+  }
+  if (file->char_mood) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  base_address = ADDRESS (&arr->array);
+  elem_index = 0;
+  for (k = 0; k < elems; k++) {
+    A68_POINTER *z = (A68_POINTER *) & base_address[elem_index];
+    MOID_T *mode = (MOID_T *) (z->value);
+    BYTE_T *item = (BYTE_T *) & base_address[elem_index + SIZE_OF (A68_POINTER)];
+    if (mode == MODE (PROC_REF_FILE_VOID)) {
+      genie_call_proc_ref_file_void (p, ref_file, *(A68_PROCEDURE *) item);
+    } else if (mode == MODE (FORMAT)) {
+      /* ignore. */ ;
+    } else {
+      genie_write_bin_standard (p, mode, item, ref_file);
+    }
+    elem_index += MOID_SIZE (MODE (SIMPLOUT));
+  }
+}
+/*!
 \brief PROC (REF FILE, [] SIMPLOUT) VOID put bin
 \param p position in syntax tree, should not be NULL
 \return
@@ -3093,23 +3272,23 @@ void genie_write_bin_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "read");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "putting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.bin) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "binary putting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary putting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
@@ -3122,7 +3301,7 @@ void genie_write_bin_file (NODE_T * p)
     file->char_mood = A_FALSE;
   }
   if (file->char_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "text");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   base_address = ADDRESS (&arr->array);
@@ -4400,7 +4579,7 @@ void format_error (NODE_T * p, A68_REF ref_file)
   on_event_handler (p, f->format_error_mended, ref_file);
   POP_BOOL (p, &z);
   if (z.value == A_FALSE) {
-    diagnostic (A_RUNTIME_ERROR, p, "number of pictures does not match number of arguments to transput");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_PICTURES);
     exit_genie (p, A_RUNTIME_ERROR);
   }
 }
@@ -4502,7 +4681,7 @@ int get_replicator_value (NODE_T * p)
   if (WHETHER (p, STATIC_REPLICATOR)) {
     A68_INT u;
     if (genie_string_to_value_internal (p, MODE (INT), SYMBOL (p), (BYTE_T *) & u) == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (INT));
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (INT));
       exit_genie (p, A_RUNTIME_ERROR);
     }
     z = u.value;
@@ -4617,7 +4796,7 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
 */
   A68_FILE *file = FILE_DEREF (&ref_file);
   if (file->format.body == NULL) {
-    diagnostic (A_RUNTIME_ERROR, p, "patterns exhausted in format");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_EXHAUSTED);
     exit_genie (p, A_RUNTIME_ERROR);
     return (NULL);
   } else {
@@ -4631,7 +4810,7 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
 	}
 	while (z == EMBEDDED_FORMAT && pat == NULL);
 	if (pat == NULL) {
-	  diagnostic (A_RUNTIME_ERROR, p, "patterns exhausted in format");
+	  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_EXHAUSTED);
 	  exit_genie (p, A_RUNTIME_ERROR);
 	}
       }
@@ -4641,7 +4820,7 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
 }
 
 /*!
-\brief diagnostic in case mode does not match picture
+\brief diagnostic_node in case mode does not match picture
 \param p position in syntax tree, should not be NULL
 \param mode
 \param att
@@ -4649,7 +4828,7 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
 
 void pattern_error (NODE_T * p, MOID_T * mode, int att)
 {
-  diagnostic (A_RUNTIME_ERROR, p, "cannot transput M value with A", mode, att);
+  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_CANNOT_TRANSPUT, mode, att);
   exit_genie (p, A_RUNTIME_ERROR);
 }
 
@@ -4879,7 +5058,7 @@ static void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item)
     }
   default:
     {
-      diagnostic (A_RUNTIME_ERROR, p, "1 .. 3 M arguments required", MODE (INT));
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_INTS_REQUIRED, MODE (INT));
       exit_genie (p, A_RUNTIME_ERROR);
       break;
     }
@@ -5597,7 +5776,7 @@ static void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
     count_zd_frames (SUB (p), &width);
     radix = get_replicator_value (SUB (SUB (p)));
     if (radix < 2 || radix > 16) {
-      diagnostic (A_RUNTIME_ERROR, p, "invalid radix D", radix);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
       exit_genie (p, A_RUNTIME_ERROR);
     }
 /* Generate string of correct width. */
@@ -5624,7 +5803,7 @@ static void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
     count_zd_frames (SUB (p), &width);
     radix = get_replicator_value (SUB (SUB (p)));
     if (radix < 2 || radix > 16) {
-      diagnostic (A_RUNTIME_ERROR, p, "invalid radix D", radix);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
       exit_genie (p, A_RUNTIME_ERROR);
     }
 /* Generate string of correct width. */
@@ -6047,19 +6226,19 @@ void genie_write_file_format (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "read");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "putting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
@@ -6076,7 +6255,7 @@ void genie_write_file_format (NODE_T * p)
     file->char_mood = A_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "binary");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Save stack state since formats have frames. */
@@ -6738,7 +6917,7 @@ static void read_bits_pattern (NODE_T * p, MOID_T * m, BYTE_T * item, A68_REF re
   char *z;
   radix = get_replicator_value (SUB (SUB (p)));
   if (radix < 2 || radix > 16) {
-    diagnostic (A_RUNTIME_ERROR, p, "invalid radix D", radix);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   z = get_transput_buffer (INPUT_BUFFER);
@@ -7002,19 +7181,19 @@ void genie_read_file_format (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   TEST_INIT (p, *file, MODE (FILE));
   if (!file->opened) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_NOT_OPEN);
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "draw");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "write");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic (A_RUNTIME_ERROR, p, CHANNEL_DOES_NOT, "getting");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
     exit_genie (p, A_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
@@ -7031,7 +7210,7 @@ void genie_read_file_format (NODE_T * p)
     file->char_mood = A_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic (A_RUNTIME_ERROR, p, FILE_HAS_MOOD, "binary");
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
     exit_genie (p, A_RUNTIME_ERROR);
   }
 /* Save stack state since formats have frames. */

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -176,7 +176,7 @@ static BOOL_T check_initialisation (NODE_T * p, BYTE_T * w, MOID_T * q, BOOL_T *
   }
   if (result == NULL) {
     if (recognised == A_TRUE && initialised == A_FALSE) {
-      diagnostic (A_RUNTIME_ERROR, p, EMPTY_VALUE_ERROR_FROM, q);
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE_FROM, q);
       exit_genie (p, A_RUNTIME_ERROR);
     }
   } else {
@@ -200,7 +200,7 @@ static void print_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
   genie_write_standard (p, mode, item, nil_file);
   if (get_transput_buffer_index (UNFORMATTED_BUFFER) > 0) {
     if (mode == MODE (ROW_CHAR) || mode == MODE (STRING)) {
-      sprintf (output_line, " value is `%s'", get_transput_buffer (UNFORMATTED_BUFFER));
+      sprintf (output_line, " value is \"%s\"", get_transput_buffer (UNFORMATTED_BUFFER));
     } else {
       char *str = get_transput_buffer (UNFORMATTED_BUFFER);
       while (IS_SPACE (str[0])) {
@@ -305,7 +305,7 @@ static void show_item (NODE_T * p, FILE_T f, BYTE_T * item, MOID_T * mode)
     for (; q != NULL; q = NEXT (q)) {
       BYTE_T *elem = &item[q->offset];
       newline (f);
-      sprintf (output_line, "field %s `%s'", moid_to_string (MOID (q), 32), TEXT (q));
+      sprintf (output_line, "field %s \"%s\"", moid_to_string (MOID (q), 32), TEXT (q));
       io_write_string (STDOUT_FILENO, output_line);
       show_item (p, f, elem, MOID (q));
     }
@@ -370,7 +370,7 @@ static void show_frame_items (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * q, int 
     ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + q->offset;
     newline (STDOUT_FILENO);
     if (modif != ANONYMOUS) {
-      sprintf (output_line, "frame[%d] %s `%s'", pos_in_frame_stack, moid_to_string (MOID (q), 32), SYMBOL (NODE (q)));
+      sprintf (output_line, "frame[%d] %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (q), 32), SYMBOL (NODE (q)));
       io_write_string (STDOUT_FILENO, output_line);
     } else {
       switch (PRIO (q)) {
@@ -536,7 +536,7 @@ void tag_search (FILE_T f, NODE_T * p, ADDR_T link, TAG_T * i, char *sym)
     ADDR_T pos_in_frame_stack = link + FRAME_INFO_SIZE + i->offset;
     if (NODE (i) != NULL && strcmp (SYMBOL (NODE (i)), sym) == 0) {
       where (f, NODE (i));
-      sprintf (output_line, "frame[%d] %s `%s'", pos_in_frame_stack, moid_to_string (MOID (i), 32), SYMBOL (NODE (i)));
+      sprintf (output_line, "frame[%d] %s \"%s\"", pos_in_frame_stack, moid_to_string (MOID (i), 32), SYMBOL (NODE (i)));
       io_write_string (STDOUT_FILENO, output_line);
       show_item (p, f, FRAME_ADDRESS (pos_in_frame_stack), MOID (i));
     }
@@ -593,18 +593,18 @@ static void breakpoints (NODE_T * p, BOOL_T set, int num)
 static void genie_help (FILE_T f)
 {
   WRITE ("(Supply sufficient characters for unique recognition)");
-  WRITE ("\nbreakpoint n   set breakpoints on units in line `n'");
+  WRITE ("\nbreakpoint n   set breakpoints on units in line \"n\"");
   WRITE ("\nbreakpoint     clear all breakpoints");
   WRITE ("\ncontinue       continue execution");
-  WRITE ("\nexamine n      write value of symbols named `n' in the call stack");
+  WRITE ("\nexamine n      write value of symbols named \"n\" in the call stack");
   WRITE ("\nframe          write the current call stack frame");
   WRITE ("\nheap           write contents of the heap");
   WRITE ("\nhelp           print brief help text");
   WRITE ("\nht             suppress program output to tty");
   WRITE ("\nhx             terminates the program");
-  WRITE ("\nlist [n]       show `n' lines around the interrupted line (default n=10)");
+  WRITE ("\nlist [n]       show \"n\" lines around the interrupted line (default n=10)");
   WRITE ("\nnext           single step");
-  WRITE ("\nstack [n]      write `n' frames in the call stack frames (default n=3)");
+  WRITE ("\nstack [n]      write \"n\" frames in the call stack frames (default n=3)");
   WRITE ("\nstep           single step");
   WRITE ("\nquit           terminates the program");
   WRITE ("\nresume         continues execution");
@@ -735,7 +735,7 @@ static BOOL_T single_stepper (NODE_T * p, char *cmd)
   } else if (strlen (cmd) == 0) {
     return (A_FALSE);
   } else {
-    io_write_string (STDOUT_FILENO, "? (try `help')");
+    io_write_string (STDOUT_FILENO, "? (try \"help\")");
     return (A_FALSE);
   }
 }

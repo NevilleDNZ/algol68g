@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -33,10 +33,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define REAL_WIDTH (DBL_DIG)
 #define EXP_WIDTH ((int) (1 + log10 ((double) DBL_MAX_10_EXP)))
 
-#define MOID_SIZE(p) ((unsigned) ((p)->size))
-
 #define HEAP_ADDRESS(n) ((BYTE_T *) & (heap_segment[n]))
 #define IS_NIL(p) ((p).offset == 0 && (p).handle == NULL)
+
+#define LHS_MODE(p) (MOID (PACK (MOID (p))))
+#define RHS_MODE(p) (MOID (NEXT (PACK (MOID (p)))))
 
 /* ADDRESS calculates the effective address of fat pointer z. */
 
@@ -50,7 +51,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define TEST_NIL(p, z, m)\
   if (IS_NIL (z)) {\
     genie_check_initialisation (p, (BYTE_T *) &z, m);\
-    diagnostic (A_RUNTIME_ERROR, (p), ACCESSING_NIL_ERROR, (m));\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_ACCESSING_NIL, (m));\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }
 
@@ -58,7 +59,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define TEST_INIT(p, z, m) {\
   if (! (z).status & INITIALISED_MASK) {\
-    diagnostic (A_RUNTIME_ERROR, (p), EMPTY_VALUE_ERROR, (m));\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE, (m));\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }}
 
@@ -89,9 +90,11 @@ struct ACTIVATION
 #define FRAME_CLEAR(m) FILL ((BYTE_T *) FRAME_OFFSET (FRAME_INFO_SIZE), 0, (m))
 #define FRAME_SIZE(fp) (FRAME_INFO_SIZE + FRAME_INCREMENT (fp))
 
-/* STATIC_LINK_FOR_FRAME: determine static link for stack frame.
+/* 
+STATIC_LINK_FOR_FRAME: determine static link for stack frame.
 new_lex_lvl: lexical level of new stack frame.
-returns: static link for stack frame at 'new_lex_lvl'. */
+returns: static link for stack frame at 'new_lex_lvl'. 
+*/
 
 #define STATIC_LINK_FOR_FRAME(dest, new_lex_lvl) {\
   int m_cur_lex_lvl = FRAME_LEXICAL_LEVEL (frame_pointer);\
@@ -129,12 +132,12 @@ returns: static link for stack frame at 'new_lex_lvl'. */
 /* Macros for row-handling. */
 
 #define GET_DESCRIPTOR(a, t, p)\
-  /* ABNORMAL_END (IS_NIL (*p), "NIL descriptor", NULL); */\
+  /* ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL); */\
   a = (A68_ARRAY *) ADDRESS (p);\
   t = (A68_TUPLE *) & (((BYTE_T *) (a)) [SIZE_OF (A68_ARRAY)]);
 
 #define PUT_DESCRIPTOR(a, t, p)\
-  ABNORMAL_END (IS_NIL (*p), "NIL descriptor", NULL);\
+  ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL);\
   *(A68_ARRAY *) ADDRESS (p) = (a);\
   *(A68_TUPLE *) &(((BYTE_T *) (ADDRESS(p))) [SIZE_OF (A68_ARRAY)]) = (t);
 
@@ -150,7 +153,7 @@ returns: static link for stack frame at 'new_lex_lvl'. */
   double m_t = p->info->module->options.time_limit;\
   BOOL_T m_trace_mood = (MASK (p) & TRACE_MASK) != 0;\
   if (m_t > 0 && (seconds () - cputime_0) > m_t) {\
-    diagnostic (A_RUNTIME_ERROR, (NODE_T *) p, "time limit exceeded");\
+    diagnostic_node (A_RUNTIME_ERROR, (NODE_T *) p, ERROR_TIME_LIMIT_EXCEEDED);\
     exit_genie ((NODE_T *) p, A_RUNTIME_ERROR);\
   } else if (sys_request_flag) {\
     sys_request_flag = A_FALSE;\
@@ -169,10 +172,10 @@ returns: static link for stack frame at 'new_lex_lvl'. */
 #define STACK_OFFSET(n) (STACK_ADDRESS (stack_pointer + (n)))
 #define STACK_TOP (STACK_ADDRESS (stack_pointer))
 
-#define INCREMENT_STACK_POINTER(err, i) {stack_pointer += (i); (void) (err);}
+#define INCREMENT_STACK_POINTER(err, i) {stack_pointer += ALIGN (i); (void) (err);}
 
 #define DECREMENT_STACK_POINTER(err, i) {\
-  stack_pointer -= (i);\
+  stack_pointer -= ALIGN (i);\
   (void) (err);\
 }
 
@@ -350,16 +353,17 @@ extern int block_heap_compacter;
 
 #define TEST_INT_ADDITION(p, i, j)\
   if (((i ^ j) & MIN_INT) == 0 && ABS (i) > INT_MAX - ABS (j)) {\
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT));\
+    errno = ERANGE;\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
     exit_genie (p, A_RUNTIME_ERROR);\
     }
 
 #ifdef HAVE_IEEE_754
 #define TEST_REAL_REPRESENTATION(p, u)\
   if (isnan (u) || isinf (u)) {\
-      errno = ERANGE;\
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (REAL), NULL);\
-      exit_genie (p, A_RUNTIME_ERROR);\
+    errno = ERANGE;\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (REAL), NULL);\
+    exit_genie (p, A_RUNTIME_ERROR);\
   }
 #else
 #define TEST_REAL_REPRESENTATION(p, u) {;}
@@ -368,9 +372,9 @@ extern int block_heap_compacter;
 #ifdef HAVE_IEEE_754
 #define TEST_COMPLEX_REPRESENTATION(p, u, v)\
   if (isnan (u) || isinf (u) || isnan (v) || isinf (v)) {\
-      errno = ERANGE;\
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (COMPLEX), NULL);\
-      exit_genie (p, A_RUNTIME_ERROR);\
+    errno = ERANGE;\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (COMPLEX), NULL);\
+    exit_genie (p, A_RUNTIME_ERROR);\
   }
 #else
 #define TEST_COMPLEX_REPRESENTATION(p, u, v) {;}
@@ -381,7 +385,7 @@ extern int block_heap_compacter;
 #define TEST_TIMES_OVERFLOW_INT(p, u, v)\
   if ((double) ABS (u) * (double) ABS (v) > (double) MAX_INT) {\
     errno = ERANGE;\
-    diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (INT), NULL);\
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (INT), NULL);\
     exit_genie (p, A_RUNTIME_ERROR);\
     }\
 
@@ -392,7 +396,7 @@ extern int block_heap_compacter;
   if (v != 0.0) {\
     if ((u >= 0 ? u : -u) > DBL_MAX / (v >= 0 ? v : -v)) {\
       errno = ERANGE;\
-      diagnostic (A_RUNTIME_ERROR, p, OUT_OF_BOUNDS, MODE (REAL), NULL);\
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_MATH, MODE (REAL), NULL);\
       exit_genie (p, A_RUNTIME_ERROR);\
       }\
   }
@@ -413,18 +417,18 @@ still is sufficient overhead to make it to the next check.
   BYTE_T stack_offset;\
   if (stack_size > 0 && SYSTEM_STACK_USED > stack_limit) {\
     if ((p) == NULL) {\
-      ABNORMAL_END (A_TRUE, TOO_COMPLEX, "imminent system stack overflow");\
+      ABNORMAL_END (A_TRUE, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
     } else {\
-      diagnostic (A_RUNTIME_ERROR, (p), "imminent system stack overflow");\
+      diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
       exit_genie ((p), A_RUNTIME_ERROR);\
     }\
   }\
   if ((p) != NULL && stack_pointer > expr_stack_limit) {\
-    diagnostic (A_RUNTIME_ERROR, (p), "imminent expression stack overflow");\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }\
   if ((p) != NULL && frame_pointer > frame_stack_limit) { \
-    diagnostic (A_RUNTIME_ERROR, (p), "imminent frame stack overflow");\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }}
 #elif defined HAVE_SYSTEM_STACK_CHECK && defined HAVE_UNIX
@@ -432,31 +436,31 @@ still is sufficient overhead to make it to the next check.
   BYTE_T stack_offset;\
   if (stack_size > 0 && ABS ((int) system_stack_offset - (int) &stack_offset) > stack_limit) {\
     if ((p) == NULL) {\
-      ABNORMAL_END (A_TRUE, TOO_COMPLEX, "imminent system stack overflow");\
+      ABNORMAL_END (A_TRUE, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
     } else {\
-      diagnostic (A_RUNTIME_ERROR, (p), "imminent system stack overflow");\
+      diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
       exit_genie ((p), A_RUNTIME_ERROR);\
     }\
   }\
   if ((p) != NULL && stack_pointer > expr_stack_limit) {\
-    diagnostic (A_RUNTIME_ERROR, (p), "imminent expression stack overflow");\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }\
   if ((p) != NULL && frame_pointer > frame_stack_limit) { \
-    diagnostic (A_RUNTIME_ERROR, (p), "imminent frame stack overflow");\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_STACK_OVERFLOW);\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }}
 #elif defined HAVE_SYSTEM_STACK_CHECK && defined PRE_MACOS_X_VERSION
 #define LOW_STACK_ALERT(p) {\
-  ABNORMAL_END (stack_size > 0 && StackSpace () < stack_limit, TOO_COMPLEX, "imminent system stack overflow");\
-  ABNORMAL_END (stack_pointer > expr_stack_limit, TOO_COMPLEX, "imminent expression stack overflow");\
-  ABNORMAL_END (frame_pointer > frame_stack_limit, TOO_COMPLEX, "imminent frame stack overflow");\
+  ABNORMAL_END (stack_size > 0 && StackSpace () < stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
+  ABNORMAL_END (stack_pointer > expr_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
+  ABNORMAL_END (frame_pointer > frame_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
   }
 #else
 #define LOW_STACK_ALERT(p) {\
   (void) (p);\
-  ABNORMAL_END (stack_pointer > expr_stack_limit, TOO_COMPLEX, "imminent expression stack overflow");\
-  ABNORMAL_END (frame_pointer > frame_stack_limit, TOO_COMPLEX, "imminent frame stack overflow");\
+  ABNORMAL_END (stack_pointer > expr_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
+  ABNORMAL_END (frame_pointer > frame_stack_limit, TOO_COMPLEX, ERROR_STACK_OVERFLOW);\
   }
 #endif
 
@@ -488,7 +492,7 @@ still is sufficient overhead to make it to the next check.
   LOW_STACK_ALERT (p);\
   static_link = (environ > 0 ? environ : frame_pointer);\
   if (frame_pointer < static_link) {\
-    diagnostic (A_RUNTIME_ERROR, (p), "value is used outside its environ");\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_SCOPE_DYNAMIC_0);\
     exit_genie (p, A_RUNTIME_ERROR);\
   }\
   frame_pointer += FRAME_SIZE (dynamic_link);\
@@ -514,7 +518,7 @@ still is sufficient overhead to make it to the next check.
 
 #define CHECK_INIT(p, c, q)\
   if (!(c)) {\
-    diagnostic (A_RUNTIME_ERROR, (p), EMPTY_VALUE_ERROR_FROM, (q));\
+    diagnostic_node (A_RUNTIME_ERROR, (p), ERROR_EMPTY_VALUE_FROM, (q));\
     exit_genie ((p), A_RUNTIME_ERROR);\
   }
 
@@ -596,9 +600,11 @@ extern int storage_overhead;
 /* External symbols. */
 
 #ifdef HAVE_POSIX_THREADS
-extern pthread_t main_id;
+extern int parallel_clauses;
+extern pthread_t main_thread_id;
 extern BOOL_T in_par_clause;
 extern BOOL_T is_main_thread (void);
+extern void count_parallel_clauses (NODE_T *);
 extern void genie_abend_thread (void);
 extern void zap_all_threads (NODE_T *, jmp_buf *, NODE_T *);
 #endif
@@ -615,6 +621,7 @@ extern GENIE_PROCEDURE genie_abs_long_mp;
 extern GENIE_PROCEDURE genie_abs_real;
 extern GENIE_PROCEDURE genie_acos_long_complex;
 extern GENIE_PROCEDURE genie_acos_long_mp;
+extern GENIE_PROCEDURE genie_acronym;
 extern GENIE_PROCEDURE genie_add_bytes;
 extern GENIE_PROCEDURE genie_add_char;
 extern GENIE_PROCEDURE genie_add_complex;
@@ -653,8 +660,6 @@ extern GENIE_PROCEDURE genie_bytes_shorts;
 extern GENIE_PROCEDURE genie_bytes_width;
 extern GENIE_PROCEDURE genie_bytespack;
 extern GENIE_PROCEDURE genie_char_in_string;
-extern GENIE_PROCEDURE genie_last_char_in_string;
-extern GENIE_PROCEDURE genie_string_in_string;
 extern GENIE_PROCEDURE genie_complex_lengths;
 extern GENIE_PROCEDURE genie_complex_shorts;
 extern GENIE_PROCEDURE genie_conj_complex;
@@ -730,6 +735,7 @@ extern GENIE_PROCEDURE genie_im_long_complex;
 extern GENIE_PROCEDURE genie_int_lengths;
 extern GENIE_PROCEDURE genie_int_shorts;
 extern GENIE_PROCEDURE genie_int_width;
+extern GENIE_PROCEDURE genie_last_char_in_string;
 extern GENIE_PROCEDURE genie_le_bits;
 extern GENIE_PROCEDURE genie_le_bytes;
 extern GENIE_PROCEDURE genie_le_char;
@@ -836,7 +842,7 @@ extern GENIE_PROCEDURE genie_over_int;
 extern GENIE_PROCEDURE genie_over_long_mp;
 extern GENIE_PROCEDURE genie_overab_int;
 extern GENIE_PROCEDURE genie_overab_long_mp;
-extern GENIE_PROCEDURE genie_overab_real;
+extern GENIE_PROCEDURE genie_divab_real;
 extern GENIE_PROCEDURE genie_pi;
 extern GENIE_PROCEDURE genie_pi_long_mp;
 extern GENIE_PROCEDURE genie_plusab_bytes;
@@ -859,6 +865,7 @@ extern GENIE_PROCEDURE genie_pow_long_mp_int;
 extern GENIE_PROCEDURE genie_pow_long_mp_int_int;
 extern GENIE_PROCEDURE genie_pow_real;
 extern GENIE_PROCEDURE genie_pow_real_int;
+extern GENIE_PROCEDURE genie_preemptive_sweep_heap;
 extern GENIE_PROCEDURE genie_program_idf;
 extern GENIE_PROCEDURE genie_re_complex;
 extern GENIE_PROCEDURE genie_re_long_complex;
@@ -901,13 +908,13 @@ extern GENIE_PROCEDURE genie_stand_in;
 extern GENIE_PROCEDURE genie_stand_in_channel;
 extern GENIE_PROCEDURE genie_stand_out;
 extern GENIE_PROCEDURE genie_stand_out_channel;
+extern GENIE_PROCEDURE genie_string_in_string;
 extern GENIE_PROCEDURE genie_sub_complex;
 extern GENIE_PROCEDURE genie_sub_int;
 extern GENIE_PROCEDURE genie_sub_long_complex;
 extern GENIE_PROCEDURE genie_sub_long_mp;
 extern GENIE_PROCEDURE genie_sub_real;
 extern GENIE_PROCEDURE genie_sweep_heap;
-extern GENIE_PROCEDURE genie_preemptive_sweep_heap;
 extern GENIE_PROCEDURE genie_system;
 extern GENIE_PROCEDURE genie_system_stack_pointer;
 extern GENIE_PROCEDURE genie_system_stack_size;
@@ -936,7 +943,6 @@ extern GENIE_PROCEDURE genie_vector_mul;
 extern GENIE_PROCEDURE genie_vector_set;
 extern GENIE_PROCEDURE genie_vector_sub;
 extern GENIE_PROCEDURE genie_vector_times_scalar;
-extern GENIE_PROCEDURE genie_vms_acronym;
 extern GENIE_PROCEDURE genie_xor_bits;
 extern GENIE_PROCEDURE genie_xor_bool;
 extern GENIE_PROCEDURE genie_xor_long_mp;
@@ -1056,6 +1062,7 @@ extern void genie_check_initialisation (NODE_T *, BYTE_T *, MOID_T *);
 extern void genie_declaration (NODE_T *);
 extern void genie_dump_frames ();
 extern void genie_enquiry_clause (NODE_T *);
+extern void genie_f_and_becomes (NODE_T *, MOID_T *, GENIE_PROCEDURE *);
 extern void genie_init_lib (NODE_T *);
 extern void genie_prepare_declarer (NODE_T *);
 extern void genie_push_undefined (NODE_T *, MOID_T *);
@@ -1081,6 +1088,8 @@ extern void where (FILE_T, NODE_T *);
 extern void genie_argc (NODE_T *);
 extern void genie_argv (NODE_T *);
 extern void genie_create_pipe (NODE_T *);
+extern void genie_utctime (NODE_T *);
+extern void genie_localtime (NODE_T *);
 extern void genie_errno (NODE_T *);
 extern void genie_execve (NODE_T *);
 extern void genie_execve_child (NODE_T *);
@@ -1096,6 +1105,7 @@ extern void genie_tcp_request (NODE_T *);
 #endif
 #ifdef HAVE_REGEX
 extern void genie_grep_in_string (NODE_T *);
+extern void genie_sub_in_string (NODE_T *);
 #endif
 #endif
 
@@ -1111,6 +1121,36 @@ extern void genie_curses_move (NODE_T *);
 extern void genie_curses_putchar (NODE_T *);
 extern void genie_curses_refresh (NODE_T *);
 extern void genie_curses_start (NODE_T *);
+#endif
+
+#ifdef HAVE_POSTGRESQL
+extern void genie_pq_backendpid (NODE_T *);
+extern void genie_pq_cmdstatus (NODE_T *);
+extern void genie_pq_cmdtuples (NODE_T *);
+extern void genie_pq_connectdb (NODE_T *);
+extern void genie_pq_db (NODE_T *);
+extern void genie_pq_errormessage (NODE_T *);
+extern void genie_pq_exec (NODE_T *);
+extern void genie_pq_fformat (NODE_T *);
+extern void genie_pq_finish (NODE_T *);
+extern void genie_pq_fname (NODE_T *);
+extern void genie_pq_fnumber (NODE_T *);
+extern void genie_pq_getisnull (NODE_T *);
+extern void genie_pq_getvalue (NODE_T *);
+extern void genie_pq_host (NODE_T *);
+extern void genie_pq_nfields (NODE_T *);
+extern void genie_pq_ntuples (NODE_T *);
+extern void genie_pq_options (NODE_T *);
+extern void genie_pq_parameterstatus (NODE_T *);
+extern void genie_pq_pass (NODE_T *);
+extern void genie_pq_port (NODE_T *);
+extern void genie_pq_protocolversion (NODE_T *);
+extern void genie_pq_reset (NODE_T *);
+extern void genie_pq_resulterrormessage (NODE_T *);
+extern void genie_pq_serverversion (NODE_T *);
+extern void genie_pq_socket (NODE_T *);
+extern void genie_pq_tty (NODE_T *);
+extern void genie_pq_user (NODE_T *);
 #endif
 
 #ifdef HAVE_IEEE_754

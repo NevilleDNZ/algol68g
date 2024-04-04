@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -62,6 +62,19 @@ static int max_scan_buf_length, source_file_size;
 static SOURCE_LINE_T *saved_l;
 static char *saved_c;
 static BOOL_T stop_scanner = A_FALSE, read_error = A_FALSE, no_preprocessing = A_FALSE;
+
+/*!
+\brief
+\param u
+\param v
+\param ch
+**/
+
+static void unworthy (SOURCE_LINE_T * u, char *v, char ch)
+{
+  sprintf (edit_line, "unworthy character %s", ctrl_char (ch));
+  scan_error (u, v, edit_line);
+}
 
 /*!
 \brief standardise NL token - only relevant for Macintosh
@@ -137,16 +150,17 @@ static BOOL_T whether_bold (SOURCE_LINE_T * z, char *u, char *v)
 \param ch
 **/
 
-static void skip_string (SOURCE_LINE_T ** top, char **ch)
+static BOOL_T skip_string (SOURCE_LINE_T ** top, char **ch)
 {
   SOURCE_LINE_T *u = *top;
   char *v = *ch;
+  v++;
   while (u != NULL) {
     while (v[0] != NULL_CHAR) {
       if (v[0] == '"' && v[1] != '"') {
 	*top = u;
 	*ch = &v[1];
-	return;
+	return (A_TRUE);
       } else if (v[0] == '"' && v[1] == '"') {
 	v += 2;
       } else {
@@ -160,7 +174,7 @@ static void skip_string (SOURCE_LINE_T ** top, char **ch)
       v = NULL;
     }
   }
-  scan_error (*top, "unterminated string");
+  return (A_FALSE);
 }
 
 /*!
@@ -170,24 +184,25 @@ static void skip_string (SOURCE_LINE_T ** top, char **ch)
 \param delim
 **/
 
-static void skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
+static BOOL_T skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
 {
   SOURCE_LINE_T *u = *top;
   char *v = *ch;
+  v++;
   while (u != NULL) {
     while (v[0] != NULL_CHAR) {
       if (whether_bold (u, v, "COMMENT") && delim == BOLD_COMMENT_SYMBOL) {
 	*top = u;
 	*ch = &v[1];
-	return;
+	return (A_TRUE);
       } else if (whether_bold (u, v, "CO") && delim == STYLE_I_COMMENT_SYMBOL) {
 	*top = u;
 	*ch = &v[1];
-	return;
+	return (A_TRUE);
       } else if (v[0] == '#' && delim == STYLE_II_COMMENT_SYMBOL) {
 	*top = u;
 	*ch = &v[1];
-	return;
+	return (A_TRUE);
       } else {
 	v++;
       }
@@ -199,7 +214,7 @@ static void skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
       v = NULL;
     }
   }
-  scan_error (*top, "unterminated comment");
+  return (A_FALSE);
 }
 
 /*!
@@ -210,7 +225,7 @@ static void skip_comment (SOURCE_LINE_T ** top, char **ch, int delim)
 \param whitespace whether other pragmat items are allowed
 **/
 
-static void skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T whitespace)
+static BOOL_T skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T whitespace)
 {
   SOURCE_LINE_T *u = *top;
   char *v = *ch;
@@ -219,14 +234,14 @@ static void skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T whi
       if (whether_bold (u, v, "PRAGMAT") && delim == BOLD_PRAGMAT_SYMBOL) {
 	*top = u;
 	*ch = &v[1];
-	return;
+	return (A_TRUE);
       } else if (whether_bold (u, v, "PR") && delim == STYLE_I_PRAGMAT_SYMBOL) {
 	*top = u;
 	*ch = &v[1];
-	return;
+	return (A_TRUE);
       } else {
 	if (whitespace && !IS_SPACE (v[0]) && v[0] != NEWLINE_CHAR) {
-	  scan_error (*top, "unexpected characters in pragmat");
+	  scan_error (u, v, "unexpected characters in pragmat");
 	} else if (IS_UPPER (v[0])) {
 /* Skip a bold word as you may trigger on REPR, for instance ... */
 	  while (IS_UPPER (v[0])) {
@@ -244,7 +259,7 @@ static void skip_pragmat (SOURCE_LINE_T ** top, char **ch, int delim, BOOL_T whi
       v = NULL;
     }
   }
-  scan_error (*top, "unterminated pragmat");
+  return (A_FALSE);
 }
 
 /*!
@@ -275,7 +290,6 @@ static char *get_pragmat_item (SOURCE_LINE_T ** top, char **ch)
       v = NULL;
     }
   }
-  scan_error (*top, "unterminated pragmat");
   return (NULL);
 }
 
@@ -313,21 +327,19 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
   *delim = 0;
   while (u != NULL) {
     while (v[0] != NULL_CHAR) {
+      SOURCE_LINE_T *start_l = u;
+      char *start_c = v;
 /* STRINGs must be skipped. */
       if (v[0] == '"') {
-	v++;
-	skip_string (&u, &v);
+	SCAN_ERROR (!skip_string (&u, &v), start_l, start_c, ERROR_UNTERMINATED_STRING);
       }
 /* COMMENTS must be skipped. */
       else if (whether_bold (u, v, "COMMENT")) {
-	v++;
-	skip_comment (&u, &v, BOLD_COMMENT_SYMBOL);
+	SCAN_ERROR (!skip_comment (&u, &v, BOLD_COMMENT_SYMBOL), start_l, start_c, ERROR_UNTERMINATED_COMMENT);
       } else if (whether_bold (u, v, "CO")) {
-	v++;
-	skip_comment (&u, &v, STYLE_I_COMMENT_SYMBOL);
+	SCAN_ERROR (!skip_comment (&u, &v, STYLE_I_COMMENT_SYMBOL), start_l, start_c, ERROR_UNTERMINATED_COMMENT);
       } else if (v[0] == '#') {
-	v++;
-	skip_comment (&u, &v, STYLE_II_COMMENT_SYMBOL);
+	SCAN_ERROR (!skip_comment (&u, &v, STYLE_II_COMMENT_SYMBOL), start_l, start_c, ERROR_UNTERMINATED_COMMENT);
       } else if (whether_bold (u, v, "PRAGMAT") || whether_bold (u, v, "PR")) {
 /* We caught a PRAGMAT. */
 	char *item;
@@ -339,19 +351,20 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
 	  v = &v[strlen ("PR")];
 	}
 	item = get_pragmat_item (&u, &v);
+	SCAN_ERROR (item == NULL, start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 /* Item "preprocessor" restarts preprocessing if it is off. */
 	if (no_preprocessing && streq (item, "PREPROCESSOR") == 0) {
 	  no_preprocessing = A_FALSE;
-	  skip_pragmat (&u, &v, *delim, A_TRUE);
+	  SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 	}
 /* If preprocessing is switched off, we idle to closing bracket. */
 	else if (no_preprocessing) {
-	  skip_pragmat (&u, &v, *delim, A_FALSE);
+	  SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_FALSE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 	}
 /* Item "nopreprocessor" stops preprocessing if it is on. */
 	if (streq (item, "NOPREPROCESSOR") == 0) {
 	  no_preprocessing = A_TRUE;
-	  skip_pragmat (&u, &v, *delim, A_TRUE);
+	  SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 	}
 /* Item "INCLUDE" includes a file. */
 	else if (streq (item, "INCLUDE") == 0) {
@@ -367,7 +380,7 @@ static char *next_preprocessor_item (SOURCE_LINE_T ** top, char **ch, int *delim
 	}
 /* Unrecognised item - probably options handled later by the tokeniser. */
 	else {
-	  skip_pragmat (&u, &v, *delim, A_FALSE);
+	  SCAN_ERROR (!skip_pragmat (&u, &v, *delim, A_FALSE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 	}
       } else if (IS_UPPER (v[0])) {
 /* Skip a bold word as you may trigger on REPR, for instance ... */
@@ -417,6 +430,8 @@ been included will not be included a second time - it will be ignored.
     while (u != NULL) {
       int pr_lim;
       char *item = next_preprocessor_item (&u, &v, &pr_lim);
+      SOURCE_LINE_T *start_l = u;
+      char *start_c = v;
 /* Search for PR include "filename" PR. */
       if (item != NULL && (streq (item, "INCLUDE") == 0 || streq (item, "READ") == 0)) {
 	FILE_T fd;
@@ -433,19 +448,17 @@ been included will not be included a second time - it will be ignored.
 	  v++;
 	}
 /* Scan quoted filename. */
-	if (v[0] != '"' && v[0] != '\'') {
-	  scan_error (u, "quoted filename expected");
-	}
+	SCAN_ERROR ((v[0] != '"' && v[0] != '\''), start_l, start_c, ERROR_INCORRECT_FILENAME);
 	delim = (v++)[0];
 	n = 0;
 	fnb[0] = NULL_CHAR;
 /* Scan Algol 68 string (note: "" denotes a ", while in C it concatenates).*/
 	do {
-	  SCAN_ERROR (EOL (v[0]), u, "filename exceeds end of line");
-	  SCAN_ERROR (n == BUFFER_SIZE - 1, u, "filename too long");
+	  SCAN_ERROR (EOL (v[0]), start_l, start_c, ERROR_INCORRECT_FILENAME);
+	  SCAN_ERROR (n == BUFFER_SIZE - 1, start_l, start_c, ERROR_INCORRECT_FILENAME);
 	  if (v[0] == delim) {
 	    while (v[0] == delim && v[1] == delim) {
-	      SCAN_ERROR (n == BUFFER_SIZE - 1, u, "filename too long");
+	      SCAN_ERROR (n == BUFFER_SIZE - 1, start_l, start_c, ERROR_INCORRECT_FILENAME);
 	      fnb[n++] = delim;
 	      fnb[n] = NULL_CHAR;
 	      v += 2;
@@ -454,15 +467,15 @@ been included will not be included a second time - it will be ignored.
 	    fnb[n++] = *(v++);
 	    fnb[n] = NULL_CHAR;
 	  } else {
-	    scan_error (u, "unworthy character in filename");
+	    SCAN_ERROR (A_TRUE, start_l, start_c, ERROR_INCORRECT_FILENAME);
 	  }
 	}
 	while (v[0] != delim);
 /* Insist that the pragmat is closed properly. */
 	v = &v[1];
-	skip_pragmat (&u, &v, pr_lim, A_TRUE);
+	SCAN_ERROR (!skip_pragmat (&u, &v, pr_lim, A_TRUE), start_l, start_c, ERROR_UNTERMINATED_PRAGMAT);
 /* Filename valid? */
-	SCAN_ERROR (n == 0, u, "empty filename");
+	SCAN_ERROR (n == 0, start_l, start_c, ERROR_INCORRECT_FILENAME);
 	fn = (char *) get_fixed_heap_space (strlen (u->module->files.path) + strlen (fnb) + 1);
 	strcpy (fn, u->module->files.path);
 	strcat (fn, fnb);
@@ -475,21 +488,18 @@ been included will not be included a second time - it will be ignored.
 /* Access the file. */
 	RESET_ERRNO;
 	fd = open (fn, O_RDONLY | O_BINARY);
-	if (fd == -1) {
-	  sprintf (edit_line, "cannot open `%s'", fn);
-	  scan_error (u, edit_line);
-	}
+	SCAN_ERROR (fd == -1, start_l, start_c, ERROR_SOURCE_FILE_OPEN);
 /* Access the file. */
 	RESET_ERRNO;
 	fsize = lseek (fd, 0, SEEK_END);
-	SCAN_ERROR (errno != 0, u, "while accessing file");
+	SCAN_ERROR (errno != 0, start_l, start_c, "while accessing file");
 	fbuf = (char *) get_temp_heap_space ((unsigned) (8 + fsize));
 	RESET_ERRNO;
 	lseek (fd, 0, SEEK_SET);
-	SCAN_ERROR (errno != 0, u, "while accessing file");
+	SCAN_ERROR (errno != 0, start_l, start_c, "while accessing file");
 	RESET_ERRNO;
 	bytes_read = io_read (fd, fbuf, fsize);
-	SCAN_ERROR (errno != 0 || bytes_read != fsize, u, "while reading file");
+	SCAN_ERROR (errno != 0 || bytes_read != fsize, start_l, start_c, "while reading file");
 	to_unix_nl (fbuf);
 /* Buffer still usable? */
 	if (fsize > max_scan_buf_length) {
@@ -505,7 +515,7 @@ been included will not be included a second time - it will be ignored.
 	  n = 0;
 	  scan_buf[0] = NULL_CHAR;
 	  while (k < fsize && fbuf[k] != NEWLINE_CHAR) {
-	    SCAN_ERROR ((IS_CNTRL (fbuf[k]) && !IS_SPACE (fbuf[k])) || fbuf[k] == STOP_CHAR, u, "control characters in include file");
+	    SCAN_ERROR ((IS_CNTRL (fbuf[k]) && !IS_SPACE (fbuf[k])) || fbuf[k] == STOP_CHAR, start_l, start_c, "control characters in include file");
 	    scan_buf[n++] = fbuf[k++];
 	    scan_buf[n] = NULL_CHAR;
 	  }
@@ -552,13 +562,9 @@ static void append_source_line (MODULE_T * module, char *str, SOURCE_LINE_T ** r
   z->filename = filename;
   z->number = (*line_num)++;
   z->print_status = NOT_PRINTED;
-  z->list = A_FALSE;
-  z->messages = NULL;
+  z->list = A_TRUE;
+  z->diagnostics = NULL;
   z->top_node = NULL;
-  z->min_level = INT_MAX;
-  z->max_level = 0;
-  z->min_proc_level = INT_MAX;
-  z->max_proc_level = 0;
   z->module = module;
   NEXT (z) = NULL;
   PREVIOUS (z) = *ref_l;
@@ -648,7 +654,9 @@ static BOOL_T read_source_file (MODULE_T * module)
     l = 0;
     scan_buf[0] = NULL_CHAR;
     while (k < source_file_size && buffer[k] != NEWLINE_CHAR) {
+/*
       ABNORMAL_END ((IS_CNTRL (buffer[k]) && !IS_SPACE (buffer[k])) || buffer[k] == STOP_CHAR, "error while reading source file", "check for control characters");
+*/
       scan_buf[l++] = buffer[k++];
       scan_buf[l] = NULL_CHAR;
     }
@@ -696,7 +704,7 @@ static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s)
   if (*ref_l == NULL) {
     return (STOP_CHAR);
   } else {
-    (*ref_l)->list = (*ref_l)->list || (module->options.nodemask & SOURCE_MASK);
+    (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A_TRUE : A_FALSE);
 /* Take new line? */
     if ((*ref_s)[0] == NULL_CHAR) {
       *ref_l = NEXT (*ref_l);
@@ -724,9 +732,9 @@ static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s)
 
 static void get_char (MODULE_T * module, char *ref_c, SOURCE_LINE_T ** ref_l, char **ref_s)
 {
-  while (*ref_c != STOP_CHAR && (IS_CNTRL (*ref_c) || (*ref_c) == ' ')) {
+  while (*ref_c != STOP_CHAR && (IS_SPACE (*ref_c) || (*ref_c == '\0'))) {
     if (*ref_l != NULL) {
-      (*ref_l)->list = (*ref_l)->list || (module->options.nodemask & SOURCE_MASK);
+      (*ref_l)->list = (module->options.nodemask & SOURCE_MASK ? A_TRUE : A_FALSE);
     }
     *ref_c = next_char (module, ref_l, ref_s);
   }
@@ -745,7 +753,7 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
 {
 #define INIT_BUFFER {chars_in_buf = 0; scan_buf[chars_in_buf] = NULL_CHAR;}
 #define ADD_ONE_CHAR(ch) {scan_buf[chars_in_buf ++] = ch; scan_buf[chars_in_buf] = NULL_CHAR;}
-  char c = **ref_c, *term_s = NULL;
+  char c = **ref_c, *term_s = NULL, *start_c = *ref_c;
   SOURCE_LINE_T *start_l = *ref_l;
   int term_s_length, chars_in_buf;
   BOOL_T stop;
@@ -781,7 +789,7 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
   get_char (module, &c, ref_l, ref_c);
   stop = A_FALSE;
   while (stop == A_FALSE) {
-    SCAN_ERROR (c == STOP_CHAR, start_l, "unterminated pragment");
+    SCAN_ERROR (c == STOP_CHAR, start_l, start_c, "unterminated pragment");
 /* A ".." or '..' delimited string in a PRAGMAT. */
     if ((c == '"' || (c == '\'' && module->options.stropping == UPPER_STROPPING)) && (type == STYLE_I_PRAGMAT_SYMBOL || type == BOLD_PRAGMAT_SYMBOL)) {
       char delim = c;
@@ -789,7 +797,7 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
       ADD_ONE_CHAR (c);
       c = next_char (module, ref_l, ref_c);
       while (!eos) {
-	SCAN_ERROR (EOL (c), start_l, "string exceeds end of line in pragmat");
+	SCAN_ERROR (EOL (c), start_l, start_c, "string exceeds end of line in pragmat");
 	if (c == delim) {
 	  ADD_ONE_CHAR (delim);
 	  c = next_char (module, ref_l, ref_c);
@@ -803,7 +811,7 @@ static BOOL_T pragment (MODULE_T * module, int type, SOURCE_LINE_T ** ref_l, cha
 	  ADD_ONE_CHAR (c);
 	  c = next_char (module, ref_l, ref_c);
 	} else {
-	  scan_error (start_l, "unworthy character in string in pragmat");
+	  unworthy (start_l, start_c, c);
 	}
       }
     }
@@ -1002,7 +1010,7 @@ static int get_format_item (char ch)
     (sym++)[0] = c;\
     c = next_char (module, ref_l, ref_s);\
   }\
-  SCAN_ERROR (!IS_DIGIT (c), *ref_l, "exponent digit expected");\
+  SCAN_ERROR (!IS_DIGIT (c), *start_l, *start_c, "exponent digit expected");\
   while (IS_DIGIT (c)) {\
     (sym++)[0] = c;\
     c = next_char (module, ref_l, ref_s);\
@@ -1095,11 +1103,11 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
       c = next_char (module, ref_l, ref_s);
       SKIP_WHITE;
     }
-    SCAN_ERROR (k == 0, *ref_l, "quoted bold tag expected");
+    SCAN_ERROR (k == 0, *start_l, *start_c, "quoted bold tag expected");
     sym[0] = NULL_CHAR;
     *att = BOLD_TAG;
 /* Skip terminating quote, or complain if it is not there. */
-    SCAN_ERROR (c != '\'', *ref_l, "unterminated quoted bold tag");
+    SCAN_ERROR (c != '\'', *start_l, *start_c, "unterminated quoted bold tag");
     c = next_char (module, ref_l, ref_s);
   } else if (IS_LOWER (c)) {
 /* Lower case word - identifier. */
@@ -1191,11 +1199,11 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
     while (!stop) {
       c = next_char (module, ref_l, ref_s);
       while (c != '"' && c != STOP_CHAR) {
-	SCAN_ERROR (EOL (c), *start_l, "string exceeds end of line");
+	SCAN_ERROR (EOL (c), *start_l, *start_c, "string exceeds end of line");
 	(sym++)[0] = c;
 	c = next_char (module, ref_l, ref_s);
       }
-      SCAN_ERROR (*ref_l == NULL, *start_l, "unterminated string");
+      SCAN_ERROR (*ref_l == NULL, *start_l, *start_c, "unterminated string");
       c = next_char (module, ref_l, ref_s);
       if (c == '"') {
 	(sym++)[0] = '\"';
@@ -1280,7 +1288,7 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 	(sym++)[0] = '=';
 	next_char (module, ref_l, ref_s);
       } else {
-	SCAN_ERROR (!(strcmp (scanned, "=:") == 0 || strcmp (scanned, "==:") == 0), *ref_l, "illegal operator ends in `:'");
+	SCAN_ERROR (!(strcmp (scanned, "=:") == 0 || strcmp (scanned, "==:") == 0), *start_l, *start_c, "invalid \":\"");
       }
     }
     sym[0] = NULL_CHAR;
@@ -1316,15 +1324,14 @@ static void get_next_token (MODULE_T * module, BOOL_T in_format, SOURCE_LINE_T *
 	sym[0] = NULL_CHAR;
 	next_char (module, ref_l, ref_s);
       } else {
-	SCAN_ERROR (strcmp (&(scanned[1]), "=:") != 0, *ref_l, "illegal operator ends in `:'");
+	SCAN_ERROR (strcmp (&(scanned[1]), "=:") != 0, *start_l, *start_c, "invalid \":\"");
       }
     }
     sym[0] = NULL_CHAR;
     *att = OPERATOR;
   } else {
 /* Afuuus ... strange characters! */
-    sprintf (edit_line, "unworthy character (hex code %02x)", (int) c);
-    scan_error (*ref_l, edit_line);
+    unworthy (*start_l, *start_c, (int) c);
   }
 #undef SKIP_WHITE
 }
@@ -1615,7 +1622,7 @@ void get_refinements (MODULE_T * z)
     new_one->end = NULL;
     p = NEXT (NEXT (p));
     if (p == NULL) {
-      diagnostic (A_ERROR, NULL, "empty refinement at end of program", NULL);
+      diagnostic_node (A_SYNTAX_ERROR, NULL, ERROR_REFINEMENT_EMPTY, NULL);
       return;
     } else {
       new_one->begin = p;
@@ -1625,7 +1632,7 @@ void get_refinements (MODULE_T * z)
       FORWARD (p);
     }
     if (p == NULL) {
-      diagnostic (A_ERROR, NULL, "point expected at end of program", NULL);
+      diagnostic_node (A_SYNTAX_ERROR, NULL, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
       return;
     } else {
       FORWARD (p);
@@ -1635,7 +1642,7 @@ void get_refinements (MODULE_T * z)
     exists = A_FALSE;
     while (x != NULL && !exists) {
       if (x->name == new_one->name) {
-	diagnostic (A_ERROR, new_one->tree, "refinement already defined", NULL);
+	diagnostic_node (A_SYNTAX_ERROR, new_one->tree, ERROR_REFINEMENT_DEFINED, NULL);
 	exists = A_TRUE;
       }
       FORWARD (x);
@@ -1647,7 +1654,7 @@ void get_refinements (MODULE_T * z)
     }
   }
   if (p != NULL && !IN_PRELUDE (p)) {
-    diagnostic (A_ERROR, p, "invalid refinement definition", NULL);
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_REFINEMENT_INVALID, NULL);
   }
 }
 
@@ -1678,7 +1685,7 @@ void put_refinements (MODULE_T * z)
   while (p != NULL && !IN_PRELUDE (p)) {
     FORWARD (p);
   }
-  ABNORMAL_END (p == NULL, INTERNAL_ERROR, NULL);
+  ABNORMAL_END (p == NULL, ERROR_INTERNAL_CONSISTENCY, NULL);
   point = p;
 /* We need to substitute until the first point. */
   p = z->top_node;
@@ -1698,7 +1705,7 @@ void put_refinements (MODULE_T * z)
 /* We found its definition. */
 	y->applications++;
 	if (y->applications > 1) {
-	  diagnostic (A_ERROR, y->line_defined->top_node, "refinement applied more than once", NULL);
+	  diagnostic_node (A_SYNTAX_ERROR, y->line_defined->top_node, ERROR_REFINEMENT_APPLIED, NULL);
 	  FORWARD (p);
 	} else {
 /* Tie the definition in the tree. */
@@ -1733,14 +1740,14 @@ void put_refinements (MODULE_T * z)
       PREVIOUS (point) = PREVIOUS (p);
     }
   } else {
-    diagnostic (A_ERROR, p, "point expected", NULL);
+    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL, NULL);
   }
 /* Has the programmer done it well? */
   if (error_count == 0) {
     x = z->top_refinement;
     while (x != NULL) {
       if (x->applications == 0) {
-	diagnostic (A_ERROR, x->line_defined->top_node, "refinement is not applied", NULL);
+	diagnostic_node (A_SYNTAX_ERROR, x->line_defined->top_node, ERROR_REFINEMENT_NOT_APPLIED, NULL);
       }
       FORWARD (x);
     }
