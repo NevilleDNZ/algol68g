@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -34,7 +34,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 void genie_preprocess (NODE_T *, int *);
-void get_global_level (NODE_T *);
 
 A68_HANDLE nil_handle = { INITIALISED_MASK, 0, 0, NULL, NULL, NULL };
 A68_REF nil_ref = { INITIALISED_MASK | NIL_MASK, 0, {NULL} };
@@ -71,7 +70,7 @@ void genie_system (NODE_T * p)
   int ret_code, size;
   A68_REF cmd;
   A68_REF ref_z;
-  POP (p, &cmd, SIZE_OF (A68_REF));
+  POP_REF (p, &cmd);
   CHECK_INIT (p, INITIALISED (&cmd), MODE (STRING));
   size = 1 + a68_string_size (p, cmd);
   ref_z = heap_generator (p, MODE (C_STRING), 1 + size);
@@ -87,20 +86,20 @@ void genie_system (NODE_T * p)
 
 void exit_genie (NODE_T * p, int ret)
 {
-  if (ret == A_RUNTIME_ERROR && in_monitor) {
+  if (ret == A68_RUNTIME_ERROR && in_monitor) {
 /*
-    sys_request_flag = A_FALSE;
-    single_step (p, A_FALSE, A_FALSE);
+    sys_request_flag = A68_FALSE;
+    single_step (p, A68_FALSE, A68_FALSE);
 */
     return;
-  } else if (ret == A_RUNTIME_ERROR && MODULE (p)->options.debug) {
-    diagnostics_to_terminal (MODULE (p)->top_line, A_RUNTIME_ERROR);
-    sys_request_flag = A_FALSE;
-    single_step (p, A_FALSE, A_FALSE);
+  } else if (ret == A68_RUNTIME_ERROR && MODULE (p)->options.debug) {
+    diagnostics_to_terminal (MODULE (p)->top_line, A68_RUNTIME_ERROR);
+    sys_request_flag = A68_FALSE;
+    single_step (p, A68_FALSE, A68_FALSE);
     return;
   } else {
-    if (ret > A_FORCE_QUIT) {
-      ret -= A_FORCE_QUIT;
+    if (ret > A68_FORCE_QUIT) {
+      ret -= A68_FORCE_QUIT;
     }
 #if defined HAVE_POSIX_THREADS
     if (in_par_clause && !is_main_thread ()) {
@@ -141,17 +140,17 @@ void genie_init_rng (void)
     if (WHETHER (p, SERIAL_CLAUSE)) {
       BOOL_T valid_follow;
       if (NEXT (p) == NULL) {
-        valid_follow = A_TRUE;
+        valid_follow = A68_TRUE;
       } else if (WHETHER (NEXT (p), CLOSE_SYMBOL)) {
-        valid_follow = A_TRUE;
+        valid_follow = A68_TRUE;
       } else if (WHETHER (NEXT (p), END_SYMBOL)) {
-        valid_follow = A_TRUE;
+        valid_follow = A68_TRUE;
       } else if (WHETHER (NEXT (p), EDOC_SYMBOL)) {
-        valid_follow = A_TRUE;
+        valid_follow = A68_TRUE;
       } else if (WHETHER (NEXT (p), OD_SYMBOL)) {
-        valid_follow = A_TRUE;
+        valid_follow = A68_TRUE;
       } else {
-        valid_follow = A_FALSE;
+        valid_follow = A68_FALSE;
       }
       if (valid_follow) {
         SYMBOL_TABLE (SUB (p))->jump_to = NULL;
@@ -234,7 +233,7 @@ become prone to the heap sweeper.
           TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, m, PROTECT_FROM_SWEEP);
           p->protect_sweep = z;
           HEAP (z) = HEAP_SYMBOL;
-          z->use = A_TRUE;
+          z->use = A68_TRUE;
         }
         break;
       }
@@ -337,13 +336,13 @@ void genie_preprocess (NODE_T * p, int *max_lev)
       MOID (p)->size = moid_size (MOID (p));
       MOID (p)->short_id = mode_attribute (MOID (p));
       if (WHETHER (MOID (p), REF_SYMBOL)) {
-        p->need_dns = A_TRUE;
+        p->need_dns = A68_TRUE;
       } else if (WHETHER (MOID (p), PROC_SYMBOL)) {
-        p->need_dns = A_TRUE;
+        p->need_dns = A68_TRUE;
       } else if (WHETHER (MOID (p), UNION_SYMBOL)) {
-        p->need_dns = A_TRUE;
+        p->need_dns = A68_TRUE;
       } else if (WHETHER (MOID (p), FORMAT_SYMBOL)) {
-        p->need_dns = A_TRUE;
+        p->need_dns = A68_TRUE;
       }
     }
     if (SYMBOL_TABLE (p) != NULL) {
@@ -390,39 +389,12 @@ void genie_preprocess (NODE_T * p, int *max_lev)
 void get_global_level (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
-    if (LINE (p)->number != 0) {
-      if (find_keyword (top_keyword, SYMBOL (p)) == NULL) {
-        if (LEX_LEVEL (p) < global_level || global_level == 0) {
-          global_level = LEX_LEVEL (p);
-        }
+    if (LINE (p)->number != 0 && WHETHER (p, UNIT)) {
+      if (LEX_LEVEL (p) < global_level) {
+        global_level = LEX_LEVEL (p);
       }
     }
     get_global_level (SUB (p));
-  }
-}
-
-/*!
-\brief get outermost lexical level in the user program
-\param p
-**/
-
-void get_global_pointer (NODE_T * p)
-{
-  for (; p != NULL; FORWARD (p)) {
-    if (LINE (p)->number != 0) {
-      if (find_keyword (top_keyword, SYMBOL (p)) == NULL) {
-        if (LEX_LEVEL (p) == global_level && global_pointer == 0) {
-          int sum = 0;
-          SYMBOL_TABLE_T *t = PREVIOUS (SYMBOL_TABLE (p));
-          for (; t != stand_env; t = PREVIOUS (t)) {
-            sum += (FRAME_INFO_SIZE + t->ap_increment);
-          }
-          global_pointer = sum;
-          return;
-        }
-      }
-    }
-    get_global_pointer (SUB (p));
   }
 }
 
@@ -450,7 +422,7 @@ static void free_genie_heap (NODE_T * p)
 void genie (MODULE_T * module)
 {
   MOID_LIST_T *ml;
-/* First fill in final info for modes */
+/* Fill in final info for modes */
   for (ml = top_moid_list; ml != NULL; FORWARD (ml)) {
     MOID_T *mml = MOID (ml);
     mml->size = moid_size (mml);
@@ -460,7 +432,7 @@ void genie (MODULE_T * module)
   max_lex_lvl = 0;
 /*  genie_lex_levels (module->top_node, 1); */
   genie_preprocess (module->top_node, &max_lex_lvl);
-  sys_request_flag = A_FALSE;
+  sys_request_flag = A68_FALSE;
   frame_stack_limit = frame_stack_size - storage_overhead;
   expr_stack_limit = expr_stack_size - storage_overhead;
   if (module->options.regression_test) {
@@ -483,12 +455,11 @@ void genie (MODULE_T * module)
     NODE_T *p = SUB (module->top_node);
     RESET_ERRNO;
     ret_code = 0;
-    global_level = 0;
+    global_level = A68_MAX_INT;
     global_pointer = 0;
+    get_global_level (p);
     frame_pointer = 0;
     stack_pointer = 0;
-    get_global_level (p);
-    get_global_pointer (p);
     FRAME_DYNAMIC_LINK (frame_pointer) = 0;
     FRAME_DYNAMIC_SCOPE (frame_pointer) = 0;
     FRAME_STATIC_LINK (frame_pointer) = 0;
@@ -501,7 +472,7 @@ void genie (MODULE_T * module)
     (void) genie_enclosed (module->top_node);
   } else {
 /* Abnormal end of program. */
-    if (ret_code == A_RUNTIME_ERROR) {
+    if (ret_code == A68_RUNTIME_ERROR) {
       if (module->options.backtrace) {
         snprintf (output_line, BUFFER_SIZE, "\n++++ Stack backtrace");
         io_write_string (STDOUT_FILENO, output_line);
@@ -518,7 +489,7 @@ void genie (MODULE_T * module)
 /* Free heap allocated by genie. */
   free_genie_heap (module->top_node);
 /* Normal end of program. */
-  diagnostics_to_terminal (module->top_line, A_RUNTIME_ERROR);
+  diagnostics_to_terminal (module->top_line, A68_RUNTIME_ERROR);
   if (module->options.trace) {
     snprintf (output_line, BUFFER_SIZE, "\n++++ Genie finishes: %.2f seconds\n", seconds () - cputime_0);
     io_write_string (STDOUT_FILENO, output_line);

@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -25,7 +25,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "algol68g.h"
 #include "genie.h"
 
-#define SHOW_EQ A_FALSE
+#define SHOW_EQ A68_FALSE
 
 /*!
 \brief brief_mode_string
@@ -180,7 +180,7 @@ static void print_mode_flat (FILE_T f, MOID_T * m)
       snprintf (output_line, BUFFER_SIZE, " trim: %s", brief_mode_string (m->trim));
       io_write_string (f, output_line);
     }
-    if (m->use == A_FALSE) {
+    if (m->use == A68_FALSE) {
       snprintf (output_line, BUFFER_SIZE, " unused");
       io_write_string (f, output_line);
     }
@@ -442,6 +442,8 @@ static void tree_listing (FILE_T f, NODE_T * p, int x, int *y, SOURCE_LINE_T * l
           snprintf (output_line, BUFFER_SIZE, "%3x %3x %3x ", p->info->PROCEDURE_NUMBER, p->info->PROCEDURE_LEVEL, PAR_LEVEL (p));
           io_write_string (f, output_line);
 /* Print grammatical stuff. */
+          snprintf (output_line, BUFFER_SIZE, "%24s ", propagator_name (p->genie.propagator.unit));
+          io_write_string (f, output_line);
           if (MOID (p) != NULL) {
             snprintf (output_line, BUFFER_SIZE, "%s ", moid_to_string (MOID (p), MOID_WIDTH));
             io_write_string (f, output_line);
@@ -492,7 +494,7 @@ void source_listing (MODULE_T * module)
   FILE_T f = module->files.listing.fd;
   int listed = 0;
   if (module->files.listing.opened == 0) {
-    diagnostic_node (A_ERROR, NULL, ERROR_CANNOT_WRITE_LISTING, NULL);
+    diagnostic_node (A68_ERROR, NULL, ERROR_CANNOT_WRITE_LISTING, NULL);
     return;
   }
   for (; line != NULL; line = NEXT (line)) {
@@ -510,7 +512,7 @@ X "ABCD.A68" 0001 01 01 # Source line #
     if (line->list) {
       listed++;
 /* Print source line. */
-      write_source_line (f, line, NULL, A_TRUE);
+      write_source_line (f, line, NULL, A68_ALL_DIAGNOSTICS);
 /* Cross reference for lexical levels starting at this line. */
       if (module->options.cross_reference) {
         cross_reference (f, line->top_node, line);
@@ -614,7 +616,7 @@ void write_listing (MODULE_T * module)
       io_write_string (f, output_line);
       for (z = module->top_line; z != NULL; z = NEXT (z)) {
         if (z->diagnostics != NULL) {
-          write_source_line (f, z, NULL, A_TRUE);
+          write_source_line (f, z, NULL, A68_TRUE);
         }
       }
     }

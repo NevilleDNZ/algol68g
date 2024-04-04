@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -77,8 +77,8 @@ void genie_icomplex (NODE_T * p)
 void genie_iint_complex (NODE_T * p)
 {
   A68_INT re, im;
-  POP_PRIMITIVE (p, &im, A68_INT);
-  POP_PRIMITIVE (p, &re, A68_INT);
+  POP_OBJECT (p, &im, A68_INT);
+  POP_OBJECT (p, &re, A68_INT);
   PUSH_PRIMITIVE (p, (double) re.value, A68_REAL);
   PUSH_PRIMITIVE (p, (double) im.value, A68_REAL);
 }
@@ -101,7 +101,7 @@ void genie_re_complex (NODE_T * p)
 void genie_im_complex (NODE_T * p)
 {
   A68_REAL im;
-  POP_PRIMITIVE (p, &im, A68_REAL);
+  POP_OBJECT (p, &im, A68_REAL);
   *(A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL))) = im;
 }
 
@@ -144,8 +144,8 @@ void genie_arg_complex (NODE_T * p)
   if (re_x.value != 0.0 || im_x.value != 0.0) {
     PUSH_PRIMITIVE (p, atan2 (im_x.value, re_x.value), A68_REAL);
   } else {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (COMPLEX), NULL);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_ARGUMENT, MODE (COMPLEX), NULL);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -223,8 +223,8 @@ void genie_div_complex (NODE_T * p)
   POP_COMPLEX (p, &re_x, &im_x);
 #if ! defined HAVE_IEEE_754
   if (re_y.value == 0.0 && im_y.value == 0.0) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (COMPLEX));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (COMPLEX));
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 #endif
   if (ABS (re_y.value) >= ABS (im_y.value)) {
@@ -252,7 +252,7 @@ void genie_pow_complex_int (NODE_T * p)
   A68_INT j;
   int expo;
   BOOL_T negative;
-  POP_PRIMITIVE (p, &j, A68_INT);
+  POP_OBJECT (p, &j, A68_INT);
   POP_COMPLEX (p, &re_x, &im_x);
   re_z = 1.0;
   im_z = 0.0;
@@ -364,8 +364,8 @@ void genie_lengthen_complex_to_long_complex (NODE_T * p)
   int digits = get_mp_digits (MODE (LONG_REAL));
   MP_DIGIT_T *z;
   A68_REAL a, b;
-  POP_PRIMITIVE (p, &b, A68_REAL);
-  POP_PRIMITIVE (p, &a, A68_REAL);
+  POP_OBJECT (p, &b, A68_REAL);
+  POP_OBJECT (p, &a, A68_REAL);
   STACK_MP (z, p, digits);
   real_to_mp (p, z, a.value, digits);
   MP_STATUS (z) = INITIALISED_MASK;
@@ -639,7 +639,7 @@ void genie_pow_long_complex_int (NODE_T * p)
   A68_INT j;
   int expo;
   BOOL_T negative;
-  POP_PRIMITIVE (p, &j, A68_INT);
+  POP_OBJECT (p, &j, A68_INT);
   pop_sp = stack_pointer;
   im_x = (MP_DIGIT_T *) STACK_OFFSET (-size);
   re_x = (MP_DIGIT_T *) STACK_OFFSET (-2 * size);
@@ -871,10 +871,10 @@ void genie_ln_complex (NODE_T * p)
   RESET_ERRNO;
   PUSH_COMPLEX (p, re->value, im->value);
   genie_abs_complex (p);
-  POP_PRIMITIVE (p, &r, A68_REAL);
+  POP_OBJECT (p, &r, A68_REAL);
   PUSH_COMPLEX (p, re->value, im->value);
   genie_arg_complex (p);
-  POP_PRIMITIVE (p, &th, A68_REAL);
+  POP_OBJECT (p, &th, A68_REAL);
   re->value = log (r.value);
   im->value = th.value;
   math_rte (p, errno != 0, MODE (COMPLEX), NULL);
@@ -998,8 +998,8 @@ void genie_tan_complex (NODE_T * p)
   PUSH_PRIMITIVE (p, r, A68_REAL);
   PUSH_PRIMITIVE (p, i, A68_REAL);
   genie_sin_complex (p);
-  POP_PRIMITIVE (p, &v, A68_REAL);
-  POP_PRIMITIVE (p, &u, A68_REAL);
+  POP_OBJECT (p, &v, A68_REAL);
+  POP_OBJECT (p, &u, A68_REAL);
   PUSH_PRIMITIVE (p, r, A68_REAL);
   PUSH_PRIMITIVE (p, i, A68_REAL);
   genie_cos_complex (p);

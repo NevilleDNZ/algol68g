@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -58,7 +58,7 @@ void genie_http_content (NODE_T * p)
   char buffer[CONTENT_BUFFER_SIZE];
   RESET_ERRNO;
 /* Pop arguments. */
-  POP_PRIMITIVE (p, &port_number, A68_INT);
+  POP_OBJECT (p, &port_number, A68_INT);
   CHECK_INIT (p, INITIALISED (&port_number), MODE (INT));
   POP_REF (p, &path_string);
   CHECK_INIT (p, INITIALISED (&path_string), MODE (STRING));
@@ -80,7 +80,7 @@ void genie_http_content (NODE_T * p)
   add_string_transput_buffer (p, REQUEST_BUFFER, get_transput_buffer (PATH_BUFFER));
   add_string_transput_buffer (p, REQUEST_BUFFER, " HTTP/1.0\n\n");
 /* Connect to host. */
-  FILL (&socket_address, 0, SIZE_OF (socket_address));
+  FILL (&socket_address, 0, sizeof (socket_address));
   socket_address.sin_family = AF_INET;
   service_address = getservbyname (SERVICE, PROTOCOL);
   if (service_address == NULL) {
@@ -152,7 +152,7 @@ void genie_http_content (NODE_T * p)
     }
   default:
     {
-      ABNORMAL_END (A_TRUE, "unexpected result from select", NULL);
+      ABNORMAL_END (A68_TRUE, "unexpected result from select", NULL);
     }
   }
   while ((k = io_read (socket_id, &buffer, (CONTENT_BUFFER_SIZE - 1))) > 0) {
@@ -189,7 +189,7 @@ void genie_tcp_request (NODE_T * p)
   char buffer[CONTENT_BUFFER_SIZE];
   RESET_ERRNO;
 /* Pop arguments. */
-  POP_PRIMITIVE (p, &port_number, A68_INT);
+  POP_OBJECT (p, &port_number, A68_INT);
   CHECK_INIT (p, INITIALISED (&port_number), MODE (INT));
   POP_REF (p, &path_string);
   CHECK_INIT (p, INITIALISED (&path_string), MODE (STRING));
@@ -209,7 +209,7 @@ void genie_tcp_request (NODE_T * p)
 /* Make request. */
   add_string_transput_buffer (p, REQUEST_BUFFER, get_transput_buffer (PATH_BUFFER));
 /* Connect to host. */
-  FILL (&socket_address, 0, SIZE_OF (socket_address));
+  FILL (&socket_address, 0, sizeof (socket_address));
   socket_address.sin_family = AF_INET;
   service_address = getservbyname (SERVICE, PROTOCOL);
   if (service_address == NULL) {
@@ -281,7 +281,7 @@ void genie_tcp_request (NODE_T * p)
     }
   default:
     {
-      ABNORMAL_END (A_TRUE, "unexpected result from select", NULL);
+      ABNORMAL_END (A68_TRUE, "unexpected result from select", NULL);
     }
   }
   while ((k = io_read (socket_id, &buffer, (CONTENT_BUFFER_SIZE - 1))) > 0) {

@@ -1,7 +1,7 @@
 #! /bin/sh
 #
 # This file is part of Algol 68 Genie - an Algol 68 interpreter.
-# Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+# Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 #
 # This program is free software; you can redistribute it and/or modify it under
 # the terms of the GNU General Public License as published by the Free Software
@@ -21,9 +21,9 @@
 
 A68G_NAME="a68g"
 MAKEFILE=makefile
-VERSION_NUMBER="10.1"
+VERSION_NUMBER="10.2"
 REVISION="Mark $VERSION_NUMBER"
-TIME_STAMP="December 2006"
+TIME_STAMP="April 2007"
 RELEASE_DATE="released $TIME_STAMP"
 PACKAGE="algol68g-mk$VERSION_NUMBER"
 warnings=

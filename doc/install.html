@@ -28,7 +28,9 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-Documentation for Algol 68 Genie Mark 10.1
+<small>
+Documentation for Algol 68 Genie Mark 10.2
+</small>
 </td>
 </table>
 
@@ -39,7 +41,7 @@ Documentation for Algol 68 Genie Mark 10.1
 <h2>Installing Algol 68 Genie</h2>
 </td>
 <td width="30%" bgcolor="white" valign=top align=center>
-<img src="logo.gif">
+<img src="algol68.gif">
 </td>
 <td width="5%" valign=top bgcolor="white">
 </td>
@@ -48,28 +50,26 @@ Documentation for Algol 68 Genie Mark 10.1
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<b>Algol68G Mark 10.1</b>
-<br>
-&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
-&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
-&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
-<br>
-<b>Extensions</b>
-<br>
-&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
-&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
-<br>
-&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
+<b>Algol68G Mark 10.2</b>
+<p>
+&nbsp;&middot;&nbsp;<a href="algol.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a>
+<p>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html"><small>Linear algebra</small></a>
+<p>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#obtaining"><small>Downloads</small></a><br>
+&nbsp;&middot;&nbsp;<a href="algol.html#contact"><small>Contact</small></a><br>
 </td>
 </tr>
 </table>
@@ -77,7 +77,7 @@ Documentation for Algol 68 Genie Mark 10.1
 </td>
 </table>
 
-<h3>Algol 68 Genie Mark 10.1</h3>
+<h3>Algol 68 Genie Mark 10.2</h3>
 <p>
 Algol 68 Genie (Algol68G) is free software distributed under GNU GPL. This software is 
 distributed in the hope that it will be useful, but without any warranty. 
@@ -91,8 +91,8 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <p>
 The following list of commands may suffice to help you on your way (if not, follow the detailed instructions in next paragraphs):
 <pre>
-tar -xzf algol68g-mk10.1.tar.gz
-cd algol68g-mk10.1
+tar -xzf algol68g-mk10.2.tar.gz
+cd algol68g-mk10.2
 ./configure -O --threads
 make depend
 make
@@ -117,7 +117,7 @@ If available on your system, Algol68G can use next libraries to extend its funct
 <li><a href="http://www.postgresql.org/">PostgreSQL</a> for writing PostgreSQL database client applications
 </ul>
 <p>
-Algol 68 Genie Mark 10.1 was developed using next versions of optional libraries:
+Algol 68 Genie Mark 10.2 was developed using next versions of optional libraries:
 <ul>
 <li><a href="http://www.gnu.org/software/plotutils/">GNU plotutils</a> version 2.5
 <li><a href="http://www.gnu.org/software/gsl/">GNU scientific library</a> version 1.8
@@ -146,20 +146,20 @@ Suppose you are user <code>algol68g</code> and your prompt indicates your presen
 <p>
 <li>Unpack the distribution by typing:
 <pre>
-/home/algol68g> tar -xzf algol68g-mk10.1.tar.gz
+/home/algol68g> tar -xzf algol68g-mk10.2.tar.gz
 </pre>
 
 <h4>Step 2: Configuring</h4>
 <p>
 <li>Make the distribution directory the present working directory by typing:
 <pre>
-/home/algol68g> cd algol68g-mk10.1
+/home/algol68g> cd algol68g-mk10.2
 </pre>
 
 <p>
 <li>In the distribution directory type:
 <pre>
-/home/algol68g/algol68g-mk10.1> ./configure
+/home/algol68g/algol68g-mk10.2> ./configure
 </pre>
 
 <p>
@@ -169,7 +169,7 @@ The configure script accepts various
 options. For an overview of options, type:
 <p>
 <pre>
-/home/algol68g/algol68g-mk10.1> ./configure --help
+/home/algol68g/algol68g-mk10.2> ./configure --help
 </pre>
 
 <p>
@@ -179,7 +179,7 @@ assume you are using <code>gcc</code>, <code>gdb</code> and <code>gprof</code>.
 If you are interested in Algol68G's parallel clause, you need to 
 build using POSIX threads. To build with POSIX threads, type:
 <pre>
-/home/algol68g/algol68g-mk10.1> ./configure --threads
+/home/algol68g/algol68g-mk10.2> ./configure --threads
 </pre>
 
 <h4>Step 3: Building</h4>
@@ -195,7 +195,7 @@ can be safely ignored.
 <p>
 <li>Type:
 <pre>
-/home/algol68g/algol68g-mk10.1> make depend
+/home/algol68g/algol68g-mk10.2> make depend
 </pre>
 
 <p>
@@ -204,13 +204,13 @@ This will register dependencies needed to build Algol68G.
 <p>
 <li>If you do not want to install Algol68G for all users, type:
 <pre>
-/home/algol68g/algol68g-mk10.1> make all
+/home/algol68g/algol68g-mk10.2> make all
 </pre>
 
 <p>
 or, simply:
 <pre>
-/home/algol68g/algol68g-mk10.1> make
+/home/algol68g/algol68g-mk10.2> make
 </pre>
 
 <p>
@@ -218,7 +218,7 @@ The executable <code>a68g</code> will be put in the present working directory.
 <p>
 If you want to install Algol68G for all users on your system, type:
 <pre>
-/home/algol68g/algol68g-mk10.1> make install
+/home/algol68g/algol68g-mk10.2> make install
 </pre>
 
 <p>
@@ -229,39 +229,39 @@ are tried.
 <p>
 <li>Installation can be undone by typing:
 <pre>
-/home/algol68g/algol68g-mk10.1> make uninstall
+/home/algol68g/algol68g-mk10.2> make uninstall
 </pre>
 
 <p>
 <li>Note that in you can supply <code>CPPFLAGS</code>, <code>CFLAGS</code> and <code>LDFLAGS</code> to <code>make</code>; 
 for instance type:
 <pre>
-/home/algol68g/algol68g-mk10.1> make CFLAGS="-O"
+/home/algol68g/algol68g-mk10.2> make CFLAGS="-O"
 </pre>
 to optimise the code.
 
 <p>
 <li>To remove binaries used for building, type: 
 <pre>
-/home/algol68g/algol68g-mk10.1> make clean
+/home/algol68g/algol68g-mk10.2> make clean
 </pre>
 To remove all files used for building, type:
 <pre>
-/home/algol68g/algol68g-mk10.1> make distclean
+/home/algol68g/algol68g-mk10.2> make distclean
 </pre>
 
 <h4>Step 4: Starting Algol 68 Genie</h4>
 <p>
 When you install <code>a68g</code> in the present working directory, you may want to include the current directory in your <TT>PATH</TT> variable. Otherwise you will need to indicate the current directory by typing <code>./a68g</code> as in the following example:
 <pre>
-/home/algol68g/algol68g-mk10.1> ./a68g --version
-Algol 68 Genie Mark 10.1, copyright 2006 J. Marcel van der Veer.
+/home/algol68g/algol68g-mk10.2> ./a68g --version
+Algol 68 Genie Mark 10.2, copyright 2006 J. Marcel van der Veer.
 Algol 68 Genie is free software covered by the GNU General Public License.
 There is ABSOLUTELY NO WARRANTY for Algol 68 Genie.
 See the GNU General Public License for more details.
 
-Algol 68 Genie Mark 10.1, released December 2006
-Image "a68g" compiled by a68g on Dec 1 2006 23:59:59 with gcc 3.3.5
+Algol 68 Genie Mark 10.2, released April 2007
+Image "a68g" compiled by a68g on Apr 1 2007 23:59:59 with gcc 3.3.5
 GNU libplot 4.2
 GNU Scientific Library 1.8
 PostgreSQL libpq 8.1.4
@@ -271,14 +271,14 @@ Default expression stack size: 1024 kB
 Default heap size: 25600 kB
 Default handle pool size: 4096 kB
 Default stack overhead: 256 kB
-/home/algol68g/algol68g-mk10.1>
+/home/algol68g/algol68g-mk10.2>
 </pre>
 If instead of above version statement you get a message like
 <pre>
-/home/algol68g/algol68g-mk10.1> ./a68g --version
+/home/algol68g/algol68g-mk10.2> ./a68g --version
 psql: error in loading shared libraries
 libpq.so.4.1: cannot open shared object file: No such file or directory
-/home/algol68g/algol68g-mk10.1>
+/home/algol68g/algol68g-mk10.2>
 </pre>
 then your shared library search path was not porperly set for PostgreSQL's <code>libpq</code> library. Find out where PostgreSQL library files are at, probably at <code>/usr/local/pgsql/lib</code>. The method to set the shared library search path varies between platforms, but the most widely used method is to set the environment variable <code>LD_LIBRARY_PATH</code>. In Bourne shells (<code>sh</code>, <code>ksh</code>, <code>bash</code>, <code>zsh</code>) you would use
 <pre>
@@ -296,8 +296,8 @@ If in doubt, refer to the manual pages of your system.
 <hr color=#f0f0f0>
 <p>
 <small>
-Copyright &copy; 2001-2006 J. Marcel van der Veer.<br>
-Algol 68 Genie Mark 10.1 (December 2006)
+Copyright &copy; 2001-2007 J. Marcel van der Veer.<br>
+Algol 68 Genie Mark 10.2 (April 2007)
 </small>
 </p>
 <hr color=#f0f0f0>

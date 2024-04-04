@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -26,10 +26,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define MOID_ERROR_WIDTH 80
 
-#define ERROR_OPTION "error in option \"%s\""
-#define ERROR_OPTION_INFO "error in option \"%s\" (%s)"
-#define ERROR_UNWORTHY_CHARACTER "unworthy character %s"
-#define ERROR_NO_INPUT_FILE "no input file specified"
 #define ERROR_ACCESSING_NIL "attempt to access N"
 #define ERROR_ALIGNMENT "alignment error"
 #define ERROR_ARGUMENT_NUMBER "incorrect number of arguments for M"
@@ -99,6 +95,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_LABELED_UNIT_MUST_FOLLOW "S must be followed by a labeled unit"
 #define ERROR_LABEL_BEFORE_DECLARATION "declaration cannot follow a labeled unit"
 #define ERROR_LABEL_IN_PAR_CLAUSE "target label is in a parallel clause"
+#define ERROR_LONG_STRING "string exceeds end of line"
 #define ERROR_MATH "M math error"
 #define ERROR_MATH_EXCEPTION "math exception E"
 #define ERROR_MATH_INFO "M math error (Y)"
@@ -110,6 +107,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_NO_COMPONENT "M is neither component nor subset of M"
 #define ERROR_NO_DYADIC "O S O has not been declared in this range"
 #define ERROR_NO_FIELD "M has no field Z"
+#define ERROR_NO_INPUT_FILE "no input file specified"
 #define ERROR_NO_MONADIC "S O has not been declared in this range"
 #define ERROR_NO_NAME "M A does not yield a name"
 #define ERROR_NO_NAME_REQUIRED "context does not require a name"
@@ -122,6 +120,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_OPERAND_NUMBER "incorrect number of operands for S"
 #define ERROR_OPERATOR_INVALID "monadic S cannot start with a character from Z"
 #define ERROR_OPERATOR_RELATED "M Z is firmly related to M Z"
+#define ERROR_OPTION "error in option \"%s\""
+#define ERROR_OPTION_INFO "error in option \"%s\" (%s)"
 #define ERROR_OUT_OF_BOUNDS "M value out of bounds"
 #define ERROR_OUT_OF_CORE "insufficient memory"
 #define ERROR_PAGE_SIZE "error in page size"
@@ -131,6 +131,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_PARALLEL_OVERFLOW "too many parallel units"
 #define ERROR_PARENTHESIS "incorrect parenthesis nesting; check for Y"
 #define ERROR_PARENTHESIS_2 "incorrect parenthesis nesting; encountered Z L but expected X; check for Y"
+#define ERROR_PRAGMENT "error in pragment"
 #define ERROR_QUOTED_BOLD_TAG "error in quoted bold tag"
 #define ERROR_REFINEMENT_APPLIED "refinement is applied more than once"
 #define ERROR_REFINEMENT_DEFINED "refinement already defined"
@@ -148,9 +149,9 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_SUBSET_RELATED "M has firmly related subset M"
 #define ERROR_SYNTAX "detected in A"
 #define ERROR_SYNTAX_EXPECTED "A expected"
-#define ERROR_SYNTAX_MIXED_DECLARATION "probably mixed identity and variable declaration"
 #define ERROR_SYNTAX_MISSING_SEPARATOR "probably a missing separator"
 #define ERROR_SYNTAX_MISSING_SYMBOL "probably a missing symbol nearby"
+#define ERROR_SYNTAX_MIXED_DECLARATION "probably mixed identity and variable declaration"
 #define ERROR_SYNTAX_WRONG_SEPARATOR "probably a wrong separator"
 #define ERROR_TIME_LIMIT_EXCEEDED "time limit exceeded"
 #define ERROR_TOO_MANY_ARGUMENTS "too many arguments"
@@ -162,24 +163,23 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_UNDECLARED_TAG_1 "tag S has not been declared properly in this range"
 #define ERROR_UNDECLARED_TAG_2 "tag Z has not been declared properly in this range"
 #define ERROR_UNDETERMINDED_FILE_MOOD "file has undetermined mood"
-#define ERROR_UNSPECIFIED "unspecified error"
 #define ERROR_UNIMPLEMENTED_PRECISION "M precision is not implemented"
+#define ERROR_UNSPECIFIED "unspecified error"
 #define ERROR_UNTERMINATED_COMMENT "unterminated comment"
 #define ERROR_UNTERMINATED_PRAGMAT "unterminated pragmat"
 #define ERROR_UNTERMINATED_PRAGMENT "unterminated pragment"
 #define ERROR_UNTERMINATED_STRING "unterminated string"
-#define ERROR_PRAGMENT "error in pragment"
-#define ERROR_LONG_STRING "string exceeds end of line"
+#define ERROR_UNWORTHY_CHARACTER "unworthy character %s"
 #define INFO_APPROPRIATE_DECLARER "appropriate declarer"
 #define INFO_MISSING_KEYWORDS "missing or unmatched keyword"
 #define WARNING_EXECUTED_AS "A will be executed as A"
-#define WARNING_TAG_NOT_PORTABLE "Tag S is not portable"
-#define WARNING_WIDENING_NOT_PORTABLE "Implicit widening of M to M is not portable"
 #define WARNING_SCOPE_STATIC_1 "value from A could be exported out of its scope"
 #define WARNING_SCOPE_STATIC_2 "M value from A could be exported out of its scope"
 #define WARNING_SKIPPED_SUPERFLUOUS "skipped superfluous A"
+#define WARNING_TAG_NOT_PORTABLE "Tag S is not portable"
 #define WARNING_TAG_UNUSED "tag S is not used"
-#define WARNING_UNINITIALISED "identifier S might be used uninitialised"
+#define WARNING_UNINITIALISED "identifier S might be used before being initialised"
 #define WARNING_UNINTENDED "possibly unintended M A in M A"
 #define WARNING_VOIDED "value of M @ will be voided"
+#define WARNING_WIDENING_NOT_PORTABLE "Implicit widening of M to M is not portable"
 #endif

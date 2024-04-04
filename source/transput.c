@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -134,8 +134,8 @@ int get_unblocked_transput_buffer (NODE_T * p)
     }
   }
 /* Oops! */
-  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_TOO_MANY_OPEN_FILES);
-  exit_genie (p, A_RUNTIME_ERROR);
+  diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_TOO_MANY_OPEN_FILES);
+  exit_genie (p, A68_RUNTIME_ERROR);
   return (-1);
 }
 
@@ -412,8 +412,8 @@ char *stack_string (NODE_T * p, int size)
   char *new_str = (char *) STACK_TOP;
   INCREMENT_STACK_POINTER (p, size);
   if (stack_pointer > expr_stack_limit) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   FILL (new_str, NULL_CHAR, size);
   return (new_str);
@@ -428,7 +428,7 @@ char *stack_string (NODE_T * p, int size)
 
 void genie_stand_in (NODE_T * p)
 {
-  PUSH (p, &stand_in, SIZE_OF (A68_REF));
+  PUSH_REF (p, stand_in);
 }
 
 /*!
@@ -438,7 +438,7 @@ void genie_stand_in (NODE_T * p)
 
 void genie_stand_out (NODE_T * p)
 {
-  PUSH (p, &stand_out, SIZE_OF (A68_REF));
+  PUSH_REF (p, stand_out);
 }
 
 /*!
@@ -448,7 +448,7 @@ void genie_stand_out (NODE_T * p)
 
 void genie_stand_back (NODE_T * p)
 {
-  PUSH (p, &stand_back, SIZE_OF (A68_REF));
+  PUSH_REF (p, stand_back);
 }
 
 /*!
@@ -459,7 +459,7 @@ void genie_stand_back (NODE_T * p)
 
 void genie_stand_error (NODE_T * p)
 {
-  PUSH (p, &stand_error, SIZE_OF (A68_REF));
+  PUSH_REF (p, stand_error);
 }
 
 /*!
@@ -559,7 +559,7 @@ void genie_tab_char (NODE_T * p)
 
 void genie_stand_in_channel (NODE_T * p)
 {
-  PUSH_CHANNEL (p, stand_in_channel);
+  PUSH_OBJECT (p, stand_in_channel, A68_CHANNEL);
 }
 
 /*!
@@ -569,7 +569,7 @@ void genie_stand_in_channel (NODE_T * p)
 
 void genie_stand_out_channel (NODE_T * p)
 {
-  PUSH_CHANNEL (p, stand_out_channel);
+  PUSH_OBJECT (p, stand_out_channel, A68_CHANNEL);
 }
 
 /*!
@@ -579,7 +579,7 @@ void genie_stand_out_channel (NODE_T * p)
 
 void genie_stand_draw_channel (NODE_T * p)
 {
-  PUSH_CHANNEL (p, stand_draw_channel);
+  PUSH_OBJECT (p, stand_draw_channel, A68_CHANNEL);
 }
 
 /*!
@@ -589,7 +589,7 @@ void genie_stand_draw_channel (NODE_T * p)
 
 void genie_stand_back_channel (NODE_T * p)
 {
-  PUSH_CHANNEL (p, stand_back_channel);
+  PUSH_OBJECT (p, stand_back_channel, A68_CHANNEL);
 }
 
 /*!
@@ -599,7 +599,7 @@ void genie_stand_back_channel (NODE_T * p)
 
 void genie_stand_error_channel (NODE_T * p)
 {
-  PUSH_CHANNEL (p, stand_error_channel);
+  PUSH_OBJECT (p, stand_error_channel, A68_CHANNEL);
 }
 
 /*!
@@ -646,7 +646,7 @@ static void init_channel (A68_CHANNEL * chan, BOOL_T r, BOOL_T s, BOOL_T g, BOOL
   chan->put = p;
   chan->bin = b;
   chan->draw = d;
-  chan->compress = A_TRUE;
+  chan->compress = A68_TRUE;
 }
 
 /*!
@@ -694,24 +694,24 @@ static void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, 
     PROTECT_SWEEP_HANDLE (&(f->identification));
     bufcpy ((char *) ADDRESS (&(f->identification)), filename, len);
     f->fd = -1;
-    f->read_mood = A_FALSE;
-    f->write_mood = A_FALSE;
-    f->char_mood = A_FALSE;
-    f->draw_mood = A_FALSE;
+    f->read_mood = A68_FALSE;
+    f->write_mood = A68_FALSE;
+    f->char_mood = A68_FALSE;
+    f->draw_mood = A68_FALSE;
   } else {
     f->identification = nil_ref;
     f->fd = s;
     f->read_mood = rm;
     f->write_mood = wm;
     f->char_mood = cm;
-    f->draw_mood = A_FALSE;
+    f->draw_mood = A68_FALSE;
   }
   f->transput_buffer = get_unblocked_transput_buffer (p);
   reset_transput_buffer (f->transput_buffer);
-  f->eof = A_FALSE;
-  f->tmp_file = A_FALSE;
-  f->opened = A_TRUE;
-  f->open_exclusive = A_FALSE;
+  f->eof = A68_FALSE;
+  f->tmp_file = A68_FALSE;
+  f->opened = A68_TRUE;
+  f->open_exclusive = A68_FALSE;
   f->format = nil_format;
   f->string = nil_ref;
   f->strpos = 0;
@@ -728,21 +728,21 @@ void genie_init_transput (NODE_T * p)
 {
   init_transput_buffers (p);
 /* Channels. */
-  init_channel (&stand_in_channel, A_FALSE, A_FALSE, A_TRUE, A_FALSE, A_FALSE, A_FALSE);
-  init_channel (&stand_out_channel, A_FALSE, A_FALSE, A_FALSE, A_TRUE, A_FALSE, A_FALSE);
-  init_channel (&stand_back_channel, A_TRUE, A_TRUE, A_TRUE, A_TRUE, A_TRUE, A_FALSE);
-  init_channel (&stand_error_channel, A_FALSE, A_FALSE, A_FALSE, A_TRUE, A_FALSE, A_FALSE);
-  init_channel (&associate_channel, A_TRUE, A_TRUE, A_TRUE, A_TRUE, A_FALSE, A_FALSE);
+  init_channel (&stand_in_channel, A68_FALSE, A68_FALSE, A68_TRUE, A68_FALSE, A68_FALSE, A68_FALSE);
+  init_channel (&stand_out_channel, A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE, A68_FALSE, A68_FALSE);
+  init_channel (&stand_back_channel, A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_FALSE);
+  init_channel (&stand_error_channel, A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE, A68_FALSE, A68_FALSE);
+  init_channel (&associate_channel, A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_FALSE, A68_FALSE);
 #if defined HAVE_PLOTUTILS
-  init_channel (&stand_draw_channel, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_TRUE);
+  init_channel (&stand_draw_channel, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE);
 #else
-  init_channel (&stand_draw_channel, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_TRUE);
+  init_channel (&stand_draw_channel, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE);
 #endif
 /* Files. */
-  init_file (p, &stand_in, stand_in_channel, STDIN_FILENO, A_TRUE, A_FALSE, A_TRUE, "A68G_STANDIN");
-  init_file (p, &stand_out, stand_out_channel, STDOUT_FILENO, A_FALSE, A_TRUE, A_TRUE, "A68G_STANDOUT");
-  init_file (p, &stand_back, stand_back_channel, -1, A_FALSE, A_FALSE, A_FALSE, NULL);
-  init_file (p, &stand_error, stand_error_channel, STDERR_FILENO, A_FALSE, A_TRUE, A_TRUE, "A68G_STANDERROR");
+  init_file (p, &stand_in, stand_in_channel, STDIN_FILENO, A68_TRUE, A68_FALSE, A68_TRUE, "A68G_STANDIN");
+  init_file (p, &stand_out, stand_out_channel, STDOUT_FILENO, A68_FALSE, A68_TRUE, A68_TRUE, "A68G_STANDOUT");
+  init_file (p, &stand_back, stand_back_channel, -1, A68_FALSE, A68_FALSE, A68_FALSE, NULL);
+  init_file (p, &stand_error, stand_error_channel, STDERR_FILENO, A68_FALSE, A68_TRUE, A68_TRUE, "A68G_STANDERROR");
 }
 
 /*!
@@ -874,6 +874,22 @@ void genie_set_possible (NODE_T * p)
 }
 
 /*!
+\brief PROC (REF FILE) BOOL reidf possible
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_reidf_possible (NODE_T * p)
+{
+  A68_REF ref_file;
+  A68_FILE *file;
+  POP_REF (p, &ref_file);
+  CHECK_NIL (p, ref_file, MODE (REF_FILE));
+  file = FILE_DEREF (&ref_file);
+  CHECK_INIT (p, INITIALISED (file), MODE (FILE));
+  PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+}
+
+/*!
 \brief PROC (REF FILE) BOOL reset possible
 \param p position in syntax tree, should not be NULL
 **/
@@ -932,7 +948,7 @@ void genie_open (NODE_T * p)
   A68_REF ref_iden, ref_file;
   A68_FILE *file;
   int size;
-  POP (p, &channel, SIZE_OF (A68_CHANNEL));
+  POP_OBJECT (p, &channel, A68_CHANNEL);
   POP_REF (p, &ref_iden);
   CHECK_NIL (p, ref_iden, MODE (REF_STRING));
   POP_REF (p, &ref_file);
@@ -940,13 +956,13 @@ void genie_open (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   file->status = INITIALISED_MASK;
   file->channel = channel;
-  file->opened = A_TRUE;
-  file->open_exclusive = A_FALSE;
-  file->read_mood = A_FALSE;
-  file->write_mood = A_FALSE;
-  file->char_mood = A_FALSE;
-  file->draw_mood = A_FALSE;
-  file->tmp_file = A_FALSE;
+  file->opened = A68_TRUE;
+  file->open_exclusive = A68_FALSE;
+  file->read_mood = A68_FALSE;
+  file->write_mood = A68_FALSE;
+  file->char_mood = A68_FALSE;
+  file->draw_mood = A68_FALSE;
+  file->tmp_file = A68_FALSE;
   size = a68_string_size (p, ref_iden);
   if (INITIALISED (&(file->identification)) && !IS_NIL (file->identification)) {
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
@@ -979,7 +995,7 @@ void genie_establish (NODE_T * p)
   A68_REF ref_iden, ref_file;
   A68_FILE *file;
   int size;
-  POP (p, &channel, SIZE_OF (A68_CHANNEL));
+  POP_OBJECT (p, &channel, A68_CHANNEL);
   POP_REF (p, &ref_iden);
   CHECK_NIL (p, ref_iden, MODE (REF_STRING));
   POP_REF (p, &ref_file);
@@ -987,16 +1003,16 @@ void genie_establish (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   file->status = INITIALISED_MASK;
   file->channel = channel;
-  file->opened = A_TRUE;
-  file->open_exclusive = A_TRUE;
-  file->read_mood = A_FALSE;
-  file->write_mood = A_FALSE;
-  file->char_mood = A_FALSE;
-  file->draw_mood = A_FALSE;
-  file->tmp_file = A_FALSE;
+  file->opened = A68_TRUE;
+  file->open_exclusive = A68_TRUE;
+  file->read_mood = A68_FALSE;
+  file->write_mood = A68_FALSE;
+  file->char_mood = A68_FALSE;
+  file->draw_mood = A68_FALSE;
+  file->tmp_file = A68_FALSE;
   if (!file->channel.put) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   size = a68_string_size (p, ref_iden);
   if (INITIALISED (&(file->identification)) && !IS_NIL (file->identification)) {
@@ -1028,19 +1044,19 @@ void genie_create (NODE_T * p)
   A68_CHANNEL channel;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &channel, SIZE_OF (A68_CHANNEL));
+  POP_OBJECT (p, &channel, A68_CHANNEL);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
   file->status = INITIALISED_MASK;
   file->channel = channel;
-  file->opened = A_TRUE;
-  file->open_exclusive = A_FALSE;
-  file->read_mood = A_FALSE;
-  file->write_mood = A_FALSE;
-  file->char_mood = A_FALSE;
-  file->draw_mood = A_FALSE;
-  file->tmp_file = A_TRUE;
+  file->opened = A68_TRUE;
+  file->open_exclusive = A68_FALSE;
+  file->read_mood = A68_FALSE;
+  file->write_mood = A68_FALSE;
+  file->char_mood = A68_FALSE;
+  file->draw_mood = A68_FALSE;
+  file->tmp_file = A68_TRUE;
   if (INITIALISED (&(file->identification)) && !IS_NIL (file->identification)) {
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
   }
@@ -1072,24 +1088,24 @@ void genie_associate (NODE_T * p)
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   if (IS_IN_HEAP (&ref_file) && !IS_IN_HEAP (&ref_string)) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+    exit_genie (p, A68_RUNTIME_ERROR);
   } else if (IS_IN_FRAME (&ref_file) && IS_IN_FRAME (&ref_string)) {
     if (GET_REF_SCOPE (&ref_string) > GET_REF_SCOPE (&ref_file)) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_SCOPE_DYNAMIC_1, MODE (REF_STRING));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
   file = FILE_DEREF (&ref_file);
   file->status = INITIALISED_MASK;
   file->channel = associate_channel;
-  file->opened = A_TRUE;
-  file->open_exclusive = A_FALSE;
-  file->read_mood = A_FALSE;
-  file->write_mood = A_FALSE;
-  file->char_mood = A_FALSE;
-  file->draw_mood = A_FALSE;
-  file->tmp_file = A_FALSE;
+  file->opened = A68_TRUE;
+  file->open_exclusive = A68_FALSE;
+  file->read_mood = A68_FALSE;
+  file->write_mood = A68_FALSE;
+  file->char_mood = A68_FALSE;
+  file->draw_mood = A68_FALSE;
+  file->tmp_file = A68_FALSE;
   if (INITIALISED (&(file->identification)) && !IS_NIL (file->identification)) {
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
   }
@@ -1123,7 +1139,7 @@ void genie_close (NODE_T * p)
   if (!file->opened || (!file->read_mood && !file->write_mood && !file->draw_mood)) {
     return;
   }
-  file->device.device_made = A_FALSE;
+  file->device.device_made = A68_FALSE;
 #if defined HAVE_PLOTUTILS
   if (file->device.device_opened) {
     close_device (p, file);
@@ -1132,11 +1148,11 @@ void genie_close (NODE_T * p)
   }
 #endif
   if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_CLOSE);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_CLOSE);
+    exit_genie (p, A68_RUNTIME_ERROR);
   } else {
     file->fd = -1;
-    file->opened = A_FALSE;
+    file->opened = A68_FALSE;
     unblock_transput_buffer (file->transput_buffer);
     set_default_mended_procedures (file);
   }
@@ -1147,8 +1163,8 @@ void genie_close (NODE_T * p)
       CHECK_INIT (p, INITIALISED (&(file->identification)), MODE (ROWS));
       filename = (char *) ADDRESS (&(file->identification));
       if (remove (filename) != 0) {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
-        exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       UNPROTECT_SWEEP_HANDLE (&(file->identification));
       file->identification = nil_ref;
@@ -1172,7 +1188,7 @@ void genie_lock (NODE_T * p)
   if (!file->opened || (!file->read_mood && !file->write_mood && !file->draw_mood)) {
     return;
   }
-  file->device.device_made = A_FALSE;
+  file->device.device_made = A68_FALSE;
 #if defined HAVE_PLOTUTILS
   if (file->device.device_opened) {
     close_device (p, file);
@@ -1186,11 +1202,11 @@ void genie_lock (NODE_T * p)
   ABNORMAL_END (errno != 0, "cannot lock file", NULL);
 #endif
   if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_LOCK);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_LOCK);
+    exit_genie (p, A68_RUNTIME_ERROR);
   } else {
     file->fd = -1;
-    file->opened = A_FALSE;
+    file->opened = A68_FALSE;
     unblock_transput_buffer (file->transput_buffer);
     set_default_mended_procedures (file);
   }
@@ -1201,8 +1217,8 @@ void genie_lock (NODE_T * p)
       CHECK_INIT (p, INITIALISED (&(file->identification)), MODE (ROWS));
       filename = (char *) ADDRESS (&(file->identification));
       if (remove (filename) != 0) {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
-        exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       UNPROTECT_SWEEP_HANDLE (&(file->identification));
       file->identification = nil_ref;
@@ -1226,7 +1242,7 @@ void genie_erase (NODE_T * p)
   if (!file->opened || (!file->read_mood && !file->write_mood && !file->draw_mood)) {
     return;
   }
-  file->device.device_made = A_FALSE;
+  file->device.device_made = A68_FALSE;
 #if defined HAVE_PLOTUTILS
   if (file->device.device_opened) {
     close_device (p, file);
@@ -1235,11 +1251,11 @@ void genie_erase (NODE_T * p)
   }
 #endif
   if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
+    exit_genie (p, A68_RUNTIME_ERROR);
   } else {
     file->fd = -1;
-    file->opened = A_FALSE;
+    file->opened = A68_FALSE;
     unblock_transput_buffer (file->transput_buffer);
     set_default_mended_procedures (file);
   }
@@ -1249,8 +1265,8 @@ void genie_erase (NODE_T * p)
     CHECK_INIT (p, INITIALISED (&(file->identification)), MODE (ROWS));
     filename = (char *) ADDRESS (&(file->identification));
     if (remove (filename) != 0) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_SCRATCH);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     UNPROTECT_SWEEP_HANDLE (&(file->identification));
     file->identification = nil_ref;
@@ -1271,19 +1287,19 @@ void genie_reset (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!IS_NIL (file->string)) {
     file->strpos = 1;
   } else if (file->fd != -1 && close (file->fd) == -1) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_RESET);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_RESET);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
-  file->read_mood = A_FALSE;
-  file->write_mood = A_FALSE;
-  file->char_mood = A_FALSE;
-  file->draw_mood = A_FALSE;
+  file->read_mood = A68_FALSE;
+  file->write_mood = A68_FALSE;
+  file->char_mood = A68_FALSE;
+  file->draw_mood = A68_FALSE;
   file->fd = -1;
   set_default_mended_procedures (file);
 }
@@ -1298,7 +1314,7 @@ void genie_on_file_end (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1316,7 +1332,7 @@ void genie_on_page_end (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1334,7 +1350,7 @@ void genie_on_line_end (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1352,7 +1368,7 @@ void genie_on_format_end (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1370,7 +1386,7 @@ void genie_on_format_error (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1388,7 +1404,7 @@ void genie_on_value_error (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1406,7 +1422,7 @@ void genie_on_open_error (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1424,7 +1440,7 @@ void genie_on_transput_error (NODE_T * p)
   A68_PROCEDURE z;
   A68_REF ref_file;
   A68_FILE *file;
-  POP (p, &z, SIZE_OF (A68_PROCEDURE));
+  POP_PROCEDURE (p, &z);
   POP_REF (p, &ref_file);
   CHECK_NIL (p, ref_file, MODE (REF_FILE));
   file = FILE_DEREF (&ref_file);
@@ -1443,11 +1459,11 @@ void on_event_handler (NODE_T * p, A68_PROCEDURE z, A68_REF ref_file)
 {
   if (z.body == NULL) {
 /* Default procedure. */
-    PUSH_PRIMITIVE (p, A_FALSE, A68_BOOL);
+    PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
   } else {
     ADDR_T pop_sp = stack_pointer, pop_fp = frame_pointer;
     MOID_T *u = MODE (PROC_REF_FILE_BOOL);
-    PUSH_REF_FILE (p, ref_file);
+    PUSH_REF (p, ref_file);
     genie_call_procedure (p, u, u, u, &z, pop_sp, pop_fp);
   }
 }
@@ -1462,10 +1478,10 @@ void end_of_file_error (NODE_T * p, A68_REF ref_file)
 {
   A68_BOOL z;
   on_event_handler (p, FILE_DEREF (&ref_file)->file_end_mended, ref_file);
-  POP_PRIMITIVE (p, &z, A68_BOOL);
-  if (z.value == A_FALSE) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_ENDED);
-    exit_genie (p, A_RUNTIME_ERROR);
+  POP_OBJECT (p, &z, A68_BOOL);
+  if (z.value == A68_FALSE) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ENDED);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -1480,8 +1496,8 @@ void open_error (NODE_T * p, A68_REF ref_file, char *mode)
 {
   A68_BOOL z;
   on_event_handler (p, FILE_DEREF (&ref_file)->open_error_mended, ref_file);
-  POP_PRIMITIVE (p, &z, A68_BOOL);
-  if (z.value == A_FALSE) {
+  POP_OBJECT (p, &z, A68_BOOL);
+  if (z.value == A68_FALSE) {
     A68_FILE *file;
     char *filename;
     CHECK_NIL (p, ref_file, MODE (REF_FILE));
@@ -1492,8 +1508,8 @@ void open_error (NODE_T * p, A68_REF ref_file, char *mode)
     } else {
       filename = "(NIL filename)";
     }
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_CANNOT_OPEN_FOR, filename, mode);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_CANNOT_OPEN_FOR, filename, mode);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -1512,10 +1528,10 @@ void value_error (NODE_T * p, MOID_T * m, A68_REF ref_file)
   } else {
     A68_BOOL z;
     on_event_handler (p, f->value_error_mended, ref_file);
-    POP_PRIMITIVE (p, &z, A68_BOOL);
-    if (z.value == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_TRANSPUT, m);
-      exit_genie (p, A_RUNTIME_ERROR);
+    POP_OBJECT (p, &z, A68_BOOL);
+    if (z.value == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_TRANSPUT, m);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
   }
 }
@@ -1531,10 +1547,10 @@ void transput_error (NODE_T * p, A68_REF ref_file, MOID_T * m)
 {
   A68_BOOL z;
   on_event_handler (p, FILE_DEREF (&ref_file)->transput_error_mended, ref_file);
-  POP_PRIMITIVE (p, &z, A68_BOOL);
-  if (z.value == A_FALSE) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_TRANSPUT, m);
-    exit_genie (p, A_RUNTIME_ERROR);
+  POP_OBJECT (p, &z, A68_BOOL);
+  if (z.value == A68_FALSE) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_TRANSPUT, m);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -1550,7 +1566,7 @@ int char_scanner (A68_FILE * f)
 {
   if (get_transput_buffer_index (f->transput_buffer) > 0) {
 /* There are buffered characters. */
-    f->eof = A_FALSE;
+    f->eof = A68_FALSE;
     return (pop_char_transput_buffer (f->transput_buffer));
   } else if (IS_NIL (f->string)) {
 /* Fetch next CHAR from the FILE. */
@@ -1558,10 +1574,10 @@ int char_scanner (A68_FILE * f)
     char ch;
     chars_read = io_read_conv (f->fd, &ch, 1);
     if (chars_read == 1) {
-      f->eof = A_FALSE;
+      f->eof = A68_FALSE;
       return (ch);
     } else {
-      f->eof = A_TRUE;
+      f->eof = A68_TRUE;
       return (EOF_CHAR);
     }
   } else {
@@ -1574,7 +1590,7 @@ int char_scanner (A68_FILE * f)
     A68_CHAR *ch;
     GET_DESCRIPTOR (a, t, &z);
     if (f->strpos < t->lower_bound || f->strpos > t->upper_bound) {
-      f->eof = A_TRUE;
+      f->eof = A68_TRUE;
       return (EOF_CHAR);
     }
     base = ADDRESS (&(a->array));
@@ -1593,7 +1609,7 @@ int char_scanner (A68_FILE * f)
 
 void unchar_scanner (NODE_T * p, A68_FILE * f, char ch)
 {
-  f->eof = A_FALSE;
+  f->eof = A68_FALSE;
   add_char_transput_buffer (p, f->transput_buffer, ch);
 }
 
@@ -1611,12 +1627,12 @@ void genie_new_line (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
     if (IS_NIL (file->string)) {
@@ -1631,8 +1647,8 @@ void genie_new_line (NODE_T * p)
       go_on = (ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !file->eof;
     }
   } else {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -1651,12 +1667,12 @@ void genie_new_page (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
     if (IS_NIL (file->string)) {
@@ -1671,8 +1687,8 @@ void genie_new_page (NODE_T * p)
       go_on = (ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !file->eof;
     }
   } else {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -1690,12 +1706,12 @@ void genie_space (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
     io_write_string (file->fd, " ");
@@ -1704,8 +1720,8 @@ void genie_space (NODE_T * p)
       (void) char_scanner (file);
     }
   } else {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -1730,7 +1746,7 @@ void skip_nl_ff (NODE_T * p, int *ch, A68_REF ref_file)
       on_event_handler (p, f->page_end_mended, ref_file);
     }
     stack_pointer = pop_sp;
-    if (z->value == A_FALSE) {
+    if (z->value == A68_FALSE) {
       (*ch) = char_scanner (f);
     }
   }
@@ -1891,13 +1907,13 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
     end_of_file_error (p, ref_file);
   } else {
     int ch = char_scanner (f);
-    BOOL_T go_on = A_TRUE;
+    BOOL_T go_on = A68_TRUE;
     reset_transput_buffer (INPUT_BUFFER);
     while (go_on) {
       if (ch == EOF_CHAR) {
-        go_on = A_FALSE;
+        go_on = A68_FALSE;
       } else if (term != NULL && a68g_strchr (term, ch) != NULL) {
-        go_on = A_FALSE;
+        go_on = A68_FALSE;
       } else if (IS_NL_FF (ch)) {
         A68_BOOL *z = (A68_BOOL *) STACK_TOP;
         ADDR_T pop_sp = stack_pointer;
@@ -1907,10 +1923,10 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
           on_event_handler (p, f->page_end_mended, ref_file);
         }
         stack_pointer = pop_sp;
-        if (z->value == A_TRUE) {
+        if (z->value == A68_TRUE) {
           ch = char_scanner (f);
         } else {
-          go_on = A_FALSE;
+          go_on = A68_FALSE;
         }
       } else {
         add_char_transput_buffer (p, INPUT_BUFFER, ch);
@@ -1947,7 +1963,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
 /* Associated file. */
     file->transput_buffer = get_unblocked_transput_buffer (p);
     reset_transput_buffer (file->transput_buffer);
-    file->eof = A_FALSE;
+    file->eof = A68_FALSE;
     return (file->fd);
   } else if (IS_NIL (file->identification)) {
 /* No identification, so generate a unique identification.
@@ -1958,8 +1974,8 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
     char filename[fnlen];
     char *letters = "0123456789abcdefghijklmnopqrstuvwxyz";
     int k, len = strlen (letters);
-    BOOL_T good_file = A_FALSE;
-    for (k = 0; k < TRIALS && good_file == A_FALSE; k++) {
+    BOOL_T good_file = A68_FALSE;
+    for (k = 0; k < TRIALS && good_file == A68_FALSE; k++) {
       int j, index;
       bufcpy (filename, A68G_NAME, fnlen);
       bufcat (filename, ".", fnlen);
@@ -1980,9 +1996,9 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
     }
 #undef TMP_SIZE
 #undef TRIALS
-    if (good_file == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NO_TEMP);
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (good_file == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NO_TEMP);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     len = 1 + strlen (filename);
     file->identification = heap_generator (p, MODE (C_STRING), len);
@@ -1990,8 +2006,8 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
     bufcpy ((char *) ADDRESS (&(file->identification)), filename, len);
     file->transput_buffer = get_unblocked_transput_buffer (p);
     reset_transput_buffer (file->transput_buffer);
-    file->eof = A_FALSE;
-    file->tmp_file = A_TRUE;
+    file->eof = A68_FALSE;
+    file->tmp_file = A68_TRUE;
     return (file->fd);
   } else {
 /* Opening an identified file. */
@@ -2001,15 +2017,15 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
     filename = (char *) ADDRESS (&ref_filename);
     if (file->open_exclusive) {
 /* Establishing requires that the file does not exist. */
-      if (mode == (A_WRITE_ACCESS)) {
+      if (mode == (A68_WRITE_ACCESS)) {
         mode |= O_EXCL;
       }
-      file->open_exclusive = A_FALSE;
+      file->open_exclusive = A68_FALSE;
     }
     file->fd = open (filename, mode, acc);
     file->transput_buffer = get_unblocked_transput_buffer (p);
     reset_transput_buffer (file->transput_buffer);
-    file->eof = A_FALSE;
+    file->eof = A68_FALSE;
     return (file->fd);
   }
 }
@@ -2026,7 +2042,7 @@ void genie_call_proc_ref_file_void (NODE_T * p, A68_REF ref_file, A68_PROCEDURE 
 {
   ADDR_T pop_sp = stack_pointer, pop_fp = frame_pointer;
   MOID_T *u = MODE (PROC_REF_FILE_VOID);
-  PUSH_REF_FILE (p, ref_file);
+  PUSH_REF (p, ref_file);
   genie_call_procedure (p, u, u, u, &z, pop_sp, pop_fp);
   stack_pointer = pop_sp;       /* VOIDING. */
 }
@@ -2163,7 +2179,7 @@ unsigned long a68g_strtoul (char *str, char **end, int base)
         return (0);
       } else {
         unsigned add = char_value (q[j]) * mul;
-        if (MAX_UNT - sum >= add) {
+        if (A68_MAX_UNT - sum >= add) {
           sum += add;
           mul *= base;
         } else {
@@ -2192,16 +2208,16 @@ static unsigned bits_to_int (NODE_T * p, char *a)
   base = a68g_strtoul (a, &radix, 10);
   if (radix != NULL && TO_UPPER (radix[0]) == TO_UPPER (RADIX_CHAR) && errno == 0) {
     if (base < 2 || base > 16) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, base);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, base);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     bits = a68g_strtoul (&(radix[1]), &end, base);
     if (end != NULL && end[0] == NULL_CHAR && errno == 0) {
       return (bits);
     }
   }
-  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (BITS));
-  exit_genie (p, A_RUNTIME_ERROR);
+  diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (BITS));
+  exit_genie (p, A68_RUNTIME_ERROR);
   return (0);
 }
 
@@ -2233,8 +2249,8 @@ static void long_bits_to_long_int (NODE_T * p, MP_DIGIT_T * z, char *a, MOID_T *
     SET_MP_ZERO (z, digits);
     set_mp_short (w, (MP_DIGIT_T) 1, 0, digits);
     if (base < 2 || base > 16) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, base);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, base);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     while ((--q) != radix) {
       int digit = char_value (q[0]);
@@ -2242,16 +2258,16 @@ static void long_bits_to_long_int (NODE_T * p, MP_DIGIT_T * z, char *a, MOID_T *
         mul_mp_digit (p, v, w, (MP_DIGIT_T) digit, digits);
         add_mp (p, z, z, v, digits);
       } else {
-        diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
-        exit_genie (p, A_RUNTIME_ERROR);
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
+        exit_genie (p, A68_RUNTIME_ERROR);
       }
       mul_mp_digit (p, w, w, (MP_DIGIT_T) base, digits);
     }
     check_long_bits_value (p, z, m);
     stack_pointer = pop_sp;
   } else {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, m);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -2269,7 +2285,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
   RESET_ERRNO;
 /* strto.. does not mind empty strings. */
   if (strlen (a) == 0) {
-    return (A_FALSE);
+    return (A68_FALSE);
   }
   if (m == MODE (INT)) {
     A68_INT *z = (A68_INT *) item;
@@ -2277,9 +2293,9 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     z->value = strtol (a, &end, 10);
     if (end[0] == NULL_CHAR && errno == 0) {
       z->status = INITIALISED_MASK;
-      return (A_TRUE);
+      return (A68_TRUE);
     } else {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   } else if (m == MODE (REAL)) {
     A68_REAL *z = (A68_REAL *) item;
@@ -2287,48 +2303,48 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
     z->value = strtod (a, &end);
     if (end[0] == NULL_CHAR && errno == 0) {
       z->status = INITIALISED_MASK;
-      return (A_TRUE);
+      return (A68_TRUE);
     } else {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   } else if (m == MODE (LONG_INT) || m == MODE (LONGLONG_INT)) {
     int digits = get_mp_digits (m);
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     if (string_to_mp (p, z, a, digits) == NULL) {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
     if (!check_mp_int (z, m)) {
       errno = ERANGE;
-      return (A_FALSE);
+      return (A68_FALSE);
     }
     MP_STATUS (z) = INITIALISED_MASK;
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (m == MODE (LONG_REAL) || m == MODE (LONGLONG_REAL)) {
     int digits = get_mp_digits (m);
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     if (string_to_mp (p, z, a, digits) == NULL) {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
     MP_STATUS (z) = INITIALISED_MASK;
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (m == MODE (BOOL)) {
     A68_BOOL *z = (A68_BOOL *) item;
     char q = a[0], flip = FLIP_CHAR, flop = FLOP_CHAR;
     if (q == flip || q == flop) {
       z->value = (q == flip);
       z->status = INITIALISED_MASK;
-      return (A_TRUE);
+      return (A68_TRUE);
     } else {
-      return (A_FALSE);
+      return (A68_FALSE);
     }
   } else if (m == MODE (BITS)) {
     A68_BITS *z = (A68_BITS *) item;
-    int status = A_TRUE;
+    int status = A68_TRUE;
     if (a[0] == FLIP_CHAR || a[0] == FLOP_CHAR) {
 /* [] BOOL denotation is "TTFFFFTFT ..." */
       if (strlen (a) > (size_t) BITS_WIDTH) {
         errno = ERANGE;
-        status = A_FALSE;
+        status = A68_FALSE;
       } else {
         int j = strlen (a) - 1;
         unsigned k = 0x1;
@@ -2337,7 +2353,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
           if (a[j] == FLIP_CHAR) {
             z->value += k;
           } else if (a[j] != FLOP_CHAR) {
-            status = A_FALSE;
+            status = A68_FALSE;
           }
           k <<= 1;
         }
@@ -2346,21 +2362,21 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
 /* BITS denotation is also allowed. */
       z->value = bits_to_int (p, a);
     }
-    if (errno != 0 || status == A_FALSE) {
-      return (A_FALSE);
+    if (errno != 0 || status == A68_FALSE) {
+      return (A68_FALSE);
     }
     z->status = INITIALISED_MASK;
-    return (A_TRUE);
+    return (A68_TRUE);
   } else if (m == MODE (LONG_BITS) || m == MODE (LONGLONG_BITS)) {
     int digits = get_mp_digits (m);
-    int status = A_TRUE;
+    int status = A68_TRUE;
     ADDR_T pop_sp = stack_pointer;
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     if (a[0] == FLIP_CHAR || a[0] == FLOP_CHAR) {
 /* [] BOOL denotation is "TTFFFFTFT ..." */
       if (strlen (a) > (size_t) BITS_WIDTH) {
         errno = ERANGE;
-        status = A_FALSE;
+        status = A68_FALSE;
       } else {
         int j;
         MP_DIGIT_T *w;
@@ -2371,7 +2387,7 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
           if (a[j] == FLIP_CHAR) {
             add_mp (p, z, z, w, digits);
           } else if (a[j] != FLOP_CHAR) {
-            status = A_FALSE;
+            status = A68_FALSE;
           }
           mul_mp_digit (p, w, w, (MP_DIGIT_T) 2, digits);
         }
@@ -2381,13 +2397,13 @@ BOOL_T genie_string_to_value_internal (NODE_T * p, MOID_T * m, char *a, BYTE_T *
       long_bits_to_long_int (p, z, a, m);
     }
     stack_pointer = pop_sp;
-    if (errno != 0 || status == A_FALSE) {
-      return (A_FALSE);
+    if (errno != 0 || status == A68_FALSE) {
+      return (A68_FALSE);
     }
     MP_STATUS (z) = INITIALISED_MASK;
-    return (A_TRUE);
+    return (A68_TRUE);
   }
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 /*!
@@ -2405,31 +2421,31 @@ void genie_string_to_value (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF re
   RESET_ERRNO;
   add_char_transput_buffer (p, INPUT_BUFFER, NULL_CHAR);        /* end string, just in case. */
   if (mode == MODE (INT)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (LONG_INT) || mode == MODE (LONGLONG_INT)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (REAL)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (LONG_REAL) || mode == MODE (LONGLONG_REAL)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (BOOL)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (BITS)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (LONG_BITS) || mode == MODE (LONGLONG_BITS)) {
-    if (genie_string_to_value_internal (p, mode, str, item) == A_FALSE) {
+    if (genie_string_to_value_internal (p, mode, str, item) == A68_FALSE) {
       value_error (p, mode, ref_file);
     }
   } else if (mode == MODE (CHAR)) {
@@ -2493,8 +2509,8 @@ void genie_read_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_
   } else if (WHETHER (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
     if (!(z->status | INITIALISED_MASK) || z->value == NULL) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     genie_read_standard (p, (MOID_T *) (z->value), &item[SIZE_OF (A68_UNION)], ref_file);
   } else if (WHETHER (mode, ROW_SYMBOL) || WHETHER (mode, FLEX_SYMBOL)) {
@@ -2505,7 +2521,7 @@ void genie_read_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, arr->dimensions) != 0) {
       BYTE_T *base_addr = ADDRESS (&arr->array);
-      BOOL_T done = A_FALSE;
+      BOOL_T done = A68_FALSE;
       initialise_internal_index (tup, arr->dimensions);
       while (!done) {
         ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -2558,37 +2574,37 @@ void genie_read_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
     if (IS_NIL (file->string)) {
-      if ((file->fd = open_physical_file (p, ref_file, A_READ_ACCESS, 0)) == -1) {
+      if ((file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS, 0)) == -1) {
         open_error (p, ref_file, "getting");
       }
     } else {
-      file->fd = open_physical_file (p, ref_file, A_READ_ACCESS, 0);
+      file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS, 0);
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_TRUE;
-    file->write_mood = A_FALSE;
-    file->char_mood = A_TRUE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_TRUE;
+    file->write_mood = A68_FALSE;
+    file->char_mood = A68_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Read. */
   base_address = ADDRESS (&arr->array);
@@ -2621,29 +2637,53 @@ void genie_read_file (NODE_T * p)
 \param item
 **/
 
-void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item)
+void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item, int mod)
 {
   if (moid == MODE (INT)) {
     A68_INT *z = (A68_INT *) item;
     PUSH_UNION (p, MODE (INT));
     PUSH_PRIMITIVE (p, z->value, A68_INT);
     INCREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)) - (SIZE_OF (A68_UNION) + SIZE_OF (A68_INT)));
-    PUSH_PRIMITIVE (p, INT_WIDTH + 1, A68_INT);
-    genie_whole (p);
+    if (mod == FORMAT_ITEM_G) {
+      PUSH_PRIMITIVE (p, INT_WIDTH + 1, A68_INT);
+      genie_whole (p);
+    } else if (mod == FORMAT_ITEM_H) {
+      PUSH_PRIMITIVE (p, REAL_WIDTH + EXP_WIDTH + 4, A68_INT);
+      PUSH_PRIMITIVE (p, REAL_WIDTH - 1, A68_INT);
+      PUSH_PRIMITIVE (p, EXP_WIDTH + 1, A68_INT);
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      genie_real (p);
+    }
   } else if (moid == MODE (LONG_INT)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     PUSH_UNION (p, MODE (LONG_INT));
     PUSH (p, z, get_mp_size (MODE (LONG_INT)));
     INCREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)) - (SIZE_OF (A68_UNION) + get_mp_size (MODE (LONG_INT))));
-    PUSH_PRIMITIVE (p, LONG_WIDTH + 1, A68_INT);
-    genie_whole (p);
+    if (mod == FORMAT_ITEM_G) {
+      PUSH_PRIMITIVE (p, LONG_WIDTH + 1, A68_INT);
+      genie_whole (p);
+    } else if (mod == FORMAT_ITEM_H) {
+      PUSH_PRIMITIVE (p, LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4, A68_INT);
+      PUSH_PRIMITIVE (p, LONG_REAL_WIDTH - 1, A68_INT);
+      PUSH_PRIMITIVE (p, LONG_EXP_WIDTH + 1, A68_INT);
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      genie_real (p);
+    }
   } else if (moid == MODE (LONGLONG_INT)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     PUSH_UNION (p, MODE (LONGLONG_INT));
     PUSH (p, z, get_mp_size (MODE (LONGLONG_INT)));
     INCREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)) - (SIZE_OF (A68_UNION) + get_mp_size (MODE (LONGLONG_INT))));
-    PUSH_PRIMITIVE (p, LONGLONG_WIDTH + 1, A68_INT);
-    genie_whole (p);
+    if (mod == FORMAT_ITEM_G) {
+      PUSH_PRIMITIVE (p, LONGLONG_WIDTH + 1, A68_INT);
+      genie_whole (p);
+    } else if (mod == FORMAT_ITEM_H) {
+      PUSH_PRIMITIVE (p, LONGLONG_REAL_WIDTH + LONGLONG_EXP_WIDTH + 4, A68_INT);
+      PUSH_PRIMITIVE (p, LONGLONG_REAL_WIDTH - 1, A68_INT);
+      PUSH_PRIMITIVE (p, LONGLONG_EXP_WIDTH + 1, A68_INT);
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      genie_real (p);
+    }
   } else if (moid == MODE (REAL)) {
     A68_REAL *z = (A68_REAL *) item;
     PUSH_UNION (p, MODE (REAL));
@@ -2652,7 +2692,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item)
     PUSH_PRIMITIVE (p, REAL_WIDTH + EXP_WIDTH + 4, A68_INT);
     PUSH_PRIMITIVE (p, REAL_WIDTH - 1, A68_INT);
     PUSH_PRIMITIVE (p, EXP_WIDTH + 1, A68_INT);
-    genie_float (p);
+    if (mod == FORMAT_ITEM_G) {
+      genie_float (p);
+    } else if (mod == FORMAT_ITEM_H) {
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      genie_real (p);
+    }
   } else if (moid == MODE (LONG_REAL)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     PUSH_UNION (p, MODE (LONG_REAL));
@@ -2661,7 +2706,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item)
     PUSH_PRIMITIVE (p, LONG_REAL_WIDTH + LONG_EXP_WIDTH + 4, A68_INT);
     PUSH_PRIMITIVE (p, LONG_REAL_WIDTH - 1, A68_INT);
     PUSH_PRIMITIVE (p, LONG_EXP_WIDTH + 1, A68_INT);
-    genie_float (p);
+    if (mod == FORMAT_ITEM_G) {
+      genie_float (p);
+    } else if (mod == FORMAT_ITEM_H) {
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      genie_real (p);
+    }
   } else if (moid == MODE (LONGLONG_REAL)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
     PUSH_UNION (p, MODE (LONGLONG_REAL));
@@ -2670,7 +2720,12 @@ void genie_value_to_string (NODE_T * p, MOID_T * moid, BYTE_T * item)
     PUSH_PRIMITIVE (p, LONGLONG_REAL_WIDTH + LONGLONG_EXP_WIDTH + 4, A68_INT);
     PUSH_PRIMITIVE (p, LONGLONG_REAL_WIDTH - 1, A68_INT);
     PUSH_PRIMITIVE (p, LONGLONG_EXP_WIDTH + 1, A68_INT);
-    genie_float (p);
+    if (mod == FORMAT_ITEM_G) {
+      genie_float (p);
+    } else if (mod == FORMAT_ITEM_H) {
+      PUSH_PRIMITIVE (p, 3, A68_INT);
+      genie_real (p);
+    }
   } else if (moid == MODE (BITS)) {
     A68_BITS *z = (A68_BITS *) item;
     char *str = stack_string (p, 8 + BITS_WIDTH);
@@ -2717,21 +2772,21 @@ void genie_write_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref
 {
   RESET_ERRNO;
   if (mode == MODE (INT) || mode == MODE (LONG_INT) || mode == MODE (LONGLONG_INT)) {
-    genie_value_to_string (p, mode, item);
+    genie_value_to_string (p, mode, item, FORMAT_ITEM_G);
     add_string_from_stack_transput_buffer (p, UNFORMATTED_BUFFER);
   } else if (mode == MODE (REAL) || mode == MODE (LONG_REAL) || mode == MODE (LONGLONG_REAL)) {
-    genie_value_to_string (p, mode, item);
+    genie_value_to_string (p, mode, item, FORMAT_ITEM_G);
     add_string_from_stack_transput_buffer (p, UNFORMATTED_BUFFER);
   } else if (mode == MODE (BOOL)) {
     A68_BOOL *z = (A68_BOOL *) item;
-    char flipflop = z->value == A_TRUE ? FLIP_CHAR : FLOP_CHAR;
+    char flipflop = z->value == A68_TRUE ? FLIP_CHAR : FLOP_CHAR;
     add_char_transput_buffer (p, UNFORMATTED_BUFFER, flipflop);
   } else if (mode == MODE (CHAR)) {
     A68_CHAR *ch = (A68_CHAR *) item;
     add_char_transput_buffer (p, UNFORMATTED_BUFFER, ch->value);
   } else if (mode == MODE (BITS) || mode == MODE (LONG_BITS) || mode == MODE (LONGLONG_BITS)) {
     char *str = (char *) STACK_TOP;
-    genie_value_to_string (p, mode, item);
+    genie_value_to_string (p, mode, item, FORMAT_ITEM_G);
     add_string_transput_buffer (p, UNFORMATTED_BUFFER, str);
   } else if (mode == MODE (ROW_CHAR) || mode == MODE (STRING)) {
 /* Handle these separately since this is faster than straightening. */
@@ -2754,7 +2809,7 @@ void genie_write_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, arr->dimensions) != 0) {
       BYTE_T *base_addr = ADDRESS (&arr->array);
-      BOOL_T done = A_FALSE;
+      BOOL_T done = A68_FALSE;
       initialise_internal_index (tup, arr->dimensions);
       while (!done) {
         ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -2811,37 +2866,37 @@ void genie_write_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
     if (IS_NIL (file->string)) {
-      if ((file->fd = open_physical_file (p, ref_file, A_WRITE_ACCESS, A68_PROTECTION)) == -1) {
+      if ((file->fd = open_physical_file (p, ref_file, A68_WRITE_ACCESS, A68_PROTECTION)) == -1) {
         open_error (p, ref_file, "putting");
       }
     } else {
-      file->fd = open_physical_file (p, ref_file, A_READ_ACCESS, 0);
+      file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS, 0);
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_FALSE;
-    file->write_mood = A_TRUE;
-    file->char_mood = A_TRUE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_FALSE;
+    file->write_mood = A68_TRUE;
+    file->char_mood = A68_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   base_address = ADDRESS (&(arr->array));
   elem_index = 0;
@@ -2878,7 +2933,7 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
   RESET_ERRNO;
   if (mode == MODE (INT)) {
     A68_INT *z = (A68_INT *) item;
-    io_read (f->fd, &(z->value), SIZE_OF (z->value));
+    io_read (f->fd, &(z->value), sizeof (z->value));
     z->status = INITIALISED_MASK;
   } else if (mode == MODE (LONG_INT) || mode == MODE (LONGLONG_INT)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
@@ -2886,7 +2941,7 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
     MP_STATUS (z) = INITIALISED_MASK;
   } else if (mode == MODE (REAL)) {
     A68_REAL *z = (A68_REAL *) item;
-    io_read (f->fd, &(z->value), SIZE_OF (z->value));
+    io_read (f->fd, &(z->value), sizeof (z->value));
     z->status = INITIALISED_MASK;
   } else if (mode == MODE (LONG_REAL) || mode == MODE (LONGLONG_REAL)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
@@ -2894,15 +2949,15 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
     MP_STATUS (z) = INITIALISED_MASK;
   } else if (mode == MODE (BOOL)) {
     A68_BOOL *z = (A68_BOOL *) item;
-    io_read (f->fd, &(z->value), SIZE_OF (z->value));
+    io_read (f->fd, &(z->value), sizeof (z->value));
     z->status = INITIALISED_MASK;
   } else if (mode == MODE (CHAR)) {
     A68_CHAR *z = (A68_CHAR *) item;
-    io_read (f->fd, &(z->value), SIZE_OF (z->value));
+    io_read (f->fd, &(z->value), sizeof (z->value));
     z->status = INITIALISED_MASK;
   } else if (mode == MODE (BITS)) {
     A68_BITS *z = (A68_BITS *) item;
-    io_read (f->fd, &(z->value), SIZE_OF (z->value));
+    io_read (f->fd, &(z->value), sizeof (z->value));
     z->status = INITIALISED_MASK;
   } else if (mode == MODE (LONG_BITS) || mode == MODE (LONGLONG_BITS)) {
     MP_DIGIT_T *z = (MP_DIGIT_T *) item;
@@ -2915,8 +2970,8 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
   } else if (WHETHER (mode, UNION_SYMBOL)) {
     A68_UNION *z = (A68_UNION *) item;
     if (!(z->status | INITIALISED_MASK) || z->value == NULL) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     genie_read_bin_standard (p, (MOID_T *) (z->value), &item[SIZE_OF (A68_UNION)], ref_file);
   } else if (WHETHER (mode, STRUCT_SYMBOL)) {
@@ -2932,7 +2987,7 @@ static void genie_read_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, arr->dimensions) != 0) {
       BYTE_T *base_addr = ADDRESS (&arr->array);
-      BOOL_T done = A_FALSE;
+      BOOL_T done = A68_FALSE;
       initialise_internal_index (tup, arr->dimensions);
       while (!done) {
         ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -2971,37 +3026,37 @@ void genie_read_bin (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.bin) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary getting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary getting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
-    if ((file->fd = open_physical_file (p, ref_file, A_READ_ACCESS | O_BINARY, 0)) == -1) {
+    if ((file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS | O_BINARY, 0)) == -1) {
       open_error (p, ref_file, "binary getting");
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_TRUE;
-    file->write_mood = A_FALSE;
-    file->char_mood = A_FALSE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_TRUE;
+    file->write_mood = A68_FALSE;
+    file->char_mood = A68_FALSE;
   }
   if (file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Read. */
   elem_index = 0;
@@ -3053,37 +3108,37 @@ void genie_read_bin_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.bin) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary getting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary getting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
-    if ((file->fd = open_physical_file (p, ref_file, A_READ_ACCESS | O_BINARY, 0)) == -1) {
+    if ((file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS | O_BINARY, 0)) == -1) {
       open_error (p, ref_file, "binary getting");
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_TRUE;
-    file->write_mood = A_FALSE;
-    file->char_mood = A_FALSE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_TRUE;
+    file->write_mood = A68_FALSE;
+    file->char_mood = A68_FALSE;
   }
   if (file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Read. */
   elem_index = 0;
@@ -3122,19 +3177,19 @@ static void genie_write_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, 
   A68_FILE *f = FILE_DEREF (&ref_file);
   RESET_ERRNO;
   if (mode == MODE (INT)) {
-    io_write (f->fd, &(((A68_INT *) item)->value), SIZE_OF (((A68_INT *) item)->value));
+    io_write (f->fd, &(((A68_INT *) item)->value), sizeof (((A68_INT *) item)->value));
   } else if (mode == MODE (LONG_INT) || mode == MODE (LONGLONG_INT)) {
     io_write (f->fd, (MP_DIGIT_T *) item, get_mp_size (mode));
   } else if (mode == MODE (REAL)) {
-    io_write (f->fd, &(((A68_REAL *) item)->value), SIZE_OF (((A68_REAL *) item)->value));
+    io_write (f->fd, &(((A68_REAL *) item)->value), sizeof (((A68_REAL *) item)->value));
   } else if (mode == MODE (LONG_REAL) || mode == MODE (LONGLONG_REAL)) {
     io_write (f->fd, (MP_DIGIT_T *) item, get_mp_size (mode));
   } else if (mode == MODE (BOOL)) {
-    io_write (f->fd, &(((A68_BOOL *) item)->value), SIZE_OF (((A68_BOOL *) item)->value));
+    io_write (f->fd, &(((A68_BOOL *) item)->value), sizeof (((A68_BOOL *) item)->value));
   } else if (mode == MODE (CHAR)) {
-    io_write (f->fd, &(((A68_CHAR *) item)->value), SIZE_OF (((A68_CHAR *) item)->value));
+    io_write (f->fd, &(((A68_CHAR *) item)->value), sizeof (((A68_CHAR *) item)->value));
   } else if (mode == MODE (BITS)) {
-    io_write (f->fd, &(((A68_BITS *) item)->value), SIZE_OF (((A68_BITS *) item)->value));
+    io_write (f->fd, &(((A68_BITS *) item)->value), sizeof (((A68_BITS *) item)->value));
   } else if (mode == MODE (LONG_BITS) || mode == MODE (LONGLONG_BITS)) {
     io_write (f->fd, (MP_DIGIT_T *) item, get_mp_size (mode));
   } else if (mode == MODE (ROW_CHAR) || mode == MODE (STRING)) {
@@ -3159,7 +3214,7 @@ static void genie_write_bin_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, 
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, arr->dimensions) != 0) {
       BYTE_T *base_addr = ADDRESS (&arr->array);
-      BOOL_T done = A_FALSE;
+      BOOL_T done = A68_FALSE;
       initialise_internal_index (tup, arr->dimensions);
       while (!done) {
         ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -3199,37 +3254,37 @@ void genie_write_bin (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.bin) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
-    if ((file->fd = open_physical_file (p, ref_file, A_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == -1) {
+    if ((file->fd = open_physical_file (p, ref_file, A68_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == -1) {
       open_error (p, ref_file, "binary putting");
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_FALSE;
-    file->write_mood = A_TRUE;
-    file->char_mood = A_FALSE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_FALSE;
+    file->write_mood = A68_TRUE;
+    file->char_mood = A68_FALSE;
   }
   if (file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   base_address = ADDRESS (&arr->array);
   elem_index = 0;
@@ -3275,37 +3330,37 @@ void genie_write_bin_file (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.bin) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "binary putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
-    if ((file->fd = open_physical_file (p, ref_file, A_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == -1) {
+    if ((file->fd = open_physical_file (p, ref_file, A68_WRITE_ACCESS | O_BINARY, A68_PROTECTION)) == -1) {
       open_error (p, ref_file, "binary putting");
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_FALSE;
-    file->write_mood = A_TRUE;
-    file->char_mood = A_FALSE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_FALSE;
+    file->write_mood = A68_TRUE;
+    file->char_mood = A68_FALSE;
   }
   if (file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "text");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   base_address = ADDRESS (&arr->array);
   elem_index = 0;
@@ -3501,7 +3556,7 @@ char *whole (NODE_T * p)
   int pop_sp, arg_sp;
   A68_INT width;
   MOID_T *mode;
-  POP_PRIMITIVE (p, &width, A68_INT);
+  POP_OBJECT (p, &width, A68_INT);
   arg_sp = stack_pointer;
   DECREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)));
   pop_sp = stack_pointer;
@@ -3649,7 +3704,7 @@ char *long_sub_fixed (NODE_T * p, MP_DIGIT_T * x, int digits, int width, int aft
   div_mp (p, y, y, s, digits);
   str[0] = NULL_CHAR;
   len = 0;
-  overflow = A_FALSE;
+  overflow = A68_FALSE;
   for (j = 0; j < before && !overflow; j++) {
     if (!(overflow = len >= width)) {
       string_plusab_char (str, long_choose_dig (p, y, digits), strwid);
@@ -3722,7 +3777,7 @@ char *sub_fixed (NODE_T * p, double x, int width, int after)
   y /= ten_to_the_power (expo);
   len = 0;
 /* Put digits, prevent garbage from overstretching precision. */
-  overflow = A_FALSE;
+  overflow = A68_FALSE;
   for (j = 0; j < before && !overflow; j++) {
     if (!(overflow = len >= width)) {
       char ch = (len < REAL_WIDTH ? choose_dig (&y) : '0');
@@ -3757,8 +3812,8 @@ char *fixed (NODE_T * p)
   A68_INT width, after;
   MOID_T *mode;
   int pop_sp, arg_sp;
-  POP_PRIMITIVE (p, &after, A68_INT);
-  POP_PRIMITIVE (p, &width, A68_INT);
+  POP_OBJECT (p, &after, A68_INT);
+  POP_OBJECT (p, &width, A68_INT);
   arg_sp = stack_pointer;
   DECREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)));
   mode = (MOID_T *) (((A68_UNION *) STACK_TOP)->value);
@@ -3787,7 +3842,7 @@ char *fixed (NODE_T * p)
       s = stack_string (p, 8 + length);
       s = sub_fixed (p, y, length, after.value);
       if (a68g_strchr (s, ERROR_CHAR) == NULL) {
-        if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == POINT_CHAR : A_TRUE) && y < 1.0) {
+        if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == POINT_CHAR : A68_TRUE) && y < 1.0) {
           plusto ('0', s);
         }
         if (x < 0) {
@@ -3843,7 +3898,7 @@ char *fixed (NODE_T * p)
       s = stack_string (p, 8 + length);
       s = long_sub_fixed (p, x, digits, length, after.value);
       if (a68g_strchr (s, ERROR_CHAR) == NULL) {
-        if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == POINT_CHAR : A_TRUE) && (MP_EXPONENT (x) < 0 || MP_DIGIT (x, 1) == 0)) {
+        if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == POINT_CHAR : A68_TRUE) && (MP_EXPONENT (x) < 0 || MP_DIGIT (x, 1) == 0)) {
           plusto ('0', s);
         }
         if (ltz) {
@@ -3957,7 +4012,7 @@ void long_standardise (NODE_T * p, MP_DIGIT_T * y, int digits, int before, int a
 \param y
 \param before
 \param after
-\param p position in syntax tree, should not be NULL
+\param p
 **/
 
 void standardise (double *y, int before, int after, int *p)
@@ -3994,19 +4049,21 @@ void standardise (double *y, int before, int after, int *p)
 \return
 **/
 
-char *fleet (NODE_T * p)
+char *real (NODE_T * p)
 {
   int pop_sp, arg_sp;
-  A68_INT width, after, expo;
+  A68_INT width, after, expo, mult;
   MOID_T *mode;
 /* POP arguments. */
-  POP_PRIMITIVE (p, &expo, A68_INT);
-  POP_PRIMITIVE (p, &after, A68_INT);
-  POP_PRIMITIVE (p, &width, A68_INT);
+  POP_OBJECT (p, &mult, A68_INT);
+  POP_OBJECT (p, &expo, A68_INT);
+  POP_OBJECT (p, &after, A68_INT);
+  POP_OBJECT (p, &width, A68_INT);
   arg_sp = stack_pointer;
   DECREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)));
   mode = (MOID_T *) (((A68_UNION *) STACK_TOP)->value);
   pop_sp = stack_pointer;
+  mult.value = (mult.value > 1 ? mult.value : 1);
   if (mode == MODE (REAL)) {
     double x = ((A68_REAL *) (STACK_OFFSET (SIZE_OF (A68_UNION))))->value;
     int before = ABS (width.value) - ABS (expo.value) - (after.value != 0 ? after.value + 1 : 0) - 2;
@@ -4023,6 +4080,13 @@ char *fleet (NODE_T * p)
       double y = ABS (x);
       int q = 0;
       standardise (&y, before, after.value, &q);
+      while (q % mult.value != 0) {
+        y *= 10;
+        q--;
+        if (after.value > 0) {
+          after.value--;
+        }
+      }
       PUSH_UNION (p, MODE (REAL));
       PUSH_PRIMITIVE (p, SIGN (x) * y, A68_REAL);
       INCREMENT_STACK_POINTER (p, MOID_SIZE (MODE (NUMBER)) - (SIZE_OF (A68_UNION) + SIZE_OF (A68_REAL)));
@@ -4044,7 +4108,8 @@ char *fleet (NODE_T * p)
         PUSH_PRIMITIVE (p, width.value, A68_INT);
         PUSH_PRIMITIVE (p, after.value != 0 ? after.value - 1 : 0, A68_INT);
         PUSH_PRIMITIVE (p, expo.value > 0 ? expo.value + 1 : expo.value - 1, A68_INT);
-        return (fleet (p));
+        PUSH_PRIMITIVE (p, mult.value, A68_INT);
+        return (real (p));
       } else {
         return (s);
       }
@@ -4069,6 +4134,13 @@ char *fleet (NODE_T * p)
       STACK_MP (z, p, digits);
       MOVE_MP (z, x, digits);
       long_standardise (p, z, digits, before, after.value, &q);
+      while (q % mult.value != 0) {
+        mul_mp_digit (p, z, z, (MP_DIGIT_T) 10, digits);
+        q--;
+        if (after.value > 0) {
+          after.value--;
+        }
+      }
       PUSH_UNION (p, mode);
       MP_DIGIT (z, 1) = ltz ? -MP_DIGIT (z, 1) : MP_DIGIT (z, 1);
       PUSH (p, z, SIZE_MP (digits));
@@ -4091,7 +4163,8 @@ char *fleet (NODE_T * p)
         PUSH_PRIMITIVE (p, width.value, A68_INT);
         PUSH_PRIMITIVE (p, after.value != 0 ? after.value - 1 : 0, A68_INT);
         PUSH_PRIMITIVE (p, expo.value > 0 ? expo.value + 1 : expo.value - 1, A68_INT);
-        return (fleet (p));
+        PUSH_PRIMITIVE (p, mult.value, A68_INT);
+        return (real (p));
       } else {
         return (s);
       }
@@ -4107,7 +4180,8 @@ char *fleet (NODE_T * p)
     PUSH_PRIMITIVE (p, width.value, A68_INT);
     PUSH_PRIMITIVE (p, after.value, A68_INT);
     PUSH_PRIMITIVE (p, expo.value, A68_INT);
-    return (fleet (p));
+    PUSH_PRIMITIVE (p, mult.value, A68_INT);
+    return (real (p));
   } else if (mode == MODE (LONG_INT) || mode == MODE (LONGLONG_INT)) {
     stack_pointer = pop_sp;
     if (mode == MODE (LONG_INT)) {
@@ -4119,7 +4193,8 @@ char *fleet (NODE_T * p)
     PUSH_PRIMITIVE (p, width.value, A68_INT);
     PUSH_PRIMITIVE (p, after.value, A68_INT);
     PUSH_PRIMITIVE (p, expo.value, A68_INT);
-    return (fleet (p));
+    PUSH_PRIMITIVE (p, mult.value, A68_INT);
+    return (real (p));
   }
   return (NULL);
 }
@@ -4136,7 +4211,7 @@ void genie_whole (NODE_T * p)
   char *str = whole (p);
   stack_pointer = pop_sp - SIZE_OF (A68_INT) - MOID_SIZE (MODE (NUMBER));
   ref = tmp_to_a68_string (p, str);
-  PUSH (p, &ref, SIZE_OF (A68_REF));
+  PUSH_REF (p, ref);
 }
 
 /*!
@@ -4152,7 +4227,23 @@ void genie_fixed (NODE_T * p)
   char *str = fixed (p);
   stack_pointer = pop_sp - 2 * SIZE_OF (A68_INT) - MOID_SIZE (MODE (NUMBER));
   ref = tmp_to_a68_string (p, str);
-  PUSH (p, &ref, SIZE_OF (A68_REF));
+  PUSH_REF (p, ref);
+}
+
+/*!
+\brief PROC (NUMBER, INT, INT, INT) STRING eng
+\param p position in syntax tree, should not be NULL
+\return
+**/
+
+void genie_real (NODE_T * p)
+{
+  int pop_sp = stack_pointer;
+  A68_REF ref;
+  char *str = real (p);
+  stack_pointer = pop_sp - 4 * SIZE_OF (A68_INT) - MOID_SIZE (MODE (NUMBER));
+  ref = tmp_to_a68_string (p, str);
+  PUSH_REF (p, ref);
 }
 
 /*!
@@ -4163,12 +4254,8 @@ void genie_fixed (NODE_T * p)
 
 void genie_float (NODE_T * p)
 {
-  int pop_sp = stack_pointer;
-  A68_REF ref;
-  char *str = fleet (p);
-  stack_pointer = pop_sp - 3 * SIZE_OF (A68_INT) - MOID_SIZE (MODE (NUMBER));
-  ref = tmp_to_a68_string (p, str);
-  PUSH (p, &ref, SIZE_OF (A68_REF));
+  PUSH_PRIMITIVE (p, 1, A68_INT);
+  genie_real (p);
 }
 
 /* ALGOL68C routines. */
@@ -4574,10 +4661,10 @@ void format_error (NODE_T * p, A68_REF ref_file)
   A68_FILE *f = FILE_DEREF (&ref_file);
   A68_BOOL z;
   on_event_handler (p, f->format_error_mended, ref_file);
-  POP_PRIMITIVE (p, &z, A68_BOOL);
-  if (z.value == A_FALSE) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_PICTURES);
-    exit_genie (p, A_RUNTIME_ERROR);
+  POP_OBJECT (p, &z, A68_BOOL);
+  if (z.value == A68_FALSE) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_PICTURES);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
 
@@ -4650,12 +4737,12 @@ format text calls "on format end".
 /* Not embedded, outermost format: execute event routine. */
     A68_BOOL z;
     on_event_handler (p, (FILE_DEREF (&ref_file))->format_end_mended, ref_file);
-    POP_PRIMITIVE (p, &z, A68_BOOL);
-    if (z.value == A_FALSE) {
+    POP_OBJECT (p, &z, A68_BOOL);
+    if (z.value == A68_FALSE) {
 /* Restart format. */
       frame_pointer = file->frame_pointer;
       stack_pointer = file->stack_pointer;
-      open_format_frame (file, &(file->format), NOT_EMBEDDED_FORMAT, A_TRUE);
+      open_format_frame (file, &(file->format), NOT_EMBEDDED_FORMAT, A68_TRUE);
     }
     return (NOT_EMBEDDED_FORMAT);
   } else {
@@ -4677,15 +4764,15 @@ int get_replicator_value (NODE_T * p)
   int z = 0;
   if (WHETHER (p, STATIC_REPLICATOR)) {
     A68_INT u;
-    if (genie_string_to_value_internal (p, MODE (INT), SYMBOL (p), (BYTE_T *) & u) == A_FALSE) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (INT));
-      exit_genie (p, A_RUNTIME_ERROR);
+    if (genie_string_to_value_internal (p, MODE (INT), SYMBOL (p), (BYTE_T *) & u) == A68_FALSE) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_IN_DENOTER, MODE (INT));
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
     z = u.value;
   } else if (WHETHER (p, DYNAMIC_REPLICATOR)) {
     A68_INT u;
     EXECUTE_UNIT (NEXT_SUB (p));
-    POP_PRIMITIVE (p, &u, A68_INT);
+    POP_OBJECT (p, &u, A68_INT);
     z = u.value;
   } else if (WHETHER (p, REPLICATOR)) {
     z = get_replicator_value (SUB (p));
@@ -4723,8 +4810,8 @@ static NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
             A68_FORMAT z;
             A68_FILE *file = FILE_DEREF (&ref_file);
             EXECUTE_UNIT (NEXT_SUB (picture));
-            POP (p, &z, SIZE_OF (A68_FORMAT));
-            open_format_frame (file, &z, EMBEDDED_FORMAT, A_TRUE);
+            POP_OBJECT (p, &z, A68_FORMAT);
+            open_format_frame (file, &z, EMBEDDED_FORMAT, A68_TRUE);
             pat = scan_format_pattern (SUB (file->format.body), ref_file);
             if (pat != NULL) {
               return (pat);
@@ -4739,11 +4826,11 @@ static NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
           } else if (file->write_mood) {
             write_insertion (picture, ref_file, INSERTION_NORMAL);
           } else {
-            ABNORMAL_END (A_TRUE, "undetermined mood for insertion", NULL);
+            ABNORMAL_END (A68_TRUE, "undetermined mood for insertion", NULL);
           }
           collitem->count = 0;  /* This insertion is now done. */
         } else if (WHETHER (picture, REPLICATOR) || WHETHER (picture, COLLECTION)) {
-          BOOL_T go_on = A_TRUE;
+          BOOL_T go_on = A68_TRUE;
           NODE_T *select = NULL;
           if (collitem->count == ITEM_NOT_USED) {
             if (WHETHER (picture, REPLICATOR)) {
@@ -4793,8 +4880,8 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
 */
   A68_FILE *file = FILE_DEREF (&ref_file);
   if (file->format.body == NULL) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_EXHAUSTED);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_EXHAUSTED);
+    exit_genie (p, A68_RUNTIME_ERROR);
     return (NULL);
   } else {
     NODE_T *pat = scan_format_pattern (SUB (file->format.body), ref_file);
@@ -4807,8 +4894,8 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
         }
         while (z == EMBEDDED_FORMAT && pat == NULL);
         if (pat == NULL) {
-          diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_EXHAUSTED);
-          exit_genie (p, A_RUNTIME_ERROR);
+          diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_EXHAUSTED);
+          exit_genie (p, A68_RUNTIME_ERROR);
         }
       }
     }
@@ -4825,8 +4912,8 @@ if needed or SKIP_PATTERN: just emptying current pattern/collection/format.
 
 void pattern_error (NODE_T * p, MOID_T * mode, int att)
 {
-  diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_CANNOT_TRANSPUT, mode, att);
-  exit_genie (p, A_RUNTIME_ERROR);
+  diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_CANNOT_TRANSPUT, mode, att);
+  exit_genie (p, A68_RUNTIME_ERROR);
 }
 
 /*!
@@ -5017,7 +5104,7 @@ static void write_boolean_pattern (NODE_T * p, A68_REF ref_file, BOOL_T z)
 \param item
 **/
 
-static void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item)
+static void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item, int mod)
 {
   A68_REF row;
   A68_ARRAY *arr;
@@ -5039,28 +5126,96 @@ static void write_number_generic (NODE_T * p, MOID_T * mode, BYTE_T * item)
     }
   }
 /* Make a string. */
-  switch (size) {
-  case 1:
-    {
-      genie_whole (p);
-      break;
+  if (mod == FORMAT_ITEM_G) {
+    switch (size) {
+    case 1:
+      {
+        genie_whole (p);
+        break;
+      }
+    case 2:
+      {
+        genie_fixed (p);
+        break;
+      }
+    case 3:
+      {
+        genie_float (p);
+        break;
+      }
+    default:
+      {
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_INTS_REQUIRED, MODE (INT));
+        exit_genie (p, A68_RUNTIME_ERROR);
+        break;
+      }
     }
-  case 2:
-    {
-      genie_fixed (p);
-      break;
+  } else if (mod == FORMAT_ITEM_H) {
+    int def_expo = 0, def_mult;
+    A68_INT a_width, a_after, a_expo, a_mult;
+    a_width.status = INITIALISED_MASK;
+    a_after.status = INITIALISED_MASK;
+    a_expo.status = INITIALISED_MASK;
+    a_mult.status = INITIALISED_MASK;
+    /*
+     * Set default values 
+     */
+    if (mode == MODE (REAL) || mode == MODE (INT)) {
+      def_expo = EXP_WIDTH + 1;
+    } else if (mode == MODE (LONG_REAL) || mode == MODE (LONG_INT)) {
+      def_expo = LONG_EXP_WIDTH + 1;
+    } else if (mode == MODE (LONGLONG_REAL) || mode == MODE (LONGLONG_INT)) {
+      def_expo = LONGLONG_EXP_WIDTH + 1;
     }
-  case 3:
-    {
-      genie_float (p);
-      break;
+    def_mult = 3;
+    /*
+     * Pop user values 
+     */
+    switch (size) {
+    case 1:
+      {
+        POP_OBJECT (p, &a_after, A68_INT);
+        a_width.value = a_after.value + def_expo + 4;
+        a_expo.value = def_expo;
+        a_mult.value = def_mult;
+        break;
+      }
+    case 2:
+      {
+        POP_OBJECT (p, &a_mult, A68_INT);
+        POP_OBJECT (p, &a_after, A68_INT);
+        a_width.value = a_after.value + def_expo + 4;
+        a_expo.value = def_expo;
+        break;
+      }
+    case 3:
+      {
+        POP_OBJECT (p, &a_mult, A68_INT);
+        POP_OBJECT (p, &a_after, A68_INT);
+        POP_OBJECT (p, &a_width, A68_INT);
+        a_expo.value = def_expo;
+        break;
+      }
+    case 4:
+      {
+        POP_OBJECT (p, &a_mult, A68_INT);
+        POP_OBJECT (p, &a_expo, A68_INT);
+        POP_OBJECT (p, &a_after, A68_INT);
+        POP_OBJECT (p, &a_width, A68_INT);
+        break;
+      }
+    default:
+      {
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FORMAT_INTS_REQUIRED, MODE (INT));
+        exit_genie (p, A68_RUNTIME_ERROR);
+        break;
+      }
     }
-  default:
-    {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FORMAT_INTS_REQUIRED, MODE (INT));
-      exit_genie (p, A_RUNTIME_ERROR);
-      break;
-    }
+    PUSH_PRIMITIVE (p, a_width.value, A68_INT);
+    PUSH_PRIMITIVE (p, a_after.value, A68_INT);
+    PUSH_PRIMITIVE (p, a_expo.value, A68_INT);
+    PUSH_PRIMITIVE (p, a_mult.value, A68_INT);
+    genie_real (p);
   }
   add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
 }
@@ -5167,7 +5322,8 @@ static void write_number_c_style (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_
       PUSH_PRIMITIVE (p, sign != 0 ? num_width : -num_width, A68_INT);
       PUSH_PRIMITIVE (p, after, A68_INT);
       PUSH_PRIMITIVE (p, expo, A68_INT);
-      str = fleet (p);
+      PUSH_PRIMITIVE (p, 1, A68_INT);
+      str = real (p);
     }
   }
 /* Did the conversion succeed? */
@@ -5240,7 +5396,6 @@ static void count_d_frames (NODE_T * p, int *z)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, FORMAT_ITEM_D)) {
-
       (*z)++;
     } else if (WHETHER (p, REPLICATOR)) {
       int j, k = get_replicator_value (SUB (p));
@@ -5759,8 +5914,8 @@ static void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
     count_zd_frames (SUB (p), &width);
     radix = get_replicator_value (SUB (SUB (p)));
     if (radix < 2 || radix > 16) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
 /* Generate string of correct width. */
     reset_transput_buffer (EDIT_BUFFER);
@@ -5786,8 +5941,8 @@ static void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
     count_zd_frames (SUB (p), &width);
     radix = get_replicator_value (SUB (SUB (p)));
     if (radix < 2 || radix > 16) {
-      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
-      exit_genie (p, A_RUNTIME_ERROR);
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
+      exit_genie (p, A68_RUNTIME_ERROR);
     }
 /* Generate string of correct width. */
     reset_transput_buffer (EDIT_BUFFER);
@@ -5814,10 +5969,10 @@ static void write_bits_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
 static void genie_write_real_format (NODE_T * p, BYTE_T * item, A68_REF ref_file)
 {
   if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) == NULL) {
-    genie_value_to_string (p, MODE (REAL), item);
+    genie_value_to_string (p, MODE (REAL), item, ATTRIBUTE (SUB (p)));
     add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
   } else if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) != NULL) {
-    write_number_generic (p, MODE (REAL), item);
+    write_number_generic (p, MODE (REAL), item, ATTRIBUTE (SUB (p)));
   } else if (WHETHER (p, FIXED_C_PATTERN) || WHETHER (p, FLOAT_C_PATTERN)) {
     write_number_c_style (p, MODE (REAL), item, ref_file);
   } else if (WHETHER (p, REAL_PATTERN)) {
@@ -5842,10 +5997,10 @@ static void genie_write_real_format (NODE_T * p, BYTE_T * item, A68_REF ref_file
 static void genie_write_long_real_format (NODE_T * p, BYTE_T * item, A68_REF ref_file)
 {
   if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) == NULL) {
-    genie_value_to_string (p, MODE (LONG_REAL), item);
+    genie_value_to_string (p, MODE (LONG_REAL), item, ATTRIBUTE (SUB (p)));
     add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
   } else if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) != NULL) {
-    write_number_generic (p, MODE (LONG_REAL), item);
+    write_number_generic (p, MODE (LONG_REAL), item, ATTRIBUTE (SUB (p)));
   } else if (WHETHER (p, FIXED_C_PATTERN) || WHETHER (p, FLOAT_C_PATTERN)) {
     write_number_c_style (p, MODE (LONG_REAL), item, ref_file);
   } else if (WHETHER (p, REAL_PATTERN)) {
@@ -5874,10 +6029,10 @@ static void genie_write_long_real_format (NODE_T * p, BYTE_T * item, A68_REF ref
 static void genie_write_longlong_real_format (NODE_T * p, BYTE_T * item, A68_REF ref_file)
 {
   if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) == NULL) {
-    genie_value_to_string (p, MODE (LONGLONG_REAL), item);
+    genie_value_to_string (p, MODE (LONGLONG_REAL), item, ATTRIBUTE (SUB (p)));
     add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
   } else if (WHETHER (p, GENERAL_PATTERN) && NEXT_SUB (p) != NULL) {
-    write_number_generic (p, MODE (LONGLONG_REAL), item);
+    write_number_generic (p, MODE (LONGLONG_REAL), item, ATTRIBUTE (SUB (p)));
   } else if (WHETHER (p, FIXED_C_PATTERN) || WHETHER (p, FLOAT_C_PATTERN)) {
     write_number_c_style (p, MODE (LONGLONG_REAL), item, ref_file);
   } else if (WHETHER (p, REAL_PATTERN)) {
@@ -5909,10 +6064,10 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
   if (mode == MODE (INT)) {
     NODE_T *pat = get_next_format_pattern (p, ref_file, WANT_PATTERN);
     if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) == NULL) {
-      genie_value_to_string (p, mode, item);
+      genie_value_to_string (p, mode, item, ATTRIBUTE (SUB (pat)));
       add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
     } else if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) != NULL) {
-      write_number_generic (pat, MODE (INT), item);
+      write_number_generic (pat, MODE (INT), item, ATTRIBUTE (SUB (pat)));
     } else if (WHETHER (pat, INTEGRAL_C_PATTERN) || WHETHER (pat, FIXED_C_PATTERN) || WHETHER (pat, FLOAT_C_PATTERN)) {
       write_number_c_style (pat, MODE (INT), item, ref_file);
     } else if (WHETHER (pat, INTEGRAL_PATTERN)) {
@@ -5934,10 +6089,10 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
   } else if (mode == MODE (LONG_INT)) {
     NODE_T *pat = get_next_format_pattern (p, ref_file, WANT_PATTERN);
     if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) == NULL) {
-      genie_value_to_string (p, mode, item);
+      genie_value_to_string (p, mode, item, ATTRIBUTE (SUB (pat)));
       add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
     } else if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) != NULL) {
-      write_number_generic (pat, MODE (LONG_INT), item);
+      write_number_generic (pat, MODE (LONG_INT), item, ATTRIBUTE (SUB (pat)));
     } else if (WHETHER (pat, INTEGRAL_C_PATTERN) || WHETHER (pat, FIXED_C_PATTERN) || WHETHER (pat, FLOAT_C_PATTERN)) {
       write_number_c_style (pat, MODE (LONG_INT), item, ref_file);
     } else if (WHETHER (pat, INTEGRAL_PATTERN)) {
@@ -5961,10 +6116,10 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
   } else if (mode == MODE (LONGLONG_INT)) {
     NODE_T *pat = get_next_format_pattern (p, ref_file, WANT_PATTERN);
     if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) == NULL) {
-      genie_value_to_string (p, mode, item);
+      genie_value_to_string (p, mode, item, ATTRIBUTE (SUB (pat)));
       add_string_from_stack_transput_buffer (p, FORMATTED_BUFFER);
     } else if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) != NULL) {
-      write_number_generic (pat, MODE (LONGLONG_INT), item);
+      write_number_generic (pat, MODE (LONGLONG_INT), item, ATTRIBUTE (SUB (pat)));
     } else if (WHETHER (pat, INTEGRAL_C_PATTERN) || WHETHER (pat, FIXED_C_PATTERN) || WHETHER (pat, FLOAT_C_PATTERN)) {
       write_number_c_style (pat, MODE (LONGLONG_INT), item, ref_file);
     } else if (WHETHER (pat, INTEGRAL_PATTERN)) {
@@ -6027,12 +6182,12 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
     A68_BOOL *z = (A68_BOOL *) item;
     NODE_T *pat = get_next_format_pattern (p, ref_file, WANT_PATTERN);
     if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) == NULL) {
-      add_char_transput_buffer (p, FORMATTED_BUFFER, (z->value == A_TRUE ? FLIP_CHAR : FLOP_CHAR));
+      add_char_transput_buffer (p, FORMATTED_BUFFER, (z->value == A68_TRUE ? FLIP_CHAR : FLOP_CHAR));
     } else if (WHETHER (pat, BOOLEAN_PATTERN)) {
       if (NEXT_SUB (pat) == NULL) {
-        add_char_transput_buffer (p, FORMATTED_BUFFER, (z->value == A_TRUE ? FLIP_CHAR : FLOP_CHAR));
+        add_char_transput_buffer (p, FORMATTED_BUFFER, (z->value == A68_TRUE ? FLIP_CHAR : FLOP_CHAR));
       } else {
-        write_boolean_pattern (pat, ref_file, z->value == A_TRUE);
+        write_boolean_pattern (pat, ref_file, z->value == A68_TRUE);
       }
     } else {
       pattern_error (p, mode, ATTRIBUTE (pat));
@@ -6041,7 +6196,7 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
     NODE_T *pat = get_next_format_pattern (p, ref_file, WANT_PATTERN);
     if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) == NULL) {
       char *str = (char *) STACK_TOP;
-      genie_value_to_string (p, mode, item);
+      genie_value_to_string (p, mode, item, ATTRIBUTE (SUB (p)));
       add_string_transput_buffer (p, FORMATTED_BUFFER, str);
     } else if (WHETHER (pat, BITS_PATTERN)) {
       write_bits_pattern (pat, MODE (BITS), item, ref_file);
@@ -6052,7 +6207,7 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
     NODE_T *pat = get_next_format_pattern (p, ref_file, WANT_PATTERN);
     if (WHETHER (pat, GENERAL_PATTERN) && NEXT_SUB (pat) == NULL) {
       char *str = (char *) STACK_TOP;
-      genie_value_to_string (p, mode, item);
+      genie_value_to_string (p, mode, item, ATTRIBUTE (SUB (p)));
       add_string_transput_buffer (p, FORMATTED_BUFFER, str);
     } else if (WHETHER (pat, BITS_PATTERN)) {
       write_bits_pattern (pat, mode, item, ref_file);
@@ -6124,7 +6279,7 @@ static void genie_write_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * ite
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, arr->dimensions) != 0) {
       BYTE_T *base_addr = ADDRESS (&arr->array);
-      BOOL_T done = A_FALSE;
+      BOOL_T done = A68_FALSE;
       initialise_internal_index (tup, arr->dimensions);
       while (!done) {
         ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -6209,37 +6364,37 @@ void genie_write_file_format (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->read_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.put) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "putting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
     if (IS_NIL (file->string)) {
-      if ((file->fd = open_physical_file (p, ref_file, A_WRITE_ACCESS, A68_PROTECTION)) == -1) {
+      if ((file->fd = open_physical_file (p, ref_file, A68_WRITE_ACCESS, A68_PROTECTION)) == -1) {
         open_error (p, ref_file, "putting");
       }
     } else {
-      file->fd = open_physical_file (p, ref_file, A_READ_ACCESS, 0);
+      file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS, 0);
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_FALSE;
-    file->write_mood = A_TRUE;
-    file->char_mood = A_TRUE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_FALSE;
+    file->write_mood = A68_TRUE;
+    file->char_mood = A68_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Save stack state since formats have frames. */
   save_frame_pointer = file->frame_pointer;
@@ -6248,7 +6403,7 @@ void genie_write_file_format (NODE_T * p)
   file->stack_pointer = stack_pointer;
 /* Process [] SIMPLOUT. */
   if (file->format.body != NULL) {
-    open_format_frame (file, &(file->format), NOT_EMBEDDED_FORMAT, A_FALSE);
+    open_format_frame (file, &(file->format), NOT_EMBEDDED_FORMAT, A68_FALSE);
   }
   formats = 0;
   base_address = ADDRESS (&(arr->array));
@@ -6265,7 +6420,7 @@ void genie_write_file_format (NODE_T * p)
       formats++;
       frame_pointer = file->frame_pointer;
       stack_pointer = file->stack_pointer;
-      open_format_frame (file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A_TRUE);
+      open_format_frame (file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A68_TRUE);
     } else if (mode == MODE (PROC_REF_FILE_VOID)) {
 /* Ignore
 	  genie_call_proc_ref_file_void (p, ref_file, *(A68_PROCEDURE *) item);
@@ -6301,9 +6456,9 @@ static BOOL_T expect (NODE_T * p, MOID_T * m, A68_REF ref_file, const char *item
 {
   if (a68g_strchr ((char *) items, ch) == NULL) {
     value_error (p, m, ref_file);
-    return (A_FALSE);
+    return (A68_FALSE);
   } else {
-    return (A_TRUE);
+    return (A68_TRUE);
   }
 }
 
@@ -6502,13 +6657,13 @@ This implementation does not have the RR peculiarity that longest
 matching literal must be first, in case of non-unique first chars.
 */
   A68_FILE *file = FILE_DEREF (&ref_file);
-  BOOL_T cont = A_TRUE;
+  BOOL_T cont = A68_TRUE;
   int longest_match = 0, longest_match_len = 0;
   while (cont) {
     int ch = char_scanner (file);
     if (!file->eof) {
       int len, count = 0, matches = 0, first_match = 0;
-      BOOL_T full_match = A_FALSE;
+      BOOL_T full_match = A68_FALSE;
       add_char_transput_buffer (p, INPUT_BUFFER, ch);
       len = get_transput_buffer_index (INPUT_BUFFER);
       traverse_choice_pattern (p, get_transput_buffer (INPUT_BUFFER), len, &count, &matches, &first_match, &full_match);
@@ -6518,17 +6673,17 @@ matching literal must be first, in case of non-unique first chars.
         longest_match = first_match;
         longest_match_len = len;
       } else if (matches == 0) {
-        cont = A_FALSE;
+        cont = A68_FALSE;
       }
     } else {
-      cont = A_FALSE;
+      cont = A68_FALSE;
     }
   }
   if (longest_match > 0) {
 /* Push back look-ahead chars. */
     if (get_transput_buffer_index (INPUT_BUFFER) > 0) {
       char *z = get_transput_buffer (INPUT_BUFFER);
-      file->eof = A_FALSE;
+      file->eof = A68_FALSE;
       add_string_transput_buffer (p, file->transput_buffer, &z[longest_match_len]);
     }
     return (longest_match);
@@ -6906,8 +7061,8 @@ static void read_bits_pattern (NODE_T * p, MOID_T * m, BYTE_T * item, A68_REF re
   char *z;
   radix = get_replicator_value (SUB (SUB (p)));
   if (radix < 2 || radix > 16) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_INVALID_RADIX, radix);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   z = get_transput_buffer (INPUT_BUFFER);
   snprintf (z, TRANSPUT_BUFFER_SIZE, "%dr", radix);
@@ -7020,7 +7175,7 @@ static void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item
         A68_BOOL *z = (A68_BOOL *) item;
         int k = read_choice_pattern (pat, ref_file);
         if (k == 1 || k == 2) {
-          z->value = (k == 1) ? A_TRUE : A_FALSE;
+          z->value = (k == 1) ? A68_TRUE : A68_FALSE;
           z->status = INITIALISED_MASK;
         } else {
           z->status = NULL_MASK;
@@ -7082,7 +7237,7 @@ static void genie_read_standard_format (NODE_T * p, MOID_T * mode, BYTE_T * item
     GET_DESCRIPTOR (arr, tup, (A68_REF *) item);
     if (get_row_size (tup, arr->dimensions) != 0) {
       BYTE_T *base_addr = ADDRESS (&arr->array);
-      BOOL_T done = A_FALSE;
+      BOOL_T done = A68_FALSE;
       initialise_internal_index (tup, arr->dimensions);
       while (!done) {
         ADDR_T index = calculate_internal_index (tup, arr->dimensions);
@@ -7170,37 +7325,37 @@ void genie_read_file_format (NODE_T * p)
   file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), MODE (FILE));
   if (!file->opened) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->draw_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "draw");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (file->write_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->channel.get) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "getting");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
   if (!file->read_mood && !file->write_mood) {
     if (IS_NIL (file->string)) {
-      if ((file->fd = open_physical_file (p, ref_file, A_READ_ACCESS, 0)) == -1) {
+      if ((file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS, 0)) == -1) {
         open_error (p, ref_file, "getting");
       }
     } else {
-      file->fd = open_physical_file (p, ref_file, A_READ_ACCESS, 0);
+      file->fd = open_physical_file (p, ref_file, A68_READ_ACCESS, 0);
     }
-    file->draw_mood = A_FALSE;
-    file->read_mood = A_TRUE;
-    file->write_mood = A_FALSE;
-    file->char_mood = A_TRUE;
+    file->draw_mood = A68_FALSE;
+    file->read_mood = A68_TRUE;
+    file->write_mood = A68_FALSE;
+    file->char_mood = A68_TRUE;
   }
   if (!file->char_mood) {
-    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
-    exit_genie (p, A_RUNTIME_ERROR);
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "binary");
+    exit_genie (p, A68_RUNTIME_ERROR);
   }
 /* Save stack state since formats have frames. */
   save_frame_pointer = file->frame_pointer;
@@ -7209,7 +7364,7 @@ void genie_read_file_format (NODE_T * p)
   file->stack_pointer = stack_pointer;
 /* Process [] SIMPLIN. */
   if (file->format.body != NULL) {
-    open_format_frame (file, &(file->format), NOT_EMBEDDED_FORMAT, A_FALSE);
+    open_format_frame (file, &(file->format), NOT_EMBEDDED_FORMAT, A68_FALSE);
   }
   formats = 0;
   base_address = ADDRESS (&(arr->array));
@@ -7226,7 +7381,7 @@ void genie_read_file_format (NODE_T * p)
       formats++;
       frame_pointer = file->frame_pointer;
       stack_pointer = file->stack_pointer;
-      open_format_frame (file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A_TRUE);
+      open_format_frame (file, (A68_FORMAT *) item, NOT_EMBEDDED_FORMAT, A68_TRUE);
     } else if (mode == MODE (PROC_REF_FILE_VOID)) {
 /* Ignore
 	  genie_call_proc_ref_file_void (p, ref_file, *(A68_PROCEDURE *) item);

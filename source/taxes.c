@@ -5,7 +5,7 @@
 
 /*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2006 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2007 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -30,7 +30,7 @@ static void tax_specifier_list (NODE_T *);
 static void tax_parameter_list (NODE_T *);
 static void tax_format_texts (NODE_T *);
 
-#define PORTCHECK_TAX(p, q) if (q == A_FALSE) {diagnostic_node (A_WARNING | FORCE_DIAGNOSTIC, p, WARNING_TAG_NOT_PORTABLE, NULL);}
+#define PORTCHECK_TAX(p, q) if (q == A68_FALSE) {diagnostic_node (A68_WARNING | A68_FORCE_DIAGNOSTICS, p, WARNING_TAG_NOT_PORTABLE, NULL);}
 
 /*!
 \brief check portability of sub tree
@@ -44,13 +44,13 @@ void portcheck (NODE_T * p)
     if (p->info->module->options.portcheck) {
       if (WHETHER (p, INDICANT) && MOID (p) != NULL) {
         PORTCHECK_TAX (p, MOID (p)->portable);
-        MOID (p)->portable = A_TRUE;
+        MOID (p)->portable = A68_TRUE;
       } else if (WHETHER (p, IDENTIFIER)) {
         PORTCHECK_TAX (p, TAX (p)->portable);
-        TAX (p)->portable = A_TRUE;
+        TAX (p)->portable = A68_TRUE;
       } else if (WHETHER (p, OPERATOR)) {
         PORTCHECK_TAX (p, TAX (p)->portable);
-        TAX (p)->portable = A_TRUE;
+        TAX (p)->portable = A68_TRUE;
       }
     }
   }
@@ -64,7 +64,7 @@ void portcheck (NODE_T * p)
 
 #define ACCEPT(u, v) if (strlen (u) >= strlen (v)) \
                      {if (strcmp (&u[strlen (u) - strlen (v)], v) == 0) \
-                     {return (A_TRUE);} }
+                     {return (A68_TRUE);} }
 
 static BOOL_T whether_mappable_routine (char *z)
 {
@@ -97,7 +97,7 @@ static BOOL_T whether_mappable_routine (char *z)
   ACCEPT (z, "bitswidth");
   ACCEPT (z, "byteswidth");
   ACCEPT (z, "smallreal");
-  return (A_FALSE);
+  return (A68_FALSE);
 }
 
 #undef ACCEPT
@@ -166,7 +166,7 @@ static void bind_identifier_tag_to_symbol_table (NODE_T * p)
       } else if ((z = bind_lengthety_identifier (SYMBOL (p))) != NULL) {
         MOID (p) = MOID (z);
       } else {
-        diagnostic_node (A_ERROR, p, ERROR_UNDECLARED_TAG_1);
+        diagnostic_node (A68_ERROR, p, ERROR_UNDECLARED_TAG_1);
         z = add_tag (SYMBOL_TABLE (p), IDENTIFIER, p, MODE (ERROR), NORMAL_IDENTIFIER);
         MOID (p) = MODE (ERROR);
       }
@@ -318,7 +318,7 @@ static void tax_routine_texts (NODE_T * p)
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MOID (p), ROUTINE_TEXT);
       TAX (p) = z;
       HEAP (z) = LOC_SYMBOL;
-      z->use = A_TRUE;
+      z->use = A68_TRUE;
     }
   }
 }
@@ -336,12 +336,12 @@ static void tax_format_texts (NODE_T * p)
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
           FORMAT_TEXT);
       TAX (p) = z;
-      z->use = A_TRUE;
+      z->use = A68_TRUE;
     } else if (WHETHER (p, FORMAT_DELIMITER_SYMBOL) && NEXT (p) != NULL) {
       TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, MODE (FORMAT),
           FORMAT_IDENTIFIER);
       TAX (p) = z;
-      z->use = A_TRUE;
+      z->use = A68_TRUE;
     }
   }
 }
@@ -374,7 +374,7 @@ static void tax_generators (NODE_T * p)
       if (WHETHER (SUB (p), LOC_SYMBOL)) {
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (SUB (p))), GENERATOR);
         HEAP (z) = LOC_SYMBOL;
-        z->use = A_TRUE;
+        z->use = A68_TRUE;
         TAX (p) = z;
       }
     }
@@ -399,14 +399,14 @@ static void structure_fields_test (NODE_T * p)
           PACK_T *s = PACK (m);
           for (; s != NULL; FORWARD (s)) {
             PACK_T *t = NEXT (s);
-            BOOL_T k = A_TRUE;
+            BOOL_T k = A68_TRUE;
             for (t = NEXT (s); t != NULL && k; FORWARD (t)) {
               if (s->text == t->text) {
-                diagnostic_node (A_ERROR, p, ERROR_MULTIPLE_FIELD);
+                diagnostic_node (A68_ERROR, p, ERROR_MULTIPLE_FIELD);
                 while (NEXT (s) != NULL && NEXT (s)->text == t->text) {
                   FORWARD (s);
                 }
-                k = A_FALSE;
+                k = A68_FALSE;
               }
             }
           }
@@ -433,13 +433,13 @@ static void incestuous_union_test (NODE_T * p)
       for (; m != NULL; m = NEXT (m)) {
         if (WHETHER (m, UNION_SYMBOL) && m->equivalent_mode == NULL) {
           PACK_T *s = PACK (m);
-          BOOL_T x = A_TRUE;
+          BOOL_T x = A68_TRUE;
 /* Discard unions with one member. */
           if (count_pack_members (s) == 1) {
             SOID_T a;
             make_soid (&a, NO_SORT, m, 0);
-            diagnostic_node (A_ERROR, NODE (m), ERROR_COMPONENT_NUMBER, m);
-            x = A_FALSE;
+            diagnostic_node (A68_ERROR, NODE (m), ERROR_COMPONENT_NUMBER, m);
+            x = A68_FALSE;
           }
 /* Discard unions with firmly related modes. */
           for (; s != NULL && x; FORWARD (s)) {
@@ -447,7 +447,7 @@ static void incestuous_union_test (NODE_T * p)
             for (; t != NULL; FORWARD (t)) {
               if (MOID (t) != MOID (s)) {
                 if (whether_firm (MOID (s), MOID (t))) {
-                  diagnostic_node (A_ERROR, p, ERROR_COMPONENT_RELATED, m);
+                  diagnostic_node (A68_ERROR, p, ERROR_COMPONENT_RELATED, m);
                 }
               }
             }
@@ -458,7 +458,7 @@ static void incestuous_union_test (NODE_T * p)
             if (WHETHER (n, UNION_SYMBOL) && whether_subset (n, m, NO_DEFLEXING)) {
               SOID_T z;
               make_soid (&z, NO_SORT, n, 0);
-              diagnostic_node (A_ERROR, p, ERROR_SUBSET_RELATED, m, n);
+              diagnostic_node (A68_ERROR, p, ERROR_SUBSET_RELATED, m, n);
             }
           }
         }
@@ -519,10 +519,10 @@ static void test_firmly_related_ops_local (NODE_T * p, TAG_T * s)
     TAG_T *t = find_firmly_related_op (SYMBOL_TABLE (s), SYMBOL (NODE (s)), l, r, s);
     if (t != NULL) {
       if (SYMBOL_TABLE (t) == stand_env) {
-        diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
-        ABNORMAL_END (A_TRUE, "standard environ error", NULL);
+        diagnostic_node (A68_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
+        ABNORMAL_END (A68_TRUE, "standard environ error", NULL);
       } else {
-        diagnostic_node (A_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
+        diagnostic_node (A68_ERROR, p, ERROR_OPERATOR_RELATED, MOID (s), SYMBOL (NODE (s)), MOID (t), SYMBOL (NODE (t)), NULL);
       }
     }
     if (NEXT (s) != NULL) {
@@ -581,7 +581,7 @@ void collect_taxes (NODE_T * p)
 static void already_declared (NODE_T * n, int a)
 {
   if (find_tag_local (SYMBOL_TABLE (n), a, SYMBOL (n)) != NULL) {
-    diagnostic_node (A_ERROR, n, ERROR_MULTIPLE_TAG);
+    diagnostic_node (A68_ERROR, n, ERROR_MULTIPLE_TAG);
   }
 }
 
@@ -629,7 +629,7 @@ TAG_T *add_tag (SYMBOL_TABLE_T * s, int a, NODE_T * n, MOID_T * m, int p)
     } else if (a == ANONYMOUS) {
       INSERT_TAG (&s->anonymous, z);
     } else {
-      ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "add tag");
+      ABNORMAL_END (A68_TRUE, ERROR_INTERNAL_CONSISTENCY, "add tag");
     }
     return (z);
   } else {
@@ -662,7 +662,7 @@ TAG_T *find_tag_global (SYMBOL_TABLE_T * table, int a, char *name)
     } else if (a == LABEL) {
       s = table->labels;
     } else {
-      ABNORMAL_END (A_TRUE, "impossible state in find_tag_global", NULL);
+      ABNORMAL_END (A68_TRUE, "impossible state in find_tag_global", NULL);
     }
     for (; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
@@ -725,7 +725,7 @@ TAG_T *find_tag_local (SYMBOL_TABLE_T * table, int a, char *name)
     } else if (a == LABEL) {
       s = table->labels;
     } else {
-      ABNORMAL_END (A_TRUE, "impossible state in find_tag_local", NULL);
+      ABNORMAL_END (A68_TRUE, "impossible state in find_tag_local", NULL);
     }
     for (; s != NULL; FORWARD (s)) {
       if (SYMBOL (NODE (s)) == name) {
@@ -824,7 +824,7 @@ static void tax_variable_dec (NODE_T * p, int *q, MOID_T ** m)
       if (*q == LOC_SYMBOL) {
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (*m), GENERATOR);
         HEAP (z) = LOC_SYMBOL;
-        z->use = A_TRUE;
+        z->use = A68_TRUE;
         entry->body = z;
       } else {
         entry->body = NULL;
@@ -864,7 +864,7 @@ static void tax_proc_variable_dec (NODE_T * p, int *q)
         TAG_T *z = add_tag (SYMBOL_TABLE (p), ANONYMOUS, p, SUB (MOID (p)),
             GENERATOR);
         HEAP (z) = LOC_SYMBOL;
-        z->use = A_TRUE;
+        z->use = A68_TRUE;
         entry->body = z;
       } else {
         entry->body = NULL;
@@ -939,13 +939,13 @@ static void check_operator_dec (NODE_T * p)
   }
   k = 1 + count_operands (pack);
   if (!(k == 1 || k == 2)) {
-    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_OPERAND_NUMBER);
+    diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_OPERAND_NUMBER);
     k = 0;
   }
   if (k == 1 && a68g_strchr (NOMADS, *(SYMBOL (p))) != NULL) {
-    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_OPERATOR_INVALID, NOMADS);
+    diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_OPERATOR_INVALID, NOMADS);
   } else if (k == 2 && !find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) {
-    diagnostic_node (A_SYNTAX_ERROR, p, ERROR_DYADIC_PRIORITY);
+    diagnostic_node (A68_SYNTAX_ERROR, p, ERROR_DYADIC_PRIORITY);
   }
 }
 
@@ -1212,7 +1212,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
 {
   NODE_T *q;
   SYMBOL_TABLE_T *s = SYMBOL_TABLE (p);
-  BOOL_T not_a_for_range = A_FALSE;
+  BOOL_T not_a_for_range = A68_FALSE;
 /* let the tree point to the current symbol table. */
   for (q = p; q != NULL; FORWARD (q)) {
     SYMBOL_TABLE (q) = s;
@@ -1234,7 +1234,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
           SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
           preliminary_symbol_table_setup (SUB (q));
           if ((FORWARD (q)) == NULL) {
-            not_a_for_range = A_TRUE;
+            not_a_for_range = A68_TRUE;
           } else {
             if (WHETHER (q, THEN_BAR_SYMBOL)) {
               SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
@@ -1260,7 +1260,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
           SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
           preliminary_symbol_table_setup (SUB (q));
           if ((FORWARD (q)) == NULL) {
-            not_a_for_range = A_TRUE;
+            not_a_for_range = A68_TRUE;
           } else {
             if (WHETHER (q, ELSE_SYMBOL)) {
               SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
@@ -1285,7 +1285,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
           SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
           preliminary_symbol_table_setup (SUB (q));
           if ((FORWARD (q)) == NULL) {
-            not_a_for_range = A_TRUE;
+            not_a_for_range = A68_TRUE;
           } else {
             if (WHETHER (q, OUT_SYMBOL)) {
               SYMBOL_TABLE (SUB (q)) = new_symbol_table (s);
@@ -1311,7 +1311,7 @@ void preliminary_symbol_table_setup (NODE_T * p)
         SYMBOL_TABLE (SUB (q)) = u;
         preliminary_symbol_table_setup (SUB (q));
         if ((FORWARD (q)) == NULL) {
-          not_a_for_range = A_TRUE;
+          not_a_for_range = A68_TRUE;
         } else if (WHETHER (q, ALT_DO_SYMBOL)) {
           SYMBOL_TABLE (SUB (q)) = new_symbol_table (u);
           preliminary_symbol_table_setup (SUB (q));
@@ -1346,9 +1346,9 @@ void preliminary_symbol_table_setup (NODE_T * p)
 
 static void mark_mode (MOID_T * m)
 {
-  if (m != NULL && m->use == A_FALSE) {
+  if (m != NULL && m->use == A68_FALSE) {
     PACK_T *p = PACK (m);
-    m->use = A_TRUE;
+    m->use = A68_TRUE;
     for (; p != NULL; FORWARD (p)) {
       mark_mode (MOID (p));
       mark_mode (SUB (m));
@@ -1391,20 +1391,20 @@ routines in transput.
     } else if (WHETHER (p, OPERATOR)) {
       TAG_T *z;
       if (TAX (p) != NULL) {
-        TAX (p)->use = A_TRUE;
+        TAX (p)->use = A68_TRUE;
       }
       if ((z = find_tag_global (SYMBOL_TABLE (p), PRIO_SYMBOL, SYMBOL (p))) != NULL) {
-        z->use = A_TRUE;
+        z->use = A68_TRUE;
       }
     } else if (WHETHER (p, INDICANT)) {
       TAG_T *z = find_tag_global (SYMBOL_TABLE (p), INDICANT, SYMBOL (p));
       if (z != NULL) {
         TAX (p) = z;
-        z->use = A_TRUE;
+        z->use = A68_TRUE;
       }
     } else if (WHETHER (p, IDENTIFIER)) {
       if (TAX (p) != NULL) {
-        TAX (p)->use = A_TRUE;
+        TAX (p)->use = A68_TRUE;
       }
     }
   }
@@ -1420,7 +1420,7 @@ static void unused (TAG_T * s)
 {
   for (; s != NULL; FORWARD (s)) {
     if (!s->use) {
-      diagnostic_node (A_WARNING, NODE (s), WARNING_TAG_UNUSED, NODE (s));
+      diagnostic_node (A68_WARNING, NODE (s), WARNING_TAG_UNUSED, NODE (s));
     }
   }
 }
@@ -1461,7 +1461,7 @@ void jumps_from_procs (NODE_T * p)
       if (u->info->PROCEDURE_NUMBER != NODE (TAX (u))->info->PROCEDURE_NUMBER) {
         PRIO (TAX (u)) = EXTERN_LABEL;
       }
-      TAX (u)->use = A_TRUE;
+      TAX (u)->use = A68_TRUE;
     } else if (WHETHER (p, JUMP)) {
       NODE_T *u = SUB (p);
       if (WHETHER (u, GOTO_SYMBOL)) {
@@ -1470,7 +1470,7 @@ void jumps_from_procs (NODE_T * p)
       if (u->info->PROCEDURE_NUMBER != NODE (TAX (u))->info->PROCEDURE_NUMBER) {
         PRIO (TAX (u)) = EXTERN_LABEL;
       }
-      TAX (u)->use = A_TRUE;
+      TAX (u)->use = A68_TRUE;
     } else {
       jumps_from_procs (SUB (p));
     }
@@ -1507,7 +1507,7 @@ void assign_offsets_table (SYMBOL_TABLE_T * c)
   c->ap_increment = assign_offset_tags (c->identifiers, 0);
   c->ap_increment = assign_offset_tags (c->operators, c->ap_increment);
   c->ap_increment = assign_offset_tags (c->anonymous, c->ap_increment);
-  c->ap_increment = ALIGN (c->ap_increment);
+  c->ap_increment = A68_ALIGN (c->ap_increment);
 }
 
 /*!
