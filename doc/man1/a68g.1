@@ -7,6 +7,7 @@ a68g \- Algol 68 Genie, an Algol 68 interpreter
 .Sh SYNOPSIS
 a68g
 .Op Fl assertions | Fl noassertions
+.Op Fl backtrace | Fl nobacktrace
 .Op Fl brackets
 .Op Fl check | Fl norun
 .Op Fl debug | Fl monitor
@@ -76,6 +77,9 @@ for multiplication with 2 ** 10, 2 ** 20 or 2 ** 30 respectively.
 .It Fl Assertions | Fl NOAssertions
 Control elaboration of assertions.
 .
+.It Fl BACKtrace | Fl NOBACKtrace
+Control whether a stack backtrace is done in case a runtime-error occurs.
+.
 .It Fl BRackets
 Consider [ .. ] and { .. } as being equivalent to ( .. ).
 Traditional Algol 68 syntax allows ( .. ) to replace [ .. ] in bounds and slices.
@@ -84,7 +88,7 @@ Traditional Algol 68 syntax allows ( .. ) to replace [ .. ] in bounds and slices
 Check syntax only, the interpreter does not start.
 .
 .It Fl DEBUG | Fl MONitor
-.Invoke the monitor in case a runtime-error occurs.
+Invoke the monitor in case a runtime-error occurs.
 The program will pause in the monitor on the line that contains the error.
 .
 .It Fl ECHO Ar string

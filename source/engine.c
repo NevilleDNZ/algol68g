@@ -703,6 +703,24 @@ PROPAGATOR_T genie_dereferencing_quick (NODE_T * p)
 }
 
 /*!
+\brief dereference a global name
+\param p position in the syntax tree, should not be NULL
+\return a propagator for this action
+**/
+
+PROPAGATOR_T genie_dereference_global_identifier (NODE_T * p)
+{
+  A68_REF *z;
+  MOID_T *deref = SUB (MOID (p));
+  unsigned size = MOID_SIZE (deref);
+  FRAME_GET_GLOBAL (z, A68_REF, p);
+  TEST_NIL (p, *z, MOID (p));
+  PUSH (p, ADDRESS (z), size);
+  GENIE_CHECK_INITIALISATION (p, STACK_OFFSET (-size), deref);
+  return (p->genie.propagator);
+}
+
+/*!
 \brief dereference a local name
 \param p position in the syntax tree, should not be NULL
 \return a propagator for this action
@@ -781,7 +799,10 @@ PROPAGATOR_T genie_dereferencing (NODE_T * p)
   TEST_NIL (p, z, MOID (SUB (p)));
   PUSH (p, ADDRESS (&z), MOID_SIZE (MOID (p)));
   GENIE_CHECK_INITIALISATION (p, STACK_OFFSET (-MOID_SIZE (MOID (p))), MOID (p));
-  if (self.unit == genie_loc_identifier) {
+  if (self.unit == genie_global_identifier) {
+    self.unit = genie_dereference_global_identifier;
+    self.source->genie.propagator.unit = self.unit;
+  } else if (self.unit == genie_loc_identifier) {
     self.unit = genie_dereference_loc_identifier;
     self.source->genie.propagator.unit = self.unit;
   } else if (self.unit == genie_slice_name_quick) {
@@ -1512,6 +1533,20 @@ PROPAGATOR_T genie_denoter (NODE_T * p)
 }
 
 /*!
+\brief push a global identifier
+\param p position in the syntax tree, should not be NULL
+\return a propagator for this action
+**/
+
+PROPAGATOR_T genie_global_identifier (NODE_T * p)
+{
+  BYTE_T *z;
+  FRAME_GET_GLOBAL (z, BYTE_T, p);
+  PUSH (p, z, MOID_SIZE (MOID (p)));
+  return (p->genie.propagator);
+}
+
+/*!
 \brief push a local identifier
 \param p position in the syntax tree, should not be NULL
 \return a propagator for this action
@@ -1521,9 +1556,6 @@ PROPAGATOR_T genie_loc_identifier (NODE_T * p)
 {
   BYTE_T *z;
   FRAME_GET (z, BYTE_T, p);
-  /*
-   * GENIE_CHECK_INITIALISATION (p, z, MOID (p)); 
-   */
   PUSH (p, z, MOID_SIZE (MOID (p)));
   return (p->genie.propagator);
 }
@@ -1578,6 +1610,9 @@ PROPAGATOR_T genie_identifier (NODE_T * p)
       genie_identifier_standenv (p);
       self.unit = genie_identifier_standenv;
     }
+  } else if (p->genie.level == global_level) {
+    genie_global_identifier (p);
+    self.unit = genie_global_identifier;
   } else {
     genie_loc_identifier (p);
     self.unit = genie_loc_identifier;
@@ -2169,7 +2204,7 @@ static void genie_jump (NODE_T * p)
     }
   }
 /* Beam us up, Scotty! */
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
   if (PAR_LEVEL (p) > 0) {
     if (PAR_LEVEL (p) > PAR_LEVEL (FRAME_TREE (f)) && PAR_LEVEL (FRAME_TREE (f)) != 0) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_LABEL_IN_PAR_CLAUSE);
@@ -2399,6 +2434,7 @@ void genie_serial_units_no_label (NODE_T * p, int pop_sp, NODE_T ** seq)
 
 void genie_serial_units (NODE_T * p, NODE_T ** jump_to, jmp_buf * exit_buf, int pop_sp)
 {
+  LOW_STACK_ALERT (p);
   for (; p != NULL; FORWARD (p)) {
     switch (ATTRIBUTE (p)) {
     case UNIT:
@@ -2498,7 +2534,7 @@ void genie_serial_clause (NODE_T * p, jmp_buf * exit_buf)
 /* HIjol! Restore state and look for indicated unit. */
       NODE_T *jump_to = SYMBOL_TABLE (p)->jump_to;
 /* If we jumped from a parallel clause we zap all units. */
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
       if (parallel_clauses > 0) {
         ABNORMAL_END (!is_main_thread (), "target label not in main thread", NULL);
       }

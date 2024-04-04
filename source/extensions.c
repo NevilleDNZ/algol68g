@@ -26,15 +26,11 @@ This code implements some UNIX/Linux related routines.
 Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>. 
 */
 
-#ifdef WIN32_VERSION
-#define PATTERN A68_PATTERN
-#endif
-
 #include "algol68g.h"
 #include "genie.h"
 #include "transput.h"
 
-#ifndef WIN32_VERSION
+#if ! defined HAVE_WIN32
 #include <sys/wait.h>
 #endif
 
@@ -299,7 +295,7 @@ void genie_getenv (NODE_T * p)
 void genie_fork (NODE_T * p)
 {
   RESET_ERRNO;
-#if defined WIN32_VERSION
+#if defined HAVE_WIN32
   PUSH_INT (p, -1);
 #else
   PUSH_INT (p, fork ());
@@ -354,7 +350,7 @@ void genie_execve_child (NODE_T * p)
   POP (p, &a_args, SIZE_OF (A68_REF));
   POP (p, &a_prog, SIZE_OF (A68_REF));
 /* Now create the pipes and fork. */
-#if defined WIN32_VERSION
+#if defined HAVE_WIN32
   pid = -1;
 #else
   pid = fork ();
@@ -408,7 +404,7 @@ Return a PIPE that contains the descriptors for the parent.
   POP (p, &a_args, SIZE_OF (A68_REF));
   POP (p, &a_prog, SIZE_OF (A68_REF));
 /* Now create the pipes and fork. */
-#if defined WIN32_VERSION
+#if defined HAVE_WIN32
   pid = -1;
 #else
   if ((pipe (ptoc_fd) == -1) || (pipe (ctop_fd) == -1)) {
@@ -454,6 +450,98 @@ Return a PIPE that contains the descriptors for the parent.
 }
 
 /*!
+\brief PROC execve_output = (STRING, [] STRING, [] STRING, REF_STRING) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_execve_output (NODE_T * p)
+{
+/*
+Child redirects STDIN and STDOUT.
+
+       pipe ptoc
+       ->W...R->
+ PARENT         CHILD
+       <-R...W<-
+       pipe ctop
+*/
+  int pid, ptoc_fd[2], ctop_fd[2];
+  A68_REF a_prog, a_args, a_env, dest;
+  RESET_ERRNO;
+/* Pop parameters. */
+  POP_REF (p, &dest);
+  POP_REF (p, &a_env);
+  POP_REF (p, &a_args);
+  POP_REF (p, &a_prog);
+/* Now create the pipes and fork. */
+#if defined HAVE_WIN32
+  pid = -1;
+#else
+  if ((pipe (ptoc_fd) == -1) || (pipe (ctop_fd) == -1)) {
+    PUSH_INT (p, -1);
+    return;
+  }
+  pid = fork ();
+#endif
+  if (pid == -1) {
+/* Fork failure. */
+    PUSH_INT (p, -1);
+    return;
+  }
+#if !defined HAVE_WIN32
+  if (pid == 0) {
+/* Child process. */
+    char *prog, *argv[VECTOR_SIZE], *envp[VECTOR_SIZE];
+/* Convert  strings. */
+    prog = (char *) get_heap_space (1 + a68_string_size (p, a_prog));
+    a_to_c_string (p, prog, a_prog);
+    convert_string_vector (p, argv, a_args);
+    convert_string_vector (p, envp, a_env);
+/* Set up redirection. */
+    close (ctop_fd[FD_READ]);
+    close (ptoc_fd[FD_WRITE]);
+    close (STDIN_FILENO);
+    close (STDOUT_FILENO);
+    dup2 (ptoc_fd[FD_READ], STDIN_FILENO);
+    dup2 (ctop_fd[FD_WRITE], STDOUT_FILENO);
+    if (argv[0] == NULL) {
+      diagnostic_node (A_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
+      exit_genie (p, A_RUNTIME_ERROR);
+    }
+    (void) execve (prog, argv, envp);
+/* execve only returns if it fails - end child process. */
+    a68g_exit (EXIT_FAILURE);
+    PUSH_INT (p, -1);
+  } else {
+/* Parent process. */
+    char ch;
+    int read, ret, status;
+    close (ptoc_fd[FD_READ]);
+    close (ctop_fd[FD_WRITE]);
+    reset_transput_buffer (INPUT_BUFFER);
+    do {
+      read = io_read_conv (ctop_fd[FD_READ], &ch, 1);
+      if (read > 0) {
+        add_char_transput_buffer (p, INPUT_BUFFER, ch);
+      }
+    }
+    while (read > 0);
+    do {
+      ret = waitpid (pid, &status, 0);
+    }
+    while (ret == -1 && errno == EINTR);
+    if (ret != pid) {
+      status = -1;
+    }
+    if (!IS_NIL (dest)) {
+      *(A68_REF *) ADDRESS (&dest) = c_to_a_string (p, get_transput_buffer (INPUT_BUFFER));
+    }
+    PUSH_INT (p, ret);
+  }
+#endif
+}
+
+/*!
 \brief PROC create pipe = PIPE
 \param p position in syntax tree, should not be NULL
 **/
@@ -476,7 +564,7 @@ void genie_waitpid (NODE_T * p)
   A68_INT k;
   RESET_ERRNO;
   POP_INT (p, &k);
-#if !defined WIN32_VERSION
+#if ! defined HAVE_WIN32
   waitpid (k.value, NULL, 0);
 #endif
 }
@@ -487,13 +575,12 @@ Be sure to know what you are doing when you use this, but on the other hand,
 "reset" will always restore your terminal. 
 */
 
-#ifdef HAVE_CURSES
+#if defined HAVE_CURSES
 
 #include <sys/time.h>
 #include <curses.h>
 
-#ifdef WIN32_VERSION
-#undef PATTERN
+#if defined HAVE_WIN32
 #undef FD_READ
 #undef FD_WRITE
 #include <winsock.h>
@@ -535,7 +622,7 @@ void init_curses ()
 
 int rgetchar (void)
 {
-#ifdef WIN32_VERSION
+#if defined HAVE_WIN32
   return (getch ());
 #else
   int retval;
@@ -679,7 +766,7 @@ void genie_curses_move (NODE_T * p)
 
 #endif                          /* HAVE_CURSES */
 
-#ifdef HAVE_POSTGRESQL
+#if defined HAVE_POSTGRESQL
 
 /*
 PostgreSQL libpq interface based on initial work by Jaap Boender. 

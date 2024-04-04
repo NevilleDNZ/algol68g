@@ -665,8 +665,12 @@ static BOOL_T read_source_file (MODULE_T * module)
     l = 0;
     scan_buf[0] = NULL_CHAR;
     while (k < source_file_size && buffer[k] != NEWLINE_CHAR) {
-      scan_buf[l++] = buffer[k++];
-      scan_buf[l] = NULL_CHAR;
+      if (k < source_file_size - 1 && buffer[k] == CR_CHAR && buffer[k + 1] == NEWLINE_CHAR) {
+        k++;
+      } else {
+        scan_buf[l++] = buffer[k++];
+        scan_buf[l] = NULL_CHAR;
+      }
     }
     scan_buf[l++] = NEWLINE_CHAR;
     scan_buf[l] = NULL_CHAR;
@@ -696,7 +700,7 @@ static BOOL_T read_source_file (MODULE_T * module)
 static char next_char (MODULE_T * module, SOURCE_LINE_T ** ref_l, char **ref_s, BOOL_T allow_typo)
 {
   char ch;
-#ifdef NO_TYPO
+#if defined NO_TYPO
   allow_typo = A_FALSE;
 #endif
   LOW_STACK_ALERT (NULL);

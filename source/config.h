@@ -28,7 +28,7 @@ automatic way. These dependencies are
    HAVE_SYSTEM_STACK_CHECK
    HAVE_MODIFIABLE_X_TITLE
    HAVE_UNIX_CLOCK
-   WIN32_VERSION
+   HAVE_WIN32
 
 Define or undefine the directives below depending on your system.
 You can also set them when using `make' by using the CFLAGS parameter:
@@ -38,7 +38,7 @@ You can also set them when using `make' by using the CFLAGS parameter:
 Refer to the file INSTALL.
 */
 
-#ifndef A68G_CONFIG_H
+#if ! defined A68G_CONFIG_H
 #define A68G_CONFIG_H
 
 /*
@@ -50,7 +50,7 @@ a stack frame at the start of execution of the Algol 68 program, is a measure
 of system stack size.
 */
 
-#ifndef HAVE_SYSTEM_STACK_CHECK
+#if ! defined HAVE_SYSTEM_STACK_CHECK
 #define HAVE_SYSTEM_STACK_CHECK
 #endif
 
@@ -59,7 +59,7 @@ Did you edit GNU libplot so you can modify X Window titles? If yes then define
 HAVE_MODIFIABLE_X_TITLE else undefine it.
 */
 
-#ifndef HAVE_MODIFIABLE_X_TITLE
+#if ! defined HAVE_MODIFIABLE_X_TITLE
 #undef HAVE_MODIFIABLE_X_TITLE
 #endif
 
@@ -72,20 +72,20 @@ Undefining it means that clock () will be called, which is portable.
 #undef HAVE_UNIX_CLOCK
 
 /*
-When defining WIN32_VERSION you may want to change directives following the 
+When defining HAVE_WIN32 you may want to change directives following the 
 definition below to reflect your particular system.
 HAVE_IEEE_754 is ok for Pentiums.
 */
 
-#ifndef WIN32_VERSION
-#undef WIN32_VERSION
+#if ! defined HAVE_WIN32
+#undef HAVE_WIN32
 #endif
 
-#ifdef WIN32_VERSION
+#if defined HAVE_WIN32
 #undef HAVE_CURSES
-#undef HAVE_PLOTUTILS
-#undef HAVE_GSL
-#undef HAVE_CURSES
+#define HAVE_PLOTUTILS 1
+#define HAVE_GSL 1
+#define HAVE_CURSES 1
 #undef HAVE_POSTGRESQL
 #undef HAVE_MODIFIABLE_X_TITLE
 #undef HAVE_UNIX_CLOCK
@@ -94,7 +94,7 @@ HAVE_IEEE_754 is ok for Pentiums.
 #undef HAVE_REGEX
 #undef HAVE_POSTGRESQL
 #define HAVE_IEEE_754 1
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
 #define X_DISPLAY_MISSING 1
 #endif
 #endif

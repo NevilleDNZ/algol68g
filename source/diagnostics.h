@@ -21,14 +21,13 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#ifndef A68G_DIAGNOSTICS_H
+#if ! defined A68G_DIAGNOSTICS_H
 #define A68G_DIAGNOSTICS_H
 
 #define MOID_ERROR_WIDTH 80
 
 #define ERROR_OPTION "error in option \"%s\""
 #define ERROR_OPTION_INFO "error in option \"%s\" (%s)"
-#define ERROR_OPTION_UNKNOWN "unknown option \"%s\""
 #define ERROR_UNWORTHY_CHARACTER "unworthy character %s"
 #define ERROR_NO_INPUT_FILE "no input file specified"
 #define ERROR_ACCESSING_NIL "attempt to access N"
@@ -93,7 +92,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_INVALID_PARAMETER "invalid parameter"
 #define ERROR_INVALID_PRIORITY "invalid priority declaration"
 #define ERROR_INVALID_RADIX "invalid radix D"
-#define ERROR_INVALID_SEQUENCE "A contains invalid sequence Z"
+#define ERROR_INVALID_SEQUENCE "U"
 #define ERROR_INVALID_SIZE "object of invalid size"
 #define ERROR_IN_DENOTER "error in M denoter"
 #define ERROR_KEYWORD "check for missing or unmatched keyword in clause starting at S"
@@ -130,7 +129,8 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_PARALLEL_CANNOT_JOIN "cannot join thread"
 #define ERROR_PARALLEL_OUTSIDE "invalid outside a parallel clause"
 #define ERROR_PARALLEL_OVERFLOW "too many parallel units"
-#define ERROR_PARENTHESIS "parenthesis error, check for Y"
+#define ERROR_PARENTHESIS "incorrect parenthesis nesting; check for Y"
+#define ERROR_PARENTHESIS_2 "incorrect parenthesis nesting; encountered Z L but expected X; check for Y"
 #define ERROR_QUOTED_BOLD_TAG "error in quoted bold tag"
 #define ERROR_REFINEMENT_APPLIED "refinement is applied more than once"
 #define ERROR_REFINEMENT_DEFINED "refinement already defined"
@@ -155,11 +155,12 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_TIME_LIMIT_EXCEEDED "time limit exceeded"
 #define ERROR_TOO_MANY_ARGUMENTS "too many arguments"
 #define ERROR_TOO_MANY_OPEN_FILES "too many open files"
+#define ERROR_TORRIX "linear algebra error (U, U)"
 #define ERROR_TRANSIENT_NAME "storing a transient name"
 #define ERROR_UNBALANCED_KEYWORD "missing or unbalanced keyword in A, near Z L"
 #define ERROR_UNDECLARED_TAG "tag S has not been declared properly in this range"
-#define ERROR_UNDECLARED_TAG_1 "Tag S has not been declared properly in this range"
-#define ERROR_UNDECLARED_TAG_2 "Tag Z has not been declared properly in this range"
+#define ERROR_UNDECLARED_TAG_1 "tag S has not been declared properly in this range"
+#define ERROR_UNDECLARED_TAG_2 "tag Z has not been declared properly in this range"
 #define ERROR_UNDETERMINDED_FILE_MOOD "file has undetermined mood"
 #define ERROR_UNSPECIFIED "unspecified error"
 #define ERROR_UNIMPLEMENTED_PRECISION "M precision is not implemented"

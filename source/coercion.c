@@ -2619,7 +2619,41 @@ static TAG_T *find_operator (SYMBOL_TABLE_T * s, char *n, MOID_T * x, MOID_T * y
   if (z != NULL) {
     return (z);
   }
-/* (D) Look in standenv for an appropriate cross-term. */
+/* (D) Vector and matrix "strong coercions" in standard environ. */
+  u = depref_completely (x);
+  v = depref_completely (y);
+  if ((u == MODE (ROW_REAL) || u == MODE (ROWROW_REAL)) || (v == MODE (ROW_REAL) || v == MODE (ROWROW_REAL)) || (u == MODE (ROW_COMPLEX) || u == MODE (ROWROW_COMPLEX)) || (v == MODE (ROW_COMPLEX) || v == MODE (ROWROW_COMPLEX))) {
+    if (u == MODE (INT)) {
+      z = search_table_for_operator (stand_env->operators, n, MODE (REAL), y, ALIAS_DEFLEXING);
+      if (z != NULL) {
+        return (z);
+      }
+      z = search_table_for_operator (stand_env->operators, n, MODE (COMPLEX), y, ALIAS_DEFLEXING);
+      if (z != NULL) {
+        return (z);
+      }
+    } else if (v == MODE (INT)) {
+      z = search_table_for_operator (stand_env->operators, n, x, MODE (REAL), ALIAS_DEFLEXING);
+      if (z != NULL) {
+        return (z);
+      }
+      z = search_table_for_operator (stand_env->operators, n, x, MODE (COMPLEX), ALIAS_DEFLEXING);
+      if (z != NULL) {
+        return (z);
+      }
+    } else if (u == MODE (REAL)) {
+      z = search_table_for_operator (stand_env->operators, n, MODE (COMPLEX), y, ALIAS_DEFLEXING);
+      if (z != NULL) {
+        return (z);
+      }
+    } else if (v == MODE (REAL)) {
+      z = search_table_for_operator (stand_env->operators, n, x, MODE (COMPLEX), ALIAS_DEFLEXING);
+      if (z != NULL) {
+        return (z);
+      }
+    }
+  }
+/* (E) Look in standenv for an appropriate cross-term. */
   u = make_series_from_moids (x, y);
   u = make_united_mode (u);
   v = get_balanced_mode (u, STRONG, NO_DEPREF, SAFE_DEFLEXING);
@@ -2627,10 +2661,13 @@ static TAG_T *find_operator (SYMBOL_TABLE_T * s, char *n, MOID_T * x, MOID_T * y
   if (z != NULL) {
     return (z);
   }
-/* (E) Now allow for depreffing for REF REAL +:= INT and alike. */
+/* (F) Now allow for depreffing for REF REAL +:= INT and alike. */
   v = get_balanced_mode (u, STRONG, DEPREF, SAFE_DEFLEXING);
   z = search_table_for_operator (stand_env->operators, n, v, v, ALIAS_DEFLEXING);
-  return (z);
+  if (z != NULL) {
+    return (z);
+  }
+  return (NULL);
 }
 
 /*!

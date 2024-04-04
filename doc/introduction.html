@@ -1,6 +1,7 @@
+<!-- Header -->
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<title>Algol 68 Genie</title>
 <meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
 <meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
@@ -14,7 +15,7 @@ h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
 h4 {font-size: 10pt; font-family: Arial,Helvetica;}
-td {font-size: 8pt; font-family: Arial,Helvetica;}
+td {font-size: 10pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Courier;}
@@ -27,22 +28,23 @@ pre {font-size: 10pt; font-family: Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="100%" background="lines.gif">
 <img src="lines.gif" align=right>
-<small>Documentation for Algol 68 Genie Mark 9.2</small>
+Documentation for Algol 68 Genie Mark 10
 </td>
 </table>
+
 
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Algol 68 Genie Mark 9.2</h2>
+<h2>Algol 68 Genie Mark 10</h2>
 <h3>An Algol 68 interpreter</h3>
-<small>
 &middot;&nbsp;<a href="#whatis">What is Algol 68 Genie?</a><br>
 &middot;&nbsp;<a href="#obtaining">Obtaining Algol 68 Genie</a><br>
+&middot;&nbsp;<a href="#linkto">What libraries can Algol 68 Genie link to?</a><br>
 &middot;&nbsp;<a href="#contact">Author and contact information</a><br>
-&middot;&nbsp;<a href="#previous">Available previous releases</a><br>
+&middot;&nbsp;<a href="#ack">Acknowlegements</a><br>
+&middot;&nbsp;<a href="#previous">Available releases</a><br>
 &middot;&nbsp;<a href="#history">Release history</a><br>
-</small>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="logo.gif">
@@ -60,27 +62,28 @@ seems as natural as a branch of mathematics.'</i>&nbsp;<br>
 <table border="0" cellspacing="0" width="100%">
 <tr>
 <td background="lines.gif">
-<small><b>Algol68G Mark 9.2</b></small>
+<b>Algol68G Mark 10</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
-&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
-&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
-&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
-&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
-&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
-&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html">Introduction</a><br>
+&nbsp;&middot;&nbsp;<a href="install.html">Installation</a><br>
+&nbsp;&middot;&nbsp;<a href="description.html">Description</a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html">Example&nbsp;programs</a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html">Synopsis</a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html">Syntax</a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html">Environment</a><br>
 <br>
-<small><b>Extensions</b></small>
+<b>Extensions</b>
 <br>
-&nbsp;&middot;&nbsp;<a href="extensions.html"><small>UNIX</small></a><br>
-&nbsp;&middot;&nbsp;<a href="postgresql.html"><small>PostgreSQL</small></a><br>
-&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
-&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html">UNIX</a><br>
+&nbsp;&middot;&nbsp;<a href="postgresql.html">PostgreSQL</a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html">Drawing</a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html">Numerical</a><br>
+&nbsp;&middot;&nbsp;<a href="torrix.html">Linear algebra</a><br>
 <br>
-&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
-&nbsp;&middot;&nbsp;<a href="resources.html"><small>A68 Resources</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a><br>
-&nbsp;&middot;&nbsp;<a href="introduction.html#contact"><small>Contact</small></a>
+&nbsp;&middot;&nbsp;<a href="contents.html">Contents</a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html">A68 Resources</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining">Downloads</a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#contact">Contact</a>
 </td>
 </tr>
 </table>
@@ -96,7 +99,7 @@ Algol 68 is a rather lean, orthogonal general-purpose programming language, that
 It can be used for executing Algol 68 programs or scripts when execution time is not of primary importance; Algol68G is pedantic rather than fast.
 <p>
 Algol68G is free software under the GNU General Public License.
-The current version is Mark 9.2, released in July 2006.
+The current version is Mark 10, released in August 2006.
 You can <a href="introduction.html#obtaining">download</a> it from this page.
 </p>
 
@@ -111,17 +114,31 @@ Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public Li
 <ul>
 <li>
 Download 
-<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk9.2/algol68g-mk9.2.tar.gz">Algol68G Mark 9.2</a>, a gzipped tar archive containing C source code and documentation. <a href="install.html">Here</a> are instructions for installation of Algol68G on UNIX/Linux.
+<a href="http://www.xs4all.nl/~jmvdveer/algol68g-mk10/algol68g-mk10.tar.gz">Algol68G Mark 10</a>, a gzipped tar archive containing C source code and documentation. 
+
 <p>
-Algol68G Mark 9.2 is regression-tested using a test set of more than 1100 programs. 
+<a href="install.html">Here</a> are instructions for installation of Algol68G on UNIX, Linux or MacOS X.
+
 <p>
-The archive includes <code>a68g.exe</code>, a Win32 executable of Algol 68 Genie Mark 9.2.
-This executable has been built and tested on Microsoft Windows XP and can be run from <code>cmd.exe</code>. 
+The archive includes <code>a68g.exe</code>, a WIN32 executable of Algol 68 Genie Mark 10, which has been built and tested on Microsoft Windows XP and can be run from <code>cmd.exe</code>. This executable has been linked to the GNU Plotting Utilities and the GNU Scientific Library.
+
+<p>
+Algol68G Mark 10 is regression-tested using a test set of more than 1100 programs. 
+
 <li>For Apple's MacOS X Darwin environment, Norman Hardy has posted a 
 <a href="http://www.cap-lore.com/Languages/A68/Build.html">binary package</a>.
 <li>
 The <a href="resources.html">resources page</a> contains links to on-line Algol 68 resources (Revised Report, informal textbook, historic documents, <i>Algol Bulletin</i> archive, other implementations, and more).
 The <a href="examples.html">example programs page</a> has examples of Algol68G programs. 
+</ul>
+
+<br>
+<h3><a name="linkto"></a>What libraries can Algol 68 Genie link to?</h3>
+<p>
+<ul>
+<li><a href="http://www.gnu.org/software/plotutils/">GNU Plotutils</a> for drawing from Algol 68.
+<li><a href="http://www.gnu.org/software/gsl/">GNU Scientific Library</a> to extend the mathematical capabilities of the standard environ.
+<li><a href="http://www.postgresql.org/">PostgreSQL</a> for writing PostgreSQL database client applications.
 </ul>
 
 <br>
@@ -133,18 +150,64 @@ If you have a question or remark, or have found a bug, please send a note to
 </p>
 
 <br>
-<h3><a name="previous"></a>Available previous releases</h3>
+<h3><a name="ack"></a>Acknowledgements</h3>
 <p>
-<li><a href="../../algol68g-mk9.2/doc/introduction.html"><small><b>Algol 68 Genie Mark 9.2</b></small></a>
-<li><a href="../../algol68g-mk9.1/doc/introduction.html"><small><b>Algol 68 Genie Mark 9.1</b></small></a>
-<li><a href="../../algol68g-mk9/doc/introduction.html"><small><b>Algol 68 Genie Mark 9</b></small></a>
+Thanks go to the following people, who were kind enough to report bugs and obscurities, to propose improvements, provide documentation, or to make a contribution in another way.
+<p>
+(In alphabetical order)
+<i>
+Mark Alford,
+Bruce Axtens,
+Lennart Benschop,
+Jaap Boenders,
+Bart Botma,
+Huw Davies, 
+Neville Dempsey,
+Koos Dering, 
+Scott Gallaher, 
+Jeremy Gibbons,
+Dick Grune, 
+Norman Hardy,
+Jim Heifetz, 
+Patrik Jansson,
+Trevor Jenkins, 
+Rob Jongschaap, 
+Henk Keller, 
+Wilhelm Kloke,
+Has van der Krieken,
+Sian Leitch, 
+Charles Lindsey, 
+Richard O'Keefe,
+France Pahlplatz, 
+Steven Pemberton,
+Richard Pinch,
+Robert Uzgalis,
+Merijn Vogel,
+Theo Vosse, 
+Andy Walker 
+</i>
+and
+<i>
+Glyn Webster.
+</i>
+<p>
+Algol68G would not be what it is without their help.
+</p>
+
+<br>
+<h3><a name="previous"></a>Available releases</h3>
+<p>
+<li><a href="../../algol68g-mk10/doc/introduction.html">Algol 68 Genie Mark 10</a>
+<li><a href="../../algol68g-mk9.2/doc/introduction.html">Algol 68 Genie Mark 9.2</a>
+<li><a href="../../algol68g-mk9.1/doc/introduction.html">Algol 68 Genie Mark 9.1</a>
+<li><a href="../../algol68g-mk9/doc/introduction.html">Algol 68 Genie Mark 9</a>
 </p>
 
 <br>
 <h3><a name="history"></a>Release history</h3>
 <p>
 <table border="0" cellspacing="0" cellpadding=6>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 <b>Mark</b>
 </td>
@@ -155,7 +218,23 @@ If you have a question or remark, or have found a bug, please send a note to
 <b>Changes</b>
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
+<td valign=top>
+Mark 10
+</td>
+<td valign=top>
+August 2006
+</td>
+<td valign=top>
+Adds basic <a href="torrix.html">linear algebra support</a><br>
+Adds procedures <code>arctan2</code>, <code>long arctan2</code> and <code>long long arctan2</code><br>
+Adds procedure <code>execve output</code><br>
+Improves diagnostics<br>
+Adds option [NO]BACKTRACE<br>
+Fixes small bugs
+</td>
+</tr>
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 9.2
 </td>
@@ -163,11 +242,12 @@ If you have a question or remark, or have found a bug, please send a note to
 July 2006
 </td>
 <td valign=top>
-Improved scanner implements typographical display features<br>
-Various bug fixes (generator, parallel-clause)
+Adds typographical display features<br>
+Fixes two serious bugs (generator, parallel-clause)<br>
+Fixes <code>configure</code> bugs that occur on some platforms
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 9.1
 </td>
@@ -176,13 +256,13 @@ May 2006
 </td>
 <td valign=top>
 64-bit safe interpreter<br>
-Improved monitor/debugger<br>
-Added of option MONITOR (or DEBUG)<br>
-Added procedure `monitor' (or `debug')<br>
-Fixed `configure' bugs that occur with Mark 9 on some platforms<br>
+Improves monitor/debugger<br>
+Adds option MONITOR (or DEBUG)<br>
+Adds procedure <code>monitor</code> (or <code>debug</code>)<br>
+Fixes <code>configure</code> bugs that occur on some platforms<br>
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 9
 </td>
@@ -190,13 +270,13 @@ Fixed `configure' bugs that occur with Mark 9 on some platforms<br>
 March 2006
 </td>
 <td valign=top>
-Basic PostgreSQL support<br>
-Added procedure `utc time' (UNIX)<br>
-Added procedure `local time' (UNIX)<br>
-Improved diagnostic messages
+Adds basic <a href="postgresql.html">PostgreSQL support</a><br>
+Adds procedure <code>utc time</code> (UNIX)<br>
+Adds procedure <code>local time</code> (UNIX)<br>
+Improves diagnostic messages
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 8.1
 </td>
@@ -204,13 +284,13 @@ Improved diagnostic messages
 November 2005
 </td>
 <td valign=top>
-Added procedure `sub in string' for substituting regular expressions in a string (UNIX)<br>
-Added option PORTCHECK cf. <a href="resources.html#documentation">standard hardware representation</a><br>
-Added option PEDANTIC<br>
-Fixed bug in partial parametrisation
+Adds procedure <code>sub in string</code> for substituting regular expressions in a string (UNIX)<br>
+Adds option <code>PORTCHECK</code> cf. <a href="resources.html#documentation">standard hardware representation</a><br>
+Adds option <code>PEDANTIC</code><br>
+Fixes bug in partial parametrisation
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 8
 </td>
@@ -218,18 +298,18 @@ Fixed bug in partial parametrisation
 July 2005
 </td>
 <td valign=top>
-Added procedure `http content' for fetching web page contents (UNIX)<br>
-Added procedure `tcp request' for sending requests via TCP (UNIX)<br>
-Added procedure `grep in string' for matching regular expressions in a string (UNIX)<br>
-Added procedure `last char in string' to find last occurence of a character in a string<br>
-Added procedure `string in string' to find first occurence of a string in a string<br>
-Added keyword UNTIL to implement post-checked loop<br>
-Added keyword DOWNTO to complement TO<br>
-Added keyword ANDTH as alternative for ANDF and keyword OREL as alternative for ORF<br>
-Made ~ a SKIP when used as a unit (cf. RR)
+Adds procedure <code>http content</code> for fetching web page contents (UNIX)<br>
+Adds procedure <code>tcp request</code> for sending requests via TCP (UNIX)<br>
+Adds procedure <code>grep in string</code> for matching regular expressions in a string (UNIX)<br>
+Adds procedure <code>last char in string</code> to find last occurence of a character in a string<br>
+Adds procedure <code>string in string</code> to find first occurence of a string in a string<br>
+Adds keyword <code>UNTIL</code> to implement post-checkes loop<br>
+Adds keyword <code>DOWNTO</code> to complement <code>TO</code><br>
+Adds keyword <code>ANDTH</code> as alternative for <code>ANDF</code> and keyword <code>OREL</code> as alternative for <code>ORF</code><br>
+Makes ~ a <code>SKIP</code> when used as a unit (cf. RR)
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 7
 </td>
@@ -237,11 +317,11 @@ Made ~ a SKIP when used as a unit (cf. RR)
 May 2005
 </td>
 <td valign=top>
-Partial parametrisation following C. H. Lindsey's proposal<br>
-Elementary and trigonometric functions for COMPLEX independent of GSL
+Adds <a href="description.html#params">partial parametrisation</a> following C. H. Lindsey</code>s proposal<br>
+Adds elementary and trigonometric functions for complex numbers, independent of GSL
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 6
 </td>
@@ -249,10 +329,10 @@ Elementary and trigonometric functions for COMPLEX independent of GSL
 March 2005
 </td>
 <td valign=top>
-Parallel clause on platforms that support POSIX threads
+Adds parallel clause on platforms that support POSIX threads
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 5
 </td>
@@ -260,14 +340,14 @@ Parallel clause on platforms that support POSIX threads
 October 2004
 </td>
 <td valign=top>
-Transput on STRINGs as well as FILEs and PIPEs<br>
-Dynamic scope checking<br>
-More efficient interpreter<br>
-Basic preprocessor<br>
-Curses support
+Improves interpreter efficiency<br>
+Adds transput on <code>STRING</code> as well as <code>FILE</code> and <code>PIPE</code><br>
+Adds dynamic scope checking<br>
+Adds basic preprocessor<br>
+Adds curses support
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 4
 </td>
@@ -275,17 +355,16 @@ Curses support
 June 2004
 </td>
 <td valign=top>
-Added more GSL support<br>
-Added mode LONG BITS and LONG LONG BITS<br>
-Made parser accept ( .. ) as alternative for [ .. ]<br>
-Made parser optionally treat { .. }, [ ..]  and ( ..) as equivalent<br>
-Made parser accept loop clause as enclosed clause<br>
-Made mode checker accept UNIONs with components related through deflexing<br>
-Changed to thread-safe plotutils interface<br>
-Simplified core management
+Adds more GSL support<br>
+Adds modes <code>LONG BITS</code> and <code>LONG LONG BITS</code><br>
+Makes parser accept <code>( .. )</code> as alternative for <code>[ .. ]</code><br>
+Makes parser optionally treat <code>{ .. }</code>, <code>[ ..]</code>  and <code>( ..)</code> as equivalent<br>
+Makes parser accept loop clause as encloses clause<br>
+Makes mode checker accept <code>UNION</code> with components relates through deflexing<br>
+Changes to thread-safe plotutils interface<br>
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 3.2
 </td>
@@ -293,10 +372,10 @@ Simplified core management
 March 2004
 </td>
 <td valign=top>
-Added overflow checks for primitive modes
+Adds overflow checks for primitive modes
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 3.1
 </td>
@@ -304,11 +383,11 @@ Added overflow checks for primitive modes
 January 2004
 </td>
 <td valign=top>
-Added optional system stack overflow handling to interpreter<br>
-Improved multiprecision library
+Adds optional system stack overflow handling to interpreter<br>
+Improves multiprecision library
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 3
 </td>
@@ -316,11 +395,11 @@ Improved multiprecision library
 September 2003
 </td>
 <td valign=top>
-Added formatted transput<br>
-Improved speed of multiprecision library
+Adds formattes transput<br>
+Improves speed of multiprecision library
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 2
 </td>
@@ -328,14 +407,14 @@ Improved speed of multiprecision library
 March 2003
 </td>
 <td valign=top>
-Added mode BYTES and LONG BYTES<br>
-Added mode FORMAT and parsing of FORMAT texts<br>
-Added straightening in unformatted transput<br>
-Added mode PIPE and UNIX support<br>
-Changed to UNIX system level IO
+Adds mode <code>BYTES</code> and <code>LONG BYTES</code><br>
+Adds mode <code>FORMAT</code> and parsing of <code>FORMAT</code> texts<br>
+Adds straightening in unformattes transput<br>
+Adds mode <code>PIPE</code> and <code>UNIX</code> support<br>
+Changes to UNIX system level IO
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 1
 </td>
@@ -346,7 +425,7 @@ November 2002
 &nbsp;
 </td>
 </tr>
-<tr bgcolor="#e8e8e8">
+<tr bgcolor="#f0f0f0">
 <td valign=top>
 Beta releases
 </td>
@@ -359,12 +438,12 @@ From November 2001 onward
 </tr>
 </table>
 
-<hr color=#e8e8e8>
+<hr color=#f0f0f0>
 <p>
 <table width=100%>
 <tr width=100%>
 <td>
-Algol 68 Genie Mark 9.2 was developed on OpenBSD
+Algol 68 Genie Mark 10 was developed on OpenBSD
 </td>
 <td>
 <a href="http://www.openbsd.org"><img src="ppuf100X91.gif" align=right border=0></a>
@@ -372,22 +451,23 @@ Algol 68 Genie Mark 9.2 was developed on OpenBSD
 </tr>
 </table>
 
-<hr color=#e8e8e8>
+<!-- Footer -->
+<hr color=#f0f0f0>
 <p>
-<br>
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <font color="black">
-<small>Copyright &copy; 2001-2006 J. Marcel van der Veer.</small>
+Copyright &copy; 2001-2006 J. Marcel van der Veer.
 </font>
 </td>
 <td width="50%" align=right valign=top bgcolor="white">
 <font color="black">
-<small>Documentation for Algol 68 Genie Mark 9.2 (July 2006)</small>
+Algol 68 Genie Mark 10 (August 2006)
 </font>
 </td>
 </table>
 </p>
-
+<hr color=#f0f0f0>
 </body>
 </html>
+

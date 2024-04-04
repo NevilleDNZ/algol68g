@@ -21,7 +21,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#ifndef A68G_MP_H
+#if ! defined A68G_MP_H
 #define A68G_MP_H
 
 /* Definitions for the multi-precision library. */
@@ -33,7 +33,7 @@ typedef double MP_DIGIT_T;
 
 #define MP_RADIX      	DEFAULT_MP_RADIX
 #define LOG_MP_BASE    	7
-#define MP_BITS_RADIX	8388608
+#define MP_BITS_RADIX	8388608 /* Max power of two smaller than MP_RADIX */
 #define MP_BITS_BITS	23
 
 /* 28-35 decimal digits for LONG REAL. */

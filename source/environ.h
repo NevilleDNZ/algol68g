@@ -21,7 +21,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#ifndef A68G_ENVIRON_H
+#if ! defined A68G_ENVIRON_H
 #define A68G_ENVIRON_H
 
 char bold_prelude_start[] = "\

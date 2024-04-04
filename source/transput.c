@@ -188,7 +188,7 @@ void enlarge_transput_buffer (NODE_T * p, int k, int size)
   set_transput_buffer_size (k, size);
   set_transput_buffer_index (k, index);
   sb_2 = get_transput_buffer (k);
-  bufcpy (sb_2, sb_1, BUFFER_SIZE);
+  bufcpy (sb_2, sb_1, size);
   DOWN_SWEEP_SEMA;
 }
 
@@ -691,9 +691,10 @@ static void init_file (NODE_T * p, A68_REF * ref_file, A68_CHANNEL c, FILE_T s, 
   f->terminator = nil_ref;
   f->channel = c;
   if (filename != NULL && strlen (filename) > 0) {
-    f->identification = heap_generator (p, MODE (C_STRING), 1 + strlen (filename));
+    int len = 1 + strlen (filename);
+    f->identification = heap_generator (p, MODE (C_STRING), len);
     PROTECT_SWEEP_HANDLE (&(f->identification));
-    bufcpy ((char *) ADDRESS (&(f->identification)), filename, BUFFER_SIZE);
+    bufcpy ((char *) ADDRESS (&(f->identification)), filename, len);
     f->fd = -1;
     f->read_mood = A_FALSE;
     f->write_mood = A_FALSE;
@@ -734,7 +735,7 @@ void genie_init_transput (NODE_T * p)
   init_channel (&stand_back_channel, A_TRUE, A_TRUE, A_TRUE, A_TRUE, A_TRUE, A_FALSE);
   init_channel (&stand_error_channel, A_FALSE, A_FALSE, A_FALSE, A_TRUE, A_FALSE, A_FALSE);
   init_channel (&associate_channel, A_TRUE, A_TRUE, A_TRUE, A_TRUE, A_FALSE, A_FALSE);
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
   init_channel (&stand_draw_channel, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_TRUE);
 #else
   init_channel (&stand_draw_channel, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_FALSE, A_TRUE);
@@ -1123,7 +1124,7 @@ void genie_close (NODE_T * p)
     return;
   }
   file->device.device_made = A_FALSE;
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
   if (file->device.device_opened) {
     close_device (p, file);
     file->device.stream = NULL;
@@ -1172,14 +1173,14 @@ void genie_lock (NODE_T * p)
     return;
   }
   file->device.device_made = A_FALSE;
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
   if (file->device.device_opened) {
     close_device (p, file);
     file->device.stream = NULL;
     return;
   }
 #endif
-#if !defined WIN32_VERSION
+#if ! defined HAVE_WIN32
   RESET_ERRNO;
   fchmod (file->fd, (mode_t) 0x0);
   ABNORMAL_END (errno != 0, "cannot lock file", NULL);
@@ -1226,7 +1227,7 @@ void genie_erase (NODE_T * p)
     return;
   }
   file->device.device_made = A_FALSE;
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
   if (file->device.device_opened) {
     close_device (p, file);
     file->device.stream = NULL;
@@ -1953,14 +1954,15 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
   "tmpnam" is not safe, "mkstemp" is Unix, so a68g brings its own tmpnam. */
 #define TMP_SIZE 8
 #define TRIALS 32
-    char filename[TMP_SIZE + 32];
+    int fnlen = TMP_SIZE + 32;
+    char filename[fnlen];
     char *letters = "0123456789abcdefghijklmnopqrstuvwxyz";
     int k, len = strlen (letters);
     BOOL_T good_file = A_FALSE;
     for (k = 0; k < TRIALS && good_file == A_FALSE; k++) {
       int j, index;
-      bufcpy (filename, A68G_NAME, BUFFER_SIZE);
-      bufcat (filename, ".", BUFFER_SIZE);
+      bufcpy (filename, A68G_NAME, fnlen);
+      bufcat (filename, ".", fnlen);
       for (j = 0; j < TMP_SIZE; j++) {
         char chars[2];
         do {
@@ -1969,9 +1971,9 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
         while (index < 0 || index >= len);
         chars[0] = letters[index];
         chars[1] = NULL_CHAR;
-        bufcat (filename, chars, BUFFER_SIZE);
+        bufcat (filename, chars, fnlen);
       }
-      bufcat (filename, ".tmp", BUFFER_SIZE);
+      bufcat (filename, ".tmp", fnlen);
       RESET_ERRNO;
       file->fd = open (filename, mode | O_EXCL, acc);
       good_file = (file->fd != -1 && errno == 0);
@@ -1982,9 +1984,10 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_NO_TEMP);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-    file->identification = heap_generator (p, MODE (C_STRING), 1 + strlen (filename));
+    len = 1 + strlen (filename);
+    file->identification = heap_generator (p, MODE (C_STRING), len);
     PROTECT_SWEEP_HANDLE (&(file->identification));
-    bufcpy ((char *) ADDRESS (&(file->identification)), filename, BUFFER_SIZE);
+    bufcpy ((char *) ADDRESS (&(file->identification)), filename, len);
     file->transput_buffer = get_unblocked_transput_buffer (p);
     reset_transput_buffer (file->transput_buffer);
     file->eof = A_FALSE;
@@ -3519,7 +3522,7 @@ char *whole (NODE_T * p)
     size += length;
     size = 8 + (size > width.value ? size : width.value);
     s = stack_string (p, size);
-    bufcpy (s, sub_whole (p, n, length), BUFFER_SIZE);
+    bufcpy (s, sub_whole (p, n, length), size);
     if (length == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
       error_chars (s, width.value);
     } else {
@@ -3563,7 +3566,7 @@ char *whole (NODE_T * p)
     size += length;
     size = 8 + (size > width.value ? size : width.value);
     s = stack_string (p, size);
-    bufcpy (s, long_sub_whole (p, n, digits, length), BUFFER_SIZE);
+    bufcpy (s, long_sub_whole (p, n, digits, length), size);
     if (length == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
       error_chars (s, width.value);
     } else {
@@ -4008,27 +4011,10 @@ char *fleet (NODE_T * p)
     double x = ((A68_REAL *) (STACK_OFFSET (SIZE_OF (A68_POINTER))))->value;
     int before = ABS (width.value) - ABS (expo.value) - (after.value != 0 ? after.value + 1 : 0) - 2;
     stack_pointer = arg_sp;
-#ifdef HAVE_IEEE_754
-    if (isnan (x)) {
-      int swid = 8 + ABS (width.value);
-      char *s = stack_string (p, swid);
-      if (width.value >= (int) strlen (NAN_STRING)) {
-        FILL (s, BLANK_CHAR, width.value);
-        bufcpy (s, NAN_STRING, swid);
-        return (s);
-      } else {
-        return (error_chars (s, width.value));
-      }
-    } else if (isinf (x)) {
-      int swid = 8 + ABS (width.value);
-      char *s = stack_string (p, swid);
-      if (width.value >= (int) strlen (INF_STRING)) {
-        FILL (s, BLANK_CHAR, width.value);
-        bufcpy (s, INF_STRING, swid);
-        return (s);
-      } else {
-        return (error_chars (s, width.value));
-      }
+#if defined HAVE_IEEE_754
+    if (NOT_A_REAL (x)) {
+      char *s = stack_string (p, 8 + ABS (width.value));
+      return (error_chars (s, width.value));
     }
 #endif
     if (SIGN (before) + SIGN (after.value) > 0) {
@@ -4050,9 +4036,9 @@ char *fleet (NODE_T * p)
       t2 = whole (p);
       strwid = 8 + strlen (t1) + 1 + strlen (t2);
       s = stack_string (p, strwid);
-      bufcpy (s, t1, BUFFER_SIZE);
+      bufcpy (s, t1, strwid);
       string_plusab_char (s, EXPONENT_CHAR, strwid);
-      bufcat (s, t2, BUFFER_SIZE);
+      bufcat (s, t2, strwid);
       if (expo.value == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
         stack_pointer = arg_sp;
         PUSH_INT (p, width.value);
@@ -4097,9 +4083,9 @@ char *fleet (NODE_T * p)
       t2 = whole (p);
       strwid = 8 + strlen (t1) + 1 + strlen (t2);
       s = stack_string (p, strwid);
-      bufcpy (s, t1, BUFFER_SIZE);
+      bufcpy (s, t1, strwid);
       string_plusab_char (s, EXPONENT_CHAR, strwid);
-      bufcat (s, t2, BUFFER_SIZE);
+      bufcat (s, t2, strwid);
       if (expo.value == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
         stack_pointer = arg_sp;
         PUSH_INT (p, width.value);
@@ -4727,7 +4713,7 @@ static NODE_T *scan_format_pattern (NODE_T * p, A68_REF ref_file)
       NODE_T *picture = SUB (p);
       A68_COLLITEM *collitem = (A68_COLLITEM *) FRAME_LOCAL (frame_pointer, TAX (p)->offset);
       if (collitem->count != 0) {
-        if (WHETHER (picture, PATTERN)) {
+        if (WHETHER (picture, A68_PATTERN)) {
           collitem->count = 0;  /* This pattern is now done. */
           picture = SUB (picture);
           if (ATTRIBUTE (picture) != FORMAT_PATTERN) {
@@ -5634,28 +5620,10 @@ static void write_real_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
       } else {
         x = (double) ((A68_INT *) item)->value;
       }
-#ifdef HAVE_IEEE_754
-      if (isnan (x)) {
-        int swid = 1 + length;
-        char *s = stack_string (p, swid);
-        if (length >= (int) strlen (NAN_STRING)) {
-          FILL (s, BLANK_CHAR, length);
-          bufcpy (s, NAN_STRING, swid);
-        } else {
-          error_chars (s, length);
-        }
-        add_string_transput_buffer (p, FORMATTED_BUFFER, s);
-        stack_pointer = old_stack_pointer;
-        return;
-      } else if (isinf (x)) {
-        int swid = 1 + length;
-        char *s = stack_string (p, swid);
-        if (length >= (int) strlen (INF_STRING)) {
-          FILL (s, BLANK_CHAR, length);
-          bufcpy (s, INF_STRING, swid);
-        } else {
-          error_chars (s, length);
-        }
+#if defined HAVE_IEEE_754
+      if (NOT_A_REAL (x)) {
+        char *s = stack_string (p, 8 + length);
+        error_chars (s, length);
         add_string_transput_buffer (p, FORMATTED_BUFFER, s);
         stack_pointer = old_stack_pointer;
         return;

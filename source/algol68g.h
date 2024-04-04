@@ -21,7 +21,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#ifndef A68G_ALGOL68G_H
+#if ! defined A68G_ALGOL68G_H
 #define A68G_ALGOL68G_H
 
 /* Includes needed by most files. */
@@ -45,11 +45,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <string.h>
 #include <time.h>
 
-#ifdef HAVE_POSIX_THREADS
+#if defined HAVE_POSIX_THREADS
 #include <pthread.h>
 #endif
 
-#ifdef HAVE_POSTGRESQL
+#if defined HAVE_POSTGRESQL
 #include <libpq-fe.h>
 #endif
 
@@ -59,21 +59,19 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#ifndef O_BINARY
+#if ! defined O_BINARY
 #define O_BINARY 0x0000
 #endif
 
-#if defined WIN32_VERSION
-/* typedef size_t ssize_t; */
+#if defined HAVE_WIN32
 #define S_IRGRP 0x040
 #define S_IROTH 0x004
-#endif
-
-#if defined WIN32_VERSION && defined __MSVCRT__ && defined _environ
+#if defined __MSVCRT__ && defined _environ
 #undef _environ
 #endif
+#endif
 
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
 #include <plot.h>
 #endif
 
@@ -94,11 +92,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define SIZE_OF(p) ((int) ALIGN (sizeof (p)))
 #define MOID_SIZE(p) ALIGN ((p)->size)
 
-#define BUFFER_SIZE (KILOBYTE)			/* BUFFER_SIZE exceeds actual requirements. */
+#define BUFFER_SIZE KILOBYTE			/* BUFFER_SIZE exceeds actual requirements. */
 #define SMALL_BUFFER_SIZE 128
 #define MAX_ERRORS 8
 #define MAX_PRIORITY 9				/* Algol 68 requirement. */
-#define MIN_MEM_SIZE (256 * KILOBYTE)		/* Stack, heap blocks not smaller than this in kB. */
+#define MIN_MEM_SIZE (MEGABYTE)			/* Stack, heap blocks not smaller than this in kB. */
 #define MAX_LINE_WIDTH (BUFFER_SIZE / 2)	/* Must be smaller than BUFFER_SIZE */
 #define MOID_WIDTH 80
 
@@ -178,7 +176,7 @@ typedef struct A68_LONG_BYTES A68_LONG_BYTES;
 typedef struct A68_POINTER A68_POINTER;
 typedef struct A68_PROCEDURE A68_PROCEDURE;
 typedef struct A68_REAL A68_REAL;
-typedef struct A68_REF A68_REF;
+typedef struct A68_REF A68_REF, A68_ROW;
 typedef struct A68_TUPLE A68_TUPLE;
 typedef struct POSTULATE_T POSTULATE_T;
 typedef struct FILES_T FILES_T;
@@ -314,7 +312,7 @@ struct A68_FILE
   struct
   {
     FILE *stream;
-#ifdef HAVE_PLOTUTILS
+#if defined HAVE_PLOTUTILS
     plPlotter *plotter;
     plPlotterParams *plotter_params;
 #endif
@@ -324,7 +322,7 @@ struct A68_FILE
     double x_coord, y_coord, red, green, blue;
   }
   device;
-#ifdef HAVE_POSTGRESQL
+#if defined HAVE_POSTGRESQL
 PGconn *connection;
 PGresult *result;
 #endif
@@ -524,7 +522,7 @@ struct OPTIONS_T
 {
   OPTION_LIST_T *list;
   BOOL_T source_listing, standard_prelude_listing, tree_listing, verbose, version, cross_reference, check_only, statistics_listing, pragmat_sema, moid_listing, unused, trace, regression_test, stropping, brackets, reductions, portcheck;
-  int time_limit, run, debug;
+  int time_limit, run, debug, backtrace;
   STATUS_MASK nodemask;
 };
 
@@ -532,11 +530,13 @@ struct MODES_T
 {
   MOID_T *UNDEFINED, *ERROR, *HIP, *ROWS, *VACUUM, *C_STRING, *COLLITEM,
     *SEMA, *VOID, *INT, *REAL, *BOOL, *CHAR, *BITS, *BYTES, *REF_INT,
-    *REF_REAL, *REF_BOOL, *REF_CHAR, *REF_BITS, *REF_BYTES, *ROW_REAL,
-    *ROWROW_REAL, *ROW_BITS, *ROW_LONG_BITS, *ROW_LONGLONG_BITS,
+    *REF_REAL, *REF_BOOL, *REF_CHAR, *REF_BITS, *REF_BYTES,
+    *ROW_INT, *REF_ROW_INT,
+    *ROW_REAL, *ROWROW_REAL, *ROW_BITS, *ROW_LONG_BITS, *ROW_LONGLONG_BITS,
+    *ROW_COMPLEX, *ROWROW_COMPLEX, *REF_ROW_COMPLEX, *REF_ROWROW_COMPLEX,
     *REF_ROW_REAL, *REF_ROWROW_REAL, *ROW_CHAR, *ROW_ROW_CHAR, *STRING,
     *ROW_STRING, *NUMBER, *REF_ROW_CHAR, *REF_STRING, *PROC_ROW_CHAR,
-    *PROC_STRING, *PROC_VOID, *PROC_REF_FILE_BOOL, *PROC_REF_FILE_VOID, *SIMPLIN, *SIMPLOUT, *ROW_SIMPLIN, *ROW_SIMPLOUT, *CHANNEL, *FILE, *REF_FILE, *ROW_BOOL, *ROW_INT, *FORMAT, *REF_FORMAT,
+    *PROC_STRING, *PROC_VOID, *PROC_REF_FILE_BOOL, *PROC_REF_FILE_VOID, *SIMPLIN, *SIMPLOUT, *ROW_SIMPLIN, *ROW_SIMPLOUT, *CHANNEL, *FILE, *REF_FILE, *ROW_BOOL, *FORMAT, *REF_FORMAT,
 /* Multiple precision*/
    *LONG_INT, *REF_LONG_INT, *LONGLONG_INT, *REF_LONGLONG_INT, *LONG_REAL,
     *REF_LONG_REAL, *LONGLONG_REAL, *REF_LONGLONG_REAL, *COMPLEX,
@@ -835,7 +835,7 @@ enum ATTRIBUTES
   PARAMETER_PACK,
   PARTICULAR_PROGRAM,
   PAR_SYMBOL,
-  PATTERN,
+  A68_PATTERN,
   PICTURE,
   PICTURE_LIST,
   PIPE_SYMBOL,
@@ -953,7 +953,7 @@ enum
 
 #define SIGN(n) ((n) == 0 ? 0 : ((n) > 0 ? 1 : -1))
 
-#ifdef NO_INLINE
+#if defined NO_INLINE
 
 #define COPY(d, s, n) memcpy (d, s, n)
 #define MOVE(d, s, n) memmove (d, s, n)
@@ -1008,6 +1008,7 @@ enum
 #define INFO(p) ((p)->info)
 #define LEX_LEVEL(p) (SYMBOL_TABLE (p)->level)
 #define LINE(p) ((p)->info->line)
+#define LINE_NUMBER(p) (NUMBER ((p)->info->line))
 #define MASK(p) ((p)->mask)
 #define MODE(p) (a68_modes.p)
 #define MODULE(p) (INFO (p)->module)
@@ -1062,6 +1063,7 @@ extern TOKEN_T *top_token;
 extern char output_line[], edit_line[], input_line[];
 extern double a68g_acosh (double);
 extern double a68g_asinh (double);
+extern double a68g_atan2 (double, double);
 extern double a68g_atanh (double);
 extern double a68g_hypot (double, double);
 extern double a68g_log1p (double);

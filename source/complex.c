@@ -35,6 +35,29 @@ Some routines are based on
 #include "genie.h"
 #include "mp.h"
 
+#if defined HAVE_GSL
+
+#include <gsl/gsl_complex.h>
+#include <gsl/gsl_complex_math.h>
+#include <gsl/gsl_const.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_sf.h>
+
+#define GSL_COMPLEX_FUNCTION(f)\
+  gsl_complex x, z;\
+  A68_REAL *rex, *imx;\
+  imx = (A68_REAL *) (STACK_OFFSET (-SIZE_OF (A68_REAL)));\
+  rex = (A68_REAL *) (STACK_OFFSET (-2 * SIZE_OF (A68_REAL)));\
+  GSL_SET_COMPLEX (&x, rex->value, imx->value);\
+  (void) gsl_set_error_handler_off ();\
+  RESET_ERRNO;\
+  z = f (x);\
+  math_rte (p, errno != 0, MODE (COMPLEX), NULL);\
+  imx->value = GSL_IMAG(z);\
+  rex->value = GSL_REAL(z)
+
+#endif
 
 /*!
 \brief OP +* = (REAL, REAL) COMPLEX
@@ -198,7 +221,7 @@ void genie_div_complex (NODE_T * p)
   double re = 0.0, im = 0.0;
   POP_COMPLEX (p, &re_y, &im_y);
   POP_COMPLEX (p, &re_x, &im_x);
-#ifndef HAVE_IEEE_754
+#if ! defined HAVE_IEEE_754
   if (re_y.value == 0.0 && im_y.value == 0.0) {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_DIVISION_BY_ZERO, MODE (COMPLEX));
     exit_genie (p, A_RUNTIME_ERROR);
@@ -1130,3 +1153,67 @@ void genie_atan_long_complex (NODE_T * p)
   MP_STATUS (im) = INITIALISED_MASK;
   math_rte (p, errno != 0, mode, NULL);
 }
+
+#if defined HAVE_GSL
+
+/*!
+\brief PROC csinh = (COMPLEX) COMPLEX
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_sinh_complex (NODE_T * p)
+{
+  GSL_COMPLEX_FUNCTION (gsl_complex_sinh);
+}
+
+/*!
+\brief PROC ccosh = (COMPLEX) COMPLEX
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_cosh_complex (NODE_T * p)
+{
+  GSL_COMPLEX_FUNCTION (gsl_complex_cosh);
+}
+
+/*!
+\brief PROC ctanh = (COMPLEX) COMPLEX
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_tanh_complex (NODE_T * p)
+{
+  GSL_COMPLEX_FUNCTION (gsl_complex_tanh);
+}
+
+/*!
+\brief PROC carcsinh = (COMPLEX) COMPLEX
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_arcsinh_complex (NODE_T * p)
+{
+  GSL_COMPLEX_FUNCTION (gsl_complex_arcsinh);
+}
+
+/*!
+\brief PROC carccosh = (COMPLEX) COMPLEX
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_arccosh_complex (NODE_T * p)
+{
+  GSL_COMPLEX_FUNCTION (gsl_complex_arccosh);
+}
+
+/*!
+\brief PROC carctanh = (COMPLEX) COMPLEX
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_arctanh_complex (NODE_T * p)
+{
+  GSL_COMPLEX_FUNCTION (gsl_complex_arctanh);
+}
+
+#endif

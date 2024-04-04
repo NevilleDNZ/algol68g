@@ -571,7 +571,7 @@ static BOOL_T needs_allocation (MOID_T * m)
 \param p position in the syntax tree, should not be NULL
 **/
 
-#ifdef DEBUG
+#if defined DEBUG
 static void pr_int (char *s)
 {
   A68_INT *z = (A68_INT *) STACK_OFFSET (-SIZE_OF (A68_INT));
@@ -595,11 +595,11 @@ static void genie_prepare_bounds (NODE_T * p)
 /* Default lower bound */
         PUSH_INT (p, 1);
       }
-#ifdef DEBUG
+#if defined DEBUG
       pr_int ("lwb");
 #endif
       EXECUTE_UNIT (p);
-#ifdef DEBUG
+#if defined DEBUG
       pr_int ("upb");
 #endif
     }
@@ -651,7 +651,7 @@ void genie_generator_field (NODE_T * p, BYTE_T ** q, NODE_T ** declarer, ADDR_T 
     if (WHETHER (p, FIELD_IDENTIFIER)) {
       MOID_T *field_mode = MOID (*declarer);
       ADDR_T pop_sp = *sp;
-#ifdef DEBUG
+#if defined DEBUG
       printf ("\n%s %s", moid_to_string (field_mode, MOID_WIDTH), SYMBOL (p));
       fflush (stdout);
 #endif
@@ -732,7 +732,7 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * q, NODE_T ** declarer, ADDR_T 
       tup[k].upper_bound = VALUE (&(bounds[2 * k + 1]));
       tup[k].span = row_size;
       tup[k].shift = tup[k].lower_bound;
-#ifdef DEBUG
+#if defined DEBUG
       printf ("\n%d:%d", tup[k].lower_bound, tup[k].upper_bound);
       fflush (stdout);
 #endif
