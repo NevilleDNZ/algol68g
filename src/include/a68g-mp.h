@@ -251,7 +251,7 @@ enum {MP_SQRT_PI, MP_PI, MP_LN_PI, MP_SQRT_TWO_PI, MP_TWO_PI, MP_HALF_PI, MP_180
 
 #define FUN_DIGITS(n) ((n) + GUARD_DIGITS (n))
 
-BOOL_T check_mp_int (MP_T *, MOID_T *);
+BOOL_T check_mp_int (MP_T *, const MOID_T *);
 BOOL_T same_mp (NODE_T *, MP_T *, MP_T *, int);
 int long_mp_digits (void);
 INT_T mp_to_int (NODE_T *, MP_T *, int);
@@ -569,8 +569,8 @@ GPROC genie_quad_mp;
 #endif
 
 #if (A68_LEVEL <= 2)
-int get_mp_bits_width (MOID_T *);
-int get_mp_bits_words (MOID_T *);
+int get_mp_bits_width (const MOID_T *);
+int get_mp_bits_words (const MOID_T *);
 MP_BITS_T *stack_mp_bits (NODE_T *, MP_T *, MOID_T *);
 #endif
 

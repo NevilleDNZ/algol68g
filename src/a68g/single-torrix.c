@@ -213,7 +213,6 @@ PROP_T genie_column_function (NODE_T * p)
     FORWARD (q);
   }
   GENIE_UNIT (NEXT (q));
-  MOID_T *m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
   if (name) {
     A68_REF z;
     POP_REF (p, &z);
@@ -224,7 +223,7 @@ PROP_T genie_column_function (NODE_T * p)
   A68_ROW row; A68_ARRAY *arr; A68_TUPLE *tup;
   POP_OBJECT (p, &row, A68_ROW);
   GET_DESCRIPTOR (arr, tup, &row);
-  m = (name ? SUB_MOID (p) : MOID (p));
+  MOID_T *m = (name ? SUB_MOID (p) : MOID (p));
   A68_ROW new_row = heap_generator (p, m, DESCRIPTOR_SIZE (2));
   A68_ARRAY new_arr;
   DIM (&new_arr) = 2;

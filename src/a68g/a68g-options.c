@@ -428,7 +428,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "plugin compiler required - exiting graciously");
+    WRITE (A68_STDERR, "plugin compiler required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -437,7 +437,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "curl library required - exiting graciously");
+    WRITE (A68_STDERR, "curl library required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -446,7 +446,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "curses required - exiting graciously");
+    WRITE (A68_STDERR, "curses required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -455,14 +455,14 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "GNU Scientific Library required - exiting graciously");
+    WRITE (A68_STDERR, "GNU Scientific Library required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
   if (eq (q, "http")) {
 #if !defined (HAVE_CURL)
     io_close_tty_line ();
-    WRITELN (A68_STDOUT, "curl required - exiting graciously");
+    WRITELN (A68_STDERR, "curl required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #else
     return (A68_TRUE);
@@ -473,7 +473,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "IEEE required - exiting graciously");
+    WRITE (A68_STDERR, "IEEE required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -482,7 +482,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "linux required - exiting graciously");
+    WRITE (A68_STDERR, "linux required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -491,7 +491,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "R mathlib required - exiting graciously");
+    WRITE (A68_STDERR, "R mathlib required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -500,7 +500,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "GNU MPFR required - exiting graciously");
+    WRITE (A68_STDERR, "GNU MPFR required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -509,7 +509,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "GNU plotutils required - exiting graciously");
+    WRITE (A68_STDERR, "GNU plotutils required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -518,7 +518,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "postgresql required - exiting graciously");
+    WRITE (A68_STDERR, "postgresql required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }
@@ -527,7 +527,7 @@ BOOL_T need_library (OPTION_LIST_T *i)
     return (A68_TRUE);
 #else
     io_close_tty_line ();
-    WRITE (A68_STDOUT, "POSIX threads required - exiting graciously");
+    WRITE (A68_STDERR, "POSIX threads required - exiting graciously");
     a68_exit (EXIT_SUCCESS);
 #endif
   }

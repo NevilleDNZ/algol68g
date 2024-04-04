@@ -27,9 +27,9 @@
 #define __A68G_POSTULATES_H__
 
 void init_postulates (void);
-void free_postulate_list (POSTULATE_T *, POSTULATE_T *);
+void free_postulate_list (POSTULATE_T *, const POSTULATE_T *);
 void make_postulate (POSTULATE_T **, MOID_T *, MOID_T *);
-POSTULATE_T *is_postulated (POSTULATE_T *, MOID_T *);
-POSTULATE_T *is_postulated_pair (POSTULATE_T *, MOID_T *, MOID_T *);
+POSTULATE_T *is_postulated (POSTULATE_T *, const MOID_T *);
+POSTULATE_T *is_postulated_pair (POSTULATE_T *, const MOID_T *, const MOID_T *);
 
 #endif

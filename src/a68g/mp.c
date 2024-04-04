@@ -145,7 +145,7 @@ void raw_write_mp (char *str, MP_T * z, int digs)
 
 //! @brief Whether z is a valid representation for its mode.
 
-BOOL_T check_mp_int (MP_T * z, MOID_T * m)
+BOOL_T check_mp_int (MP_T * z, const MOID_T * m)
 {
   if (m == M_LONG_INT || m == M_LONG_BITS) {
     return (BOOL_T) ((MP_EXPONENT (z) >= (MP_T) 0) && (MP_EXPONENT (z) < (MP_T) LONG_MP_DIGITS));

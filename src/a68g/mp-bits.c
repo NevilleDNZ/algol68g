@@ -51,7 +51,7 @@
 
 //! @brief Length in bits of mode.
 
-int get_mp_bits_width (MOID_T * m)
+int get_mp_bits_width (const MOID_T * m)
 {
   if (m == M_LONG_BITS) {
     return MP_BITS_WIDTH (LONG_MP_DIGITS);
@@ -63,7 +63,7 @@ int get_mp_bits_width (MOID_T * m)
 
 //! @brief Length in words of mode.
 
-int get_mp_bits_words (MOID_T * m)
+int get_mp_bits_words (const MOID_T * m)
 {
   if (m == M_LONG_BITS) {
     return MP_BITS_WORDS (LONG_MP_DIGITS);

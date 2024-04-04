@@ -1160,11 +1160,10 @@ void genie_set (NODE_T * p)
     errno = 0;
     __off_t curpos = lseek (FD (file), 0, SEEK_CUR);
     __off_t maxpos = lseek (FD (file), 0, SEEK_END);
-    __off_t res = lseek (FD (file), curpos, SEEK_SET);
 // Circumvent buffering problems.
     int reserve = get_transput_buffer_index (TRANSPUT_BUFFER (file));
     curpos -= (__off_t) reserve;
-    res = lseek (FD (file), -reserve, SEEK_CUR);
+    __off_t res = lseek (FD (file), -reserve, SEEK_CUR);
     ASSERT (res != -1 && errno == 0);
     reset_transput_buffer (TRANSPUT_BUFFER (file));
 // Now set.

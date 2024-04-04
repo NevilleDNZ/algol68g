@@ -955,9 +955,8 @@ void compute_derived_modes (MODULE_T * mod)
     if (IS (z, STRUCT_SYMBOL) && EQUIVALENT (z) == NO_MOID) {
       PACK_T *s = PACK (z);
       for (; s != NO_PACK; FORWARD (s)) {
-        PACK_T *t = NEXT (s);
         BOOL_T x = A68_TRUE;
-        for (t = NEXT (s); t != NO_PACK && x; FORWARD (t)) {
+        for (PACK_T *t = NEXT (s); t != NO_PACK && x; FORWARD (t)) {
           if (TEXT (s) == TEXT (t)) {
             diagnostic (A68_ERROR, NODE (z), ERROR_MULTIPLE_FIELD);
             while (NEXT (s) != NO_PACK && TEXT (NEXT (s)) == TEXT (t)) {

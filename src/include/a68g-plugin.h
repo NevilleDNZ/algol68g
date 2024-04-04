@@ -65,7 +65,7 @@ union UFU
 
 #define NAME_SIZE 200
 
-BOOK_T *signed_in (int, int, char *);
+BOOK_T *signed_in (int, int, const char *);
 BOOL_T basic_argument (NODE_T *);
 BOOL_T basic_call (NODE_T *);
 BOOL_T basic_collateral (NODE_T *);
@@ -80,7 +80,7 @@ BOOL_T basic_slice (NODE_T *);
 BOOL_T basic_unit (NODE_T *);
 BOOL_T basic_unit (NODE_T *);
 BOOL_T need_initialise_frame (NODE_T *);
-BOOL_T primitive_mode (MOID_T *);
+BOOL_T primitive_mode (const MOID_T *);
 BOOL_T same_tree (NODE_T *, NODE_T *);
 char *compile_call (NODE_T *, FILE_T);
 char *compile_cast (NODE_T *, FILE_T);
@@ -117,7 +117,7 @@ char *gen_voiding_call (NODE_T *, FILE_T, int);
 char *gen_voiding_deproceduring (NODE_T *, FILE_T, int);
 char *gen_voiding_formula (NODE_T *, FILE_T, int);
 char *inline_mode (MOID_T *);
-char *internal_mode (MOID_T *);
+char *internal_mode (const MOID_T *);
 char *make_name (char *, char *, char *, int);
 char *make_unic_name (char *, char *, char *, char *);
 char *moid_with_name (char *, MOID_T *, char *);
