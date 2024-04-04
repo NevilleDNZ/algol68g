@@ -219,6 +219,20 @@ void sigpipe_handler (int i)
 
 //! @brief Signal alarm - time limit check.
 
+unsigned a68_alarm (unsigned seconds)
+{
+  struct itimerval old, new;
+  new.it_interval.tv_usec = 0;
+  new.it_interval.tv_sec = 0;
+  new.it_value.tv_usec = 0;
+  new.it_value.tv_sec = (long int) seconds;
+  if (setitimer (ITIMER_REAL, &new, &old) < 0) {
+    return 0;
+  } else {
+    return old.it_value.tv_sec;
+  }
+}
+
 void sigalrm_handler (int i)
 {
   (void) i;
@@ -229,7 +243,8 @@ void sigalrm_handler (int i)
       exit_genie ((NODE_T *) A68 (f_entry), A68_RUNTIME_ERROR);
     }
   }
-  (void) alarm (1);
+  ABEND (signal (SIGALRM, sigalrm_handler) == SIG_ERR, ERROR_ACTION, __func__);
+  (void) a68_alarm (INTERRUPT_INTERVAL);
 }
 
 #endif
@@ -255,6 +270,22 @@ void install_signal_handlers (void)
 REAL_T seconds (void)
 {
   return (REAL_T) clock () / (REAL_T) CLOCKS_PER_SEC;
+}
+
+//! @brief Delay for specified number of microseconds.
+
+int a68_usleep (unsigned delay)
+{
+#if defined (BUILD_WIN32)
+  errno = ENOSYS; // Function not implemented.
+  return -1; 
+#else
+// usleep is not compatible with _XOPEN_SOURCE 700.
+  struct timespec reqtime;
+  reqtime.tv_sec = delay / 1000000;
+  reqtime.tv_nsec = 1000 * (delay % 1000000);
+  return nanosleep (&reqtime, NULL);
+#endif
 }
 
 //! @brief Safely append to buffer.

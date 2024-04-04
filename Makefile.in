@@ -181,12 +181,11 @@ am_a68g_OBJECTS = ./src/a68g/a68g-a68g-apropos.$(OBJEXT) \
 	./src/a68g/a68g-prelude-mathlib.$(OBJEXT) \
 	./src/a68g/a68g-rts-bool.$(OBJEXT) \
 	./src/a68g/a68g-rts-char.$(OBJEXT) \
+	./src/a68g/a68g-rts-curl.$(OBJEXT) \
 	./src/a68g/a68g-rts-curses.$(OBJEXT) \
 	./src/a68g/a68g-rts-enquiries.$(OBJEXT) \
 	./src/a68g/a68g-rts-formatted.$(OBJEXT) \
 	./src/a68g/a68g-rts-heap.$(OBJEXT) \
-	./src/a68g/a68g-rts-http.$(OBJEXT) \
-	./src/a68g/a68g-rts-https.$(OBJEXT) \
 	./src/a68g/a68g-rts-int128.$(OBJEXT) \
 	./src/a68g/a68g-rts-internal.$(OBJEXT) \
 	./src/a68g/a68g-rts-mach.$(OBJEXT) \
@@ -216,8 +215,8 @@ am_a68g_OBJECTS = ./src/a68g/a68g-a68g-apropos.$(OBJEXT) \
 	./src/a68g/a68g-single-torrix-gsl.$(OBJEXT)
 a68g_OBJECTS = $(am_a68g_OBJECTS)
 a68g_DEPENDENCIES =
-a68g_LINK = $(CCLD) $(a68g_CFLAGS) $(CFLAGS) $(a68g_LDFLAGS) \
-	$(LDFLAGS) -o $@
+a68g_LINK = $(CCLD) $(a68g_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
+	-o $@
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -306,12 +305,11 @@ am__depfiles_remade = ./src/a68g/$(DEPDIR)/a68g-a68g-apropos.Po \
 	./src/a68g/$(DEPDIR)/a68g-prelude.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-bool.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-char.Po \
+	./src/a68g/$(DEPDIR)/a68g-rts-curl.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-curses.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-heap.Po \
-	./src/a68g/$(DEPDIR)/a68g-rts-http.Po \
-	./src/a68g/$(DEPDIR)/a68g-rts-https.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-int128.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-internal.Po \
 	./src/a68g/$(DEPDIR)/a68g-rts-mach.Po \
@@ -645,12 +643,11 @@ a68g_SOURCES = \
 ./src/a68g/prelude-mathlib.c \
 ./src/a68g/rts-bool.c \
 ./src/a68g/rts-char.c \
+./src/a68g/rts-curl.c \
 ./src/a68g/rts-curses.c \
 ./src/a68g/rts-enquiries.c \
 ./src/a68g/rts-formatted.c \
 ./src/a68g/rts-heap.c \
-./src/a68g/rts-http.c \
-./src/a68g/rts-https.c \
 ./src/a68g/rts-int128.c \
 ./src/a68g/rts-internal.c \
 ./src/a68g/rts-mach.c \
@@ -767,36 +764,36 @@ TESTS = \
 	./src/test-set/04-bulls-and-cows.a68\
 	./src/test-set/05-chaos.a68\
 	./src/test-set/06-decision.a68\
-	./src/test-set/07-digits.a68\
-	./src/test-set/08-end-of-time.a68\
-	./src/test-set/09-fft.a68\
-	./src/test-set/10-fft-par.a68\
-	./src/test-set/11-fibonacci-grammar.a68\
-	./src/test-set/12-formula-manipulation.a68\
-	./src/test-set/13-gammainc.a68\
-	./src/test-set/14-guldens.a68\
-	./src/test-set/15-hamming.a68\
-	./src/test-set/16-hilbert-matrix.a68\
-	./src/test-set/17-lisp.a68\
-	./src/test-set/18-mandelbrot.a68\
-	./src/test-set/19-math.a68\
-	./src/test-set/20-matrix.a68\
-	./src/test-set/21-pebbles.a68\
-	./src/test-set/22-procedures.a68\
-	./src/test-set/23-pseudo-switch.a68\
-	./src/test-set/24-queens.a68\
-	./src/test-set/25-quicksort.a68\
-	./src/test-set/26-rationals.a68\
-	./src/test-set/27-roman-decimal.a68\
-	./src/test-set/28-semana-santa.a68\
-	./src/test-set/29-tukey.a68\
-	./src/test-set/30-warshall.a68\
-	./src/test-set/31-whetstones.a68\
-	./src/test-set/32-www.a68\
-	./src/test-set/33-zeroin.a68
+	./src/test-set/07-dictionary.a68\
+	./src/test-set/08-digits.a68\
+	./src/test-set/09-end-of-time.a68\
+	./src/test-set/10-fft.a68\
+	./src/test-set/11-fft-par.a68\
+	./src/test-set/12-fibonacci-grammar.a68\
+	./src/test-set/13-formula-manipulation.a68\
+	./src/test-set/14-gammainc.a68\
+	./src/test-set/15-guldens.a68\
+	./src/test-set/16-hamming.a68\
+	./src/test-set/17-hilbert-matrix.a68\
+	./src/test-set/18-lisp.a68\
+	./src/test-set/19-lucas-sequence.a68\
+	./src/test-set/20-mandelbrot.a68\
+	./src/test-set/21-math.a68\
+	./src/test-set/22-matrix.a68\
+	./src/test-set/23-pebbles.a68\
+	./src/test-set/24-procedures.a68\
+	./src/test-set/25-pseudo-switch.a68\
+	./src/test-set/26-queens.a68\
+	./src/test-set/27-quicksort.a68\
+	./src/test-set/28-rationals.a68\
+	./src/test-set/29-roman-decimal.a68\
+	./src/test-set/30-semana-santa.a68\
+	./src/test-set/31-tukey.a68\
+	./src/test-set/32-warshall.a68\
+	./src/test-set/33-whetstones.a68\
+	./src/test-set/34-www.a68\
+	./src/test-set/35-zeroin.a68
 
-@EXPORT_DYNAMIC_FALSE@a68g_LDFLAGS = 
-@EXPORT_DYNAMIC_TRUE@a68g_LDFLAGS = -Wl,--export-dynamic
 man_MANS = ./src/doc/a68g.1
 doc_DATA = AUTHORS COPYING ChangeLog NEWS README
 EXTRA_DIST = $(man_MANS)\
@@ -1049,6 +1046,8 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-char.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
+./src/a68g/a68g-rts-curl.$(OBJEXT): src/a68g/$(am__dirstamp) \
+	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-curses.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-enquiries.$(OBJEXT): src/a68g/$(am__dirstamp) \
@@ -1056,10 +1055,6 @@ src/a68g/$(DEPDIR)/$(am__dirstamp):
 ./src/a68g/a68g-rts-formatted.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-heap.$(OBJEXT): src/a68g/$(am__dirstamp) \
-	src/a68g/$(DEPDIR)/$(am__dirstamp)
-./src/a68g/a68g-rts-http.$(OBJEXT): src/a68g/$(am__dirstamp) \
-	src/a68g/$(DEPDIR)/$(am__dirstamp)
-./src/a68g/a68g-rts-https.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
 ./src/a68g/a68g-rts-int128.$(OBJEXT): src/a68g/$(am__dirstamp) \
 	src/a68g/$(DEPDIR)/$(am__dirstamp)
@@ -1200,12 +1195,11 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-prelude.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-bool.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-char.Po@am__quote@ # am--include-marker
+@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-curl.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-curses.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-heap.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-http.Po@am__quote@ # am--include-marker
-@AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-https.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-int128.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-internal.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./src/a68g/$(DEPDIR)/a68g-rts-mach.Po@am__quote@ # am--include-marker
@@ -2278,6 +2272,20 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-char.obj `if test -f './src/a68g/rts-char.c'; then $(CYGPATH_W) './src/a68g/rts-char.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-char.c'; fi`
 
+./src/a68g/a68g-rts-curl.o: ./src/a68g/rts-curl.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-curl.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-curl.Tpo -c -o ./src/a68g/a68g-rts-curl.o `test -f './src/a68g/rts-curl.c' || echo '$(srcdir)/'`./src/a68g/rts-curl.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-curl.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-curl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-curl.c' object='./src/a68g/a68g-rts-curl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-curl.o `test -f './src/a68g/rts-curl.c' || echo '$(srcdir)/'`./src/a68g/rts-curl.c
+
+./src/a68g/a68g-rts-curl.obj: ./src/a68g/rts-curl.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-curl.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-curl.Tpo -c -o ./src/a68g/a68g-rts-curl.obj `if test -f './src/a68g/rts-curl.c'; then $(CYGPATH_W) './src/a68g/rts-curl.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-curl.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-curl.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-curl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-curl.c' object='./src/a68g/a68g-rts-curl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-curl.obj `if test -f './src/a68g/rts-curl.c'; then $(CYGPATH_W) './src/a68g/rts-curl.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-curl.c'; fi`
+
 ./src/a68g/a68g-rts-curses.o: ./src/a68g/rts-curses.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-curses.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-curses.Tpo -c -o ./src/a68g/a68g-rts-curses.o `test -f './src/a68g/rts-curses.c' || echo '$(srcdir)/'`./src/a68g/rts-curses.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-curses.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-curses.Po
@@ -2333,34 +2341,6 @@ am--depfiles: $(am__depfiles_remade)
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-heap.c' object='./src/a68g/a68g-rts-heap.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-heap.obj `if test -f './src/a68g/rts-heap.c'; then $(CYGPATH_W) './src/a68g/rts-heap.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-heap.c'; fi`
-
-./src/a68g/a68g-rts-http.o: ./src/a68g/rts-http.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-http.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo -c -o ./src/a68g/a68g-rts-http.o `test -f './src/a68g/rts-http.c' || echo '$(srcdir)/'`./src/a68g/rts-http.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-http.c' object='./src/a68g/a68g-rts-http.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-http.o `test -f './src/a68g/rts-http.c' || echo '$(srcdir)/'`./src/a68g/rts-http.c
-
-./src/a68g/a68g-rts-http.obj: ./src/a68g/rts-http.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-http.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo -c -o ./src/a68g/a68g-rts-http.obj `if test -f './src/a68g/rts-http.c'; then $(CYGPATH_W) './src/a68g/rts-http.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-http.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-http.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-http.c' object='./src/a68g/a68g-rts-http.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-http.obj `if test -f './src/a68g/rts-http.c'; then $(CYGPATH_W) './src/a68g/rts-http.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-http.c'; fi`
-
-./src/a68g/a68g-rts-https.o: ./src/a68g/rts-https.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-https.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo -c -o ./src/a68g/a68g-rts-https.o `test -f './src/a68g/rts-https.c' || echo '$(srcdir)/'`./src/a68g/rts-https.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-https.c' object='./src/a68g/a68g-rts-https.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-https.o `test -f './src/a68g/rts-https.c' || echo '$(srcdir)/'`./src/a68g/rts-https.c
-
-./src/a68g/a68g-rts-https.obj: ./src/a68g/rts-https.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-https.obj -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo -c -o ./src/a68g/a68g-rts-https.obj `if test -f './src/a68g/rts-https.c'; then $(CYGPATH_W) './src/a68g/rts-https.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-https.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) ./src/a68g/$(DEPDIR)/a68g-rts-https.Tpo ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='./src/a68g/rts-https.c' object='./src/a68g/a68g-rts-https.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o ./src/a68g/a68g-rts-https.obj `if test -f './src/a68g/rts-https.c'; then $(CYGPATH_W) './src/a68g/rts-https.c'; else $(CYGPATH_W) '$(srcdir)/./src/a68g/rts-https.c'; fi`
 
 ./src/a68g/a68g-rts-int128.o: ./src/a68g/rts-int128.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(a68g_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT ./src/a68g/a68g-rts-int128.o -MD -MP -MF ./src/a68g/$(DEPDIR)/a68g-rts-int128.Tpo -c -o ./src/a68g/a68g-rts-int128.o `test -f './src/a68g/rts-int128.c' || echo '$(srcdir)/'`./src/a68g/rts-int128.c
@@ -3267,12 +3247,11 @@ distclean: distclean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-prelude.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-bool.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-char.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-curl.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-curses.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-heap.Po
-	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
-	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-int128.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-mach.Po
@@ -3420,12 +3399,11 @@ maintainer-clean: maintainer-clean-am
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-prelude.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-bool.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-char.Po
+	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-curl.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-curses.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-enquiries.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-formatted.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-heap.Po
-	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-http.Po
-	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-https.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-int128.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-internal.Po
 	-rm -f ./src/a68g/$(DEPDIR)/a68g-rts-mach.Po

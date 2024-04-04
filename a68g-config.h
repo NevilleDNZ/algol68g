@@ -16,8 +16,8 @@
 /* Define this if a good pthread installation was detected */
 /* #undef BUILD_PARALLEL_CLAUSE */
 
-/* Define this if a good WWW installation was detected */
-/* #undef BUILD_WWW */
+/* Define link loader flags */
+#define EXPORT_DYNAMIC_FLAGS "--export-dynamic -shared"
 
 /* Define to 1 if `TIOCGWINSZ' requires <sys/ioctl.h>. */
 #define GWINSZ_IN_SYS_IOCTL 1
@@ -246,7 +246,7 @@
 #define HAVE_MATH_H 1
 
 /* Define this if math.h includes POSIX's signgam. */
-#define HAVE_MATH_H_SIGNGAM 1
+/* #undef HAVE_MATH_H_SIGNGAM */
 
 /* Define to 1 if you have the `memcpy' function. */
 #define HAVE_MEMCPY 1
@@ -280,12 +280,6 @@
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 /* #undef HAVE_NDIR_H */
-
-/* Define to 1 if you have the <netdb.h> header file. */
-#define HAVE_NETDB_H 1
-
-/* Define to 1 if you have the <netinet/in.h> header file. */
-/* #undef HAVE_NETINET_IN_H */
 
 /* Define this if /opt/local/pgsql/include was detected */
 /* #undef HAVE_OPT_LOCAL_PGSQL_INCLUDE */
@@ -382,12 +376,6 @@
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #define HAVE_SYS_RESOURCE_H 1
 
-/* Define to 1 if you have the <sys/select.h> header file. */
-/* #undef HAVE_SYS_SELECT_H */
-
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#define HAVE_SYS_SOCKET_H 1
-
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
@@ -425,7 +413,7 @@
 /* #undef HAVE_USR_PKG_PGSQL_INCLUDE */
 
 /* Platform dependent */
-#define INCLUDE_DIR ""
+#define INCLUDE_DIR " -I/usr/include/postgresql"
 
 /* Define to 1 if assertions should be disabled. */
 /* #undef NDEBUG */
@@ -440,7 +428,7 @@
 #define PACKAGE_NAME "algol68g"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "algol68g 3.3.24"
+#define PACKAGE_STRING "algol68g 3.4.4"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "algol68g"
@@ -449,7 +437,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "3.3.24"
+#define PACKAGE_VERSION "3.4.4"
 
 /* Define to 1 if all of the C90 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -457,7 +445,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "3.3.24"
+#define VERSION "3.4.4"
 
 /* Define to 1 if type `char' is unsigned and your compiler does not
    predefine this macro.  */

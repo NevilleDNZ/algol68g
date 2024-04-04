@@ -62,10 +62,6 @@
 #undef HAVE_PLOT_H
 #endif
 
-#if defined (BUILD_WWW)
-#undef BUILD_WWW
-#endif
-
 #if defined (HAVE_CURSES)
 #define HAVE_CURSES_H
 #define HAVE_LIBNCURSES
@@ -74,34 +70,34 @@
 #undef HAVE_LIBNCURSES
 #endif
 
+#undef HAVE_CURL
 #undef HAVE_DLFCN_H
 #undef HAVE_LIBPQ_FE_H
 #undef HAVE_PTHREAD_H
 #undef HAVE_TERM_H
-#define HAVE_STDINT_H
 
-#define HAVE_STDARG_H
-#define HAVE_STDLIB_H
-#define HAVE_ERRNO_H
 #define HAVE_ASSERT_H
+#define HAVE_COMPLEX_H
 #define HAVE_CONIO_H
 #define HAVE_CTYPE_H
 #define HAVE_DIRENT_H
+#define HAVE_ERRNO_H
 #define HAVE_FCNTL_H
 #define HAVE_FLOAT_H
 #define HAVE_LIBGEN_H
 #define HAVE_LIMITS_H
 #define HAVE_MATH_H
-#define HAVE_COMPLEX_H
 #define HAVE_SETJMP_H
 #define HAVE_SIGNAL_H
+#define HAVE_STDARG_H
+#define HAVE_STDINT_H
 #define HAVE_STDIO_H
+#define HAVE_STDLIB_H
 #define HAVE_STRING_H
 #define HAVE_SYS_STAT_H
 #define HAVE_SYS_TYPES_H
 #define HAVE_TIME_H
 #define HAVE_UNISTD_H
-#define HAVE_WINSOCK_H
 
 #endif // BUILD_WIN32
 
@@ -118,11 +114,11 @@
 #define PACKAGE_BUGREPORT "Marcel van der Veer <algol68g@xs4all.nl>"
 
 // Define to the full name and version of this package.
-#define PACKAGE_STRING "algol68g 3.3.24"
+#define PACKAGE_STRING "algol68g 3.4.4"
 
 // Define to the version of this package.
-#define PACKAGE_VERSION "3.3.24"
+#define PACKAGE_VERSION "3.4.4"
 
 // Version number of package
-#define VERSION "3.3.24"
+#define VERSION "3.4.4"
 

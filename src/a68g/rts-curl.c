@@ -1,4 +1,4 @@
-//! @file rts-https.c
+//! @file rts-curl.c
 //! @author J. Marcel van der Veer
 
 //! @section Copyright
@@ -21,14 +21,14 @@
 
 //! @section Synopsis
 //!
-//! HTTPS client.
+//! HTTP/HTTPS client.
 
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
 #include "a68g-transput.h"
 
-#if defined (BUILD_WWW) && defined (HAVE_CURL)
+#if defined (HAVE_CURL)
 
 #if defined (HAVE_CURL_CURL_H)
 #  include <curl/curl.h>
@@ -68,9 +68,7 @@ static size_t a68_curl_concat (void *data, size_t len, size_t n, void *buf)
   return new_len;
 }
 
-//! @brief PROC (REF STRING, STRING, STRING, INT) INT https content 
-
-void genie_https_content (NODE_T * p)
+void genie_curl_content (NODE_T * p, char *protocol)
 {
   A68_REF path_string, domain_string, content_string;
   A68_INT port;
@@ -92,7 +90,9 @@ void genie_https_content (NODE_T * p)
   add_a_string_transput_buffer (p, PATH_BUFFER, (BYTE_T *) & path_string);
 // Compose request.
   reset_transput_buffer (REQUEST_BUFFER);
-  add_string_transput_buffer (p, REQUEST_BUFFER, "https://");
+  if (protocol != NO_TEXT) {
+    add_string_transput_buffer (p, REQUEST_BUFFER, protocol);
+  }
   add_string_transput_buffer (p, REQUEST_BUFFER, get_transput_buffer (DOMAIN_BUFFER));
   add_string_transput_buffer (p, REQUEST_BUFFER, get_transput_buffer (PATH_BUFFER));
 // cURL connects to host, negotiates and collects data.
@@ -116,6 +116,20 @@ void genie_https_content (NODE_T * p)
   curl_easy_cleanup (handle);
   curl_global_cleanup ();
   PUSH_VALUE (p, errno, A68_INT);
+}
+
+//! @brief PROC (REF STRING, STRING, STRING, INT) INT http content 
+
+void genie_http_content (NODE_T * p)
+{
+   genie_curl_content (p, "http://");
+}
+
+//! @brief PROC (REF STRING, STRING, STRING, INT) INT https content 
+
+void genie_https_content (NODE_T * p)
+{
+   genie_curl_content (p, "https://");
 }
 
 #endif

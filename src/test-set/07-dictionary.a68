@@ -1,0 +1,75 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Write Python-style dictionaries in json format.
+
+COMMENT
+
+MODE DICT = FLEX [0] PAIR,
+     PAIR = STRUCT (KEY key, VALUE val),
+     VALUE = UNION (BASIC, [] BASIC, REF DICT, VOID),
+     BASIC = UNION (INT, REAL, BOOL, STRING),
+     KEY = STRING;
+
+REF DICT empty dict = NIL;
+VALUE null = EMPTY;
+
+CHAR quote = """";
+
+OP JSON = (REF DICT dict) VOID:
+
+   # Write dictionary in json format. #
+
+   IF dict IS empty dict
+   THEN ~
+   ELSE print ("{");
+        
+        FOR i TO UPB dict
+        DO OP ONE = (VALUE v) VOID:
+              CASE v
+              IN (VOID): print ("null"),
+                 (REF DICT d): JSON d,
+                 (BASIC w):
+                    CASE w
+                    IN (STRING s): print (quote + s + quote),
+                       (BOOL b): print ((b | "True" | "False")),
+                       (INT i): print (whole (i, 0)),
+                       (REAL r): print (stringf (HEAP STRING, ($%g$, r)))
+                    ESAC,
+                 ([] BASIC a): (
+                    print ("{");
+                    FOR j TO UPB a
+                    DO ONE (a[j]);
+                       print((j < UPB a | ", " | "}"))
+                    OD
+                 )
+              ESAC;
+
+           print ((quote, key OF dict[i], quote, ": "));
+           ONE val OF dict[i];
+           print ((i < UPB dict | ", " | "}"))
+        OD
+   FI;
+
+DICT empty := PAIR ("empty_field", null);
+[] BASIC row = (1, pi, TRUE, "algol 68");
+DICT test := (("empty_dict", empty), ("row", row), ("string", "string"));
+
+JSON test;
+
+newline (standout)

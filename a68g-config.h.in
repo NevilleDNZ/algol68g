@@ -15,8 +15,8 @@
 /* Define this if a good pthread installation was detected */
 #undef BUILD_PARALLEL_CLAUSE
 
-/* Define this if a good WWW installation was detected */
-#undef BUILD_WWW
+/* Define link loader flags */
+#undef EXPORT_DYNAMIC_FLAGS
 
 /* Define to 1 if `TIOCGWINSZ' requires <sys/ioctl.h>. */
 #undef GWINSZ_IN_SYS_IOCTL
@@ -280,12 +280,6 @@
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
 
-/* Define to 1 if you have the <netdb.h> header file. */
-#undef HAVE_NETDB_H
-
-/* Define to 1 if you have the <netinet/in.h> header file. */
-#undef HAVE_NETINET_IN_H
-
 /* Define this if /opt/local/pgsql/include was detected */
 #undef HAVE_OPT_LOCAL_PGSQL_INCLUDE
 
@@ -380,12 +374,6 @@
 
 /* Define to 1 if you have the <sys/resource.h> header file. */
 #undef HAVE_SYS_RESOURCE_H
-
-/* Define to 1 if you have the <sys/select.h> header file. */
-#undef HAVE_SYS_SELECT_H
-
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#undef HAVE_SYS_SOCKET_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

@@ -2060,13 +2060,10 @@ void stand_extensions (void)
   m = a68_proc (M_ROW_STRING, M_STRING, NO_MOID);
   a68_idf (A68_EXT, "getdirectory", m, genie_directory);
 #endif
-#if defined (BUILD_WWW)
+#if defined (HAVE_CURL)
   m = a68_proc (M_INT, M_REF_STRING, M_STRING, M_STRING, M_INT, NO_MOID);
   a68_idf (A68_EXT, "httpcontent", m, genie_http_content);
-  a68_idf (A68_EXT, "tcprequest", m, genie_tcp_request);
-#if defined (HAVE_CURL)
   a68_idf (A68_EXT, "httpscontent", m, genie_https_content);
-#endif
 #endif
 }
 

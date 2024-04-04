@@ -27,14 +27,17 @@
 #define __A68G_H__
 
 // Debugging switch, only useful during development.
-#undef A68_DEBUG
 
-// Early typedef
-#define unt unsigned
-
-// Configuration
+#if defined (A68_DEBUG)
+#  undef A68_DEBUG
+#endif
 
 #include "a68g-platform.h"
+
+// Configuration starts here.
+
+#define unt unsigned
+
 #include "a68g-includes.h"
 
 // Build switches depending on platform.
@@ -125,6 +128,8 @@ int get_row_size (A68_TUPLE *, int);
 int moid_digits (MOID_T *);
 int moid_size (MOID_T *);
 int (snprintf) (char *, size_t, const char *, ...); // Prevent macro substitution on Darwin.
+int a68_usleep (unsigned);
+unsigned a68_alarm (unsigned);
 void *a68_alloc (size_t, const char *, int);
 void a68_exit (int);
 void a68_free (void *);

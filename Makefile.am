@@ -72,12 +72,11 @@ a68g_SOURCES = \
 ./src/a68g/prelude-mathlib.c \
 ./src/a68g/rts-bool.c \
 ./src/a68g/rts-char.c \
+./src/a68g/rts-curl.c \
 ./src/a68g/rts-curses.c \
 ./src/a68g/rts-enquiries.c \
 ./src/a68g/rts-formatted.c \
 ./src/a68g/rts-heap.c \
-./src/a68g/rts-http.c \
-./src/a68g/rts-https.c \
 ./src/a68g/rts-int128.c \
 ./src/a68g/rts-internal.c \
 ./src/a68g/rts-mach.c \
@@ -193,38 +192,35 @@ TESTS=\
 	./src/test-set/04-bulls-and-cows.a68\
 	./src/test-set/05-chaos.a68\
 	./src/test-set/06-decision.a68\
-	./src/test-set/07-digits.a68\
-	./src/test-set/08-end-of-time.a68\
-	./src/test-set/09-fft.a68\
-	./src/test-set/10-fft-par.a68\
-	./src/test-set/11-fibonacci-grammar.a68\
-	./src/test-set/12-formula-manipulation.a68\
-	./src/test-set/13-gammainc.a68\
-	./src/test-set/14-guldens.a68\
-	./src/test-set/15-hamming.a68\
-	./src/test-set/16-hilbert-matrix.a68\
-	./src/test-set/17-lisp.a68\
-	./src/test-set/18-mandelbrot.a68\
-	./src/test-set/19-math.a68\
-	./src/test-set/20-matrix.a68\
-	./src/test-set/21-pebbles.a68\
-	./src/test-set/22-procedures.a68\
-	./src/test-set/23-pseudo-switch.a68\
-	./src/test-set/24-queens.a68\
-	./src/test-set/25-quicksort.a68\
-	./src/test-set/26-rationals.a68\
-	./src/test-set/27-roman-decimal.a68\
-	./src/test-set/28-semana-santa.a68\
-	./src/test-set/29-tukey.a68\
-	./src/test-set/30-warshall.a68\
-	./src/test-set/31-whetstones.a68\
-	./src/test-set/32-www.a68\
-	./src/test-set/33-zeroin.a68
-if EXPORT_DYNAMIC
-a68g_LDFLAGS = -Wl,--export-dynamic
-else
-a68g_LDFLAGS =
-endif
+	./src/test-set/07-dictionary.a68\
+	./src/test-set/08-digits.a68\
+	./src/test-set/09-end-of-time.a68\
+	./src/test-set/10-fft.a68\
+	./src/test-set/11-fft-par.a68\
+	./src/test-set/12-fibonacci-grammar.a68\
+	./src/test-set/13-formula-manipulation.a68\
+	./src/test-set/14-gammainc.a68\
+	./src/test-set/15-guldens.a68\
+	./src/test-set/16-hamming.a68\
+	./src/test-set/17-hilbert-matrix.a68\
+	./src/test-set/18-lisp.a68\
+	./src/test-set/19-lucas-sequence.a68\
+	./src/test-set/20-mandelbrot.a68\
+	./src/test-set/21-math.a68\
+	./src/test-set/22-matrix.a68\
+	./src/test-set/23-pebbles.a68\
+	./src/test-set/24-procedures.a68\
+	./src/test-set/25-pseudo-switch.a68\
+	./src/test-set/26-queens.a68\
+	./src/test-set/27-quicksort.a68\
+	./src/test-set/28-rationals.a68\
+	./src/test-set/29-roman-decimal.a68\
+	./src/test-set/30-semana-santa.a68\
+	./src/test-set/31-tukey.a68\
+	./src/test-set/32-warshall.a68\
+	./src/test-set/33-whetstones.a68\
+	./src/test-set/34-www.a68\
+	./src/test-set/35-zeroin.a68
 
 man_MANS = ./src/doc/a68g.1
 docdir = @docdir@

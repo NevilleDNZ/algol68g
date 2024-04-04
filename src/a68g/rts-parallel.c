@@ -499,7 +499,7 @@ void genie_down_sema (NODE_T * p)
         }
         UNLOCK_THREAD;
 // Waiting a bit relaxes overhead.
-        int ret = usleep (10);
+        int ret = a68_usleep (10);
         ASSERT (ret == 0 || errno == EINTR);
         LOCK_THREAD;
 // Garbage may be collected, so recalculate 'k'.

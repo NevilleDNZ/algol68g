@@ -175,10 +175,6 @@ void state_version (FILE_T f)
   ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With PostgreSQL support\n") >= 0);
   WRITE (f, A68 (output_line));
 #endif
-#if defined (BUILD_WWW)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With WWW support\n") >= 0);
-  WRITE (f, A68 (output_line));
-#endif
 #if defined (HAVE_CURL)
   curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
   ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With curl %s\n", data->version) >= 0);
@@ -477,15 +473,15 @@ void compiler_interpreter (void)
   }
 // Interpreter initialisation.
   diagnostics_to_terminal (TOP_LINE (&A68_JOB), A68_ALL_DIAGNOSTICS);
-  announce_phase ("genie");
-  GetRNGstate ();
-  A68 (f_entry) = TOP_NODE (&A68_JOB);
-  A68 (close_tty_on_exit) = A68_FALSE;
   if (OPTION_DEBUG (&A68_JOB)) {
     state_license (A68_STDOUT);
   }
   if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_COMPILE (&A68_JOB) == A68_FALSE && 
      (OPTION_CHECK_ONLY (&A68_JOB) ? OPTION_RUN (&A68_JOB) : A68_TRUE)) {
+    announce_phase ("genie");
+    GetRNGstate ();
+    A68 (f_entry) = TOP_NODE (&A68_JOB);
+    A68 (close_tty_on_exit) = A68_FALSE;
 #if defined (BUILD_A68_COMPILER)
     plugin_driver_genie ();
 #else

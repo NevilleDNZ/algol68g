@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.3.24, configure.ac
+# Algol 68 Genie 3.4.4, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,8 +8,12 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.3.24], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.4.4], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
+
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([AC_PACKAGE_NAME-AC_PACKAGE_VERSION])
+AC_MSG_NOTICE([])
 
 # Check whether compiler supports $1 as a command-line option. 
 # If it does, add the string to CFLAGS.
@@ -28,11 +32,12 @@ AC_DEFUN([A68G_AC_PROG_CC_CFLAGS],
 # Platform ids.
 #
 
-AC_MSG_NOTICE([host system...])
+AC_MSG_NOTICE([select host system...])
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
+a68g_silicon_mac=no
 bsd_include_dirs=no
 
 AC_MSG_CHECKING([platform])
@@ -43,55 +48,68 @@ case "$host" in
 # aarch64*-*-linux* is for RaspberryPi-4 on ARM-64 - otherwise http/tcp isnt found
 # Generic *-*-linux-gnu catches for instance s390x-ibm-linux-gnu
 #
+
 *86-*-gnu | *86_64-*-gnu | *86-*-linux* | *86_64-*-linux* | arm*-*-linux* | aarch*-*-linux* | *-*-linux-gnu)
    AC_DEFINE(BUILD_LINUX, 1, [Define this if LINUX was detected]) 
    AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant])
    AC_MSG_RESULT([linux])
   ;;
+
 #
 # Cygwin.
 #
+
 *86-*-cygwin* | *86_64-*-cygwin*) 
   AC_DEFINE(BUILD_CYGWIN, 1, [Define this if CYGWIN was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant])
   AC_MSG_RESULT([cygwin])
   ;;
+  
 #
 # MacOS.
 #
-*86-*-*darwin* | *86_64-*-*darwin*) 
+
+*86-*-*darwin* | *86_64-*-*darwin* | aarch64-*-*darwin*)
   AC_DEFINE(BUILD_BSD, 1, [Define this if DARWIN was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant]) 
   AC_MSG_RESULT([macOS])
   ;;
+
 #
 # FreeBSD.
 #
+
 *86-*-freebsd* | *86_64-*-freebsd*) 
   AC_DEFINE(BUILD_BSD, 1, [Define this if FreeBSD was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant]) 
   AC_MSG_RESULT([freebsd])
   ;;
+
 #
 # NetBSD.
 #
+
 *86-*-netbsd* | *86_64-*-netbsd*) 
   AC_DEFINE(BUILD_BSD, 1, [Define this if NetBSD was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant]) 
   AC_MSG_RESULT([netbsd])
   ;;
+
 #
 # OpenBSD.
 #
+
 *86-*-openbsd* | *86_64-*-openbsd*) 
   AC_DEFINE(BUILD_BSD, 1, [Define this if OpenBSD was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant]) 
   bsd_include_dirs=yes
   AC_MSG_RESULT([openbsd])
   ;;
+  
 #
 # Haiku.
 #
+
 *86-*-haiku* | *86_64-*-haiku*) 
   AC_DEFINE(HAVE_UNTESTED, 1, [Define this if untested OS was detected]) 
   AC_MSG_WARN([untested platform])
@@ -100,9 +118,11 @@ case "$host" in
   enable_stable=yes
   AC_MSG_RESULT([haiku])
   ;;
+  
 #
 # Others, untested.
 #
+
 *)
   AC_DEFINE(HAVE_UNTESTED, 1, [Define this if untested OS was detected]) 
   AC_MSG_WARN([untested platform])
@@ -153,7 +173,6 @@ fi
 # Initialisation.
 #
 
-AC_MSG_NOTICE([initialising...])
 AM_INIT_AUTOMAKE([subdir-objects serial-tests])
 AC_PREFIX_DEFAULT(/usr/local)
 AC_CONFIG_SRCDIR([src/include/a68g.h])
@@ -164,7 +183,7 @@ AC_PROG_INSTALL
 # C compiler.
 #
 
-AC_MSG_NOTICE([C compiler...])
+AC_MSG_NOTICE([select C compiler...])
 AC_LANG(C)
 
 if test "x$enable_clang" = "xyes"; then
@@ -184,15 +203,19 @@ else
 # from /usr/lib/rpm/redhat/macros
   CFLAGS="${CFLAGS:-$COPTFLAGS}" ; export CFLAGS
   LDFLAGS="${LDFLAGS:-$LDOPTFLAGS}" ; export LDFLAGS
+  A68G_AC_PROG_CC_CFLAGS([--std=c17])
   A68G_AC_PROG_CC_CFLAGS([-Wall])
   A68G_AC_PROG_CC_CFLAGS([-Wshadow])
   A68G_AC_PROG_CC_CFLAGS([-Wunused-variable])
   A68G_AC_PROG_CC_CFLAGS([-Wunused-parameter])
   A68G_AC_PROG_CC_CFLAGS([-Wno-long-long])
-  A68G_AC_PROG_CC_CFLAGS([-fno-diagnostics-color])
+# A68G_AC_PROG_CC_CFLAGS([-Wimplicit-function-declaration])
+# A68G_AC_PROG_CC_CFLAGS([-fno-diagnostics-color])
+
 #
 # Test on gcc capabilities.
 #
+
   AC_MSG_CHECKING([__attribute__((aligned())) supported])
   AC_RUN_IFELSE([AC_LANG_PROGRAM([], [typedef int aint __attribute__((aligned(8)));])],
   [AC_MSG_RESULT(yes)],
@@ -200,62 +223,101 @@ else
    AC_MSG_FAILURE([stop -- C compiler does not support __attribute__aligned directive])],
   [])
   AC_C_INLINE()
+
 #
-# Set -I/usr/local/include for *BSD
+# Check -Wl,--export-dynamic or -export_dynamic, needed for creating shared objects.
+# If either is supported, add to LDFLAGS
 #
-  if test "x$bsd_include_dirs" = "xyes"; then
-    AC_DEFINE(INCLUDE_DIR, "-I/usr/local/include", [Platform dependent])
-  else
-    AC_DEFINE(INCLUDE_DIR, "", [Platform dependent])
-  fi
+# GNU ld and LLVM lld accept --export-dynamic, OS X ld accepts -export_dynamic.
 #
-# Check -Wl,--export-dynamic, needed for creating shared objects.
+# Test for -export_dynamic on Darwin platforms only.
+# Platforms like OpenBSD interpret this as -e xport_dynamic which is not intended.
 #
-# Check whether we can link to a particular function, not just whether we can link.
-# In fact, we must actually check that the resulting program runs.
+# Check whether we can link to a particular function and run.
 #
-    a68g_ac_arg="-Wl,--export-dynamic"
-    AC_MSG_CHECKING([if $CC accepts $a68g_ac_arg])
-    a68g_ac_save_LDFLAGS=$LDFLAGS
-    LDFLAGS="$a68g_ac_save_LDFLAGS $a68g_ac_arg"
-    AC_RUN_IFELSE([AC_LANG_PROGRAM([extern void exit (); void (*fptr) () = exit;],[])],
-      [AC_MSG_RESULT(yes)
-       AC_DEFINE(HAVE_EXPORT_DYNAMIC, 1, [Define this if EXPORT_DYNAMIC is recognised]) 
-      ],
-      [AC_MSG_RESULT(no)
-       AC_MSG_WARN([--export-dynamic is not accepted; configuring interpreter-only])
-       a68g_ac_compiler=no
-       LDFLAGS=$a68g_ac_save_LDFLAGS
-      ],
-      [AC_MSG_RESULT(assuming no)
-       AC_MSG_WARN([--export-dynamic is not accepted; configuring interpreter-only])
-       a68g_ac_compiler=no
-       LDFLAGS=$a68g_ac_save_LDFLAGS
-      ]
-    )
-  fi
-  AM_CONDITIONAL([EXPORT_DYNAMIC], [test "x$a68g_ac_compiler" = "xyes"])
+
+# Generic case first.
+
+  a68g_ac_arg="-Wl,--export-dynamic"
+  a68g_ac_save_LDFLAGS=$LDFLAGS
+  AC_MSG_CHECKING([whether $CC accepts $a68g_ac_arg])
+  LDFLAGS="$a68g_ac_save_LDFLAGS $a68g_ac_arg"
+  AC_RUN_IFELSE([AC_LANG_PROGRAM([extern void exit (); void (*fptr) () = exit;],[])],
+    [AC_MSG_RESULT(yes)
+     AC_DEFINE(HAVE_EXPORT_DYNAMIC, 1, [Define this if EXPORT_DYNAMIC is recognised])
+     AC_DEFINE(EXPORT_DYNAMIC_FLAGS, "--export-dynamic -shared", [Define link loader flags])
+    ],
+    [AC_MSG_RESULT(no)
+     LDFLAGS=$a68g_ac_save_LDFLAGS
+    ],
+    [AC_MSG_RESULT(assuming no)
+     LDFLAGS=$a68g_ac_save_LDFLAGS
+    ]
+  )
+
+# Extra check, targetting (Silicon) Macs.
+
+  case "$host" in
+
+    *86-*-*darwin* | *86_64-*-*darwin* | aarch64-*-*darwin*)
+
+      a68g_ac_arg="-Wl,-export_dynamic"
+      AC_MSG_CHECKING([whether $CC accepts $a68g_ac_arg])
+      a68g_ac_save_LDFLAGS=$LDFLAGS
+      LDFLAGS="$a68g_ac_save_LDFLAGS $a68g_ac_arg"
+      AC_RUN_IFELSE([AC_LANG_PROGRAM([extern void exit (); void (*fptr) () = exit;],[])],
+        [AC_MSG_RESULT(yes)
+         AC_DEFINE(HAVE_EXPORT_DYNAMIC, 1, [Define this if EXPORT_DYNAMIC is recognised])
+  
+         # On x86 Darwin we need to have Xcode tools installed and libSystem.dylib available for the plugin compiler
+         case "$host" in
+           *86-*-*darwin* | *86_64-*-*darwin*)
+             AC_DEFINE(EXPORT_DYNAMIC_FLAGS, "-export_dynamic -undefined dynamic_lookup -L/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib -lSystem", [Define link loader flags])
+             ;;
+           aarch64-*-*darwin*)  
+             AC_DEFINE(EXPORT_DYNAMIC_FLAGS, "-export_dynamic -undefined dynamic_lookup", [Define link loader flags])
+             ;;
+         esac
+        ],
+        [AC_MSG_RESULT(no)
+         LDFLAGS=$a68g_ac_save_LDFLAGS
+        ],
+        [AC_MSG_RESULT(assuming no)
+         LDFLAGS=$a68g_ac_save_LDFLAGS
+        ]
+      )
+      ;;
+
+  esac
+	
+  # AC_MSG_NOTICE($LDFLAGS)
+
+fi
+
 #
 # Optionally, tune for a specific processor.
 #
-  if test "x$enable_arch" != "xno"; then
-    AC_MSG_CHECKING([whether $CC accepts -march=$enable_arch])
-    a68g_ac_save_CFLAGS=$CFLAGS
-    a68g_ac_march="-march=$enable_arch"
-    CFLAGS="$a68g_ac_save_CFLAGS $a68g_ac_march"
-    _AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], 
-      [AC_MSG_RESULT(yes)
-       AC_DEFINE_UNQUOTED(HAVE_TUNING, "$a68g_ac_march", [Define this if user wants to tune for a specific CPU]) 
-      ], 
-      [AC_MSG_RESULT(no)
-       AC_MSG_WARN([your CPU name is not accepted; resetting to default])
-       CFLAGS="$a68g_ac_save_CFLAGS"
-      ]
-    )
-  fi
+
+if test "x$enable_arch" != "xno"; then
+  AC_MSG_CHECKING([whether $CC accepts -march=$enable_arch])
+  a68g_ac_save_CFLAGS=$CFLAGS
+  a68g_ac_march="-march=$enable_arch"
+  CFLAGS="$a68g_ac_save_CFLAGS $a68g_ac_march"
+  _AC_COMPILE_IFELSE([AC_LANG_PROGRAM()], 
+    [AC_MSG_RESULT(yes)
+     AC_DEFINE_UNQUOTED(HAVE_TUNING, "$a68g_ac_march", [Define this if user wants to tune for a specific CPU]) 
+    ], 
+    [AC_MSG_RESULT(no)
+     AC_MSG_WARN([your CPU name is not accepted; resetting to default])
+     CFLAGS="$a68g_ac_save_CFLAGS"
+    ]
+  )
+fi
+
 #
 # Some platforms want another or no PIC option.
 #
+
 if test "x$enable_compiler" = "xyes"; then
   if test "x$enable_pic" != "xno"; then
     AC_MSG_CHECKING([whether $CC accepts $enable_pic])
@@ -275,7 +337,7 @@ fi
 
 AM_PROG_CC_C_O
 AC_PROG_CPP
-AC_MSG_NOTICE([types...])
+AC_MSG_NOTICE([check types...])
 AC_C_CHAR_UNSIGNED
 AC_TYPE_MODE_T
 AC_TYPE_SIZE_T
@@ -368,11 +430,44 @@ fi
 # Extra include directories.
 #
 
-AC_MSG_NOTICE([extra include directories...])
+AC_MSG_NOTICE([check extra include directories...])
+
+EXTRA_INCLUDES=""
+
+# Set -I/usr/local/include for *BSD
+
+if test "x$bsd_include_dirs" = "xyes"; then
+  AC_MSG_NOTICE([... /usr/local/include])
+  EXTRA_INCLUDES="-I/usr/local/include"
+fi
+
+# Homebrew on macOS
+
+if test -d /opt/homebrew; then
+  AC_MSG_NOTICE([... /opt/homebrew])
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/opt/homebrew/include"
+  CFLAGS="$CFLAGS -I/opt/homebrew/include"
+  CPPFLAGS="$CPPFLAGS -I/opt/homebrew/include"
+  CXXFLAGS="$CXXFLAGS -I/opt/homebrew/include"
+  LDFLAGS="$LDFLAGS -L/opt/homebrew/lib"
+fi
+
+# MacPorts on macOS
+
+if test -d /opt/local; then
+  AC_MSG_NOTICE([... /opt/local])
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/opt/local/include"
+  CFLAGS="$CFLAGS -I/opt/local/include"
+  CPPFLAGS="$CPPFLAGS -I/opt/local/include"
+  CXXFLAGS="$CXXFLAGS -I/opt/local/include"
+  LDFLAGS="$LDFLAGS -L/opt/local/lib"
+fi
 
 # GSL on OpenBSD
 
 if test -d /usr/local/include/gsl; then
+  AC_MSG_NOTICE([... /usr/local/include/gsl])
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/usr/local/include"
   CFLAGS="$CFLAGS -I/usr/local/include"
   CPPFLAGS="$CPPFLAGS -I/usr/local/include"
   CXXFLAGS="$CXXFLAGS -I/usr/local/include"
@@ -382,7 +477,9 @@ fi
 # R on Debian
 # 
 # if test -d /usr/share/R/include; then
+#   AC_MSG_NOTICE([... /usr/share/R/include])
 #   AC_DEFINE(HAVE_USR_SHARE_R_INCLUDE, 1, [Define this if /usr/share/R/include was detected]) 
+#   EXTRA_INCLUDES="$EXTRA_INCLUDES -I/usr/share/R/include"
 #   CFLAGS="$CFLAGS -I/usr/share/R/include"
 #   CPPFLAGS="$CPPFLAGS -I/usr/share/R/include"
 #   CXXFLAGS="$CXXFLAGS -I/usr/share/R/include"
@@ -392,7 +489,9 @@ fi
 # Postgresql
 
 if test -d /usr/local/pgsql/include; then
+  AC_MSG_NOTICE([... /usr/local/pgsql/include])
   AC_DEFINE(HAVE_USR_LOCAL_PGSQL_INCLUDE, 1, [Define this if /usr/local/pgsql/include was detected]) 
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/usr/local/pgsql/include"
   CFLAGS="$CFLAGS -I/usr/local/pgsql/include"
   CPPFLAGS="$CPPFLAGS -I/usr/local/pgsql/include"
   CXXFLAGS="$CXXFLAGS -I/usr/local/pgsql/include"
@@ -400,7 +499,9 @@ if test -d /usr/local/pgsql/include; then
 fi
 
 if test -d /usr/pkg/pgsql/include; then
+  AC_MSG_NOTICE([... /usr/pkg/pgsql/include])
   AC_DEFINE(HAVE_USR_PKG_PGSQL_INCLUDE, 1, [Define this if /usr/pkg/pgsql/include was detected]) 
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/usr/pkg/pgsql/include"
   CFLAGS="$CFLAGS -I/usr/pkg/pgsql/include"
   CPPFLAGS="$CPPFLAGS -I/usr/pkg/pgsql/include"
   CXXFLAGS="$CXXFLAGS -I/usr/pkg/pgsql/include"
@@ -408,7 +509,9 @@ if test -d /usr/pkg/pgsql/include; then
 fi
 
 if test -d /opt/local/pgsql/include; then
+  AC_MSG_NOTICE([... /opt/local/pgsql/include])
   AC_DEFINE(HAVE_OPT_LOCAL_PGSQL_INCLUDE, 1, [Define this if /opt/local/pgsql/include was detected]) 
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/opt/local/pgsql/include"
   CFLAGS="$CFLAGS -I/opt/local/pgsql/include"
   CPPFLAGS="$CPPFLAGS -I/opt/local/pgsql/include"
   CXXFLAGS="$CXXFLAGS -I/opt/local/pgsql/include"
@@ -416,18 +519,23 @@ if test -d /opt/local/pgsql/include; then
 fi
 
 if test -d /usr/include/postgresql; then
+  AC_MSG_NOTICE([... /usr/include/postgresql])
   AC_DEFINE(HAVE_USR_INCLUDE_POSTGRESQL, 1, [Define this if /usr/include/postgresql was detected]) 
+  EXTRA_INCLUDES="$EXTRA_INCLUDES -I/usr/include/postgresql"
   CFLAGS="$CFLAGS -I/usr/include/postgresql"
   CPPFLAGS="$CPPFLAGS -I/usr/include/postgresql"
   CXXFLAGS="$CXXFLAGS -I/usr/include/postgresql"
   LDFLAGS="$LDFLAGS -L/usr/lib"
 fi
 
+AC_DEFINE_UNQUOTED(INCLUDE_DIR, "$EXTRA_INCLUDES", [Platform dependent])
+
 #
 # Checks for header files.
 #
 
-AC_MSG_NOTICE([standard header files...])
+AC_MSG_NOTICE([check standard header files...])
+
 #
 # <math.h> test is GSL proof.
 #
@@ -451,13 +559,13 @@ AC_HEADER_DIRENT
 AC_HEADER_SYS_WAIT
 AC_HEADER_TIOCGWINSZ
 
-AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h execinfo.h fcntl.h fenv.h float.h libgen.h limits.h netdb.h regex.h setjmp.h signal.h stdarg.h stddef.h stdio.h stdlib.h sys/ioctl.h sys/resource.h sys/socket.h sys/time.h termios.h time.h])
+AC_CHECK_HEADERS([assert.h complex.h ctype.h endian.h errno.h execinfo.h fcntl.h fenv.h float.h libgen.h limits.h regex.h setjmp.h signal.h stdarg.h stddef.h stdio.h stdlib.h sys/ioctl.h sys/resource.h sys/time.h termios.h time.h unistd.h])
 
 #
-# Functions we expect
+# Functions we expect.
 #
 
-AC_MSG_NOTICE([standard functions...])
+AC_MSG_NOTICE([check standard functions...])
 AC_CHECK_FUNCS(aligned_alloc)
 AC_CHECK_FUNCS(basename)
 AC_CHECK_FUNCS(csqrt)
@@ -515,7 +623,7 @@ AC_COMPILE_IFELSE(
     [AC_MSG_RESULT(no)]
 )
 
-AC_MSG_NOTICE([optional headers and libraries...])
+AC_MSG_NOTICE([select optional headers and libraries...])
 
 if test "x$enable_standard_types" = "xyes"; then
   AC_MSG_CHECKING([int is 32 bit])
@@ -633,7 +741,7 @@ if test "x$enable_long_types" = "xyes"; then
 fi
 
 if test "x$enable_parallel" = "xyes"; then
-  AC_MSG_NOTICE([POSIX pthreads...])
+  AC_MSG_NOTICE([check POSIX pthreads...])
   AC_CHECK_HEADERS([pthread.h], [], [enable_parallel=no], [])
   AC_CHECK_LIB([pthread], [pthread_attr_getstacksize], [], [enable_parallel=no])
   if test "x$enable_parallel" = "xyes"; then
@@ -642,7 +750,7 @@ if test "x$enable_parallel" = "xyes"; then
 fi
 
 if test "x$enable_mathlib" = "xyes"; then
-  AC_MSG_NOTICE([mathlib...])
+  AC_MSG_NOTICE([check mathlib...])
   AC_CHECK_HEADERS([Rmath.h], [], [enable_mathlib=no], 
     [#define MATHLIB_STANDALONE
      #include <Rmath.h>
@@ -654,7 +762,7 @@ if test "x$enable_mathlib" = "xyes"; then
 fi
 
 if test "x$enable_gsl" = "xyes"; then
-  AC_MSG_NOTICE([GNU Scientific Library...])
+  AC_MSG_NOTICE([check GNU Scientific Library...])
   AX_PATH_GSL(2.5, [enable_gsl=yes], [enable_gsl=no])
   if test "x$enable_gsl" = "xyes"; then
     AC_CHECK_LIB([gslcblas], [cblas_dgemm], [], [enable_gsl=no])
@@ -667,7 +775,7 @@ if test "x$enable_gsl" = "xyes"; then
 fi
 
 if test "x$enable_plotutils" = "xyes"; then
-  AC_MSG_NOTICE([GNU plotutils...])
+  AC_MSG_NOTICE([check GNU plotutils...])
   AC_CHECK_HEADERS([plot.h], [], [enable_plotutils=no], [])
   AC_CHECK_LIB([plot], [pl_alabel_r], [], [enable_plotutils=no])
   if test "x$enable_plotutils" = "xyes"; then
@@ -676,16 +784,18 @@ if test "x$enable_plotutils" = "xyes"; then
 fi
 
 if test "x$enable_curses" = "xyes"; then
-  AC_MSG_NOTICE([curses...])
+  AC_MSG_NOTICE([check curses...])
 # Next macro is in the debian autoconf-archive package.
+# It inserts -D_DEFAULT_SOURCE -D_XOPEN_SOURCE=600, which we do not want.
   AX_WITH_CURSES
+#
   if test "x$ax_cv_curses" != xyes || test "x$ax_cv_curses_color" != xyes; then
     enable_curses=no
   fi
 fi
 
 if test "x$enable_postgresql" = "xyes"; then
-  AC_MSG_NOTICE([PostgreSQL...])
+  AC_MSG_NOTICE([check PostgreSQL...])
   AC_CHECK_HEADERS([libpq-fe.h], [], [enable_postgresql=no], [])
   AC_CHECK_LIB([pq], [PQbackendPID], [], [enable_postgresql=no])
   if test "x$enable_postgresql" = "xyes"; then
@@ -694,27 +804,20 @@ if test "x$enable_postgresql" = "xyes"; then
 fi
 
 if test "x$enable_www" = "xyes"; then
-  AC_MSG_NOTICE([Internet...])
-  AC_CHECK_HEADERS([sys/select.h], [], [enable_www=no], [])
-  AC_CHECK_HEADERS([sys/socket.h], [], [enable_www=no], [])
-  AC_CHECK_HEADERS([sys/types.h], [], [enable_www=no], [])
-  AC_CHECK_HEADERS([netinet/in.h], [], [enable_www=no], [])
-  if test "x$enable_www" = "xyes"; then
-    AC_DEFINE(BUILD_WWW, 1, [Define this if a good WWW installation was detected]) 
+  AC_MSG_NOTICE([check internet...])
+  if test "x$enable_curl" = "xyes"; then
+    AC_MSG_NOTICE([cURL...])
+    AC_CHECK_HEADERS([curl/curl.h], [], [enable_curl=no], [])
+    AC_CHECK_LIB([curl], [curl_easy_init], [], [enable_curl=no])
     if test "x$enable_curl" = "xyes"; then
-      AC_MSG_NOTICE([cURL...])
-      AC_CHECK_HEADERS([curl/curl.h], [], [enable_curl=no], [])
-      AC_CHECK_LIB([curl], [curl_easy_init], [], [enable_curl=no])
-      if test "x$enable_curl" = "xyes"; then
-        AC_DEFINE(HAVE_CURL, 1, [Define this if a good curl installation was detected]) 
-      fi
+      AC_DEFINE(HAVE_CURL, 1, [Define this if a good curl installation was detected]) 
     fi
   fi
 fi
 
 if test "x$enable_compiler" = "xyes"; then
   libdl_found=no
-  AC_MSG_NOTICE([Dynamic loader via libdl...])
+  AC_MSG_NOTICE([check dynamic loader via libdl...])
   AC_CHECK_HEADERS([dlfcn.h])
   AC_SEARCH_LIBS([dlopen], [dl], [], enable_compiler=no)
   if test "x$enable_compiler" = "xyes"; then
@@ -726,7 +829,7 @@ fi
 # Are we on Haiku?
 if test "x$enable_compiler" = "xyes"; then
   if test "x$libdl_found" = "xno"; then
-    AC_MSG_NOTICE([Dynamic loader via libroot...])
+    AC_MSG_NOTICE([check dynamic loader via libroot...])
     AC_CHECK_HEADERS([dlfcn.h])
     AC_CHECK_LIB([root], [dlopen], [], enable_compiler=no)
     if test "x$enable_compiler" = "xyes"; then
@@ -747,7 +850,7 @@ AC_MSG_NOTICE([])
 AC_MSG_NOTICE([C compiler is $CC])
 AC_MSG_NOTICE([])
 if test "x$enable_long_types" = "xyes"; then
-  AC_MSG_NOTICE([building with hardware support for long modes])
+  AC_MSG_NOTICE([building with long modes])
 fi
 if test "x$enable_parallel" = "xyes"; then
   AC_MSG_NOTICE([building with parallel clause])
@@ -769,9 +872,6 @@ if test "x$enable_plotutils" = "xyes"; then
 fi
 if test "x$enable_postgresql" = "xyes"; then
   AC_MSG_NOTICE([building with PostgreSQL])
-fi
-if test "x$enable_www" = "xyes"; then
-  AC_MSG_NOTICE([building with WWW support])
 fi
 if test "x$enable_curl" = "xyes"; then
   AC_MSG_NOTICE([building with curl])
