@@ -36,7 +36,11 @@ void init_heap (void)
   unt handle_a_size = A68_ALIGN (A68 (handle_pool_size));
   unt frame_a_size = A68_ALIGN (A68 (frame_stack_size));
   unt expr_a_size = A68_ALIGN (A68 (expr_stack_size));
-  BYTE_T *core;
+  REAL_T /* sic */ total_size = A68_ALIGN (heap_a_size + handle_a_size + frame_a_size + 2 * expr_a_size);
+  ABEND (OVER_2G (total_size), ERROR_OUT_OF_CORE_2G, __func__);
+  errno = 0;
+  BYTE_T *core = (BYTE_T *) (A68_ALIGN_T *) a68_alloc ((size_t) total_size, __func__, __LINE__);
+  ABEND (core == NO_BYTE, ERROR_OUT_OF_CORE, __func__);
   A68_HEAP = NO_BYTE;
   A68_HANDLES = NO_BYTE;
   A68_STACK = NO_BYTE;
@@ -44,11 +48,6 @@ void init_heap (void)
   A68_FP = 0;
   A68_HP = 0;
   A68_GLOBALS = 0;
-  REAL_T /* sic */ total_size = A68_ALIGN (heap_a_size + handle_a_size + frame_a_size + 2 * expr_a_size);
-  ABEND (OVER_2G (total_size), ERROR_OUT_OF_CORE_2G, __func__);
-  errno = 0;
-  core = (BYTE_T *) (A68_ALIGN_T *) a68_alloc ((size_t) total_size, __func__, __LINE__);
-  ABEND (core == NO_BYTE, ERROR_OUT_OF_CORE, __func__);
   A68_HEAP = &(core[0]);
   A68_HANDLES = &(A68_HEAP[heap_a_size]);
   A68_STACK = &(A68_HANDLES[handle_a_size]);
@@ -119,9 +118,8 @@ void a68_free (void *z)
 
 BYTE_T *get_heap_space (size_t s)
 {
-  BYTE_T *z;
   ABEND (s == 0, ERROR_INVALID_SIZE, __func__);
-  z = (BYTE_T *) (A68_ALIGN_T *) a68_alloc (A68_ALIGN (s), __func__, __LINE__);
+  BYTE_T *z = (BYTE_T *) (A68_ALIGN_T *) a68_alloc (A68_ALIGN (s), __func__, __LINE__);
   ABEND (z == NO_BYTE, ERROR_OUT_OF_CORE, __func__);
   return z;
 }
@@ -131,21 +129,20 @@ BYTE_T *get_heap_space (size_t s)
 char *new_string (char *t, ...)
 {
   va_list vl;
-  char *q, *z;
-  int len = 0;
   va_start (vl, t);
-  q = t;
+  char *q = t;
   if (q == NO_TEXT) {
     va_end (vl);
     return NO_TEXT;
   }
+  int len = 0;
   while (q != NO_TEXT) {
     len += (int) strlen (q);
     q = va_arg (vl, char *);
   }
   va_end (vl);
   len++;
-  z = (char *) get_heap_space ((size_t) len);
+  char *z = (char *) get_heap_space ((size_t) len);
   z[0] = NULL_CHAR;
   q = t;
   va_start (vl, t);
@@ -181,9 +178,8 @@ char *new_temp_string (char *t)
 
 BYTE_T *get_fixed_heap_space (size_t s)
 {
-  BYTE_T *z;
   if (A68 (heap_is_fluid)) {
-    z = HEAP_ADDRESS (A68 (fixed_heap_pointer));
+    BYTE_T *z = HEAP_ADDRESS (A68 (fixed_heap_pointer));
     A68 (fixed_heap_pointer) += A68_ALIGN ((int) s);
 // Allow for extra storage for diagnostics etcetera 
     ABEND (A68 (fixed_heap_pointer) >= (A68 (heap_size) - MIN_MEM_SIZE), ERROR_OUT_OF_CORE, __func__);
@@ -198,13 +194,11 @@ BYTE_T *get_fixed_heap_space (size_t s)
 
 BYTE_T *get_temp_heap_space (size_t s)
 {
-  BYTE_T *z;
   if (A68 (heap_is_fluid)) {
     A68 (temp_heap_pointer) -= A68_ALIGN ((int) s);
 // Allow for extra storage for diagnostics etcetera.
     ABEND (((unt) A68 (temp_heap_pointer) - (unt) A68 (fixed_heap_pointer)) <= MIN_MEM_SIZE, ERROR_OUT_OF_CORE, __func__);
-    z = HEAP_ADDRESS (A68 (temp_heap_pointer));
-    return z;
+    return HEAP_ADDRESS (A68 (temp_heap_pointer));
   } else {
     return get_heap_space (s);
   }
@@ -217,9 +211,9 @@ void get_stack_size (void)
 #if defined (BUILD_WIN32)
   A68 (stack_size) = MEGABYTE;  // Guestimate
 #else
-  struct rlimit limits;
   errno = 0;
 // Some systems do not implement RLIMIT_STACK so if getrlimit fails, we do not abend.
+  struct rlimit limits;
   if (!(getrlimit (RLIMIT_STACK, &limits) == 0 && errno == 0)) {
     A68 (stack_size) = MEGABYTE;
   }

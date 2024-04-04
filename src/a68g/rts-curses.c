@@ -73,16 +73,14 @@ int rgetchar (void)
     return NULL_CHAR;
   }
 #else
-  int retval;
   struct timeval tv;
-  fd_set rfds;
   TV_SEC (&tv) = 0;
   TV_USEC (&tv) = 100;
-  FD_ZERO (&rfds);
-  FD_SET (0, &rfds);
-  retval = select (1, &rfds, NULL, NULL, &tv);
-  if (retval) {
-// FD_ISSET(0, &rfds) will be true.  
+  fd_set fd;
+  FD_ZERO (&fd);
+  FD_SET (0, &fd);
+  if (select (1, &fd, NULL, NULL, &tv)) {
+// FD_ISSET(0, &fd) will be true.  
     return getch ();
   } else {
     return NULL_CHAR;
@@ -175,20 +173,21 @@ void f##_inverse (NODE_T *p) {\
   }\
 }
 
-GENIE_COLOUR (genie_curses_blue, 1, COLOR_BLUE, COLOR_BLACK)
-  GENIE_COLOUR (genie_curses_cyan, 2, COLOR_CYAN, COLOR_BLACK)
-  GENIE_COLOUR (genie_curses_green, 3, COLOR_GREEN, COLOR_BLACK)
-  GENIE_COLOUR (genie_curses_magenta, 4, COLOR_MAGENTA, COLOR_BLACK)
-  GENIE_COLOUR (genie_curses_red, 5, COLOR_RED, COLOR_BLACK)
-  GENIE_COLOUR (genie_curses_white, 6, COLOR_WHITE, COLOR_BLACK)
-  GENIE_COLOUR (genie_curses_yellow, 7, COLOR_YELLOW, COLOR_BLACK)
+GENIE_COLOUR (genie_curses_blue, 1, COLOR_BLUE, COLOR_BLACK);
+GENIE_COLOUR (genie_curses_cyan, 2, COLOR_CYAN, COLOR_BLACK);
+GENIE_COLOUR (genie_curses_green, 3, COLOR_GREEN, COLOR_BLACK);
+GENIE_COLOUR (genie_curses_magenta, 4, COLOR_MAGENTA, COLOR_BLACK);
+GENIE_COLOUR (genie_curses_red, 5, COLOR_RED, COLOR_BLACK);
+GENIE_COLOUR (genie_curses_white, 6, COLOR_WHITE, COLOR_BLACK);
+GENIE_COLOUR (genie_curses_yellow, 7, COLOR_YELLOW, COLOR_BLACK);
+
 //! @brief PROC curses delchar = (CHAR) BOOL
-     void genie_curses_del_char (NODE_T * p)
+
+void genie_curses_del_char (NODE_T * p)
 {
   A68_CHAR ch;
-  int v;
   POP_OBJECT (p, &ch, A68_CHAR);
-  v = (int) VALUE (&ch);
+  int v = (int) VALUE (&ch);
   PUSH_VALUE (p, (BOOL_T) (v == 8 || v == 127 || v == KEY_BACKSPACE), A68_BOOL);
 }
 
@@ -196,10 +195,10 @@ GENIE_COLOUR (genie_curses_blue, 1, COLOR_BLUE, COLOR_BLACK)
 
 void genie_curses_putchar (NODE_T * p)
 {
-  A68_CHAR ch;
   if (A68 (curses_mode) == A68_FALSE) {
     genie_curses_start (p);
   }
+  A68_CHAR ch;
   POP_OBJECT (p, &ch, A68_CHAR);
   (void) (addch ((chtype) (VALUE (&ch))));
 }
@@ -208,10 +207,10 @@ void genie_curses_putchar (NODE_T * p)
 
 void genie_curses_move (NODE_T * p)
 {
-  A68_INT i, j;
   if (A68 (curses_mode) == A68_FALSE) {
     genie_curses_start (p);
   }
+  A68_INT i, j;
   POP_OBJECT (p, &j, A68_INT);
   POP_OBJECT (p, &i, A68_INT);
   if (VALUE (&i) < 0 || VALUE (&i) >= LINES) {

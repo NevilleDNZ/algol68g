@@ -189,13 +189,13 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
   } else {
     reset_transput_buffer (INPUT_BUFFER);
     int ch = char_scanner (f);
-    BOOL_T go_on = A68_TRUE;
-    while (go_on) {
+    BOOL_T siga = A68_TRUE;
+    while (siga) {
       if (ch == EOF_CHAR || END_OF_FILE (f)) {
         if (get_transput_buffer_index (INPUT_BUFFER) == 0) {
           end_of_file_error (p, ref_file);
         }
-        go_on = A68_FALSE;
+        siga = A68_FALSE;
       } else if (IS_NL_FF (ch)) {
         ADDR_T pop_sp = A68_SP;
         unchar_scanner (p, f, (char) ch);
@@ -205,9 +205,9 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
           on_event_handler (p, PAGE_END_MENDED (f), ref_file);
         }
         A68_SP = pop_sp;
-        go_on = A68_FALSE;
+        siga = A68_FALSE;
       } else if (term != NO_TEXT && strchr (term, ch) != NO_TEXT) {
-        go_on = A68_FALSE;
+        siga = A68_FALSE;
         unchar_scanner (p, f, (char) ch);
       } else {
         plusab_transput_buffer (p, INPUT_BUFFER, (char) ch);
@@ -294,6 +294,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int flags, mode_t permi
     } else {
       BUFFER tfilename;
       int len;
+      BUFCLR (tfilename);
       if (!a68_mkstemp (tfilename, flags, permissions)) {
         diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NO_TEMP);
         exit_genie (p, A68_RUNTIME_ERROR);
@@ -349,78 +350,61 @@ void genie_call_proc_ref_file_void (NODE_T * p, A68_REF ref_file, A68_PROCEDURE 
 int char_value (int ch)
 {
   switch (ch) {
-  case '0':
-    {
+  case '0': {
       return 0;
     }
-  case '1':
-    {
+  case '1': {
       return 1;
     }
-  case '2':
-    {
+  case '2': {
       return 2;
     }
-  case '3':
-    {
+  case '3': {
       return 3;
     }
-  case '4':
-    {
+  case '4': {
       return 4;
     }
-  case '5':
-    {
+  case '5': {
       return 5;
     }
-  case '6':
-    {
+  case '6': {
       return 6;
     }
-  case '7':
-    {
+  case '7': {
       return 7;
     }
-  case '8':
-    {
+  case '8': {
       return 8;
     }
-  case '9':
-    {
+  case '9': {
       return 9;
     }
   case 'A':
-  case 'a':
-    {
+  case 'a': {
       return 10;
     }
   case 'B':
-  case 'b':
-    {
+  case 'b': {
       return 11;
     }
   case 'C':
-  case 'c':
-    {
+  case 'c': {
       return 12;
     }
   case 'D':
-  case 'd':
-    {
+  case 'd': {
       return 13;
     }
   case 'E':
-  case 'e':
-    {
+  case 'e': {
       return 14;
     }
   case 'F':
-  case 'f':
-    {
+  case 'f': {
       return 15;
     }
-  default:
-    {
+  default: {
       return -1;
     }
   }

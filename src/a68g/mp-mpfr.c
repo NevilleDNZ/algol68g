@@ -60,15 +60,14 @@ void mp_to_mpfr (NODE_T * p, MP_T * z, mpfr_t * x, int digits)
   (void) p;
   mpfr_set_ui (*x, 0, DEFAULT);
   if (MP_EXPONENT (z) * (MP_T) LOG_MP_RADIX > (MP_T) REAL_MIN_10_EXP) {
-    int j, expo;
     BOOL_T neg = MP_DIGIT (z, 1) < 0;
     mpfr_t term, W;
     mpfr_inits2 (MPFR_MP_BITS, term, W, NO_MPFR);
     MP_DIGIT (z, 1) = ABS (MP_DIGIT (z, 1));
-    expo = (int) (MP_EXPONENT (z) * LOG_MP_RADIX);
+    int expo = (int) (MP_EXPONENT (z) * LOG_MP_RADIX);
     mpfr_set_ui (W, 10, DEFAULT);
     mpfr_pow_si (W, W, expo, DEFAULT);
-    for (j = 1; j <= digits; j++) {
+    for (int j = 1; j <= digits; j++) {
       mpfr_set_d (term, MP_DIGIT (z, j), DEFAULT);
       mpfr_mul (term, term, W, DEFAULT);
       mpfr_add (*x, *x, term, DEFAULT);
@@ -84,12 +83,12 @@ void mp_to_mpfr (NODE_T * p, MP_T * z, mpfr_t * x, int digits)
 
 MP_T *mpfr_to_mp (NODE_T * p, MP_T * z, mpfr_t * x, int digits)
 {
-  mpfr_t u, v, t;
   SET_MP_ZERO (z, digits);
   if (mpfr_zero_p (*x)) {
     return z;
   }
   int sign_x = mpfr_sgn (*x);
+  mpfr_t u, v, t;
   mpfr_inits2 (MPFR_MP_BITS, t, u, v, NO_MPFR);
 // Scale to [0, 0.1>.
 // a = ABS (x);
@@ -140,10 +139,9 @@ MP_T *mpfr_to_mp (NODE_T * p, MP_T * z, mpfr_t * x, int digits)
 void genie_mpfr_mp (NODE_T * p)
 {
   MOID_T *mode = MOID (p);
-  int digits = DIGITS (mode);
-  int size = SIZE (mode);
-  mpfr_t u;
+  int digits = DIGITS (mode), size = SIZE (mode);
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  mpfr_t u;
   mpfr_init2 (u, MPFR_MP_BITS);
   mp_to_mpfr (p, z, &u, digits);
   mpfr_out_str (stdout, 10, 0, u, DEFAULT);
@@ -252,8 +250,8 @@ void genie_mpfr_erf_mp (NODE_T * p)
   MOID_T *mode = MOID (p);
   int digits = DIGITS (mode);
   int size = SIZE (mode);
-  mpfr_t u;
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  mpfr_t u;
   mpfr_init2 (u, MPFR_MP_BITS);
   mp_to_mpfr (p, z, &u, digits);
   mpfr_erf (u, u, DEFAULT);
@@ -269,8 +267,8 @@ void genie_mpfr_erfc_mp (NODE_T * p)
   MOID_T *mode = MOID (p);
   int digits = DIGITS (mode);
   int size = SIZE (mode);
-  mpfr_t u;
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  mpfr_t u;
   mpfr_init2 (u, MPFR_MP_BITS);
   mp_to_mpfr (p, z, &u, digits);
   mpfr_erfc (u, u, DEFAULT);
@@ -286,8 +284,8 @@ void genie_mpfr_inverf_mp (NODE_T * _p_)
   MOID_T *mode = MOID (_p_);
   int digits = DIGITS (mode), size = SIZE (mode);
   REAL_T x0;
-  mpfr_t a, b, u, y;
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  mpfr_t a, b, u, y;
   mpfr_inits2 (MPFR_MP_BITS, a, b, u, y, NO_MPFR);
   mp_to_mpfr (_p_, z, &y, digits);
   x0 = a68_inverf (mp_to_real (_p_, z, digits));
@@ -321,8 +319,8 @@ void genie_gamma_mpfr (NODE_T * p)
   MOID_T *mode = MOID (p);
   int digits = DIGITS (mode);
   int size = SIZE (mode);
-  mpfr_t u;
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  mpfr_t u;
   mpfr_init2 (u, MPFR_MP_BITS);
   mp_to_mpfr (p, z, &u, digits);
   mpfr_gamma (u, u, DEFAULT);
@@ -338,8 +336,8 @@ void genie_lngamma_mpfr (NODE_T * p)
   MOID_T *mode = MOID (p);
   int digits = DIGITS (mode);
   int size = SIZE (mode);
-  mpfr_t u;
   MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  mpfr_t u;
   mpfr_init2 (u, MPFR_MP_BITS);
   mp_to_mpfr (p, z, &u, digits);
   mpfr_lngamma (u, u, DEFAULT);
@@ -351,9 +349,9 @@ void genie_lngamma_mpfr (NODE_T * p)
 void genie_gamma_inc_real_mpfr (NODE_T * p)
 {
   A68_REAL x, s;
-  mpfr_t xx, ss;
   POP_OBJECT (p, &x, A68_REAL);
   POP_OBJECT (p, &s, A68_REAL);
+  mpfr_t xx, ss;
   mpfr_inits2 (MPFR_LONG_REAL_BITS, ss, xx, NO_MPFR);
   mpfr_set_d (xx, VALUE (&x), DEFAULT);
   mpfr_set_d (ss, VALUE (&s), DEFAULT);
@@ -366,9 +364,9 @@ void genie_gamma_inc_real_mpfr (NODE_T * p)
 void genie_gamma_inc_double_mpfr (NODE_T * p)
 {
   A68_LONG_REAL x, s;
-  mpfr_t xx, ss;
   POP_OBJECT (p, &x, A68_LONG_REAL);
   POP_OBJECT (p, &s, A68_LONG_REAL);
+  mpfr_t xx, ss;
   mpfr_inits2 (MPFR_LONG_REAL_BITS, ss, xx, NO_MPFR);
   mpfr_set_float128 (xx, VALUE (&x).f, DEFAULT);
   mpfr_set_float128 (ss, VALUE (&s).f, DEFAULT);
@@ -383,8 +381,8 @@ void genie_gamma_inc_mpfr (NODE_T * p)
   int digits = DIGITS (MOID (p)), size = SIZE (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   MP_T *s = (MP_T *) STACK_OFFSET (-2 * size);
-  mpfr_t xx, ss;
   A68_SP -= size;
+  mpfr_t xx, ss;
   mpfr_inits2 (MPFR_MP_BITS, ss, xx, NO_MPFR);
   mp_to_mpfr (p, x, &xx, digits);
   mp_to_mpfr (p, s, &ss, digits);
@@ -399,8 +397,8 @@ void genie_beta_mpfr (NODE_T * p)
   int digits = DIGITS (MOID (p)), size = SIZE (MOID (p));
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   MP_T *s = (MP_T *) STACK_OFFSET (-2 * size);
-  mpfr_t xx, ss;
   A68_SP -= size;
+  mpfr_t xx, ss;
   mpfr_inits2 (MPFR_MP_BITS, ss, xx, NO_MPFR);
   mp_to_mpfr (p, x, &xx, digits);
   mp_to_mpfr (p, s, &ss, digits);
@@ -415,8 +413,8 @@ void genie_ln_beta_mpfr (NODE_T * p)
   int digits = DIGITS (MOID (p)), size = SIZE (MOID (p));
   MP_T *b = (MP_T *) STACK_OFFSET (-size);
   MP_T *a = (MP_T *) STACK_OFFSET (-2 * size);
-  mpfr_t bb, aa, yy, zz;
   A68_SP -= size;
+  mpfr_t bb, aa, yy, zz;
   mpfr_inits2 (MPFR_MP_BITS, aa, bb, yy, zz, NO_MPFR);
   mp_to_mpfr (p, b, &bb, digits);
   mp_to_mpfr (p, a, &aa, digits);
@@ -437,8 +435,8 @@ void genie_beta_inc_mpfr (NODE_T * p)
   MP_T *x = (MP_T *) STACK_OFFSET (-size);
   MP_T *t = (MP_T *) STACK_OFFSET (-2 * size);
   MP_T *s = (MP_T *) STACK_OFFSET (-3 * size);
-  mpfr_t xx, ss, tt;
   A68_SP -= 2 * size;
+  mpfr_t xx, ss, tt;
   mpfr_inits2 (MPFR_MP_BITS, ss, tt, xx, NO_MPFR);
   mp_to_mpfr (p, x, &xx, digits);
   mp_to_mpfr (p, s, &ss, digits);
@@ -455,8 +453,7 @@ void zeroin_mpfr (NODE_T * _p_, mpfr_t * z, mpfr_t a, mpfr_t b, mpfr_t y, int (*
 {
 // 'zeroin'
 // MCA 2310 in 'ALGOL 60 Procedures in Numerical Algebra' by Th.J. Dekker
-  int sign, its = 5;
-  BOOL_T go_on = A68_TRUE;
+  BOOL_T siga = A68_TRUE;
   mpfr_t c, fa, fb, fc, tolb, eps, p, q, v, w;
   mpfr_inits2 (MPFR_MP_BITS, c, fa, fb, fc, tolb, eps, p, q, v, w, NO_MPFR);
   mpfr_set_ui (eps, 10, DEFAULT);
@@ -467,7 +464,8 @@ void zeroin_mpfr (NODE_T * _p_, mpfr_t * z, mpfr_t a, mpfr_t b, mpfr_t y, int (*
   mpfr_sub (fb, fb, y, DEFAULT);
   mpfr_set (c, a, DEFAULT);
   mpfr_set (fc, fa, DEFAULT);
-  while (go_on && (its--) > 0) {
+  int iter = 5;
+  while (siga && (iter--) > 0) {
     mpfr_abs (v, fc, DEFAULT);
     mpfr_abs (w, fb, DEFAULT);
     if (mpfr_cmp (v, w) < 0) {
@@ -485,8 +483,8 @@ void zeroin_mpfr (NODE_T * _p_, mpfr_t * z, mpfr_t a, mpfr_t b, mpfr_t y, int (*
     mpfr_div_2ui (w, w, 1, DEFAULT);
     mpfr_sub (v, w, b, DEFAULT);
     mpfr_abs (v, v, DEFAULT);
-    go_on = mpfr_cmp (v, tolb) > 0;
-    if (go_on) {
+    siga = mpfr_cmp (v, tolb) > 0;
+    if (siga) {
       mpfr_sub (p, b, a, DEFAULT);
       mpfr_mul (p, p, fb, DEFAULT);
       mpfr_sub (q, fa, fb, DEFAULT);
@@ -516,7 +514,7 @@ void zeroin_mpfr (NODE_T * _p_, mpfr_t * z, mpfr_t a, mpfr_t b, mpfr_t y, int (*
       }
       f (fb, b, DEFAULT);
       mpfr_sub (fb, fb, y, DEFAULT);
-      sign = mpfr_sgn (fb) + mpfr_sgn (fc);
+      int sign = mpfr_sgn (fb) + mpfr_sgn (fc);
       if (ABS (sign) == 2) {
         mpfr_set (c, a, DEFAULT);
         mpfr_set (fc, fa, DEFAULT);

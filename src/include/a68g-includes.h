@@ -89,26 +89,12 @@
 #  include <float.h>
 #endif
 
-#if defined (HAVE_LIBPQ_FE_H)
-#  if ! defined (A68_OPTIMISE)
-#    include <libpq-fe.h>
-#  endif
-#endif
-
 #if defined (HAVE_MATH_H)
 #  include <math.h>
 #endif
 
 #if defined (HAVE_COMPLEX_H)
 #  include <complex.h>
-#endif
-
-#if defined (HAVE_NETDB_H)
-#  include <netdb.h>
-#endif
-
-#if defined (HAVE_NETINET_IN_H)
-#  include <netinet/in.h>
 #endif
 
 #if defined (HAVE_GNU_PLOTUTILS)
@@ -179,10 +165,6 @@
 
 #if defined (HAVE_SYS_RESOURCE_H)
 #  include <sys/resource.h>
-#endif
-
-#if defined (HAVE_SYS_SOCKET_H)
-#  include <sys/socket.h>
 #endif
 
 #if defined (HAVE_SYS_STAT_H)
@@ -296,6 +278,12 @@
 #    include "a68g-regex.h"
 #  else
 #    include <regex.h>
+#  endif
+#endif
+
+#if defined (HAVE_LIBPQ_FE_H)
+#  if ! defined (A68_OPTIMISE)
+#    include <libpq-fe.h>
 #  endif
 #endif
 

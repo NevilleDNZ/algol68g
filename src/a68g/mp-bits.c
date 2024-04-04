@@ -78,9 +78,8 @@ int get_mp_bits_words (MOID_T * m)
 
 MP_BITS_T *stack_mp_bits (NODE_T * p, MP_T * z, MOID_T * m)
 {
-  int digits = DIGITS (m), words = get_mp_bits_words (m), k, lim;
-  MP_BITS_T *row, mask;
-  row = (MP_BITS_T *) STACK_ADDRESS (A68_SP);
+  int digits = DIGITS (m), words = get_mp_bits_words (m);
+  MP_BITS_T *row = (MP_BITS_T *) STACK_ADDRESS (A68_SP);
   INCREMENT_STACK_POINTER (p, words * SIZE_ALIGNED (MP_BITS_T));
   MP_T *u = nil_mp (p, digits);
   MP_T *v = nil_mp (p, digits);
@@ -93,7 +92,7 @@ MP_BITS_T *stack_mp_bits (NODE_T * p, MP_T * z, MOID_T * m)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
 // Convert radix MP_BITS_RADIX number.
-  for (k = words - 1; k >= 0; k--) {
+  for (int k = words - 1; k >= 0; k--) {
     (void) move_mp (w, u, digits);
     (void) over_mp_digit (p, u, u, (MP_T) MP_BITS_RADIX, digits);
     (void) mul_mp_digit (p, v, u, (MP_T) MP_BITS_RADIX, digits);
@@ -101,9 +100,9 @@ MP_BITS_T *stack_mp_bits (NODE_T * p, MP_T * z, MOID_T * m)
     row[k] = (MP_BITS_T) MP_DIGIT (v, 1);
   }
 // Test on overflow: too many bits or not reduced to 0.
-  mask = 0x1;
-  lim = get_mp_bits_width (m) % MP_BITS_BITS;
-  for (k = 1; k < lim; k++) {
+  MP_BITS_T mask = 0x1;
+  int lim = get_mp_bits_width (m) % MP_BITS_BITS;
+  for (int k = 1; k < lim; k++) {
     mask <<= 1;
     mask |= 0x1;
   }
@@ -120,29 +119,29 @@ MP_BITS_T *stack_mp_bits (NODE_T * p, MP_T * z, MOID_T * m)
 
 MP_T *pack_mp_bits (NODE_T * p, MP_T * u, MP_BITS_T * row, MOID_T * m)
 {
-  int digits = DIGITS (m), words = get_mp_bits_words (m), k, lim;
+  int digits = DIGITS (m), words = get_mp_bits_words (m);
   ADDR_T pop_sp = A68_SP;
 // Discard excess bits.
   MP_BITS_T mask = 0x1, musk = 0x0;
   MP_T *v = nil_mp (p, digits);
   MP_T *w = nil_mp (p, digits);
-  lim = get_mp_bits_width (m) % MP_BITS_BITS;
-  for (k = 1; k < lim; k++) {
+  int lim = get_mp_bits_width (m) % MP_BITS_BITS;
+  for (int k = 1; k < lim; k++) {
     mask <<= 1;
     mask |= 0x1;
   }
   row[0] &= mask;
-  for (k = 1; k < (BITS_WIDTH - MP_BITS_BITS); k++) {
+  for (int k = 1; k < (BITS_WIDTH - MP_BITS_BITS); k++) {
     musk <<= 1;
   }
-  for (k = 0; k < MP_BITS_BITS; k++) {
+  for (int k = 0; k < MP_BITS_BITS; k++) {
     musk <<= 1;
     musk |= 0x1;
   }
 // Convert.
   SET_MP_ZERO (u, digits);
   SET_MP_ONE (v, digits);
-  for (k = words - 1; k >= 0; k--) {
+  for (int k = words - 1; k >= 0; k--) {
     (void) mul_mp_digit (p, w, v, (MP_T) (musk & row[k]), digits);
     (void) add_mp (p, u, u, w, digits);
     if (k != 0) {
@@ -160,19 +159,18 @@ UNSIGNED_T mp_to_unt (NODE_T * p, MP_T * z, int digits)
 {
 // This routine looks a lot like "strtol". We do not use "mp_to_real" since int
 // could be wider than 2 ** 52.
-  int j, expo = (int) MP_EXPONENT (z);
-  UNSIGNED_T sum = 0, weight = 1;
+  int expo = (int) MP_EXPONENT (z);
   if (expo >= digits) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, MOID (p));
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  for (j = 1 + expo; j >= 1; j--) {
-    UNSIGNED_T term;
+  UNSIGNED_T sum = 0, weight = 1;
+  for (int j = 1 + expo; j >= 1; j--) {
     if ((unt) MP_DIGIT (z, j) > UINT_MAX / weight) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, M_BITS);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    term = (unt) MP_DIGIT (z, j) * weight;
+    UNSIGNED_T term = (unt) MP_DIGIT (z, j) * weight;
     if (sum > UINT_MAX - term) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_BOUNDS, M_BITS);
       exit_genie (p, A68_RUNTIME_ERROR);
@@ -198,10 +196,9 @@ void check_long_bits_value (NODE_T * p, MP_T * u, MOID_T * m)
 
 void mp_strtou (NODE_T * p, MP_T * z, char *str, MOID_T * m)
 {
-  int base = 0;
-  char *radix = NO_TEXT;
   errno = 0;
-  base = (int) a68_strtou (str, &radix, 10);
+  char *radix = NO_TEXT;
+  int base = (int) a68_strtou (str, &radix, 10);
   if (radix != NO_TEXT && TO_UPPER (radix[0]) == TO_UPPER (RADIX_CHAR) && errno == 0) {
     int digits = DIGITS (m);
     ADDR_T pop_sp = A68_SP;
@@ -240,17 +237,15 @@ void mp_strtou (NODE_T * p, MP_T * z, char *str, MOID_T * m)
 
 BOOL_T convert_radix_mp (NODE_T * p, MP_T * u, int radix, int width, MOID_T * m, MP_T * v, MP_T * w)
 {
-  static char *images = "0123456789abcdef";
   if (width > 0 && (radix >= 2 && radix <= 16)) {
-    MP_INT_T digit;
+    static char *images = "0123456789abcdef";
     int digits = DIGITS (m);
-    BOOL_T success;
     (void) move_mp (w, u, digits);
     (void) over_mp_digit (p, u, u, (MP_T) radix, digits);
     (void) mul_mp_digit (p, v, u, (MP_T) radix, digits);
     (void) sub_mp (p, v, w, v, digits);
-    digit = (MP_INT_T) MP_DIGIT (v, 1);
-    success = convert_radix_mp (p, u, radix, width - 1, m, v, w);
+    MP_INT_T digit = (MP_INT_T) MP_DIGIT (v, 1);
+    BOOL_T success = convert_radix_mp (p, u, radix, width - 1, m, v, w);
     plusab_transput_buffer (p, EDIT_BUFFER, images[digit]);
     return success;
   } else {
@@ -262,9 +257,9 @@ BOOL_T convert_radix_mp (NODE_T * p, MP_T * u, int radix, int width, MOID_T * m,
 
 void genie_lengthen_unt_to_mp (NODE_T * p)
 {
-  int digits = DIGITS (M_LONG_INT);
   A68_BITS k;
   POP_OBJECT (p, &k, A68_BITS);
+  int digits = DIGITS (M_LONG_INT);
   MP_T *z = nil_mp (p, digits);
   (void) unt_to_mp (p, z, (UNSIGNED_T) VALUE (&k), digits);
   MP_STATUS (z) = (MP_T) INIT_MASK;
@@ -316,11 +311,10 @@ void genie_shorten_mp_to_bits (NODE_T * p)
 
 unt elem_long_bits (NODE_T * p, ADDR_T k, MP_T * z, MOID_T * m)
 {
-  int n;
   ADDR_T pop_sp = A68_SP;
   MP_BITS_T *words = stack_mp_bits (p, z, m), mask = 0x1;
   k += (MP_BITS_BITS - get_mp_bits_width (m) % MP_BITS_BITS - 1);
-  for (n = 0; n < MP_BITS_BITS - k % MP_BITS_BITS - 1; n++) {
+  for (int n = 0; n < MP_BITS_BITS - k % MP_BITS_BITS - 1; n++) {
     mask = mask << 1;
   }
   A68_SP = pop_sp;
@@ -331,14 +325,11 @@ unt elem_long_bits (NODE_T * p, ADDR_T k, MP_T * z, MOID_T * m)
 
 void genie_elem_long_bits (NODE_T * p)
 {
-  A68_INT *i;
-  MP_T *z;
-  MP_BITS_T w;
   int bits = get_mp_bits_width (M_LONG_BITS), size = SIZE (M_LONG_BITS);
-  z = (MP_T *) STACK_OFFSET (-size);
-  i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
+  MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  A68_INT *i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
   PRELUDE_ERROR (VALUE (i) < 1 || VALUE (i) > bits, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  w = elem_long_bits (p, VALUE (i), z, M_LONG_BITS);
+  MP_BITS_T w = elem_long_bits (p, VALUE (i), z, M_LONG_BITS);
   DECREMENT_STACK_POINTER (p, size + SIZE (M_INT));
   PUSH_VALUE (p, (BOOL_T) (w != 0), A68_BOOL);
 }
@@ -347,14 +338,11 @@ void genie_elem_long_bits (NODE_T * p)
 
 void genie_elem_long_mp_bits (NODE_T * p)
 {
-  A68_INT *i;
-  MP_T *z;
-  MP_BITS_T w;
   int bits = get_mp_bits_width (M_LONG_LONG_BITS), size = SIZE (M_LONG_LONG_BITS);
-  z = (MP_T *) STACK_OFFSET (-size);
-  i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
+  MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  A68_INT *i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
   PRELUDE_ERROR (VALUE (i) < 1 || VALUE (i) > bits, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  w = elem_long_bits (p, VALUE (i), z, M_LONG_LONG_BITS);
+  MP_BITS_T w = elem_long_bits (p, VALUE (i), z, M_LONG_LONG_BITS);
   DECREMENT_STACK_POINTER (p, size + SIZE (M_INT));
   PUSH_VALUE (p, (BOOL_T) (w != 0), A68_BOOL);
 }
@@ -363,10 +351,9 @@ void genie_elem_long_mp_bits (NODE_T * p)
 
 MP_BITS_T *set_long_bits (NODE_T * p, int k, MP_T * z, MOID_T * m, MP_BITS_T bit)
 {
-  int n;
   MP_BITS_T *words = stack_mp_bits (p, z, m), mask = 0x1;
   k += (MP_BITS_BITS - get_mp_bits_width (m) % MP_BITS_BITS - 1);
-  for (n = 0; n < MP_BITS_BITS - k % MP_BITS_BITS - 1; n++) {
+  for (int n = 0; n < MP_BITS_BITS - k % MP_BITS_BITS - 1; n++) {
     mask = mask << 1;
   }
   if (bit == 0x1) {
@@ -381,15 +368,12 @@ MP_BITS_T *set_long_bits (NODE_T * p, int k, MP_T * z, MOID_T * m, MP_BITS_T bit
 
 void genie_set_long_bits (NODE_T * p)
 {
-  A68_INT *i;
-  MP_T *z;
-  MP_BITS_T *w;
   ADDR_T pop_sp = A68_SP;
   int bits = get_mp_bits_width (M_LONG_BITS), size = SIZE (M_LONG_BITS);
-  z = (MP_T *) STACK_OFFSET (-size);
-  i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
+  MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  A68_INT *i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
   PRELUDE_ERROR (VALUE (i) < 1 || VALUE (i) > bits, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  w = set_long_bits (p, VALUE (i), z, M_LONG_BITS, 0x1);
+  MP_BITS_T *w = set_long_bits (p, VALUE (i), z, M_LONG_BITS, 0x1);
   (void) pack_mp_bits (p, (MP_T *) STACK_ADDRESS (pop_sp - size - SIZE (M_INT)), w, M_LONG_BITS);
   A68_SP = pop_sp;
   DECREMENT_STACK_POINTER (p, SIZE (M_INT));
@@ -399,15 +383,12 @@ void genie_set_long_bits (NODE_T * p)
 
 void genie_set_long_mp_bits (NODE_T * p)
 {
-  A68_INT *i;
-  MP_T *z;
-  MP_BITS_T *w;
   ADDR_T pop_sp = A68_SP;
   int bits = get_mp_bits_width (M_LONG_LONG_BITS), size = SIZE (M_LONG_LONG_BITS);
-  z = (MP_T *) STACK_OFFSET (-size);
-  i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
+  MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  A68_INT *i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
   PRELUDE_ERROR (VALUE (i) < 1 || VALUE (i) > bits, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  w = set_long_bits (p, VALUE (i), z, M_LONG_LONG_BITS, 0x1);
+  MP_BITS_T *w = set_long_bits (p, VALUE (i), z, M_LONG_LONG_BITS, 0x1);
   (void) pack_mp_bits (p, (MP_T *) STACK_ADDRESS (pop_sp - size - SIZE (M_INT)), w, M_LONG_LONG_BITS);
   A68_SP = pop_sp;
   DECREMENT_STACK_POINTER (p, SIZE (M_INT));
@@ -417,15 +398,12 @@ void genie_set_long_mp_bits (NODE_T * p)
 
 void genie_clear_long_bits (NODE_T * p)
 {
-  A68_INT *i;
-  MP_T *z;
-  MP_BITS_T *w;
   ADDR_T pop_sp = A68_SP;
   int bits = get_mp_bits_width (M_LONG_BITS), size = SIZE (M_LONG_BITS);
-  z = (MP_T *) STACK_OFFSET (-size);
-  i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
+  MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  A68_INT *i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
   PRELUDE_ERROR (VALUE (i) < 1 || VALUE (i) > bits, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  w = set_long_bits (p, VALUE (i), z, M_LONG_BITS, 0x0);
+  MP_BITS_T *w = set_long_bits (p, VALUE (i), z, M_LONG_BITS, 0x0);
   (void) pack_mp_bits (p, (MP_T *) STACK_ADDRESS (pop_sp - size - SIZE (M_INT)), w, M_LONG_BITS);
   A68_SP = pop_sp;
   DECREMENT_STACK_POINTER (p, SIZE (M_INT));
@@ -435,15 +413,12 @@ void genie_clear_long_bits (NODE_T * p)
 
 void genie_clear_long_mp_bits (NODE_T * p)
 {
-  A68_INT *i;
-  MP_T *z;
-  MP_BITS_T *w;
   ADDR_T pop_sp = A68_SP;
   int bits = get_mp_bits_width (M_LONG_LONG_BITS), size = SIZE (M_LONG_LONG_BITS);
-  z = (MP_T *) STACK_OFFSET (-size);
-  i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
+  MP_T *z = (MP_T *) STACK_OFFSET (-size);
+  A68_INT *i = (A68_INT *) STACK_OFFSET (-(size + SIZE (M_INT)));
   PRELUDE_ERROR (VALUE (i) < 1 || VALUE (i) > bits, p, ERROR_OUT_OF_BOUNDS, M_INT);
-  w = set_long_bits (p, VALUE (i), z, M_LONG_LONG_BITS, 0x0);
+  MP_BITS_T *w = set_long_bits (p, VALUE (i), z, M_LONG_LONG_BITS, 0x0);
   (void) pack_mp_bits (p, (MP_T *) STACK_ADDRESS (pop_sp - size - SIZE (M_INT)), w, M_LONG_LONG_BITS);
   A68_SP = pop_sp;
   DECREMENT_STACK_POINTER (p, SIZE (M_INT));
@@ -453,27 +428,23 @@ void genie_clear_long_mp_bits (NODE_T * p)
 
 void genie_long_bits_pack (NODE_T * p)
 {
-  MOID_T *mode = MOID (p);
   A68_REF z;
-  A68_ARRAY *arr;
-  A68_TUPLE *tup;
-  BYTE_T *base;
-  int size, k, bits, digits;
-  ADDR_T pop_sp;
   POP_REF (p, &z);
   CHECK_REF (p, z, M_ROW_BOOL);
+  A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &z);
-  size = ROW_SIZE (tup);
-  bits = get_mp_bits_width (mode);
-  digits = DIGITS (mode);
+  int size = ROW_SIZE (tup);
+  MOID_T *mode = MOID (p);
+  int bits = get_mp_bits_width (mode);
+  int digits = DIGITS (mode);
   PRELUDE_ERROR (size < 0 || size > bits, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
 // Convert so that LWB goes to MSB, so ELEM gives same order as [] BOOL.
   MP_T *sum = nil_mp (p, digits);
-  pop_sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   MP_T *fact = lit_mp (p, 1, 0, digits);
   if (ROW_SIZE (tup) > 0) {
-    base = DEREF (BYTE_T, &ARRAY (arr));
-    for (k = UPB (tup); k >= LWB (tup); k--) {
+    BYTE_T *base = DEREF (BYTE_T, &ARRAY (arr));
+    for (int k = UPB (tup); k >= LWB (tup); k--) {
       int addr = INDEX_1_DIM (arr, tup, k);
       A68_BOOL *boo = (A68_BOOL *) & (base[addr]);
       CHECK_INIT (p, INITIALISED (boo), M_BOOL);
@@ -491,21 +462,17 @@ void genie_long_bits_pack (NODE_T * p)
 
 void genie_shl_mp (NODE_T * p)
 {
-  MOID_T *mode = LHS_MODE (p);
-  int i, k, size = SIZE (mode), words = get_mp_bits_words (mode);
-  MP_T *u;
-  MP_BITS_T *row_u;
-  ADDR_T pop_sp;
   A68_INT j;
-// Pop number of bits.
   POP_OBJECT (p, &j, A68_INT);
-  u = (MP_T *) STACK_OFFSET (-size);
-  pop_sp = A68_SP;
-  row_u = stack_mp_bits (p, u, mode);
+  MOID_T *mode = LHS_MODE (p);
+  int size = SIZE (mode), words = get_mp_bits_words (mode);
+  MP_T *u = (MP_T *) STACK_OFFSET (-size);
+  ADDR_T pop_sp = A68_SP;
+  MP_BITS_T *row_u = stack_mp_bits (p, u, mode);
   if (VALUE (&j) >= 0) {
-    for (i = 0; i < VALUE (&j); i++) {
+    for (int i = 0; i < VALUE (&j); i++) {
       BOOL_T carry = A68_FALSE;
-      for (k = words - 1; k >= 0; k--) {
+      for (int k = words - 1; k >= 0; k--) {
         row_u[k] <<= 1;
         if (carry) {
           row_u[k] |= 0x1;
@@ -515,9 +482,9 @@ void genie_shl_mp (NODE_T * p)
       }
     }
   } else {
-    for (i = 0; i < -VALUE (&j); i++) {
+    for (int i = 0; i < -VALUE (&j); i++) {
       BOOL_T carry = A68_FALSE;
-      for (k = 0; k < words; k++) {
+      for (int k = 0; k < words; k++) {
         if (carry) {
           row_u[k] |= MP_BITS_RADIX;
         }
@@ -545,12 +512,12 @@ void genie_shr_mp (NODE_T * p)
 void genie_le_long_bits (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
-  int k, size = SIZE (mode), words = get_mp_bits_words (mode);
+  int size = SIZE (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = A68_SP;
-  BOOL_T result = A68_TRUE;
   MP_T *u = (MP_T *) STACK_OFFSET (-2 * size), *v = (MP_T *) STACK_OFFSET (-size);
   MP_BITS_T *row_u = stack_mp_bits (p, u, mode), *row_v = stack_mp_bits (p, v, mode);
-  for (k = 0; (k < words) && result; k++) {
+  BOOL_T result = A68_TRUE;
+  for (int k = 0; (k < words) && result; k++) {
     result = (BOOL_T) (result & ((row_u[k] | row_v[k]) == row_v[k]));
   }
   A68_SP = pop_sp;
@@ -563,12 +530,12 @@ void genie_le_long_bits (NODE_T * p)
 void genie_ge_long_bits (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
-  int k, size = SIZE (mode), words = get_mp_bits_words (mode);
+  int size = SIZE (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = A68_SP;
-  BOOL_T result = A68_TRUE;
   MP_T *u = (MP_T *) STACK_OFFSET (-2 * size), *v = (MP_T *) STACK_OFFSET (-size);
   MP_BITS_T *row_u = stack_mp_bits (p, u, mode), *row_v = stack_mp_bits (p, v, mode);
-  for (k = 0; (k < words) && result; k++) {
+  BOOL_T result = A68_TRUE;
+  for (int k = 0; (k < words) && result; k++) {
     result = (BOOL_T) (result & ((row_u[k] | row_v[k]) == row_u[k]));
   }
   A68_SP = pop_sp;
@@ -581,11 +548,11 @@ void genie_ge_long_bits (NODE_T * p)
 void genie_and_mp (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
-  int k, size = SIZE (mode), words = get_mp_bits_words (mode);
+  int size = SIZE (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *u = (MP_T *) STACK_OFFSET (-2 * size), *v = (MP_T *) STACK_OFFSET (-size);
   MP_BITS_T *row_u = stack_mp_bits (p, u, mode), *row_v = stack_mp_bits (p, v, mode);
-  for (k = 0; k < words; k++) {
+  for (int k = 0; k < words; k++) {
     row_u[k] &= row_v[k];
   }
   (void) pack_mp_bits (p, u, row_u, mode);
@@ -598,11 +565,11 @@ void genie_and_mp (NODE_T * p)
 void genie_or_mp (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
-  int k, size = SIZE (mode), words = get_mp_bits_words (mode);
+  int size = SIZE (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *u = (MP_T *) STACK_OFFSET (-2 * size), *v = (MP_T *) STACK_OFFSET (-size);
   MP_BITS_T *row_u = stack_mp_bits (p, u, mode), *row_v = stack_mp_bits (p, v, mode);
-  for (k = 0; k < words; k++) {
+  for (int k = 0; k < words; k++) {
     row_u[k] |= row_v[k];
   }
   (void) pack_mp_bits (p, u, row_u, mode);
@@ -615,11 +582,11 @@ void genie_or_mp (NODE_T * p)
 void genie_xor_mp (NODE_T * p)
 {
   MOID_T *mode = LHS_MODE (p);
-  int k, size = SIZE (mode), words = get_mp_bits_words (mode);
+  int size = SIZE (mode), words = get_mp_bits_words (mode);
   ADDR_T pop_sp = A68_SP;
   MP_T *u = (MP_T *) STACK_OFFSET (-2 * size), *v = (MP_T *) STACK_OFFSET (-size);
   MP_BITS_T *row_u = stack_mp_bits (p, u, mode), *row_v = stack_mp_bits (p, v, mode);
-  for (k = 0; k < words; k++) {
+  for (int k = 0; k < words; k++) {
     row_u[k] ^= row_v[k];
   }
   (void) pack_mp_bits (p, u, row_u, mode);
@@ -633,9 +600,8 @@ void genie_long_max_bits (NODE_T * p)
 {
   int digits = DIGITS (M_LONG_BITS);
   int width = get_mp_bits_width (M_LONG_BITS);
-  ADDR_T pop_sp;
   MP_T *z = nil_mp (p, digits);
-  pop_sp = A68_SP;
+  ADDR_T pop_sp = A68_SP;
   (void) set_mp (z, (MP_T) 2, 0, digits);
   (void) pow_mp_int (p, z, z, width, digits);
   (void) minus_one_mp (p, z, z, digits);
@@ -646,8 +612,7 @@ void genie_long_max_bits (NODE_T * p)
 
 void genie_long_mp_max_bits (NODE_T * p)
 {
-  int digits = DIGITS (M_LONG_LONG_BITS);
-  int width = get_mp_bits_width (M_LONG_LONG_BITS);
+  int digits = DIGITS (M_LONG_LONG_BITS), width = get_mp_bits_width (M_LONG_LONG_BITS);
   MP_T *z = nil_mp (p, digits);
   ADDR_T pop_sp = A68_SP;
   (void) set_mp (z, (MP_T) 2, 0, digits);
@@ -661,26 +626,20 @@ void genie_long_mp_max_bits (NODE_T * p)
 void genie_lengthen_long_bits_to_row_bool (NODE_T * p)
 {
   MOID_T *m = MOID (SUB (p));
-  A68_REF z, row;
-  A68_ARRAY arr;
-  A68_TUPLE tup;
-  int size = SIZE (m), k, width = get_mp_bits_width (m), words = get_mp_bits_words (m);
-  MP_BITS_T *bits;
-  BYTE_T *base;
-  MP_T *x;
+  int size = SIZE (m), width = get_mp_bits_width (m), words = get_mp_bits_words (m);
   ADDR_T pop_sp = A68_SP;
 // Calculate and convert BITS value.
-  x = (MP_T *) STACK_OFFSET (-size);
-  bits = stack_mp_bits (p, x, m);
+  MP_T *x = (MP_T *) STACK_OFFSET (-size);
+  MP_BITS_T *bits = stack_mp_bits (p, x, m);
 // Make [] BOOL.
+  A68_REF z, row; A68_ARRAY arr; A68_TUPLE tup;
   NEW_ROW_1D (z, row, arr, tup, M_ROW_BOOL, M_BOOL, width);
   PUT_DESCRIPTOR (arr, tup, &z);
-  base = ADDRESS (&row) + (width - 1) * SIZE (M_BOOL);
-  k = width;
+  BYTE_T *base = ADDRESS (&row) + (width - 1) * SIZE (M_BOOL);
+  int k = width;
   while (k > 0) {
     MP_BITS_T bit = 0x1;
-    int j;
-    for (j = 0; j < MP_BITS_BITS && k >= 0; j++) {
+    for (int j = 0; j < MP_BITS_BITS && k >= 0; j++) {
       STATUS ((A68_BOOL *) base) = INIT_MASK;
       VALUE ((A68_BOOL *) base) = (BOOL_T) ((bits[words - 1] & bit) ? A68_TRUE : A68_FALSE);
       base -= SIZE (M_BOOL);

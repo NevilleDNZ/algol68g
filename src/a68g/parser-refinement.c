@@ -70,7 +70,7 @@ void get_refinements (void)
 // Apparently this is code with refinements.
   FORWARD (p);
   if (p == NO_NODE || IN_PRELUDE (p)) {
-// Ok, we accept a program with no refinements as well.
+// Ok, we accept a program without refinements as well.
     return;
   }
   while (p != NO_NODE && !IN_PRELUDE (p) && whether (p, IDENTIFIER, COLON_SYMBOL, STOP)) {
@@ -85,7 +85,7 @@ void get_refinements (void)
     BEGIN (new_one) = END (new_one) = NO_NODE;
     p = NEXT_NEXT (p);
     if (p == NO_NODE) {
-      diagnostic (A68_SYNTAX_ERROR, NO_NODE, ERROR_REFINEMENT_EMPTY);
+      diagnostic (A68_SYNTAX_ERROR, NODE_DEFINED (new_one), ERROR_REFINEMENT_EMPTY);
       return;
     } else {
       BEGIN (new_one) = p;
@@ -95,7 +95,7 @@ void get_refinements (void)
       FORWARD (p);
     }
     if (p == NO_NODE) {
-      diagnostic (A68_SYNTAX_ERROR, NO_NODE, ERROR_SYNTAX_EXPECTED, POINT_SYMBOL);
+      diagnostic (A68_SYNTAX_ERROR, NODE_DEFINED (new_one), ERROR_REFINEMENT_INVALID);
       return;
     } else {
       FORWARD (p);

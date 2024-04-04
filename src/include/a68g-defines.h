@@ -229,9 +229,6 @@
 #define LONG_INT_WIDTH (1 + LONG_WIDTH)
 #define PM(m) (moid_to_string (m, 132, NO_NODE))
 #define SIGN(n) ((n) == 0 ? 0 : ((n) > 0 ? 1 : -1))
-#define STATUS_CLEAR(p, q) {STATUS (p) &= (~(q));}
-#define STATUS_SET(p, q) {STATUS (p) |= (q);}
-#define STATUS_TEST(p, q) ((STATUS (p) & (q)) != (unt) 0)
 #define WIS(p) where_in_source (STDOUT_FILENO, (p))
 #define WRITE(f, s) io_write_string ((f), (s));
 #define WRITELN(f, s) {WRITE ((f), "\n"); WRITE ((f), (s));}

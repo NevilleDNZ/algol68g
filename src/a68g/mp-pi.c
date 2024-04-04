@@ -107,15 +107,33 @@ MP_T *mp_pi (NODE_T * p, MP_T * api, int mod, int digs)
     A68_SP = pop_sp;
   }
   switch (mod) {
-  case MP_PI:          return move_mp (api, A68_MP (mp_pi), digs);
-  case MP_HALF_PI:     return move_mp (api, A68_MP (mp_half_pi), digs);
-  case MP_TWO_PI:      return move_mp (api, A68_MP (mp_two_pi), digs);
-  case MP_SQRT_TWO_PI: return move_mp (api, A68_MP (mp_sqrt_two_pi), digs);
-  case MP_SQRT_PI:     return move_mp (api, A68_MP (mp_sqrt_pi), digs);
-  case MP_LN_PI:       return move_mp (api, A68_MP (mp_ln_pi), digs);
-  case MP_180_OVER_PI: return move_mp (api, A68_MP (mp_180_over_pi), digs);
-  case MP_PI_OVER_180: return move_mp (api, A68_MP (mp_pi_over_180), digs);
-  default:             return NaN_MP; // Should not be here.
+  case MP_PI: {
+      return move_mp (api, A68_MP (mp_pi), digs);
+    }
+  case MP_HALF_PI: {
+      return move_mp (api, A68_MP (mp_half_pi), digs);
+    }
+  case MP_TWO_PI: {
+      return move_mp (api, A68_MP (mp_two_pi), digs);
+    }
+  case MP_SQRT_TWO_PI: {
+      return move_mp (api, A68_MP (mp_sqrt_two_pi), digs);
+    }
+  case MP_SQRT_PI: {
+      return move_mp (api, A68_MP (mp_sqrt_pi), digs);
+    }
+  case MP_LN_PI: {
+      return move_mp (api, A68_MP (mp_ln_pi), digs);
+    }
+  case MP_180_OVER_PI: {
+      return move_mp (api, A68_MP (mp_180_over_pi), digs);
+    }
+  case MP_PI_OVER_180: {
+      return move_mp (api, A68_MP (mp_pi_over_180), digs);
+    }
+  default: {
+      return NaN_MP; // Should not be here.
+    }
   }
 }
 

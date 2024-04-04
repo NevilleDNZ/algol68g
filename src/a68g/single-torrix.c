@@ -35,12 +35,12 @@ PROP_T genie_diagonal_function (NODE_T * p)
   int k = 0;
   if (IS (q, TERTIARY)) {
     A68_INT x;
-    EXECUTE_UNIT (q);
+    GENIE_UNIT (q);
     POP_OBJECT (p, &x, A68_INT);
     k = VALUE (&x);
     FORWARD (q);
   }
-  EXECUTE_UNIT (NEXT (q));
+  GENIE_UNIT (NEXT (q));
   MOID_T *m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
   ADDR_T scope = PRIMAL_SCOPE;
   if (name) {
@@ -101,7 +101,7 @@ PROP_T genie_transpose_function (NODE_T * p)
   NODE_T *q = SUB (p);
   BOOL_T name = (BOOL_T) (IS_REF (MOID (p)));
   MOID_T *m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
-  EXECUTE_UNIT (NEXT (q));
+  GENIE_UNIT (NEXT (q));
   ADDR_T scope = PRIMAL_SCOPE;
   if (name) {
     A68_REF z;
@@ -141,12 +141,12 @@ PROP_T genie_row_function (NODE_T * p)
   int k = 1;
   if (IS (q, TERTIARY)) {
     A68_INT x;
-    EXECUTE_UNIT (q);
+    GENIE_UNIT (q);
     POP_OBJECT (p, &x, A68_INT);
     k = VALUE (&x);
     FORWARD (q);
   }
-  EXECUTE_UNIT (NEXT (q));
+  GENIE_UNIT (NEXT (q));
   MOID_T *m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
   if (name) {
     A68_REF z;
@@ -207,12 +207,12 @@ PROP_T genie_column_function (NODE_T * p)
   int k = 1;
   if (IS (q, TERTIARY)) {
     A68_INT x;
-    EXECUTE_UNIT (q);
+    GENIE_UNIT (q);
     POP_OBJECT (p, &x, A68_INT);
     k = VALUE (&x);
     FORWARD (q);
   }
-  EXECUTE_UNIT (NEXT (q));
+  GENIE_UNIT (NEXT (q));
   MOID_T *m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
   if (name) {
     A68_REF z;

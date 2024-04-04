@@ -1,0 +1,23 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+PR need curl PR
+
+INT rc, STRING reply;
+rc := http content (reply, "www.gnu.org", "/", 0);
+print ((rc, UPB reply, new line));
+rc := https content (reply, "www.gnu.org", "/", 0);
+print ((rc, UPB reply, new line));
+rc = tcp request (reply, "www.gnu.org", "GET / HTTP/1.0", 0);
+print ((rc, UPB reply, new line))

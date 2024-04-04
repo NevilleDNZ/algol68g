@@ -64,12 +64,11 @@ void default_mem_sizes (int n)
 
 void read_rc_options (void)
 {
-  FILE *f;
   BUFFER name, new_name;
   BUFCLR (name);
   BUFCLR (new_name);
   ASSERT (snprintf (name, SNPRINTF_SIZE, ".%src", A68 (a68_cmd_name)) >= 0);
-  f = a68_fopen (name, "r", new_name);
+  FILE *f = a68_fopen (name, "r", new_name);
   if (f != NO_FILE) {
     while (!feof (f)) {
       if (fgets (A68 (input_line), BUFFER_SIZE, f) != NO_TEXT) {
@@ -101,8 +100,6 @@ void read_env_options (void)
 
 void isolate_options (char *p, LINE_T * line)
 {
-  char *q;
-// 'q' points at first significant char in item.
   while (p[0] != NULL_CHAR) {
 // Skip white space etc.
     while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',' || p[0] == NEWLINE_CHAR) && p[0] != NULL_CHAR) {
@@ -110,10 +107,12 @@ void isolate_options (char *p, LINE_T * line)
     }
 // ... then tokenise an item.
     if (p[0] != NULL_CHAR) {
+      char *q;
 // Item can be "string". Note that these are not A68 strings.
       if (p[0] == QUOTE_CHAR || p[0] == '\'' || p[0] == '`') {
         char delim = p[0];
         p++;
+// 'q' points at first significant char in item.
         q = p;
         while (p[0] != delim && p[0] != NULL_CHAR) {
           p++;
@@ -306,7 +305,6 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   LINE_T *start_l = LINE (*i);
   char *start_c = STR (*i);
   char *car = NO_TEXT, *num = NO_TEXT;
-  INT_T k, mult = 1;
   *error = A68_FALSE;
 // Fetch argument.
   car = strchr (p, '=');
@@ -331,7 +329,8 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   } else {
     char *suffix;
     errno = 0;
-    k = (int) strtol (num, &suffix, 0); // Accept also octal and hex
+    INT_T k = (int) strtol (num, &suffix, 0); // Accept also octal and hex
+    INT_T mult = 1;
     *error = (BOOL_T) (suffix == num);
     if (errno != 0 || *error) {
       option_error (start_l, start_c, "conversion error in");
@@ -343,31 +342,26 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 // Accept suffix multipliers: 32k, 64M, 1G.
       if (suffix != NO_TEXT) {
         switch (suffix[0]) {
-        case NULL_CHAR:
-          {
+        case NULL_CHAR: {
             mult = 1;
             break;
           }
         case 'k':
-        case 'K':
-          {
+        case 'K': {
             mult = KILOBYTE;
             break;
           }
         case 'm':
-        case 'M':
-          {
+        case 'M': {
             mult = MEGABYTE;
             break;
           }
         case 'g':
-        case 'G':
-          {
+        case 'G': {
             mult = GIGABYTE;
             break;
           }
-        default:
-          {
+        default: {
             option_error (start_l, start_c, "unknown suffix in");
             *error = A68_TRUE;
             break;
@@ -391,10 +385,10 @@ int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 
 BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
 {
-  BOOL_T go_on = A68_TRUE, name_set = A68_FALSE, skip = A68_FALSE;
+  BOOL_T siga = A68_TRUE, name_set = A68_FALSE, skip = A68_FALSE;
   OPTION_LIST_T *j = i;
   errno = 0;
-  while (i != NO_OPTION_LIST && go_on) {
+  while (i != NO_OPTION_LIST && siga) {
 // Once SCRIPT is processed we skip options on the command line.
     if (cmd_line && skip) {
       FORWARD (i);
@@ -423,13 +417,13 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
           }
         } else if (eq (p, "INCLUDE")) {
 // Preprocessor items stop option processing.
-          go_on = A68_FALSE;
+          siga = A68_FALSE;
         } else if (eq (p, "READ")) {
-          go_on = A68_FALSE;
+          siga = A68_FALSE;
         } else if (eq (p, "PREPROCESSOR")) {
-          go_on = A68_FALSE;
+          siga = A68_FALSE;
         } else if (eq (p, "NOPREPROCESSOR")) {
-          go_on = A68_FALSE;
+          siga = A68_FALSE;
         } else if (eq (p, "TECHnicalities")) {
 // TECH prints out some tech stuff.
           state_version (STDOUT_FILENO);
@@ -467,11 +461,11 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
         }
 // EXIT stops option processing.
         else if (eq (p, "EXIT")) {
-          go_on = A68_FALSE;
+          siga = A68_FALSE;
         }
 // Empty item (from specifying '-' or '--') stops option processing.
         else if (eq (p, "")) {
-          go_on = A68_FALSE;
+          siga = A68_FALSE;
         }
 // FILE accepts its argument as filename.
         else if (eq (p, "File") && cmd_line) {
@@ -500,21 +494,24 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
             option_error (start_l, start_c, "missing argument in");
           } else {
             char *q = strip_sign (STR (i));
-            if (eq (q, "MVS")) {
-              WRITELN (STDOUT_FILENO, "mvs required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-            }
-            if (eq (q, "mpfr")) {
-#if !defined (HAVE_GNU_MPFR)
+            if (eq (q, "compiler")) {
+#if !defined (BUILD_A68_COMPILER)
               io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "GNU MPFR required - exiting graciously");
+              WRITE (STDOUT_FILENO, "plugin compiler required - exiting graciously");
               a68_exit (EXIT_SUCCESS);
 #endif
             }
-            if (eq (q, "mathlib")) {
-#if !defined (HAVE_MATHLIB)
+            if (eq (q, "curl")) {
+#if !defined (HAVE_CURL)
               io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "R mathlib required - exiting graciously");
+              WRITE (STDOUT_FILENO, "curl library required - exiting graciously");
+              a68_exit (EXIT_SUCCESS);
+#endif
+            }
+            if (eq (q, "curses")) {
+#if !defined (HAVE_CURSES)
+              io_close_tty_line ();
+              WRITE (STDOUT_FILENO, "curses required - exiting graciously");
               a68_exit (EXIT_SUCCESS);
 #endif
             }
@@ -525,17 +522,10 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
               a68_exit (EXIT_SUCCESS);
 #endif
             }
-            if (eq (q, "plotutils")) {
-#if !defined (HAVE_GNU_PLOTUTILS)
+            if (eq (q, "http")) {
+#if !defined (BUILD_WWW)
               io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "plotutils required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-#endif
-            }
-            if (eq (q, "curses")) {
-#if !defined (HAVE_CURSES)
-              io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "curses required - exiting graciously");
+              WRITELN (STDOUT_FILENO, "HTTP support required - exiting graciously");
               a68_exit (EXIT_SUCCESS);
 #endif
             }
@@ -553,10 +543,24 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
               a68_exit (EXIT_SUCCESS);
 #endif
             }
-            if (eq (q, "threads")) {
-#if !defined (BUILD_PARALLEL_CLAUSE)
+            if (eq (q, "mathlib")) {
+#if !defined (HAVE_MATHLIB)
               io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "threads required - exiting graciously");
+              WRITE (STDOUT_FILENO, "R mathlib required - exiting graciously");
+              a68_exit (EXIT_SUCCESS);
+#endif
+            }
+            if (eq (q, "mpfr")) {
+#if !defined (HAVE_GNU_MPFR)
+              io_close_tty_line ();
+              WRITE (STDOUT_FILENO, "GNU MPFR required - exiting graciously");
+              a68_exit (EXIT_SUCCESS);
+#endif
+            }
+            if (eq (q, "plotutils")) {
+#if !defined (HAVE_GNU_PLOTUTILS)
+              io_close_tty_line ();
+              WRITE (STDOUT_FILENO, "GNU plotutils required - exiting graciously");
               a68_exit (EXIT_SUCCESS);
 #endif
             }
@@ -567,20 +571,13 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
               a68_exit (EXIT_SUCCESS);
 #endif
             }
-            if (eq (q, "compiler")) {
-#if !defined (BUILD_A68_COMPILER)
+            if (eq (q, "threads")) {
+#if !defined (BUILD_PARALLEL_CLAUSE)
               io_close_tty_line ();
-              WRITE (STDOUT_FILENO, "compiler required - exiting graciously");
+              WRITE (STDOUT_FILENO, "POSIX threads required - exiting graciously");
               a68_exit (EXIT_SUCCESS);
 #endif
             }
-#if !defined (BUILD_HTTP)
-            if (eq (q, "http")) {
-              io_close_tty_line ();
-              WRITELN (STDOUT_FILENO, "HTTP support required - exiting graciously");
-              a68_exit (EXIT_SUCCESS);
-            }
-#endif
           }
         }
 // SCRIPT takes next argument as filename.
@@ -647,11 +644,10 @@ BOOL_T set_options (OPTION_LIST_T * i, BOOL_T cmd_line)
             }
             if (!error) {
               BUFFER name, new_name;
-              FILE *f;
               int s_errno = errno;
               bufcpy (name, HIDDEN_TEMP_FILE_NAME, BUFFER_SIZE);
               bufcat (name, ".a68", BUFFER_SIZE);
-              f = a68_fopen (name, "w", new_name);
+              FILE *f = a68_fopen (name, "w", new_name);
               ABEND (f == NO_FILE, ERROR_ACTION, __func__);
               errno = s_errno;
               if (eq (p, "Execute") || eq (p, "X")) {

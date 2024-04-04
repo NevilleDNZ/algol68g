@@ -361,7 +361,7 @@ void add_c_string_to_a_string (NODE_T * p, A68_REF ref_str, char *s)
   int l_1 = ROW_SIZE (t_1);
 // Sum string.
   A68_REF c = heap_generator (p, M_STRING, DESCRIPTOR_SIZE (1));
-  A68_REF d = heap_generator (p, M_STRING, (l_1 + l_2) * SIZE (M_CHAR));
+  A68_REF d = heap_generator_2 (p, M_STRING, l_1 + l_2, SIZE (M_CHAR));
 // Calculate again since garbage collector might have moved data.
 // Todo: GC should not move volatile data.
   GET_DESCRIPTOR (a_1, t_1, &a);
@@ -653,7 +653,7 @@ void genie_init_transput (NODE_T * p)
   init_channel (&(A68 (stand_out_channel)), A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE, A68_FALSE, A68_FALSE);
   init_channel (&(A68 (stand_back_channel)), A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_FALSE);
   init_channel (&(A68 (stand_error_channel)), A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE, A68_FALSE, A68_FALSE);
-  init_channel (&(A68 (associate_channel)), A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_FALSE, A68_FALSE);
+  init_channel (&(A68 (associate_channel)), A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_TRUE, A68_FALSE);
   init_channel (&(A68 (skip_channel)), A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE);
 #if defined (HAVE_GNU_PLOTUTILS)
   init_channel (&(A68 (stand_draw_channel)), A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_FALSE, A68_TRUE);
@@ -1569,14 +1569,14 @@ void genie_new_line (NODE_T * p)
       add_c_string_to_a_string (p, STRING (file), NEWLINE_STRING);
     }
   } else if (READ_MOOD (file)) {
-    BOOL_T go_on = A68_TRUE;
-    while (go_on) {
+    BOOL_T siga = A68_TRUE;
+    while (siga) {
       int ch;
       if (END_OF_FILE (file)) {
         end_of_file_error (p, ref_file);
       }
       ch = char_scanner (file);
-      go_on = (BOOL_T) ((ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
+      siga = (BOOL_T) ((ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
     }
   } else {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
@@ -1609,13 +1609,13 @@ void genie_new_page (NODE_T * p)
       add_c_string_to_a_string (p, STRING (file), "\f");
     }
   } else if (READ_MOOD (file)) {
-    BOOL_T go_on = A68_TRUE;
-    while (go_on) {
+    BOOL_T siga = A68_TRUE;
+    while (siga) {
       if (END_OF_FILE (file)) {
         end_of_file_error (p, ref_file);
       }
       int ch = char_scanner (file);
-      go_on = (BOOL_T) ((ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
+      siga = (BOOL_T) ((ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !END_OF_FILE (file));
     }
   } else {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
@@ -1651,4 +1651,3 @@ void genie_space (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
 }
-

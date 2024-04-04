@@ -242,64 +242,53 @@ void xref_tags (FILE_T f, TAG_T * s, int a)
       ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "tag %d ", NUMBER (s)) >= 0);
       WRITE (f, A68 (output_line));
       switch (a) {
-      case IDENTIFIER:
-        {
+      case IDENTIFIER: {
           a68_print_mode (f, MOID (s));
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " %s", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
-      case INDICANT:
-        {
+      case INDICANT: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "indicant %s ", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           a68_print_mode (f, MOID (s));
           break;
         }
-      case PRIO_SYMBOL:
-        {
+      case PRIO_SYMBOL: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "priority %s %d", NSYMBOL (NODE (s)), PRIO (s)) >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
-      case OP_SYMBOL:
-        {
+      case OP_SYMBOL: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "operator %s ", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           a68_print_mode (f, MOID (s));
           break;
         }
-      case LABEL:
-        {
+      case LABEL: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "label %s", NSYMBOL (NODE (s))) >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
-      case ANONYMOUS:
-        {
+      case ANONYMOUS: {
           switch (PRIO (s)) {
-          case ROUTINE_TEXT:
-            {
+          case ROUTINE_TEXT: {
               ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "routine text ") >= 0);
               break;
             }
-          case FORMAT_TEXT:
-            {
+          case FORMAT_TEXT: {
               ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "format text ") >= 0);
               break;
             }
-          case FORMAT_IDENTIFIER:
-            {
+          case FORMAT_IDENTIFIER: {
               ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "format item ") >= 0);
               break;
             }
-          case COLLATERAL_CLAUSE:
-            {
+          case COLLATERAL_CLAUSE: {
               ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "display ") >= 0);
               break;
             }
-          case GENERATOR:
-            {
+          case GENERATOR: {
               ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "generator ") >= 0);
               break;
             }
@@ -308,8 +297,7 @@ void xref_tags (FILE_T f, TAG_T * s, int a)
           a68_print_mode (f, MOID (s));
           break;
         }
-      default:
-        {
+      default: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "internal %d ", a) >= 0);
           WRITE (f, A68 (output_line));
           a68_print_mode (f, MOID (s));
@@ -365,6 +353,9 @@ void xref1_moid (FILE_T f, MOID_T * p)
 
 void moid_listing (FILE_T f, MOID_T * m)
 {
+  if (m == NO_MOID) {
+    return;
+  }
   for (; m != NO_MOID; FORWARD (m)) {
     xref1_moid (f, m);
   }
@@ -450,7 +441,7 @@ void tree_listing (FILE_T f, NODE_T * q, int x, LINE_T * l, int *ld, BOOL_T comm
           WRITE (f, "\n     ");
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%02d %06d p%02d ", x, NUMBER (p), PROCEDURE_LEVEL (INFO (p))) >= 0);
           WRITE (f, A68 (output_line));
-          if (PREVIOUS (TABLE (p)) != NO_TABLE) {
+          if (TABLE (p) != NO_TABLE && PREVIOUS (TABLE (p)) != NO_TABLE) {
             ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%02d-%02d-%02d ", (TABLE (p) != NO_TABLE ? LEX_LEVEL (p) : 0), (TABLE (p) != NO_TABLE ? LEVEL (PREVIOUS (TABLE (p))) : 0), (NON_LOCAL (p) != NO_TABLE ? LEVEL (NON_LOCAL (p)) : 0)
                     ) >= 0);
           } else {
@@ -573,7 +564,7 @@ void write_source_listing (void)
   WRITE (FILE_LISTING_FD (&A68_JOB), "\n------ -------");
   WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
   if (FILE_LISTING_OPENED (&A68_JOB) == 0) {
-    diagnostic (A68_ERROR, NO_NODE, ERROR_CANNOT_WRITE_LISTING);
+    diagnostic (A68_ERROR, NO_NODE, ERROR_CANNOT_WRITE_LISTING, NO_LINE, 0);
     return;
   }
   for (; line != NO_LINE; FORWARD (line)) {
@@ -601,7 +592,7 @@ void write_tree_listing (void)
   WRITE (FILE_LISTING_FD (&A68_JOB), "\n------ ---- -------");
   WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
   if (FILE_LISTING_OPENED (&A68_JOB) == 0) {
-    diagnostic (A68_ERROR, NO_NODE, ERROR_CANNOT_WRITE_LISTING);
+    diagnostic (A68_ERROR, NO_NODE, ERROR_CANNOT_WRITE_LISTING, NO_LINE, 0);
     return;
   }
   for (; line != NO_LINE; FORWARD (line)) {
@@ -635,7 +626,7 @@ void write_object_listing (void)
 void write_listing (void)
 {
   FILE_T f = FILE_LISTING_FD (&A68_JOB);
-  if (OPTION_MOID_LISTING (&A68_JOB)) {
+  if (OPTION_MOID_LISTING (&A68_JOB) && TOP_MOID (&A68_JOB) != NO_MOID) {
     WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
     WRITE (FILE_LISTING_FD (&A68_JOB), "\nMode listing");
     WRITE (FILE_LISTING_FD (&A68_JOB), "\n---- -------");
@@ -667,18 +658,15 @@ void write_listing (void)
         WRITE (f, A68 (output_line));
       }
       switch (APPLICATIONS (x)) {
-      case 0:
-        {
+      case 0: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", not applied") >= 0);
           WRITE (f, A68 (output_line));
           break;
         }
-      case 1:
-        {
+      case 1: {
           break;
         }
-      default:
-        {
+      default: {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, ", applied more than once") >= 0);
           WRITE (f, A68 (output_line));
           break;
@@ -688,14 +676,13 @@ void write_listing (void)
     }
   }
   if (OPTION_LIST (&A68_JOB) != NO_OPTION_LIST) {
-    OPTION_LIST_T *i;
     int k = 1;
     WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
     WRITE (FILE_LISTING_FD (&A68_JOB), "\nPragmat listing");
     WRITE (FILE_LISTING_FD (&A68_JOB), "\n------- -------");
     WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
-    for (i = OPTION_LIST (&A68_JOB); i != NO_OPTION_LIST; FORWARD (i)) {
-      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n%d: %s", k++, STR (i)) >= 0);
+    for (OPTION_LIST_T *l = OPTION_LIST (&A68_JOB); l != NO_OPTION_LIST; FORWARD (l)) {
+      ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\n%d: %s", k++, STR (l)) >= 0);
       WRITE (f, A68 (output_line));
     }
   }
@@ -706,7 +693,6 @@ void write_listing (void)
 void write_listing_header (void)
 {
   FILE_T f = FILE_LISTING_FD (&A68_JOB);
-  LINE_T *z;
   state_version (FILE_LISTING_FD (&A68_JOB));
   WRITE (FILE_LISTING_FD (&A68_JOB), "\nFile \"");
   WRITE (FILE_LISTING_FD (&A68_JOB), FILE_SOURCE_NAME (&A68_JOB));
@@ -715,7 +701,7 @@ void write_listing_header (void)
     if (ERROR_COUNT (&A68_JOB) + WARNING_COUNT (&A68_JOB) > 0) {
       ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nDiagnostics: %d error(s), %d warning(s)", ERROR_COUNT (&A68_JOB), WARNING_COUNT (&A68_JOB)) >= 0);
       WRITE (f, A68 (output_line));
-      for (z = TOP_LINE (&A68_JOB); z != NO_LINE; FORWARD (z)) {
+      for (LINE_T *z = TOP_LINE (&A68_JOB); z != NO_LINE; FORWARD (z)) {
         if (DIAGNOSTICS (z) != NO_DIAGNOSTIC) {
           write_source_line (f, z, NO_NODE, A68_TRUE);
         }

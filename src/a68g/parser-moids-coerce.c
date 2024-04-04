@@ -62,21 +62,18 @@ void coerce_identity_declaration (NODE_T * p)
 {
   if (p != NO_NODE) {
     switch (ATTRIBUTE (p)) {
-    case DECLARER:
-      {
+    case DECLARER: {
         coerce_declarer (SUB (p));
         coerce_identity_declaration (NEXT (p));
         break;
       }
-    case DEFINING_IDENTIFIER:
-      {
+    case DEFINING_IDENTIFIER: {
         SOID_T q;
         make_soid (&q, STRONG, MOID (p), 0);
         coerce_unit (NEXT_NEXT (p), &q);
         break;
       }
-    default:
-      {
+    default: {
         coerce_identity_declaration (SUB (p));
         coerce_identity_declaration (NEXT (p));
         break;
@@ -91,14 +88,12 @@ void coerce_variable_declaration (NODE_T * p)
 {
   if (p != NO_NODE) {
     switch (ATTRIBUTE (p)) {
-    case DECLARER:
-      {
+    case DECLARER: {
         coerce_declarer (SUB (p));
         coerce_variable_declaration (NEXT (p));
         break;
       }
-    case DEFINING_IDENTIFIER:
-      {
+    case DEFINING_IDENTIFIER: {
         if (whether (p, DEFINING_IDENTIFIER, ASSIGN_SYMBOL, UNIT, STOP)) {
           SOID_T q;
           make_soid (&q, STRONG, SUB_MOID (p), 0);
@@ -106,8 +101,7 @@ void coerce_variable_declaration (NODE_T * p)
           break;
         }
       }
-    default:
-      {
+    default: {
         coerce_variable_declaration (SUB (p));
         coerce_variable_declaration (NEXT (p));
         break;
@@ -120,10 +114,10 @@ void coerce_variable_declaration (NODE_T * p)
 
 void coerce_routine_text (NODE_T * p)
 {
-  SOID_T w;
   if (IS (p, PARAMETER_PACK)) {
     FORWARD (p);
   }
+  SOID_T w;
   make_soid (&w, STRONG, MOID (p), 0);
   coerce_unit (NEXT_NEXT (p), &w);
 }
@@ -178,39 +172,32 @@ void coerce_declaration_list (NODE_T * p)
 {
   if (p != NO_NODE) {
     switch (ATTRIBUTE (p)) {
-    case IDENTITY_DECLARATION:
-      {
+    case IDENTITY_DECLARATION: {
         coerce_identity_declaration (SUB (p));
         break;
       }
-    case VARIABLE_DECLARATION:
-      {
+    case VARIABLE_DECLARATION: {
         coerce_variable_declaration (SUB (p));
         break;
       }
-    case MODE_DECLARATION:
-      {
+    case MODE_DECLARATION: {
         coerce_declarer (SUB (p));
         break;
       }
     case PROCEDURE_DECLARATION:
-    case PROCEDURE_VARIABLE_DECLARATION:
-      {
+    case PROCEDURE_VARIABLE_DECLARATION: {
         coerce_proc_declaration (SUB (p));
         break;
       }
-    case BRIEF_OPERATOR_DECLARATION:
-      {
+    case BRIEF_OPERATOR_DECLARATION: {
         coerce_brief_op_declaration (SUB (p));
         break;
       }
-    case OPERATOR_DECLARATION:
-      {
+    case OPERATOR_DECLARATION: {
         coerce_op_declaration (SUB (p));
         break;
       }
-    default:
-      {
+    default: {
         coerce_declaration_list (SUB (p));
         coerce_declaration_list (NEXT (p));
         break;
@@ -583,8 +570,8 @@ void coerce_selection (NODE_T * p)
 
 void coerce_cast (NODE_T * p)
 {
-  SOID_T w;
   coerce_declarer (p);
+  SOID_T w;
   make_soid (&w, STRONG, MOID (p), 0);
   coerce_enclosed (NEXT (p), &w);
 }
@@ -613,11 +600,10 @@ void coerce_call (NODE_T * p)
 {
   MOID_T *proc = MOID (p);
   SOID_T w;
-  PACK_T *t;
   make_soid (&w, MEEK, proc, 0);
   coerce_unit (SUB (p), &w);
   FORWARD (p);
-  t = PACK (proc);
+  PACK_T *t = PACK (proc);
   coerce_argument_list (&t, SUB (p));
 }
 
@@ -665,8 +651,7 @@ void coerce_indexer (NODE_T * p)
 void coerce_slice (NODE_T * p)
 {
   SOID_T w;
-  MOID_T *row;
-  row = MOID (p);
+  MOID_T *row = MOID (p);
   make_soid (&w, STRONG, row, 0);
   coerce_unit (SUB (p), &w);
   coerce_indexer (SUB_NEXT (p));
@@ -826,8 +811,7 @@ void widen_denotation (NODE_T * p)
   if (OPTION_PORTCHECK (&A68_JOB) && !(STATUS_TEST (SUB (q), OPTIMAL_MASK))) {\
     diagnostic (A68_WARNING | A68_FORCE_DIAGNOSTICS, q, WARNING_WIDENING_NOT_PORTABLE);\
   }
-  NODE_T *q;
-  for (q = p; q != NO_NODE; FORWARD (q)) {
+  for (NODE_T *q = p; q != NO_NODE; FORWARD (q)) {
     widen_denotation (SUB (q));
     if (IS (q, WIDENING) && IS (SUB (q), DENOTATION)) {
       MOID_T *lm = MOID (q), *m = MOID (SUB (q));

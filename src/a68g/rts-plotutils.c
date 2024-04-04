@@ -35,8 +35,8 @@
 
 #if defined (HAVE_GNU_PLOTUTILS)
 
-// This part contains names for 24-bit colours recognised by libplot.
-// The table below is based on the "rgb.txt" file distributed with X11R6. 
+#define COLOUR_MAX 65535
+#define COLOUR_NAMES 668
 
 struct COLOUR_INFO
 {
@@ -46,8 +46,824 @@ struct COLOUR_INFO
 
 typedef struct COLOUR_INFO colour_info;
 
-#define COLOUR_MAX 65535
-#define COLOUR_NAMES 668
+const colour_info A68_COLOURS[];
+
+BOOL_T string_to_colour (NODE_T *, char *, int *);
+
+//! @brief Scans string for an integer.
+
+BOOL_T scan_int (char **z, int *k)
+{
+  char *y = *z;
+  while (y[0] != NULL_CHAR && !IS_DIGIT (y[0])) {
+    y++;
+  }
+  if (y[0] != NULL_CHAR) {
+    (*k) = strtol (y, z, 10);
+    return (BOOL_T) (errno == 0);
+  } else {
+    return A68_FALSE;
+  }
+}
+
+//! @brief PROC (REF FILE, STRING, STRING) make device
+
+void genie_make_device (NODE_T * p)
+{
+// Pop arguments.
+  A68_REF ref_device, ref_page, ref_file;
+  POP_REF (p, &ref_page);
+  POP_REF (p, &ref_device);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *file = FILE_DEREF (&ref_file);
+  if (DEVICE_MADE (&DEVICE (file))) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_ALREADY_SET);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+// Fill in page_size.
+  int size = a68_string_size (p, ref_page);
+  if (INITIALISED (&(A68_PAGE_SIZE (&DEVICE (file)))) && !IS_NIL (A68_PAGE_SIZE (&DEVICE (file)))) {
+    UNBLOCK_GC_HANDLE (&A68_PAGE_SIZE (&DEVICE (file)));
+  }
+  A68_PAGE_SIZE (&DEVICE (file)) = heap_generator (p, M_STRING, 1 + size);
+  BLOCK_GC_HANDLE (&A68_PAGE_SIZE (&DEVICE (file)));
+  ASSERT (a_to_c_string (p, DEREF (char, &A68_PAGE_SIZE (&DEVICE (file))), ref_page) != NO_TEXT);
+// Fill in device.
+  size = a68_string_size (p, ref_device);
+  if (INITIALISED (&(DEVICE (&DEVICE (file)))) && !IS_NIL (DEVICE (&DEVICE (file)))) {
+    UNBLOCK_GC_HANDLE (&DEVICE (&DEVICE (file)));
+  }
+  DEVICE (&DEVICE (file)) = heap_generator (p, M_STRING, 1 + size);
+  BLOCK_GC_HANDLE (&DEVICE (&DEVICE (file)));
+  ASSERT (a_to_c_string (p, DEREF (char, &DEVICE (&DEVICE (file))), ref_device) != NO_TEXT);
+  DEVICE_MADE (&DEVICE (file)) = A68_TRUE;
+  PUSH_VALUE (p, A68_TRUE, A68_BOOL);
+}
+
+//! @brief Closes the plotter.
+
+BOOL_T close_device (NODE_T * p, A68_FILE * f)
+{
+  CHECK_INIT (p, INITIALISED (f), M_FILE);
+  if (!OPENED (f)) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (!(DEVICE_OPENED (&DEVICE (f)))) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (DEVICE_MADE (&DEVICE (f))) {
+    if (!IS_NIL (DEVICE (&DEVICE (f)))) {
+      UNBLOCK_GC_HANDLE (&(DEVICE (&DEVICE (f))));
+    }
+    if (!IS_NIL (A68_PAGE_SIZE (&DEVICE (f)))) {
+      UNBLOCK_GC_HANDLE (&(A68_PAGE_SIZE (&DEVICE (f))));
+    }
+  }
+  if (pl_closepl_r (PLOTTER (&DEVICE (f))) < 0) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CLOSING_DEVICE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (pl_deletepl_r (PLOTTER (&DEVICE (f))) < 0) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CLOSING_DEVICE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (STREAM (&DEVICE (f)) != NO_STREAM && fclose (STREAM (&DEVICE (f))) != 0) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CLOSING_FILE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  DEVICE_OPENED (&DEVICE (f)) = A68_FALSE;
+  return A68_TRUE;
+}
+
+//! @brief Sets up the plotter prior to using it.
+
+plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
+{
+// First set up the general device, then plotter-specific things.
+  CHECK_INIT (p, INITIALISED (f), M_FILE);
+  A68_REF ref_filename = IDENTIFICATION (f);
+// This one in front as to quickly select the plotter.
+  if (DEVICE_OPENED (&DEVICE (f))) {
+    if (DEVICE_HANDLE (&DEVICE (f)) < 0) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    return PLOTTER (&DEVICE (f));
+  }
+// Device not set up yet.
+  if (!OPENED (f)) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (READ_MOOD (f)) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (WRITE_MOOD (f)) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (!DRAW (&CHANNEL (f))) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "drawing");
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  if (!DEVICE_MADE (&DEVICE (f))) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_NOT_SET);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  char *device_type = DEREF (char, &DEVICE (&DEVICE (f)));
+  if (!strcmp (device_type, "X")) {
+#if defined (X_DISPLAY_MISSING)
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "X plotter missing", "");
+    exit_genie (p, A68_RUNTIME_ERROR);
+#else
+//
+// Supported plotter type - X Window System
+//
+    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
+// Establish page size.
+    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (z[0] != NULL_CHAR) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+// Make the X window.
+    FD (f) = -1;
+    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
+    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "VANISH_ON_DELETE", (void *) "no");
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "X_AUTO_FLUSH", (void *) "yes");
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "USE_DOUBLE_BUFFERING", (void *) "no");
+    PLOTTER (&DEVICE (f)) = pl_newpl_r ("X", NULL, NULL, stderr, PLOTTER_PARAMS (&DEVICE (f)));
+    if (PLOTTER (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
+    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
+    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
+    DRAW_MOOD (f) = A68_TRUE;
+    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
+    X_COORD (&DEVICE (f)) = 0;
+    Y_COORD (&DEVICE (f)) = 0;
+    return PLOTTER (&DEVICE (f));
+#endif
+  } else if (!strcmp (device_type, "gif")) {
+//
+// Supported plotter type - pseudo GIF
+//
+    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
+// Establish page size.
+    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (z[0] != NULL_CHAR) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+// Open the output file for drawing.
+    CHECK_REF (p, ref_filename, M_ROWS);
+    char *filename = DEREF (char, &ref_filename);
+    errno = 0;
+    if ((STREAM (&DEVICE (f)) = fopen (filename, "wb")) == NO_STREAM) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    } else {
+      READ_MOOD (f) = A68_FALSE;
+      WRITE_MOOD (f) = A68_FALSE;
+      CHAR_MOOD (f) = A68_FALSE;
+      DRAW_MOOD (f) = A68_TRUE;
+    }
+// Set up plotter.
+    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
+    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "GIF_ANIMATION", (void *) "no");
+    PLOTTER (&DEVICE (f)) = pl_newpl_r ("gif", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
+    if (PLOTTER (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
+    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
+    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
+    DRAW_MOOD (f) = A68_TRUE;
+    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
+    X_COORD (&DEVICE (f)) = 0;
+    Y_COORD (&DEVICE (f)) = 0;
+    return PLOTTER (&DEVICE (f));
+  } else if (!strcmp (device_type, "pnm")) {
+//
+// Supported plotter type - Portable aNyMap
+//
+    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
+// Establish page size.
+    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (z[0] != NULL_CHAR) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+// Open the output file for drawing.
+    CHECK_REF (p, ref_filename, M_ROWS);
+    char *filename = DEREF (char, &ref_filename);
+    errno = 0;
+    if ((STREAM (&DEVICE (f)) = fopen (filename, "wb")) == NO_STREAM) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    } else {
+      READ_MOOD (f) = A68_FALSE;
+      WRITE_MOOD (f) = A68_FALSE;
+      CHAR_MOOD (f) = A68_FALSE;
+      DRAW_MOOD (f) = A68_TRUE;
+    }
+// Set up plotter.
+    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
+    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "PNM_PORTABLE", (void *) "no");
+    PLOTTER (&DEVICE (f)) = pl_newpl_r ("pnm", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
+    if (PLOTTER (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
+    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
+    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
+    DRAW_MOOD (f) = A68_TRUE;
+    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
+    X_COORD (&DEVICE (f)) = 0;
+    Y_COORD (&DEVICE (f)) = 0;
+    return PLOTTER (&DEVICE (f));
+  } else if (!strcmp (device_type, "png")) {
+#if defined (X_DISPLAY_MISSING)
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "PNG plotter missing", "");
+    exit_genie (p, A68_RUNTIME_ERROR);
+#else
+//
+// Supported plotter type - PNG
+//
+    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
+// Establish page size.
+    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (z[0] != NULL_CHAR) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+// Open the output file for drawing.
+    CHECK_REF (p, ref_filename, M_ROWS);
+    char *filename = DEREF (char, &ref_filename);
+    errno = 0;
+    if ((STREAM (&DEVICE (f)) = fopen (filename, "wb")) == NO_STREAM) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    } else {
+      READ_MOOD (f) = A68_FALSE;
+      WRITE_MOOD (f) = A68_FALSE;
+      CHAR_MOOD (f) = A68_FALSE;
+      DRAW_MOOD (f) = A68_TRUE;
+    }
+// Set up plotter.
+    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
+    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "GIF_ANIMATION", (void *) "no");
+    PLOTTER (&DEVICE (f)) = pl_newpl_r ("png", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
+    if (PLOTTER (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
+    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
+    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
+    DRAW_MOOD (f) = A68_TRUE;
+    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
+    X_COORD (&DEVICE (f)) = 0;
+    Y_COORD (&DEVICE (f)) = 0;
+    return PLOTTER (&DEVICE (f));
+#endif
+  } else if (!strcmp (device_type, "ps")) {
+#if defined (POSTSCRIPT_MISSING)
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "postscript plotter missing", "");
+    exit_genie (p, A68_RUNTIME_ERROR);
+#else
+//
+// Supported plotter type - Postscript
+//
+// Open the output file for drawing.
+    CHECK_REF (p, ref_filename, M_ROWS);
+    char *filename = DEREF (char, &ref_filename);
+    errno = 0;
+    if ((STREAM (&DEVICE (f)) = fopen (filename, "w")) == NO_STREAM) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    } else {
+      READ_MOOD (f) = A68_FALSE;
+      WRITE_MOOD (f) = A68_FALSE;
+      CHAR_MOOD (f) = A68_FALSE;
+      DRAW_MOOD (f) = A68_TRUE;
+    }
+// Set up ps plotter.
+    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
+    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "PAGESIZE", DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))));
+    PLOTTER (&DEVICE (f)) = pl_newpl_r ("ps", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
+    if (PLOTTER (&DEVICE (f)) == NULL) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    WINDOW_X_SIZE (&DEVICE (f)) = 1000;
+    WINDOW_Y_SIZE (&DEVICE (f)) = 1000;
+    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
+    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
+    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
+    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
+    DRAW_MOOD (f) = A68_TRUE;
+    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
+    X_COORD (&DEVICE (f)) = 0;
+    Y_COORD (&DEVICE (f)) = 0;
+    return PLOTTER (&DEVICE (f));
+#endif
+  } else {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unindentified plotter", device_type);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  return NULL;
+}
+
+//! @brief PROC (REF FILE) VOID draw erase
+
+void genie_draw_clear (NODE_T * p)
+{
+  A68_REF ref_file;
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_flushpl_r (plotter);
+  (void) pl_erase_r (plotter);
+}
+
+//! @brief PROC (REF FILE) VOID draw show
+
+void genie_draw_show (NODE_T * p)
+{
+  A68_REF ref_file;
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_flushpl_r (plotter);
+}
+
+//! @brief PROC (REF FILE) REAL draw aspect
+
+void genie_draw_aspect (NODE_T * p)
+{
+  A68_REF ref_file;
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  PUSH_VALUE (p, (REAL_T) WINDOW_Y_SIZE (&DEVICE (f)) / (REAL_T) WINDOW_X_SIZE (&DEVICE (f)), A68_REAL);
+  (void) plotter;
+}
+
+//! @brief PROC (REF FILE, INT) VOID draw fillstyle
+
+void genie_draw_fillstyle (NODE_T * p)
+{
+  A68_INT z; A68_REF ref_file;
+  POP_OBJECT (p, &z, A68_INT);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_filltype_r (plotter, (int) VALUE (&z));
+}
+
+//! @brief PROC (INT) STRING draw get colour name
+
+void genie_draw_get_colour_name (NODE_T * p)
+{
+  A68_INT z;
+  POP_OBJECT (p, &z, A68_INT);
+  int j = (VALUE (&z) - 1) % COLOUR_NAMES;
+  char *str = NAME (&A68_COLOURS[j]);
+  PUSH_REF (p, c_to_a_string (p, str, DEFAULT_WIDTH));
+}
+
+//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw colour
+
+void genie_draw_colour (NODE_T * p)
+{
+  A68_REAL x, y, z; A68_REF ref_file;
+  POP_OBJECT (p, &z, A68_REAL);
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  RED (&DEVICE (f)) = VALUE (&x);
+  GREEN (&DEVICE (f)) = VALUE (&y);
+  BLUE (&DEVICE (f)) = VALUE (&z);
+  (void) pl_color_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
+  (void) pl_pencolor_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
+  (void) pl_fillcolor_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
+}
+
+//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw background colour
+
+void genie_draw_background_colour (NODE_T * p)
+{
+  A68_REAL x, y, z; A68_REF ref_file;
+  POP_OBJECT (p, &z, A68_REAL);
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_bgcolor_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
+}
+
+//! @brief PROC (REF FILE, STRING) VOID draw colour name
+
+void genie_draw_colour_name (NODE_T * p)
+{
+  A68_REF ref_c, ref_file;
+  POP_REF (p, &ref_c);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  A68_REF ref_name = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, ref_c));
+  char *name = DEREF (char, &ref_name);
+  ASSERT (a_to_c_string (p, name, ref_c) != NO_TEXT);
+  int k;
+  if (!string_to_colour (p, name, &k)) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  REAL_T x = (REAL_T) (RED (&A68_COLOURS[k])) / (REAL_T) (0xff);
+  REAL_T y = (REAL_T) (GREEN (&A68_COLOURS[k])) / (REAL_T) (0xff);
+  REAL_T z = (REAL_T) (BLUE (&A68_COLOURS[k])) / (REAL_T) (0xff);
+  plPlotter *plotter = set_up_device (p, f);
+  RED (&DEVICE (f)) = x;
+  GREEN (&DEVICE (f)) = y;
+  BLUE (&DEVICE (f)) = z;
+  (void) pl_color_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
+  (void) pl_pencolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
+  (void) pl_fillcolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
+}
+
+//! @brief PROC (REF FILE, STRING) VOID draw background colour name
+
+void genie_draw_background_colour_name (NODE_T * p)
+{
+  A68_REF ref_c, ref_file;
+  POP_REF (p, &ref_c);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  A68_REF ref_name = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, ref_c));
+  char *name = DEREF (char, &ref_name);
+  ASSERT (a_to_c_string (p, name, ref_c) != NO_TEXT);
+  int k;
+  if (!string_to_colour (p, name, &k)) {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  REAL_T x = (REAL_T) (RED (&A68_COLOURS[k])) / (REAL_T) (0xff);
+  REAL_T y = (REAL_T) (GREEN (&A68_COLOURS[k])) / (REAL_T) (0xff);
+  REAL_T z = (REAL_T) (BLUE (&A68_COLOURS[k])) / (REAL_T) (0xff);
+  plPlotter *plotter = set_up_device (p, f);
+  RED (&DEVICE (f)) = x;
+  GREEN (&DEVICE (f)) = y;
+  BLUE (&DEVICE (f)) = z;
+  (void) pl_bgcolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
+}
+
+//! @brief PROC (REF FILE, STRING) VOID draw linestyle
+
+void genie_draw_linestyle (NODE_T * p)
+{
+  A68_REF txt, ref_file;
+  POP_REF (p, &txt);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  int size = a68_string_size (p, txt);
+  A68_REF z_ref = heap_generator (p, M_C_STRING, 1 + size);
+  char *z = DEREF (char, &z_ref);
+  ASSERT (a_to_c_string (p, z, txt) != NO_TEXT);
+  (void) pl_linemod_r (plotter, z);
+}
+
+//! @brief PROC (REF FILE, INT) VOID draw linewidth
+
+void genie_draw_linewidth (NODE_T * p)
+{
+  A68_REAL width; A68_REF ref_file;
+  POP_OBJECT (p, &width, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_linewidth_r (plotter, (int) (VALUE (&width) * (REAL_T) WINDOW_Y_SIZE (&DEVICE (f))));
+}
+
+//! @brief PROC (REF FILE, REAL, REAL) VOID draw move
+
+void genie_draw_move (NODE_T * p)
+{
+  A68_REAL x, y; A68_REF ref_file;
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_fmove_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, REAL, REAL) VOID draw line
+
+void genie_draw_line (NODE_T * p)
+{
+  A68_REAL x, y; A68_REF ref_file;
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_fline_r (plotter, X_COORD (&DEVICE (f)) * WINDOW_X_SIZE (&DEVICE (f)), Y_COORD (&DEVICE (f)) * WINDOW_Y_SIZE (&DEVICE (f)), VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, REAL, REAL) VOID draw point
+
+void genie_draw_point (NODE_T * p)
+{
+  A68_REAL x, y; A68_REF ref_file;
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_fpoint_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, REAL, REAL) VOID draw rect
+
+void genie_draw_rect (NODE_T * p)
+{
+  A68_REAL x, y; A68_REF ref_file;
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_fbox_r (plotter, X_COORD (&DEVICE (f)) * WINDOW_X_SIZE (&DEVICE (f)), Y_COORD (&DEVICE (f)) * WINDOW_Y_SIZE (&DEVICE (f)), VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw circle
+
+void genie_draw_circle (NODE_T * p)
+{
+  A68_REAL x, y, r; A68_REF ref_file;
+  POP_OBJECT (p, &r, A68_REAL);
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_fcircle_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)), VALUE (&r) * MAX (WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))));
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw atom
+
+void genie_draw_atom (NODE_T * p)
+{
+  A68_REAL x, y, r; A68_REF ref_file;
+  POP_OBJECT (p, &r, A68_REAL);
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  int k = (int) (VALUE (&r) * MAX (WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))));
+  (void) pl_filltype_r (plotter, 1);
+  for (int j = k - 1; j >= 0; j--) {
+    REAL_T frac = (REAL_T) j / (REAL_T) (k - 1);
+    frac = 0.6 + 0.3 * sqrt (1.0 - frac * frac);
+    (void) pl_color_r (plotter, (int) (frac * RED (&DEVICE (f)) * COLOUR_MAX), (int) (frac * GREEN (&DEVICE (f)) * COLOUR_MAX), (int) (frac * BLUE (&DEVICE (f)) * COLOUR_MAX));
+    (void) pl_fcircle_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)), (REAL_T) j);
+  }
+  (void) pl_filltype_r (plotter, 0);
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw atom
+
+void genie_draw_star (NODE_T * p)
+{
+  A68_REAL x, y, r; A68_REF ref_file;
+  POP_OBJECT (p, &r, A68_REAL);
+  POP_OBJECT (p, &y, A68_REAL);
+  POP_OBJECT (p, &x, A68_REAL);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  int k = (int) (VALUE (&r) * MAX (WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))));
+  for (int j = k; j >= 0; j--) {
+    REAL_T z = (REAL_T) j / (REAL_T) k, frac;
+    if (z < 0.2) {
+      z = z / 0.2;
+      frac = 0.5 * (1 + (cos (CONST_PI / 2 * z)));
+    } else {
+      z = (z - 0.2) / 0.8;
+      frac = (1 - z) * 0.3;
+    }
+    (void) pl_color_r (plotter, (int) (frac * RED (&DEVICE (f)) * COLOUR_MAX), (int) (frac * GREEN (&DEVICE (f)) * COLOUR_MAX), (int) (frac * BLUE (&DEVICE (f)) * COLOUR_MAX));
+    (void) pl_fcircle_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)), (REAL_T) j);
+  }
+  (void) pl_color_r (plotter, (int) (RED (&DEVICE (f)) * COLOUR_MAX), (int) (GREEN (&DEVICE (f)) * COLOUR_MAX), (int) (BLUE (&DEVICE (f)) * COLOUR_MAX));
+  X_COORD (&DEVICE (f)) = VALUE (&x);
+  Y_COORD (&DEVICE (f)) = VALUE (&y);
+}
+
+//! @brief PROC (REF FILE, CHAR, CHAR, STRING) VOID draw text
+
+void genie_draw_text (NODE_T * p)
+{
+  A68_CHAR just_v, just_h; A68_REF txt, ref_file;
+  POP_REF (p, &txt);
+  POP_OBJECT (p, &just_v, A68_CHAR);
+  POP_OBJECT (p, &just_h, A68_CHAR);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  int size = a68_string_size (p, txt);
+  A68_REF z_ref = heap_generator (p, M_C_STRING, 1 + size);
+  char *z = DEREF (char, &z_ref);
+  ASSERT (a_to_c_string (p, z, txt) != NO_TEXT);
+  (void) pl_alabel_r (plotter, VALUE (&just_h), VALUE (&just_v), z);
+}
+
+//! @brief PROC (REF FILE, STRING) VOID draw fontname
+
+void genie_draw_fontname (NODE_T * p)
+{
+  A68_REF txt, ref_file;
+  POP_REF (p, &txt);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  int size = a68_string_size (p, txt);
+  A68_REF z_ref = heap_generator (p, M_C_STRING, 1 + size);
+  char *z = DEREF (char, &z_ref);
+  ASSERT (a_to_c_string (p, z, txt) != NO_TEXT);
+  (void) pl_fontname_r (plotter, z);
+}
+
+//! @brief PROC (REF FILE, INT) VOID draw fontsize
+
+void genie_draw_fontsize (NODE_T * p)
+{
+  A68_INT size;
+  A68_REF ref_file;
+  POP_OBJECT (p, &size, A68_INT);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  A68_FILE *f = FILE_DEREF (&ref_file);
+  plPlotter *plotter = set_up_device (p, f);
+  (void) pl_fontsize_r (plotter, (int) VALUE (&size));
+}
+
+//! @brief PROC (REF FILE, INT) VOID draw textangle
+
+void genie_draw_textangle (NODE_T * p)
+{
+  A68_INT angle;
+  A68_REF ref_file;
+  A68_FILE *f;
+  plPlotter *plotter;
+  POP_OBJECT (p, &angle, A68_INT);
+  POP_REF (p, &ref_file);
+  CHECK_REF (p, ref_file, M_REF_FILE);
+  f = FILE_DEREF (&ref_file);
+  plotter = set_up_device (p, f);
+  (void) pl_textangle_r (plotter, (int) VALUE (&angle));
+}
+
+// This part contains names for 24-bit colours recognised by libplot.
+// The table below is based on the "rgb.txt" file distributed with X11R6. 
 
 const colour_info A68_COLOURS[COLOUR_NAMES + 1] = {
   {"aliceblue", 0xf0, 0xf8, 0xff},
@@ -723,918 +1539,26 @@ const colour_info A68_COLOURS[COLOUR_NAMES + 1] = {
 
 //! @brief Searches colour in the list.
 
-BOOL_T string_to_colour (NODE_T * p, char *name, int *iindex)
+BOOL_T string_to_colour (NODE_T * p, char *name, int *pos)
 {
   A68_REF z_ref = heap_generator (p, M_C_STRING, (int) (1 + strlen (name)));
   char *z = DEREF (char, &z_ref);
-  int i, j;
-  BOOL_T k;
 // First remove formatting from name: spaces and capitals are irrelevant.
-  j = 0;
-  for (i = 0; name[i] != NULL_CHAR; i++) {
+  int j = 0;
+  for (int i = 0; name[i] != NULL_CHAR; i++) {
     if (name[i] != BLANK_CHAR) {
       z[j++] = (char) TO_LOWER (name[i]);
     }
-    z[j] = 0;
+    z[j] = NULL_CHAR;
   }
 // Now search with the famous British Library Method.
-  k = A68_FALSE;
-  for (i = 0; i < COLOUR_NAMES && !k; i++) {
+  for (int i = 0; i < COLOUR_NAMES; i++) {
     if (!strcmp (NAME (&A68_COLOURS[i]), z)) {
-      k = A68_TRUE;
-      *iindex = i;
+      *pos = i;
+      return A68_TRUE;
     }
   }
-  return k;
-}
-
-//! @brief Scans string for an integer.
-
-BOOL_T scan_int (char **z, int *k)
-{
-  char *y = *z;
-  while (y[0] != NULL_CHAR && !IS_DIGIT (y[0])) {
-    y++;
-  }
-  if (y[0] != NULL_CHAR) {
-    (*k) = strtol (y, z, 10);
-    return (BOOL_T) (errno == 0);
-  } else {
-    return A68_FALSE;
-  }
-}
-
-//! @brief PROC (REF FILE, STRING, STRING) make device
-
-void genie_make_device (NODE_T * p)
-{
-  int size;
-  A68_REF ref_device, ref_page, ref_file;
-  A68_FILE *file;
-// Pop arguments.
-  POP_REF (p, &ref_page);
-  POP_REF (p, &ref_device);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
-  if (DEVICE_MADE (&DEVICE (file))) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_ALREADY_SET);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-// Fill in page_size.
-  size = a68_string_size (p, ref_page);
-  if (INITIALISED (&(A68_PAGE_SIZE (&DEVICE (file)))) && !IS_NIL (A68_PAGE_SIZE (&DEVICE (file)))) {
-    UNBLOCK_GC_HANDLE (&A68_PAGE_SIZE (&DEVICE (file)));
-  }
-  A68_PAGE_SIZE (&DEVICE (file)) = heap_generator (p, M_STRING, 1 + size);
-  BLOCK_GC_HANDLE (&A68_PAGE_SIZE (&DEVICE (file)));
-  ASSERT (a_to_c_string (p, DEREF (char, &A68_PAGE_SIZE (&DEVICE (file))), ref_page) != NO_TEXT);
-// Fill in device.
-  size = a68_string_size (p, ref_device);
-  if (INITIALISED (&(DEVICE (&DEVICE (file)))) && !IS_NIL (DEVICE (&DEVICE (file)))) {
-    UNBLOCK_GC_HANDLE (&DEVICE (&DEVICE (file)));
-  }
-  DEVICE (&DEVICE (file)) = heap_generator (p, M_STRING, 1 + size);
-  BLOCK_GC_HANDLE (&DEVICE (&DEVICE (file)));
-  ASSERT (a_to_c_string (p, DEREF (char, &DEVICE (&DEVICE (file))), ref_device) != NO_TEXT);
-  DEVICE_MADE (&DEVICE (file)) = A68_TRUE;
-  PUSH_VALUE (p, A68_TRUE, A68_BOOL);
-}
-
-//! @brief Closes the plotter.
-
-BOOL_T close_device (NODE_T * p, A68_FILE * f)
-{
-  CHECK_INIT (p, INITIALISED (f), M_FILE);
-  if (!OPENED (f)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (!(DEVICE_OPENED (&DEVICE (f)))) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_NOT_OPEN);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (DEVICE_MADE (&DEVICE (f))) {
-    if (!IS_NIL (DEVICE (&DEVICE (f)))) {
-      UNBLOCK_GC_HANDLE (&(DEVICE (&DEVICE (f))));
-    }
-    if (!IS_NIL (A68_PAGE_SIZE (&DEVICE (f)))) {
-      UNBLOCK_GC_HANDLE (&(A68_PAGE_SIZE (&DEVICE (f))));
-    }
-  }
-  if (pl_closepl_r (PLOTTER (&DEVICE (f))) < 0) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CLOSING_DEVICE);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (pl_deletepl_r (PLOTTER (&DEVICE (f))) < 0) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CLOSING_DEVICE);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (STREAM (&DEVICE (f)) != NO_STREAM && fclose (STREAM (&DEVICE (f))) != 0) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CLOSING_FILE);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  DEVICE_OPENED (&DEVICE (f)) = A68_FALSE;
-  return A68_TRUE;
-}
-
-//! @brief Sets up the plotter prior to using it.
-
-plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
-{
-  A68_REF ref_filename;
-  char *filename, *device_type;
-// First set up the general device, then plotter-specific things.
-  CHECK_INIT (p, INITIALISED (f), M_FILE);
-  ref_filename = IDENTIFICATION (f);
-// This one in front as to quickly select the plotter.
-  if (DEVICE_OPENED (&DEVICE (f))) {
-    if (DEVICE_HANDLE (&DEVICE (f)) < 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    return PLOTTER (&DEVICE (f));
-  }
-// Device not set up yet.
-  if (!OPENED (f)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_NOT_OPEN);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (READ_MOOD (f)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "read");
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (WRITE_MOOD (f)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "write");
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (!DRAW (&CHANNEL (f))) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_CHANNEL_DOES_NOT_ALLOW, "drawing");
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (!DEVICE_MADE (&DEVICE (f))) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_NOT_SET);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  device_type = DEREF (char, &DEVICE (&DEVICE (f)));
-  if (!strcmp (device_type, "X")) {
-#if defined (X_DISPLAY_MISSING)
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "X plotter missing", "");
-    exit_genie (p, A68_RUNTIME_ERROR);
-#else
-//
-// Supported plotter type - X Window System
-//
-    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
-// Establish page size.
-    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (z[0] != NULL_CHAR) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-// Make the X window.
-    FD (f) = -1;
-    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
-    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "VANISH_ON_DELETE", (void *) "no");
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "X_AUTO_FLUSH", (void *) "yes");
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "USE_DOUBLE_BUFFERING", (void *) "no");
-    PLOTTER (&DEVICE (f)) = pl_newpl_r ("X", NULL, NULL, stderr, PLOTTER_PARAMS (&DEVICE (f)));
-    if (PLOTTER (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
-    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
-    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
-    DRAW_MOOD (f) = A68_TRUE;
-    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
-    X_COORD (&DEVICE (f)) = 0;
-    Y_COORD (&DEVICE (f)) = 0;
-    return PLOTTER (&DEVICE (f));
-#endif
-  } else if (!strcmp (device_type, "gif")) {
-//
-// Supported plotter type - pseudo GIF
-//
-    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
-// Establish page size.
-    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (z[0] != NULL_CHAR) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-// Open the output file for drawing.
-    CHECK_REF (p, ref_filename, M_ROWS);
-    filename = DEREF (char, &ref_filename);
-    errno = 0;
-    if ((STREAM (&DEVICE (f)) = fopen (filename, "wb")) == NO_STREAM) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    } else {
-      READ_MOOD (f) = A68_FALSE;
-      WRITE_MOOD (f) = A68_FALSE;
-      CHAR_MOOD (f) = A68_FALSE;
-      DRAW_MOOD (f) = A68_TRUE;
-    }
-// Set up plotter.
-    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
-    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "GIF_ANIMATION", (void *) "no");
-    PLOTTER (&DEVICE (f)) = pl_newpl_r ("gif", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
-    if (PLOTTER (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
-    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
-    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
-    DRAW_MOOD (f) = A68_TRUE;
-    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
-    X_COORD (&DEVICE (f)) = 0;
-    Y_COORD (&DEVICE (f)) = 0;
-    return PLOTTER (&DEVICE (f));
-  } else if (!strcmp (device_type, "pnm")) {
-//
-// Supported plotter type - Portable aNyMap
-//
-    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
-// Establish page size.
-    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (z[0] != NULL_CHAR) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-// Open the output file for drawing.
-    CHECK_REF (p, ref_filename, M_ROWS);
-    filename = DEREF (char, &ref_filename);
-    errno = 0;
-    if ((STREAM (&DEVICE (f)) = fopen (filename, "wb")) == NO_STREAM) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    } else {
-      READ_MOOD (f) = A68_FALSE;
-      WRITE_MOOD (f) = A68_FALSE;
-      CHAR_MOOD (f) = A68_FALSE;
-      DRAW_MOOD (f) = A68_TRUE;
-    }
-// Set up plotter.
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
-    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
-    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "PNM_PORTABLE", (void *) "no");
-    PLOTTER (&DEVICE (f)) = pl_newpl_r ("pnm", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
-    if (PLOTTER (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
-    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
-    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
-    DRAW_MOOD (f) = A68_TRUE;
-    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
-    X_COORD (&DEVICE (f)) = 0;
-    Y_COORD (&DEVICE (f)) = 0;
-    return PLOTTER (&DEVICE (f));
-  } else if (!strcmp (device_type, "png")) {
-#if defined (X_DISPLAY_MISSING)
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "PNG plotter missing", "");
-    exit_genie (p, A68_RUNTIME_ERROR);
-#else
-//
-// Supported plotter type - PNG
-//
-    char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
-// Establish page size.
-    if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (!scan_int (&z, &(WINDOW_Y_SIZE (&DEVICE (f))))) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (z[0] != NULL_CHAR) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-// Open the output file for drawing.
-    CHECK_REF (p, ref_filename, M_ROWS);
-    filename = DEREF (char, &ref_filename);
-    errno = 0;
-    if ((STREAM (&DEVICE (f)) = fopen (filename, "wb")) == NO_STREAM) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    } else {
-      READ_MOOD (f) = A68_FALSE;
-      WRITE_MOOD (f) = A68_FALSE;
-      CHAR_MOOD (f) = A68_FALSE;
-      DRAW_MOOD (f) = A68_TRUE;
-    }
-// Set up plotter.
-    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
-    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    ASSERT (snprintf (size, SNPRINTF_SIZE, "%dx%d", WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))) >= 0);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BITMAPSIZE", size);
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "BG_COLOR", (void *) "black");
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "GIF_ANIMATION", (void *) "no");
-    PLOTTER (&DEVICE (f)) = pl_newpl_r ("png", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
-    if (PLOTTER (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
-    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
-    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
-    DRAW_MOOD (f) = A68_TRUE;
-    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
-    X_COORD (&DEVICE (f)) = 0;
-    Y_COORD (&DEVICE (f)) = 0;
-    return PLOTTER (&DEVICE (f));
-#endif
-  } else if (!strcmp (device_type, "ps")) {
-#if defined (POSTSCRIPT_MISSING)
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "postscript plotter missing", "");
-    exit_genie (p, A68_RUNTIME_ERROR);
-#else
-//
-// Supported plotter type - Postscript
-//
-// Open the output file for drawing.
-    CHECK_REF (p, ref_filename, M_ROWS);
-    filename = DEREF (char, &ref_filename);
-    errno = 0;
-    if ((STREAM (&DEVICE (f)) = fopen (filename, "w")) == NO_STREAM) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_OPEN_NAME, filename);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    } else {
-      READ_MOOD (f) = A68_FALSE;
-      WRITE_MOOD (f) = A68_FALSE;
-      CHAR_MOOD (f) = A68_FALSE;
-      DRAW_MOOD (f) = A68_TRUE;
-    }
-// Set up ps plotter.
-    PLOTTER_PARAMS (&DEVICE (f)) = pl_newplparams ();
-    if (PLOTTER_PARAMS (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_ALLOCATE);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    (void) pl_setplparam (PLOTTER_PARAMS (&DEVICE (f)), "PAGESIZE", DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))));
-    PLOTTER (&DEVICE (f)) = pl_newpl_r ("ps", NULL, STREAM (&DEVICE (f)), stderr, PLOTTER_PARAMS (&DEVICE (f)));
-    if (PLOTTER (&DEVICE (f)) == NULL) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    if (pl_openpl_r (PLOTTER (&DEVICE (f))) < 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_DEVICE_CANNOT_OPEN);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
-    WINDOW_X_SIZE (&DEVICE (f)) = 1000;
-    WINDOW_Y_SIZE (&DEVICE (f)) = 1000;
-    (void) pl_space_r (PLOTTER (&DEVICE (f)), 0, 0, WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f)));
-    (void) pl_bgcolorname_r (PLOTTER (&DEVICE (f)), "black");
-    (void) pl_colorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_pencolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_fillcolorname_r (PLOTTER (&DEVICE (f)), "white");
-    (void) pl_filltype_r (PLOTTER (&DEVICE (f)), 0);
-    DRAW_MOOD (f) = A68_TRUE;
-    DEVICE_OPENED (&DEVICE (f)) = A68_TRUE;
-    X_COORD (&DEVICE (f)) = 0;
-    Y_COORD (&DEVICE (f)) = 0;
-    return PLOTTER (&DEVICE (f));
-#endif
-  } else {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unindentified plotter", device_type);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  return NULL;
-}
-
-//! @brief PROC (REF FILE) VOID draw erase
-
-void genie_draw_clear (NODE_T * p)
-{
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_flushpl_r (plotter);
-  (void) pl_erase_r (plotter);
-}
-
-//! @brief PROC (REF FILE) VOID draw show
-
-void genie_draw_show (NODE_T * p)
-{
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_flushpl_r (plotter);
-}
-
-//! @brief PROC (REF FILE) REAL draw aspect
-
-void genie_draw_aspect (NODE_T * p)
-{
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  PUSH_VALUE (p, (REAL_T) WINDOW_Y_SIZE (&DEVICE (f)) / (REAL_T) WINDOW_X_SIZE (&DEVICE (f)), A68_REAL);
-  (void) plotter;
-}
-
-//! @brief PROC (REF FILE, INT) VOID draw fillstyle
-
-void genie_draw_fillstyle (NODE_T * p)
-{
-  A68_INT z;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &z, A68_INT);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_filltype_r (plotter, (int) VALUE (&z));
-}
-
-//! @brief PROC (INT) STRING draw get colour name
-
-void genie_draw_get_colour_name (NODE_T * p)
-{
-  A68_INT z;
-  int j;
-  char *str;
-  POP_OBJECT (p, &z, A68_INT);
-  j = (VALUE (&z) - 1) % COLOUR_NAMES;
-  str = NAME (&A68_COLOURS[j]);
-  PUSH_REF (p, c_to_a_string (p, str, DEFAULT_WIDTH));
-}
-
-//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw colour
-
-void genie_draw_colour (NODE_T * p)
-{
-  A68_REAL x, y, z;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &z, A68_REAL);
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  RED (&DEVICE (f)) = VALUE (&x);
-  GREEN (&DEVICE (f)) = VALUE (&y);
-  BLUE (&DEVICE (f)) = VALUE (&z);
-  (void) pl_color_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
-  (void) pl_pencolor_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
-  (void) pl_fillcolor_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
-}
-
-//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw background colour
-
-void genie_draw_background_colour (NODE_T * p)
-{
-  A68_REAL x, y, z;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &z, A68_REAL);
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_bgcolor_r (plotter, (int) (VALUE (&x) * COLOUR_MAX), (int) (VALUE (&y) * COLOUR_MAX), (int) (VALUE (&z) * COLOUR_MAX));
-}
-
-//! @brief PROC (REF FILE, STRING) VOID draw colour name
-
-void genie_draw_colour_name (NODE_T * p)
-{
-  A68_REF ref_c, ref_file;
-  A68_FILE *f;
-  A68_REF name_ref;
-  char *name;
-  int iindex;
-  REAL_T x, y, z;
-  plPlotter *plotter;
-  POP_REF (p, &ref_c);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  name_ref = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, ref_c));
-  name = DEREF (char, &name_ref);
-  ASSERT (a_to_c_string (p, name, ref_c) != NO_TEXT);
-  if (!string_to_colour (p, name, &iindex)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  x = (REAL_T) (RED (&A68_COLOURS[iindex])) / (REAL_T) (0xff);
-  y = (REAL_T) (GREEN (&A68_COLOURS[iindex])) / (REAL_T) (0xff);
-  z = (REAL_T) (BLUE (&A68_COLOURS[iindex])) / (REAL_T) (0xff);
-  plotter = set_up_device (p, f);
-  RED (&DEVICE (f)) = x;
-  GREEN (&DEVICE (f)) = y;
-  BLUE (&DEVICE (f)) = z;
-  (void) pl_color_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
-  (void) pl_pencolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
-  (void) pl_fillcolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
-}
-
-//! @brief PROC (REF FILE, STRING) VOID draw background colour name
-
-void genie_draw_background_colour_name (NODE_T * p)
-{
-  A68_REF ref_c, ref_file;
-  A68_FILE *f;
-  A68_REF name_ref;
-  char *name;
-  int iindex;
-  REAL_T x, y, z;
-  plPlotter *plotter;
-  POP_REF (p, &ref_c);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  name_ref = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, ref_c));
-  name = DEREF (char, &name_ref);
-  ASSERT (a_to_c_string (p, name, ref_c) != NO_TEXT);
-  if (!string_to_colour (p, name, &iindex)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "unidentified colour name", name);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  x = (REAL_T) (RED (&A68_COLOURS[iindex])) / (REAL_T) (0xff);
-  y = (REAL_T) (GREEN (&A68_COLOURS[iindex])) / (REAL_T) (0xff);
-  z = (REAL_T) (BLUE (&A68_COLOURS[iindex])) / (REAL_T) (0xff);
-  plotter = set_up_device (p, f);
-  RED (&DEVICE (f)) = x;
-  GREEN (&DEVICE (f)) = y;
-  BLUE (&DEVICE (f)) = z;
-  (void) pl_bgcolor_r (plotter, (int) (x * COLOUR_MAX), (int) (y * COLOUR_MAX), (int) (z * COLOUR_MAX));
-}
-
-//! @brief PROC (REF FILE, STRING) VOID draw linestyle
-
-void genie_draw_linestyle (NODE_T * p)
-{
-  A68_REF txt, ref_file;
-  A68_FILE *f;
-  int size;
-  A68_REF z_ref;
-  char *z;
-  plPlotter *plotter;
-  POP_REF (p, &txt);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  size = a68_string_size (p, txt);
-  z_ref = heap_generator (p, M_C_STRING, 1 + size);
-  z = DEREF (char, &z_ref);
-  ASSERT (a_to_c_string (p, z, txt) != NO_TEXT);
-  (void) pl_linemod_r (plotter, z);
-}
-
-//! @brief PROC (REF FILE, INT) VOID draw linewidth
-
-void genie_draw_linewidth (NODE_T * p)
-{
-  A68_REAL width;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &width, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_linewidth_r (plotter, (int) (VALUE (&width) * (REAL_T) WINDOW_Y_SIZE (&DEVICE (f))));
-}
-
-//! @brief PROC (REF FILE, REAL, REAL) VOID draw move
-
-void genie_draw_move (NODE_T * p)
-{
-  A68_REAL x, y;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_fmove_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, REAL, REAL) VOID draw line
-
-void genie_draw_line (NODE_T * p)
-{
-  A68_REAL x, y;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_fline_r (plotter, X_COORD (&DEVICE (f)) * WINDOW_X_SIZE (&DEVICE (f)), Y_COORD (&DEVICE (f)) * WINDOW_Y_SIZE (&DEVICE (f)), VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, REAL, REAL) VOID draw point
-
-void genie_draw_point (NODE_T * p)
-{
-  A68_REAL x, y;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_fpoint_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, REAL, REAL) VOID draw rect
-
-void genie_draw_rect (NODE_T * p)
-{
-  A68_REAL x, y;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_fbox_r (plotter, X_COORD (&DEVICE (f)) * WINDOW_X_SIZE (&DEVICE (f)), Y_COORD (&DEVICE (f)) * WINDOW_Y_SIZE (&DEVICE (f)), VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)));
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw circle
-
-void genie_draw_circle (NODE_T * p)
-{
-  A68_REAL x, y, r;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &r, A68_REAL);
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_fcircle_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)), VALUE (&r) * MAX (WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))));
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw atom
-
-void genie_draw_atom (NODE_T * p)
-{
-  A68_REAL x, y, r;
-  REAL_T frac;
-  int j, k;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &r, A68_REAL);
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  k = (int) (VALUE (&r) * MAX (WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))));
-  (void) pl_filltype_r (plotter, 1);
-  for (j = k - 1; j >= 0; j--) {
-    frac = (REAL_T) j / (REAL_T) (k - 1);
-    frac = 0.6 + 0.3 * sqrt (1.0 - frac * frac);
-    (void) pl_color_r (plotter, (int) (frac * RED (&DEVICE (f)) * COLOUR_MAX), (int) (frac * GREEN (&DEVICE (f)) * COLOUR_MAX), (int) (frac * BLUE (&DEVICE (f)) * COLOUR_MAX));
-    (void) pl_fcircle_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)), (REAL_T) j);
-  }
-  (void) pl_filltype_r (plotter, 0);
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, REAL, REAL, REAL) VOID draw atom
-
-void genie_draw_star (NODE_T * p)
-{
-  A68_REAL x, y, r;
-  REAL_T z, frac;
-  int j, k;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &r, A68_REAL);
-  POP_OBJECT (p, &y, A68_REAL);
-  POP_OBJECT (p, &x, A68_REAL);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  k = (int) (VALUE (&r) * MAX (WINDOW_X_SIZE (&DEVICE (f)), WINDOW_Y_SIZE (&DEVICE (f))));
-  for (j = k; j >= 0; j--) {
-    z = (REAL_T) j / (REAL_T) k;
-    if (z < 0.2) {
-      z = z / 0.2;
-      frac = 0.5 * (1 + (cos (CONST_PI / 2 * z)));
-    } else {
-      z = (z - 0.2) / 0.8;
-      frac = (1 - z) * 0.3;
-    }
-    (void) pl_color_r (plotter, (int) (frac * RED (&DEVICE (f)) * COLOUR_MAX), (int) (frac * GREEN (&DEVICE (f)) * COLOUR_MAX), (int) (frac * BLUE (&DEVICE (f)) * COLOUR_MAX));
-    (void) pl_fcircle_r (plotter, VALUE (&x) * WINDOW_X_SIZE (&DEVICE (f)), VALUE (&y) * WINDOW_Y_SIZE (&DEVICE (f)), (REAL_T) j);
-  }
-  (void) pl_color_r (plotter, (int) (RED (&DEVICE (f)) * COLOUR_MAX), (int) (GREEN (&DEVICE (f)) * COLOUR_MAX), (int) (BLUE (&DEVICE (f)) * COLOUR_MAX));
-  X_COORD (&DEVICE (f)) = VALUE (&x);
-  Y_COORD (&DEVICE (f)) = VALUE (&y);
-}
-
-//! @brief PROC (REF FILE, CHAR, CHAR, STRING) VOID draw text
-
-void genie_draw_text (NODE_T * p)
-{
-  A68_CHAR just_v, just_h;
-  A68_REF txt, ref_file;
-  A68_FILE *f;
-  int size;
-  A68_REF z_ref;
-  char *z;
-  plPlotter *plotter;
-  POP_REF (p, &txt);
-  POP_OBJECT (p, &just_v, A68_CHAR);
-  POP_OBJECT (p, &just_h, A68_CHAR);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  size = a68_string_size (p, txt);
-  z_ref = heap_generator (p, M_C_STRING, 1 + size);
-  z = DEREF (char, &z_ref);
-  ASSERT (a_to_c_string (p, z, txt) != NO_TEXT);
-  size = pl_alabel_r (plotter, VALUE (&just_h), VALUE (&just_v), z);
-}
-
-//! @brief PROC (REF FILE, STRING) VOID draw fontname
-
-void genie_draw_fontname (NODE_T * p)
-{
-  A68_REF txt, ref_file;
-  A68_FILE *f;
-  int size;
-  A68_REF z_ref;
-  char *z;
-  plPlotter *plotter;
-  POP_REF (p, &txt);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  size = a68_string_size (p, txt);
-  z_ref = heap_generator (p, M_C_STRING, 1 + size);
-  z = DEREF (char, &z_ref);
-  ASSERT (a_to_c_string (p, z, txt) != NO_TEXT);
-  (void) pl_fontname_r (plotter, z);
-}
-
-//! @brief PROC (REF FILE, INT) VOID draw fontsize
-
-void genie_draw_fontsize (NODE_T * p)
-{
-  A68_INT size;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &size, A68_INT);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_fontsize_r (plotter, (int) VALUE (&size));
-}
-
-//! @brief PROC (REF FILE, INT) VOID draw textangle
-
-void genie_draw_textangle (NODE_T * p)
-{
-  A68_INT angle;
-  A68_REF ref_file;
-  A68_FILE *f;
-  plPlotter *plotter;
-  POP_OBJECT (p, &angle, A68_INT);
-  POP_REF (p, &ref_file);
-  CHECK_REF (p, ref_file, M_REF_FILE);
-  f = FILE_DEREF (&ref_file);
-  plotter = set_up_device (p, f);
-  (void) pl_textangle_r (plotter, (int) VALUE (&angle));
+  return A68_FALSE;
 }
 
 #endif

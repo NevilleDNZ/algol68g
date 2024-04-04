@@ -51,8 +51,7 @@
 
 void genie_pq_connectdb (NODE_T * p)
 {
-  A68_REF ref_string, ref_file, ref_z, conninfo;
-  A68_FILE *file;
+  A68_REF ref_string, ref_file, conninfo;
   POP_REF (p, &ref_string);
   CHECK_REF (p, ref_string, M_REF_STRING);
   POP_REF (p, &conninfo);
@@ -68,7 +67,7 @@ void genie_pq_connectdb (NODE_T * p)
     }
   }
 // Initialise the file.
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   if (OPENED (file)) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_ALREADY_OPEN);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -98,7 +97,7 @@ void genie_pq_connectdb (NODE_T * p)
   STREAM (&DEVICE (file)) = NULL;
   set_default_event_procedures (file);
 // Establish a connection.
-  ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, conninfo));
+  A68_REF ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, conninfo));
   CONNECTION (file) = PQconnectdb (a_to_c_string (p, DEREF (char, &ref_z), conninfo));
   RESULT (file) = NO_PGRESULT;
   if (CONNECTION (file) == NO_PGCONN) {
@@ -117,10 +116,9 @@ void genie_pq_connectdb (NODE_T * p)
 void genie_pq_finish (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -162,11 +160,10 @@ void genie_pq_exec (NODE_T * p)
 {
   A68_REF ref_z, query;
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &query);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -191,11 +188,10 @@ void genie_pq_parameterstatus (NODE_T * p)
 {
   A68_REF ref_z, parameter;
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &parameter);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -215,10 +211,9 @@ void genie_pq_parameterstatus (NODE_T * p)
 void genie_pq_cmdstatus (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -242,10 +237,9 @@ void genie_pq_cmdstatus (NODE_T * p)
 void genie_pq_cmdtuples (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -269,10 +263,9 @@ void genie_pq_cmdtuples (NODE_T * p)
 void genie_pq_ntuples (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -290,10 +283,9 @@ void genie_pq_ntuples (NODE_T * p)
 void genie_pq_nfields (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -310,15 +302,12 @@ void genie_pq_nfields (NODE_T * p)
 
 void genie_pq_fname (NODE_T * p)
 {
-  A68_INT a68_index;
-  int upb;
-  A68_REF ref_file;
-  A68_FILE *file;
+  A68_INT a68_index; A68_REF ref_file;
   POP_OBJECT (p, &a68_index, A68_INT);
   CHECK_INIT (p, INITIALISED (&a68_index), M_INT);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -328,7 +317,7 @@ void genie_pq_fname (NODE_T * p)
     PUSH_PRIMAL (p, -2, INT);
     return;
   }
-  upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
+  int upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
   if (VALUE (&a68_index) < 1 || VALUE (&a68_index) > upb) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -344,14 +333,11 @@ void genie_pq_fname (NODE_T * p)
 
 void genie_pq_fnumber (NODE_T * p)
 {
-  A68_REF ref_z, name;
-  A68_REF ref_file;
-  A68_FILE *file;
-  int k;
+  A68_REF name, ref_file;
   POP_REF (p, &name);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -361,8 +347,8 @@ void genie_pq_fnumber (NODE_T * p)
     PUSH_PRIMAL (p, -2, INT);
     return;
   }
-  ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, name));
-  k = PQfnumber (RESULT (file), a_to_c_string (p, DEREF (char, &ref_z), name));
+  A68_REF ref_z = heap_generator (p, M_C_STRING, 1 + a68_string_size (p, name));
+  int k = PQfnumber (RESULT (file), a_to_c_string (p, DEREF (char, &ref_z), name));
   if (k == -1) {
     PUSH_PRIMAL (p, -3, INT);
   } else {
@@ -374,15 +360,12 @@ void genie_pq_fnumber (NODE_T * p)
 
 void genie_pq_fformat (NODE_T * p)
 {
-  A68_INT a68_index;
-  int upb;
-  A68_REF ref_file;
-  A68_FILE *file;
+  A68_INT a68_index; A68_REF ref_file;
   POP_OBJECT (p, &a68_index, A68_INT);
   CHECK_INIT (p, INITIALISED (&a68_index), M_INT);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -392,7 +375,7 @@ void genie_pq_fformat (NODE_T * p)
     PUSH_PRIMAL (p, -2, INT);
     return;
   }
-  upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
+  int upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
   if (VALUE (&a68_index) < 1 || VALUE (&a68_index) > upb) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -404,18 +387,14 @@ void genie_pq_fformat (NODE_T * p)
 
 void genie_pq_getvalue (NODE_T * p)
 {
-  A68_INT row, column;
-  char *str;
-  int upb;
-  A68_REF ref_file;
-  A68_FILE *file;
+  A68_INT row, column; A68_REF ref_file;
   POP_OBJECT (p, &column, A68_INT);
   CHECK_INIT (p, INITIALISED (&column), M_INT);
   POP_OBJECT (p, &row, A68_INT);
   CHECK_INIT (p, INITIALISED (&row), M_INT);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -425,7 +404,7 @@ void genie_pq_getvalue (NODE_T * p)
     PUSH_PRIMAL (p, -2, INT);
     return;
   }
-  upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
+  int upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
   if (VALUE (&column) < 1 || VALUE (&column) > upb) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -435,7 +414,7 @@ void genie_pq_getvalue (NODE_T * p)
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  str = PQgetvalue (RESULT (file), VALUE (&row) - 1, VALUE (&column) - 1);
+  char *str = PQgetvalue (RESULT (file), VALUE (&row) - 1, VALUE (&column) - 1);
   if (str == NULL) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_NO_QUERY_RESULT);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -453,17 +432,14 @@ void genie_pq_getvalue (NODE_T * p)
 
 void genie_pq_getisnull (NODE_T * p)
 {
-  A68_INT row, column;
-  int upb;
-  A68_REF ref_file;
-  A68_FILE *file;
+  A68_INT row, column; A68_REF ref_file;
   POP_OBJECT (p, &column, A68_INT);
   CHECK_INIT (p, INITIALISED (&column), M_INT);
   POP_OBJECT (p, &row, A68_INT);
   CHECK_INIT (p, INITIALISED (&row), M_INT);
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -473,7 +449,7 @@ void genie_pq_getisnull (NODE_T * p)
     PUSH_PRIMAL (p, -2, INT);
     return;
   }
-  upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
+  int upb = (PQresultStatus (RESULT (file)) == PGRES_TUPLES_OK ? PQnfields (RESULT (file)) : 0);
   if (VALUE (&column) < 1 || VALUE (&column) > upb) {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
     exit_genie (p, A68_RUNTIME_ERROR);
@@ -494,10 +470,9 @@ char *pq_edit (char *str)
     return "";
   } else {
     static BUFFER edt;
-    char *q;
+    char *q = edt;
     int newlines = 0, len = (int) strlen (str);
     BOOL_T suppress_blank = A68_FALSE;
-    q = edt;
     while (len > 0 && str[len - 1] == NEWLINE_CHAR) {
       str[len - 1] = NULL_CHAR;
       len = (int) strlen (str);
@@ -543,10 +518,9 @@ char *pq_edit (char *str)
 void genie_pq_errormessage (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -554,10 +528,9 @@ void genie_pq_errormessage (NODE_T * p)
   }
   if (!IS_NIL (STRING (file))) {
     BUFFER str;
-    int upb;
     if (PQerrorMessage (CONNECTION (file)) != NULL) {
       bufcpy (str, pq_edit (PQerrorMessage (CONNECTION (file))), BUFFER_SIZE);
-      upb = (int) strlen (str);
+      int upb = (int) strlen (str);
       if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
         str[upb - 1] = NULL_CHAR;
       }
@@ -577,10 +550,9 @@ void genie_pq_errormessage (NODE_T * p)
 void genie_pq_resulterrormessage (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -592,10 +564,9 @@ void genie_pq_resulterrormessage (NODE_T * p)
   }
   if (!IS_NIL (STRING (file))) {
     BUFFER str;
-    int upb;
     if (PQresultErrorMessage (RESULT (file)) != NULL) {
       bufcpy (str, pq_edit (PQresultErrorMessage (RESULT (file))), BUFFER_SIZE);
-      upb = (int) strlen (str);
+      int upb = (int) strlen (str);
       if (upb > 0 && str[upb - 1] == NEWLINE_CHAR) {
         str[upb - 1] = NULL_CHAR;
       }
@@ -615,10 +586,9 @@ void genie_pq_resulterrormessage (NODE_T * p)
 void genie_pq_db (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -638,10 +608,9 @@ void genie_pq_db (NODE_T * p)
 void genie_pq_user (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -661,10 +630,9 @@ void genie_pq_user (NODE_T * p)
 void genie_pq_pass (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -684,10 +652,9 @@ void genie_pq_pass (NODE_T * p)
 void genie_pq_host (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -707,10 +674,9 @@ void genie_pq_host (NODE_T * p)
 void genie_pq_port (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -730,10 +696,9 @@ void genie_pq_port (NODE_T * p)
 void genie_pq_tty (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -753,10 +718,9 @@ void genie_pq_tty (NODE_T * p)
 void genie_pq_options (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -776,10 +740,9 @@ void genie_pq_options (NODE_T * p)
 void genie_pq_protocolversion (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -797,10 +760,9 @@ void genie_pq_protocolversion (NODE_T * p)
 void genie_pq_serverversion (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -818,10 +780,9 @@ void genie_pq_serverversion (NODE_T * p)
 void genie_pq_socket (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);
@@ -839,10 +800,9 @@ void genie_pq_socket (NODE_T * p)
 void genie_pq_backendpid (NODE_T * p)
 {
   A68_REF ref_file;
-  A68_FILE *file;
   POP_REF (p, &ref_file);
   CHECK_REF (p, ref_file, M_REF_FILE);
-  file = FILE_DEREF (&ref_file);
+  A68_FILE *file = FILE_DEREF (&ref_file);
   CHECK_INIT (p, INITIALISED (file), M_FILE);
   if (CONNECTION (file) == NO_PGCONN) {
     PUSH_PRIMAL (p, -1, INT);

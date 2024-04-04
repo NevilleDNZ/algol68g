@@ -56,7 +56,7 @@ union UFU
 #define NEEDS_DNS(m) (m != NO_MOID && (IS (m, REF_SYMBOL) || IS (m, PROC_SYMBOL) || IS (m, UNION_SYMBOL) || IS (m, FORMAT_SYMBOL)))
 
 #define CODE_EXECUTE(p) {\
-  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "EXECUTE_UNIT_TRACE (_NODE_ (%d));", NUMBER (p)));\
+  indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "GENIE_UNIT_TRACE (_NODE_ (%d));", NUMBER (p)));\
   }
 
 #define NAME_SIZE 200

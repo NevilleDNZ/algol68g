@@ -41,11 +41,11 @@ void init_postulates (void)
 
 void free_postulate_list (POSTULATE_T * start, POSTULATE_T * stop)
 {
-  POSTULATE_T *last;
   if (start == stop) {
     return;
   }
-  for (last = start; NEXT (last) != stop; FORWARD (last)) {
+  POSTULATE_T *last = start;
+  for (; NEXT (last) != stop; FORWARD (last)) {
     ;
   }
   NEXT (last) = A68 (top_postulate_list);

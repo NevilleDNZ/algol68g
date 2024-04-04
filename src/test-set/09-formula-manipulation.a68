@@ -1,0 +1,291 @@
+COMMENT
+
+This program is part of the Algol 68 Genie test set.
+
+A small selection of the Algol 68 Genie regression test set is distributed 
+with Algol 68 Genie. The purpose of those programs is to perform some checks 
+to judge whether A68G behaves as expected.
+None of these programs should end ungraciously with for instance an 
+addressing fault.
+
+COMMENT
+
+PR quiet regression PR
+
+COMMENT
+
+@section Synopsis
+
+Symbolic computing in Algol 68.
+
+Based on example 11.10 in the Revised Report on Algol 68.
+
+COMMENT
+
+PR quiet PR
+
+# Data structure #
+
+MODE FORM =  UNION (REF CONST, REF VAR, REF DYAD, REF MONAD),
+     DYAD =  STRUCT (FORM lhs, INT op, FORM rhs),
+     MONAD = STRUCT (INT op, FORM rhs),
+     VAR =   STRUCT (STRING name, REF CONST value),
+     CONST = STRUCT (NUM value),
+     NUM =   LONG LONG REAL;
+
+# Access ops #
+
+OP VALUE = (REF CONST c) REF NUM: value OF c,
+   VALUE = (REF VAR v) REF CONST: value OF v,
+   NAME =  (REF VAR v) REF STRING: name OF v,
+   LHS =   (REF DYAD t) REF FORM: lhs OF t,
+   RHS =   (REF DYAD t) REF FORM: rhs OF t,
+   RHS =   (REF MONAD t) REF FORM: rhs OF t,
+   OPER =  (REF DYAD t) REF INT: op OF t,
+   OPER =  (REF MONAD t) REF INT: op OF t,
+   NUMER = (FORM f) NUM: CASE f
+                         IN (REF CONST c): (c :/=: NIL | VALUE (c))
+                         ESAC;
+
+# Generate objects #
+
+PROC new num =   (NUM v) REF NUM: HEAP NUM := v;
+PROC new dyad =  (FORM u, INT op, FORM v) REF DYAD:  NEW DYAD := (u, op, v);
+PROC new monad = (INT op, FORM v) REF MONAD: NEW MONAD := (op, v); 
+PROC new var =   (STRING name, REF CONST value) REF VAR: NEW VAR := (name, value);
+PROC new const = (NUM x) REF CONST: (NEW CONST c; VALUE c := x; c); 
+
+PROC zero =  REF CONST: new const (0), 
+     one =   REF CONST: new const (1),
+     two =   REF CONST: new const (2);
+
+PROC half = FORM: one / two;
+
+# Basic routines and ops #
+
+INT plus = 1, minus = 2, times = 3, over = 4, up = 5;
+
+PROC const = (FORM f) BOOL:
+     CASE f
+     IN (REF CONST u): u :/=: NIL
+     OUT FALSE
+     ESAC;
+
+OP DUP = (FORM f) FORM:
+   CASE f
+   IN (REF CONST u): new const (VALUE u),
+      (REF VAR u):   new var (NAME u, VALUE u),
+      (REF DYAD u):  new dyad (DUP LHS u, OPER u, DUP RHS u),
+      (REF MONAD u): new monad (OPER u, DUP RHS u)
+   ESAC;
+
+OP = = (FORM f, g) BOOL:
+   CASE f
+   IN (REF CONST u): CASE g
+                     IN (REF CONST v): IF (u :=: NIL) OR (v :=: NIL)
+                                       THEN FALSE
+                                       ELSE VALUE u = VALUE v
+                                       FI 
+                     OUT FALSE 
+                     ESAC, 
+      (REF VAR u):   (g | (REF VAR v): NAME u = NAME v | FALSE), 
+      (REF DYAD u):  (g | (REF DYAD v): OPER u = OPER v AND LHS u = LHS v AND RHS u = RHS v | FALSE),
+      (REF MONAD u): (g | (REF MONAD v): OPER u = OPER v AND RHS u = RHS v | FALSE)
+   OUT FALSE
+   ESAC;
+
+OP /= = (FORM f, g) BOOL: NOT (f = g);
+
+# Pretty print NUM. #
+
+OP PRETTY = (NUM z) STRING:
+   IF ABS (z - ROUND z) < 10 * long long small real
+   THEN whole (z, 0)
+   ELIF ABS (z) >= 0.1 THEF ABS (z) <= 10
+   THEN STRING buf; 
+        FOR digits TO real width
+        WHILE puts (buf, fixed (z, 0, digits));
+              NUM y;
+              gets (buf, y);
+              z /= y
+        DO ~ OD;
+        buf
+   ELSE STRING buf, INT expw = 4; 
+        FOR digits TO real width
+        WHILE puts (buf, float (z, 4 + digits + expw, digits, expw));
+              NUM y;
+              gets (buf, y);
+              z /= y
+        DO ~ OD;
+        buf
+   FI;
+
+# Basic math. Indulge yourself adding more heuristics. #
+
+OP + = (FORM f) FORM: SIMPL f;
+
+OP - = (FORM f) FORM: 
+   (FORM s = SIMPL f; s = zero | s | new monad (minus, s));
+
+OP + = (FORM f, g) FORM: 
+   IF FORM s = SIMPL f, t = SIMPL g;
+      s = zero
+   THEN t
+   ELIF t = zero
+   THEN s
+   ELIF s = t
+   THEN new const (2) * s
+   ELIF const (s) THEF const (t)
+   THEN new const (NUMER (s) + NUMER (t))
+   ELSE new dyad (s, plus, t)
+   FI;
+
+OP - = (FORM f, g) FORM: 
+   IF FORM s = SIMPL f, t = SIMPL g;
+      s = zero
+   THEN new monad (minus, t)
+   ELIF t = zero
+   THEN s
+   ELIF s = t
+   THEN zero
+   ELIF const (s) THEF const (t)
+   THEN new const (NUMER (s) - NUMER (t))
+   ELSE new dyad (s, minus, t)
+   FI;
+
+OP * = (FORM f, g) FORM:
+   IF FORM s = SIMPL f, t = SIMPL g;
+      s = zero OR t = zero
+   THEN zero
+   ELIF s = one
+   THEN t
+   ELIF t = one
+   THEN s
+   ELIF const (s) THEF const (t)
+   THEN new const (NUMER (s) * NUMER (t))
+   ELSE new dyad (s, times, t)
+   FI;
+
+OP / = (FORM f, g) FORM:
+   IF FORM s = SIMPL f, t = SIMPL g;
+      t = zero
+   THEN REF CONST (NIL)
+   ELIF s = zero
+   THEN zero
+   ELIF t = one
+   THEN s
+   ELIF const (s) THEF const (t)
+   THEN new const (NUMER (s) / NUMER (t))
+   ELSE new dyad (s, over, t)
+   FI;
+
+OP ^ = (FORM f, g) FORM:
+   IF FORM s = SIMPL f, t = SIMPL g;
+      t = zero
+   THEN one
+   ELIF t = one
+   THEN s
+   ELIF const (s) THEF const (t)
+   THEN new const (NUMER (s) ** NUMER (t))
+   ELSE new dyad (s, up, t)
+   FI;
+
+OP SIMPL = (FORM f) FORM:
+   CASE f
+   IN (REF CONST u): u,
+      (REF VAR u): (VALUE u :=: NIL | u | VALUE u),
+      (REF MONAD u):
+         CASE OPER u
+         IN SIMPL RHS u,
+            -SIMPL RHS u
+         ESAC,
+      (REF DYAD u):
+         CASE OPER u
+         IN SIMPL LHS u + SIMPL RHS u,
+            SIMPL LHS u - SIMPL RHS u,
+            SIMPL LHS u * SIMPL RHS u,
+            SIMPL LHS u / SIMPL RHS u,
+            SIMPL LHS u ^ SIMPL RHS u
+         ESAC
+   OUT f
+   ESAC;
+
+OP EVAL = (FORM f) FORM:
+   # Simplify as much as rules allow #
+   BEGIN FORM u := DUP f, v;
+         DO v := DUP u;
+            u := SIMPL u
+            UNTIL u = v
+         OD;
+         u
+   END;
+
+# Applications of above definitions: derivative. #
+
+PROC deriv = (FORM f, # with respect to # REF VAR x) FORM:
+     CASE f
+     IN (REF CONST): zero,
+        (REF VAR v): (v = x | one | zero),
+        (REF MONAD u):
+           CASE FORM s = RHS u;
+                OPER u
+           IN + deriv (s, x),
+              - deriv (s, x)
+           ESAC,
+        (REF DYAD u):
+           CASE FORM s = LHS u, t = RHS u;
+                FORM deriv s = deriv (s, x), deriv t = deriv (t, x);
+                OPER u
+           IN deriv s + deriv t,
+              deriv s - deriv t,
+              s * deriv t + deriv s * t,
+              (deriv s - u * deriv t) / t,
+              # (t | (REF CONST c): t * s ^ new const (VALUE c - 1) * deriv s) #
+              t * s ^ (t - one) * deriv s
+           ESAC
+     ESAC;
+
+# A tiny demonstration #
+
+PROC write = (FORM f) VOID:
+     CASE f
+     IN (REF CONST c): print ((c :=: NIL | "(empty)" | PRETTY VALUE c)),
+        (REF VAR v): print (NAME v),
+        (REF MONAD u):  
+           BEGIN
+              print (("(", (OPER u | "+", "-")));
+              write (RHS u);
+              print (")")
+           END,
+        (REF DYAD u):
+           BEGIN
+              print ("(");
+              write (LHS u);
+              print ((OPER u | " + ", " - ", " * ", " / ", " ^ "));
+              write (RHS u);
+              print (")")
+           END
+     ESAC;
+
+PROC demo = (FORM f, REF VAR z) VOID:
+     BEGIN write (f);
+           print (" => ");
+           write (EVAL f);
+           IF z :/=: NIL
+           THEN print ("; d/d");
+                write (z);
+                print (" = ");
+                write (EVAL deriv (EVAL f, z))
+           FI;
+           newline (standout)
+     END;
+
+REF VAR pi var = new var ("pi", new const (qpi)), 
+        x = new var ("x", NIL), 
+        y = new var ("y", NIL);
+
+demo (zero - y, y);
+demo (x ^ half, x);
+demo (x ^ y, x);
+demo (pi var + pi var, NIL);
+demo (new const (2) ^ new const (3) + one, NIL)

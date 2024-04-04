@@ -142,17 +142,16 @@ char *a68_relpath (char *p1, char *p2, char *fn)
 void genie_realpath (NODE_T * p)
 {
   A68_REF str;
-  char in[PATH_MAX + 1];
-  char * out;
   POP_REF (p, &str);
+  char in[PATH_MAX + 1];
   if (a_to_c_string (p, in, str) == NO_TEXT) {
     PUSH_REF (p, empty_string (p));
   } else {
 // Note that ~ is not resolved since that is the shell, not libc.
 #if defined (BUILD_WIN32)
-    out = win32_realpath (in, NO_TEXT);
+    char *out = win32_realpath (in, NO_TEXT);
 #else
-    out = realpath (in, NO_TEXT);
+    char *out = realpath (in, NO_TEXT);
 #endif
     if (out == NO_TEXT) {
       PUSH_REF (p, empty_string (p));

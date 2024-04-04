@@ -23,6 +23,53 @@
 //!
 //! Algol 68 Genie main driver.
 
+// --assertions, --noassertions, switch elaboration of assertions on or off.
+// --backtrace, --nobacktrace, switch stack backtracing in case of a runtime error.
+// --boldstropping, set stropping mode to bold stropping.
+// --brackets, consider [ .. ] and { .. } as equivalent to ( .. ).
+// --check, --norun, check syntax only, interpreter does not start.
+// --clock, report execution time excluding compilation time.
+// --compile, compile source file.
+// --debug, --monitor, start execution in the debugger and debug in case of runtime error.
+// --echo string, echo 'string' to standard output.
+// --execute unit, execute algol 68 unit 'unit'.
+// --exit, --, ignore next options.
+// --extensive, make extensive listing.
+// --file string, accept string as generic filename.
+// --frame 'number', set frame stack size to 'number'.
+// --handles 'number', set handle space size to 'number'.
+// --heap 'number', set heap size to 'number'.
+// --keep, --nokeep, switch object file deletion off or on.
+// --listing, make concise listing.
+// --moids, make overview of moids in listing file.
+// -O0, -O1, -O2, -O3, switch compilation on and pass option to back-end C compiler.
+// --optimise, --nooptimise, switch compilation on or off.
+// --pedantic, equivalent to --warnings --portcheck.
+// --portcheck, --noportcheck, switch portability warnings on or off.
+// --pragmats, --nopragmats, switch elaboration of pragmat items on or off.
+// --precision 'number', set precision for long long modes to 'number' significant digits.
+// --preludelisting, make a listing of preludes.
+// --pretty-print, pretty-print the source file.
+// --print unit, print value yielded by algol 68 unit 'unit'.
+// --quiet, suppresses all warning diagnostics.
+// --quotestropping, set stropping mode to quote stropping.
+// --reductions, print parser reductions.
+// --run, override --check/--norun options.
+// --rerun, run using already compiled code.
+// --script, set next option as source file name; pass further options to algol 68 program.
+// --source, --nosource, switch listing of source lines in listing file on or off.
+// --stack 'number', set expression stack size to 'number'.
+// --statistics, print statistics in listing file.
+// --strict, disable most extensions to Algol 68 syntax.
+// --timelimit 'number', interrupt the interpreter after 'number' seconds.
+// --trace, --notrace, switch tracing of a running program on or off.
+// --tree, --notree, switch syntax tree listing in listing file on or off.
+// --unused, make an overview of unused tags in the listing file.
+// --verbose, inform on program actions.
+// --version, state version of the running copy.
+// --warnings, --nowarnings, switch warning diagnostics on or off.
+// --xref, --noxref, switch cross reference in the listing file on or off.
+
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-listing.h"
@@ -36,6 +83,10 @@
 
 #if defined (HAVE_MATHLIB)
 #include <Rmath.h>
+#endif
+
+#if defined (HAVE_CURL)
+#include <curl/curl.h>
 #endif
 
 GLOBALS_T common;
@@ -126,8 +177,13 @@ void state_version (FILE_T f)
   ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With PostgreSQL support\n") >= 0);
   WRITE (f, A68 (output_line));
 #endif
-#if defined (BUILD_HTTP)
-  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With TCP/IP support\n") >= 0);
+#if defined (BUILD_WWW)
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With WWW support\n") >= 0);
+  WRITE (f, A68 (output_line));
+#endif
+#if defined (HAVE_CURL)
+  curl_version_info_data *data = curl_version_info(CURLVERSION_NOW);
+  ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "With curl %s\n", data->version) >= 0);
   WRITE (f, A68 (output_line));
 #endif
 #if defined (HAVE_GNU_MPFR)

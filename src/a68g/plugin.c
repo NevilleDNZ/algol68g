@@ -71,22 +71,22 @@
 char *optimisation_option (void)
 {
   switch (OPTION_OPT_LEVEL (&A68_JOB)) {
-  case OPTIMISE_0:{
+  case OPTIMISE_0: {
       return "-Og";
     }
-  case OPTIMISE_1:{
+  case OPTIMISE_1: {
       return "-O1";
     }
-  case OPTIMISE_2:{
+  case OPTIMISE_2: {
       return "-O2";
     }
-  case OPTIMISE_3:{
+  case OPTIMISE_3: {
       return "-O3";
     }
-  case OPTIMISE_FAST:{
+  case OPTIMISE_FAST: {
       return "-Ofast";
     }
-  default:{
+  default: {
       return "-Og";
     }
   }
@@ -451,16 +451,14 @@ NODE_T *stems_from (NODE_T * p, int att)
 
 BOOL_T need_initialise_frame (NODE_T * p)
 {
-  TAG_T *tag;
-  int count;
-  for (tag = ANONYMOUS (TABLE (p)); tag != NO_TAG; FORWARD (tag)) {
+  for (TAG_T *tag = ANONYMOUS (TABLE (p)); tag != NO_TAG; FORWARD (tag)) {
     if (PRIO (tag) == ROUTINE_TEXT) {
       return A68_TRUE;
     } else if (PRIO (tag) == FORMAT_TEXT) {
       return A68_TRUE;
     }
   }
-  count = 0;
+  int count = 0;
   genie_find_proc_op (p, &count);
   if (count > 0) {
     return A68_TRUE;
@@ -475,8 +473,7 @@ void comment_tree (NODE_T * p, FILE_T out, int *want_space, int *max_print)
 {
 // Take care not to generate nested comments.
 #define UNDENT(out, p) {\
-  char * q;\
-  for (q = p; q[0] != NULL_CHAR; q ++) {\
+  for (char *q = p; q[0] != NULL_CHAR; q ++) {\
     if (q[0] == '*' && q[1] == '/') {\
       undent (out, "\\*\\/");\
       q ++;\
@@ -706,9 +703,6 @@ char *compile_denotation (NODE_T * p, FILE_T out)
       ASSERT (snprintf (N, NAME_SIZE, A68_LX "_", z) >= 0);
       (void) make_unic_name (fn, moid_with_name ("", MOID (p), "_denotation"), "", N);
     } else if (MOID (p) == M_REAL) {
-      char *V;
-      char W[NAME_SIZE];
-      int k;
       A68_SP = 0;
       PUSH_UNION (p, M_REAL);
       push_unit (p);
@@ -717,8 +711,9 @@ char *compile_denotation (NODE_T * p, FILE_T out)
       PUSH_VALUE (p, REAL_WIDTH, A68_INT);
       PUSH_VALUE (p, EXP_WIDTH + 1, A68_INT);
       PUSH_VALUE (p, 3, A68_INT);
-      V = real (p);
-      for (k = 0; V[0] != '\0'; V++) {
+      char *V = real (p);
+      char W[NAME_SIZE];
+      for (int k = 0; V[0] != '\0'; V++) {
         if (IS_ALNUM (V[0])) {
           W[k++] = TO_LOWER (V[0]);
           W[k] = '\0';
@@ -972,7 +967,7 @@ char *compile_call (NODE_T * p, FILE_T out)
     inline_arguments (args, out, L_YIELD, &size);
 // Execute procedure.
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "A68_SP = %s;\n", pop));
-    indent (out, "EXECUTE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
+    indent (out, "GENIE_UNIT_TRACE (NEXT_NEXT_NEXT (body));\n");
     indent (out, "if (A68_FP == A68_MON (finish_frame_pointer)) {\n");
     A68_OPT (indentation)++;
     indentf (out, snprintf (A68 (edit_line), SNPRINTF_SIZE, "change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_INTERRUPT_MASK, A68_TRUE);\n"));

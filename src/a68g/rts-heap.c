@@ -101,7 +101,7 @@ void genie_gc_heap (NODE_T * p)
 void genie_preemptive_gc_heap (NODE_T * p)
 {
   if (A68_GC (preemptive)) {
-    gc_heap ((NODE_T *) (p), A68_FP);
+    gc_heap (p, A68_FP);
   }
 }
 
@@ -406,6 +406,10 @@ void gc_heap (NODE_T * p, ADDR_T fp)
     return;
   }
 #endif
+  if (STATUS_TEST (p, BLOCK_GC_MASK) || A68_GC (sema) > 0) {
+    A68_GC (refused)++;
+    return;
+  }
 // Take no risk when intermediate results are on the stack.
   if (A68_SP != A68 (stack_start)) {
     A68_GC (refused)++;
@@ -504,6 +508,36 @@ A68_REF heap_generator (NODE_T * p, MOID_T * mode, int size)
   }
 }
 
+//! @brief Give a block of heap for an object of indicated mode.
+
+A68_REF heap_generator_2 (NODE_T * p, MOID_T * mode, int len, int size)
+{
+  if (len == 0 || size == 0) {
+    return heap_generator (p, mode, 0);
+  } else if (len != 0 && (ABS (size) < (2 * GIGABYTE) / ABS (len))) {
+    return heap_generator (p, mode, len * size);
+  } else {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  return nil_ref;
+}
+
+//! @brief Give a block of heap for an object of indicated mode.
+
+A68_REF heap_generator_3 (NODE_T * p, MOID_T * mode, int len1, int len2, int size)
+{
+  if (len1 == 0 || len2 == 0) {
+    return heap_generator (p, mode, 0);
+  } else if (len1 != 0 && (ABS (len2) < (2 * GIGABYTE) / ABS (len1))) {
+    return heap_generator_2 (p, mode, len1 * len2, size);
+  } else {
+    diagnostic (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  }
+  return nil_ref;
+}
+
 // Following implements the generator.
 
 //! @brief Whether a moid needs work in allocation.
@@ -528,13 +562,13 @@ void genie_compute_bounds (NODE_T * p)
       genie_compute_bounds (SUB (p));
     } else if (IS (p, UNIT)) {
       if (NEXT (p) != NO_NODE && (is_one_of (NEXT (p), COLON_SYMBOL, DOTDOT_SYMBOL, STOP))) {
-        EXECUTE_UNIT (p);
+        GENIE_UNIT (p);
         p = NEXT_NEXT (p);
       } else {
 // Default lower bound.
         PUSH_VALUE (p, 1, A68_INT);
       }
-      EXECUTE_UNIT (p);
+      GENIE_UNIT (p);
     }
   }
 }
@@ -681,7 +715,7 @@ void genie_generator_stowed (NODE_T * p, BYTE_T * addr, NODE_T ** decl, ADDR_T *
     } else {
       ADDR_T pop_sp = *cur_sp, top_sp = *cur_sp;
       BYTE_T *elem;
-      ARRAY (arr) = heap_generator (p, rmod, rsiz * esiz);
+      ARRAY (arr) = heap_generator_2 (p, rmod, rsiz, esiz);
       elem = ADDRESS (&(ARRAY (arr)));
       for (k = 0; k < rsiz; k++) {
         if (alloc_sub) {

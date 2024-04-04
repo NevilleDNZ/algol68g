@@ -117,18 +117,15 @@ void elaborate_bold_tags (NODE_T * p)
   for (q = p; q != NO_NODE; FORWARD (q)) {
     if (IS (q, BOLD_TAG)) {
       switch (find_tag_definition (TABLE (q), NSYMBOL (q))) {
-      case 0:
-        {
+      case 0: {
           diagnostic (A68_SYNTAX_ERROR, q, ERROR_UNDECLARED_TAG);
           break;
         }
-      case INDICANT:
-        {
+      case INDICANT: {
           ATTRIBUTE (q) = INDICANT;
           break;
         }
-      case OPERATOR:
-        {
+      case OPERATOR: {
           ATTRIBUTE (q) = OPERATOR;
           break;
         }

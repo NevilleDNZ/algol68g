@@ -26,6 +26,7 @@
 #include "a68g.h"
 #include "a68g-prelude.h"
 #include "a68g-mp.h"
+#include "a68g-numbers.h"
 #include "a68g-genie.h"
 #include "a68g-postulates.h"
 #include "a68g-parser.h"
@@ -96,11 +97,10 @@ FILE *a68_fopen (char *fn, char *mode, char *new_fn)
   ASSERT (snprintf (new_fn, SNPRINTF_SIZE, "%s", fn) >= 0);
   return fopen (new_fn, mode);
 #else
-  BUFFER dn;
-  int rc;
   errno = 0;
+  BUFFER dn;
   ASSERT (snprintf (dn, SNPRINTF_SIZE, "%s/%s", getenv ("HOME"), A68_DIR) >= 0);
-  rc = mkdir (dn, (mode_t) (S_IRUSR | S_IWUSR | S_IXUSR));
+  int rc = mkdir (dn, (mode_t) (S_IRUSR | S_IWUSR | S_IXUSR));
   if (rc == 0 || (rc == -1 && errno == EEXIST)) {
     struct stat status;
     if (stat (dn, &status) == 0 && S_ISDIR (ST_MODE (&status)) != 0) {
@@ -263,12 +263,12 @@ void bufcat (char *dst, char *src, int len)
 {
   if (src != NO_TEXT) {
     char *d = dst, *s = src;
-    int n = len, dlen;
+    int n = len;
 // Find end of dst and left-adjust; do not go past end 
     for (; n-- != 0 && d[0] != NULL_CHAR; d++) {
       ;
     }
-    dlen = (int) (d - dst);
+    int dlen = (int) (d - dst);
     n = len - dlen;
     if (n > 0) {
       while (s[0] != NULL_CHAR) {
@@ -325,4 +325,117 @@ void *a68_memmove (void *dest, void *src, size_t len)
     }
   }
   return dest;
+}
+
+// Routines _d1mach and _i1mach come from libraries such as SLATEC.
+// SLATEC was developed at US government research laboratories 
+// and is in the public domain.
+// Repository: http://www.netlib.org/slatec/
+
+REAL_T a68g_d1mach (int i)
+{
+// d1mach yields machine-dependent parameters for the 
+// local machine environment.
+  switch (i) {
+// d1mach(1) = b**(emin-1), the smallest positive magnitude. 
+    case 1: {
+	return DBL_MIN;
+      }
+// d1mach(2) = b**emax*(1 - b**(-t)), the largest magnitude. 
+    case 2: {
+	return DBL_MAX;
+      }
+// d1mach(3) = b**(-t), the smallest relative spacing. 
+    case 3: {
+	return 0.5 * DBL_EPSILON;
+      }
+// d1mach(4) = b**(1-t), the largest relative spacing. 
+    case 4: {
+	return DBL_EPSILON;
+      }
+// d1mach(5) = log10(b) 
+    case 5: {
+	return CONST_M_LOG10_2;
+      }
+//
+    default: {
+	return 0.0;
+      }
+    }
+}
+
+int a68g_i1mach (int i)
+{
+// i1mach yields machine-dependent parameters for the 
+// local machine environment.
+  switch (i) {
+// i1mach(1) = the standard input unit. 
+    case 1: {
+	return STDIN_FILENO;
+      }
+// i1mach(2) = the standard output unit. 
+    case 2: {
+	return STDOUT_FILENO;
+      }
+// i1mach(3) = the standard punch unit. 
+    case 3: {
+	return STDOUT_FILENO;
+      }
+// i1mach(4) = the standard error message unit. 
+    case 4: {
+	return STDERR_FILENO;
+      }
+// i1mach(5) = the number of bits per int storage unit. 
+    case 5: {
+	return CHAR_BIT * sizeof (int);
+      }
+// i1mach(6) = the number of characters per int storage unit. 
+    case 6: {
+	return sizeof (int);
+      }
+// i1mach(7) = a, the base. 
+    case 7: {
+	return 2;
+      }
+// i1mach(8) = s, the number of base-a digits. 
+    case 8: {
+	return CHAR_BIT * sizeof (int) - 1;
+      }
+// i1mach(9) = a**s - 1, the largest magnitude. 
+    case 9: {
+	return INT_MAX;
+      }
+// i1mach(10) = b, the base. 
+    case 10: {
+	return FLT_RADIX;
+      }
+// i1mach(11) = t, the number of base-b digits. 
+    case 11: {
+	return FLT_MANT_DIG;
+      }
+// i1mach(12) = emin, the smallest exponent e. 
+    case 12: {
+	return FLT_MIN_EXP;
+      }
+// i1mach(13) = emax, the largest exponent e. 
+    case 13: {
+	return FLT_MAX_EXP;
+      }
+// i1mach(14) = t, the number of base-b digits. 
+    case 14: {
+	return DBL_MANT_DIG;
+      }
+// i1mach(15) = emin, the smallest exponent e. 
+    case 15: {
+	return DBL_MIN_EXP;
+      }
+// i1mach(16) = emax, the largest exponent e. 
+    case 16: {
+	return DBL_MAX_EXP;
+      }
+//
+    default: {
+	return 0;
+      }
+    }
 }
