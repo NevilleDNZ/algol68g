@@ -27,10 +27,7 @@
 #include "a68g-genie.h"
 #include "a68g-frames.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-double.h"
 #include "a68g-parser.h"
-#include "a68g-transput.h"
 
 #define LABEL_FREE(_p_) {\
   NODE_T *_m_q; ADDR_T pop_sp_lf = A68_SP;\

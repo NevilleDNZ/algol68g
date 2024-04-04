@@ -74,6 +74,9 @@ typedef unt STATUS_MASK_T, BOOL_T;
 #include "a68g-stddef.h"
 
 #define ALIGNED __attribute__((aligned (sizeof (A68_ALIGN_T))))
+#define A68_ALIGN(s) ((int) ((s) % A68_ALIGNMENT) == 0 ? (s) : ((s) - (s) % A68_ALIGNMENT + A68_ALIGNMENT))
+#define A68_ALIGNMENT ((int) (sizeof (A68_ALIGN_T)))
+#define SIZE_ALIGNED(p) ((int) A68_ALIGN (sizeof (p)))
 
 #if (A68_LEVEL >= 3)
 #  include "a68g-level-3.h"
@@ -90,9 +93,6 @@ typedef unt __off_t;
 #  endif
 #endif
 
-#define A68_ALIGN(s) ((int) ((s) % A68_ALIGNMENT) == 0 ? (s) : ((s) - (s) % A68_ALIGNMENT + A68_ALIGNMENT))
-#define A68_ALIGNMENT ((int) (sizeof (A68_ALIGN_T)))
-
 #include "a68g-defines.h"
 #include "a68g-stack.h"
 #include "a68g-masks.h"
@@ -102,63 +102,61 @@ typedef unt __off_t;
 #include "a68g-diagnostics.h"
 #include "a68g-common.h"
 #include "a68g-lib.h"
+#include "a68g-mach.h"
 
 // Global declarations
 
-extern BOOL_T a68_mkstemp (char *, int, mode_t);
-extern BYTE_T *get_fixed_heap_space (size_t);
-extern BYTE_T *get_heap_space (size_t);
-extern BYTE_T *get_temp_heap_space (size_t);
-extern char *a68_basename (char *);
-extern char *a68_dirname (char *);
-extern char *a68_relpath (char *, char *, char *);
-extern char *ctrl_char (int);
-extern char *moid_to_string (MOID_T *, int, NODE_T *);
-extern char *new_fixed_string (char *);
-extern char *new_string (char *, ...);
-extern char *new_temp_string (char *);
-extern char *non_terminal_string (char *, int);
-extern char *read_string_from_tty (char *);
-extern char *standard_environ_proc_name (GPROC);
-extern int get_row_size (A68_TUPLE *, int);
-extern int moid_digits (MOID_T *);
-extern int moid_size (MOID_T *);
-extern int (snprintf) (char *, size_t, const char *, ...); // Prevent macro substitution on Darwin.
-extern void *a68_alloc (size_t, const char *, int);
-extern void a68_exit (int);
-extern void a68_free (void *);
-extern void a68_getty (int *, int *);
-extern void *a68_memmove (void *, void *, size_t);
-extern void abend (char *, char *, char *, int);
-extern void announce_phase (char *);
-extern void apropos (FILE_T, char *, char *);
-extern void bufcat (char *, char *, int);
-extern void bufcpy (char *, char *, int);
-extern void default_mem_sizes (int);
-extern void discard_heap (void);
-extern void free_file_entries (void);
-extern void free_syntax_tree (NODE_T *);
-extern void get_stack_size (void);
-extern void indenter (MODULE_T *);
-extern void init_curses (void);
-extern void init_file_entries (void);
-extern void init_file_entry (int);
-extern void init_heap (void);
-extern void init_rng (unt);
-extern void init_tty (void);
-extern void install_signal_handlers (void);
-extern void online_help (FILE_T);
-extern void state_version (FILE_T);
-
-extern int a68g_i1mach (int);
-extern REAL_T a68g_d1mach (int);
+BOOL_T a68_mkstemp (char *, int, mode_t);
+BYTE_T *get_fixed_heap_space (size_t);
+BYTE_T *get_heap_space (size_t);
+BYTE_T *get_temp_heap_space (size_t);
+char *a68_basename (char *);
+char *a68_dirname (char *);
+char *a68_relpath (char *, char *, char *);
+char *ctrl_char (int);
+char *moid_to_string (MOID_T *, int, NODE_T *);
+char *new_fixed_string (char *);
+char *new_string (char *, ...);
+char *new_temp_string (char *);
+char *non_terminal_string (char *, int);
+char *read_string_from_tty (char *);
+char *standard_environ_proc_name (GPROC);
+int get_row_size (A68_TUPLE *, int);
+int moid_digits (MOID_T *);
+int moid_size (MOID_T *);
+int (snprintf) (char *, size_t, const char *, ...); // Prevent macro substitution on Darwin.
+void *a68_alloc (size_t, const char *, int);
+void a68_exit (int);
+void a68_free (void *);
+void a68_getty (int *, int *);
+void a68_rm (char *);
+void abend (char *, char *, char *, int);
+void announce_phase (char *);
+void apropos (FILE_T, char *, char *);
+void bufcat (char *, char *, int);
+void bufcpy (char *, char *, int);
+void default_mem_sizes (int);
+void discard_heap (void);
+void free_file_entries (void);
+void free_syntax_tree (NODE_T *);
+void get_stack_size (void);
+void indenter (MODULE_T *);
+void init_curses (void);
+void init_file_entries (void);
+void init_file_entry (int);
+void init_heap (void);
+void init_rng (unt);
+void init_tty (void);
+void install_signal_handlers (void);
+void online_help (FILE_T);
+void state_version (FILE_T);
 
 // Below from R mathlib
 
-extern void GetRNGstate (void);
-extern void PutRNGstate (void);
-extern REAL_T a68_unif_rand (void);
-extern REAL_T a68_gauss_rand (void);
-extern REAL_T R_unif_index (REAL_T);
+void GetRNGstate (void);
+void PutRNGstate (void);
+REAL_T a68_unif_rand (void);
+REAL_T a68_gauss_rand (void);
+REAL_T R_unif_index (REAL_T);
 
 #endif

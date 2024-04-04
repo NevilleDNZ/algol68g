@@ -26,7 +26,6 @@
 #include "a68g.h"
 
 #include "a68g-double.h"
-#include "a68g-genie.h"
 #include "a68g-mp.h"
 #include "a68g-prelude.h"
 
@@ -63,8 +62,7 @@ MP_T *sqrt_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   }
   int gdigs = FUN_DIGITS (digs), hdigs;
   BOOL_T reciprocal = A68_FALSE;
-  MP_T *z_g = nil_mp (p, gdigs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
+  MP_T *z_g = nil_mp (p, gdigs), *x_g = len_mp (p, x, digs, gdigs);
   MP_T *tmp = nil_mp (p, gdigs);
 // Scaling for small x; sqrt (x) = 1 / sqrt (1 / x).
   if ((reciprocal = (BOOL_T) (MP_EXPONENT (x_g) < 0)) == A68_TRUE) {
@@ -121,8 +119,7 @@ MP_T *curt_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   }
   int gdigs = FUN_DIGITS (digs), hdigs;
   BOOL_T reciprocal = A68_FALSE;
-  MP_T *z_g = nil_mp (p, gdigs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
+  MP_T *z_g = nil_mp (p, gdigs), *x_g = len_mp (p, x, digs, gdigs);
   MP_T *tmp = nil_mp (p, gdigs);
 // Scaling for small x; curt (x) = 1 / curt (1 / x).
   if ((reciprocal = (BOOL_T) (MP_EXPONENT (x_g) < 0)) == A68_TRUE) {
@@ -136,7 +133,6 @@ MP_T *curt_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     MP_EXPONENT (z_g) += (MP_T) (expo / 3);
   } else {
 // Argument is in range. Estimate the root as double.
-    int decimals;
 #if (A68_LEVEL >= 3)
     DOUBLE_T x_d = mp_to_double (p, x_g, gdigs);
     (void) double_to_mp (p, z_g, cbrt_double (x_d), gdigs);
@@ -145,7 +141,7 @@ MP_T *curt_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     (void) real_to_mp (p, z_g, cbrt (x_d), gdigs);
 #endif
 // Newton's method: x<n+1> = (2 x<n> + a / x<n> ^ 2) / 3.
-    decimals = DOUBLE_ACCURACY;
+    int decimals = DOUBLE_ACCURACY;
     do {
       decimals <<= 1;
       hdigs = MINIMUM (1 + decimals / LOG_MP_RADIX, gdigs);
@@ -174,9 +170,7 @@ MP_T *hypot_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 {
 // sqrt (x^2 + y^2).
   ADDR_T pop_sp = A68_SP;
-  MP_T *t = nil_mp (p, digs);
-  MP_T *u = nil_mp (p, digs);
-  MP_T *v = nil_mp (p, digs);
+  MP_T *t = nil_mp (p, digs), *u = nil_mp (p, digs), *v = nil_mp (p, digs);
   (void) move_mp (u, x, digs);
   (void) move_mp (v, y, digs);
   MP_DIGIT (u, 1) = ABS (MP_DIGIT (u, 1));
@@ -218,9 +212,7 @@ MP_T *exp_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     return z;
   }
   MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *sum = nil_mp (p, gdigs);
-  MP_T *a68_pow = nil_mp (p, gdigs);
-  MP_T *fac = nil_mp (p, gdigs);
+  MP_T *pwr = nil_mp (p, gdigs), *fac = nil_mp (p, gdigs), *sum = nil_mp (p, gdigs);
   MP_T *tmp = nil_mp (p, gdigs);
   int m = 0;
 // Scale x down.
@@ -231,41 +223,41 @@ MP_T *exp_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Calculate Taylor sum exp (z) = 1 + z / 1 ! + z ** 2 / 2 ! + ..
   SET_MP_ONE (sum, gdigs);
   (void) add_mp (p, sum, sum, x_g, gdigs);
-  (void) mul_mp (p, a68_pow, x_g, x_g, gdigs);
-  (void) half_mp (p, tmp, a68_pow, gdigs);
+  (void) mul_mp (p, pwr, x_g, x_g, gdigs);
+  (void) half_mp (p, tmp, pwr, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 6, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 6, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 24, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 24, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 120, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 120, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 720, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 720, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 5040, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 5040, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 40320, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 40320, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 362880, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 362880, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
   (void) set_mp (fac, (MP_T) (MP_T) 3628800, 0, gdigs);
   int n = 10;
-  BOOL_T iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+  BOOL_T iter = (BOOL_T) (MP_DIGIT (pwr, 1) != 0);
   while (iter) {
-    (void) div_mp (p, tmp, a68_pow, fac, gdigs);
+    (void) div_mp (p, tmp, pwr, fac, gdigs);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (sum) - gdigs)) {
       iter = A68_FALSE;
     } else {
       (void) add_mp (p, sum, sum, tmp, gdigs);
-      (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
+      (void) mul_mp (p, pwr, pwr, x_g, gdigs);
       n++;
       (void) mul_mp_digit (p, fac, fac, (MP_T) n, gdigs);
     }
@@ -292,47 +284,45 @@ MP_T *expm1_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     return z;
   }
   MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *sum = nil_mp (p, gdigs);
-  MP_T *a68_pow = nil_mp (p, gdigs);
-  MP_T *fac = nil_mp (p, gdigs);
+  MP_T *pwr = nil_mp (p, gdigs), *fac = nil_mp (p, gdigs), *sum = nil_mp (p, gdigs);
   MP_T *tmp = nil_mp (p, gdigs);
 // Calculate Taylor sum expm1 (z) = z / 1 ! + z ** 2 / 2 ! + ...
   (void) add_mp (p, sum, sum, x_g, gdigs);
-  (void) mul_mp (p, a68_pow, x_g, x_g, gdigs);
-  (void) half_mp (p, tmp, a68_pow, gdigs);
+  (void) mul_mp (p, pwr, x_g, x_g, gdigs);
+  (void) half_mp (p, tmp, pwr, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 6, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 6, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 24, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 24, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 120, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 120, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 720, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 720, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 5040, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 5040, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 40320, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 40320, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 362880, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 362880, gdigs);
   (void) add_mp (p, sum, sum, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
+  (void) mul_mp (p, pwr, pwr, x_g, gdigs);
   (void) set_mp (fac, (MP_T) (MP_T) 3628800, 0, gdigs);
   int n = 10;
-  BOOL_T iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+  BOOL_T iter = (BOOL_T) (MP_DIGIT (pwr, 1) != 0);
   while (iter) {
-    (void) div_mp (p, tmp, a68_pow, fac, gdigs);
+    (void) div_mp (p, tmp, pwr, fac, gdigs);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (sum) - gdigs)) {
       iter = A68_FALSE;
     } else {
       (void) add_mp (p, sum, sum, tmp, gdigs);
-      (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
+      (void) mul_mp (p, pwr, pwr, x_g, gdigs);
       n++;
       (void) mul_mp_digit (p, fac, fac, (MP_T) n, gdigs);
     }
@@ -402,8 +392,7 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     errno = EDOM;
     return NaN_MP;
   }
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *z_g = nil_mp (p, gdigs);
 // We use ln (1 / x) = - ln (x).
   neg = (BOOL_T) (MP_EXPONENT (x_g) < 0);
   if (neg) {
@@ -420,21 +409,20 @@ MP_T *ln_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Taylor sum for x close to unity.
 // ln (x) = (x - 1) - (x - 1) ** 2 / 2 + (x - 1) ** 3 / 3 - ...
 // This is faster for small x and avoids cancellation.
-    MP_T *tmp = nil_mp (p, gdigs);
-    MP_T *a68_pow = nil_mp (p, gdigs);
+    MP_T *pwr = nil_mp (p, gdigs), *tmp = nil_mp (p, gdigs);
     (void) minus_one_mp (p, x_g, x_g, gdigs);
-    (void) mul_mp (p, a68_pow, x_g, x_g, gdigs);
+    (void) mul_mp (p, pwr, x_g, x_g, gdigs);
     (void) move_mp (z_g, x_g, gdigs);
     int n = 2;
-    BOOL_T iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+    BOOL_T iter = (BOOL_T) (MP_DIGIT (pwr, 1) != 0);
     while (iter) {
-      (void) div_mp_digit (p, tmp, a68_pow, (MP_T) n, gdigs);
+      (void) div_mp_digit (p, tmp, pwr, (MP_T) n, gdigs);
       if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - gdigs)) {
         iter = A68_FALSE;
       } else {
         MP_DIGIT (tmp, 1) = (EVEN (n) ? -MP_DIGIT (tmp, 1) : MP_DIGIT (tmp, 1));
         (void) add_mp (p, z_g, z_g, tmp, gdigs);
-        (void) mul_mp (p, a68_pow, a68_pow, x_g, gdigs);
+        (void) mul_mp (p, pwr, pwr, x_g, gdigs);
         n++;
       }
     }
@@ -495,9 +483,7 @@ MP_T *log_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *hyp_mp (NODE_T * p, MP_T * sh, MP_T * ch, MP_T * z, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *x_g = nil_mp (p, digs);
-  MP_T *y_g = nil_mp (p, digs);
-  MP_T *z_g = nil_mp (p, digs);
+  MP_T *x_g = nil_mp (p, digs), *y_g = nil_mp (p, digs), *z_g = nil_mp (p, digs);
   (void) move_mp (z_g, z, digs);
   (void) exp_mp (p, x_g, z_g, digs);
   (void) rec_mp (p, y_g, x_g, digs);
@@ -521,9 +507,7 @@ MP_T *sinh_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
   (void) hyp_mp (p, z_g, y_g, x_g, gdigs);
   (void) shorten_mp (p, z, digs, z_g, gdigs);
   A68_SP = pop_sp;
@@ -546,9 +530,7 @@ MP_T *asinh_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Extra precision when x^2+1 gets close to 1.
       gdigs = 2 * FUN_DIGITS (digs);
     }
-    MP_T *x_g = len_mp (p, x, digs, gdigs);
-    MP_T *y_g = nil_mp (p, gdigs);
-    MP_T *z_g = nil_mp (p, gdigs);
+    MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
     (void) mul_mp (p, z_g, x_g, x_g, gdigs);
     SET_MP_ONE (y_g, gdigs);
     (void) add_mp (p, y_g, z_g, y_g, gdigs);
@@ -571,9 +553,7 @@ MP_T *cosh_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
   (void) hyp_mp (p, y_g, z_g, x_g, gdigs);
   (void) shorten_mp (p, z, digs, z_g, gdigs);
   A68_SP = pop_sp;
@@ -592,9 +572,7 @@ MP_T *acosh_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   } else {
     gdigs = FUN_DIGITS (digs);
   }
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
   (void) mul_mp (p, z_g, x_g, x_g, gdigs);
   SET_MP_ONE (y_g, gdigs);
   (void) sub_mp (p, y_g, z_g, y_g, gdigs);
@@ -612,9 +590,7 @@ MP_T *tanh_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
   (void) hyp_mp (p, y_g, z_g, x_g, gdigs);
   (void) div_mp (p, z_g, y_g, z_g, gdigs);
   (void) shorten_mp (p, z, digs, z_g, gdigs);
@@ -628,9 +604,7 @@ MP_T *atanh_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
   SET_MP_ONE (y_g, gdigs);
   (void) add_mp (p, z_g, y_g, x_g, gdigs);
   (void) sub_mp (p, y_g, y_g, x_g, gdigs);
@@ -650,9 +624,7 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
 // We will use "pi".
-  MP_T *pi = nil_mp (p, gdigs);
-  MP_T *tpi = nil_mp (p, gdigs);
-  MP_T *hpi = nil_mp (p, gdigs);
+  MP_T *pi = nil_mp (p, gdigs), *tpi = nil_mp (p, gdigs), *hpi = nil_mp (p, gdigs);
   (void) mp_pi (p, pi, MP_PI, gdigs);
   (void) mp_pi (p, tpi, MP_TWO_PI, gdigs);
   (void) mp_pi (p, hpi, MP_HALF_PI, gdigs);
@@ -684,27 +656,25 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     (void) div_mp_digit (p, x_g, x_g, (MP_T) 3, gdigs);
   }
 // Taylor sum.
-  MP_T *sqr = nil_mp (p, gdigs);
-  MP_T *a68_pow = nil_mp (p, gdigs);
-  MP_T *fac = nil_mp (p, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *sqr = nil_mp (p, gdigs), *z_g = nil_mp (p, gdigs);
+  MP_T *pwr = nil_mp (p, gdigs), *fac = nil_mp (p, gdigs);
   (void) mul_mp (p, sqr, x_g, x_g, gdigs);
-  (void) mul_mp (p, a68_pow, sqr, x_g, gdigs);
+  (void) mul_mp (p, pwr, sqr, x_g, gdigs);
   (void) move_mp (z_g, x_g, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 6, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 6, gdigs);
   (void) sub_mp (p, z_g, z_g, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, sqr, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 120, gdigs);
+  (void) mul_mp (p, pwr, pwr, sqr, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 120, gdigs);
   (void) add_mp (p, z_g, z_g, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, sqr, gdigs);
-  (void) div_mp_digit (p, tmp, a68_pow, (MP_T) 5040, gdigs);
+  (void) mul_mp (p, pwr, pwr, sqr, gdigs);
+  (void) div_mp_digit (p, tmp, pwr, (MP_T) 5040, gdigs);
   (void) sub_mp (p, z_g, z_g, tmp, gdigs);
-  (void) mul_mp (p, a68_pow, a68_pow, sqr, gdigs);
+  (void) mul_mp (p, pwr, pwr, sqr, gdigs);
   (void) set_mp (fac, (MP_T) 362880, 0, gdigs);
   int n = 9;
-  BOOL_T even = A68_TRUE, iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+  BOOL_T even = A68_TRUE, iter = (BOOL_T) (MP_DIGIT (pwr, 1) != 0);
   while (iter) {
-    (void) div_mp (p, tmp, a68_pow, fac, gdigs);
+    (void) div_mp (p, tmp, pwr, fac, gdigs);
     if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - gdigs)) {
       iter = A68_FALSE;
     } else {
@@ -715,7 +685,7 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
         (void) sub_mp (p, z_g, z_g, tmp, gdigs);
         even = A68_TRUE;
       }
-      (void) mul_mp (p, a68_pow, a68_pow, sqr, gdigs);
+      (void) mul_mp (p, pwr, pwr, sqr, gdigs);
       (void) mul_mp_digit (p, fac, fac, (MP_T) (++n), gdigs);
       (void) mul_mp_digit (p, fac, fac, (MP_T) (++n), gdigs);
     }
@@ -724,16 +694,30 @@ MP_T *sin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Use existing mp's for intermediates.
   (void) set_mp (fac, (MP_T) 3, 0, gdigs);
   while (m--) {
-    (void) mul_mp (p, a68_pow, z_g, z_g, gdigs);
-    (void) mul_mp_digit (p, a68_pow, a68_pow, (MP_T) 4, gdigs);
-    (void) sub_mp (p, a68_pow, fac, a68_pow, gdigs);
-    (void) mul_mp (p, z_g, a68_pow, z_g, gdigs);
+    (void) mul_mp (p, pwr, z_g, z_g, gdigs);
+    (void) mul_mp_digit (p, pwr, pwr, (MP_T) 4, gdigs);
+    (void) sub_mp (p, pwr, fac, pwr, gdigs);
+    (void) mul_mp (p, z_g, pwr, z_g, gdigs);
   }
   (void) shorten_mp (p, z, digs, z_g, gdigs);
   if (neg ^ flip) {
     MP_DIGIT (z, 1) = -MP_DIGIT (z, 1);
   }
 // Exit.
+  A68_SP = pop_sp;
+  return z;
+}
+
+//! @brief PROC (LONG REAL) LONG REAL cas
+
+MP_T *cas_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
+{
+// Hartley kernel, which Hartley named cas (cosine and sine).
+  ADDR_T pop_sp = A68_SP;
+  MP_T *sinx = nil_mp (p, digs), *cosx = nil_mp (p, digs);
+  cos_mp (p, cosx, x, digs);
+  sin_mp (p, sinx, x, digs);
+  (void) add_mp (p, z, cosx, sinx, digs);
   A68_SP = pop_sp;
   return z;
 }
@@ -746,10 +730,8 @@ MP_T *cos_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Compute x mod 2 pi before subtracting to avoid cancellation.
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *hpi = nil_mp (p, gdigs);
-  MP_T *tpi = nil_mp (p, gdigs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y = nil_mp (p, digs);
+  MP_T *hpi = nil_mp (p, gdigs), *tpi = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y = nil_mp (p, digs);
   (void) mp_pi (p, hpi, MP_HALF_PI, gdigs);
   (void) mp_pi (p, tpi, MP_TWO_PI, gdigs);
   (void) mod_mp (p, x_g, x_g, tpi, gdigs);
@@ -767,14 +749,11 @@ MP_T *tan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Use tan (x) = sin (x) / sqrt (1 - sin ^ 2 (x)).
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *pi = nil_mp (p, gdigs);
-  MP_T *hpi = nil_mp (p, gdigs);
+  MP_T *pi = nil_mp (p, gdigs), *hpi = nil_mp (p, gdigs);
   (void) mp_pi (p, pi, MP_PI, gdigs);
   (void) mp_pi (p, hpi, MP_HALF_PI, gdigs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *sns = nil_mp (p, digs);
-  MP_T *cns = nil_mp (p, digs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs);
+  MP_T *sns = nil_mp (p, digs), *cns = nil_mp (p, digs);
 // Argument mod pi.
   BOOL_T neg;
   (void) mod_mp (p, x_g, x_g, pi, gdigs);
@@ -809,9 +788,8 @@ MP_T *asin_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *z_g = nil_mp (p, gdigs);
   MP_T *y = nil_mp (p, digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
   (void) mul_mp (p, z_g, x_g, x_g, gdigs);
   (void) one_minus_mp (p, z_g, z_g, gdigs);
   if (sqrt_mp (p, z_g, z_g, digs) == NaN_MP) {
@@ -848,9 +826,8 @@ MP_T *acos_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     A68_SP = pop_sp;
     return z;
   }
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *z_g = nil_mp (p, gdigs);
   MP_T *y = nil_mp (p, digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
   (void) mul_mp (p, z_g, x_g, x_g, gdigs);
   (void) one_minus_mp (p, z_g, z_g, gdigs);
   if (sqrt_mp (p, z_g, z_g, digs) == NaN_MP) {
@@ -885,8 +862,7 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
     return z;
   }
   int gdigs = FUN_DIGITS (digs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *z_g = nil_mp (p, gdigs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *z_g = nil_mp (p, gdigs);
   BOOL_T neg = (BOOL_T) (MP_DIGIT (x_g, 1) < 0);
   if (neg) {
     MP_DIGIT (x_g, 1) = -MP_DIGIT (x_g, 1);
@@ -900,16 +876,14 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Taylor sum for x close to zero.
 // arctan (x) = x - x ** 3 / 3 + x ** 5 / 5 - x ** 7 / 7 + ..
 // This is faster for small x and avoids cancellation
-    MP_T *tmp = nil_mp (p, gdigs);
-    MP_T *a68_pow = nil_mp (p, gdigs);
-    MP_T *sqr = nil_mp (p, gdigs);
+    MP_T *pwr = nil_mp (p, gdigs), *sqr = nil_mp (p, gdigs), *tmp = nil_mp (p, gdigs);
     (void) mul_mp (p, sqr, x_g, x_g, gdigs);
-    (void) mul_mp (p, a68_pow, sqr, x_g, gdigs);
+    (void) mul_mp (p, pwr, sqr, x_g, gdigs);
     (void) move_mp (z_g, x_g, gdigs);
     int n = 3;
-    BOOL_T even = A68_FALSE, iter = (BOOL_T) (MP_DIGIT (a68_pow, 1) != 0);
+    BOOL_T even = A68_FALSE, iter = (BOOL_T) (MP_DIGIT (pwr, 1) != 0);
     while (iter) {
-      (void) div_mp_digit (p, tmp, a68_pow, (MP_T) n, gdigs);
+      (void) div_mp_digit (p, tmp, pwr, (MP_T) n, gdigs);
       if (MP_EXPONENT (tmp) <= (MP_EXPONENT (z_g) - gdigs)) {
         iter = A68_FALSE;
       } else {
@@ -920,15 +894,13 @@ MP_T *atan_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
           (void) sub_mp (p, z_g, z_g, tmp, gdigs);
           even = A68_TRUE;
         }
-        (void) mul_mp (p, a68_pow, a68_pow, sqr, gdigs);
+        (void) mul_mp (p, pwr, pwr, sqr, gdigs);
         n += 2;
       }
     }
   } else {
 // Newton's method: x<n+1> = x<n> - cos (x<n>) * (sin (x<n>) - a cos (x<n>)).
-    MP_T *tmp = nil_mp (p, gdigs);
-    MP_T *sns = nil_mp (p, gdigs);
-    MP_T *cns = nil_mp (p, gdigs);
+    MP_T *sns = nil_mp (p, gdigs), *cns = nil_mp (p, gdigs), *tmp = nil_mp (p, gdigs);
 // Construct an estimate.
 #if (A68_LEVEL >= 3)
     (void) double_to_mp (p, z_g, atan_double (mp_to_double (p, x_g, gdigs)), gdigs);
@@ -1004,6 +976,17 @@ MP_T *csc_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   return z;
 }
 
+//! @brief PROC (LONG REAL) LONG REAL cscdg
+
+MP_T *cscdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
+{
+  sindg_mp (p, z, x, digs);
+  if (rec_mp (p, z, z, digs) == NaN_MP) {
+    return NaN_MP;
+  }
+  return z;
+}
+
 //! @brief PROC (LONG REAL) LONG REAL acsc
 
 MP_T *acsc_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
@@ -1014,11 +997,32 @@ MP_T *acsc_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   return asin_mp (p, z, z, digs);
 }
 
+//! @brief PROC (LONG REAL) LONG REAL acscdg
+
+MP_T *acscdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
+{
+  if (rec_mp (p, z, x, digs) == NaN_MP) {
+    return NaN_MP;
+  }
+  return asindg_mp (p, z, z, digs);
+}
+
 //! @brief PROC (LONG REAL) LONG REAL sec
 
 MP_T *sec_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   cos_mp (p, z, x, digs);
+  if (rec_mp (p, z, z, digs) == NaN_MP) {
+    return NaN_MP;
+  }
+  return z;
+}
+
+//! @brief PROC (LONG REAL) LONG REAL secdg
+
+MP_T *secdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
+{
+  cosdg_mp (p, z, x, digs);
   if (rec_mp (p, z, z, digs) == NaN_MP) {
     return NaN_MP;
   }
@@ -1035,6 +1039,16 @@ MP_T *asec_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
   return acos_mp (p, z, z, digs);
 }
 
+//! @brief PROC (LONG REAL) LONG REAL asec
+
+MP_T *asecdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
+{
+  if (rec_mp (p, z, x, digs) == NaN_MP) {
+    return NaN_MP;
+  }
+  return acosdg_mp (p, z, z, digs);
+}
+
 //! @brief PROC (LONG REAL) LONG REAL cot
 
 MP_T *cot_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
@@ -1042,14 +1056,11 @@ MP_T *cot_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 // Use tan (x) = sin (x) / sqrt (1 - sin ^ 2 (x)).
   ADDR_T pop_sp = A68_SP;
   int gdigs = FUN_DIGITS (digs);
-  MP_T *pi = nil_mp (p, gdigs);
-  MP_T *hpi = nil_mp (p, gdigs);
+  MP_T *pi = nil_mp (p, gdigs), *hpi = nil_mp (p, gdigs);
   (void) mp_pi (p, pi, MP_PI, gdigs);
   (void) mp_pi (p, hpi, MP_HALF_PI, gdigs);
-  MP_T *x_g = len_mp (p, x, digs, gdigs);
-  MP_T *y_g = nil_mp (p, gdigs);
-  MP_T *sns = nil_mp (p, digs);
-  MP_T *cns = nil_mp (p, digs);
+  MP_T *x_g = len_mp (p, x, digs, gdigs), *y_g = nil_mp (p, gdigs);
+  MP_T *sns = nil_mp (p, digs), *cns = nil_mp (p, digs);
 // Argument mod pi.
   BOOL_T neg;
   (void) mod_mp (p, x_g, x_g, pi, gdigs);
@@ -1100,8 +1111,7 @@ MP_T *acot_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *sindg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) mp_pi (p, f, MP_PI_OVER_180, digs);
   (void) mul_mp (p, g, x, f, digs);
   (void) sin_mp (p, z, g, digs);
@@ -1114,8 +1124,7 @@ MP_T *sindg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *cosdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) mp_pi (p, f, MP_PI_OVER_180, digs);
   (void) mul_mp (p, g, x, f, digs);
   (void) cos_mp (p, z, g, digs);
@@ -1128,8 +1137,7 @@ MP_T *cosdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *tandg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) mp_pi (p, f, MP_PI_OVER_180, digs);
   (void) mul_mp (p, g, x, f, digs);
   if (tan_mp (p, z, g, digs) == NaN_MP) {
@@ -1147,8 +1155,7 @@ MP_T *tandg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *cotdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) mp_pi (p, f, MP_PI_OVER_180, digs);
   (void) mul_mp (p, g, x, f, digs);
   if (cot_mp (p, z, g, digs) == NaN_MP) {
@@ -1166,8 +1173,7 @@ MP_T *cotdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *asindg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) asin_mp (p, f, x, digs);
   (void) mp_pi (p, g, MP_180_OVER_PI, digs);
   (void) mul_mp (p, z, f, g, digs);
@@ -1180,8 +1186,7 @@ MP_T *asindg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *acosdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) acos_mp (p, f, x, digs);
   (void) mp_pi (p, g, MP_180_OVER_PI, digs);
   (void) mul_mp (p, z, f, g, digs);
@@ -1194,8 +1199,7 @@ MP_T *acosdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *atandg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   (void) atan_mp (p, f, x, digs);
   (void) mp_pi (p, g, MP_180_OVER_PI, digs);
   (void) mul_mp (p, z, f, g, digs);
@@ -1208,8 +1212,7 @@ MP_T *atandg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *acotdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   if (acot_mp (p, f, x, digs) == NaN_MP) {
     errno = EDOM;
     A68_SP = pop_sp;
@@ -1227,8 +1230,7 @@ MP_T *acotdg_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *atan2dg_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = nil_mp (p, digs);
   if (atan2_mp (p, f, x, y, digs) == NaN_MP) {
     errno = EDOM;
     A68_SP = pop_sp;
@@ -1246,8 +1248,7 @@ MP_T *atan2dg_mp (NODE_T * p, MP_T * z, MP_T * x, MP_T * y, int digs)
 MP_T *sinpi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = lit_mp (p, 1, 0, digs);
+  MP_T *f = nil_mp (p, digs), *g = lit_mp (p, 1, 0, digs);
   (void) mod_mp (p, f, x, g, digs);
   if (IS_ZERO_MP (f)) {
     SET_MP_ZERO (z, digs);
@@ -1266,8 +1267,7 @@ MP_T *sinpi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *cospi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = lit_mp (p, 1, 0, digs);
+  MP_T *f = nil_mp (p, digs), *g = lit_mp (p, 1, 0, digs);
   (void) mod_mp (p, f, x, g, digs);
   abs_mp (p, f, f, digs);
   SET_MP_HALF (g, digs);
@@ -1289,10 +1289,8 @@ MP_T *cospi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *tanpi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = lit_mp (p, 1, 0, digs);
-  MP_T *h = nil_mp (p, digs);
-  MP_T *half = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = lit_mp (p, 1, 0, digs);
+  MP_T *h = nil_mp (p, digs), *half = nil_mp (p, digs);
   SET_MP_ONE (g, digs);
   (void) mod_mp (p, f, x, g, digs);
   if (IS_ZERO_MP (f)) {
@@ -1341,10 +1339,8 @@ MP_T *tanpi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 MP_T *cotpi_mp (NODE_T * p, MP_T * z, MP_T * x, int digs)
 {
   ADDR_T pop_sp = A68_SP;
-  MP_T *f = nil_mp (p, digs);
-  MP_T *g = lit_mp (p, 1, 0, digs);
-  MP_T *h = nil_mp (p, digs);
-  MP_T *half = nil_mp (p, digs);
+  MP_T *f = nil_mp (p, digs), *g = lit_mp (p, 1, 0, digs);
+  MP_T *h = nil_mp (p, digs), *half = nil_mp (p, digs);
   (void) mod_mp (p, f, x, g, digs);
   if (IS_ZERO_MP (f)) {
     errno = EDOM;

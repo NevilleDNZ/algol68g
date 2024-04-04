@@ -24,14 +24,14 @@
 //! [LONG] LONG BITS routines, legacy MP implementation.
 
 #include "a68g.h"
-#include "a68g-genie.h"
-#include "a68g-prelude.h"
-#include "a68g-double.h"
-#include "a68g-mp.h"
-#include "a68g-numbers.h"
-#include "a68g-transput.h"
 
 #if (A68_LEVEL <= 2)
+
+#include "a68g-prelude.h"
+#include "a68g-mp.h"
+#include "a68g-genie.h"
+#include "a68g-numbers.h"
+#include "a68g-transput.h"
 
 // This legacy code implements a quick-and-dirty LONG LONG BITS mode,
 // constructed on top of the LONG LONG INT/REAL/COMPLEX library.
@@ -131,7 +131,7 @@ MP_T *pack_mp_bits (NODE_T * p, MP_T * u, MP_BITS_T * row, MOID_T * m)
     mask |= 0x1;
   }
   row[0] &= mask;
-  for (int k = 1; k < (BITS_WIDTH - MP_BITS_BITS); k++) {
+  for (int k = 1; k < (A68_BITS_WIDTH - MP_BITS_BITS); k++) {
     musk <<= 1;
   }
   for (int k = 0; k < MP_BITS_BITS; k++) {

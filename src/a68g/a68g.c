@@ -71,13 +71,13 @@
 // --xref, --noxref, switch cross reference in the listing file on or off.
 
 #include "a68g.h"
-#include "a68g-genie.h"
 #include "a68g-listing.h"
 #include "a68g-mp.h"
 #include "a68g-optimiser.h"
 #include "a68g-options.h"
 #include "a68g-parser.h"
 #include "a68g-postulates.h"
+#include "a68g-genie.h"
 #include "a68g-prelude.h"
 #include "a68g-prelude-mathlib.h"
 
@@ -122,7 +122,7 @@ void state_license (FILE_T f)
   ASSERT (snprintf(A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, A68 (output_line));
 //
-  if (f == STDOUT_FILENO) {
+  if (f == A68_STDOUT) {
     io_close_tty_line ();
   }
   ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Algol 68 Genie %s\n", PACKAGE_VERSION) >= 0);
@@ -151,7 +151,7 @@ void state_version (FILE_T f)
   ASSERT (snprintf(A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, A68 (output_line));
 //
-  if (f == STDOUT_FILENO) {
+  if (f == A68_STDOUT) {
     io_close_tty_line ();
   }
   state_license (f);
@@ -241,7 +241,7 @@ WRITE (f, A68 (output_line));
 
 void online_help (FILE_T f)
 {
-  if (f == STDOUT_FILENO) {
+  if (f == A68_STDOUT) {
     io_close_tty_line ();
   }
   state_license (f);
@@ -258,7 +258,7 @@ void announce_phase (char *t)
   if (OPTION_VERBOSE (&A68_JOB)) {
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "%s: %s", A68 (a68_cmd_name), t) >= 0);
     io_close_tty_line ();
-    WRITE (STDOUT_FILENO, A68 (output_line));
+    WRITE (A68_STDOUT, A68 (output_line));
   }
 }
 
@@ -335,10 +335,7 @@ void a68_rm (char *fn)
 
 void compiler_interpreter (void)
 {
-  int len, num;
-#if defined (BUILD_A68_COMPILER)
   BOOL_T emitted = A68_FALSE;
-#endif
   TREE_LISTING_SAFE (&A68_JOB) = A68_FALSE;
   CROSS_REFERENCE_SAFE (&A68_JOB) = A68_FALSE;
   A68 (in_execution) = A68_FALSE;
@@ -409,7 +406,7 @@ void compiler_interpreter (void)
   ABEND (FILE_SOURCE_NAME (&A68_JOB) == NO_TEXT, ERROR_INTERNAL_CONSISTENCY, __func__);
   ABEND (FILE_GENERIC_NAME (&A68_JOB) == NO_TEXT, ERROR_INTERNAL_CONSISTENCY, __func__);
 // Object file.
-  len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (OBJECT_EXTENSION);
+  int len = 1 + (int) strlen (FILE_GENERIC_NAME (&A68_JOB)) + (int) strlen (OBJECT_EXTENSION);
   FILE_OBJECT_NAME (&A68_JOB) = (char *) get_heap_space ((size_t) len);
   bufcpy (FILE_OBJECT_NAME (&A68_JOB), FILE_GENERIC_NAME (&A68_JOB), len);
   bufcat (FILE_OBJECT_NAME (&A68_JOB), OBJECT_EXTENSION, len);
@@ -452,7 +449,7 @@ void compiler_interpreter (void)
   }
 // Finalise syntax tree.
   if (ERROR_COUNT (&A68_JOB) == 0) {
-    num = 0;
+    int num = 0;
     renumber_nodes (TOP_NODE (&A68_JOB), &num);
     NEST (TABLE (TOP_NODE (&A68_JOB))) = A68 (symbol_table_count) = 3;
     reset_symbol_table_nest_count (TOP_NODE (&A68_JOB));
@@ -462,125 +459,43 @@ void compiler_interpreter (void)
   if (A68_MP (varying_mp_digits) > width_to_mp_digits (MP_MAX_DECIMALS)) {
     diagnostic (A68_WARNING, NO_NODE, WARNING_PRECISION, NO_LINE, 0, A68_MP (varying_mp_digits) * LOG_MP_RADIX);
   }
-// Compiler.
+// Plugin code generation and compilation.
   if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_OPT_LEVEL (&A68_JOB) > NO_OPTIMISE) {
-    announce_phase ("optimiser (code generator)");
-    num = 0;
-    renumber_nodes (TOP_NODE (&A68_JOB), &num);
-    A68 (node_register) = (NODE_T **) get_heap_space ((size_t) num * sizeof (NODE_T));
-    ABEND (A68 (node_register) == NO_VAR, ERROR_ACTION, __func__);
-    register_nodes (TOP_NODE (&A68_JOB));
-    FILE_OBJECT_FD (&A68_JOB) = open (FILE_OBJECT_NAME (&A68_JOB), O_WRONLY | O_CREAT | O_TRUNC, A68_PROTECTION);
-    ABEND (FILE_OBJECT_FD (&A68_JOB) == -1, ERROR_ACTION, FILE_OBJECT_NAME (&A68_JOB));
-    FILE_OBJECT_OPENED (&A68_JOB) = A68_TRUE;
-    compiler (FILE_OBJECT_FD (&A68_JOB));
-    ASSERT (close (FILE_OBJECT_FD (&A68_JOB)) == 0);
-    FILE_OBJECT_OPENED (&A68_JOB) = A68_FALSE;
+    announce_phase ("plugin-compiler");
+    plugin_driver_code ();
 #if defined (BUILD_A68_COMPILER)
     emitted = A68_TRUE;
-#endif
-  }
-#if defined (BUILD_A68_COMPILER)
-// Only compile C if the A68 compiler found no errors (constant folder for instance).
-  if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_OPT_LEVEL (&A68_JOB) > 0 && !OPTION_RUN_SCRIPT (&A68_JOB)) {
-    BUFFER cmd, options;
-    BUFCLR (cmd);
-    BUFCLR (options);
-    if (OPTION_RERUN (&A68_JOB) == A68_FALSE) {
-      announce_phase ("optimiser (code compiler)");
-      errno = 0;
-//
-// Compilation on Linux, BSD.
-// Build shared library using gcc or clang.
-// TODO: One day this should be all portable between platforms.
-//
-// -fno-stack-protector is needed for OS's that enforce -fstack-protector-strong which may give
-// undefined reference to `__stack_chk_fail_local'
-// by ld. Ubuntu is one such.
-//
-      ASSERT (snprintf (options, SNPRINTF_SIZE, "%s %s", optimisation_option (), A68_GCC_OPTIONS) >= 0);
-#if defined (HAVE_PIC)
-      bufcat (options, " ", BUFFER_SIZE);
-      bufcat (options, HAVE_PIC, BUFFER_SIZE);
-#endif
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "%s -I%s %s -c -o \"%s\" \"%s\"", C_COMPILER, INCLUDEDIR, options, FILE_BINARY_NAME (&A68_JOB), FILE_OBJECT_NAME (&A68_JOB)) >= 0);
-      ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
-      ASSERT (snprintf (cmd, SNPRINTF_SIZE, "ld -export-dynamic -shared -o \"%s\" \"%s\"", FILE_PLUGIN_NAME (&A68_JOB), FILE_BINARY_NAME (&A68_JOB)) >= 0);
-      ABEND (system (cmd) != 0, ERROR_ACTION, cmd);
-      a68_rm (FILE_BINARY_NAME (&A68_JOB));
+    if (ERROR_COUNT (&A68_JOB) == 0 && !OPTION_RUN_SCRIPT (&A68_JOB)) {
+      plugin_driver_compile ();
     }
     verbosity ();
-  }
 #else
-  if (OPTION_OPT_LEVEL (&A68_JOB) > 0) {
+    emitted = A68_FALSE;
     diagnostic (A68_WARNING | A68_FORCE_DIAGNOSTICS, TOP_NODE (&A68_JOB), WARNING_OPTIMISATION);
-  }
 #endif
+  }
 // Indenter.
   if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_PRETTY (&A68_JOB)) {
     announce_phase ("indenter");
     indenter (&A68_JOB);
     verbosity ();
   }
-// Interpreter.
+// Interpreter initialisation.
   diagnostics_to_terminal (TOP_LINE (&A68_JOB), A68_ALL_DIAGNOSTICS);
-// Restore seed for rng.
+  announce_phase ("genie");
   GetRNGstate ();
   A68 (f_entry) = TOP_NODE (&A68_JOB);
+  A68 (close_tty_on_exit) = A68_FALSE;
+  if (OPTION_DEBUG (&A68_JOB)) {
+    state_license (A68_STDOUT);
+  }
 //
-  if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_COMPILE (&A68_JOB) == A68_FALSE && (OPTION_CHECK_ONLY (&A68_JOB) ? OPTION_RUN (&A68_JOB) : A68_TRUE)) {
+  if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_COMPILE (&A68_JOB) == A68_FALSE && 
+     (OPTION_CHECK_ONLY (&A68_JOB) ? OPTION_RUN (&A68_JOB) : A68_TRUE)) {
 #if defined (BUILD_A68_COMPILER)
-    void *compile_plugin;
-#endif
-    A68 (close_tty_on_exit) = A68_FALSE;        // Assuming no runtime errors a priori
-#if defined (BUILD_A68_COMPILER)
-    if (OPTION_RUN_SCRIPT (&A68_JOB)) {
-      rewrite_script_source ();
-    }
-#endif
-    if (OPTION_DEBUG (&A68_JOB)) {
-      state_license (STDOUT_FILENO);
-    }
-#if defined (BUILD_A68_COMPILER)
-    if (OPTION_OPT_LEVEL (&A68_JOB) > 0) {
-      char plugin_name[BUFFER_SIZE];
-      void *a68_plugin;
-      struct stat srcstat, objstat;
-      int ret;
-      announce_phase ("dynamic linker");
-      ASSERT (snprintf (plugin_name, SNPRINTF_SIZE, "%s", FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
-// Correction when pwd is outside LD_PLUGIN_PATH.
-// The DL cannot be loaded if it is.
-      if (strcmp (plugin_name, a68_basename (plugin_name)) == 0) {
-        ASSERT (snprintf (plugin_name, SNPRINTF_SIZE, "./%s", FILE_PLUGIN_NAME (&A68_JOB)) >= 0);
-      }
-// Check whether we are doing something rash.
-      ret = stat (FILE_SOURCE_NAME (&A68_JOB), &srcstat);
-      ABEND (ret != 0, ERROR_ACTION, FILE_SOURCE_NAME (&A68_JOB));
-      ret = stat (plugin_name, &objstat);
-      ABEND (ret != 0, ERROR_ACTION, plugin_name);
-      if (OPTION_RERUN (&A68_JOB)) {
-        ABEND (ST_MTIME (&srcstat) > ST_MTIME (&objstat), "plugin outdates source", "cannot RERUN");
-      }
-// First load a68g itself so compiler code can resolve a68g symbols.
-      a68_plugin = dlopen (NULL, RTLD_NOW | RTLD_GLOBAL);
-      ABEND (a68_plugin == NULL, ERROR_CANNOT_OPEN_PLUGIN, dlerror ());
-// Then load compiler code.
-      compile_plugin = dlopen (plugin_name, RTLD_NOW | RTLD_GLOBAL);
-      ABEND (compile_plugin == NULL, ERROR_CANNOT_OPEN_PLUGIN, dlerror ());
-    } else {
-      compile_plugin = NULL;
-    }
-    announce_phase ("genie");
-    genie (compile_plugin);
-// Unload compiler plugin.
-    if (OPTION_OPT_LEVEL (&A68_JOB) > 0) {
-      int ret = dlclose (compile_plugin);
-      ABEND (ret != 0, ERROR_ACTION, dlerror ());
-    }
+    plugin_driver_genie ();
 #else
-    announce_phase ("genie");
-    genie (NO_NODE);
+    genie ((void *) NULL);
 #endif
 // Free heap allocated by genie.
     genie_free (TOP_NODE (&A68_JOB));
@@ -591,7 +506,7 @@ void compiler_interpreter (void)
     diagnostics_to_terminal (TOP_LINE (&A68_JOB), A68_RUNTIME_ERROR);
     if (OPTION_DEBUG (&A68_JOB) || OPTION_TRACE (&A68_JOB) || OPTION_CLOCK (&A68_JOB)) {
       ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nGenie finished in %.2f seconds\n", seconds () - A68 (cputime_0)) >= 0);
-      WRITE (STDOUT_FILENO, A68 (output_line));
+      WRITE (A68_STDOUT, A68 (output_line));
     }
     verbosity ();
   }
@@ -621,40 +536,9 @@ void compiler_interpreter (void)
 // Cleaning up the intermediate files.
 #if defined (BUILD_A68_COMPILER)
   announce_phase ("clean up intermediate files");
-  if (OPTION_OPT_LEVEL (&A68_JOB) >= OPTIMISE_0 && OPTION_REGRESSION_TEST (&A68_JOB) && !OPTION_KEEP (&A68_JOB)) {
-    if (emitted) {
-      a68_rm (FILE_OBJECT_NAME (&A68_JOB));
-    }
-    a68_rm (FILE_PLUGIN_NAME (&A68_JOB));
-  }
-  if (OPTION_RUN_SCRIPT (&A68_JOB) && !OPTION_KEEP (&A68_JOB)) {
-    if (emitted) {
-      a68_rm (FILE_OBJECT_NAME (&A68_JOB));
-    }
-    a68_rm (FILE_SOURCE_NAME (&A68_JOB));
-    a68_rm (FILE_PLUGIN_NAME (&A68_JOB));
-  } else if (OPTION_COMPILE (&A68_JOB)) {
-    build_script ();
-    if (!OPTION_KEEP (&A68_JOB)) {
-      if (emitted) {
-        a68_rm (FILE_OBJECT_NAME (&A68_JOB));
-      }
-      a68_rm (FILE_PLUGIN_NAME (&A68_JOB));
-    }
-  } else if (OPTION_OPT_LEVEL (&A68_JOB) == OPTIMISE_0 && !OPTION_KEEP (&A68_JOB)) {
-    if (emitted) {
-      a68_rm (FILE_OBJECT_NAME (&A68_JOB));
-    }
-    a68_rm (FILE_PLUGIN_NAME (&A68_JOB));
-  } else if (OPTION_OPT_LEVEL (&A68_JOB) > OPTIMISE_0 && !OPTION_KEEP (&A68_JOB)) {
-    if (emitted) {
-      a68_rm (FILE_OBJECT_NAME (&A68_JOB));
-    }
-  } else if (OPTION_RERUN (&A68_JOB) && !OPTION_KEEP (&A68_JOB)) {
-    if (emitted) {
-      a68_rm (FILE_OBJECT_NAME (&A68_JOB));
-    }
-  }
+  plugin_driver_clean (emitted);
+#else
+  (void) emitted;
 #endif
 }
 
@@ -782,7 +666,7 @@ int main (int argc, char *argv[])
     read_env_options ();
 // Posix copies arguments from the command line.
     if (argc <= 1) {
-      online_help (STDOUT_FILENO);
+      online_help (A68_STDOUT);
       a68_exit (EXIT_FAILURE);
     }
     for (int k = 1; k < argc; k++) {
@@ -793,11 +677,11 @@ int main (int argc, char *argv[])
     }
 // State license.
     if (OPTION_LICENSE (&A68_JOB)) {
-      state_license (STDOUT_FILENO);
+      state_license (A68_STDOUT);
     }
 // State version.
     if (OPTION_VERSION (&A68_JOB)) {
-      state_version (STDOUT_FILENO);
+      state_version (A68_STDOUT);
     }
 // Start the UI.
     init_before_tokeniser ();

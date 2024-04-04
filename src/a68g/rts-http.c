@@ -30,10 +30,6 @@
 
 #if defined (BUILD_WWW)
 
-#if defined (HAVE_ARPA_INET_H)
-#  include <arpa/inet.h>
-#endif
-
 #if defined (HAVE_NETDB_H)
 #  include <netdb.h>
 #endif

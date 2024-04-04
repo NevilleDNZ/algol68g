@@ -26,8 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-double.h"
 #include "a68g-transput.h"
 
 //! @brief Return code for regex interface.

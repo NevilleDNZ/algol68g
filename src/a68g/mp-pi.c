@@ -24,9 +24,6 @@
 //! [LONG] LONG REAL value of pi by AGM.
 
 #include "a68g.h"
-#include "a68g-genie.h"
-#include "a68g-prelude.h"
-#include "a68g-double.h"
 #include "a68g-mp.h"
 
 //! @brief Return "pi" with "digs" precision, using Borwein & Borwein AGM.
@@ -36,9 +33,13 @@ MP_T *mp_pi (NODE_T * p, MP_T * api, int mod, int digs)
   int gdigs = FUN_DIGITS (digs);
   if (gdigs > A68_MP (mp_pi_size)) {
 //
-// No luck with the kept value, hence we generate a longer "pi".
-// Calculate "pi" using the Borwein & Borwein AGM algorithm.
-// This AGM doubles the numbers of digits every iteration.
+// No luck with the cached value, so we compute a longer "pi".
+//
+// Calculate "pi" using a Borwein & Borwein AGM algorithm that doubles 
+// the numbers of digits on each iteration.
+//
+// J. M. Borwein, P. B. Borwein. "Pi and the AGM – A Study in Analytic Number
+// Theory and Computational Complexity", Wiley, New York, 1987.
 //
     a68_free (A68_MP (mp_pi));
     a68_free (A68_MP (mp_half_pi));

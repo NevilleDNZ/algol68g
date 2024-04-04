@@ -35,7 +35,6 @@
 #include "a68g-frames.h"
 #include "a68g-prelude.h"
 #include "a68g-mp.h"
-#include "a68g-double.h"
 #include "a68g-parser.h"
 #include "a68g-transput.h"
 
@@ -372,7 +371,7 @@ void genie (void *compile_plugin)
   io_close_tty_line ();
   if (OPTION_TRACE (&A68_JOB)) {
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", A68 (frame_stack_size) / KILOBYTE, A68 (expr_stack_size) / KILOBYTE, A68 (heap_size) / KILOBYTE, A68 (handle_pool_size) / KILOBYTE) >= 0);
-    WRITE (STDOUT_FILENO, A68 (output_line));
+    WRITE (A68_STDOUT, A68 (output_line));
   }
   install_signal_handlers ();
   set_default_event_procedure (&A68 (on_gc_event));
@@ -386,7 +385,7 @@ void genie (void *compile_plugin)
 // If we are to stop in the monitor, set a breakpoint on the first unit.
     if (OPTION_DEBUG (&A68_JOB)) {
       change_masks (TOP_NODE (&A68_JOB), BREAKPOINT_TEMPORARY_MASK, A68_TRUE);
-      WRITE (STDOUT_FILENO, "Execution begins ...");
+      WRITE (A68_STDOUT, "Execution begins ...");
     }
     errno = 0;
     A68 (ret_code) = 0;
@@ -421,7 +420,7 @@ void genie (void *compile_plugin)
   } else {
 // Here we have jumped out of the interpreter. What happened?.
     if (OPTION_DEBUG (&A68_JOB)) {
-      WRITE (STDOUT_FILENO, "Execution discontinued");
+      WRITE (A68_STDOUT, "Execution discontinued");
     }
     if (A68 (ret_code) == A68_RERUN) {
       diagnostics_to_terminal (TOP_LINE (&A68_JOB), A68_RUNTIME_ERROR);
@@ -430,9 +429,9 @@ void genie (void *compile_plugin)
       if (OPTION_BACKTRACE (&A68_JOB)) {
         int printed = 0;
         ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nStack backtrace") >= 0);
-        WRITE (STDOUT_FILENO, A68 (output_line));
-        stack_dump (STDOUT_FILENO, A68_FP, 16, &printed);
-        WRITE (STDOUT_FILENO, NEWLINE_STRING);
+        WRITE (A68_STDOUT, A68 (output_line));
+        stack_dump (A68_STDOUT, A68_FP, 16, &printed);
+        WRITE (A68_STDOUT, NEWLINE_STRING);
       }
       if (FILE_LISTING_OPENED (&A68_JOB)) {
         int printed = 0;

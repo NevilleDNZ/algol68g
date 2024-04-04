@@ -120,11 +120,10 @@
 #if defined (BUILD_PARALLEL_CLAUSE)
 #define OPEN_STATIC_FRAME(p) {\
   ADDR_T dynamic_link = A68_FP, static_link;\
-  ACTIVATION_RECORD *act, *pre;\
   STATIC_LINK_FOR_FRAME (static_link, LEX_LEVEL (p));\
-  pre = FACT (A68_FP);\
+  ACTIVATION_RECORD *pre = FACT (A68_FP);\
   A68_FP += FRAME_SIZE (dynamic_link);\
-  act = FACT (A68_FP);\
+  ACTIVATION_RECORD *act = FACT (A68_FP);\
   FRAME_NO (act) = FRAME_NO (pre) + 1;\
   FRAME_LEVEL (act) = LEX_LEVEL (p);\
   PARAMETER_LEVEL (act) = PARAMETER_LEVEL (pre);\
@@ -140,11 +139,10 @@
 #else
 #define OPEN_STATIC_FRAME(p) {\
   ADDR_T dynamic_link = A68_FP, static_link;\
-  ACTIVATION_RECORD *act, *pre;\
   STATIC_LINK_FOR_FRAME (static_link, LEX_LEVEL (p));\
-  pre = FACT (A68_FP);\
+  ACTIVATION_RECORD *pre = FACT (A68_FP);\
   A68_FP += FRAME_SIZE (dynamic_link);\
-  act = FACT (A68_FP);\
+  ACTIVATION_RECORD *act = FACT (A68_FP);\
   FRAME_NO (act) = FRAME_NO (pre) + 1;\
   FRAME_LEVEL (act) = LEX_LEVEL (p);\
   PARAMETER_LEVEL (act) = PARAMETER_LEVEL (pre);\
@@ -163,16 +161,14 @@
 
 #if defined (BUILD_PARALLEL_CLAUSE)
 #define OPEN_PROC_FRAME(p, environ) {\
-  ADDR_T dynamic_link = A68_FP, static_link;\
-  ACTIVATION_RECORD *act;\
   LOW_STACK_ALERT (p);\
-  static_link = (environ > 0 ? environ : A68_FP);\
+  ADDR_T dynamic_link = A68_FP, static_link = (environ > 0 ? environ : A68_FP);\
   if (A68_FP < static_link) {\
     diagnostic (A68_RUNTIME_ERROR, (p), ERROR_SCOPE_DYNAMIC_0);\
     exit_genie (p, A68_RUNTIME_ERROR);\
   }\
   A68_FP += FRAME_SIZE (dynamic_link);\
-  act = FACT (A68_FP);\
+  ACTIVATION_RECORD *act = FACT (A68_FP);\
   FRAME_NO (act) = FRAME_NUMBER (dynamic_link) + 1;\
   FRAME_LEVEL (act) = LEX_LEVEL (p);\
   PARAMETER_LEVEL (act) = LEX_LEVEL (p);\
@@ -187,16 +183,14 @@
   }
 #else
 #define OPEN_PROC_FRAME(p, environ) {\
-  ADDR_T dynamic_link = A68_FP, static_link;\
-  ACTIVATION_RECORD *act;\
   LOW_STACK_ALERT (p);\
-  static_link = (environ > 0 ? environ : A68_FP);\
+  ADDR_T dynamic_link = A68_FP, static_link = (environ > 0 ? environ : A68_FP);\
   if (A68_FP < static_link) {\
     diagnostic (A68_RUNTIME_ERROR, (p), ERROR_SCOPE_DYNAMIC_0);\
     exit_genie (p, A68_RUNTIME_ERROR);\
   }\
   A68_FP += FRAME_SIZE (dynamic_link);\
-  act = FACT (A68_FP);\
+  ACTIVATION_RECORD *act = FACT (A68_FP);\
   FRAME_NO (act) = FRAME_NUMBER (dynamic_link) + 1;\
   FRAME_LEVEL (act) = LEX_LEVEL (p);\
   PARAMETER_LEVEL (act) = LEX_LEVEL (p);\

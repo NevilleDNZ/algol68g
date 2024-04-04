@@ -178,22 +178,22 @@ void reduce (NODE_T * p, void (*a) (NODE_T *), BOOL_T * z, ...)
     A68_PARSER (reductions)++;
     WIS (head);
     ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "\nReduction %d: %s<-", A68_PARSER (reductions), non_terminal_string (A68 (edit_line), result)) >= 0);
-    WRITE (STDOUT_FILENO, A68 (output_line));
+    WRITE (A68_STDOUT, A68 (output_line));
     int count = 0;
     for (NODE_T *q = head; q != NO_NODE && tail != NO_NODE && q != NEXT (tail); FORWARD (q), count++) {
       int gatt = ATTRIBUTE (q);
       char *str = non_terminal_string (A68 (input_line), gatt);
       if (count > 0) {
-        WRITE (STDOUT_FILENO, ", ");
+        WRITE (A68_STDOUT, ", ");
       }
       if (str != NO_TEXT) {
-        WRITE (STDOUT_FILENO, str);
+        WRITE (A68_STDOUT, str);
         if (gatt == IDENTIFIER || gatt == OPERATOR || gatt == DENOTATION || gatt == INDICANT) {
           ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, " \"%s\"", NSYMBOL (q)) >= 0);
-          WRITE (STDOUT_FILENO, A68 (output_line));
+          WRITE (A68_STDOUT, A68 (output_line));
         }
       } else {
-        WRITE (STDOUT_FILENO, NSYMBOL (q));
+        WRITE (A68_STDOUT, NSYMBOL (q));
       }
     }
   }

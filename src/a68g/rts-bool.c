@@ -26,11 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-physics.h"
-#include "a68g-numbers.h"
-#include "a68g-optimiser.h"
-#include "a68g-double.h"
 
 // BOOL operations.
 

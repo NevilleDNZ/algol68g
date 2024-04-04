@@ -483,9 +483,9 @@ void a68_parser (void)
     if (OPTION_REGRESSION_TEST (&A68_JOB)) {
       bufcpy (A68 (a68_cmd_name), "a68g", BUFFER_SIZE);
       io_close_tty_line ();
-      WRITE (STDERR_FILENO, "[");
-      WRITE (STDERR_FILENO, FILE_INITIAL_NAME (&A68_JOB));
-      WRITE (STDERR_FILENO, "]\n");
+      WRITE (A68_STDERR, "[");
+      WRITE (A68_STDERR, FILE_INITIAL_NAME (&A68_JOB));
+      WRITE (A68_STDERR, "]\n");
     }
     A68_STANDENV = NO_TABLE;
     init_postulates ();

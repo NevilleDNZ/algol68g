@@ -26,14 +26,14 @@
 #if !defined (__A68G_OPTIONS_H__)
 #define __A68G_OPTIONS_H__ 
 
-extern BOOL_T set_options (OPTION_LIST_T *, BOOL_T);
-extern char *optimisation_option (void);
-extern void add_option_list (OPTION_LIST_T **, char *, LINE_T *);
-extern void free_option_list (OPTION_LIST_T *);
-extern void default_options (MODULE_T *);
-extern void init_options (void);
-extern void isolate_options (char *, LINE_T *);
-extern void read_env_options (void);
-extern void read_rc_options (void);
+BOOL_T set_options (OPTION_LIST_T *, BOOL_T);
+char *optimisation_option (void);
+void add_option_list (OPTION_LIST_T **, char *, LINE_T *);
+void free_option_list (OPTION_LIST_T *);
+void default_options (MODULE_T *);
+void init_options (void);
+void isolate_options (char *, LINE_T *);
+void read_env_options (void);
+void read_rc_options (void);
 
 #endif

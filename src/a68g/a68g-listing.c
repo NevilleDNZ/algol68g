@@ -25,8 +25,6 @@
 
 #include "a68g.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-genie.h"
 #include "a68g-listing.h"
 #include "a68g-parser.h"
 #include "a68g-optimiser.h"
@@ -615,7 +613,7 @@ void write_object_listing (void)
     WRITE (FILE_LISTING_FD (&A68_JOB), "\nObject listing");
     WRITE (FILE_LISTING_FD (&A68_JOB), "\n------ -------");
     WRITE (FILE_LISTING_FD (&A68_JOB), NEWLINE_STRING);
-    compiler (FILE_LISTING_FD (&A68_JOB));
+    plugin_driver_emit (FILE_LISTING_FD (&A68_JOB));
   }
 }
 

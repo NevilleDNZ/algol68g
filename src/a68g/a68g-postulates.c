@@ -24,9 +24,6 @@
 //! Postulates needed for proving equivalence of modes.
 
 #include "a68g.h"
-#include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-genie.h"
 #include "a68g-postulates.h"
 
 //! @brief Initialise use of postulate-lists.

@@ -26,11 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-mp.h"
-#include "a68g-physics.h"
-#include "a68g-numbers.h"
-#include "a68g-optimiser.h"
-#include "a68g-double.h"
 #include "a68g-transput.h"
 
 #define VECTOR_SIZE 512
@@ -214,7 +209,7 @@ int find_good_arg (void)
 
 //! @brief PROC INT a68g argc
 
-void genie_a68_argc (NODE_T * p)
+void genie_a68g_argc (NODE_T * p)
 {
   errno = 0;
   PUSH_VALUE (p, A68 (argc) - find_good_arg (), A68_INT);
@@ -222,7 +217,7 @@ void genie_a68_argc (NODE_T * p)
 
 //! @brief PROC (INT) STRING a68_argv
 
-void genie_a68_argv (NODE_T * p)
+void genie_a68g_argv (NODE_T * p)
 {
   errno = 0;
   A68_INT a68_index;
@@ -722,10 +717,10 @@ void genie_exec_sub_pipeline (NODE_T * p)
 // Set up redirection.
     ASSERT (close (ctop_fd[FD_READ]) == 0);
     ASSERT (close (ptoc_fd[FD_WRITE]) == 0);
-    ASSERT (close (STDIN_FILENO) == 0);
-    ASSERT (close (STDOUT_FILENO) == 0);
-    ASSERT (dup2 (ptoc_fd[FD_READ], STDIN_FILENO) != -1);
-    ASSERT (dup2 (ctop_fd[FD_WRITE], STDOUT_FILENO) != -1);
+    ASSERT (close (A68_STDIN) == 0);
+    ASSERT (close (A68_STDOUT) == 0);
+    ASSERT (dup2 (ptoc_fd[FD_READ], A68_STDIN) != -1);
+    ASSERT (dup2 (ctop_fd[FD_WRITE], A68_STDOUT) != -1);
     if (argv[0] == NO_TEXT) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
       exit_genie (p, A68_RUNTIME_ERROR);
@@ -788,10 +783,10 @@ void genie_exec_sub_output (NODE_T * p)
 // Set up redirection.
     ASSERT (close (ctop_fd[FD_READ]) == 0);
     ASSERT (close (ptoc_fd[FD_WRITE]) == 0);
-    ASSERT (close (STDIN_FILENO) == 0);
-    ASSERT (close (STDOUT_FILENO) == 0);
-    ASSERT (dup2 (ptoc_fd[FD_READ], STDIN_FILENO) != -1);
-    ASSERT (dup2 (ctop_fd[FD_WRITE], STDOUT_FILENO) != -1);
+    ASSERT (close (A68_STDIN) == 0);
+    ASSERT (close (A68_STDOUT) == 0);
+    ASSERT (dup2 (ptoc_fd[FD_READ], A68_STDIN) != -1);
+    ASSERT (dup2 (ctop_fd[FD_WRITE], A68_STDOUT) != -1);
     if (argv[0] == NO_TEXT) {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_ARGUMENT);
       exit_genie (p, A68_RUNTIME_ERROR);

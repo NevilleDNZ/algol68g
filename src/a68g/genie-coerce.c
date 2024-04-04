@@ -30,7 +30,6 @@
 #include "a68g-mp.h"
 #include "a68g-double.h"
 #include "a68g-parser.h"
-#include "a68g-transput.h"
 
 //! @brief Push result of cast (coercions are deeper in the tree).
 
@@ -214,10 +213,10 @@ PROP_T genie_widen (NODE_T * p)
     A68_BITS x;
     POP_OBJECT (p, &x, A68_BITS);
     A68_REF z, row; A68_ARRAY arr; A68_TUPLE tup;
-    NEW_ROW_1D (z, row, arr, tup, M_ROW_BOOL, M_BOOL, BITS_WIDTH);
-    BYTE_T *base = ADDRESS (&row) + SIZE (M_BOOL) * (BITS_WIDTH - 1);
+    NEW_ROW_1D (z, row, arr, tup, M_ROW_BOOL, M_BOOL, A68_BITS_WIDTH);
+    BYTE_T *base = ADDRESS (&row) + SIZE (M_BOOL) * (A68_BITS_WIDTH - 1);
     UNSIGNED_T bit = 1;
-    for (int k = BITS_WIDTH - 1; k >= 0; k--, base -= SIZE (M_BOOL), bit <<= 1) {
+    for (int k = A68_BITS_WIDTH - 1; k >= 0; k--, base -= SIZE (M_BOOL), bit <<= 1) {
       STATUS ((A68_BOOL *) base) = INIT_MASK;
       VALUE ((A68_BOOL *) base) = (BOOL_T) ((VALUE (&x) & bit) != 0 ? A68_TRUE : A68_FALSE);
     }
@@ -228,15 +227,15 @@ PROP_T genie_widen (NODE_T * p)
     A68_LONG_BITS x;
     POP_OBJECT (p, &x, A68_LONG_BITS);
     A68_REF z, row; A68_ARRAY arr; A68_TUPLE tup;
-    NEW_ROW_1D (z, row, arr, tup, M_ROW_BOOL, M_BOOL, LONG_BITS_WIDTH);
-    BYTE_T *base = ADDRESS (&row) + SIZE (M_BOOL) * (LONG_BITS_WIDTH - 1);
+    NEW_ROW_1D (z, row, arr, tup, M_ROW_BOOL, M_BOOL, A68_LONG_BITS_WIDTH);
+    BYTE_T *base = ADDRESS (&row) + SIZE (M_BOOL) * (A68_LONG_BITS_WIDTH - 1);
     UNSIGNED_T bit = 1;
-    for (int k = BITS_WIDTH - 1; k >= 0; k--, base -= SIZE (M_BOOL), bit <<= 1) {
+    for (int k = A68_BITS_WIDTH - 1; k >= 0; k--, base -= SIZE (M_BOOL), bit <<= 1) {
       STATUS ((A68_BOOL *) base) = INIT_MASK;
       VALUE ((A68_BOOL *) base) = (BOOL_T) ((LW (VALUE (&x)) & bit) != 0 ? A68_TRUE : A68_FALSE);
     }
     bit = 1;
-    for (int k = BITS_WIDTH - 1; k >= 0; k--, base -= SIZE (M_BOOL), bit <<= 1) {
+    for (int k = A68_BITS_WIDTH - 1; k >= 0; k--, base -= SIZE (M_BOOL), bit <<= 1) {
       STATUS ((A68_BOOL *) base) = INIT_MASK;
       VALUE ((A68_BOOL *) base) = (BOOL_T) ((HW (VALUE (&x)) & bit) != 0 ? A68_TRUE : A68_FALSE);
     }
@@ -254,12 +253,12 @@ PROP_T genie_widen (NODE_T * p)
     GENIE_UNIT (SUB (p));
     A68_BYTES z;
     POP_OBJECT (p, &z, A68_BYTES);
-    PUSH_REF (p, c_string_to_row_char (p, VALUE (&z), BYTES_WIDTH));
+    PUSH_REF (p, c_string_to_row_char (p, VALUE (&z), A68_BYTES_WIDTH));
   } else if (COERCE_FROM_TO (p, M_LONG_BYTES, M_ROW_CHAR) || COERCE_FROM_TO (p, M_LONG_BYTES, M_FLEX_ROW_CHAR)) {
     GENIE_UNIT (SUB (p));
     A68_LONG_BYTES z;
     POP_OBJECT (p, &z, A68_LONG_BYTES);
-    PUSH_REF (p, c_string_to_row_char (p, VALUE (&z), LONG_BYTES_WIDTH));
+    PUSH_REF (p, c_string_to_row_char (p, VALUE (&z), A68_LONG_BYTES_WIDTH));
   } else {
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_CANNOT_WIDEN, MOID (SUB (p)), MOID (p));
     exit_genie (p, A68_RUNTIME_ERROR);

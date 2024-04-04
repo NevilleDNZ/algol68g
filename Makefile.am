@@ -60,6 +60,7 @@ a68g_SOURCES = \
 ./src/a68g/parser-victal.c \
 ./src/a68g/plugin-basic.c \
 ./src/a68g/plugin.c \
+./src/a68g/plugin-driver.c \
 ./src/a68g/plugin-folder.c \
 ./src/a68g/plugin-gen.c \
 ./src/a68g/plugin-inline.c \
@@ -77,7 +78,9 @@ a68g_SOURCES = \
 ./src/a68g/rts-heap.c \
 ./src/a68g/rts-http.c \
 ./src/a68g/rts-https.c \
+./src/a68g/rts-int128.c \
 ./src/a68g/rts-internal.c \
+./src/a68g/rts-mach.c \
 ./src/a68g/rts-monitor.c \
 ./src/a68g/rts-parallel.c \
 ./src/a68g/rts-plotutils.c \
@@ -117,6 +120,7 @@ a68g_SOURCES = \
 ./src/include/a68g-level-3.h \
 ./src/include/a68g-lib.h \
 ./src/include/a68g-listing.h \
+./src/include/a68g-mach.h \
 ./src/include/a68g-masks.h \
 ./src/include/a68g-math.h \
 ./src/include/a68g-moids.h \
@@ -155,6 +159,7 @@ pkginclude_HEADERS = \
 ./src/include/a68g-level-3.h \
 ./src/include/a68g-lib.h \
 ./src/include/a68g-listing.h \
+./src/include/a68g-mach.h \
 ./src/include/a68g-masks.h \
 ./src/include/a68g-math.h \
 ./src/include/a68g-moids.h \
@@ -207,11 +212,13 @@ TESTS=\
 	./src/test-set/23-queens.a68\
 	./src/test-set/24-quicksort.a68\
 	./src/test-set/25-rationals.a68\
-	./src/test-set/26-semana-santa.a68\
-	./src/test-set/27-tukey.a68\
-	./src/test-set/28-whetstones.a68\
-	./src/test-set/29-www.a68\
-	./src/test-set/30-zeroin.a68
+	./src/test-set/26-roman-decimal.a68\
+	./src/test-set/27-semana-santa.a68\
+	./src/test-set/28-tukey.a68\
+	./src/test-set/29-warshall.a68\
+	./src/test-set/30-whetstones.a68\
+	./src/test-set/31-www.a68\
+	./src/test-set/32-zeroin.a68
 if EXPORT_DYNAMIC
 a68g_LDFLAGS = -Wl,--export-dynamic
 else

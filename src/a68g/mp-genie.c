@@ -26,7 +26,6 @@
 #include "a68g.h"
 #include "a68g-genie.h"
 #include "a68g-prelude.h"
-#include "a68g-double.h"
 #include "a68g-mp.h"
 
 //! brief LONG REAL long infinity
@@ -358,6 +357,13 @@ void genie_atanh_mp (NODE_T * p)
 void genie_sin_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, sin_mp);
+}
+
+//! @brief PROC (LONG REAL) LONG REAL long cas
+
+void genie_cas_mp (NODE_T * p)
+{
+  C_L_FUNCTION (p, cas_mp);
 }
 
 //! @brief PROC (LONG REAL) LONG REAL long cos
@@ -1238,98 +1244,127 @@ void genie_long_next_random (NODE_T * p)
   }
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long csc
 
 void genie_csc_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, csc_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long acsc
 
 void genie_acsc_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, acsc_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long sec
 
 void genie_sec_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, sec_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long asec
 
 void genie_asec_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, asec_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long cot
 
 void genie_cot_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, cot_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long acot
 
 void genie_acot_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, acot_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long sindg
 
 void genie_sindg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, sindg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long cosdg
 
 void genie_cosdg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, cosdg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long tandg
 
 void genie_tandg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, tandg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long secdg
+
+void genie_secdg_mp (NODE_T * p)
+{
+  C_L_FUNCTION (p, secdg_mp);
+}
+
+//! @brief PROC (LONG REAL) LONG REAL long asecdg
+
+void genie_asecdg_mp (NODE_T * p)
+{
+  C_L_FUNCTION (p, asecdg_mp);
+}
+
+//! @brief PROC (LONG REAL) LONG REAL long cscdg
+
+void genie_cscdg_mp (NODE_T * p)
+{
+  C_L_FUNCTION (p, cscdg_mp);
+}
+
+//! @brief PROC (LONG REAL) LONG REAL long acscdg
+
+void genie_acscdg_mp (NODE_T * p)
+{
+  C_L_FUNCTION (p, acscdg_mp);
+}
+
+
+//! @brief PROC (LONG REAL) LONG REAL long cotdg
 
 void genie_cotdg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, cotdg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long asindg
 
 void genie_asindg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, asindg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long acosdg
 
 void genie_acosdg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, acosdg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long atandg
 
 void genie_atandg_mp (NODE_T * p)
 {
   C_L_FUNCTION (p, atandg_mp);
 }
 
-//! @brief PROC (LONG REAL) LONG REAL long
+//! @brief PROC (LONG REAL) LONG REAL long acotdg
 
 void genie_acotdg_mp (NODE_T * p)
 {

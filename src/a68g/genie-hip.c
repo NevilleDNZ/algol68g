@@ -29,8 +29,6 @@
 #include "a68g-prelude.h"
 #include "a68g-mp.h"
 #include "a68g-double.h"
-#include "a68g-parser.h"
-#include "a68g-transput.h"
 
 //! @brief Push an undefined value of the required mode.
 
