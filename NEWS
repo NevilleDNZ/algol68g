@@ -1,6 +1,7 @@
-Version 3.3.1-16, August/September 2023
+Version 3.3.1-24, August/September 2023
 * Fix configuration issue for 32-bit systems.
 * Minor fixes.
+* Distribution updates.
 
 Version 3.3.0, August 2023
 * Minor fixes.

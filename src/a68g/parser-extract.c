@@ -1,11 +1,11 @@
 //! @file parser-extract.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -27,7 +27,6 @@
 #include "a68g-parser.h"
 
 // This is part of the bottom-up parser.
-//
 // Here is a set of routines that gather definitions from phrases.
 // This way we can apply tags before defining them.
 // These routines do not look very elegant as they have to scan through all

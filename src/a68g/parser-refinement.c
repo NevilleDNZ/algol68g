@@ -1,11 +1,11 @@
 //! @file parser-refinement.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -28,39 +28,32 @@
 
 // This code implements a small refinement preprocessor for A68G.
 // It is included for educational purposes only.
-//
 // At the University of Nijmegen a preprocessor much like this one
 // was used as a front-end to FLACC in freshman programming courses.
 //
 // See: 
-//
 //   C.H.A. Koster et al., 
 //   Systematisch programmeren in Algol 68, Deel I en II.
 //   Kluwer, Deventer [1978, 1981]
 //
 // The superimposed 'refinement grammar' is trivial:
-//
 //   refined-program-option:
 //     refined-algol-68-source-code;
 //     point-symbol;
 //     refinement-definition-sequence-option.
-//
 //   refinement-definition:
 //     defining-identifier;
 //     colon-symbol;
 //     refined-Algol-68-source-code;
 //     point-symbol.
-//
 //   refined-algol-68-source-code:
 //     # valid source code,
 //       with applied-refinements,
 //       without refinement-definitions #.
-//
 //   applied-refinement:
 //     identifier.
 //
 // An applied-refinement is textually substituted for its definition.
-//
 // Note that refinement-definitions cannot be nested.
 // Nested refinement-definitions would allow conflict with Algol 68 labels.
 // The naive approach (no nesting) was chosen here to keep matters simple.

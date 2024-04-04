@@ -1,11 +1,11 @@
 //! @file rts-plotutils.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -180,9 +180,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "X plotter missing", "");
     exit_genie (p, A68_RUNTIME_ERROR);
 #else
-//
 // Supported plotter type - X Window System
-//
     char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
 // Establish page size.
     if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
@@ -232,9 +230,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     return PLOTTER (&DEVICE (f));
 #endif
   } else if (!strcmp (device_type, "gif")) {
-//
 // Supported plotter type - pseudo GIF
-//
     char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
 // Establish page size.
     if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
@@ -293,9 +289,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     Y_COORD (&DEVICE (f)) = 0;
     return PLOTTER (&DEVICE (f));
   } else if (!strcmp (device_type, "pnm")) {
-//
 // Supported plotter type - Portable aNyMap
-//
     char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
 // Establish page size.
     if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
@@ -358,9 +352,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "PNG plotter missing", "");
     exit_genie (p, A68_RUNTIME_ERROR);
 #else
-//
 // Supported plotter type - PNG
-//
     char *z = DEREF (char, &A68_PAGE_SIZE (&DEVICE (f))), size[BUFFER_SIZE];
 // Establish page size.
     if (!scan_int (&z, &(WINDOW_X_SIZE (&DEVICE (f))))) {
@@ -424,9 +416,7 @@ plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
     diagnostic (A68_RUNTIME_ERROR, p, ERROR_INVALID_PARAMETER, "postscript plotter missing", "");
     exit_genie (p, A68_RUNTIME_ERROR);
 #else
-//
 // Supported plotter type - Postscript
-//
 // Open the output file for drawing.
     CHECK_REF (p, ref_filename, M_ROWS);
     char *filename = DEREF (char, &ref_filename);

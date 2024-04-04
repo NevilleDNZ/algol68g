@@ -1,11 +1,11 @@
 //! @file genie-unix.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -682,7 +682,6 @@ void genie_exec_sub_pipeline (NODE_T * p)
 //  PARENT         CHILD
 //        <-R...W<-
 //        pipe ctop
-//
   errno = 0;
   A68_REF a_prog, a_args, a_env;
   POP_REF (p, &a_env);
@@ -749,7 +748,6 @@ void genie_exec_sub_output (NODE_T * p)
 //  PARENT         CHILD
 //        <-R...W<-
 //       pipe ctop
-//
   errno = 0;
   A68_REF a_prog, a_args, a_env, dest;
   POP_REF (p, &dest);

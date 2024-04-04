@@ -1,11 +1,11 @@
 //! @file double-gamic.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -24,7 +24,9 @@
 //! LONG REAL generalised incomplete gamma function.
 
 // Generalised incomplete gamma code in this file was downloaded from 
+//
 //   [http://helios.mi.parisdescartes.fr/~rabergel/]
+//
 // and adapted for Algol 68 Genie.
 //
 // Reference:
@@ -32,7 +34,6 @@
 //   generalized incomplete gamma function. 2019. hal-01329669v2
 //
 // Original source code copyright and license:
-//
 // DELTAGAMMAINC Fast and Accurate Evaluation of a Generalized Incomplete Gamma
 // Function. Copyright (C) 2016 Remy Abergel (remy.abergel AT gmail.com), Lionel
 // Moisan (Lionel.Moisan AT parisdescartes.fr).
@@ -40,7 +41,6 @@
 // This file is a part of the DELTAGAMMAINC software, dedicated to the
 // computation of a generalized incomplete gammafunction. See the Companion paper
 // for a complete description of the algorithm.
-//
 // ``Fast and accurate evaluation of a generalized incomplete gamma function''
 // (Rémy Abergel, Lionel Moisan), preprint MAP5 nº2016-14, revision 1.
 //
@@ -48,7 +48,6 @@
 // the terms of the GNU General Public License as published by the Free Software
 // Foundation, either version 3 of the License, or (at your option) any later
 // version.
-//
 // This program is distributed in the hope that it will be useful, but WITHOUT
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
@@ -58,21 +57,16 @@
 // this program.  If not, see [http://www.gnu.org/licenses/].
 
 // References
-//
 //   R. Abergel and L. Moisan. 2016. Fast and accurate evaluation of a
 //   generalized incomplete gamma function, preprint MAP5 nº2016-14, revision 1
-//
 //   Rémy Abergel, Lionel Moisan. Fast and accurate evaluation of a
 //   generalized incomplete gamma function. 2019. hal-01329669v2
-//
 //   F. W. J. Olver, D. W. Lozier, R. F. Boisvert, and C. W. Clark
 //   (Eds.). 2010. NIST Handbook of Mathematical Functions. Cambridge University
 //   Press. (see online version at [http://dlmf.nist.gov/])
-//
 //   W. H. Press, S. A. Teukolsky, W. T. Vetterling, and
 //   B. P. Flannery. 1992. Numerical recipes in C: the art of scientific
 //   computing (2nd ed.).
-//
 //   G. R. Pugh, 2004. An analysis of the Lanczos Gamma approximation (phd
 //   thesis)
 
@@ -90,7 +84,6 @@
 #define TOL_ROMBERG 0.1q        // Tolerance factor used to stop the Romberg iterations
 
 //! @brief compute G(p,x) in the domain x <= p using a continued fraction
-//
 // p >= 0
 // x <= p
 
@@ -131,7 +124,6 @@ void double_G_cfrac_lower (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
 //! @brief compute the G-function in the domain x < 0 and |x| < max (1,p-1)
 // using a recursive integration by parts relation.
 // This function cannot be used when mu > 0.
-//
 // p > 0, integer
 // x < 0, |x| < max (1,p-1)
 
@@ -160,7 +152,6 @@ void double_G_ibp (DOUBLE_T * Gibp, DOUBLE_T p, DOUBLE_T x)
 
 //! @brief compute plim (x), the limit of the partition of the domain (p,x)
 // detailed in the paper.
-//
 //            |      x              if   0 < x
 //            |
 // plim (x) = <      0              if -9 <= x <= 0
@@ -174,7 +165,6 @@ DOUBLE_T double_plim (DOUBLE_T x)
 
 //! @brief compute the G-function in the domain x > p using a
 // continued fraction.
-//
 // p > 0
 // x > p, or x = +infinity
 
@@ -229,12 +219,10 @@ void double_G_cfrac_upper (DOUBLE_T * Gcfrac, DOUBLE_T p, DOUBLE_T x)
 }
 
 //! @brief compute G : (p,x) --> R defined as follows
-//
 // if x <= p:
 //   G(p,x) = exp (x-p*ln (|x|)) * integral of s^{p-1} * exp (-sign (x)*s) ds from s = 0 to |x|
 // otherwise:
 //   G(p,x) = exp (x-p*ln (|x|)) * integral of s^{p-1} * exp (-s) ds from s = x to infinity
-//
 //   p > 0
 //   x is a real number or +infinity.
 
@@ -300,18 +288,13 @@ void double_romberg_estimate (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUB
 }
 
 //! @brief compute generalized incomplete gamma function I_{x,y}^{mu,p}
-//
 //   I_{x,y}^{mu,p} = integral from x to y of s^{p-1} * exp (-mu*s) ds
-//
 // This procedure computes (rho, sigma) described below.
 // The approximated value of I_{x,y}^{mu,p} is I = rho * exp (sigma)
-//
 //   mu is a real number non equal to zero 
 //     (in general we take mu = 1 or -1 but any nonzero real number is allowed)
-//
 //   x, y are two numbers with 0 <= x <= y <= +infinity,
 //     (the setting y=+infinity is allowed only when mu > 0)
-//
 //   p is a real number > 0, p must be an integer when mu < 0.
 
 void deltagammainc_double (DOUBLE_T * rho, DOUBLE_T * sigma, DOUBLE_T x, DOUBLE_T y, DOUBLE_T mu, DOUBLE_T p)

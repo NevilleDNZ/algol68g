@@ -1,11 +1,11 @@
 //! @file rts-internal.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -30,14 +30,12 @@
 
 // These routines use A68G's RR transput routines,
 // essentially mimicking code of the form
-//
 //    PROC puts = (REF STRING s, [] SIMPLOUT items) VOID:
 //         BEGIN FILE f;
 //               associate (f, s);
 //               put (f, items);
 //               close (f)
 //         END 
-//
 // which is not the most efficient, though practical.
 
 static void associate (A68_FILE *f, A68_REF s)
@@ -296,7 +294,6 @@ void genie_string (NODE_T * p)
     }
     * DEREF (A68_REF, &ref_string) = c_to_a_string (p, get_transput_buffer (UNFORMATTED_BUFFER), DEFAULT_WIDTH);
   }
-//
   PUSH_REF (p, ref_string);
 // Discard temp file.
   unblock_transput_buffer (TRANSPUT_BUFFER (file));
@@ -358,7 +355,6 @@ void genie_stringf (NODE_T * p)
   A68_SP = STACK_POINTER (file);
   FRAME_POINTER (file) = pop_fp;
   STACK_POINTER (file) = pop_sp;
-//
   PUSH_REF (p, ref_string);
 // Discard temp file.
   unblock_transput_buffer (TRANSPUT_BUFFER (file));

@@ -1,11 +1,11 @@
 //! @file mp-pi.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -26,21 +26,18 @@
 #include "a68g.h"
 #include "a68g-mp.h"
 
-//! @brief Return "pi" with "digs" precision, using Borwein & Borwein AGM.
+//! @brief Return "pi" with "digs" precision, using a Borwein & Borwein AGM.
 
 MP_T *mp_pi (NODE_T * p, MP_T * api, int mod, int digs)
 {
   int gdigs = FUN_DIGITS (digs);
   if (gdigs > A68_MP (mp_pi_size)) {
-//
 // No luck with the cached value, so we compute a longer "pi".
-//
 // Calculate "pi" using a Borwein & Borwein AGM algorithm that doubles 
 // the numbers of digits on each iteration.
 //
 // J. M. Borwein, P. B. Borwein. "Pi and the AGM – A Study in Analytic Number
 // Theory and Computational Complexity", Wiley, New York, 1987.
-//
     a68_free (A68_MP (mp_pi));
     a68_free (A68_MP (mp_half_pi));
     a68_free (A68_MP (mp_two_pi));
@@ -49,7 +46,6 @@ MP_T *mp_pi (NODE_T * p, MP_T * api, int mod, int digs)
     a68_free (A68_MP (mp_ln_pi));
     a68_free (A68_MP (mp_180_over_pi));
     a68_free (A68_MP (mp_pi_over_180));
-//
     ADDR_T pop_sp = A68_SP;
     MP_T *pi_g = nil_mp (p, gdigs);
     MP_T *two = lit_mp (p, 2, 0, gdigs);

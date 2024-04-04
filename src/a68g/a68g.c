@@ -1,11 +1,11 @@
 //! @file a68g.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -121,7 +121,6 @@ void state_license (FILE_T f)
 #define PR(s)\
   ASSERT (snprintf(A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, A68 (output_line));
-//
   if (f == A68_STDOUT) {
     io_close_tty_line ();
   }
@@ -150,7 +149,6 @@ void state_version (FILE_T f)
 #define PR(s)\
   ASSERT (snprintf(A68 (output_line), SNPRINTF_SIZE, "%s\n", (s)) >= 0);\
   WRITE (f, A68 (output_line));
-//
   if (f == A68_STDOUT) {
     io_close_tty_line ();
   }
@@ -224,7 +222,6 @@ void state_version (FILE_T f)
   }
 #endif
 #endif
-
 #define RSIZE(n) (unt) (sizeof (n) / sizeof (int))
 #if defined (BUILD_A68_COMPILER) && defined (C_COMPILER)
   ASSERT (snprintf (A68 (output_line), SNPRINTF_SIZE, "Build level %d.%x%x%x%x %s %s\n", A68_LEVEL, RSIZE (INT_T), RSIZE (REAL_T), RSIZE (MP_INT_T), RSIZE (MP_REAL_T), C_COMPILER, __DATE__) >= 0);
@@ -233,7 +230,6 @@ void state_version (FILE_T f)
 #endif
 #undef RSIZE
 WRITE (f, A68 (output_line));
-
 #undef PR
 }
 
@@ -455,7 +451,6 @@ void compiler_interpreter (void)
     reset_symbol_table_nest_count (TOP_NODE (&A68_JOB));
     verbosity ();
   }
-//
   if (A68_MP (varying_mp_digits) > width_to_mp_digits (MP_MAX_DECIMALS)) {
     diagnostic (A68_WARNING, NO_NODE, WARNING_PRECISION, NO_LINE, 0, A68_MP (varying_mp_digits) * LOG_MP_RADIX);
   }
@@ -489,7 +484,6 @@ void compiler_interpreter (void)
   if (OPTION_DEBUG (&A68_JOB)) {
     state_license (A68_STDOUT);
   }
-//
   if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_COMPILE (&A68_JOB) == A68_FALSE && 
      (OPTION_CHECK_ONLY (&A68_JOB) ? OPTION_RUN (&A68_JOB) : A68_TRUE)) {
 #if defined (BUILD_A68_COMPILER)
@@ -569,9 +563,7 @@ void a68_exit (int code)
   free_option_list (OPTION_LIST (&A68_JOB));
   a68_free (A68 (node_register));
   a68_free (A68 (options));
-//
   discard_heap ();
-//
   a68_free (FILE_PATH (&A68_JOB));
   a68_free (FILE_INITIAL_NAME (&A68_JOB));
   a68_free (FILE_GENERIC_NAME (&A68_JOB));
@@ -583,7 +575,6 @@ void a68_exit (int code)
   a68_free (FILE_PRETTY_NAME (&A68_JOB));
   a68_free (FILE_SCRIPT_NAME (&A68_JOB));
   a68_free (FILE_DIAGS_NAME (&A68_JOB));
-//
   a68_free (A68_MP (mp_one));
   a68_free (A68_MP (mp_pi));
   a68_free (A68_MP (mp_half_pi));
@@ -593,7 +584,6 @@ void a68_exit (int code)
   a68_free (A68_MP (mp_ln_pi));
   a68_free (A68_MP (mp_180_over_pi));
   a68_free (A68_MP (mp_pi_over_180));
-//
   exit (code);
 }
 

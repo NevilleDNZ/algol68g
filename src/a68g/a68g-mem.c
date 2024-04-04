@@ -1,11 +1,11 @@
 //! @file a68g-mem.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -35,7 +35,7 @@ void init_heap (void)
   unt frame_a_size = A68_ALIGN (A68 (frame_stack_size));
   unt expr_a_size = A68_ALIGN (A68 (expr_stack_size));
   REAL_T /* sic */ total_size = A68_ALIGN (heap_a_size + handle_a_size + frame_a_size + 2 * expr_a_size);
-  ABEND (OVER_2G (total_size), ERROR_OUT_OF_CORE_2G, __func__);
+  ABEND (OVER_2G (total_size), ERROR_OVER_2G, __func__);
   errno = 0;
   BYTE_T *core = (BYTE_T *) (A68_ALIGN_T *) a68_alloc ((size_t) total_size, __func__, __LINE__);
   ABEND (core == NO_BYTE, ERROR_OUT_OF_CORE, __func__);

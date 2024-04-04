@@ -1,11 +1,11 @@
 //! @file a68g-environ.h
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -29,7 +29,8 @@
 // Standard environ.
 
 static char *bold_prelude_start[] = {
-  "BEGIN MODE DOUBLE = LONG REAL,",
+  "BEGIN MODE ZAHL = LONG INT,",
+  "           DOUBLE = LONG REAL,",
   "           QUAD = LONG LONG REAL;",
   "      start: commence:",
   "      BEGIN",
@@ -44,7 +45,8 @@ static char *bold_postlude[] = {
 };
 
 static char *quote_prelude_start[] = {
-  "'BEGIN' 'MODE' 'DOUBLE' = 'LONG' 'REAL',",
+  "'BEGIN' 'MODE' 'ZAHL' = 'LONG' 'INT'",
+  "               'DOUBLE' = 'LONG' 'REAL',",
   "               'QUAD' = 'LONG' 'LONG' 'REAL';",
   "        START: COMMENCE:",
   "        'BEGIN'",

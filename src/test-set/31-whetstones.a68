@@ -361,7 +361,7 @@ BEGIN [1 : 4] LONG LONG REAL e1;
         
          # If i = 10 we have 1e6 whetstone instructions per loop #
       
-         i := 100;
+         i := 10;
          ii := i; 
          INT n2 = 12 * i, n3 = 14 * i, n4 = 345 * i, 
              n6 = 210 * i, n7 = 32 * i, n8 = 899 * i, n9 = 616 * i,

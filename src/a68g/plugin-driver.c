@@ -1,11 +1,11 @@
 //! @file plugin-driver.c
 //! @author J. Marcel van der Veer
-//!
+
 //! @section Copyright
 //!
 //! This file is part of Algol68G - an Algol 68 compiler-interpreter.
 //! Copyright 2001-2023 J. Marcel van der Veer [algol68g@xs4all.nl].
-//!
+
 //! @section License
 //!
 //! This program is free software; you can redistribute it and/or modify it 
@@ -24,7 +24,6 @@
 //! Plugin compiler driver.
 
 #include "a68g.h"
-
 
 #include "a68g-optimiser.h"
 #include "a68g-options.h"
@@ -57,13 +56,10 @@ void plugin_driver_code (void)
 void plugin_driver_compile (void)
 {
 #if defined (BUILD_A68_COMPILER)
-//
 // Compilation on Linux, BSD.
 // Build shared library using gcc or clang.
 // TODO: One day this should be all portable between platforms.
-//
 // Only compile if the A68 compiler found no errors (constant folder for instance).
-//
   if (ERROR_COUNT (&A68_JOB) == 0 && OPTION_OPT_LEVEL (&A68_JOB) > 0 && !OPTION_RUN_SCRIPT (&A68_JOB)) {
     BUFFER cmd, options;
     BUFCLR (cmd);
