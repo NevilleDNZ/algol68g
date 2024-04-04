@@ -1,3 +1,7 @@
+Version 3.2.1, July 2023
+* Minor fixes.
+* Distribution updates.
+
 Version 3.2.0, June 2023
 * Enable CLANG as (optional) back-end plugin compiler, as alternative for GCC.
 

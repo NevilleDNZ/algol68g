@@ -53,8 +53,8 @@ void a68_dgemm (CBLAS_TRANSPOSE_t TransA, CBLAS_TRANSPOSE_t TransB,
 // GEMM from BLAS computes C := alpha * TransA (A) * TransB (B) + beta * C
 //
   if ((*C) == NO_REAL_MATRIX) {
-    unt N = (TransA == I ? SIZE1 (A) : SIZE2 (A));
-    unt M = (TransB == I ? SIZE2 (B) : SIZE1 (B));
+    unt N = (TransA == SELF ? SIZE1 (A) : SIZE2 (A));
+    unt M = (TransB == SELF ? SIZE2 (B) : SIZE1 (B));
     (*C) = gsl_matrix_calloc (N, M); // NxM * MxP gives NxP.
   }
   ASSERT_GSL (gsl_blas_dgemm (TransA, TransB, alpha, A, B, beta, (*C)))

@@ -64,14 +64,22 @@ Documentation is available from the web pages for Algol68G.
 
 INSTALLATION
 
-1) WIN32 BINARY PACKAGE
+The distribution contains the following directories:
 
-Unpack the distribution and start command shell cmd.exe. 
+./bin/          (WIN32 only) precompiled a68g.exe
+./src/a68g/     Source files
+./src/include/  Include files  
+./src/doc/      Documentation
+./src/test-set/ Test programs 
+
+1) WIN32 Precompiled binary (Windows 10, 11)
+
+Unpack the distribution and start command shell powershell.exe. 
 From this shell, go to algol68g-VERSION's directory and start bin\a68g.exe. 
 
-2) LINUX, UNIX, BSD, MACOS X
+2) Linux, BSD, macOS
 
-Please refer to file INSTALL or the manual for detailed instructions.
+Please refer to the manual for detailed instructions.
 Since Algol 68 Genie complies with the GNU build system, a reasonably 
 experienced user can execute:
 

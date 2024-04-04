@@ -167,41 +167,42 @@ pkginclude_HEADERS = \
 ./src/include/a68g-types.h
 bin_PROGRAMS = a68g
 a68g_CFLAGS = -DBINDIR='"$(bindir)"' -DINCLUDEDIR='"$(includedir)"'
-a68g_CPPFLAGS = -I$(top_srcdir)/src/include
+a68g_LDADD = @CURSES_LIBS@
+a68g_CPPFLAGS = -I$(top_srcdir)/src/include @CURSES_CFLAGS@
 TESTS_ENVIRONMENT=./a68g
 TESTS=\
-	test-set/01-ackermann.a68\
-	test-set/02-chaos.a68\
-	test-set/03-decision.a68\
-	test-set/04-digits.a68\
-	test-set/05-end-of-time.a68\
-	test-set/06-fft.a68\
-	test-set/07-fibonacci-grammar.a68\
-	test-set/08-formula-manipulation.a68\
-	test-set/09-gammainc.a68\
-	test-set/10-guldens.a68\
-	test-set/11-hamming.a68\
-	test-set/12-hilbert.a68\
-	test-set/13-lisp.a68\
-	test-set/14-mandelbrot.a68\
-	test-set/15-mastermind.a68\
-	test-set/16-math.a68\
-	test-set/17-matrix.a68\
-	test-set/18-procedures.a68\
-	test-set/19-pseudo-switch.a68\
-	test-set/20-queens.a68\
-	test-set/21-quicksort.a68\
-	test-set/22-rationals.a68\
-	test-set/23-semana-santa.a68\
-	test-set/24-tukey.a68\
-	test-set/25-whetstones.a68
+	./src/test-set/01-ackermann.a68\
+	./src/test-set/02-chaos.a68\
+	./src/test-set/03-decision.a68\
+	./src/test-set/04-digits.a68\
+	./src/test-set/05-end-of-time.a68\
+	./src/test-set/06-fft.a68\
+	./src/test-set/07-fibonacci-grammar.a68\
+	./src/test-set/08-formula-manipulation.a68\
+	./src/test-set/09-gammainc.a68\
+	./src/test-set/10-guldens.a68\
+	./src/test-set/11-hamming.a68\
+	./src/test-set/12-hilbert.a68\
+	./src/test-set/13-lisp.a68\
+	./src/test-set/14-mandelbrot.a68\
+	./src/test-set/15-mastermind.a68\
+	./src/test-set/16-math.a68\
+	./src/test-set/17-matrix.a68\
+	./src/test-set/18-procedures.a68\
+	./src/test-set/19-pseudo-switch.a68\
+	./src/test-set/20-queens.a68\
+	./src/test-set/21-quicksort.a68\
+	./src/test-set/22-rationals.a68\
+	./src/test-set/23-semana-santa.a68\
+	./src/test-set/24-tukey.a68\
+	./src/test-set/25-whetstones.a68
 if EXPORT_DYNAMIC
 a68g_LDFLAGS = -Wl,--export-dynamic
 else
 a68g_LDFLAGS =
 endif
 
-man_MANS = doc/a68g.1
+man_MANS = ./src/doc/a68g.1
 docdir = @docdir@
 doc_DATA = AUTHORS COPYING ChangeLog NEWS README
 EXTRA_DIST = $(man_MANS)\
