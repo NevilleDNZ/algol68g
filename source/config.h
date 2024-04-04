@@ -29,8 +29,6 @@ automatic way. These dependencies are
    HAVE_MODIFIABLE_X_TITLE
    HAVE_UNIX_CLOCK
    WIN32_VERSION
-   OS2_VERSION
-   PRE_MACOS_X_VERSION
 
 Define or undefine the directives below depending on your system.
 You can also set them when using `make' by using the CFLAGS parameter:
@@ -98,54 +96,7 @@ HAVE_IEEE_754 is ok for Pentiums.
 #endif
 
 /*
-Jim Heifetz ported Algol68G to OS/2.
-To select his modifications, define OS2_VERSION.			      i
+OS_2_VERSION and PRE_MACOS_X_VERSION have been decommitted since Mark 9.1.
 */
-
-#ifndef OS2_VERSION
-#undef OS2_VERSION
-#endif
-
-#ifdef OS2_VERSION
-#define HAVE_IEEE_754
-#undef HAVE_CURSES
-#undef HAVE_GSL
-#undef HAVE_PLOTUTILS
-#undef HAVE_MODIFIABLE_X_TITLE
-#undef HAVE_UNIX_CLOCK
-#undef HAVE_POSIX_THREADS
-#undef HAVE_HTTP
-#undef HAVE_REGEX
-#undef HAVE_POSTGRESQL
-#endif
-
-/*
-What was to become Algol68G started as an Algol 68 subset implementation for
-desktop computers at the time (PC XT and Mac SE). A first version actually ran
-on a Mac SE (8 MHz 68000, 4 MB RAM). Mark 9 still compiles and runs on a 
-Performa 630 (68LC040).
-
-To compile on pre-MacOS X Macs, define PRE_MACOS_X_VERSION. When defining
-PRE_MACOS_X_VERSION you may want to change MAC_STACK_SIZE to reflect your
-particular system. HAVE_IEEE_754 is ok.
-*/
-
-#ifndef PRE_MACOS_X_VERSION
-#undef PRE_MACOS_X_VERSION
-#endif
-
-#ifdef PRE_MACOS_X_VERSION
-#define MAC_STACK_SIZE 1024L
-#define HAVE_IEEE_754
-#undef HAVE_CURSES
-#undef HAVE_GSL
-#undef HAVE_PLOTUTILS
-#undef HAVE_MODIFIABLE_X_TITLE
-#undef HAVE_UNIX_CLOCK
-#undef HAVE_POSIX_THREADS
-#undef HAVE_HTTP
-#undef HAVE_REGEX
-#undef HAVE_POSTGRESQL
-#endif
 
 #endif

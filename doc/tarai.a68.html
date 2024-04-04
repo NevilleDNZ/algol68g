@@ -34,7 +34,7 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 <table width="100%" border=0 cellspacing=0 cellpadding=0>
 <td width="50%" valign=top bgcolor="white">
 <br>
-<h2>Example: Lucas numbers</h2>
+<h2>Example: Takeuchi's Tarai-function</h2>
 </td>
 <td width="30%" valign=top bgcolor="white">
 <img src="logo.gif">
@@ -76,28 +76,20 @@ pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 
 <font color=black>
 <pre>
-CO Using refinements CO
+# 
+Takeuchi's Tarai (or Tak) function. Moore proved its termination. 
+See <a href="http://mathworld.wolfram.com/TAKFunction.html">http://mathworld.wolfram.com/TAKFunction.html</a>
+#
 
-determine first generation;
-WHILE can represent next generation
-DO calculate next generation;
-   print next generation
-OD.
+PROC tarai = (INT i, j, k) INT:
+     IF i <= j 
+     THEN j
+     ELSE tarai ((tarai ((i - 1), j, k)),
+                 (tarai ((j - 1), k, i)),
+                 (tarai ((k - 1), i, j))) 
+     FI;
 
-   determine first generation:
-      INT previous := 1, current := 3.
-
-   can represent next generation:
-      current <= max int - previous.
-
-   calculate next generation:
-      INT new = current + previous;
-      previous := current;
-      current := new.
-
-   print next generation:
-      printf (($lz","3z","3z","2z-d$, current, $xz","3z","3z","2z-d$, previous,
-               $xd.n(real width - 1)d$, current / previous)).
+tarai (1, 2, 3)
 </pre>
 </font>
 

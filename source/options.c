@@ -68,7 +68,7 @@ static void option_unrecognised (SOURCE_LINE_T * l, char *option)
 {
   char *c;
   sprintf (edit_line, "unrecognised option \"%s\"", option);
-  for (c = edit_line; c[0] != '\0'; c++) {
+  for (c = edit_line; c[0] != NULL_CHAR; c++) {
     c[0] = TO_LOWER (c[0]);
   }
   scan_error (l, NULL, edit_line);
@@ -98,16 +98,16 @@ static void online_help ()
   printf ("\nAlgol68G %s, Copyright (C) 2001-2006 J. Marcel van der Veer", REVISION);
   printf ("\nAlgol68G comes with ABSOLUTELY NO WARRANTY;");
   printf ("\nSee the GNU General Public License for more details.");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nusage: %s [options | filename]", A68G_NAME);
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nOptions that execute Algol 68 code from the command line:");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\n   print unit                Print value yielded by Algol 68 unit \"unit\"");
   printf ("\n   execute unit              Execute Algol 68 unit \"unit\"");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nOptions to control the listing file:");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\n   extensive                 Make extensive listing");
   printf ("\n   listing                   Make concise listing");
   printf ("\n   moids                     Make overview of moids in listing file");
@@ -117,28 +117,28 @@ static void online_help ()
   printf ("\n   tree, notree              Switch on/off syntax tree listing in listing file");
   printf ("\n   unused                    Make an overview of unused tags in the listing file");
   printf ("\n   xref, noxref              Switch on/off cross reference in the listing file");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nInterpreter options:");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\n   assertions, noassertions  Switch on/off elaboration of assertions");
   printf ("\n   precision number          Sets precision for LONG LONG modes to \"number\" significant digits");
   printf ("\n   timelimit number          Interrupt the interpreter after \"number\" seconds");
   printf ("\n   trace, notrace            Switch on/off tracing of a running program");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nOptions to control the stropping regime:");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\n   boldstropping             Set stropping mode to bold stropping");
   printf ("\n   quotestropping            Set stropping mode to quote stropping");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nOptions to control memory usage:");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\n   heap number               Set heap size to \"number\"");
   printf ("\n   handles number            Set handle space size to \"number\"");
   printf ("\n   frame number              Set frame stack size to \"number\"");
   printf ("\n   stack number              Set expression stack size to \"number\"");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\nMiscellaneous options:");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   printf ("\n   brackets                  Consider [ .. ] and { .. } as equivalent to ( .. )");
   printf ("\n   check, norun              Check syntax only, interpreter does not start");
   printf ("\n   run                       Override the CHECK/NORUN options");
@@ -155,7 +155,7 @@ static void online_help ()
   printf ("\n   verbose                   Inform on program actions");
   printf ("\n   version                   State the version of the running copy");
   printf ("\n   warnings, nowarnings      Switch on/off warning diagnostics");
-  printf ("\n");
+  printf (NEWLINE_STRING);
   fflush (stdout);
 }
 
@@ -223,7 +223,7 @@ void prune_echoes (MODULE_T * module, OPTION_LIST_T * i)
 /* ECHO echoes a string. */
       if (eq (module, p, "ECHO")) {
 	{
-	  char *car = strchr (p, '=');
+	  char *car = a68g_strchr (p, '=');
 	  if (car != NULL) {
 	    io_close_tty_line ();
 	    sprintf (output_line, "%s", &car[1]);
@@ -264,7 +264,7 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
   int k, mult = 1;
   *error = A_FALSE;
 /* Fetch argument. */
-  car = strchr (p, '=');
+  car = a68g_strchr (p, '=');
   if (car == NULL) {
     FORWARD (*i);
     *error = (*i == NULL);
@@ -297,7 +297,7 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 /* Accept postfix multipliers: 32k, 64M, 1G. */
       if (postfix != NULL) {
 	switch (postfix[0]) {
-	case '\0':
+	case NULL_CHAR:
 	  {
 	    mult = 1;
 	    break;
@@ -327,11 +327,15 @@ static int fetch_integral (char *p, OPTION_LIST_T ** i, BOOL_T * error)
 	    break;
 	  }
 	}
-	if (postfix[0] != '\0' && postfix[1] != '\0') {
+	if (postfix[0] != NULL_CHAR && postfix[1] != NULL_CHAR) {
 	  option_error (start_l, start_c, NULL);
 	  *error = A_TRUE;
 	}
       }
+    }
+    if ((double) k * (double) mult > (double) MAX_INT) {
+      errno = ERANGE;
+      option_error (start_l, start_c, NULL);
     }
     return (k * mult);
   }
@@ -408,7 +412,7 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
       }
 /* ECHO is treated later. */
       else if (eq (module, p, "ECHO")) {
-	if (strchr (p, '=') == NULL) {
+	if (a68g_strchr (p, '=') == NULL) {
 	  FORWARD (i);
 	  if (i != NULL) {
 	    if (strcmp (i->str, "=") == 0) {
@@ -511,6 +515,10 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 /* RUN overrides NORUN. */
       else if (eq (module, p, "RUN")) {
 	module->options.run = A_TRUE;
+      }
+/* MONITOR or DEBUG invokes the debugger at runtime errors. */
+      else if (eq (module, p, "MONitor") || eq (module, p, "DEBUG")) {
+	module->options.debug = A_TRUE;
       }
 /* REGRESSION is an option that sets preferences when running the Algol68G test suite. */
       else if (eq (module, p, "REGRESSION")) {
@@ -689,21 +697,11 @@ BOOL_T set_options (MODULE_T * module, OPTION_LIST_T * i, BOOL_T cmd_line)
 
 void default_mem_sizes (void)
 {
-#ifdef PRE_MACOS_X_VERSION
-/* 8 MB. */
-  frame_stack_size = 512 * KILOBYTE;
-  expr_stack_size = 512 * KILOBYTE;
-  heap_size = 6 * MEGABYTE;
-  handle_pool_size = MEGABYTE;
-  storage_overhead = 256 * KILOBYTE;
-#else
-/* 16 MB. */
   frame_stack_size = 2 * MEGABYTE;
   expr_stack_size = MEGABYTE;
   heap_size = 15 * MEGABYTE;
   handle_pool_size = 2 * MEGABYTE;
   storage_overhead = 256 * KILOBYTE;
-#endif
 }
 
 /*!
@@ -733,7 +731,8 @@ void default_options (MODULE_T * module)
   module->options.reductions = A_FALSE;
   module->options.run = A_FALSE;
   module->options.portcheck = A_FALSE;
-#if defined WIN32_VERSION || defined PRE_MACOS_X_VERSION || defined OS2_VERSION
+  module->options.debug = A_FALSE;
+#if defined WIN32_VERSION
   a68c_diags = A_FALSE;
   gnu_diags = A_TRUE;
   no_warnings = A_TRUE;
@@ -760,8 +759,8 @@ void read_rc_options (MODULE_T * module)
   if (f != NULL) {
     while (!feof (f)) {
       if (fgets (input_line, BUFFER_SIZE, f) != NULL) {
-	if (input_line[strlen (input_line) - 1] == '\n') {
-	  input_line[strlen (input_line) - 1] = '\0';
+	if (input_line[strlen (input_line) - 1] == NEWLINE_CHAR) {
+	  input_line[strlen (input_line) - 1] = NULL_CHAR;
 	}
 	isolate_options (module, input_line, NULL);
       }
@@ -800,23 +799,23 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 {
   char *q;
 /* 'q' points at first significant char in item .*/
-  while (p[0] != '\0') {
+  while (p[0] != NULL_CHAR) {
 /* Skip white space ... */
-    while ((p[0] == ' ' || p[0] == '\t' || p[0] == ',') && p[0] != '\0') {
+    while ((p[0] == BLANK_CHAR || p[0] == TAB_CHAR || p[0] == ',') && p[0] != NULL_CHAR) {
       p++;
     }
 /* ... then tokenise an item. */
-    if (p[0] != '\0') {
+    if (p[0] != NULL_CHAR) {
 /* Item can be "string". Note that these are not A68 strings. */
-      if (p[0] == '"' || p[0] == '\'' || p[0] == '`') {
+      if (p[0] == QUOTE_CHAR || p[0] == '\'' || p[0] == '`') {
 	char delim = p[0];
 	p++;
 	q = p;
-	while (p[0] != delim && p[0] != '\0') {
+	while (p[0] != delim && p[0] != NULL_CHAR) {
 	  p++;
 	}
-	if (p[0] != '\0') {
-	  p[0] = '\0';		/* p[0] was delimiter. */
+	if (p[0] != NULL_CHAR) {
+	  p[0] = NULL_CHAR;	/* p[0] was delimiter. */
 	  p++;
 	} else {
 	  scan_error (line, NULL, ERROR_UNTERMINATED_STRING);
@@ -830,12 +829,12 @@ void isolate_options (MODULE_T * module, char *p, SOURCE_LINE_T * line)
 	  p++;
 	} else {
 	  /* Skip item. */
-	  while (p[0] != ' ' && p[0] != '\0' && p[0] != '=' && p[0] != ',') {
+	  while (p[0] != BLANK_CHAR && p[0] != NULL_CHAR && p[0] != '=' && p[0] != ',') {
 	    p++;
 	  }
 	}
-	if (p[0] != '\0') {
-	  p[0] = '\0';
+	if (p[0] != NULL_CHAR) {
+	  p[0] = NULL_CHAR;
 	  p++;
 	}
       }

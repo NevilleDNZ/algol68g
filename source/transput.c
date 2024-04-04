@@ -45,7 +45,6 @@ It is in the heap, but cannot be sweeped. If it is too small, we give up on
 it and make a larger one.
 */
 
-#define TRANSPUT_BUFFER_SIZE 	1024
 static A68_REF ref_transput_buffer[MAX_TRANSPUT_BUFFER];
 
 /*!
@@ -206,10 +205,8 @@ void add_char_transput_buffer (NODE_T * p, int k, char ch)
   int size = get_transput_buffer_size (k);
   int index = get_transput_buffer_index (k);
   if (index == size - 2) {
-    enlarge_transput_buffer (p, k, size + TRANSPUT_BUFFER_SIZE);
+    enlarge_transput_buffer (p, k, 10 * size /* size + TRANSPUT_BUFFER_SIZE */ );
     add_char_transput_buffer (p, k, ch);
-  } else if (ch == NULL_CHAR) {
-    return;
   } else {
     sb[index] = ch;
     sb[index + 1] = NULL_CHAR;
@@ -1573,11 +1570,11 @@ int char_scanner (A68_FILE * f)
       return (ch);
     } else {
       f->eof = A_TRUE;
-      return (EOF);
+      return (EOF_CHAR);
     }
   } else {
 /* File is associated with a STRING. Give next CHAR. When we're outside the
-   STRING give EOF. */
+   STRING give EOF_CHAR. */
     A68_REF z = *(A68_REF *) (ADDRESS (&f->string));	/* Dereference REF STRING. */
     A68_ARRAY *a;
     A68_TUPLE *t;
@@ -1586,7 +1583,7 @@ int char_scanner (A68_FILE * f)
     GET_DESCRIPTOR (a, t, &z);
     if (f->strpos < t->lower_bound || f->strpos > t->upper_bound) {
       f->eof = A_TRUE;
-      return (EOF);
+      return (EOF_CHAR);
     }
     base = ADDRESS (&(a->array));
     ch = (A68_CHAR *) & (base[INDEX_1_DIM (a, t, f->strpos)]);
@@ -1631,15 +1628,15 @@ void genie_new_line (NODE_T * p)
   }
   if (file->write_mood) {
     if (IS_NIL (file->string)) {
-      io_write_string (file->fd, "\n");
+      io_write_string (file->fd, NEWLINE_STRING);
     } else {
-      add_c_string_to_a_string (p, file->string, "\n");
+      add_c_string_to_a_string (p, file->string, NEWLINE_STRING);
     }
   } else if (file->read_mood) {
     BOOL_T go_on = !file->eof;
     while (go_on) {
       int ch = char_scanner (file);
-      go_on = (ch != '\n') && (ch != EOF) && !file->eof;
+      go_on = (ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !file->eof;
     }
   } else {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
@@ -1679,7 +1676,7 @@ void genie_new_page (NODE_T * p)
     BOOL_T go_on = !file->eof;
     while (go_on) {
       int ch = char_scanner (file);
-      go_on = (ch != '\f') && (ch != EOF) && !file->eof;
+      go_on = (ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !file->eof;
     }
   } else {
     diagnostic_node (A_RUNTIME_ERROR, p, ERROR_FILE_WRONG_MOOD, "undetermined");
@@ -1720,7 +1717,7 @@ void genie_space (NODE_T * p)
   }
 }
 
-#define IS_NL_FF(ch) ((ch) == '\n' || (ch) == '\f')
+#define IS_NL_FF(ch) ((ch) == NEWLINE_CHAR || (ch) == FORMFEED_CHAR)
 
 /*!
 \brief skip new-lines and form-feeds
@@ -1732,12 +1729,12 @@ void genie_space (NODE_T * p)
 void skip_nl_ff (NODE_T * p, int *ch, A68_REF ref_file)
 {
   A68_FILE *f = FILE_DEREF (&ref_file);
-  while ((*ch) != EOF && IS_NL_FF (*ch)) {
+  while ((*ch) != EOF_CHAR && IS_NL_FF (*ch)) {
     A68_BOOL *z = (A68_BOOL *) STACK_TOP;
     ADDR_T pop_sp = stack_pointer;
-    if (*ch == '\n') {
+    if (*ch == NEWLINE_CHAR) {
       on_event_handler (p, f->line_end_mended, ref_file);
-    } else if (*ch == '\f') {
+    } else if (*ch == FORMFEED_CHAR) {
       on_event_handler (p, f->page_end_mended, ref_file);
     }
     stack_pointer = pop_sp;
@@ -1759,22 +1756,22 @@ void scan_integer (NODE_T * p, A68_REF ref_file)
   int ch;
   reset_transput_buffer (INPUT_BUFFER);
   ch = char_scanner (f);
-  while (ch != EOF && (IS_SPACE (ch) || IS_NL_FF (ch))) {
+  while (ch != EOF_CHAR && (IS_SPACE (ch) || IS_NL_FF (ch))) {
     if (IS_NL_FF (ch)) {
       skip_nl_ff (p, &ch, ref_file);
     } else {
       ch = char_scanner (f);
     }
   }
-  if (ch != EOF && (ch == '+' || ch == '-')) {
+  if (ch != EOF_CHAR && (ch == '+' || ch == '-')) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
   }
-  while (ch != EOF && IS_DIGIT (ch)) {
+  while (ch != EOF_CHAR && IS_DIGIT (ch)) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
   }
-  if (ch != EOF) {
+  if (ch != EOF_CHAR) {
     unchar_scanner (p, f, ch);
   }
 }
@@ -1792,52 +1789,52 @@ void scan_real (NODE_T * p, A68_REF ref_file)
   int ch;
   reset_transput_buffer (INPUT_BUFFER);
   ch = char_scanner (f);
-  while (ch != EOF && (IS_SPACE (ch) || IS_NL_FF (ch))) {
+  while (ch != EOF_CHAR && (IS_SPACE (ch) || IS_NL_FF (ch))) {
     if (IS_NL_FF (ch)) {
       skip_nl_ff (p, &ch, ref_file);
     } else {
       ch = char_scanner (f);
     }
   }
-  if (ch != EOF && (ch == '+' || ch == '-')) {
+  if (ch != EOF_CHAR && (ch == '+' || ch == '-')) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
   }
-  while (ch != EOF && IS_DIGIT (ch)) {
+  while (ch != EOF_CHAR && IS_DIGIT (ch)) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
   }
-  if (ch == EOF || !(ch == '.' || TO_UPPER (ch) == x_e)) {
+  if (ch == EOF_CHAR || !(ch == '.' || TO_UPPER (ch) == x_e)) {
     goto salida;
   }
   if (ch == '.') {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
-    while (ch != EOF && IS_DIGIT (ch)) {
+    while (ch != EOF_CHAR && IS_DIGIT (ch)) {
       add_char_transput_buffer (p, INPUT_BUFFER, ch);
       ch = char_scanner (f);
     }
   }
-  if (ch == EOF || TO_UPPER (ch) != x_e) {
+  if (ch == EOF_CHAR || TO_UPPER (ch) != x_e) {
     goto salida;
   }
   if (TO_UPPER (ch) == x_e) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
-    while (ch != EOF && ch == ' ') {
+    while (ch != EOF_CHAR && ch == BLANK_CHAR) {
       ch = char_scanner (f);
     }
-    if (ch != EOF && (ch == '+' || ch == '-')) {
+    if (ch != EOF_CHAR && (ch == '+' || ch == '-')) {
       add_char_transput_buffer (p, INPUT_BUFFER, ch);
       ch = char_scanner (f);
     }
-    while (ch != EOF && IS_DIGIT (ch)) {
+    while (ch != EOF_CHAR && IS_DIGIT (ch)) {
       add_char_transput_buffer (p, INPUT_BUFFER, ch);
       ch = char_scanner (f);
     }
   }
 salida:
-  if (ch != EOF) {
+  if (ch != EOF_CHAR) {
     unchar_scanner (p, f, ch);
   }
 }
@@ -1854,18 +1851,18 @@ void scan_bits (NODE_T * p, A68_REF ref_file)
   int ch, flip = FLIP_CHAR, flop = FLOP_CHAR;
   reset_transput_buffer (INPUT_BUFFER);
   ch = char_scanner (f);
-  while (ch != EOF && (IS_SPACE (ch) || IS_NL_FF (ch))) {
+  while (ch != EOF_CHAR && (IS_SPACE (ch) || IS_NL_FF (ch))) {
     if (IS_NL_FF (ch)) {
       skip_nl_ff (p, &ch, ref_file);
     } else {
       ch = char_scanner (f);
     }
   }
-  while (ch != EOF && (ch == flip || ch == flop)) {
+  while (ch != EOF_CHAR && (ch == flip || ch == flop)) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
     ch = char_scanner (f);
   }
-  if (ch != EOF) {
+  if (ch != EOF_CHAR) {
     unchar_scanner (p, f, ch);
   }
 }
@@ -1883,7 +1880,7 @@ void scan_char (NODE_T * p, A68_REF ref_file)
   reset_transput_buffer (INPUT_BUFFER);
   ch = char_scanner (f);
   skip_nl_ff (p, &ch, ref_file);
-  if (ch != EOF) {
+  if (ch != EOF_CHAR) {
     add_char_transput_buffer (p, INPUT_BUFFER, ch);
   }
 }
@@ -1905,16 +1902,16 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
     BOOL_T go_on = A_TRUE;
     reset_transput_buffer (INPUT_BUFFER);
     while (go_on) {
-      if (ch == EOF) {
+      if (ch == EOF_CHAR) {
 	go_on = A_FALSE;
-      } else if (term != NULL && strchr (term, ch) != NULL) {
+      } else if (term != NULL && a68g_strchr (term, ch) != NULL) {
 	go_on = A_FALSE;
       } else if (IS_NL_FF (ch)) {
 	A68_BOOL *z = (A68_BOOL *) STACK_TOP;
 	ADDR_T pop_sp = stack_pointer;
-	if (ch == '\n') {
+	if (ch == NEWLINE_CHAR) {
 	  on_event_handler (p, f->line_end_mended, ref_file);
-	} else if (ch == '\f') {
+	} else if (ch == FORMFEED_CHAR) {
 	  on_event_handler (p, f->page_end_mended, ref_file);
 	}
 	stack_pointer = pop_sp;
@@ -1928,7 +1925,7 @@ void scan_string (NODE_T * p, char *term, A68_REF ref_file)
 	ch = char_scanner (f);
       }
     }
-    if (ch != EOF) {
+    if (ch != EOF_CHAR) {
       unchar_scanner (p, f, ch);
     } else if (get_transput_buffer_index (INPUT_BUFFER) == 0) {
       end_of_file_error (p, ref_file);
@@ -1985,11 +1982,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
       }
       strcat (filename, ".tmp");
       RESET_ERRNO;
-#ifdef PRE_MACOS_X_VERSION
-      file->fd = open (filename, mode | O_EXCL);
-#else
       file->fd = open (filename, mode | O_EXCL, acc);
-#endif
       good_file = (file->fd != -1 && errno == 0);
     }
 #undef TMP_SIZE
@@ -2019,11 +2012,7 @@ FILE_T open_physical_file (NODE_T * p, A68_REF ref_file, int mode, mode_t acc)
       }
       file->open_exclusive = A_FALSE;
     }
-#ifdef PRE_MACOS_X_VERSION
-    file->fd = open (filename, mode);
-#else
     file->fd = open (filename, mode, acc);
-#endif
     file->transput_buffer = get_unblocked_transput_buffer (p);
     reset_transput_buffer (file->transput_buffer);
     file->eof = A_FALSE;
@@ -2164,7 +2153,16 @@ unsigned long a68g_strtoul (char *str, char **end, int base)
     while (IS_XDIGIT (q[k])) {
       k++;
     }
-    (*end) = &q[k];
+    if (k == start) {
+      if (end != NULL) {
+	*end = str;
+      }
+      errno = EDOM;
+      return (0);
+    }
+    if (end != NULL) {
+      (*end) = &q[k];
+    }
     for (j = k - 1; j >= start; j--) {
       if (char_value (q[j]) >= base) {
 	errno = EDOM;
@@ -3406,7 +3404,7 @@ static char *leading_spaces (char *str, int width)
 {
   int j = width - strlen (str);
   while (--j >= 0) {
-    plusto (' ', str);
+    plusto (BLANK_CHAR, str);
   }
   return (str);
 }
@@ -3517,7 +3515,7 @@ char *whole (NODE_T * p)
     size = 8 + (size > width.value ? size : width.value);
     s = stack_string (p, size);
     strcpy (s, sub_whole (p, n, length));
-    if (length == 0 || strchr (s, ERROR_CHAR) != NULL) {
+    if (length == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
       error_chars (s, width.value);
     } else {
       if (x < 0) {
@@ -3561,7 +3559,7 @@ char *whole (NODE_T * p)
     size = 8 + (size > width.value ? size : width.value);
     s = stack_string (p, size);
     strcpy (s, long_sub_whole (p, n, digits, length));
-    if (length == 0 || strchr (s, ERROR_CHAR) != NULL) {
+    if (length == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
       error_chars (s, width.value);
     } else {
       if (ltz) {
@@ -3778,7 +3776,7 @@ char *fixed (NODE_T * p)
       }
       s = stack_string (p, 8 + length);
       s = sub_fixed (p, y, length, after.value);
-      if (strchr (s, ERROR_CHAR) == NULL) {
+      if (a68g_strchr (s, ERROR_CHAR) == NULL) {
 	if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == '.' : A_TRUE) && y < 1.0) {
 	  plusto ('0', s);
 	}
@@ -3834,7 +3832,7 @@ char *fixed (NODE_T * p)
       }
       s = stack_string (p, 8 + length);
       s = long_sub_fixed (p, x, digits, length, after.value);
-      if (strchr (s, ERROR_CHAR) == NULL) {
+      if (a68g_strchr (s, ERROR_CHAR) == NULL) {
 	if (length > (int) strlen (s) && (s[0] != NULL_CHAR ? s[0] == '.' : A_TRUE) && (MP_EXPONENT (x) < 0 || MP_DIGIT (x, 1) == 0)) {
 	  plusto ('0', s);
 	}
@@ -4007,7 +4005,7 @@ char *fleet (NODE_T * p)
     if (isnan (x)) {
       char *s = stack_string (p, 8 + ABS (width.value));
       if (width.value >= (int) strlen (NAN_STRING)) {
-	FILL (s, ' ', width.value);
+	FILL (s, BLANK_CHAR, width.value);
 	strncpy (s, NAN_STRING, strlen (NAN_STRING));
 	return (s);
       } else {
@@ -4016,7 +4014,7 @@ char *fleet (NODE_T * p)
     } else if (isinf (x)) {
       char *s = stack_string (p, 8 + ABS (width.value));
       if (width.value >= (int) strlen (INF_STRING)) {
-	FILL (s, ' ', width.value);
+	FILL (s, BLANK_CHAR, width.value);
 	strncpy (s, INF_STRING, strlen (INF_STRING));
 	return (s);
       } else {
@@ -4044,7 +4042,7 @@ char *fleet (NODE_T * p)
       strcpy (s, t1);
       string_plusab_char (s, EXPONENT_CHAR);
       strcat (s, t2);
-      if (expo.value == 0 || strchr (s, ERROR_CHAR) != NULL) {
+      if (expo.value == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
 	stack_pointer = arg_sp;
 	PUSH_INT (p, width.value);
 	PUSH_INT (p, after.value != 0 ? after.value - 1 : 0);
@@ -4089,7 +4087,7 @@ char *fleet (NODE_T * p)
       strcpy (s, t1);
       string_plusab_char (s, EXPONENT_CHAR);
       strcat (s, t2);
-      if (expo.value == 0 || strchr (s, ERROR_CHAR) != NULL) {
+      if (expo.value == 0 || a68g_strchr (s, ERROR_CHAR) != NULL) {
 	stack_pointer = arg_sp;
 	PUSH_INT (p, width.value);
 	PUSH_INT (p, after.value != 0 ? after.value - 1 : 0);
@@ -4861,13 +4859,13 @@ void write_insertion (NODE_T * p, A68_REF ref_file, unsigned mood)
   for (; p != NULL; FORWARD (p)) {
     write_insertion (SUB (p), ref_file, mood);
     if (WHETHER (p, FORMAT_ITEM_L)) {
-      add_char_transput_buffer (p, FORMATTED_BUFFER, '\n');
+      add_char_transput_buffer (p, FORMATTED_BUFFER, NEWLINE_CHAR);
       write_purge_buffer (p, ref_file, FORMATTED_BUFFER);
     } else if (WHETHER (p, FORMAT_ITEM_P)) {
-      add_char_transput_buffer (p, FORMATTED_BUFFER, '\f');
+      add_char_transput_buffer (p, FORMATTED_BUFFER, FORMFEED_CHAR);
       write_purge_buffer (p, ref_file, FORMATTED_BUFFER);
     } else if (WHETHER (p, FORMAT_ITEM_X) || WHETHER (p, FORMAT_ITEM_Q)) {
-      add_char_transput_buffer (p, FORMATTED_BUFFER, ' ');
+      add_char_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
     } else if (WHETHER (p, FORMAT_ITEM_Y)) {
       /* Not supported, parser has warned you. */ ;
     } else if (WHETHER (p, LITERAL)) {
@@ -4876,7 +4874,7 @@ void write_insertion (NODE_T * p, A68_REF ref_file, unsigned mood)
       } else if (mood & INSERTION_BLANK) {
 	int j, k = strlen (SYMBOL (p));
 	for (j = 1; j <= k; j++) {
-	  add_char_transput_buffer (p, FORMATTED_BUFFER, ' ');
+	  add_char_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
 	}
       }
     } else if (WHETHER (p, REPLICATOR)) {
@@ -4888,7 +4886,7 @@ void write_insertion (NODE_T * p, A68_REF ref_file, unsigned mood)
       } else {
 	int pos = get_transput_buffer_index (FORMATTED_BUFFER);
 	for (j = 1; j < (k - pos); j++) {
-	  add_char_transput_buffer (p, FORMATTED_BUFFER, ' ');
+	  add_char_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
 	}
       }
       return;
@@ -4966,7 +4964,7 @@ static void write_string_c_style (NODE_T * p, char *str)
 	add_string_transput_buffer (p, FORMATTED_BUFFER, str);
       }
       while (k--) {
-	add_char_transput_buffer (p, FORMATTED_BUFFER, ' ');
+	add_char_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
       }
       if (sign == FORMAT_ITEM_MINUS) {
 	add_string_transput_buffer (p, FORMATTED_BUFFER, str);
@@ -5172,18 +5170,18 @@ static void write_number_c_style (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_
     }
   }
 /* Did the conversion succeed? */
-  if (strchr (str, ERROR_CHAR) != NULL) {
+  if (a68g_strchr (str, ERROR_CHAR) != NULL) {
     value_error (p, mode, ref_file);
     error_chars (get_transput_buffer (FORMATTED_BUFFER), width);
   } else {
 /* Edit and output. */
     if (sign == FORMAT_ITEM_MINUS) {
       char *ch = str;
-      while (ch[0] != NULL_CHAR && ch[0] == ' ') {
+      while (ch[0] != NULL_CHAR && ch[0] == BLANK_CHAR) {
 	ch++;
       }
       if (ch[0] != NULL_CHAR && ch[0] == '+') {
-	ch[0] = ' ';
+	ch[0] = BLANK_CHAR;
       }
     }
     if (width == 0) {
@@ -5192,7 +5190,7 @@ static void write_number_c_style (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_
       int blanks = width - strlen (str);
       if (blanks >= 0) {
 	while (blanks--) {
-	  add_char_transput_buffer (p, FORMATTED_BUFFER, ' ');
+	  add_char_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
 	}
 	add_string_transput_buffer (p, FORMATTED_BUFFER, str);
       } else {
@@ -5328,7 +5326,7 @@ static void put_sign_to_integral (NODE_T * p, int sign)
   if (WHETHER (sign_node, FORMAT_ITEM_PLUS)) {
     add_char_transput_buffer (p, EDIT_BUFFER, (sign >= 0 ? '+' : '-'));
   } else {
-    add_char_transput_buffer (p, EDIT_BUFFER, (sign >= 0 ? ' ' : '-'));
+    add_char_transput_buffer (p, EDIT_BUFFER, (sign >= 0 ? BLANK_CHAR : '-'));
   }
 }
 
@@ -5417,7 +5415,7 @@ static void write_pie_frame (NODE_T * p, A68_REF ref_file, int att, int sym)
 
 static void write_mould_put_sign (NODE_T * p, char **q)
 {
-  if ((*q)[0] == '+' || (*q)[0] == '-' || (*q)[0] == ' ') {
+  if ((*q)[0] == '+' || (*q)[0] == '-' || (*q)[0] == BLANK_CHAR) {
     add_char_transput_buffer (p, FORMATTED_BUFFER, (*q)[0]);
     (*q)++;
   }
@@ -5446,7 +5444,7 @@ static void write_mould (NODE_T * p, A68_REF ref_file, int type, char **q, unsig
 	write_mould_put_sign (p, q);
 	if ((*q)[0] == '0') {
 	  if (*mood & DIGIT_BLANK) {
-	    add_char_transput_buffer (p, FORMATTED_BUFFER, ' ');
+	    add_char_transput_buffer (p, FORMATTED_BUFFER, BLANK_CHAR);
 	    (*q)++;
 	    *mood = (*mood & ~INSERTION_NORMAL) | INSERTION_BLANK;
 	  } else if (*mood & DIGIT_NORMAL) {
@@ -5525,7 +5523,7 @@ static void write_integral_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A6
       str = long_sub_whole (p, z, get_mp_digits (mode), width);
     }
 /* Edit string and output. */
-    if (strchr (str, ERROR_CHAR) != NULL) {
+    if (a68g_strchr (str, ERROR_CHAR) != NULL) {
       value_error (p, mode, ref_file);
     }
     if (WHETHER (p, SIGN_MOULD)) {
@@ -5625,7 +5623,7 @@ static void write_real_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
       if (isnan (x)) {
 	char *s = stack_string (p, 1 + length);
 	if (length >= (int) strlen (NAN_STRING)) {
-	  FILL (s, ' ', length);
+	  FILL (s, BLANK_CHAR, length);
 	  strncpy (s, NAN_STRING, strlen (NAN_STRING));
 	} else {
 	  error_chars (s, length);
@@ -5636,7 +5634,7 @@ static void write_real_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
       } else if (isinf (x)) {
 	char *s = stack_string (p, 1 + length);
 	if (length >= (int) strlen (INF_STRING)) {
-	  FILL (s, ' ', length);
+	  FILL (s, BLANK_CHAR, length);
 	  strncpy (s, INF_STRING, strlen (INF_STRING));
 	} else {
 	  error_chars (s, length);
@@ -5675,16 +5673,16 @@ static void write_real_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_RE
       stack_pointer = old_stack_pointer;
     }
 /* Edit and output the string. */
-    if (strchr (str, ERROR_CHAR) != NULL) {
+    if (a68g_strchr (str, ERROR_CHAR) != NULL) {
       value_error (p, mode, ref_file);
     }
     put_zeroes_to_integral (p, length - strlen (str));
     add_string_transput_buffer (p, EDIT_BUFFER, str);
     stag_str = get_transput_buffer (EDIT_BUFFER);
-    if (strchr (stag_str, ERROR_CHAR) != NULL) {
+    if (a68g_strchr (stag_str, ERROR_CHAR) != NULL) {
       value_error (p, mode, ref_file);
     }
-    str = strchr (stag_str, '.');
+    str = a68g_strchr (stag_str, '.');
     if (frac_mould != NULL) {
       frac_str = &str[1];
     }
@@ -6316,7 +6314,7 @@ void genie_write_file_format (NODE_T * p)
 
 static BOOL_T expect (NODE_T * p, MOID_T * m, A68_REF ref_file, const char *items, char ch)
 {
-  if (strchr (items, ch) == NULL) {
+  if (a68g_strchr ((char *) items, ch) == NULL) {
     value_error (p, m, ref_file);
     return (A_FALSE);
   } else {
@@ -6335,7 +6333,7 @@ static char read_single_char (NODE_T * p, A68_REF ref_file)
 {
   A68_FILE *file = FILE_DEREF (&ref_file);
   int ch = char_scanner (file);
-  if (ch == EOF) {
+  if (ch == EOF_CHAR) {
     end_of_file_error (p, ref_file);
   }
   return (ch);
@@ -6380,13 +6378,13 @@ put, which is non-standard Algol68, but convenient.
       BOOL_T go_on = !file->eof;
       while (go_on) {
 	int ch = read_single_char (p, ref_file);
-	go_on = (ch != '\n') && (ch != EOF) && !file->eof;
+	go_on = (ch != NEWLINE_CHAR) && (ch != EOF_CHAR) && !file->eof;
       }
     } else if (WHETHER (p, FORMAT_ITEM_P)) {
       BOOL_T go_on = !file->eof;
       while (go_on) {
 	int ch = read_single_char (p, ref_file);
-	go_on = (ch != '\f') && (ch != EOF) && !file->eof;
+	go_on = (ch != FORMFEED_CHAR) && (ch != EOF_CHAR) && !file->eof;
       }
     } else if (WHETHER (p, FORMAT_ITEM_X) || WHETHER (p, FORMAT_ITEM_Q)) {
       if (!file->eof) {
@@ -6692,7 +6690,7 @@ static void read_sign_mould (NODE_T * p, MOID_T * m, A68_REF ref_file, int *sign
    in stead of a sign, the digit is accepted and '+' is assumed; RR demands a
    space to preceed the digit, Algol68G does not. */
 	  } else {
-	    if (strchr (SIGN_DIGITS, ch) != NULL) {
+	    if (a68g_strchr (SIGN_DIGITS, ch) != NULL) {
 	      if (ch == '+') {
 		*sign = 1;
 	      } else if (ch == '-') {

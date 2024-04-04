@@ -26,15 +26,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #include "transput.h"
 #include "mp.h"
 
-#ifdef PRE_MACOS_X_VERSION
-#include <types.h>
-#include <time.h>
-#else
 #include <sys/types.h>
 #include <sys/time.h>
+
 #ifndef WIN32_VERSION
 #include <sys/resource.h>
-#endif
 #endif
 
 void genie_preprocess (NODE_T *, int *);
@@ -83,18 +79,6 @@ void genie_system (NODE_T * p)
 }
 
 /*!
-\brief PROC break = VOID
-\param p
-\return
-**/
-
-void genie_break (NODE_T * p)
-{
-  (void) p;
-  sys_request_flag = A_TRUE;
-}
-
-/*!
 \brief leave interpretation
 \param p
 \param ret
@@ -102,19 +86,35 @@ void genie_break (NODE_T * p)
 
 void exit_genie (NODE_T * p, int ret)
 {
-#ifdef HAVE_POSIX_THREADS
-  if (in_par_clause && !is_main_thread ()) {
-    genie_abend_thread ();
+  if (ret == A_RUNTIME_ERROR && in_monitor) {
+/*
+    sys_request_flag = A_FALSE;
+    single_step (p, A_FALSE, A_FALSE);
+*/
+    return;
+  } else if (ret == A_RUNTIME_ERROR && MODULE (p)->options.debug) {
+    diagnostics_to_terminal (MODULE (p)->top_line, A_RUNTIME_ERROR);
+    sys_request_flag = A_FALSE;
+    single_step (p, A_FALSE, A_FALSE);
+    return;
   } else {
+    if (ret > A_FORCE_QUIT) {
+      ret -= A_FORCE_QUIT;
+    }
+#ifdef HAVE_POSIX_THREADS
+    if (in_par_clause && !is_main_thread ()) {
+      genie_abend_thread ();
+    } else {
+      ret_line_number = LINE (p)->number;
+      ret_code = ret;
+      longjmp (genie_exit_label, 1);
+    }
+#else
     ret_line_number = LINE (p)->number;
     ret_code = ret;
     longjmp (genie_exit_label, 1);
-  }
-#else
-  ret_line_number = LINE (p)->number;
-  ret_code = ret;
-  longjmp (genie_exit_label, 1);
 #endif
+  }
 }
 
 /*!
@@ -130,13 +130,10 @@ void genie_init_rng (void)
     init_rng (seed);
   }
 }
-
 /*!
 \brief tie label to the clause it is defined in
 \param p
-**/
-
-void tie_label_to_serial (NODE_T * p)
+**/ void tie_label_to_serial (NODE_T * p)
 {
   for (; p != NULL; FORWARD (p)) {
     if (WHETHER (p, SERIAL_CLAUSE)) {
@@ -205,8 +202,7 @@ Insert annotations in the tree that prevent premature sweeping of temporary
 names and rows. For instance, let x, y be PROC STRING, then x + y can crash by
 the heap sweeper. Annotations are local hence when the block is exited they
 become prone to the heap sweeper.
-*/
-  for (; p != NULL; FORWARD (p)) {
+*/ for (; p != NULL; FORWARD (p)) {
     protect_from_sweep (SUB (p));
     p->protect_sweep = NULL;
 /* Catch all constructs that give vulnarable intermediate results on the stack.

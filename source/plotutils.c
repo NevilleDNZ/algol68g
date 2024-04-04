@@ -750,8 +750,8 @@ static BOOL_T string_to_colour (NODE_T * p, char *name, int *index)
   BOOL_T k;
 /* First remove formatting from name: spaces and capitals are irrelevant. */
   j = 0;
-  for (i = 0; name[i] != '\0'; i++) {
-    if (name[i] != ' ') {
+  for (i = 0; name[i] != NULL_CHAR; i++) {
+    if (name[i] != BLANK_CHAR) {
       z[j++] = TO_LOWER (name[i]);
     }
     z[j] = 0;
@@ -779,7 +779,7 @@ static int scan_int (char *buffer, char **current, int *k)
 {
   char *z = *current;
   (void) buffer;
-  while (z[0] != '\0' && !IS_DIGIT (z[0])) {
+  while (z[0] != NULL_CHAR && !IS_DIGIT (z[0])) {
     z++;
   }
   if (z[0] != 0) {
@@ -929,7 +929,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-    if (z[0] != '\0') {
+    if (z[0] != NULL_CHAR) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
@@ -989,7 +989,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-    if (z[0] != '\0') {
+    if (z[0] != NULL_CHAR) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
@@ -1052,7 +1052,7 @@ static plPlotter *set_up_device (NODE_T * p, A68_FILE * f)
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }
-    if (z[0] != '\0') {
+    if (z[0] != NULL_CHAR) {
       diagnostic_node (A_RUNTIME_ERROR, p, ERROR_PAGE_SIZE);
       exit_genie (p, A_RUNTIME_ERROR);
     }

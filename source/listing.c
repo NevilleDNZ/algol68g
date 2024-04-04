@@ -503,8 +503,8 @@ void source_listing (MODULE_T * module)
 /* Mask the prelude and postlude. */
       continue;
     }
-    if ((line->string)[k] == '\n') {
-      (line->string)[k] = '\0';
+    if ((line->string)[k] == NEWLINE_CHAR) {
+      (line->string)[k] = NULL_CHAR;
     }
 /*
 X "ABCD.A68" 0001 01 01 # Source line #
@@ -512,7 +512,7 @@ X "ABCD.A68" 0001 01 01 # Source line #
     if (line->list) {
       listed++;
 /* Print source line. */
-      write_source_line (f, line);
+      write_source_line (f, line, NULL, A_TRUE);
 /* Cross reference for lexical levels starting at this line. */
       if (module->options.cross_reference) {
 	cross_reference (f, line->top_node, line);
@@ -602,12 +602,12 @@ void write_listing (MODULE_T * module)
       io_write_string (f, output_line);
       for (z = module->top_line; z != NULL; z = NEXT (z)) {
 	if (z->diagnostics != NULL) {
-	  write_source_line (f, z);
+	  write_source_line (f, z, NULL, A_TRUE);
 	}
       }
     }
     sprintf (output_line, "\n++++ Garbage collections: %d", garbage_collects);
     io_write_string (f, output_line);
   }
-  io_write_string (f, "\n");
+  io_write_string (f, NEWLINE_STRING);
 }

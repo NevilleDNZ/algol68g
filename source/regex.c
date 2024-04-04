@@ -34,26 +34,28 @@ this program; if not, write to the Free Software Foundation, Inc.,
 void genie_char_in_string (NODE_T * p)
 {
   A68_CHAR c;
+  A68_INT pos;
   A68_REF ref_pos, ref_str;
-  char *q;
+  char *q, ch;
+  int k, len;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pos);
   POP_CHAR (p, &c);
   reset_transput_buffer (PATTERN_BUFFER);
   add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_str);
-  q = strchr (get_transput_buffer (PATTERN_BUFFER), c.value);
-  if (q != NULL) {
-    if (!IS_NIL (ref_pos)) {
-      A68_INT pos;
+  len = get_transput_buffer_index (PATTERN_BUFFER);
+  q = get_transput_buffer (PATTERN_BUFFER);
+  ch = VALUE (&c);
+  for (k = 0; k < len; k++) {
+    if (q[k] == ch) {
       STATUS (&pos) = INITIALISED_MASK;
-/* ANSI standard leaves pointer difference undefined. */
-      VALUE (&pos) = 1 + (int) get_transput_buffer_index (PATTERN_BUFFER) - (int) strlen (q);
+      VALUE (&pos) = k + 1;
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
+      PUSH_BOOL (p, A_TRUE);
+      return;
     }
-    PUSH_BOOL (p, A_TRUE);
-  } else {
-    PUSH_BOOL (p, A_FALSE);
   }
+  PUSH_BOOL (p, A_FALSE);
 }
 
 /*!
@@ -64,26 +66,28 @@ void genie_char_in_string (NODE_T * p)
 void genie_last_char_in_string (NODE_T * p)
 {
   A68_CHAR c;
+  A68_INT pos;
   A68_REF ref_pos, ref_str;
-  char *q;
+  char *q, ch;
+  int k, len;
   POP_REF (p, &ref_str);
   POP_REF (p, &ref_pos);
   POP_CHAR (p, &c);
-  reset_transput_buffer (STRING_BUFFER);
-  add_a_string_transput_buffer (p, STRING_BUFFER, (BYTE_T *) & ref_str);
-  q = strrchr (get_transput_buffer (STRING_BUFFER), c.value);
-  if (q != NULL) {
-    if (!IS_NIL (ref_pos)) {
-      A68_INT pos;
+  reset_transput_buffer (PATTERN_BUFFER);
+  add_a_string_transput_buffer (p, PATTERN_BUFFER, (BYTE_T *) & ref_str);
+  len = get_transput_buffer_index (PATTERN_BUFFER);
+  q = get_transput_buffer (PATTERN_BUFFER);
+  ch = VALUE (&c);
+  for (k = len - 1; k >= 0; k--) {
+    if (q[k] == ch) {
       STATUS (&pos) = INITIALISED_MASK;
-/* ANSI standard leaves pointer difference undefined. */
-      VALUE (&pos) = 1 + (int) get_transput_buffer_index (STRING_BUFFER) - (int) strlen (q);
+      VALUE (&pos) = k + 1;
       *(A68_INT *) ADDRESS (&ref_pos) = pos;
+      PUSH_BOOL (p, A_TRUE);
+      return;
     }
-    PUSH_BOOL (p, A_TRUE);
-  } else {
-    PUSH_BOOL (p, A_FALSE);
   }
+  PUSH_BOOL (p, A_FALSE);
 }
 
 /*!

@@ -1,14 +1,15 @@
-.Dd March 2006
+.Dd April 2006
 .Dt A68G 1
 .
 .Sh NAME
-a68g \- Algol 68 Genie, an algol 68 interpreter
+a68g \- Algol 68 Genie, an Algol 68 interpreter
 .
 .Sh SYNOPSIS
 a68g
 .Op Fl assertions | Fl noassertions
 .Op Fl brackets
 .Op Fl check | Fl norun
+.Op Fl debug | Fl monitor
 .Op Fl echo Ar string
 .Op Fl execute Ar unit
 .Op Fl extensive
@@ -41,13 +42,15 @@ a68g
 .
 .Sh DESCRIPTION
 Algol 68 Genie (a68g) is an Algol 68 interpreter.
-The interpreter offers many runtime checks and is therefore pedantic rather than fast.
+The interpreter offers many runtime checks and is pedantic rather than fast.
 .
 .Sh OPTIONS
 Options are passed to a68g either from the file .a68g.rc in the 
-working directory, the command-line or through pragmats. Precedence 
-is as follows: pragmats supersede command-line options, command-line 
-options supersede options in .a68g.rc. 
+working directory, the command-line or through pragmats. 
+Precedence is as follows: 
+pragmats supersede command-line options, 
+command-line options supersede options in environment variable A68G_OPTIONS, 
+A68G_OPTIONS supersedes options in .a68g.rc. 
 .Pp
 Listing options, tracing options and -pragmat, -nopragmat, 
 take their effect when they are 
@@ -68,8 +71,13 @@ Control elaboration of assertions.
 .It Fl BRackets
 Consider [ .. ] and { .. } as being equivalent to ( .. ).
 Traditional Algol 68 syntax allows ( .. ) to replace [ .. ] in bounds and slices.
+.
 .It Fl Check | Fl NORun
 Check syntax only, the interpreter does not start.
+.
+.It Fl DEBUG | Fl MONitor
+.Invoke the monitor in case a runtime-error occurs.
+The program will pause in the monitor on the line that contains the error.
 .
 .It Fl ECHO Ar string
 Echo `string' to standout.

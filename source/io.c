@@ -48,7 +48,7 @@ void init_tty (void)
 void io_close_tty_line (void)
 {
   if (chars_in_tty_line > 0) {
-    io_write_string (STDOUT_FILENO, "\n");
+    io_write_string (STDOUT_FILENO, NEWLINE_STRING);
   }
 }
 
@@ -64,36 +64,42 @@ char get_stdin_char (void)
   RESET_ERRNO;
   j = io_read_conv (STDIN_FILENO, &ch, 1);
   ABNORMAL_END (errno != 0, "cannot read char from stdin", NULL);
-  return (j == 1 ? ch : EOF);
+  return (j == 1 ? ch : EOF_CHAR);
 }
 
 /*!
-\brief read string from STDIN, until "\n"
+\brief read string from STDIN, until NEWLINE_STRING
 \param prompt prompt string
 \return
 **/
 
 char *read_string_from_tty (char *prompt)
 {
-  int ch, k = 0;
-  io_write_string (STDOUT_FILENO, "\n");
-  io_write_string (STDOUT_FILENO, prompt);
-  io_write_string (STDOUT_FILENO, ">");
-  while (IS_CNTRL (ch = get_stdin_char ()) && ch != NEWLINE_CHAR) {;
+  int ch, k = 0, n;
+  if (prompt != NULL) {
+    io_close_tty_line ();
+    io_write_string (STDOUT_FILENO, prompt);
   }
-  while (ch != NEWLINE_CHAR && ch != EOF && k < BUFFER_SIZE - 1) {
-    input_line[k++] = ch;
-    ch = get_stdin_char ();
+  ch = get_stdin_char ();
+  while (ch != NEWLINE_CHAR && k < BUFFER_SIZE - 1) {
+    if (ch == EOF_CHAR) {
+      input_line[0] = EOF_CHAR;
+      input_line[1] = NULL_CHAR;
+      chars_in_tty_line = 1;
+      return (input_line);
+    } else {
+      input_line[k++] = ch;
+      ch = get_stdin_char ();
+    }
   }
-  if (ch == NEWLINE_CHAR) {
-    chars_in_tty_line++;
-  }
-  input_line[k] = '\0';
+  input_line[k] = NULL_CHAR;
+  n = strlen (input_line);
+  chars_in_tty_line = (ch == NEWLINE_CHAR ? 0 : (n > 0 ? n : 1));
   return (input_line);
 }
 
 /*!
-\brief read string from file including "\n"
+\brief read string from file including NEWLINE_STRING
 \param f
 \param z
 \param max
@@ -103,12 +109,8 @@ char *read_string_from_tty (char *prompt)
 size_t io_read_string (FILE_T f, char *z, size_t max)
 {
   int j = 1, k = 0;
-  char ch = '\0';
-#ifdef PRE_MACOS_X_VERSION
-  char nl = CR_CHAR;
-#else
+  char ch = NULL_CHAR;
   char nl = NEWLINE_CHAR;
-#endif
   ABNORMAL_END (max < 2, "no buffer", NULL);
   while ((j == 1) && (ch != nl) && (k < (int) (max - 1))) {
     RESET_ERRNO;
@@ -118,7 +120,7 @@ size_t io_read_string (FILE_T f, char *z, size_t max)
       z[k++] = ch;
     }
   }
-  z[k] = '\0';
+  z[k] = NULL_CHAR;
   return (k);
 }
 
@@ -131,7 +133,7 @@ size_t io_read_string (FILE_T f, char *z, size_t max)
 void io_write_string (FILE_T f, const char *z)
 {
   RESET_ERRNO;
-  if (f != STDOUT_FILENO) {
+  if (f != STDOUT_FILENO && f != STDERR_FILENO) {
 /* Writing to file. */
     io_write_conv (f, z, strlen (z));
     ABNORMAL_END (errno != 0, "cannot write", NULL);
@@ -143,30 +145,31 @@ void io_write_string (FILE_T f, const char *z)
     do {
       k = first;
 /* How far can we get? */
-      while (z[k] != '\0' && z[k] != NEWLINE_CHAR) {
+      while (z[k] != NULL_CHAR && z[k] != NEWLINE_CHAR) {
 	k++;
       }
       if (k > first) {
 /* Write these characters. */
-	io_write_conv (STDOUT_FILENO, &(z[first]), k - first);
+	int n = k - first;
+	io_write_conv (f, &(z[first]), n);
 	ABNORMAL_END (errno != 0, "cannot write", NULL);
-	chars_in_tty_line += (k - first);
+	chars_in_tty_line += n;
       }
       if (z[k] == NEWLINE_CHAR) {
 /* Pretty-print newline. */
 	k++;
 	first = k;
-	io_write_conv (STDOUT_FILENO, "\n", 1);
+	io_write_conv (f, NEWLINE_STRING, 1);
 	ABNORMAL_END (errno != 0, "cannot write", NULL);
 	chars_in_tty_line = 0;
       }
     }
-    while (z[k] != '\0');
+    while (z[k] != NULL_CHAR);
   }
 }
 
 /*!
-\brief read bytes from file into buffer and convert "\r" into "\n"
+\brief read bytes from file into buffer
 \param fd file descriptor, must be open
 \param buf character buffer, size must be >= n
 \param n maximum number of bytes to read
@@ -187,7 +190,6 @@ ssize_t io_read (FILE_T fd, void *buf, size_t n)
     RESET_ERRNO;
     bytes_read = read (fd, z, to_do);
     if (bytes_read < 0) {
-#ifndef PRE_MACOS_X_VERSION
       if (errno == EINTR) {
 /* interrupt, retry. */
 	bytes_read = 0;
@@ -198,11 +200,8 @@ ssize_t io_read (FILE_T fd, void *buf, size_t n)
 /* read error. */
 	return (-1);
       }
-#else
-      return (-1);
-#endif
     } else if (bytes_read == 0) {
-      break;			/* EOF. */
+      break;			/* EOF_CHAR. */
     }
     to_do -= bytes_read;
     z += bytes_read;
@@ -228,7 +227,6 @@ ssize_t io_write (FILE_T fd, const void *buf, size_t n)
     RESET_ERRNO;
     bytes_written = write (fd, z, to_do);
     if (bytes_written <= 0) {
-#ifndef PRE_MACOS_X_VERSION
       if (errno == EINTR) {
 /* interrupt, retry. */
 	bytes_written = 0;
@@ -239,9 +237,6 @@ ssize_t io_write (FILE_T fd, const void *buf, size_t n)
 /* write error. */
 	return (-1);
       }
-#else
-      return (-1);
-#endif
     }
     to_do -= bytes_written;
     z += bytes_written;
@@ -250,7 +245,7 @@ ssize_t io_write (FILE_T fd, const void *buf, size_t n)
 }
 
 /*!
-\brief read bytes from file into buffer and convert "\r" into "\n"
+\brief read bytes from file into buffer
 \param fd file descriptor, must be open
 \param buf character buffer, size must be >= n
 \param n maximum number of bytes to read
@@ -271,7 +266,6 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
     RESET_ERRNO;
     bytes_read = read (fd, z, to_do);
     if (bytes_read < 0) {
-#ifndef PRE_MACOS_X_VERSION
       if (errno == EINTR) {
 /* interrupt, retry. */
 	bytes_read = 0;
@@ -282,32 +276,17 @@ ssize_t io_read_conv (FILE_T fd, void *buf, size_t n)
 /* read error. */
 	return (-1);
       }
-#else
-      return (-1);
-#endif
     } else if (bytes_read == 0) {
-      break;			/* EOF. */
+      break;			/* EOF_CHAR. */
     }
     to_do -= bytes_read;
     z += bytes_read;
   }
-#ifdef PRE_MACOS_X_VERSION
-  {
-/* Translate CR_CHAR into NEWLINE_CHAR. */
-    unsigned k, lim = n - to_do;
-    z = buf;
-    for (k = 0; k < lim; k++) {
-      if (z[k] == CR_CHAR) {
-	z[k] = NEWLINE_CHAR;
-      }
-    }
-  }
-#endif
   return (n - to_do);		/* return >= 0 */
 }
 
 /*!
-\brief writes n bytes from buffer to file and converts "\r" into "\n"
+\brief writes n bytes from buffer to file
 \param fd file descriptor, must be open
 \param buf character buffer, size must be >= n
 \param n maximum number of bytes to write
@@ -319,23 +298,11 @@ ssize_t io_write_conv (FILE_T fd, const void *buf, size_t n)
   size_t to_do = n;
   int restarts = 0;
   char *z = (char *) buf;
-#ifdef PRE_MACOS_X_VERSION
-  {
-/* Translate NEWLINE_CHAR into CR_CHAR. */
-    unsigned k;
-    for (k = 0; k < n; k++) {
-      if (z[k] == NEWLINE_CHAR) {
-	z[k] = CR_CHAR;
-      }
-    }
-  }
-#endif
   while (to_do > 0) {
     ssize_t bytes_written;
     RESET_ERRNO;
     bytes_written = write (fd, z, to_do);
     if (bytes_written <= 0) {
-#ifndef PRE_MACOS_X_VERSION
       if (errno == EINTR) {
 /* interrupt, retry. */
 	bytes_written = 0;
@@ -346,9 +313,6 @@ ssize_t io_write_conv (FILE_T fd, const void *buf, size_t n)
 /* write error. */
 	return (-1);
       }
-#else
-      return (-1);
-#endif
     }
     to_do -= bytes_written;
     z += bytes_written;

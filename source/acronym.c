@@ -44,7 +44,7 @@ static void make_acronym (char *, char *);
 
 static BOOL_T is_vowel (char ch)
 {
-  return (strchr ("aeiouAEIOU", ch) != NULL);
+  return (a68g_strchr ("aeiouAEIOU", ch) != NULL);
 }
 
 /*!
@@ -55,7 +55,7 @@ static BOOL_T is_vowel (char ch)
 
 static BOOL_T is_consonant (char ch)
 {
-  return (strchr ("qwrtypsdfghjklzxcvbnmQWRTYPSDFGHJKLZXCVBNM", ch) != NULL);
+  return (a68g_strchr ("qwrtypsdfghjklzxcvbnmQWRTYPSDFGHJKLZXCVBNM", ch) != NULL);
 }
 
 static char *codas[] = {
@@ -101,7 +101,7 @@ static BOOL_T is_coda (char *str, int len)
 {
   char str2[8];
   strncpy (str2, str, len);
-  str2[len] = '\0';
+  str2[len] = NULL_CHAR;
   return (bsearch (str2, codas, sizeof (codas) / sizeof (char *), sizeof (char *), cmp) != NULL);
 }
 
@@ -113,29 +113,29 @@ static BOOL_T is_coda (char *str, int len)
 static void get_init_sylls (char *in, char *out)
 {
   char *coda;
-  while (*in != '\0') {
+  while (*in != NULL_CHAR) {
     if (isalpha (*in)) {
-      while (*in != '\0' && isalpha (*in) && !is_vowel (*in))
+      while (*in != NULL_CHAR && isalpha (*in) && !is_vowel (*in))
 	*out++ = toupper (*in++);
-      while (*in != '\0' && is_vowel (*in))
+      while (*in != NULL_CHAR && is_vowel (*in))
 	*out++ = toupper (*in++);
       coda = out;
-      while (*in != '\0' && is_consonant (*in)) {
+      while (*in != NULL_CHAR && is_consonant (*in)) {
 	*out++ = toupper (*in++);
-	*out = '\0';
+	*out = NULL_CHAR;
 	if (!is_coda (coda, out - coda)) {
 	  out--;
 	  break;
 	}
       }
-      while (*in != '\0' && isalpha (*in))
+      while (*in != NULL_CHAR && isalpha (*in))
 	in++;
       *out++ = '+';
     } else {
       in++;
     }
   }
-  out[-1] = '\0';
+  out[-1] = NULL_CHAR;
 }
 
 /*!
@@ -146,8 +146,8 @@ static void get_init_sylls (char *in, char *out)
 static void reduce_vowels (char *str)
 {
   char *next;
-  while (*str != '\0') {
-    next = strchr (str + 1, '+');
+  while (*str != NULL_CHAR) {
+    next = a68g_strchr (str + 1, '+');
     if (next == NULL) {
       break;
     }
@@ -158,7 +158,7 @@ static void reduce_vowels (char *str)
 	memmove (str, next, strlen (next) + 1);
       }
     } else {
-      while (*str != '\0' && *str != '+')
+      while (*str != NULL_CHAR && *str != '+')
 	str++;
     }
     if (*str == '+')
@@ -174,9 +174,9 @@ static void reduce_vowels (char *str)
 static void remove_boundaries (char *str, int maxLen)
 {
   int len = 0;
-  while (*str != '\0') {
+  while (*str != NULL_CHAR) {
     if (len >= maxLen) {
-      *str = '\0';
+      *str = NULL_CHAR;
       return;
     }
     if (*str == '+') {
@@ -197,7 +197,7 @@ static void remove_boundaries (char *str, int maxLen)
 static int error_length (char *str)
 {
   int len = 0;
-  while (*str != '\0') {
+  while (*str != NULL_CHAR) {
     if (*str != '+')
       len++;
     str++;
@@ -214,9 +214,9 @@ static int error_length (char *str)
 static BOOL_T remove_extra_coda (char *str)
 {
   int len;
-  while (*str != '\0') {
-    if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1]) && str[2] != '+' && str[2] != '\0') {
-      for (len = 2; str[len] != '\0' && str[len] != '+'; len++);
+  while (*str != NULL_CHAR) {
+    if (is_vowel (*str) && str[1] != '+' && !is_vowel (str[1]) && str[2] != '+' && str[2] != NULL_CHAR) {
+      for (len = 2; str[len] != NULL_CHAR && str[len] != '+'; len++);
       memmove (str + 1, str + len, strlen (str + len) + 1);
       return (A_TRUE);
     }
@@ -254,7 +254,7 @@ void genie_acronym (NODE_T * p)
   u = malloc (len + 1);
   v = malloc (len + 1 + 8);
   a_to_c_string (p, u, z);
-  if (u != NULL && u[0] != '\0' && v != NULL) {
+  if (u != NULL && u[0] != NULL_CHAR && v != NULL) {
     make_acronym (u, v);
     PUSH_REF (p, c_to_a_string (p, v));
   } else {

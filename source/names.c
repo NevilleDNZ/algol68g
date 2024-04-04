@@ -347,7 +347,7 @@ char *non_terminal_string (char *buf, int att)
     if (attribute_names[att] != NULL) {
       char *q = buf;
       strcpy (q, attribute_names[att]);
-      while (q[0] != '\0') {
+      while (q[0] != NULL_CHAR) {
 	if (q[0] == '_') {
 	  q[0] = '-';
 	} else {
@@ -361,5 +361,20 @@ char *non_terminal_string (char *buf, int att)
     }
   } else {
     return (NULL);
+  }
+}
+
+/*!
+\brief
+\return
+**/
+
+char *standard_environ_proc_name (GENIE_PROCEDURE f)
+{
+  TAG_T *i = stand_env->identifiers;
+  for (; i != NULL; FORWARD (i)) {
+    if (i->procedure == f) {
+      return (SYMBOL (NODE (i)));
+    }
   }
 }

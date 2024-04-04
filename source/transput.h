@@ -24,6 +24,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #ifndef A68G_TRANSPUT_H
 #define A68G_TRANSPUT_H
 
+#define TRANSPUT_BUFFER_SIZE 	1024
 #define ITEM_NOT_USED		(-1)
 #define EMBEDDED_FORMAT 	A_TRUE
 #define NOT_EMBEDDED_FORMAT     A_FALSE

@@ -118,6 +118,27 @@ BOOL_T increment_internal_index (A68_TUPLE * tup, int dimensions)
 }
 
 /*!
+\brief print index
+\param tup
+\param dimensions
+\return
+**/
+
+void print_internal_index (FILE_T f, A68_TUPLE * tup, int dimensions)
+{
+  int k;
+  for (k = 0; k < dimensions; k++) {
+    A68_TUPLE *ref = &tup[k];
+    char buf[BUFFER_SIZE];
+    sprintf (buf, "%d", ref->k);
+    io_write_string (f, buf);
+    if (k < dimensions - 1) {
+      io_write_string (f, ", ");
+    }
+  }
+}
+
+/*!
 \brief convert C string to A68 [] CHAR
 \param p
 \param str
@@ -152,7 +173,7 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
   for (k = 0; k < width; k++) {
     A68_CHAR ch;
     ch.status = INITIALISED_MASK;
-    ch.value = (k < str_size ? str[k] : '\0');
+    ch.value = (k < str_size ? str[k] : NULL_CHAR);
     *(A68_CHAR *) HEAP_ADDRESS (ref_h) = ch;
     ref_h += SIZE_OF (A68_CHAR);
   }
@@ -255,7 +276,7 @@ char *a_to_c_string (NODE_T * p, char *str, A68_REF row)
 	str[n++] = ch->value;
       }
     }
-    str[n] = '\0';
+    str[n] = NULL_CHAR;
     return (str);
   } else {
     return (NULL);
@@ -1071,4 +1092,139 @@ A68_REF genie_copy_stowed (A68_REF old, NODE_T * p, MOID_T * m)
     ABNORMAL_END (A_TRUE, ERROR_INTERNAL_CONSISTENCY, "genie_copy_stowed");
     return (nil_ref);
   }
+}
+
+/* Operators for ROWS. */
+
+/*!
+\brief OP ELEMS = (ROWS) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_monad_elems (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *x;
+  A68_TUPLE *t;
+  POP_REF (p, &z);
+/* Decrease pointer since a UNION is on the stack. */
+  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
+  TEST_INIT (p, z, MODE (ROWS));
+  TEST_NIL (p, z, MODE (ROWS));
+  GET_DESCRIPTOR (x, t, &z);
+  PUSH_INT (p, get_row_size (t, x->dimensions));
+}
+
+/*!
+\brief OP LWB = (ROWS) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_monad_lwb (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *x;
+  A68_TUPLE *t;
+  POP_REF (p, &z);
+/* Decrease pointer since a UNION is on the stack. */
+  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
+  TEST_INIT (p, z, MODE (ROWS));
+  TEST_NIL (p, z, MODE (ROWS));
+  GET_DESCRIPTOR (x, t, &z);
+  PUSH_INT (p, t->lower_bound);
+}
+
+/*!
+\brief OP UPB = (ROWS) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_monad_upb (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *x;
+  A68_TUPLE *t;
+  POP_REF (p, &z);
+/* Decrease pointer since a UNION is on the stack. */
+  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
+  TEST_INIT (p, z, MODE (ROWS));
+  TEST_NIL (p, z, MODE (ROWS));
+  GET_DESCRIPTOR (x, t, &z);
+  PUSH_INT (p, t->upper_bound);
+}
+
+/*!
+\brief OP ELEMS = (INT, ROWS) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_dyad_elems (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *x;
+  A68_TUPLE *t, *u;
+  A68_INT k;
+  POP_REF (p, &z);
+/* Decrease pointer since a UNION is on the stack. */
+  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
+  TEST_INIT (p, z, MODE (ROWS));
+  TEST_NIL (p, z, MODE (ROWS));
+  POP_INT (p, &k);
+  GET_DESCRIPTOR (x, t, &z);
+  if (k.value < 1 || k.value > x->dimensions) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  u = &(t[k.value - 1]);
+  PUSH_INT (p, ROW_SIZE (u));
+}
+
+/*!
+\brief OP LWB = (INT, ROWS) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_dyad_lwb (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *x;
+  A68_TUPLE *t;
+  A68_INT k;
+  POP_REF (p, &z);
+/* Decrease pointer since a UNION is on the stack. */
+  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
+  TEST_INIT (p, z, MODE (ROWS));
+  TEST_NIL (p, z, MODE (ROWS));
+  POP_INT (p, &k);
+  GET_DESCRIPTOR (x, t, &z);
+  if (k.value < 1 || k.value > x->dimensions) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  PUSH_INT (p, t[k.value - 1].lower_bound);
+}
+
+/*!
+\brief OP UPB = (INT, ROWS) INT
+\param p position in syntax tree, should not be NULL
+**/
+
+void genie_dyad_upb (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *x;
+  A68_TUPLE *t;
+  A68_INT k;
+  POP_REF (p, &z);
+/* Decrease pointer since a UNION is on the stack. */
+  DECREMENT_STACK_POINTER (p, SIZE_OF (A68_POINTER));
+  TEST_INIT (p, z, MODE (ROWS));
+  TEST_NIL (p, z, MODE (ROWS));
+  POP_INT (p, &k);
+  GET_DESCRIPTOR (x, t, &z);
+  if (k.value < 1 || k.value > x->dimensions) {
+    diagnostic_node (A_RUNTIME_ERROR, p, ERROR_INVALID_DIMENSION, (int) k.value);
+    exit_genie (p, A_RUNTIME_ERROR);
+  }
+  PUSH_INT (p, t[k.value - 1].upper_bound);
 }

@@ -409,16 +409,16 @@ static void stand_prelude (void)
 {
 /* Identifiers. */
   a68_idf (A_TRUE, "intlengths", MODE (INT), genie_int_lengths);
-  a68_idf (A_TRUE, "intshorts", MODE (INT), genie_int_shorts);
+  a68_idf (A_TRUE, "intshorths", MODE (INT), genie_int_shorths);
   a68_idf (A_TRUE, "maxint", MODE (INT), genie_max_int);
   a68_idf (A_TRUE, "maxreal", MODE (REAL), genie_max_real);
   a68_idf (A_TRUE, "smallreal", MODE (REAL), genie_small_real);
   a68_idf (A_TRUE, "reallengths", MODE (INT), genie_real_lengths);
-  a68_idf (A_TRUE, "realshorts", MODE (INT), genie_real_shorts);
+  a68_idf (A_TRUE, "realshorths", MODE (INT), genie_real_shorths);
   a68_idf (A_TRUE, "compllengths", MODE (INT), genie_complex_lengths);
-  a68_idf (A_TRUE, "complshorts", MODE (INT), genie_complex_shorts);
+  a68_idf (A_TRUE, "complshorths", MODE (INT), genie_complex_shorths);
   a68_idf (A_TRUE, "bitslengths", MODE (INT), genie_bits_lengths);
-  a68_idf (A_TRUE, "bitsshorts", MODE (INT), genie_bits_shorts);
+  a68_idf (A_TRUE, "bitsshorths", MODE (INT), genie_bits_shorths);
   a68_idf (A_TRUE, "bitswidth", MODE (INT), genie_bits_width);
   a68_idf (A_TRUE, "longbitswidth", MODE (INT), genie_long_bits_width);
   a68_idf (A_TRUE, "longlongbitswidth", MODE (INT), genie_longlong_bits_width);
@@ -426,7 +426,7 @@ static void stand_prelude (void)
   a68_idf (A_TRUE, "longmaxbits", MODE (LONG_BITS), genie_long_max_bits);
   a68_idf (A_TRUE, "longlongmaxbits", MODE (LONGLONG_BITS), genie_longlong_max_bits);
   a68_idf (A_TRUE, "byteslengths", MODE (INT), genie_bytes_lengths);
-  a68_idf (A_TRUE, "bytesshorts", MODE (INT), genie_bytes_shorts);
+  a68_idf (A_TRUE, "bytesshorths", MODE (INT), genie_bytes_shorths);
   a68_idf (A_TRUE, "byteswidth", MODE (INT), genie_bytes_width);
   a68_idf (A_TRUE, "maxabschar", MODE (INT), genie_max_abs_char);
   a68_idf (A_TRUE, "pi", MODE (REAL), genie_pi);
@@ -467,6 +467,10 @@ static void stand_prelude (void)
   a68_idf (A_FALSE, "sweepheap", m, genie_sweep_heap);
   a68_idf (A_FALSE, "preemptivesweepheap", m, genie_preemptive_sweep_heap);
   a68_idf (A_FALSE, "break", m, genie_break);
+  a68_idf (A_FALSE, "debug", m, genie_debug);
+  a68_idf (A_FALSE, "monitor", m, genie_debug);
+  m = a68_proc (MODE (STRING), MODE (STRING), NULL);
+  a68_idf (A_FALSE, "evaluate", m, genie_evaluate);
   m = a68_proc (MODE (INT), MODE (STRING), NULL);
   a68_idf (A_FALSE, "system", m, genie_system);
   m = a68_proc (MODE (STRING), MODE (STRING), NULL);

@@ -2472,21 +2472,19 @@ PROPAGATOR_T genie_unit (NODE_T * p)
 void genie_unit_trace (NODE_T * p)
 {
   if (sys_request_flag) {
-    sys_request_flag = A_FALSE;
-    single_step (p);
-    EXECUTE_UNIT (p);
+    single_step (p, A_TRUE, A_FALSE);
   } else if (MASK (p) & BREAKPOINT_MASK) {
-    sys_request_flag = A_FALSE;
-    sprintf (output_line, "\nbreakpoint in line %d", LINE (p)->number);
-    io_write_string (STDOUT_FILENO, output_line);
-    single_step (p);
-    EXECUTE_UNIT (p);
+    if (INFO (p)->expr == NULL) {
+      sys_request_flag = A_FALSE;
+      single_step (p, A_FALSE, A_TRUE);
+    } else if (breakpoint_expression (p)) {
+      sys_request_flag = A_FALSE;
+      single_step (p, A_FALSE, A_TRUE);
+    }
   } else if (MASK (p) & TRACE_MASK) {
     where (STDOUT_FILENO, p);
-    EXECUTE_UNIT (p);
-  } else {
-    EXECUTE_UNIT (p);
   }
+  EXECUTE_UNIT (p);
 }
 
 /*!
@@ -2919,6 +2917,7 @@ static void genie_prepare_struct (NODE_T * p)
 void genie_prepare_declarer (NODE_T * p)
 {
   if (p != NULL) {
+    ABNORMAL_END (MOID (p) == NULL, "NULL moid in genie_prepare_declarer", NULL);
     CHECK_TIME_LIMIT (p);
     if (MOID (p)->has_rows == A_TRUE) {
       if (WHETHER (p, INDICANT)) {

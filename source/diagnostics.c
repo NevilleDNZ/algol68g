@@ -40,7 +40,7 @@ int error_count, warning_count, run_time_error_count;
 
 BOOL_T unprintable (char ch)
 {
-  return ((ch < 32 || ch >= 127) && ch != '\t');
+  return ((ch < 32 || ch >= 127) && ch != TAB_CHAR);
 }
 
 /*!
@@ -54,6 +54,8 @@ char *ctrl_char (int ch)
   ch = TO_UCHAR (ch);
   if (ch > 0 && ch < 27) {
     sprintf (str, "\\^%c", ch + 96);
+  } else if (ch >= 27 && ch < 128) {
+    sprintf (str, "'%c'", ch);
   } else {
     sprintf (str, "\\%02x", ch);
   }
@@ -70,7 +72,7 @@ static char *char_to_str (char ch)
 {
   static char str[SMALL_BUFFER_SIZE];
   str[0] = ch;
-  str[1] = '\0';
+  str[1] = NULL_CHAR;
   return (str);
 }
 
@@ -89,11 +91,11 @@ static void pretty_diag (FILE_T f, char *p)
   } else {
     pos = 1;
   }
-  while (p[0] != '\0') {
+  while (p[0] != NULL_CHAR) {
     char *q;
     int k;
     if (IS_GRAPH (p[0])) {
-      for (k = 0, q = p; q[0] != ' ' && q[0] != '\0' && k <= line_width - 5; q++, k++) {
+      for (k = 0, q = p; q[0] != BLANK_CHAR && q[0] != NULL_CHAR && k <= line_width - 5; q++, k++) {
 	;
       }
     } else {
@@ -107,7 +109,7 @@ static void pretty_diag (FILE_T f, char *p)
 	io_write_string (f, "\n     ");
 	pos = 5;
       } else {
-	io_write_string (f, "\n");
+	io_write_string (f, NEWLINE_STRING);
 	pos = 1;
       }
     }
@@ -115,7 +117,7 @@ static void pretty_diag (FILE_T f, char *p)
       io_write_string (f, char_to_str (p[0]));
     }
   }
-  for (; p[0] == ' '; p++, pos++) {
+  for (; p[0] == BLANK_CHAR; p++, pos++) {
     io_write_string (f, char_to_str (p[0]));
   }
 }
@@ -150,6 +152,32 @@ void abend (char *reason, char *info, char *file, int line)
 }
 
 /*!
+\brief position in line 
+\param 
+\param
+**/
+
+static char *where_pos (SOURCE_LINE_T * p, NODE_T * q)
+{
+  char *pos;
+  if (q != NULL && p == LINE (q)) {
+    pos = q->info->char_in_line;
+  } else {
+    pos = p->string;
+  }
+  if (pos == NULL) {
+    pos = p->string;
+  }
+  for (; IS_SPACE (pos[0]) && pos[0] != NULL_CHAR; pos++) {
+    ;
+  }
+  if (pos[0] == NULL_CHAR) {
+    pos = p->string;
+  }
+  return (pos);
+}
+
+/*!
 \brief position in line where diagnostic points at
 \param 
 \param
@@ -166,10 +194,10 @@ static char *diag_pos (SOURCE_LINE_T * p, DIAGNOSTIC_T * d)
   if (pos == NULL) {
     pos = p->string;
   }
-  for (; IS_SPACE (pos[0]) && pos[0] != '\0'; pos++) {
+  for (; IS_SPACE (pos[0]) && pos[0] != NULL_CHAR; pos++) {
     ;
   }
-  if (pos[0] == '\0') {
+  if (pos[0] == NULL_CHAR) {
     pos = p->string;
   }
   return (pos);
@@ -179,10 +207,10 @@ static char *diag_pos (SOURCE_LINE_T * p, DIAGNOSTIC_T * d)
 \brief write source line to file with diagnostics
 \param f
 \param p
-\param what
+\param where
 **/
 
-void write_source_line (FILE_T f, SOURCE_LINE_T * p)
+void write_source_line (FILE_T f, SOURCE_LINE_T * p, NODE_T * where, BOOL_T diag)
 {
   char *c, *c0;
   int continuations = 0;
@@ -190,18 +218,26 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
   int line_width = (f == STDOUT_FILENO ? term_width : MAX_LINE_WIDTH);
   BOOL_T line_ended;
 /* Terminate properly */
-  if ((p->string)[strlen (p->string) - 1] == '\n') {
-    (p->string)[strlen (p->string) - 1] = '\0';
-    if ((p->string)[strlen (p->string) - 1] == '\r') {
-      (p->string)[strlen (p->string) - 1] = '\0';
+  if ((p->string)[strlen (p->string) - 1] == NEWLINE_CHAR) {
+    (p->string)[strlen (p->string) - 1] = NULL_CHAR;
+    if ((p->string)[strlen (p->string) - 1] == CR_CHAR) {
+      (p->string)[strlen (p->string) - 1] = NULL_CHAR;
     }
   }
 /* Print line number */
   if (f == STDOUT_FILENO) {
     io_close_tty_line ();
-    sprintf (output_line, "%04d ", p->number % 10000);
+    if (p->number == 0) {
+      sprintf (output_line, "     ");
+    } else {
+      sprintf (output_line, "%-4d ", p->number % 10000);
+    }
   } else {
-    sprintf (output_line, "\n%04d ", p->number % 10000);
+    if (p->number == 0) {
+      sprintf (output_line, "\n     ");
+    } else {
+      sprintf (output_line, "\n%-4d ", p->number % 10000);
+    }
   }
   io_write_string (f, output_line);
 /* Pretty print line */
@@ -211,7 +247,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
   while (!line_ended) {
     int len = 0;
     char *new_pos = NULL;
-    if (c[0] == '\0') {
+    if (c[0] == NULL_CHAR) {
       strcpy (output_line, "");
       line_ended = A_TRUE;
     } else {
@@ -227,7 +263,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
 	}
 	new_pos = &c[len];
 	col += len;
-      } else if (c[0] == '\t') {
+      } else if (c[0] == TAB_CHAR) {
 	int n = TABULATE (col);
 	len = n;
 	col += n;
@@ -255,18 +291,21 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
       c = new_pos;
     } else {
 /* First see if there are diagnostics to be printed */
-      BOOL_T z = A_FALSE;
+      BOOL_T y = A_FALSE, z = A_FALSE;
       DIAGNOSTIC_T *d = p->diagnostics;
-      if (d != NULL) {
+      if (d != NULL || where != NULL) {
 	char *c1;
 	for (c1 = c0; c1 != c; c1++) {
-	  for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-	    z |= (c1 == diag_pos (p, d));
+	  y |= (where != NULL && p == LINE (where) ? c1 == where_pos (p, where) : A_FALSE);
+	  if (diag) {
+	    for (d = p->diagnostics; d != NULL; FORWARD (d)) {
+	      z |= (c1 == diag_pos (p, d));
+	    }
 	  }
 	}
       }
 /* If diagnostics are to be printed then print marks */
-      if (z) {
+      if (y || z) {
 	DIAGNOSTIC_T *d;
 	char *c1;
 	int col_2 = 1;
@@ -279,7 +318,9 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
 	      k = d->number;
 	    }
 	  }
-	  if (diags_at_this_pos != 0) {
+	  if (y == A_TRUE && c1 == where_pos (p, where)) {
+	    strcpy (output_line, "^");
+	  } else if (diags_at_this_pos != 0) {
 	    if (diags_at_this_pos == 1) {
 	      sprintf (output_line, "%c", digit_to_char (k));
 	    } else {
@@ -293,7 +334,7 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
 	      while (n--) {
 		strcat (output_line, " ");
 	      }
-	    } else if (c1[0] == '\t') {
+	    } else if (c1[0] == TAB_CHAR) {
 	      int n = TABULATE (col_2);
 	      col_2 += n;
 	      strcpy (output_line, "");
@@ -325,11 +366,13 @@ void write_source_line (FILE_T f, SOURCE_LINE_T * p)
     }
   }				/* while */
 /* Print the diagnostics */
-  if (p->diagnostics != NULL) {
-    DIAGNOSTIC_T *d;
-    for (d = p->diagnostics; d != NULL; FORWARD (d)) {
-      io_write_string (f, "\n");
-      pretty_diag (f, d->text);
+  if (diag) {
+    if (p->diagnostics != NULL) {
+      DIAGNOSTIC_T *d;
+      for (d = p->diagnostics; d != NULL; FORWARD (d)) {
+	io_write_string (f, NEWLINE_STRING);
+	pretty_diag (f, d->text);
+      }
     }
   }
 }
@@ -354,7 +397,7 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
 	}
       }
       if (z) {
-	write_source_line (STDOUT_FILENO, p);
+	write_source_line (STDOUT_FILENO, p, NULL, A_TRUE);
       }
     }
   }
@@ -368,7 +411,11 @@ void diagnostics_to_terminal (SOURCE_LINE_T * p, int what)
 
 void scan_error (SOURCE_LINE_T * u, char *v, char *txt)
 {
-  diagnostic_line (A_ERROR, u, v, txt, ERROR_SPECIFICATION, NULL);
+  if (errno != 0) {
+    diagnostic_line (A_ERROR, u, v, txt, ERROR_SPECIFICATION, NULL);
+  } else {
+    diagnostic_line (A_ERROR, u, v, txt, ERROR_UNSPECIFIED, NULL);
+  }
   longjmp (exit_compilation, 1);
 }
 
@@ -444,8 +491,12 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
   if (line == NULL && p == NULL) {
     return;
   }
+  if (in_monitor) {
+    monitor_error (b, NULL);
+    return;
+  }
   strcpy (st, get_severity (sev));
-  nst[0] = '\0';
+  nst[0] = NULL_CHAR;
   if (line == NULL && p != NULL) {
     line = LINE (p);
   }
@@ -502,7 +553,7 @@ static void add_diagnostic (SOURCE_LINE_T * line, char *pos, NODE_T * p, int sev
   msg = (DIAGNOSTIC_T *) get_heap_space (SIZE_OF (DIAGNOSTIC_T));
   *ref_msg = msg;
   ATTRIBUTE (msg) = sev;
-  if (nst[0] != '\0') {
+  if (nst[0] != NULL_CHAR) {
     strcat (a, " ");
     strcat (a, nst);
   }
@@ -535,7 +586,7 @@ Z string literal.
 */
 
 #define COMPOSE_DIAGNOSTIC\
-  while (t[0] != '\0') {\
+  while (t[0] != NULL_CHAR) {\
     if (t[0] == '#') {\
       extra_syntax = A_FALSE;\
     } else if (t[0] == '@') {\
@@ -662,9 +713,9 @@ Z string literal.
       strcat (q, "\"");\
     } else {\
       *(q++) = *t;\
-      *q = '\0';\
+      *q = NULL_CHAR;\
     }\
-    while (*q != '\0') {\
+    while (*q != NULL_CHAR) {\
       q++;\
     }\
     t++;\
@@ -686,7 +737,7 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
   BOOL_T force, extra_syntax = A_TRUE, shortcut = A_FALSE;
   int err = errno;
   va_start (args, str);
-  q[0] = '\0';
+  q[0] = NULL_CHAR;
   force = (sev & FORCE_DIAGNOSTIC) != 0;
   sev &= ~FORCE_DIAGNOSTIC;
 /* No warnings? */
@@ -721,7 +772,7 @@ void diagnostic_node (int sev, NODE_T * p, char *str, ...)
       if (str != NULL) {
 	char *stu;
 	strcat (q, " (");
-	for (stu = str; stu[0] != '\0'; stu++) {
+	for (stu = str; stu[0] != NULL_CHAR; stu++) {
 	  stu[0] = TO_LOWER (stu[0]);
 	}
 	strncat (q, str, 128);
@@ -755,7 +806,7 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
   int err = errno;
   NODE_T *p = NULL;
   va_start (args, str);
-  q[0] = '\0';
+  q[0] = NULL_CHAR;
   force = (sev & FORCE_DIAGNOSTIC) != 0;
   sev &= ~FORCE_DIAGNOSTIC;
 /* No warnings? */
@@ -790,7 +841,7 @@ void diagnostic_line (int sev, SOURCE_LINE_T * line, char *pos, char *str, ...)
       if (str != NULL) {
 	char *stu;
 	strcat (q, " (");
-	for (stu = str; stu[0] != '\0'; stu++) {
+	for (stu = str; stu[0] != NULL_CHAR; stu++) {
 	  stu[0] = TO_LOWER (stu[0]);
 	}
 	strncat (q, str, 128);
