@@ -132,8 +132,8 @@ void compute_pseudo_inverse (NODE_T *p, gsl_matrix **mpinv, gsl_matrix *X, REAL_
   }
 // Compute pseudo inverse A⁻¹ = VS⁻¹Uᵀ. 
   gsl_matrix *VS_inv = NO_REAL_MATRIX, *X_inv = NO_REAL_MATRIX;
-  a68_dgemm (I, I, 1, V, S_inv, 0, &VS_inv);
-  a68_dgemm (I, T, 1, VS_inv, Uf, 0, &X_inv);
+  a68_dgemm (SELF, SELF, 1, V, S_inv, 0, &VS_inv);
+  a68_dgemm (SELF, FLIP, 1, VS_inv, Uf, 0, &X_inv);
 // Compose result.
   if (transpose) {
     (*mpinv) = gsl_matrix_calloc (M, N);
@@ -275,7 +275,7 @@ void genie_matrix_pca_cv (NODE_T * p)
 // Covariance matrix, M samples: Cov = XᵀX.
   M = MAX (M, N);
   gsl_matrix *CV = NO_REAL_MATRIX;
-  a68_dgemm (T, I, 1, C, C, 0, &CV);
+  a68_dgemm (FLIP, SELF, 1, C, C, 0, &CV);
 // Compute and sort eigenvectors.
   gsl_vector *Sv = gsl_vector_calloc (M);
   gsl_matrix *eigens = gsl_matrix_calloc (M, M);
@@ -380,13 +380,13 @@ void genie_matrix_pcr (NODE_T * p)
   gsl_matrix *reduced = left_columns (p, eigens, Nk);
 // Compute projected set = X * reduced.
   gsl_matrix *proj = NO_REAL_MATRIX;
-  a68_dgemm (I, I, 1.0, X, reduced, 0.0, &proj);
+  a68_dgemm (SELF, SELF, 1.0, X, reduced, 0.0, &proj);
 // Compute β = reduced * P⁻¹ * Y.
   gsl_matrix *mpinv = NO_REAL_MATRIX;
   compute_pseudo_inverse (p, &mpinv, proj, SMALL_EIGEN);
   gsl_matrix *z = NO_REAL_MATRIX, *beta = NO_REAL_MATRIX;
-  a68_dgemm (I, I, 1.0, reduced, mpinv, 0.0, &z);
-  a68_dgemm (I, I, 1.0, z, Y, 0.0, &beta);
+  a68_dgemm (SELF, SELF, 1.0, reduced, mpinv, 0.0, &z);
+  a68_dgemm (SELF, SELF, 1.0, z, Y, 0.0, &beta);
 // Yield results.
   if (!IS_NIL (singulars)) {
     *DEREF (A68_REF, &singulars) = vector_to_row (p, Sv);
@@ -425,7 +425,7 @@ void genie_matrix_ols (NODE_T *p)
 // Compute β = X⁻¹ * Y.
   gsl_matrix *mpinv = NO_REAL_MATRIX, *beta = NO_REAL_MATRIX;
   compute_pseudo_inverse (p, &mpinv, X, SMALL_EIGEN);
-  a68_dgemm (I, I, 1.0, X, Y, 0.0, &beta);
+  a68_dgemm (SELF, SELF, 1.0, X, Y, 0.0, &beta);
 // Yield results.
   push_matrix (p, beta);
   (void) gsl_set_error_handler (save_handler);
@@ -488,7 +488,7 @@ void genie_matrix_pls1 (NODE_T *p)
   for (int k = 0; k < Nk && go_on; k ++) {
 // E weight from E, F covariance.
 // eigens = Eᵀ * f / | Eᵀ * f |
-    a68_dgemm (T, I, 1.0, E, F, 0.0, &eigens);
+    a68_dgemm (FLIP, SELF, 1.0, E, F, 0.0, &eigens);
     REAL_T norm = matrix_norm (eigens);
     if (k > 0 && (norm / gsl_vector_get (Sv, 0)) < VALUE (&lim)) {
       Nk = k;
@@ -498,15 +498,15 @@ void genie_matrix_pls1 (NODE_T *p)
       gsl_vector_set (Sv, k, norm);
 // Compute latent variable.
 // lat = E * eigens / | E * eigens |
-      a68_dgemm (I, I, 1.0, E, eigens, 0.0, &lat);
+      a68_dgemm (SELF, SELF, 1.0, E, eigens, 0.0, &lat);
       norm = matrix_norm (lat);
       ASSERT_GSL (gsl_matrix_scale (lat, 1.0 / norm));
 // Deflate E and F, remove latent variable from both.
 // pl = Eᵀ * lat; E -= lat * plᵀ and ql = Fᵀ * lat; F -= lat * qlᵀ
-      a68_dgemm (T, I, 1.0, E, lat, 0.0, &pl);
-      a68_dgemm (I, T, -1.0, lat, pl, 1.0, &E);
-      a68_dgemm (T, I, 1.0, F, lat, 0.0, &ql);
-      a68_dgemm (I, T, -1.0, lat, ql, 1.0, &F);
+      a68_dgemm (FLIP, SELF, 1.0, E, lat, 0.0, &pl);
+      a68_dgemm (SELF, FLIP, -1.0, lat, pl, 1.0, &E);
+      a68_dgemm (FLIP, SELF, 1.0, F, lat, 0.0, &ql);
+      a68_dgemm (SELF, FLIP, -1.0, lat, ql, 1.0, &F);
 // Build matrices.
       EIGEN = mat_before_ab (p, EIGEN, eigens);
       nE = mat_before_ab (p, nE, pl); // P
@@ -515,12 +515,12 @@ void genie_matrix_pls1 (NODE_T *p)
   }
 // Projection of original data = Eᵀ * EIGEN
   gsl_matrix *nP = NO_REAL_MATRIX;
-  a68_dgemm (T, I, 1.0, nE, EIGEN, 0.0, &nP);
+  a68_dgemm (FLIP, SELF, 1.0, nE, EIGEN, 0.0, &nP);
 // Compute β = EIGEN * nP⁻¹ * nF
   gsl_matrix *mpinv = NO_REAL_MATRIX, *z = NO_REAL_MATRIX, *beta = NO_REAL_MATRIX;
   compute_pseudo_inverse (p, &mpinv, nP, SMALL_EIGEN);
-  a68_dgemm (I, I, 1.0, EIGEN, mpinv, 0.0, &z);
-  a68_dgemm (I, I, 1.0, z, nF, 0.0, &beta);
+  a68_dgemm (SELF, SELF, 1.0, EIGEN, mpinv, 0.0, &z);
+  a68_dgemm (SELF, SELF, 1.0, z, nF, 0.0, &beta);
 // Yield results.
   if (!IS_NIL (singulars)) {
     gsl_vector *Svl = gsl_vector_calloc (Nk);
@@ -612,19 +612,19 @@ void genie_matrix_pls2 (NODE_T *p)
 // Eᵀ * F * Fᵀ * E * w / |Eᵀ * F * Fᵀ * w| = (1 / lambda) (Fᵀ * E)ᵀ * (Fᵀ * E) * w,
 // that is, w is an eigenvector of covariance matrix Fᵀ * E and 
 // longest eigenvector of symmetric matrix Eᵀ * F * Fᵀ * E.
-      a68_dgemm (T, I, 1.0, E, u, 0.0, &eigens);
+      a68_dgemm (FLIP, SELF, 1.0, E, u, 0.0, &eigens);
       norm_e = matrix_norm (eigens);
       ASSERT_GSL (gsl_matrix_scale (eigens, 1.0 / norm_e));
 // X factor score.
-      a68_dgemm (I, I, 1.0, E, eigens, 0.0, &t);
+      a68_dgemm (SELF, SELF, 1.0, E, eigens, 0.0, &t);
       norm = matrix_norm (t);
       ASSERT_GSL (gsl_matrix_scale (t, 1.0 / norm));
 // Y weight.
-      a68_dgemm (T, I, 1.0, F, t, 0.0, &c);
+      a68_dgemm (FLIP, SELF, 1.0, F, t, 0.0, &c);
       norm = matrix_norm (c);
       ASSERT_GSL (gsl_matrix_scale (c, 1.0 / norm));
 // Y score.
-      a68_dgemm (I, I, 1.0, F, c, 0.0, &u);
+      a68_dgemm (SELF, SELF, 1.0, F, c, 0.0, &u);
       gsl_matrix_memcpy (diff, u);
       gsl_matrix_sub (diff, u0);
       norm = matrix_norm (diff);
@@ -638,16 +638,16 @@ void genie_matrix_pls2 (NODE_T *p)
     } else {
       gsl_vector_set (Sv, k, norm_e);
 // X factor loading and deflation.
-      a68_dgemm (T, I, 1.0, E, t, 0.0, &pl);
+      a68_dgemm (FLIP, SELF, 1.0, E, t, 0.0, &pl);
       norm = matrix_norm (t);
       ASSERT_GSL (gsl_matrix_scale (pl, 1.0 / (norm * norm)));
-      a68_dgemm (I, T, -1.0, t, pl, 1.0, &E);
+      a68_dgemm (SELF, FLIP, -1.0, t, pl, 1.0, &E);
 // Y factor loading and deflation.
-      a68_dgemm (T, I, 1.0, F, u, 0.0, &ql);
+      a68_dgemm (FLIP, SELF, 1.0, F, u, 0.0, &ql);
       norm = matrix_norm (u);
       ASSERT_GSL (gsl_matrix_scale (ql, 1.0 / (norm * norm)));
-      a68_dgemm (T, I, 1.0, t, u, 0.0, &b);
-      a68_dgemm (I, T, -gsl_matrix_get (b, 0, 0), t, ql, 1.0, &F);
+      a68_dgemm (FLIP, SELF, 1.0, t, u, 0.0, &b);
+      a68_dgemm (SELF, FLIP, -gsl_matrix_get (b, 0, 0), t, ql, 1.0, &F);
 // Build vector and matrices.
       gsl_vector_set (dD, k, gsl_matrix_get(b, 0, 0));
       nP = mat_before_ab (p, nP, pl); // P
@@ -664,8 +664,8 @@ void genie_matrix_pls2 (NODE_T *p)
   gsl_matrix *mpinv = NO_REAL_MATRIX;
   compute_pseudo_inverse (p, &mpinv, nP, SMALL_EIGEN);
   gsl_matrix *z = NO_REAL_MATRIX, *beta = NO_REAL_MATRIX;
-  a68_dgemm (T, I, 1.0, mpinv, D, 0.0, &z);
-  a68_dgemm (I, T, 1.0, z, nC, 0.0, &beta);
+  a68_dgemm (FLIP, SELF, 1.0, mpinv, D, 0.0, &z);
+  a68_dgemm (SELF, FLIP, 1.0, z, nC, 0.0, &beta);
 // Yield results.
   if (!IS_NIL (singulars)) {
     gsl_vector *Svl = gsl_vector_calloc (Nk);

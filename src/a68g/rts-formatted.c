@@ -578,12 +578,12 @@ void write_c_pattern (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref_file
   int width = 0, after = 0, letter;
   ADDR_T pop_sp = A68_SP;
   char *str = NO_TEXT;
+  char tmp[2];
   if (IS (p, CHAR_C_PATTERN)) {
     A68_CHAR *z = (A68_CHAR *) item;
-    char q[2];
-    q[0] = (char) VALUE (z);
-    q[1] = NULL_CHAR;
-    str = (char *) &q;
+    tmp[0] = (char) VALUE (z);
+    tmp[1] = NULL_CHAR;
+    str = (char *) &tmp;
     width = (int) strlen (str);
     scan_c_pattern (SUB (p), &right_align, &sign, &width, &after, &letter);
   } else if (IS (p, STRING_C_PATTERN)) {

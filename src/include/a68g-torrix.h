@@ -70,8 +70,8 @@ extern void torrix_test_error (int);
 
 // BLAS support
 
-#define T ((CBLAS_TRANSPOSE_t) CblasTrans)
-#define I ((CBLAS_TRANSPOSE_t) CblasNoTrans)
+#define FLIP ((CBLAS_TRANSPOSE_t) CblasTrans)
+#define SELF ((CBLAS_TRANSPOSE_t) CblasNoTrans)
 
 extern void a68_vector_free (gsl_vector *);
 extern void a68_matrix_free (gsl_matrix *);
