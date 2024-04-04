@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
@@ -44,10 +43,10 @@ static void genie_copy_union (NODE_T *, BYTE_T *, BYTE_T *, A68_REF);
 static A68_REF genie_copy_row (A68_REF, NODE_T *, MOID_T *);
 
 /*!
-\brief return size of a row
-\param tup
-\param dim
-\return
+\brief size of a row
+\param tup first tuple
+\param tup dimension of row
+\return same
 **/
 
 int get_row_size (A68_TUPLE * tup, int dim)
@@ -63,8 +62,8 @@ int get_row_size (A68_TUPLE * tup, int dim)
 
 /*!
 \brief initialise index for FORALL constructs
-\param tup
-\param dim
+\param tup first tuple
+\param tup dimension of row
 **/
 
 void initialise_internal_index (A68_TUPLE * tup, int dim)
@@ -78,9 +77,9 @@ void initialise_internal_index (A68_TUPLE * tup, int dim)
 
 /*!
 \brief calculate index
-\param tup
-\param dim
-\return
+\param tup first tuple
+\param tup dimension of row
+\return same
 **/
 
 ADDR_T calculate_internal_index (A68_TUPLE * tup, int dim)
@@ -89,21 +88,20 @@ ADDR_T calculate_internal_index (A68_TUPLE * tup, int dim)
   int k;
   for (k = 0; k < dim; k++) {
     A68_TUPLE *ref = &tup[k];
-    index += ref->span * ref->k - ref->shift;
+    index += (ref->span * ref->k - ref->shift);
   }
   return (index);
 }
 
 /*!
 \brief increment index for FORALL constructs
-\param tup
-\param dim
-\return
+\param tup first tuple
+\param tup dimension of row
+\return whetehr maximum (index + 1) is reached
 **/
 
 BOOL_T increment_internal_index (A68_TUPLE * tup, int dim)
 {
-/* Returns whether maximum index + 1 is reached. */
   BOOL_T carry = A68_TRUE;
   int k;
   for (k = dim - 1; k >= 0 && carry; k--) {
@@ -120,9 +118,8 @@ BOOL_T increment_internal_index (A68_TUPLE * tup, int dim)
 
 /*!
 \brief print index
-\param tup
-\param dim
-\return
+\param tup first tuple
+\param tup dimension of row
 **/
 
 void print_internal_index (FILE_T f, A68_TUPLE * tup, int dim)
@@ -142,9 +139,9 @@ void print_internal_index (FILE_T f, A68_TUPLE * tup, int dim)
 /*!
 \brief convert C string to A68 [] CHAR
 \param p position in tree
-\param str
-\param width
-\return
+\param str string to convert
+\param width width of string
+\return pointer to [] CHAR
 **/
 
 A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
@@ -155,13 +152,13 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
   BYTE_T *base;
   int str_size, k;
   str_size = strlen (str);
-  z = heap_generator (p, MODE (ROW_CHAR), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  z = heap_generator (p, MODE (ROW_CHAR), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&z);
-  row = heap_generator (p, MODE (ROW_CHAR), width * ALIGNED_SIZEOF (A68_CHAR));
+  row = heap_generator (p, MODE (ROW_CHAR), width * ALIGNED_SIZE_OF (A68_CHAR));
   PROTECT_SWEEP_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (CHAR);
-  arr.elem_size = ALIGNED_SIZEOF (A68_CHAR);
+  arr.elem_size = ALIGNED_SIZE_OF (A68_CHAR);
   arr.slice_offset = 0;
   arr.field_offset = 0;
   ARRAY (&arr) = row;
@@ -173,7 +170,7 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
   PUT_DESCRIPTOR (arr, tup, &z);
   base = ADDRESS (&row);
   for (k = 0; k < width; k++) {
-    A68_CHAR *ch = (A68_CHAR *) & (base[k * ALIGNED_SIZEOF (A68_CHAR)]);
+    A68_CHAR *ch = (A68_CHAR *) & (base[k * ALIGNED_SIZE_OF (A68_CHAR)]);
     STATUS (ch) = INITIALISED_MASK;
     VALUE (ch) = str[k];
   }
@@ -185,8 +182,8 @@ A68_REF c_string_to_row_char (NODE_T * p, char *str, int width)
 /*!
 \brief convert C string to A68 string
 \param p position in tree
-\param str
-\return
+\param str string to convert
+\return STRING
 **/
 
 A68_REF c_to_a_string (NODE_T * p, char *str)
@@ -199,10 +196,10 @@ A68_REF c_to_a_string (NODE_T * p, char *str)
 }
 
 /*!
-\brief yield the size of a string
+\brief size of a string
 \param p position in tree
-\param row
-\return
+\param row row, pointer to descriptor
+\return same
 **/
 
 int a68_string_size (NODE_T * p, A68_REF row)
@@ -221,9 +218,9 @@ int a68_string_size (NODE_T * p, A68_REF row)
 /*!
 \brief convert A68 string to C string
 \param p position in tree
-\param str
-\param row
-\return
+\param str string to store result
+\param row STRING to convert
+\return str on success or NULL on failure
 **/
 
 char *a_to_c_string (NODE_T * p, char *str, A68_REF row)
@@ -256,8 +253,8 @@ char *a_to_c_string (NODE_T * p, char *str, A68_REF row)
 /*!
 \brief return an empty row
 \param p position in tree
-\param u
-\return
+\param u mode of row
+\return fat pointer to descriptor
 **/
 
 A68_REF empty_row (NODE_T * p, MOID_T * u)
@@ -270,7 +267,7 @@ A68_REF empty_row (NODE_T * p, MOID_T * u)
     u = SUB (u);
   }
   dim = DIM (u);
-  ref_desc = heap_generator (p, u, ALIGNED_SIZEOF (A68_ARRAY) + dim * ALIGNED_SIZEOF (A68_TUPLE));
+  ref_desc = heap_generator (p, u, ALIGNED_SIZE_OF (A68_ARRAY) + dim * ALIGNED_SIZE_OF (A68_TUPLE));
   GET_DESCRIPTOR (arr, tup, &ref_desc);
   DIM (arr) = dim;
   MOID (arr) = SLICE (u);
@@ -292,7 +289,7 @@ A68_REF empty_row (NODE_T * p, MOID_T * u)
 /*!
 \brief an empty string, FLEX [1 : 0] CHAR
 \param p position in tree
-\return
+\return fat pointer to descriptor
 **/
 
 A68_REF empty_string (NODE_T * p)
@@ -303,10 +300,10 @@ A68_REF empty_string (NODE_T * p)
 /*!
 \brief make [,, ..] MODE  from [, ..] MODE
 \param p position in tree
-\param row_mode
-\param elems_in_stack
-\param sp
-\return
+\param row_mode row of mode
+\param elems_in_stack number of elements
+\param sp stack pointer
+\return fat pointer to descriptor
 **/
 
 A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stack, ADDR_T sp)
@@ -319,7 +316,7 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
   int span, old_dim = DIM (new_mode) - 1;
 /* Make the new descriptor. */
   UP_SWEEP_SEMA;
-  new_row = heap_generator (p, row_mode, ALIGNED_SIZEOF (A68_ARRAY) + DIM (new_mode) * ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, row_mode, ALIGNED_SIZE_OF (A68_ARRAY) + DIM (new_mode) * ALIGNED_SIZE_OF (A68_TUPLE));
   GET_DESCRIPTOR (new_arr, new_tup, &new_row);
   DIM (new_arr) = DIM (new_mode);
   MOID (new_arr) = elem_mode;
@@ -348,7 +345,7 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
         A68_TUPLE *run_tup, *ref_tup;
         int j;
         ref_row = *(A68_REF *) STACK_ADDRESS (sp);
-        run_row = *(A68_REF *) STACK_ADDRESS (sp + i * ALIGNED_SIZEOF (A68_REF));
+        run_row = *(A68_REF *) STACK_ADDRESS (sp + i * ALIGNED_SIZE_OF (A68_REF));
         GET_DESCRIPTOR (dummy, ref_tup, &ref_row);
         GET_DESCRIPTOR (dummy, run_tup, &run_row);
         for (j = 0; j < old_dim; j++) {
@@ -388,7 +385,7 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
 /* new [j, , ] := old [, ] */
       BYTE_T *old_elem;
       BOOL_T done;
-      GET_DESCRIPTOR (old_arr, old_tup, (A68_REF *) STACK_ADDRESS (sp + j * ALIGNED_SIZEOF (A68_REF)));
+      GET_DESCRIPTOR (old_arr, old_tup, (A68_REF *) STACK_ADDRESS (sp + j * ALIGNED_SIZE_OF (A68_REF)));
       old_elem = ADDRESS (&(ARRAY (old_arr)));
       initialise_internal_index (old_tup, old_dim);
       initialise_internal_index (&new_tup[1], old_dim);
@@ -411,10 +408,10 @@ A68_REF genie_concatenate_rows (NODE_T * p, MOID_T * row_mode, int elems_in_stac
 /*!
 \brief make a row of 'elems_in_stack' objects that are in the stack
 \param p position in tree
-\param elem_mode
-\param elems_in_stack
-\param sp
-\return
+\param elem_mode mode of element
+\param elems_in_stack number of elements in the stack
+\param sp stack pointer
+\return fat pointer to descriptor
 **/
 
 A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR_T sp)
@@ -423,7 +420,7 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR
   A68_ARRAY *arr;
   A68_TUPLE *tup;
   int k;
-  new_row = heap_generator (p, MOID (p), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, MOID (p), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&new_row);
   new_arr = heap_generator (p, MOID (p), elems_in_stack * MOID_SIZE (elem_mode));
   PROTECT_SWEEP_HANDLE (&new_arr);
@@ -476,10 +473,10 @@ A68_REF genie_make_row (NODE_T * p, MOID_T * elem_mode, int elems_in_stack, ADDR
 /*!
 \brief make REF [1 : 1] [] MODE from REF [] MODE
 \param p position in tree
-\param dst_mode
-\param src_mode
-\param sp
-\return
+\param dst_mode destination mode
+\param src_mode source mode
+\param sp stack pointer
+\return fat pointer to descriptor
 **/
 
 A68_REF genie_make_ref_row_of_row (NODE_T * p, MOID_T * dst_mode, MOID_T * src_mode, ADDR_T sp)
@@ -494,9 +491,9 @@ A68_REF genie_make_ref_row_of_row (NODE_T * p, MOID_T * dst_mode, MOID_T * src_m
   if (IS_NIL (array)) {
     return (nil_ref);
   }
-  new_row = heap_generator (p, SUB (dst_mode), ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, SUB (dst_mode), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&new_row);
-  name = heap_generator (p, dst_mode, ALIGNED_SIZEOF (A68_REF));
+  name = heap_generator (p, dst_mode, ALIGNED_SIZE_OF (A68_REF));
   GET_DESCRIPTOR (arr, tup, &new_row);
   DIM (arr) = 1;
   MOID (arr) = src_mode;
@@ -516,10 +513,10 @@ A68_REF genie_make_ref_row_of_row (NODE_T * p, MOID_T * dst_mode, MOID_T * src_m
 /*!
 \brief make REF [1 : 1, ..] MODE from REF [..] MODE
 \param p position in tree
-\param dst_mode
-\param src_mode
-\param sp
-\return
+\param dst_mode destination mode
+\param src_mode source mode
+\param sp stack pointer
+\return fat pointer to descriptor
 **/
 
 A68_REF genie_make_ref_row_row (NODE_T * p, MOID_T * dst_mode, MOID_T * src_mode, ADDR_T sp)
@@ -538,9 +535,9 @@ A68_REF genie_make_ref_row_row (NODE_T * p, MOID_T * dst_mode, MOID_T * src_mode
   old_row = *(A68_REF *) ADDRESS (&name);
   GET_DESCRIPTOR (old_arr, old_tup, &old_row);
 /* Make new descriptor. */
-  new_row = heap_generator (p, dst_mode, ALIGNED_SIZEOF (A68_ARRAY) + DIM (SUB (dst_mode)) * ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, dst_mode, ALIGNED_SIZE_OF (A68_ARRAY) + DIM (SUB (dst_mode)) * ALIGNED_SIZE_OF (A68_TUPLE));
   PROTECT_SWEEP_HANDLE (&new_row);
-  name = heap_generator (p, dst_mode, ALIGNED_SIZEOF (A68_REF));
+  name = heap_generator (p, dst_mode, ALIGNED_SIZE_OF (A68_REF));
   GET_DESCRIPTOR (new_arr, new_tup, &new_row);
   DIM (new_arr) = DIM (SUB (dst_mode));
   MOID (new_arr) = MOID (old_arr);
@@ -565,7 +562,7 @@ A68_REF genie_make_ref_row_row (NODE_T * p, MOID_T * dst_mode, MOID_T * src_mode
 /*!
 \brief coercion to [1 : 1, ] MODE
 \param p position in tree
-\return
+\return propagator for this action
 **/
 
 PROPAGATOR_T genie_rowing_row_row (NODE_T * p)
@@ -583,7 +580,7 @@ PROPAGATOR_T genie_rowing_row_row (NODE_T * p)
 /*!
 \brief coercion to [1 : 1] [] MODE
 \param p position in tree
-\return
+\return propagator for this action
 **/
 
 PROPAGATOR_T genie_rowing_row_of_row (NODE_T * p)
@@ -601,7 +598,7 @@ PROPAGATOR_T genie_rowing_row_of_row (NODE_T * p)
 /*!
 \brief coercion to REF [1 : 1, ..] MODE
 \param p position in tree
-\return
+\return propagator for this action
 **/
 
 PROPAGATOR_T genie_rowing_ref_row_row (NODE_T * p)
@@ -620,7 +617,7 @@ PROPAGATOR_T genie_rowing_ref_row_row (NODE_T * p)
 /*!
 \brief REF [1 : 1] [] MODE from [] MODE
 \param p position in tree
-\return
+\return propagator for this action
 **/
 
 PROPAGATOR_T genie_rowing_ref_row_of_row (NODE_T * p)
@@ -639,7 +636,7 @@ PROPAGATOR_T genie_rowing_ref_row_of_row (NODE_T * p)
 /*!
 \brief rowing coercion
 \param p position in tree
-\return
+\return propagator for this action
 **/
 
 PROPAGATOR_T genie_rowing (NODE_T * p)
@@ -675,9 +672,9 @@ PROPAGATOR_T genie_rowing (NODE_T * p)
 /*!
 \brief copy a united object holding stowed
 \param p position in tree
-\param dst_a
-\param src_a
-\param struct_field
+\param dst_a destination
+\param src_a source
+\param struct_field pointer to structured field
 **/
 
 static void genie_copy_union (NODE_T * p, BYTE_T * dst_a, BYTE_T * src_a, A68_REF struct_field)
@@ -707,11 +704,11 @@ static void genie_copy_union (NODE_T * p, BYTE_T * dst_a, BYTE_T * src_a, A68_RE
 }
 
 /*!
-\brief make copy ARRAY(&from) of mode 'm' from 'old'
-\param old_row
+\brief make copy array of mode 'm' from 'old'
+\param old_row fat pointer to descriptor of old row
 \param p position in tree
-\param m
-\return
+\param m mode of row
+\return fat pointer to descriptor
 **/
 
 A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
@@ -732,7 +729,7 @@ A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
   }
 /* Make ARRAY(&new). */
   GET_DESCRIPTOR (old_arr, old_tup, &old_row);
-  new_row = heap_generator (p, m, ALIGNED_SIZEOF (A68_ARRAY) + DIM (old_arr) * ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + DIM (old_arr) * ALIGNED_SIZE_OF (A68_TUPLE));
 /* Get descriptor again in case the heap sweeper moved data (but switched off now) */
   GET_DESCRIPTOR (old_arr, old_tup, &old_row);
   GET_DESCRIPTOR (new_arr, new_tup, &new_row);
@@ -804,10 +801,10 @@ A68_REF genie_copy_row (A68_REF old_row, NODE_T * p, MOID_T * m)
 
 /*!
 \brief make copy of stowed value at 'old'
-\param old
+\param old pointer to old object
 \param p position in tree
-\param m
-\return
+\param m mode of object
+\return fat pointer to descriptor or structured value
 **/
 
 A68_REF genie_copy_stowed (A68_REF old, NODE_T * p, MOID_T * m)
@@ -865,12 +862,12 @@ A68_REF genie_copy_stowed (A68_REF old, NODE_T * p, MOID_T * m)
 }
 
 /*!
-\brief ARRAY(&assign) of MODE 'm' from 'old_row' to 'dst'
-\param old_row
-\param dst
+\brief assign array of MODE 'm' from 'old_row' to 'dst'
+\param old_row pointer to old object
+\param dst destination, may be overwritten
 \param p position in tree
-\param m
-\return
+\param m mode of row
+\return fat pointer to descriptor
 **/
 
 static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOID_T * m)
@@ -887,7 +884,7 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
   if (WHETHER (m, FLEX_SYMBOL) || m == MODE (STRING)) {
 /* In case of FLEX rows we make a new descriptor. */
     m = SUB (m);
-    new_row = heap_generator (p, m, ALIGNED_SIZEOF (A68_ARRAY) + DIM (old_arr) * ALIGNED_SIZEOF (A68_TUPLE));
+    new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + DIM (old_arr) * ALIGNED_SIZE_OF (A68_TUPLE));
     GET_DESCRIPTOR (new_arr, new_tup, &new_row);
     DIM (new_arr) = DIM (old_arr);
     MOID (new_arr) = MOID (old_arr);
@@ -980,11 +977,11 @@ static A68_REF genie_assign_row (A68_REF old_row, A68_REF * dst, NODE_T * p, MOI
 
 /*!
 \brief assign multiple value of mode 'm' from 'old' to 'dst'
-\param old
-\param dst
+\param old pointer to old value
+\param dst pointer to destination
 \param p position in tree
-\param m
-\return
+\param m mode of object
+\return fat pointer to descriptor or structured value
 **/
 
 A68_REF genie_assign_stowed (A68_REF old, A68_REF * dst, NODE_T * p, MOID_T * m)
@@ -1155,7 +1152,7 @@ void genie_monad_elems (NODE_T * p)
   A68_TUPLE *t;
   POP_REF (p, &z);
 /* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_UNION));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_UNION));
   CHECK_REF (p, z, MODE (ROWS));
   GET_DESCRIPTOR (x, t, &z);
   PUSH_PRIMITIVE (p, get_row_size (t, DIM (x)), A68_INT);
@@ -1173,7 +1170,7 @@ void genie_monad_lwb (NODE_T * p)
   A68_TUPLE *t;
   POP_REF (p, &z);
 /* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_UNION));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_UNION));
   CHECK_REF (p, z, MODE (ROWS));
   GET_DESCRIPTOR (x, t, &z);
   PUSH_PRIMITIVE (p, LWB (t), A68_INT);
@@ -1191,7 +1188,7 @@ void genie_monad_upb (NODE_T * p)
   A68_TUPLE *t;
   POP_REF (p, &z);
 /* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_UNION));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_UNION));
   CHECK_REF (p, z, MODE (ROWS));
   GET_DESCRIPTOR (x, t, &z);
   PUSH_PRIMITIVE (p, UPB (t), A68_INT);
@@ -1210,7 +1207,7 @@ void genie_dyad_elems (NODE_T * p)
   A68_INT k;
   POP_REF (p, &z);
 /* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_UNION));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_UNION));
   CHECK_REF (p, z, MODE (ROWS));
   POP_OBJECT (p, &k, A68_INT);
   GET_DESCRIPTOR (x, t, &z);
@@ -1235,7 +1232,7 @@ void genie_dyad_lwb (NODE_T * p)
   A68_INT k;
   POP_REF (p, &z);
 /* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_UNION));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_UNION));
   CHECK_REF (p, z, MODE (ROWS));
   POP_OBJECT (p, &k, A68_INT);
   GET_DESCRIPTOR (x, t, &z);
@@ -1259,7 +1256,7 @@ void genie_dyad_upb (NODE_T * p)
   A68_INT k;
   POP_REF (p, &z);
 /* Decrease pointer since a UNION is on the stack. */
-  DECREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (A68_UNION));
+  DECREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (A68_UNION));
   CHECK_REF (p, z, MODE (ROWS));
   POP_OBJECT (p, &k, A68_INT);
   GET_DESCRIPTOR (x, t, &z);
@@ -1316,7 +1313,7 @@ PROPAGATOR_T genie_diagonal_function (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   m = (name ? SUB (MOID (p)) : MOID (p));
-  new_row = heap_generator (p, m, ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   DIM (&new_arr) = 1;
   MOID (&new_arr) = m;
   new_arr.elem_size = arr->elem_size;
@@ -1333,7 +1330,7 @@ PROPAGATOR_T genie_diagonal_function (NODE_T * p)
   new_tup.k = 0;
   PUT_DESCRIPTOR (new_arr, new_tup, &new_row);
   if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZEOF (A68_REF));
+    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZE_OF (A68_REF));
     *(A68_REF *) ADDRESS (&ref_new) = new_row;
     SET_REF_SCOPE (&ref_new, scope);
     PUSH_REF (p, ref_new);
@@ -1379,13 +1376,13 @@ PROPAGATOR_T genie_transpose_function (NODE_T * p)
     diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_NO_SQUARE_MATRIX, m, NULL);
     exit_genie (p, A68_RUNTIME_ERROR);
   }
-  new_row = heap_generator (p, m, ALIGNED_SIZEOF (A68_ARRAY) + 2 * ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + 2 * ALIGNED_SIZE_OF (A68_TUPLE));
   new_arr = *arr;
   new_tup1 = *tup2;
   new_tup2 = *tup1;
   PUT_DESCRIPTOR2 (new_arr, new_tup1, new_tup2, &new_row);
   if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZEOF (A68_REF));
+    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZE_OF (A68_REF));
     *(A68_REF *) ADDRESS (&ref_new) = new_row;
     SET_REF_SCOPE (&ref_new, scope);
     PUSH_REF (p, ref_new);
@@ -1440,7 +1437,7 @@ PROPAGATOR_T genie_row_function (NODE_T * p)
     exit_genie (p, A68_RUNTIME_ERROR);
   }
   m = (name ? SUB (MOID (p)) : MOID (p));
-  new_row = heap_generator (p, m, ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   DIM (&new_arr) = 2;
   MOID (&new_arr) = m;
   new_arr.elem_size = arr->elem_size;
@@ -1459,7 +1456,7 @@ PROPAGATOR_T genie_row_function (NODE_T * p)
   tup2.k = 0;
   PUT_DESCRIPTOR2 (new_arr, tup1, tup2, &new_row);
   if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZEOF (A68_REF));
+    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZE_OF (A68_REF));
     *(A68_REF *) ADDRESS (&ref_new) = new_row;
     SET_REF_SCOPE (&ref_new, scope);
     PUSH_REF (p, ref_new);
@@ -1511,7 +1508,7 @@ PROPAGATOR_T genie_column_function (NODE_T * p)
   POP_OBJECT (p, &row, A68_ROW);
   GET_DESCRIPTOR (arr, tup, &row);
   m = (name ? SUB (MOID (p)) : MOID (p));
-  new_row = heap_generator (p, m, ALIGNED_SIZEOF (A68_ARRAY) + ALIGNED_SIZEOF (A68_TUPLE));
+  new_row = heap_generator (p, m, ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
   DIM (&new_arr) = 2;
   MOID (&new_arr) = m;
   new_arr.elem_size = arr->elem_size;
@@ -1530,7 +1527,7 @@ PROPAGATOR_T genie_column_function (NODE_T * p)
   tup2.k = 0;
   PUT_DESCRIPTOR2 (new_arr, tup1, tup2, &new_row);
   if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZEOF (A68_REF));
+    A68_REF ref_new = heap_generator (p, MOID (p), ALIGNED_SIZE_OF (A68_REF));
     *(A68_REF *) ADDRESS (&ref_new) = new_row;
     SET_REF_SCOPE (&ref_new, scope);
     PUSH_REF (p, ref_new);
@@ -1541,4 +1538,90 @@ PROPAGATOR_T genie_column_function (NODE_T * p)
   self.unit = genie_column_function;
   self.source = p;
   return (self);
+}
+
+/*!
+\brief strcmp for qsort
+\param a string
+\param b string
+\return a - b
+**/
+
+int qstrcmp (const void *a, const void *b)
+{
+  return (strcmp (*(char *const *) a, *(char *const *) b));
+}
+
+/*!
+\brief sort row of string
+\param p position in tree
+**/
+
+void genie_sort_row_string (NODE_T * p)
+{
+  A68_REF z;
+  A68_ARRAY *arr;
+  A68_TUPLE *tup;
+  ADDR_T pop_sp;
+  int size;
+  POP_REF (p, &z);
+  pop_sp = stack_pointer;
+  CHECK_REF (p, z, MODE (ROW_STRING));
+  GET_DESCRIPTOR (arr, tup, &z);
+  size = ROW_SIZE (tup);
+  if (size > 0) {
+    A68_REF row, *base_ref;
+    A68_ARRAY arrn;
+    A68_TUPLE tupn;
+    int j, k;
+    BYTE_T *base = ADDRESS (&ARRAY (arr));
+    char **ptrs = (char **) malloc (size * sizeof (char *));
+    if (ptrs == NULL) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+/* Copy C-strings into the stack and sort. */
+    for (j = 0, k = LWB (tup); k <= UPB (tup); j++, k++) {
+      int addr = INDEX_1_DIM (arr, tup, k);
+      A68_REF ref = *(A68_REF *) & (base[addr]);
+      int len;
+      CHECK_REF (p, ref, MODE (STRING));
+      len = A68_ALIGN (a68_string_size (p, ref) + 1);
+      if (stack_pointer + len > expr_stack_limit) {
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_STACK_OVERFLOW);
+        exit_genie (p, A68_RUNTIME_ERROR);
+      }
+      ptrs[j] = (char *) STACK_TOP;
+      a_to_c_string (p, (char *) STACK_TOP, ref);
+      INCREMENT_STACK_POINTER (p, len);
+    }
+    qsort (ptrs, size, sizeof (char *), qstrcmp);
+/* Construct an array of sorted strings. */
+    z = heap_generator (p, MODE (ROW_STRING), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
+    PROTECT_SWEEP_HANDLE (&z);
+    row = heap_generator (p, MODE (ROW_STRING), size * MOID_SIZE (MODE (STRING)));
+    DIM (&arrn) = 1;
+    MOID (&arrn) = MODE (STRING);
+    arrn.elem_size = MOID_SIZE (MODE (STRING));
+    arrn.slice_offset = 0;
+    arrn.field_offset = 0;
+    ARRAY (&arrn) = row;
+    LWB (&tupn) = 1;
+    UPB (&tupn) = size;
+    tupn.shift = LWB (&tupn);
+    tupn.span = 1;
+    tupn.k = 0;
+    PUT_DESCRIPTOR (arrn, tupn, &z);
+    base_ref = (A68_REF *) ADDRESS (&row);
+    for (k = 0; k < size; k++) {
+      base_ref[k] = c_to_a_string (p, ptrs[k]);
+    }
+    free (ptrs);
+    stack_pointer = pop_sp;
+    PUSH_REF (p, z);
+  } else {
+/* This is how we sort an empty row of strings ... */
+    stack_pointer = pop_sp;
+    PUSH_REF (p, empty_row (p, MODE (ROW_STRING)));
+  }
 }

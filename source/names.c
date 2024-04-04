@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -46,7 +45,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "ASSIGN_TO_SYMBOL",
   "AT_SYMBOL",
   "BEGIN_SYMBOL",
-  "BITS_DENOTER",
+  "BITS_DENOTATION",
   "BITS_PATTERN",
   "BITS_SYMBOL",
   "BOLD_COMMENT_SYMBOL",
@@ -70,6 +69,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "CASE_SYMBOL",
   "CAST",
   "CHANNEL_SYMBOL",
+  "CHAR_DENOTATION",
   "CHAR_SYMBOL",
   "CHOICE",
   "CHOICE_PATTERN",
@@ -92,7 +92,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "DEFINING_IDENTIFIER",
   "DEFINING_INDICANT",
   "DEFINING_OPERATOR",
-  "DENOTER",
+  "DENOTATION",
   "DEPROCEDURING",
   "DEREFERENCING",
   "DIAGONAL_FUNCTION",
@@ -195,7 +195,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "INITIALISER_SERIES",
   "INSERTION",
   "IN_SYMBOL",
-  "INT_DENOTER",
+  "INT_DENOTATION",
   "INTEGER_CASE_CLAUSE",
   "INTEGER_CHOICE_CLAUSE",
   "INTEGER_IN_PART",
@@ -261,7 +261,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "PROC_SYMBOL",
   "QUALIFIER",
   "RADIX_FRAME",
-  "REAL_DENOTER",
+  "REAL_DENOTATION",
   "REAL_PATTERN",
   "REAL_SYMBOL",
   "REF_SYMBOL",
@@ -270,7 +270,7 @@ static char *attribute_names[WILDCARD + 1] = {
   "ROUTINE_UNIT",
   "ROW_ASSIGNATION",
   "ROW_ASSIGN_SYMBOL",
-  "ROW_CHAR_DENOTER",
+  "ROW_CHAR_DENOTATION",
   "ROW_FUNCTION",
   "ROWING",
   "ROWS_SYMBOL",
@@ -343,9 +343,9 @@ static char *attribute_names[WILDCARD + 1] = {
 
 /*!
 \brief non_terminal_string
-\param buf
-\param att
-\return
+\param buf text buffer
+\param att attribute
+\return buf, containing name of non terminal string, or NULL
 **/
 
 char *non_terminal_string (char *buf, int att)
@@ -372,8 +372,9 @@ char *non_terminal_string (char *buf, int att)
 }
 
 /*!
-\brief
-\return
+\brief standard_environ_proc_name
+\param f routine that implements a standard environ item
+\return name of that what "f" implements
 **/
 
 char *standard_environ_proc_name (GENIE_PROCEDURE f)
@@ -386,6 +387,12 @@ char *standard_environ_proc_name (GENIE_PROCEDURE f)
   }
   return (NULL);
 }
+
+/*!
+\brief propagator_name
+\param p propagator procedure
+\return function name of "p"
+**/
 
 char *propagator_name (PROPAGATOR_PROCEDURE * p)
 {
@@ -407,7 +414,7 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_cast) {
     return ("genie_cast");
   }
-  if (p == genie_closed) {
+  if ((void *) p == (void *) genie_closed) {
     return ("genie_closed");
   }
   if (p == genie_coercion) {
@@ -419,14 +426,14 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_column_function) {
     return ("genie_column_function");
   }
-  if (p == genie_conditional) {
+  if ((void *) p == (void *) genie_conditional) {
     return ("genie_conditional");
   }
   if (p == genie_constant) {
     return ("genie_constant");
   }
-  if (p == genie_denoter) {
-    return ("genie_denoter");
+  if (p == genie_denotation) {
+    return ("genie_denotation");
   }
   if (p == genie_deproceduring) {
     return ("genie_deproceduring");
@@ -455,7 +462,7 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_dyadic_quick) {
     return ("genie_dyadic_quick");
   }
-  if (p == genie_enclosed) {
+  if ((void *) p == (void *) genie_enclosed) {
     return ("genie_enclosed");
   }
   if (p == genie_format_text) {
@@ -551,13 +558,13 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_identity_relation_isnt_nil) {
     return ("genie_identity_relation_isnt_nil");
   }
-  if (p == genie_int_case) {
+  if ((void *) p == (void *) genie_int_case) {
     return ("genie_int_case");
   }
   if (p == genie_loc_identifier) {
     return ("genie_loc_identifier");
   }
-  if (p == genie_loop) {
+  if ((void *) p == (void *) genie_loop) {
     return ("genie_loop");
   }
   if (p == genie_monadic) {
@@ -619,7 +626,7 @@ char *propagator_name (PROPAGATOR_PROCEDURE * p)
   if (p == genie_unit) {
     return ("genie_unit");
   }
-  if (p == genie_united_case) {
+  if ((void *) p == (void *) genie_united_case) {
     return ("genie_united_case");
   }
   if (p == genie_uniting) {

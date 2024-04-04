@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if ! defined A68G_GENIE_H
@@ -61,7 +60,7 @@ struct ACTIVATION_RECORD
 #define FRAME_DYNAMIC_LINK(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_link)
 #define FRAME_DYNAMIC_SCOPE(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->dynamic_scope)
 #define FRAME_INCREMENT(n) (SYMBOL_TABLE (FRAME_TREE(n))->ap_increment)
-#define FRAME_INFO_SIZE (A68_ALIGN (ALIGNED_SIZEOF (ACTIVATION_RECORD)))
+#define FRAME_INFO_SIZE (A68_ALIGN (ALIGNED_SIZE_OF (ACTIVATION_RECORD)))
 #define FRAME_JUMP_STAT(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->jump_stat)
 #define FRAME_LEXICAL_LEVEL(n) (((ACTIVATION_RECORD *) FRAME_ADDRESS(n))->frame_level)
 #define FRAME_LOCAL(n, m) (FRAME_ADDRESS ((n) + FRAME_INFO_SIZE + (m)))
@@ -164,6 +163,7 @@ extern GENIE_PROCEDURE genie_bytes_lengths;
 extern GENIE_PROCEDURE genie_bytespack;
 extern GENIE_PROCEDURE genie_bytes_shorths;
 extern GENIE_PROCEDURE genie_bytes_width;
+extern GENIE_PROCEDURE genie_cd;
 extern GENIE_PROCEDURE genie_char_in_string;
 extern GENIE_PROCEDURE genie_clear_bits;
 extern GENIE_PROCEDURE genie_clear_long_bits;
@@ -180,6 +180,7 @@ extern GENIE_PROCEDURE genie_cputime;
 extern GENIE_PROCEDURE genie_curt_long_mp;
 extern GENIE_PROCEDURE genie_curt_real;
 extern GENIE_PROCEDURE genie_debug;
+extern GENIE_PROCEDURE genie_directory;
 extern GENIE_PROCEDURE genie_divab_complex;
 extern GENIE_PROCEDURE genie_divab_long_complex;
 extern GENIE_PROCEDURE genie_divab_long_mp;
@@ -217,6 +218,11 @@ extern GENIE_PROCEDURE genie_exp_long_complex;
 extern GENIE_PROCEDURE genie_exp_long_mp;
 extern GENIE_PROCEDURE genie_exp_real;
 extern GENIE_PROCEDURE genie_exp_width;
+extern GENIE_PROCEDURE genie_file_is_block_device;
+extern GENIE_PROCEDURE genie_file_is_char_device;
+extern GENIE_PROCEDURE genie_file_is_directory;
+extern GENIE_PROCEDURE genie_file_is_regular;
+extern GENIE_PROCEDURE genie_file_mode;
 extern GENIE_PROCEDURE genie_first_random;
 extern GENIE_PROCEDURE genie_garbage_collections;
 extern GENIE_PROCEDURE genie_garbage_freed;
@@ -225,12 +231,12 @@ extern GENIE_PROCEDURE genie_ge_bits;
 extern GENIE_PROCEDURE genie_ge_bytes;
 extern GENIE_PROCEDURE genie_ge_char;
 extern GENIE_PROCEDURE genie_ge_int;
+extern GENIE_PROCEDURE genie_ge_long_bits;
 extern GENIE_PROCEDURE genie_ge_long_bytes;
 extern GENIE_PROCEDURE genie_ge_long_mp;
 extern GENIE_PROCEDURE genie_ge_real;
 extern GENIE_PROCEDURE genie_ge_string;
 extern GENIE_PROCEDURE genie_get_sound;
-extern GENIE_PROCEDURE genie_gt_bits;
 extern GENIE_PROCEDURE genie_gt_bytes;
 extern GENIE_PROCEDURE genie_gt_char;
 extern GENIE_PROCEDURE genie_gt_int;
@@ -247,11 +253,23 @@ extern GENIE_PROCEDURE genie_im_long_complex;
 extern GENIE_PROCEDURE genie_int_lengths;
 extern GENIE_PROCEDURE genie_int_shorths;
 extern GENIE_PROCEDURE genie_int_width;
+extern GENIE_PROCEDURE genie_is_alnum;
+extern GENIE_PROCEDURE genie_is_alpha;
+extern GENIE_PROCEDURE genie_is_cntrl;
+extern GENIE_PROCEDURE genie_is_digit;
+extern GENIE_PROCEDURE genie_is_graph;
+extern GENIE_PROCEDURE genie_is_lower;
+extern GENIE_PROCEDURE genie_is_print;
+extern GENIE_PROCEDURE genie_is_punct;
+extern GENIE_PROCEDURE genie_is_space;
+extern GENIE_PROCEDURE genie_is_upper;
+extern GENIE_PROCEDURE genie_is_xdigit;
 extern GENIE_PROCEDURE genie_last_char_in_string;
 extern GENIE_PROCEDURE genie_le_bits;
 extern GENIE_PROCEDURE genie_le_bytes;
 extern GENIE_PROCEDURE genie_le_char;
 extern GENIE_PROCEDURE genie_le_int;
+extern GENIE_PROCEDURE genie_le_long_bits;
 extern GENIE_PROCEDURE genie_le_long_bytes;
 extern GENIE_PROCEDURE genie_le_long_mp;
 extern GENIE_PROCEDURE genie_leng_bytes;
@@ -290,7 +308,6 @@ extern GENIE_PROCEDURE genie_long_max_real;
 extern GENIE_PROCEDURE genie_long_next_random;
 extern GENIE_PROCEDURE genie_long_real_width;
 extern GENIE_PROCEDURE genie_long_small_real;
-extern GENIE_PROCEDURE genie_lt_bits;
 extern GENIE_PROCEDURE genie_lt_bytes;
 extern GENIE_PROCEDURE genie_lt_char;
 extern GENIE_PROCEDURE genie_lt_int;
@@ -379,6 +396,7 @@ extern GENIE_PROCEDURE genie_pow_real;
 extern GENIE_PROCEDURE genie_pow_real_int;
 extern GENIE_PROCEDURE genie_preemptive_sweep_heap;
 extern GENIE_PROCEDURE genie_program_idf;
+extern GENIE_PROCEDURE genie_pwd;
 extern GENIE_PROCEDURE genie_real_lengths;
 extern GENIE_PROCEDURE genie_real_shorths;
 extern GENIE_PROCEDURE genie_real_width;
@@ -411,6 +429,7 @@ extern GENIE_PROCEDURE genie_sin_long_complex;
 extern GENIE_PROCEDURE genie_sin_long_mp;
 extern GENIE_PROCEDURE genie_sin_real;
 extern GENIE_PROCEDURE genie_small_real;
+extern GENIE_PROCEDURE genie_sort_row_string;
 extern GENIE_PROCEDURE genie_sound_channels;
 extern GENIE_PROCEDURE genie_sound_rate;
 extern GENIE_PROCEDURE genie_sound_resolution;
@@ -454,6 +473,8 @@ extern GENIE_PROCEDURE genie_times_char_int;
 extern GENIE_PROCEDURE genie_times_int_char;
 extern GENIE_PROCEDURE genie_times_int_string;
 extern GENIE_PROCEDURE genie_times_string_int;
+extern GENIE_PROCEDURE genie_to_lower;
+extern GENIE_PROCEDURE genie_to_upper;
 extern GENIE_PROCEDURE genie_unimplemented;
 extern GENIE_PROCEDURE genie_vector_times_scalar;
 extern GENIE_PROCEDURE genie_xor_bits;
@@ -472,7 +493,7 @@ extern PROPAGATOR_T genie_collateral (NODE_T *p);
 extern PROPAGATOR_T genie_column_function (NODE_T *p);
 extern PROPAGATOR_T genie_conditional (volatile NODE_T *p);
 extern PROPAGATOR_T genie_constant (NODE_T *p);
-extern PROPAGATOR_T genie_denoter (NODE_T *p);
+extern PROPAGATOR_T genie_denotation (NODE_T *p);
 extern PROPAGATOR_T genie_deproceduring (NODE_T *p);
 extern PROPAGATOR_T genie_dereference_loc_identifier (NODE_T *p);
 extern PROPAGATOR_T genie_dereference_selection_name_quick (NODE_T *p);
@@ -619,6 +640,14 @@ extern void genie_getenv (NODE_T *);
 extern void genie_reset_errno (NODE_T *);
 extern void genie_strerror (NODE_T *);
 extern void genie_waitpid (NODE_T *);
+
+#ifdef __S_IFIFO
+extern GENIE_PROCEDURE genie_file_is_fifo;
+#endif
+
+#ifdef __S_IFLNK
+extern GENIE_PROCEDURE genie_file_is_link;
+#endif
 
 #if defined ENABLE_PAR_CLAUSE
 extern pthread_t main_thread_id;

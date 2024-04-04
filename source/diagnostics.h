@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if ! defined A68G_DIAGNOSTICS_H
@@ -59,6 +58,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_FALSE_ASSERTION "false assertion"
 #define ERROR_FEATURE_UNSUPPORTED "unsupported feature S"
 #define ERROR_FFT "fourier transform error; U; U"
+#define ERROR_FILE_ACCESS "file access error"
 #define ERROR_FILE_ALREADY_OPEN "file is already open"
 #define ERROR_FILE_CANNOT_OPEN_FOR "cannot open Z for Y"
 #define ERROR_FILE_CLOSE "error while closing file"
@@ -68,6 +68,9 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_FILE_NO_TEMP "cannot create unique temporary file name"
 #define ERROR_FILE_NOT_OPEN "file is not open"
 #define ERROR_FILE_READ "error while reading file"
+#define ERROR_FILE_CANT_SET "cannot set file"
+#define ERROR_FILE_SET "error while setting file"
+#define ERROR_FILE_CANT_RESET "cannot reset file"
 #define ERROR_FILE_RESET "error while resetting file"
 #define ERROR_FILE_SCRATCH "error while scratching file"
 #define ERROR_FILE_TRANSPUT "error transputting M value"
@@ -77,11 +80,11 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_FORMAT_CANNOT_TRANSPUT "cannot transput M value with A"
 #define ERROR_FORMAT_EXHAUSTED "patterns exhausted in format"
 #define ERROR_FORMAT_INTS_REQUIRED "1 .. 3 M arguments required"
-#define ERROR_FORMAT_INVALID_REPLICATOR "zero or negative replicator"
+#define ERROR_FORMAT_INVALID_REPLICATOR "negative replicator"
 #define ERROR_FORMAT_PICTURE_NUMBER "incorrect number of pictures for A"
 #define ERROR_FORMAT_PICTURES "number of pictures does not match number of arguments"
 #define ERROR_INCORRECT_FILENAME "incorrect filename"
-#define ERROR_IN_DENOTER "error in M denoter"
+#define ERROR_IN_DENOTATION "error in M denotation"
 #define ERROR_INDEXER_NUMBER "incorrect number of indexers for M"
 #define ERROR_INDEX_OUT_OF_BOUNDS "index out of bounds"
 #define ERROR_INTERNAL_CONSISTENCY "internal consistency check failure"
@@ -107,12 +110,12 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_MULTIPLE_TAG "multiple declaration of tag S"
 #define ERROR_NIL_DESCRIPTOR "descriptor is N"
 #define ERROR_NO_COMPONENT "M is neither component nor subset of M"
-#define ERROR_NO_DYADIC "O S O has not been declared in this range"
+#define ERROR_NO_DYADIC "dyadic operator O S O has not been declared in this range"
 #define ERROR_NO_FIELD "M has no field Z"
 #define ERROR_NO_INPUT_FILE "no input file specified"
 #define ERROR_NO_FLEX_ARGUMENT "M value from A cannot be flexible"
 #define ERROR_NO_MATRIX "M A does not yield a two-dimensional row"
-#define ERROR_NO_MONADIC "S O has not been declared in this range"
+#define ERROR_NO_MONADIC "monadic operator S O has not been declared in this range"
 #define ERROR_NO_NAME "M A does not yield a name"
 #define ERROR_NO_NAME_REQUIRED "context does not require a name"
 #define ERROR_NO_PARALLEL_CLAUSE "interpreter was compiled without support for the parallel-clause"
@@ -128,8 +131,6 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_OPERAND_NUMBER "incorrect number of operands for S"
 #define ERROR_OPERATOR_INVALID "monadic S cannot start with a character from Z"
 #define ERROR_OPERATOR_RELATED "M Z is firmly related to M Z"
-#define ERROR_OPTION "error in option \"%s\""
-#define ERROR_OPTION_INFO "error in option \"%s\" (%s)"
 #define ERROR_OUT_OF_BOUNDS "M value out of bounds"
 #define ERROR_OUT_OF_CORE "insufficient memory"
 #define ERROR_PAGE_SIZE "error in page size"
@@ -161,7 +162,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_SYNTAX "detected in A"
 #define ERROR_SYNTAX_EXPECTED "A expected"
 #define ERROR_SYNTAX_MISSING_SEPARATOR "probably a missing separator"
-#define ERROR_SYNTAX_MISSING_SYMBOL "probably a missing symbol nearby"
+#define ERROR_SYNTAX_STRANGE_TOKENS "probably missing or wrong symbols nearby"
 #define ERROR_SYNTAX_MIXED_DECLARATION "probably mixed identity and variable declaration"
 #define ERROR_SYNTAX_WRONG_SEPARATOR "probably a wrong separator"
 #define ERROR_THREAD_ACTIVE "parallel clause terminated but thread still active"
@@ -186,7 +187,7 @@ this program; if not, write to the Free Software Foundation, Inc.,
 #define ERROR_UNWORTHY_CHARACTER "unworthy character %s"
 #define INFO_APPROPRIATE_DECLARER "appropriate declarer"
 #define INFO_MISSING_KEYWORDS "missing or unmatched keyword"
-#define WARNING_EXTENSION "this construct is an extension"
+#define WARNING_EXTENSION "construct is an extension"
 #define WARNING_SCOPE_STATIC_1 "value from A could be exported out of its scope"
 #define WARNING_SCOPE_STATIC_2 "M value from A could be exported out of its scope"
 #define WARNING_SKIPPED_SUPERFLUOUS "skipped superfluous A"

@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
@@ -31,8 +30,8 @@ char *bar[BUFFER_SIZE];
 
 /*!
 \brief brief_mode_string
-\param p
-\return
+\param p moid to print
+\return pointer to string
 **/
 
 static char *brief_mode_string (MOID_T * p)
@@ -44,8 +43,8 @@ static char *brief_mode_string (MOID_T * p)
 
 /*!
 \brief brief_mode_flat
-\param f
-\param z
+\param f file number
+\param z moid to print
 **/
 
 static void brief_mode_flat (FILE_T f, MOID_T * z)
@@ -71,8 +70,8 @@ static void brief_mode_flat (FILE_T f, MOID_T * z)
 
 /*!
 \brief brief_fields_flat
-\param f
-\param pack
+\param f file number
+\param pack pack to print
 **/
 
 static void brief_fields_flat (FILE_T f, PACK_T * pack)
@@ -89,8 +88,8 @@ static void brief_fields_flat (FILE_T f, PACK_T * pack)
 
 /*!
 \brief brief_moid_flat
-\param f
-\param z
+\param f file number
+\param z moid to print
 **/
 
 static void brief_moid_flat (FILE_T f, MOID_T * z)
@@ -150,8 +149,8 @@ static void brief_moid_flat (FILE_T f, MOID_T * z)
 
 /*!
 \brief print_mode_flat
-\param f
-\param m
+\param f file number
+\param m moid to print
 **/
 
 static void print_mode_flat (FILE_T f, MOID_T * m)
@@ -197,9 +196,9 @@ static void print_mode_flat (FILE_T f, MOID_T * m)
 
 /*!
 \brief xref_tags
-\param f
-\param s
-\param a
+\param f file number
+\param s tag to print
+\param a attribute
 **/
 
 static void xref_tags (FILE_T f, TAG_T * s, int a)
@@ -304,36 +303,36 @@ static void xref_tags (FILE_T f, TAG_T * s, int a)
 
 /*!
 \brief xref_decs
-\param f
-\param next
+\param f file number
+\param t symbol table
 **/
 
-static void xref_decs (FILE_T f, SYMBOL_TABLE_T * next)
+static void xref_decs (FILE_T f, SYMBOL_TABLE_T * t)
 {
-  if (next->indicants != NULL) {
-    xref_tags (f, next->indicants, INDICANT);
+  if (t->indicants != NULL) {
+    xref_tags (f, t->indicants, INDICANT);
   }
-  if (next->operators != NULL) {
-    xref_tags (f, next->operators, OP_SYMBOL);
+  if (t->operators != NULL) {
+    xref_tags (f, t->operators, OP_SYMBOL);
   }
-  if (PRIO (next) != NULL) {
-    xref_tags (f, PRIO (next), PRIO_SYMBOL);
+  if (PRIO (t) != NULL) {
+    xref_tags (f, PRIO (t), PRIO_SYMBOL);
   }
-  if (next->identifiers != NULL) {
-    xref_tags (f, next->identifiers, IDENTIFIER);
+  if (t->identifiers != NULL) {
+    xref_tags (f, t->identifiers, IDENTIFIER);
   }
-  if (next->labels != NULL) {
-    xref_tags (f, next->labels, LABEL);
+  if (t->labels != NULL) {
+    xref_tags (f, t->labels, LABEL);
   }
-  if (next->anonymous != NULL) {
-    xref_tags (f, next->anonymous, ANONYMOUS);
+  if (t->anonymous != NULL) {
+    xref_tags (f, t->anonymous, ANONYMOUS);
   }
 }
 
 /*!
 \brief xref1_moid
-\param f
-\param p
+\param f file number
+\param p moid to xref
 **/
 
 static void xref1_moid (FILE_T f, MOID_T * p)
@@ -350,8 +349,8 @@ static void xref1_moid (FILE_T f, MOID_T * p)
 
 /*!
 \brief xref_moids
-\param f
-\param p
+\param f file number
+\param p moid chain to xref
 **/
 
 static void xref_moids (FILE_T f, MOID_T * p)
@@ -363,8 +362,8 @@ static void xref_moids (FILE_T f, MOID_T * p)
 
 /*!
 \brief moid_listing
-\param f
-\param m
+\param f file number
+\param m moid list to xref
 **/
 
 static void moid_listing (FILE_T f, MOID_LIST_T * m)
@@ -376,18 +375,18 @@ static void moid_listing (FILE_T f, MOID_LIST_T * m)
 
 /*!
 \brief cross_reference
-\param f
-\param p
-\param l
+\param file number
+\param p top node
+\param l source line
 **/
 
 static void cross_reference (FILE_T f, NODE_T * p, SOURCE_LINE_T * l)
 {
-  if (cross_reference_safe) {
+  if (MODULE (INFO (p))->cross_reference_safe) {
     for (; p != NULL; FORWARD (p)) {
       if (whether_new_lexical_level (p) && l == LINE (p)) {
         SYMBOL_TABLE_T *c = SYMBOL_TABLE (SUB (p));
-        snprintf (output_line, BUFFER_SIZE, "\n++++ [level %d", c->level);
+        snprintf (output_line, BUFFER_SIZE, "\n[level %d", c->level);
         WRITE (f, output_line);
         if (PREVIOUS (c) == stand_env) {
           snprintf (output_line, BUFFER_SIZE, ", in standard environ]");
@@ -409,8 +408,9 @@ static void cross_reference (FILE_T f, NODE_T * p, SOURCE_LINE_T * l)
 
 /*!
 \brief write_symbols
-\param f
-\param p
+\param file number
+\param p top node
+\param count symbols written
 **/
 
 static void write_symbols (FILE_T f, NODE_T * p, int *count)
@@ -435,10 +435,12 @@ static void write_symbols (FILE_T f, NODE_T * p, int *count)
 
 /*!
 \brief tree_listing
-\param f
-\param p
-\param x
-\param l
+\param f file number
+\param q top node
+\param x current level
+\param l source line
+\param quick_form quick form of listing
+\param ld index for indenting and drawing bars connecting nodes
 **/
 
 static void tree_listing (FILE_T f, NODE_T * q, int x, SOURCE_LINE_T * l, BOOL_T quick_form, int *ld)
@@ -512,8 +514,8 @@ static void tree_listing (FILE_T f, NODE_T * q, int x, SOURCE_LINE_T * l, BOOL_T
 
 /*!
 \brief leaves_to_print
-\param p
-\param l
+\param p top node
+\param l source line
 \return number of nodes to be printed in tree listing
 **/
 
@@ -532,7 +534,10 @@ static int leaves_to_print (NODE_T * p, SOURCE_LINE_T * l, BOOL_T quick_form)
 
 /*!
 \brief list_source_line
-\param module
+\param f file number
+\param module current module
+\param line source line
+\param quick_form quick form of listing
 **/
 
 void list_source_line (FILE_T f, MODULE_T * module, SOURCE_LINE_T * line, BOOL_T quick_form)
@@ -549,13 +554,13 @@ void list_source_line (FILE_T f, MODULE_T * module, SOURCE_LINE_T * line, BOOL_T
   write_source_line (f, line, NULL, A68_ALL_DIAGNOSTICS);
 /* Cross reference for lexical levels starting at this line. */
   if (module->options.cross_reference) {
-    cross_reference (f, line->top_node, line);
+    cross_reference (f, MODULE (line)->top_node, line);
   }
 /* Syntax tree listing connected with this line. */
   if (module->options.tree_listing || quick_form) {
-    if (tree_listing_safe && leaves_to_print (module->top_node, line, quick_form)) {
+    if (module->tree_listing_safe && leaves_to_print (module->top_node, line, quick_form)) {
       int ld = -1, k;
-      WRITE (f, "\n++++ Syntax tree");
+      WRITE (f, "\nSyntax tree");
       for (k = 0; k < BUFFER_SIZE; k++) {
         bar[k] = " ";
       }
@@ -566,7 +571,7 @@ void list_source_line (FILE_T f, MODULE_T * module, SOURCE_LINE_T * line, BOOL_T
 
 /*!
 \brief source_listing
-\param module
+\param module current module
 **/
 
 void source_listing (MODULE_T * module)
@@ -593,7 +598,7 @@ void source_listing (MODULE_T * module)
 
 /*!
 \brief write_listing
-\param module
+\param module current module
 **/
 
 void write_listing (MODULE_T * module)
@@ -601,18 +606,18 @@ void write_listing (MODULE_T * module)
   SOURCE_LINE_T *z;
   FILE_T f = module->files.listing.fd;
   if (module->options.moid_listing && top_moid_list != NULL) {
-    snprintf (output_line, BUFFER_SIZE, "\n++++ Moid listing");
+    snprintf (output_line, BUFFER_SIZE, "\nMoid listing");
     WRITE (f, output_line);
     moid_listing (f, top_moid_list);
   }
   if (module->options.standard_prelude_listing && stand_env != NULL) {
-    snprintf (output_line, BUFFER_SIZE, "\n++++ Standard prelude listing");
+    snprintf (output_line, BUFFER_SIZE, "\nStandard prelude listing");
     WRITE (f, output_line);
     xref_decs (f, stand_env);
   }
   if (module->top_refinement != NULL) {
     REFINEMENT_T *x = module->top_refinement;
-    snprintf (output_line, BUFFER_SIZE, "\n++++ Refinements");
+    snprintf (output_line, BUFFER_SIZE, "\nRefinements");
     WRITE (f, output_line);
     while (x != NULL) {
       snprintf (output_line, BUFFER_SIZE, "\n  \"%s\"", x->name);
@@ -643,40 +648,45 @@ void write_listing (MODULE_T * module)
           break;
         }
       }
-      x = NEXT (x);
+      FORWARD (x);
     }
   }
   if (module->options.list != NULL) {
     OPTION_LIST_T *i;
     int k = 1;
-    snprintf (output_line, BUFFER_SIZE, "\n++++ Options and pragmat items");
+    snprintf (output_line, BUFFER_SIZE, "\nOptions and pragmat items");
     WRITE (f, output_line);
-    for (i = module->options.list; i != NULL; i = NEXT (i)) {
+    for (i = module->options.list; i != NULL; FORWARD (i)) {
       snprintf (output_line, BUFFER_SIZE, "\n     %-4d %s", k++, i->str);
       WRITE (f, output_line);
     }
   }
   if (module->options.statistics_listing) {
-    if (error_count + warning_count > 0) {
-      snprintf (output_line, BUFFER_SIZE, "\n++++ Diagnostics: %d error(s), %d warning(s)", error_count, warning_count);
+    if (a68_prog.error_count + a68_prog.warning_count > 0) {
+      snprintf (output_line, BUFFER_SIZE, "\nDiagnostics: %d error(s), %d warning(s)", a68_prog.error_count, a68_prog.warning_count);
       WRITE (f, output_line);
-      for (z = module->top_line; z != NULL; z = NEXT (z)) {
+      for (z = module->top_line; z != NULL; FORWARD (z)) {
         if (z->diagnostics != NULL) {
           write_source_line (f, z, NULL, A68_TRUE);
         }
       }
     }
-    snprintf (output_line, BUFFER_SIZE, "\n++++ Garbage collections: %d", garbage_collects);
+    snprintf (output_line, BUFFER_SIZE, "\nGarbage collections: %d", garbage_collects);
     WRITE (f, output_line);
   }
   WRITE (f, NEWLINE_STRING);
 }
 
-extern void write_listing_header (MODULE_T * module)
+/*!
+\brief write_listing_header
+\param module current module
+**/
+
+void write_listing_header (MODULE_T * module)
 {
   state_version (module->files.listing.fd);
-  WRITE (module->files.listing.fd, "\n++++ File \"");
+  WRITE (module->files.listing.fd, "\nFile \"");
   WRITE (module->files.listing.fd, a68_prog.files.source.name);
   WRITE (module->files.listing.fd, "\"");
-  WRITE (module->files.listing.fd, "\n++++ Source listing");
+  WRITE (module->files.listing.fd, "\nSource listing");
 }

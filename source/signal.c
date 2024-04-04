@@ -9,21 +9,25 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 
 #include "algol68g.h"
 #include "genie.h"
+
+/*!
+\brief signal reading for segment violation
+\param i dummy
+**/
 
 static void sigsegv_handler (int i)
 {
@@ -34,7 +38,7 @@ static void sigsegv_handler (int i)
 
 /*!
 \brief signal reading from disconnected terminal
-\param i
+\param i dummy
 **/
 
 static void sigttin_handler (int i)
@@ -45,7 +49,7 @@ static void sigttin_handler (int i)
 
 /*!
 \brief signal broken pipe
-\param i
+\param i dummy
 **/
 
 static void sigpipe_handler (int i)
@@ -56,7 +60,7 @@ static void sigpipe_handler (int i)
 
 /*!
 \brief raise SYSREQUEST so you get to a monitor
-\param i
+\param i dummy
 **/
 
 static void sigint_handler (int i)

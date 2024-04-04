@@ -9,16 +9,15 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #if ! defined A68G_INLINE_H
@@ -68,25 +67,25 @@ this program; if not, write to the Free Software Foundation, Inc.,
 
 #define GET_DESCRIPTOR(a, t, p)\
   a = (A68_ARRAY *) ARRAY_ADDRESS (p);\
-  t = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZEOF (A68_ARRAY)]);
+  t = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZE_OF (A68_ARRAY)]);
 
 #define GET_DESCRIPTOR2(a, t1, t2, p)\
   a = (A68_ARRAY *) ARRAY_ADDRESS (p);\
-  t1 = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZEOF (A68_ARRAY)]);\
-  t2 = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZEOF (A68_ARRAY) + sizeof (A68_TUPLE)]);
+  t1 = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZE_OF (A68_ARRAY)]);\
+  t2 = (A68_TUPLE *) & (((BYTE_T *) (a)) [ALIGNED_SIZE_OF (A68_ARRAY) + sizeof (A68_TUPLE)]);
 
 #define PUT_DESCRIPTOR(a, t1, p) {\
   BYTE_T *a_p = ARRAY_ADDRESS (p);\
   *(A68_ARRAY *) a_p = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZEOF (A68_ARRAY)]) = (t1);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZE_OF (A68_ARRAY)]) = (t1);\
   }
 
 #define PUT_DESCRIPTOR2(a, t1, t2, p) {\
   /* ABNORMAL_END (IS_NIL (*p), ERROR_NIL_DESCRIPTOR, NULL); */\
   BYTE_T *a_p = ARRAY_ADDRESS (p);\
   *(A68_ARRAY *) a_p = (a);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZEOF (A68_ARRAY)]) = (t1);\
-  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZEOF (A68_ARRAY) + sizeof (A68_TUPLE)]) = (t2);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZE_OF (A68_ARRAY)]) = (t1);\
+  *(A68_TUPLE *) &(((BYTE_T *) (a_p)) [ALIGNED_SIZE_OF (A68_ARRAY) + sizeof (A68_TUPLE)]) = (t2);\
   }
 
 #define ROW_SIZE(t) ((UPB (t) >= LWB (t)) ? (UPB (t) - LWB (t) + 1) : 0)
@@ -207,7 +206,7 @@ This saves a push/pop pair.
 #define PROTECT_FROM_SWEEP_STACK(p)\
   if ((p)->protect_sweep != NULL) {\
     *(A68_REF *) FRAME_LOCAL (frame_pointer, (p)->protect_sweep->offset) =\
-    *(A68_REF *) (STACK_OFFSET (- ALIGNED_SIZEOF (A68_REF)));\
+    *(A68_REF *) (STACK_OFFSET (- ALIGNED_SIZE_OF (A68_REF)));\
   }
 
 #define PREEMPTIVE_SWEEP {\
@@ -259,7 +258,13 @@ extern int block_heap_compacter;
 /* Tests for objects of mode REAL. */
 
 #if defined ENABLE_IEEE_754
+
+#if defined ENABLE_WIN32
+extern int finite (double);
+#endif
+
 #define NOT_A_REAL(x) (!finite (x))
+
 #define TEST_REAL_REPRESENTATION(p, u)\
   if (NOT_A_REAL (u)) {\
     errno = ERANGE;\
@@ -496,7 +501,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
     }\
   case MODE_COMPLEX: {\
       A68_REAL *_r_ = (A68_REAL *) (w);\
-      A68_REAL *_i_ = (A68_REAL *) ((w) + ALIGNED_SIZEOF (A68_REAL));\
+      A68_REAL *_i_ = (A68_REAL *) ((w) + ALIGNED_SIZE_OF (A68_REAL));\
       CHECK_INIT ((p), INITIALISED (_r_), (q));\
       CHECK_INIT ((p), INITIALISED (_i_), (q));\
       break;\
@@ -559,42 +564,42 @@ returns: static link for stack frame at 'new_lex_lvl'.
   }
 
 #define POP_ADDRESS(p, addr, type) {\
-  DECREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (type));\
+  DECREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (type));\
   (addr) = (type *) STACK_TOP;\
   }
 
 #define POP_OPERAND_ADDRESS(p, i, type) {\
   (void) (p);\
-  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
+  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZE_OF (type)));\
   }
 
 #define POP_OPERAND_ADDRESSES(p, i, j, type) {\
-  DECREMENT_STACK_POINTER ((p), ALIGNED_SIZEOF (type));\
+  DECREMENT_STACK_POINTER ((p), ALIGNED_SIZE_OF (type));\
   (j) = (type *) STACK_TOP;\
-  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
+  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZE_OF (type)));\
   }
 
 #define POP_3_OPERAND_ADDRESSES(p, i, j, k, type) {\
-  DECREMENT_STACK_POINTER ((p), 2 * ALIGNED_SIZEOF (type));\
-  (k) = (type *) (STACK_OFFSET (ALIGNED_SIZEOF (type)));\
+  DECREMENT_STACK_POINTER ((p), 2 * ALIGNED_SIZE_OF (type));\
+  (k) = (type *) (STACK_OFFSET (ALIGNED_SIZE_OF (type)));\
   (j) = (type *) STACK_TOP;\
-  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZEOF (type)));\
+  (i) = (type *) (STACK_OFFSET (-ALIGNED_SIZE_OF (type)));\
   }
 
 #define PUSH_PRIMITIVE(p, z, mode) {\
   mode *_x_ = (mode *) STACK_TOP;\
   _x_->status = INITIALISED_MASK;\
   _x_->value = (z);\
-  INCREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (mode));\
+  INCREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (mode));\
   }
 
 #define PUSH_OBJECT(p, z, mode) {\
   *(mode *) STACK_TOP = (z);\
-  INCREMENT_STACK_POINTER (p, ALIGNED_SIZEOF (mode));\
+  INCREMENT_STACK_POINTER (p, ALIGNED_SIZE_OF (mode));\
   }
 
 #define POP_OBJECT(p, z, mode) {\
-  DECREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (mode));\
+  DECREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (mode));\
   (*(z)) = *((mode *) STACK_TOP);\
   }
 
@@ -612,14 +617,14 @@ returns: static link for stack frame at 'new_lex_lvl'.
   A68_BYTES *_z_ = (A68_BYTES *) STACK_TOP;\
   _z_->status = INITIALISED_MASK;\
   strncpy (_z_->value, k, BYTES_WIDTH);\
-  INCREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (A68_BYTES));\
+  INCREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (A68_BYTES));\
   }
 
 #define PUSH_LONG_BYTES(p, k) {\
   A68_LONG_BYTES *_z_ = (A68_LONG_BYTES *) STACK_TOP;\
   _z_->status = INITIALISED_MASK;\
   strncpy (_z_->value, k, LONG_BYTES_WIDTH);\
-  INCREMENT_STACK_POINTER((p), ALIGNED_SIZEOF (A68_LONG_BYTES));\
+  INCREMENT_STACK_POINTER((p), ALIGNED_SIZE_OF (A68_LONG_BYTES));\
   }
 
 #define PUSH_REF(p, z) PUSH_OBJECT (p, z, A68_REF)
@@ -644,7 +649,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
 #if defined A68_DEBUG
 #define A68_TRACE(txt, p) {\
   BYTE_T stack_offset;\
-  snprintf (output_line, BUFFER_SIZE, "\n\n++++ \"%s\" file=\"%s\" line=%d level=%d node=%p attr=\"%s\"",\
+  snprintf (output_line, BUFFER_SIZE, "\n\n\"%s\" file=\"%s\" line=%d level=%d node=%p attr=\"%s\"",\
 	    txt, __FILE__, __LINE__, LEX_LEVEL (p), p, non_terminal_string (edit_line, ATTRIBUTE (p)));\
   WRITE (STDOUT_FILENO, output_line);\
   where (STDOUT_FILENO, p);\
@@ -658,7 +663,7 @@ returns: static link for stack frame at 'new_lex_lvl'.
 
 #if defined A68_DEBUG
 #define A68_PRINT_REF(txt, z) {\
-  snprintf (output_line, BUFFER_SIZE, "\n\n++++ \"%s\" file=\"%s\" line=%d", txt, __FILE__, __LINE__);\
+  snprintf (output_line, BUFFER_SIZE, "\n\n\"%s\" file=\"%s\" line=%d", txt, __FILE__, __LINE__);\
   WRITE (STDOUT_FILENO, output_line);\
   if (IS_IN_HEAP (z)) {\
     snprintf (output_line, BUFFER_SIZE, " heap pointer %u %u", REF_OFFSET (z), REF_OFFSET (REF_HANDLE (z)));\

@@ -9,21 +9,20 @@ Copyright (C) 2001-2008 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or (at your option) any later
+Foundation; either version 3 of the License, or (at your option) any later
 version.
 
 This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc.,
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU General Public License along with 
+this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 /*
-This code implements some UNIX/Linux related routines.
-Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>. 
+This code implements some UNIX/Linux/BSD related routines.
+In part contributed by Sian Leitch. 
 */
 
 #include "algol68g.h"
@@ -42,6 +41,91 @@ Partly contributions by Sian Leitch <sian@sleitch.nildram.co.uk>.
 extern A68_REF tmp_to_a68_string (NODE_T *, char *);
 
 extern A68_CHANNEL stand_in_channel, stand_out_channel, stand_draw_channel, stand_back_channel, stand_error_channel;
+
+#if defined ENABLE_DIRENT
+
+#include <dirent.h>
+
+/*!
+\brief PROC (STRING) [] STRING directory
+\param p position in tree
+**/
+
+void genie_directory (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    PUSH_PRIMITIVE (p, A68_MAX_INT, A68_INT);
+  } else {
+    char *dir_name = a_to_c_string (p, buffer, name);
+    A68_REF z, row;
+    A68_ARRAY arr;
+    A68_TUPLE tup;
+    int k, n = 0;
+    A68_REF *base;
+    DIR *dir;
+    struct dirent *entry;
+    dir = opendir (dir_name);
+    if (dir == NULL) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    do {
+      entry = readdir (dir);
+      if (errno != 0) {
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
+        exit_genie (p, A68_RUNTIME_ERROR);
+      }
+      if (entry != NULL) {
+        n++;
+      }
+    } while (entry != NULL);
+    rewinddir (dir);
+    if (errno != 0) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    z = heap_generator (p, MODE (ROW_STRING), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
+    PROTECT_SWEEP_HANDLE (&z);
+    row = heap_generator (p, MODE (ROW_STRING), n * MOID_SIZE (MODE (STRING)));
+    DIM (&arr) = 1;
+    MOID (&arr) = MODE (STRING);
+    arr.elem_size = MOID_SIZE (MODE (STRING));
+    arr.slice_offset = 0;
+    arr.field_offset = 0;
+    ARRAY (&arr) = row;
+    LWB (&tup) = 1;
+    UPB (&tup) = n;
+    tup.shift = LWB (&tup);
+    tup.span = 1;
+    tup.k = 0;
+    PUT_DESCRIPTOR (arr, tup, &z);
+    base = (A68_REF *) ADDRESS (&row);
+    for (k = 0; k < n; k++) {
+      entry = readdir (dir);
+      if (errno != 0) {
+        diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
+        exit_genie (p, A68_RUNTIME_ERROR);
+      }
+      base[k] = c_to_a_string (p, entry->d_name);
+    }
+    if (closedir (dir) != 0) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    PUSH_REF (p, z);
+    UNPROTECT_SWEEP_HANDLE (&z);
+    free (buffer);
+  }
+}
+
+#endif
 
 /*!
 \brief PROC [] INT utc time
@@ -128,16 +212,275 @@ void genie_argv (NODE_T * p)
 }
 
 /*!
+\brief PROC STRING pwd
+\param p position in tree
+**/
+
+void genie_pwd (NODE_T * p)
+{
+  size_t size = BUFFER_SIZE;
+  char *buffer = NULL;
+  BOOL_T cont = A68_TRUE;
+  RESET_ERRNO;
+  while (cont) {
+    buffer = (char *) malloc (size);
+    if (buffer == NULL) {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    if (getcwd (buffer, size) == buffer) {
+      cont = A68_FALSE;
+    } else {
+      free (buffer);
+      cont = (errno == 0);
+      size *= 2;
+    }
+  }
+  if (buffer != NULL && errno == 0) {
+    PUSH_REF (p, c_to_a_string (p, buffer));
+    free (buffer);
+  } else {
+    PUSH_REF (p, empty_string (p));
+  }
+}
+
+/*!
+\brief PROC (STRING) INT cd
+\param p position in tree
+**/
+
+void genie_cd (NODE_T * p)
+{
+  A68_REF dir;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &dir);
+  CHECK_INIT (p, INITIALISED (&dir), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, dir));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    int rc = chdir (a_to_c_string (p, buffer, dir));
+    if (rc == 0) {
+      PUSH_PRIMITIVE (p, chdir (a_to_c_string (p, buffer, dir)), A68_INT);
+    } else {
+      diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    free (buffer);
+  }
+}
+
+/*!
+\brief PROC (STRING) BITS
+\param p position in tree
+**/
+
+void genie_file_mode (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, status.st_mode, A68_BITS);
+    } else {
+      PUSH_PRIMITIVE (p, 0x0, A68_BITS);
+    }
+    free (buffer);
+  }
+}
+
+/*!
+\brief PROC (STRING) BOOL file is block device
+\param p position in tree
+**/
+
+void genie_file_is_block_device (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, (S_ISBLK (status.st_mode) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+    } else {
+      PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+    }
+    free (buffer);
+  }
+}
+
+/*!
+\brief PROC (STRING) BOOL file is char device
+\param p position in tree
+**/
+
+void genie_file_is_char_device (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, (S_ISCHR (status.st_mode) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+    } else {
+      PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+    }
+    free (buffer);
+  }
+}
+
+/*!
+\brief PROC (STRING) BOOL file is directory
+\param p position in tree
+**/
+
+void genie_file_is_directory (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, (S_ISDIR (status.st_mode) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+    } else {
+      PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+    }
+    free (buffer);
+  }
+}
+
+/*!
+\brief PROC (STRING) BOOL file is regular
+\param p position in tree
+**/
+
+void genie_file_is_regular (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, (S_ISREG (status.st_mode) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+    } else {
+      PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+    }
+    free (buffer);
+  }
+}
+
+#ifdef __S_IFIFO
+
+/*!
+\brief PROC (STRING) BOOL file is fifo
+\param p position in tree
+**/
+
+void genie_file_is_fifo (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, (S_ISFIFO (status.st_mode) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+    } else {
+      PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+    }
+    free (buffer);
+  }
+}
+
+#endif
+
+#ifdef __S_IFLNK
+
+/*!
+\brief PROC (STRING) BOOL file is link
+\param p position in tree
+**/
+
+void genie_file_is_link (NODE_T * p)
+{
+  A68_REF name;
+  char *buffer;
+  RESET_ERRNO;
+  POP_REF (p, &name);
+  CHECK_INIT (p, INITIALISED (&name), MODE (STRING));
+  buffer = (char *) malloc (1 + a68_string_size (p, name));
+  if (buffer == NULL) {
+    diagnostic_node (A68_RUNTIME_ERROR, p, ERROR_OUT_OF_CORE);
+    exit_genie (p, A68_RUNTIME_ERROR);
+  } else {
+    struct stat status;
+    if (stat (a_to_c_string (p, buffer, name), &status) == 0) {
+      PUSH_PRIMITIVE (p, (S_ISLNK (status.st_mode) != 0 ? A68_TRUE : A68_FALSE), A68_BOOL);
+    } else {
+      PUSH_PRIMITIVE (p, A68_FALSE, A68_BOOL);
+    }
+    free (buffer);
+  }
+}
+
+#endif
+
+/*!
 \brief convert [] STRING row to char *vec[]
 \param p position in tree
-\param row
+\param vec string vector
+\param row [] STRING
 **/
 
 static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
 {
   BYTE_T *z = ADDRESS (&row);
   A68_ARRAY *arr = (A68_ARRAY *) & z[0];
-  A68_TUPLE *tup = (A68_TUPLE *) & z[ALIGNED_SIZEOF (A68_ARRAY)];
+  A68_TUPLE *tup = (A68_TUPLE *) & z[ALIGNED_SIZE_OF (A68_ARRAY)];
   int k = 0;
   if (get_row_size (tup, DIM (arr)) != 0) {
     BYTE_T *base_addr = ADDRESS (&ARRAY (arr));
@@ -166,6 +509,7 @@ static void convert_string_vector (NODE_T * p, char *vec[], A68_REF row)
 
 /*!
 \brief free char *vec[]
+\param vec string vector
 **/
 
 static void free_vector (char *vec[])
@@ -213,18 +557,18 @@ void genie_strerror (NODE_T * p)
 /*!
 \brief set up file for usage in pipe
 \param p position in tree
-\param z
-\param fd
-\param chan
-\param r_mood
-\param w_mood
-\param p position in treeid
+\param z pointer to file
+\param fd file number
+\param chan channel
+\param r_mood read mood
+\param w_mood write mood
+\param pid pid
 **/
 
 static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL_T r_mood, BOOL_T w_mood, int pid)
 {
   A68_FILE *f;
-  *z = heap_generator (p, MODE (REF_FILE), ALIGNED_SIZEOF (A68_FILE));
+  *z = heap_generator (p, MODE (REF_FILE), ALIGNED_SIZE_OF (A68_FILE));
   f = (A68_FILE *) ADDRESS (z);
   STATUS (f) = (pid < 0) ? 0 : INITIALISED_MASK;
   f->identification = nil_ref;
@@ -248,9 +592,9 @@ static void set_up_file (NODE_T * p, A68_REF * z, int fd, A68_CHANNEL chan, BOOL
 /*!
 \brief create and push a pipe
 \param p position in tree
-\param fd_r
-\param fd_w
-\param p position in treeid
+\param fd_r read file number
+\param fd_w write file number
+\param pid pid
 **/
 
 static void genie_mkpipe (NODE_T * p, int fd_r, int fd_w, int pid)
@@ -307,7 +651,6 @@ void genie_fork (NODE_T * p)
 /*!
 \brief PROC execve = (STRING, [] STRING, [] STRING) INT 
 \param p position in tree
-\return
 **/
 
 void genie_execve (NODE_T * p)
@@ -616,7 +959,7 @@ void init_curses ()
 
 /*!
 \brief watch stdin for input, do not wait very long
-\return
+\return character read
 **/
 
 int rgetchar (void)
@@ -633,9 +976,7 @@ int rgetchar (void)
   FD_SET (0, &rfds);
   retval = select (1, &rfds, NULL, NULL, &tv);
   if (retval) {
-    /*
-     * FD_ISSET(0, &rfds) will be true. 
-     */
+    /* FD_ISSET(0, &rfds) will be true.  */
     return (getch ());
   } else {
     return (NULL_CHAR);
@@ -954,8 +1295,7 @@ void genie_pq_parameterstatus (NODE_T * p)
   }
   ref_z = heap_generator (p, MODE (C_STRING), 1 + a68_string_size (p, parameter));
   if (!IS_NIL (file->string)) {
-    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, (char *) PQparameterStatus (file->connection, a_to_c_string (p, (char *)
-                                                                                                                          ADDRESS (&ref_z), parameter)));
+    *(A68_REF *) ADDRESS (&file->string) = c_to_a_string (p, (char *) PQparameterStatus (file->connection, a_to_c_string (p, (char *) ADDRESS (&ref_z), parameter)));
     PUSH_PRIMITIVE (p, 0, A68_INT);
   } else {
     PUSH_PRIMITIVE (p, -3, A68_INT);
@@ -1763,7 +2103,7 @@ void genie_http_content (NODE_T * p)
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
-  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZEOF (socket_address));
+  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZE_OF (socket_address));
   if (conn < 0) {
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
@@ -1891,7 +2231,7 @@ void genie_tcp_request (NODE_T * p)
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     return;
   };
-  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZEOF (socket_address));
+  conn = connect (socket_id, (const struct sockaddr *) &socket_address, ALIGNED_SIZE_OF (socket_address));
   if (conn < 0) {
     PUSH_PRIMITIVE (p, (errno == 0 ? 1 : errno), A68_INT);
     close (socket_id);
@@ -2017,8 +2357,9 @@ void genie_grep_in_string (NODE_T * p)
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = malloc (nmatch * ALIGNED_SIZEOF (regmatch_t));
+  matches = malloc (nmatch * ALIGNED_SIZE_OF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
+    rc = 2;
     PUSH_PRIMITIVE (p, rc, A68_INT);
     regfree (&compiled);
     return;
@@ -2088,7 +2429,7 @@ void genie_sub_in_string (NODE_T * p)
   if (nmatch == 0) {
     nmatch = 1;
   }
-  matches = malloc (nmatch * ALIGNED_SIZEOF (regmatch_t));
+  matches = malloc (nmatch * ALIGNED_SIZE_OF (regmatch_t));
   if (nmatch > 0 && matches == NULL) {
     PUSH_PRIMITIVE (p, rc, A68_INT);
     regfree (&compiled);
