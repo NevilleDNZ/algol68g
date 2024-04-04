@@ -123,9 +123,7 @@ static void push_permutation (NODE_T * p, gsl_permutation * v)
   BYTE_T *base;
   len = (int) (SIZE (v));
   desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZE_OF (A68_INT));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (INT);
   ELEM_SIZE (&arr) = ALIGNED_SIZE_OF (A68_INT);
@@ -145,8 +143,6 @@ static void push_permutation (NODE_T * p, gsl_permutation * v)
     STATUS (x) = INITIALISED_MASK;
     VALUE (x) = (int) gsl_permutation_get (v, (size_t) k);
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -198,9 +194,7 @@ static void push_vector (NODE_T * p, gsl_vector * v)
   BYTE_T *base;
   len = (int) (SIZE (v));
   desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZE_OF (A68_REAL));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (REAL);
   ELEM_SIZE (&arr) = ALIGNED_SIZE_OF (A68_REAL);
@@ -221,8 +215,6 @@ static void push_vector (NODE_T * p, gsl_vector * v)
     VALUE (x) = gsl_vector_get (v, (size_t) k);
     CHECK_REAL_REPRESENTATION (p, VALUE (x));
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -280,9 +272,7 @@ static void push_matrix (NODE_T * p, gsl_matrix * a)
   len1 = (int) (SIZE1 (a));
   len2 = (int) (SIZE2 (a));
   desc = heap_generator (p, MODE (ROWROW_REAL), ALIGNED_SIZE_OF (A68_ARRAY) + 2 * ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROWROW_REAL), len1 * len2 * ALIGNED_SIZE_OF (A68_REAL));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 2;
   MOID (&arr) = MODE (REAL);
   ELEM_SIZE (&arr) = ALIGNED_SIZE_OF (A68_REAL);
@@ -311,8 +301,6 @@ static void push_matrix (NODE_T * p, gsl_matrix * a)
       CHECK_REAL_REPRESENTATION (p, VALUE (x));
     }
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -368,9 +356,7 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
   BYTE_T *base;
   len = (int) (SIZE (v));
   desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZE_OF (A68_REAL));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (COMPLEX);
   ELEM_SIZE (&arr) = 2 * ALIGNED_SIZE_OF (A68_REAL);
@@ -395,8 +381,6 @@ static void push_vector_complex (NODE_T * p, gsl_vector_complex * v)
     VALUE (im) = GSL_IMAG (z);
     CHECK_COMPLEX_REPRESENTATION (p, VALUE (re), VALUE (im));
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -457,9 +441,7 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
   len1 = (int) (SIZE1 (a));
   len2 = (int) (SIZE2 (a));
   desc = heap_generator (p, MODE (ROWROW_COMPLEX), ALIGNED_SIZE_OF (A68_ARRAY) + 2 * ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROWROW_COMPLEX), len1 * len2 * 2 * ALIGNED_SIZE_OF (A68_REAL));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 2;
   MOID (&arr) = MODE (COMPLEX);
   ELEM_SIZE (&arr) = 2 * ALIGNED_SIZE_OF (A68_REAL);
@@ -492,8 +474,6 @@ static void push_matrix_complex (NODE_T * p, gsl_matrix_complex * a)
       CHECK_COMPLEX_REPRESENTATION (p, VALUE (re), VALUE (im));
     }
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -2410,9 +2390,7 @@ static void push_array_real (NODE_T * p, double *v, int len)
   BYTE_T *base;
   error_node = p;
   desc = heap_generator (p, MODE (ROW_REAL), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_REAL), len * ALIGNED_SIZE_OF (A68_REAL));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (REAL);
   ELEM_SIZE (&arr) = ALIGNED_SIZE_OF (A68_REAL);
@@ -2433,8 +2411,6 @@ static void push_array_real (NODE_T * p, double *v, int len)
     VALUE (x) = v[2 * k];
     CHECK_REAL_REPRESENTATION (p, VALUE (x));
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -2492,9 +2468,7 @@ static void push_array_complex (NODE_T * p, double *v, int len)
   BYTE_T *base;
   error_node = p;
   desc = heap_generator (p, MODE (ROW_COMPLEX), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_COMPLEX), len * 2 * ALIGNED_SIZE_OF (A68_REAL));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (COMPLEX);
   ELEM_SIZE (&arr) = 2 * ALIGNED_SIZE_OF (A68_REAL);
@@ -2518,8 +2492,6 @@ static void push_array_complex (NODE_T * p, double *v, int len)
     VALUE (im) = v[2 * k + 1];
     CHECK_COMPLEX_REPRESENTATION (p, VALUE (re), VALUE (im));
   }
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
 }
 
@@ -2544,9 +2516,7 @@ void genie_prime_factors (NODE_T * p)
   wt = gsl_fft_complex_wavetable_alloc ((size_t) (VALUE (&n)));
   len = (int) (NF (wt));
   desc = heap_generator (p, MODE (ROW_INT), ALIGNED_SIZE_OF (A68_ARRAY) + ALIGNED_SIZE_OF (A68_TUPLE));
-  BLOCK_GC_HANDLE (&desc);
   row = heap_generator (p, MODE (ROW_INT), len * ALIGNED_SIZE_OF (A68_INT));
-  BLOCK_GC_HANDLE (&row);
   DIM (&arr) = 1;
   MOID (&arr) = MODE (INT);
   ELEM_SIZE (&arr) = ALIGNED_SIZE_OF (A68_INT);
@@ -2567,8 +2537,6 @@ void genie_prime_factors (NODE_T * p)
     VALUE (x) = (int) ((FACTOR (wt))[k]);
   }
   gsl_fft_complex_wavetable_free (wt);
-  UNBLOCK_GC_HANDLE (&desc);
-  UNBLOCK_GC_HANDLE (&row);
   PUSH_REF (p, desc);
   (void) gsl_set_error_handler (save_handler);
 }
@@ -2820,7 +2788,7 @@ void genie_laplace (NODE_T * p)
   F (&l) = f;
   S (&l) = VALUE (&s);
   FUNCTION (&g) = &laplace_f;
-  PARAMS (&g) = &l;
+  GSL_PARAMS (&g) = &l;
   w = gsl_integration_workspace_alloc (LAPLACE_DIVISIONS);
   if (VALUE (error) >= 0.0) {
     rc = gsl_integration_qagiu (&g, 0.0, VALUE (error), 0.0, LAPLACE_DIVISIONS, w, &result, &estimated_error);

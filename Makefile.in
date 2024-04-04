@@ -59,7 +59,8 @@ am_a68g_OBJECTS = a68g-a68g.$(OBJEXT) a68g-code.$(OBJEXT) \
 	a68g-environ.$(OBJEXT) a68g-genie.$(OBJEXT) a68g-gsl.$(OBJEXT) \
 	a68g-inet.$(OBJEXT) a68g-monitor.$(OBJEXT) a68g-mp.$(OBJEXT) \
 	a68g-plotutils.$(OBJEXT) a68g-postgresql.$(OBJEXT) \
-	a68g-syntax.$(OBJEXT) a68g-edit.$(OBJEXT)
+	a68g-pretty.$(OBJEXT) a68g-syntax.$(OBJEXT) \
+	a68g-edit.$(OBJEXT)
 a68g_OBJECTS = $(am_a68g_OBJECTS)
 a68g_LDADD = $(LDADD)
 a68g_LINK = $(CCLD) $(a68g_CFLAGS) $(CFLAGS) $(a68g_LDFLAGS) \
@@ -197,7 +198,7 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-a68g_SOURCES = a68g.c code.c environ.c genie.c gsl.c inet.c monitor.c mp.c plotutils.c postgresql.c syntax.c edit.c
+a68g_SOURCES = a68g.c code.c environ.c genie.c gsl.c inet.c monitor.c mp.c plotutils.c postgresql.c pretty.c syntax.c edit.c
 a68g_CFLAGS = -DBINDIR='"$(bindir)"' -DINCLUDEDIR='"$(includedir)"'
 TESTS_ENVIRONMENT = ./a68g
 TESTS = check-01.a68 check-02.a68 check-03.a68 check-04.a68 check-05.a68 check-06.a68 check-07.a68 check-08.a68 check-09.a68
@@ -307,6 +308,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a68g-mp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a68g-plotutils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a68g-postgresql.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a68g-pretty.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/a68g-syntax.Po@am__quote@
 
 .c.o:
@@ -462,6 +464,20 @@ a68g-postgresql.obj: postgresql.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='postgresql.c' object='a68g-postgresql.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o a68g-postgresql.obj `if test -f 'postgresql.c'; then $(CYGPATH_W) 'postgresql.c'; else $(CYGPATH_W) '$(srcdir)/postgresql.c'; fi`
+
+a68g-pretty.o: pretty.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT a68g-pretty.o -MD -MP -MF $(DEPDIR)/a68g-pretty.Tpo -c -o a68g-pretty.o `test -f 'pretty.c' || echo '$(srcdir)/'`pretty.c
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/a68g-pretty.Tpo $(DEPDIR)/a68g-pretty.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pretty.c' object='a68g-pretty.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o a68g-pretty.o `test -f 'pretty.c' || echo '$(srcdir)/'`pretty.c
+
+a68g-pretty.obj: pretty.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT a68g-pretty.obj -MD -MP -MF $(DEPDIR)/a68g-pretty.Tpo -c -o a68g-pretty.obj `if test -f 'pretty.c'; then $(CYGPATH_W) 'pretty.c'; else $(CYGPATH_W) '$(srcdir)/pretty.c'; fi`
+@am__fastdepCC_TRUE@	mv -f $(DEPDIR)/a68g-pretty.Tpo $(DEPDIR)/a68g-pretty.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='pretty.c' object='a68g-pretty.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -c -o a68g-pretty.obj `if test -f 'pretty.c'; then $(CYGPATH_W) 'pretty.c'; else $(CYGPATH_W) '$(srcdir)/pretty.c'; fi`
 
 a68g-syntax.o: syntax.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(a68g_CFLAGS) $(CFLAGS) -MT a68g-syntax.o -MD -MP -MF $(DEPDIR)/a68g-syntax.Tpo -c -o a68g-syntax.o `test -f 'syntax.c' || echo '$(srcdir)/'`syntax.c
