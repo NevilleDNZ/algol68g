@@ -295,7 +295,7 @@ void genie_cd (NODE_T * p)
   } else {
     int rc = chdir (a_to_c_string (p, buffer, dir));
     if (rc == 0) {
-      PUSH_VALUE (p, chdir (a_to_c_string (p, buffer, dir)), A68_INT);
+      PUSH_VALUE (p, 0, A68_INT);
     } else {
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_FILE_ACCESS);
       exit_genie (p, A68_RUNTIME_ERROR);

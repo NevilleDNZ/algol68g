@@ -30,6 +30,11 @@
 
 // Genie routines.
 
+extern PROP_T genie_column_function (NODE_T *);
+extern PROP_T genie_diagonal_function (NODE_T *);
+extern PROP_T genie_row_function (NODE_T *);
+extern PROP_T genie_transpose_function (NODE_T *);
+
 static A68_REF genie_clone (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
 static A68_REF genie_make_ref_row_of_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
 static A68_REF genie_make_ref_row_row (NODE_T *, MOID_T *, MOID_T *, ADDR_T);
@@ -44,7 +49,6 @@ static PROP_T genie_cast (NODE_T *);
 static PROP_T genie_closed (volatile NODE_T *);
 static PROP_T genie_coercion (NODE_T *);
 static PROP_T genie_collateral (NODE_T *);
-static PROP_T genie_column_function (NODE_T *);
 static PROP_T genie_conditional (volatile NODE_T *);
 static PROP_T genie_constant (NODE_T *);
 static PROP_T genie_denotation (NODE_T *);
@@ -55,7 +59,6 @@ static PROP_T genie_dereference_selection_name_quick (NODE_T *);
 static PROP_T genie_dereference_slice_name_quick (NODE_T *);
 static PROP_T genie_dereferencing (NODE_T *);
 static PROP_T genie_dereferencing_quick (NODE_T *);
-static PROP_T genie_diagonal_function (NODE_T *);
 static PROP_T genie_dyadic (NODE_T *);
 static PROP_T genie_dyadic_quick (NODE_T *);
 static PROP_T genie_enclosed (volatile NODE_T *);
@@ -74,7 +77,6 @@ static PROP_T genie_monadic (NODE_T *);
 static PROP_T genie_nihil (NODE_T *);
 static PROP_T genie_or_function (NODE_T *);
 static PROP_T genie_routine_text (NODE_T *);
-static PROP_T genie_row_function (NODE_T *);
 static PROP_T genie_rowing (NODE_T *);
 static PROP_T genie_rowing_ref_row_of_row (NODE_T *);
 static PROP_T genie_rowing_ref_row_row (NODE_T *);
@@ -86,7 +88,6 @@ static PROP_T genie_selection_value_quick (NODE_T *);
 static PROP_T genie_skip (NODE_T *);
 static PROP_T genie_slice_name_quick (NODE_T *);
 static PROP_T genie_slice (NODE_T *);
-static PROP_T genie_transpose_function (NODE_T *);
 static PROP_T genie_united_case (volatile NODE_T *);
 static PROP_T genie_uniting (NODE_T *);
 static PROP_T genie_unit (NODE_T *);
@@ -95,6 +96,7 @@ static PROP_T genie_voiding_assignation (NODE_T *);
 static PROP_T genie_voiding (NODE_T *);
 static PROP_T genie_widen_int_to_real (NODE_T *);
 static PROP_T genie_widen (NODE_T *);
+
 static void genie_clone_stack (NODE_T *, MOID_T *, A68_REF *, A68_REF *);
 static void genie_serial_units_no_label (NODE_T *, ADDR_T, NODE_T **);
 
@@ -4070,30 +4072,30 @@ A68_REF genie_make_rowrow (NODE_T * p, MOID_T * rmod, int len, ADDR_T sp)
   MOID_T *nmod = IS_FLEX (rmod) ? SUB (rmod) : rmod;
   MOID_T *emod = SUB (nmod);
   A68_REF nrow, orow;
-  A68_ARRAY *narr, *oarr;
-  A68_TUPLE *ntup, *otup;
+  A68_ARRAY *new_arr, *old_arr;
+  A68_TUPLE *new_tup, *old_tup;
   int j, k, span, odim = DIM (nmod) - 1;
 // Make the new descriptor.
   nrow = heap_generator (p, rmod, DESCRIPTOR_SIZE (DIM (nmod)));
-  GET_DESCRIPTOR (narr, ntup, &nrow);
-  DIM (narr) = DIM (nmod);
-  MOID (narr) = emod;
-  ELEM_SIZE (narr) = SIZE (emod);
-  SLICE_OFFSET (narr) = 0;
-  FIELD_OFFSET (narr) = 0;
+  GET_DESCRIPTOR (new_arr, new_tup, &nrow);
+  DIM (new_arr) = DIM (nmod);
+  MOID (new_arr) = emod;
+  ELEM_SIZE (new_arr) = SIZE (emod);
+  SLICE_OFFSET (new_arr) = 0;
+  FIELD_OFFSET (new_arr) = 0;
   if (len == 0) {
 // There is a vacuum on the stack.
     for (k = 0; k < odim; k++) {
-      LWB (&ntup[k + 1]) = 1;
-      UPB (&ntup[k + 1]) = 0;
-      SPAN (&ntup[k + 1]) = 1;
-      SHIFT (&ntup[k + 1]) = LWB (&ntup[k + 1]);
+      LWB (&new_tup[k + 1]) = 1;
+      UPB (&new_tup[k + 1]) = 0;
+      SPAN (&new_tup[k + 1]) = 1;
+      SHIFT (&new_tup[k + 1]) = LWB (&new_tup[k + 1]);
     }
-    LWB (ntup) = 1;
-    UPB (ntup) = 0;
-    SPAN (ntup) = 0;
-    SHIFT (ntup) = 0;
-    ARRAY (narr) = nil_ref;
+    LWB (new_tup) = 1;
+    UPB (new_tup) = 0;
+    SPAN (new_tup) = 0;
+    SHIFT (new_tup) = 0;
+    ARRAY (new_arr) = nil_ref;
     return nrow;
   } else if (len > 0) {
     A68_ARRAY *x = NO_ARRAY;
@@ -4114,48 +4116,48 @@ A68_REF genie_make_rowrow (NODE_T * p, MOID_T * rmod, int len, ADDR_T sp)
     }
 // Fill descriptor of new row with info from (arbitrary) first one.
     orow = *(A68_REF *) STACK_ADDRESS (sp);
-    GET_DESCRIPTOR (x, otup, &orow);
+    GET_DESCRIPTOR (x, old_tup, &orow);
     for (span = 1, k = 0; k < odim; k++) {
-      A68_TUPLE *nt = &ntup[k + 1], *ot = &otup[k];
+      A68_TUPLE *nt = &new_tup[k + 1], *ot = &old_tup[k];
       LWB (nt) = LWB (ot);
       UPB (nt) = UPB (ot);
       SPAN (nt) = span;
       SHIFT (nt) = LWB (nt) * SPAN (nt);
       span *= ROW_SIZE (nt);
     }
-    LWB (ntup) = 1;
-    UPB (ntup) = len;
-    SPAN (ntup) = span;
-    SHIFT (ntup) = LWB (ntup) * SPAN (ntup);
-    ARRAY (narr) = heap_generator (p, rmod, len * span * ELEM_SIZE (narr));
+    LWB (new_tup) = 1;
+    UPB (new_tup) = len;
+    SPAN (new_tup) = span;
+    SHIFT (new_tup) = LWB (new_tup) * SPAN (new_tup);
+    ARRAY (new_arr) = heap_generator (p, rmod, len * span * ELEM_SIZE (new_arr));
     for (j = 0; j < len; j++) {
 // new[j,, ] := old[, ].
       BOOL_T done;
-      GET_DESCRIPTOR (oarr, otup, (A68_REF *) STACK_ADDRESS (sp + j * A68_REF_SIZE));
-      if (LWB (otup) > UPB (otup)) {
-        A68_REF dst = ARRAY (narr);
-        ADDR_T nindex = j * SPAN (ntup) + calculate_internal_index (&ntup[1], odim);
-        OFFSET (&dst) += ROW_ELEMENT (narr, nindex);
+      GET_DESCRIPTOR (old_arr, old_tup, (A68_REF *) STACK_ADDRESS (sp + j * A68_REF_SIZE));
+      if (LWB (old_tup) > UPB (old_tup)) {
+        A68_REF dst = ARRAY (new_arr);
+        ADDR_T new_k = j * SPAN (new_tup) + calculate_internal_index (&new_tup[1], odim);
+        OFFSET (&dst) += ROW_ELEMENT (new_arr, new_k);
         A68_REF none = empty_row (p, SLICE (rmod));
         MOVE (ADDRESS (&dst), ADDRESS (&none), SIZE (emod));
       } else {
-        initialise_internal_index (otup, odim);
-        initialise_internal_index (&ntup[1], odim);
+        initialise_internal_index (old_tup, odim);
+        initialise_internal_index (&new_tup[1], odim);
         done = A68_FALSE;
         while (!done) {
-          A68_REF src = ARRAY (oarr), dst = ARRAY (narr);
-          ADDR_T oindex, nindex;
-          oindex = calculate_internal_index (otup, odim);
-          nindex = j * SPAN (ntup) + calculate_internal_index (&ntup[1], odim);
-          OFFSET (&src) += ROW_ELEMENT (oarr, oindex);
-          OFFSET (&dst) += ROW_ELEMENT (narr, nindex);
+          A68_REF src = ARRAY (old_arr), dst = ARRAY (new_arr);
+          ADDR_T old_k, new_k;
+          old_k = calculate_internal_index (old_tup, odim);
+          new_k = j * SPAN (new_tup) + calculate_internal_index (&new_tup[1], odim);
+          OFFSET (&src) += ROW_ELEMENT (old_arr, old_k);
+          OFFSET (&dst) += ROW_ELEMENT (new_arr, new_k);
           if (HAS_ROWS (emod)) {
             A68_REF none = genie_clone (p, emod, (A68_REF *) & nil_ref, &src);
             MOVE (ADDRESS (&dst), ADDRESS (&none), SIZE (emod));
           } else {
             MOVE (ADDRESS (&dst), ADDRESS (&src), SIZE (emod));
           }
-          done = increment_internal_index (otup, odim) | increment_internal_index (&ntup[1], odim);
+          done = increment_internal_index (old_tup, odim) | increment_internal_index (&new_tup[1], odim);
         }
       }
     }
@@ -4416,20 +4418,20 @@ A68_REF genie_clone (NODE_T * p, MOID_T * m, A68_REF * tmp, A68_REF * old)
   } else if (IF_ROW (m)) {
 // REF [FLEX] [].
     A68_REF nrow, ntmp, heap;
-    A68_ARRAY *oarr, *narr, *tarr;
-    A68_TUPLE *otup, *ntup, *ttup = NO_TUPLE, *op, *np, *tp;
+    A68_ARRAY *old_arr, *new_arr, *tarr;
+    A68_TUPLE *old_tup, *new_tup, *ttup = NO_TUPLE, *op, *np, *tp;
     MOID_T *em = SUB (IS_FLEX (m) ? SUB (m) : m);
     int k, span;
     BOOL_T check_bounds;
 // Make new array.
-    GET_DESCRIPTOR (oarr, otup, DEREF (A68_REF, old));
-    nrow = heap_generator (p, m, DESCRIPTOR_SIZE (DIM (oarr)));
-    GET_DESCRIPTOR (narr, ntup, &nrow);
-    DIM (narr) = DIM (oarr);
-    MOID (narr) = MOID (oarr);
-    ELEM_SIZE (narr) = ELEM_SIZE (oarr);
-    SLICE_OFFSET (narr) = 0;
-    FIELD_OFFSET (narr) = 0;
+    GET_DESCRIPTOR (old_arr, old_tup, DEREF (A68_REF, old));
+    nrow = heap_generator (p, m, DESCRIPTOR_SIZE (DIM (old_arr)));
+    GET_DESCRIPTOR (new_arr, new_tup, &nrow);
+    DIM (new_arr) = DIM (old_arr);
+    MOID (new_arr) = MOID (old_arr);
+    ELEM_SIZE (new_arr) = ELEM_SIZE (old_arr);
+    SLICE_OFFSET (new_arr) = 0;
+    FIELD_OFFSET (new_arr) = 0;
 // Get size and copy bounds; check in case of a row.
 // This is just song and dance to comply with the RR.
     check_bounds = A68_FALSE;
@@ -4443,14 +4445,16 @@ A68_REF genie_clone (NODE_T * p, MOID_T * m, A68_REF * tmp, A68_REF * old)
         check_bounds = IS_ROW (m);
       }
     }
-    for (span = 1, k = 0; k < DIM (oarr); k++) {
-      op = &otup[k];
-      np = &ntup[k];
+    for (span = 1, k = 0; k < DIM (old_arr); k++) {
+      op = &old_tup[k];
+      np = &new_tup[k];
       if (check_bounds) {
         tp = &ttup[k];
-        if (UPB (tp) != UPB (op) || LWB (tp) != LWB (op)) {
-          diagnostic (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-          exit_genie (p, A68_RUNTIME_ERROR);
+        if (UPB (tp) >= LWB (tp) && UPB (op) >= LWB (op)) {
+          if (UPB (tp) != UPB (op) || LWB (tp) != LWB (op)) {
+            diagnostic (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+            exit_genie (p, A68_RUNTIME_ERROR);
+          }
         }
       }
       LWB (np) = LWB (op);
@@ -4461,41 +4465,44 @@ A68_REF genie_clone (NODE_T * p, MOID_T * m, A68_REF * tmp, A68_REF * old)
     }
 // Make a new array with at least a ghost element.
     if (span == 0) {
-      ARRAY (narr) = heap_generator (p, em, ELEM_SIZE (narr));
+      ARRAY (new_arr) = heap_generator (p, em, ELEM_SIZE (new_arr));
     } else {
-      ARRAY (narr) = heap_generator (p, em, span * ELEM_SIZE (narr));
+      ARRAY (new_arr) = heap_generator (p, em, span * ELEM_SIZE (new_arr));
     }
 // Copy the ghost element if there are no elements.
-    if (span == 0 && HAS_ROWS (em)) {
-      A68_REF nold, ndst, a68_clone;
-      nold = ARRAY (oarr);
-      OFFSET (&nold) += ROW_ELEMENT (oarr, 0);
-      ndst = ARRAY (narr);
-      OFFSET (&ndst) += ROW_ELEMENT (narr, 0);
-      a68_clone = genie_clone (p, em, &ntmp, &nold);
-      MOVE (ADDRESS (&ndst), ADDRESS (&a68_clone), SIZE (em));
+    if (span == 0) {
+      if (IS_UNION (em)) {
+// UNION has formal members.
+      } else if (HAS_ROWS (em)) {
+        A68_REF old_ref, dst_ref, a68_clone;
+        old_ref = ARRAY (old_arr);
+        OFFSET (&old_ref) += ROW_ELEMENT (old_arr, 0);
+        dst_ref = ARRAY (new_arr);
+        OFFSET (&dst_ref) += ROW_ELEMENT (new_arr, 0);
+        a68_clone = genie_clone (p, em, &ntmp, &old_ref);
+        MOVE (ADDRESS (&dst_ref), ADDRESS (&a68_clone), SIZE (em));
+      }
     } else if (span > 0) {
 // The n-dimensional copier.
       BOOL_T done = A68_FALSE;
-      initialise_internal_index (otup, DIM (oarr));
-      initialise_internal_index (ntup, DIM (narr));
+      initialise_internal_index (old_tup, DIM (old_arr));
+      initialise_internal_index (new_tup, DIM (new_arr));
       while (!done) {
-        A68_REF nold = ARRAY (oarr);
-        A68_REF ndst = ARRAY (narr);
-        ADDR_T oindex = calculate_internal_index (otup, DIM (oarr));
-        ADDR_T nindex = calculate_internal_index (ntup, DIM (narr));
-        OFFSET (&nold) += ROW_ELEMENT (oarr, oindex);
-        OFFSET (&ndst) += ROW_ELEMENT (narr, nindex);
+        A68_REF old_ref = ARRAY (old_arr);
+        A68_REF dst_ref = ARRAY (new_arr);
+        ADDR_T old_k = calculate_internal_index (old_tup, DIM (old_arr));
+        ADDR_T new_k = calculate_internal_index (new_tup, DIM (new_arr));
+        OFFSET (&old_ref) += ROW_ELEMENT (old_arr, old_k);
+        OFFSET (&dst_ref) += ROW_ELEMENT (new_arr, new_k);
         if (HAS_ROWS (em)) {
           A68_REF a68_clone;
-          a68_clone = genie_clone (p, em, &ntmp, &nold);
-          MOVE (ADDRESS (&ndst), ADDRESS (&a68_clone), SIZE (em));
+          a68_clone = genie_clone (p, em, &ntmp, &old_ref);
+          MOVE (ADDRESS (&dst_ref), ADDRESS (&a68_clone), SIZE (em));
         } else {
-          MOVE (ADDRESS (&ndst), ADDRESS (&nold), SIZE (em));
+          MOVE (ADDRESS (&dst_ref), ADDRESS (&old_ref), SIZE (em));
         }
 // Increase pointers.
-        done = increment_internal_index (otup, DIM (oarr))
-          | increment_internal_index (ntup, DIM (narr));
+        done = increment_internal_index (old_tup, DIM (old_arr)) | increment_internal_index (new_tup, DIM (new_arr));
       }
     }
     heap = heap_generator (p, m, A68_REF_SIZE);
@@ -4525,12 +4532,26 @@ A68_REF genie_store (NODE_T * p, MOID_T * m, A68_REF * dst, A68_REF * old)
     for (span = 1, k = 0; k < DIM (old_arr); k++) {
       old_p = &old_tup[k];
       new_p = &new_tup[k];
-      if ((UPB (new_p) != UPB (old_p) || LWB (new_p) != LWB (old_p))) {
-        diagnostic (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
-        exit_genie (p, A68_RUNTIME_ERROR);
+      if ((UPB (new_p) >= LWB (new_p) && UPB (old_p) >= LWB (old_p))) {
+        if ((UPB (new_p) != UPB (old_p) || LWB (new_p) != LWB (old_p))) {
+          diagnostic (A68_RUNTIME_ERROR, p, ERROR_DIFFERENT_BOUNDS);
+          exit_genie (p, A68_RUNTIME_ERROR);
+        }
       }
       span *= ROW_SIZE (new_p);
     }
+// Destination is an empty row, inspect if the source has elements.
+    if (span == 0) {
+      for (span = 1, k = 0; k < DIM (old_arr); k++) {
+        span *= ROW_SIZE (old_p);
+      }
+      if (span > 0) {
+        for (span = 1, k = 0; k < DIM (old_arr); k++) {
+          new_tup[k] = old_tup[k];
+        }
+        ARRAY (new_arr) = heap_generator (p, em, span * ELEM_SIZE (new_arr));
+      }
+    } 
     if (span > 0) {
       initialise_internal_index (old_tup, DIM (old_arr));
       initialise_internal_index (new_tup, DIM (new_arr));
@@ -4542,8 +4563,7 @@ A68_REF genie_store (NODE_T * p, MOID_T * m, A68_REF * dst, A68_REF * old)
         OFFSET (&new_old) += ROW_ELEMENT (old_arr, old_index);
         OFFSET (&new_dst) += ROW_ELEMENT (new_arr, new_index);
         MOVE (ADDRESS (&new_dst), ADDRESS (&new_old), SIZE (em));
-        done = increment_internal_index (old_tup, DIM (old_arr))
-          | increment_internal_index (new_tup, DIM (new_arr));
+        done = increment_internal_index (old_tup, DIM (old_arr)) | increment_internal_index (new_tup, DIM (new_arr));
       }
     }
     return *dst;
@@ -4571,246 +4591,6 @@ static void genie_clone_stack (NODE_T * p, MOID_T * srcm, A68_REF * dst, A68_REF
     a68_clone = genie_clone (p, srcm, tmp, &stack);
     MOVE (ADDRESS (dst), ADDRESS (&a68_clone), SIZE (srcm));
   }
-}
-
-//! @brief Push description for diagonal of square matrix.
-
-static PROP_T genie_diagonal_function (NODE_T * p)
-{
-  NODE_T *q = SUB (p);
-  ADDR_T scope = PRIMAL_SCOPE;
-  PROP_T self;
-  A68_ROW row, new_row;
-  int k = 0;
-  BOOL_T name = (BOOL_T) (IS_REF (MOID (p)));
-  A68_ARRAY *arr, new_arr;
-  A68_TUPLE *tup1, *tup2, new_tup;
-  MOID_T *m;
-  if (IS (q, TERTIARY)) {
-    A68_INT x;
-    EXECUTE_UNIT (q);
-    POP_OBJECT (p, &x, A68_INT);
-    k = VALUE (&x);
-    FORWARD (q);
-  }
-  EXECUTE_UNIT (NEXT (q));
-  m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
-  if (name) {
-    A68_REF z;
-    POP_REF (p, &z);
-    CHECK_REF (p, z, MOID (SUB (p)));
-    scope = REF_SCOPE (&z);
-    PUSH_REF (p, *DEREF (A68_REF, &z));
-  }
-  POP_OBJECT (p, &row, A68_ROW);
-  GET_DESCRIPTOR2 (arr, tup1, tup2, &row);
-  if (ROW_SIZE (tup1) != ROW_SIZE (tup2)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_NO_SQUARE_MATRIX, m);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  if (ABS (k) >= ROW_SIZE (tup1)) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_INDEX_OUT_OF_BOUNDS);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  m = (name ? SUB_MOID (p) : MOID (p));
-  new_row = heap_generator (p, m, DESCRIPTOR_SIZE (1));
-  DIM (&new_arr) = 1;
-  MOID (&new_arr) = m;
-  ELEM_SIZE (&new_arr) = ELEM_SIZE (arr);
-  SLICE_OFFSET (&new_arr) = SLICE_OFFSET (arr);
-  FIELD_OFFSET (&new_arr) = FIELD_OFFSET (arr);
-  ARRAY (&new_arr) = ARRAY (arr);
-  LWB (&new_tup) = 1;
-  UPB (&new_tup) = ROW_SIZE (tup1) - ABS (k);
-  SHIFT (&new_tup) = SHIFT (tup1) + SHIFT (tup2) - k * SPAN (tup2);
-  if (k < 0) {
-    SHIFT (&new_tup) -= (-k) * (SPAN (tup1) + SPAN (tup2));
-  }
-  SPAN (&new_tup) = SPAN (tup1) + SPAN (tup2);
-  K (&new_tup) = 0;
-  PUT_DESCRIPTOR (new_arr, new_tup, &new_row);
-  if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), A68_REF_SIZE);
-    *DEREF (A68_REF, &ref_new) = new_row;
-    REF_SCOPE (&ref_new) = scope;
-    PUSH_REF (p, ref_new);
-  } else {
-    PUSH_OBJECT (p, new_row, A68_ROW);
-  }
-  UNIT (&self) = genie_diagonal_function;
-  SOURCE (&self) = p;
-  return self;
-}
-
-//! @brief Push description for transpose of matrix.
-
-static PROP_T genie_transpose_function (NODE_T * p)
-{
-  NODE_T *q = SUB (p);
-  ADDR_T scope = PRIMAL_SCOPE;
-  PROP_T self;
-  A68_ROW row, new_row;
-  BOOL_T name = (BOOL_T) (IS_REF (MOID (p)));
-  A68_ARRAY *arr, new_arr;
-  A68_TUPLE *tup1, *tup2, new_tup1, new_tup2;
-  MOID_T *m;
-  EXECUTE_UNIT (NEXT (q));
-  m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
-  if (name) {
-    A68_REF z;
-    POP_REF (p, &z);
-    CHECK_REF (p, z, MOID (SUB (p)));
-    scope = REF_SCOPE (&z);
-    PUSH_REF (p, *DEREF (A68_REF, &z));
-  }
-  POP_OBJECT (p, &row, A68_ROW);
-  GET_DESCRIPTOR2 (arr, tup1, tup2, &row);
-  new_row = heap_generator (p, m, DESCRIPTOR_SIZE (2));
-  new_arr = *arr;
-  new_tup1 = *tup2;
-  new_tup2 = *tup1;
-  PUT_DESCRIPTOR2 (new_arr, new_tup1, new_tup2, &new_row);
-  if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), A68_REF_SIZE);
-    *DEREF (A68_REF, &ref_new) = new_row;
-    REF_SCOPE (&ref_new) = scope;
-    PUSH_REF (p, ref_new);
-  } else {
-    PUSH_OBJECT (p, new_row, A68_ROW);
-  }
-  UNIT (&self) = genie_transpose_function;
-  SOURCE (&self) = p;
-  return self;
-}
-
-//! @brief Push description for row vector.
-
-static PROP_T genie_row_function (NODE_T * p)
-{
-  NODE_T *q = SUB (p);
-  ADDR_T scope = PRIMAL_SCOPE;
-  PROP_T self;
-  A68_ROW row, new_row;
-  int k = 1;
-  BOOL_T name = (BOOL_T) (IS_REF (MOID (p)));
-  A68_ARRAY *arr, new_arr;
-  A68_TUPLE tup1, tup2, *tup;
-  MOID_T *m;
-  if (IS (q, TERTIARY)) {
-    A68_INT x;
-    EXECUTE_UNIT (q);
-    POP_OBJECT (p, &x, A68_INT);
-    k = VALUE (&x);
-    FORWARD (q);
-  }
-  EXECUTE_UNIT (NEXT (q));
-  m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
-  if (name) {
-    A68_REF z;
-    POP_REF (p, &z);
-    CHECK_REF (p, z, MOID (SUB (p)));
-    scope = REF_SCOPE (&z);
-    PUSH_REF (p, *DEREF (A68_REF, &z));
-  }
-  POP_OBJECT (p, &row, A68_ROW);
-  GET_DESCRIPTOR (arr, tup, &row);
-  if (DIM (arr) != 1) {
-    diagnostic (A68_RUNTIME_ERROR, p, ERROR_NO_VECTOR, m, PRIMARY);
-    exit_genie (p, A68_RUNTIME_ERROR);
-  }
-  m = (name ? SUB_MOID (p) : MOID (p));
-  new_row = heap_generator (p, m, DESCRIPTOR_SIZE (2));
-  DIM (&new_arr) = 2;
-  MOID (&new_arr) = m;
-  ELEM_SIZE (&new_arr) = ELEM_SIZE (arr);
-  SLICE_OFFSET (&new_arr) = SLICE_OFFSET (arr);
-  FIELD_OFFSET (&new_arr) = FIELD_OFFSET (arr);
-  ARRAY (&new_arr) = ARRAY (arr);
-  LWB (&tup1) = k;
-  UPB (&tup1) = k;
-  SPAN (&tup1) = 1;
-  SHIFT (&tup1) = k * SPAN (&tup1);
-  K (&tup1) = 0;
-  LWB (&tup2) = 1;
-  UPB (&tup2) = ROW_SIZE (tup);
-  SPAN (&tup2) = SPAN (tup);
-  SHIFT (&tup2) = SPAN (tup);
-  K (&tup2) = 0;
-  PUT_DESCRIPTOR2 (new_arr, tup1, tup2, &new_row);
-  if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), A68_REF_SIZE);
-    *DEREF (A68_REF, &ref_new) = new_row;
-    REF_SCOPE (&ref_new) = scope;
-    PUSH_REF (p, ref_new);
-  } else {
-    PUSH_OBJECT (p, new_row, A68_ROW);
-  }
-  UNIT (&self) = genie_row_function;
-  SOURCE (&self) = p;
-  return self;
-}
-
-//! @brief Push description for column vector.
-
-static PROP_T genie_column_function (NODE_T * p)
-{
-  NODE_T *q = SUB (p);
-  ADDR_T scope = PRIMAL_SCOPE;
-  PROP_T self;
-  A68_ROW row, new_row;
-  int k = 1;
-  BOOL_T name = (BOOL_T) (IS_REF (MOID (p)));
-  A68_ARRAY *arr, new_arr;
-  A68_TUPLE tup1, tup2, *tup;
-  MOID_T *m;
-  if (IS (q, TERTIARY)) {
-    A68_INT x;
-    EXECUTE_UNIT (q);
-    POP_OBJECT (p, &x, A68_INT);
-    k = VALUE (&x);
-    FORWARD (q);
-  }
-  EXECUTE_UNIT (NEXT (q));
-  m = (name ? SUB_MOID (NEXT (q)) : MOID (NEXT (q)));
-  if (name) {
-    A68_REF z;
-    POP_REF (p, &z);
-    CHECK_REF (p, z, MOID (SUB (p)));
-    scope = REF_SCOPE (&z);
-    PUSH_REF (p, *DEREF (A68_REF, &z));
-  }
-  POP_OBJECT (p, &row, A68_ROW);
-  GET_DESCRIPTOR (arr, tup, &row);
-  m = (name ? SUB_MOID (p) : MOID (p));
-  new_row = heap_generator (p, m, DESCRIPTOR_SIZE (2));
-  DIM (&new_arr) = 2;
-  MOID (&new_arr) = m;
-  ELEM_SIZE (&new_arr) = ELEM_SIZE (arr);
-  SLICE_OFFSET (&new_arr) = SLICE_OFFSET (arr);
-  FIELD_OFFSET (&new_arr) = FIELD_OFFSET (arr);
-  ARRAY (&new_arr) = ARRAY (arr);
-  LWB (&tup1) = 1;
-  UPB (&tup1) = ROW_SIZE (tup);
-  SPAN (&tup1) = SPAN (tup);
-  SHIFT (&tup1) = SPAN (tup);
-  K (&tup1) = 0;
-  LWB (&tup2) = k;
-  UPB (&tup2) = k;
-  SPAN (&tup2) = 1;
-  SHIFT (&tup2) = k * SPAN (&tup2);
-  K (&tup2) = 0;
-  PUT_DESCRIPTOR2 (new_arr, tup1, tup2, &new_row);
-  if (name) {
-    A68_REF ref_new = heap_generator (p, MOID (p), A68_REF_SIZE);
-    *DEREF (A68_REF, &ref_new) = new_row;
-    REF_SCOPE (&ref_new) = scope;
-    PUSH_REF (p, ref_new);
-  } else {
-    PUSH_OBJECT (p, new_row, A68_ROW);
-  }
-  UNIT (&self) = genie_column_function;
-  SOURCE (&self) = p;
-  return self;
 }
 
 //! @brief Strcmp for qsort.

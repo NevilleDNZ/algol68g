@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.0.7, configure.ac
+# Algol 68 Genie 3.0.8, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.0.7], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.0.8], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 # Check whether compiler supports $1 as a command-line option. 
@@ -322,8 +322,8 @@ if test "x$GCC" != "xyes"; then
 else
   AC_DEFINE(HAVE_GCC, 1, [Define this if GCC was detected]) 
   AC_DEFINE_UNQUOTED(C_COMPILER, "$CC", [Name of C compiler detected])
-# On rhel8 "rpmbuild" sneaks in -pie and -fPIE, so a68g also needs to pass through
-# On Suse15 the header files for pgsql and R have their own pet directories, a trend?
+# On rhel8 "rpmbuild" sneaks in -pie and -fPIE, so a68g also needs to pass through.
+# On Suse15 the header files for pgsql and R have their own directories.
   COPTFLAGS="-g -O2 -Wall -I /usr/include/pgsql -I /usr/lib64/R/include"
   LDOPTFLAG="-L /usr/lib64/R/lib"
 # from /usr/lib/rpm/redhat/macros
