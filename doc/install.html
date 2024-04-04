@@ -1,0 +1,438 @@
+<html>
+<head>
+<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
+<style type="text/css">
+a:link    {color: navy; text-decoration: underline;}
+a:visited {color: navy; text-decoration: underline;}
+a:active  {color: navy; text-decoration: underline;}
+p {font-size: 10pt; font-family: Arial,Helvetica;}
+u {font-size: 10pt; font-family: Arial,Helvetica;}
+dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
+h2 {font-size: 14pt; font-family: Arial,Helvetica;}
+h3 {font-size: 12pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 8pt; font-family: Arial,Helvetica;}
+ul {font-size: 10pt; font-family: Arial,Helvetica;}
+body {font-size: 10pt; font-family: Arial,Helvetica;}
+code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
+</style>
+</head>
+
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<h2>Installing Algol 68 Genie</h2>
+</td>
+<td width="30%" bgcolor="white" valign=top align=center>
+<img src="logo.gif">
+</td>
+<td width="5%" valign=top bgcolor="white">
+</td>
+<td width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td bgcolor="skyblue">
+&nbsp;&nbsp;<b>Manual</b>
+</td>
+</tr>
+<tr>
+<td bgcolor="powderblue">
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+</td>
+</tr>
+</table>
+
+<!-- End navigation bar -->
+</td>
+</table>
+
+<h3>Algol 68 Genie Mark 8</h3>
+<p>
+Algol 68 Genie (Algol68G) is free software distributed under GNU GPL. This software is 
+distributed in the hope that it will be useful, but without any warranty. 
+The author of this software does not accept responsibility to anyone for the 
+consequences of using it or for whether it serves any particular purpose or 
+works at all. 
+Consult the <a href="http://www.gnu.org/licenses/gpl.html">GNU General Public License</a> for details.
+
+<h3>Installing Algol68G</h3>
+
+<p>
+This page describes how to install Algol68G on GNU/Linux. The procedure 
+should work equally well on related operating systems as Unix, FreeBSD or 
+MacOS X.
+<p>
+Although Algol68G also runs on other platforms (for example Microsoft Windows, 
+MacOS 7 or MacOS 8), installation on such platforms is not described here. 
+A <a href="introduction.html#obtaining">precompiled Win32 application</a> for 
+Microsoft Windows is available from this site.
+
+<h3>Optional libraries</h3>
+
+<p>
+If available on your system, Algol68G can use next libraries to extend its functionality:
+<ul>
+<li>GNU plotutils (version 2.4.0 or compatible) for graphics routines.
+<li>GNU scientific library (version 1.6 or compatible) for extensions of the standard prelude.  
+<li>POSIX threads to implement the parallel clause. You need to specify when configuring that you wish to use POSIX threads - see instructions below.
+<li>Curses library.
+<li>Support for HTTP.
+<li>Support for regular expressions.
+</ul>
+
+<p>
+The <i>configure</i> script checks <i>/usr/lib</i>, <i>/usr/local/lib</i>, 
+<i>/usr/include</i> and <i>/usr/local/include</i> for shared 
+libraries and necessary includes. If necessary files are not detected then 
+Algol68G builds without support for absent libraries.
+
+<h3>Generic installation</h3>
+
+<p>
+For a generic installation, follow next instructions.
+For customised installation, refer to the INSTALL file in the distribution.
+<p>
+Suppose you are user <i>marcel</i> at your GNU/Linux machine, and your prompt indicates your present working directory in this way:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel> 
+</tt>
+</font>
+</td>
+</table>
+
+<h4>Step 1: Unpacking the distribution</h4>
+<p>
+<li>Unpack the distribution by typing:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel> tar -xzf algol68g-mk8.tar.gz
+</tt>
+</font>
+</td>
+</table>
+
+<h4>Step 2: Configuring</h4>
+<p>
+<li>Make the distribution directory the present working directory by typing:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel> cd algol68g-mk8
+</tt>
+</font>
+</td>
+</table>
+<p>
+<li>In the distribution directory type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> ./configure
+</tt>
+</font>
+</td>
+</table>
+<p>
+This will generate a makefile. 
+<p>
+The configure script accepts various
+options. For an overview of options, type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> ./configure --help
+</tt>
+</font>
+</td>
+</table>
+<p>
+Note that various options for optimisation, debugging and profiling
+assume you are using <i>gcc</i>, <i>gdb</i> and <i>gprof</i>.
+<p> 
+If you are interested in Algol68G's parallel clause, you need to 
+build using POSIX threads. To build with POSIX threads, type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> ./configure --threads
+</tt>
+</font>
+</td>
+</table>
+<p>
+Below is typical output from the configuring script:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+/home/marcel/algol68g-mk8>  ./configure --threads
+configuring algol68g-mk8
+platform:  linux algol68g 2.2.26M64 #9 Sun Jul 18 13:55:33 GMT 2004 ppc powerpc
+checking C compiler in /usr/bin: found gcc
+include directory: /usr/local/include
+library directory: /usr/local/lib
+target binary directory: /usr/local/bin
+marcel cannot write to /usr/local/bin, set to /home/marcel/algol68g-mk8
+target man directory: /usr/local/man/man1
+marcel cannot write to /usr/local/man/man1, set to /home/marcel/algol68g-mk8
+generated makefile
+not using POSIX threads; parallel clause will be disabled (specify --threads)
+checking GNU plotutils in /usr/local/lib and /usr/local/include: found
+checking GNU scientific library in /usr/local/lib: found
+checking curses in /usr/lib: found
+checking HTTP support in /usr/include: found
+checking regular expression support in /usr/include: found
+checking IEEE 754 floating point compatibility using system information: compatible
+generated ./source/makefile
+generated ./regression-mk8/regression
+/home/marcel/algol68g-mk8>
+</pre>
+</font>
+</td>
+</table>
+
+<h4>Step 3: Building</h4>
+<p>
+The standard makefile will turn warnings off in case <i>gcc</i> is used.
+If you do not use <i>gcc</i>, or make <i>gcc</i> issue warnings, it is possible 
+that your C compiler will issue spurious warnings 
+suggesting that some variables might be clobbered by <i>longjmp</i> or
+<i>vfork</i>. For some reason data path analysis in such compiler cannot 
+see that the code is safe since these variables are declared <i>volatile</i>.
+There is no risk of clobbering, and therefore such warning messages 
+can be safely ignored.
+<p>
+<li>Type :
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make depend
+</tt>
+</font>
+</td>
+</table>
+<p>
+This will register dependencies needed to build Algol68G.
+
+<p>
+<li>If you do not want to install Algol68G for all users, type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make all
+</tt>
+</font>
+</td>
+</table>
+<p>
+or, simply:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make
+</tt>
+</font>
+</td>
+</table>
+<p>
+The executable <i>a68g</i> will be put in the present working directory.
+<p>
+If you want to install Algol68G for all users on your system, type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make install
+</tt>
+</font>
+</td>
+</table>
+<p>
+to make available the executable and a manual page.
+Targets for those files are <i>/usr/local/bin</i> and <i>/usr/local/man</i>. 
+If latter directory does not exist, <i>/usr/share/man</i> and then <i>/usr/man</i> 
+are tried.
+<p>
+Building generates a lot of output. A typical build will generate output like this:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+/home/marcel/algol68g-mk8> make
+cd ./source; make CPP_FLAGS="" CFLAGS="" LD_FLAGS=""; mv a68g ..; cd ..
+make[1]: Entering directory `/home/marcel/algol68g-mk8/source'
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  algol68g.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  coercion.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  complex.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  diagnostics.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  engine.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  extensions.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  garbage.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  genie.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  gsl.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  http.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  io.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  listing.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  moids.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  monitor.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  mp.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  names.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  options.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  parallel.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  parser.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  plotutils.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  prelude.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  scanner.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  scope.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  signal.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  standard.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  stowed.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  support.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  taxes.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  transput.c
+gcc -c -I/usr/local/include -O2 -DHAVE_POSIX_THREADS -DHAVE_PLOTUTILS -DHAVE_GSL -DHAVE_CURSES -DHAVE_UNIX -DHAVE_IEEE_754 -DHAVE_HTTP -DHAVE_REGEX  vector.c
+gcc algol68g.o coercion.o complex.o diagnostics.o engine.o extensions.o garbage.o genie.o gsl.o http.o io.o listing.o moids.o monitor.o mp.o names.o options.o parallel.o parser.o plotutils.o prelude.o scanner.o scope.o signal.o standard.o stowed.o support.o taxes.o transput.o vector.o  -L/usr/local/lib -lpthread -L/usr/X11R6/lib -lXaw -lXmu -lXt -lSM -lICE -lXext -lX11 -lplot -lgsl -lgslcblas -lncurses -lm  -o a68g
+make[1]: Leaving directory `/home/marcel/algol68g-mk8/source'
+/home/marcel/algol68g-mk8>
+</pre>
+</font>
+</td>
+</table>
+
+<p>
+<li>Installation can be undone by typing:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make uninstall
+</tt>
+</font>
+</td>
+</table>
+
+<p>
+<li>Note that in you can supply <i>CPPFLAGS</i>, <i>CFLAGS</i> and <i>LDFLAGS</i> to <i>make</i>; 
+for instance type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make CFLAGS="-O"
+</tt>
+</font>
+</td>
+</table>
+<p>
+to optimise the code.
+
+<p>
+<li>To remove binaries used for building, type: 
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make clean
+</tt>
+</font>
+</td>
+</table>
+<p>
+To remove all files used for building, type:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+/home/marcel/algol68g-mk8> make distclean
+</tt>
+</font>
+</td>
+</table>
+
+<h4>Step 4: Starting Algol 68 Genie</h4>
+<p>
+When you install <i>a68g</i> in the current directory, you may want to include the current directory in your <i>PATH</i> variable. Otherwise you will need to
+indicate the current directory by typing <i>./a68g</i> as in the following example:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+/home/marcel/algol68g-mk8> ./a68g --version
+a68g: Mark 8, released July 2005
+a68g: compiled on July 1 2005 18:08:52 with gcc 2.95.2
+a68g: gnu plotutils version 4.0
+a68g: gnu scientific library version 1.6
+/home/marcel/algol68g-mk8>
+</pre>
+</font>
+</td>
+</table>
+</p>
+
+<p>
+<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<font color="black">
+<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
+</font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+<small>Documentation for Algol 68 Genie Mark 8</small>
+</font>
+</td>
+</table>
+</p>
+
+</body>
+</html>

@@ -1,19 +1,26 @@
-/*-------1---------2---------3---------4---------5---------6---------7---------+
+/*!
+\file prelude.c
+\brief builds symbol table for standard prelude
+*/
+
+/*
 This file is part of Algol68G - an Algol 68 interpreter.
-Copyright (C) 2001-2004 J. Marcel van der Veer <algol68g@xs4all.nl>.
+Copyright (C) 2001-2005 J. Marcel van der Veer <algol68g@xs4all.nl>.
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later
 version.
 
-This program is distributed in the hope that it will be useful,but WITHOUT ANY 
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
 WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
-this program; if not, write to the Free Software Foundation, Inc., 
-59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.                      */
+this program; if not, write to the Free Software Foundation, Inc.,
+59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+
 
 #include "algol68g.h"
 #include "genie.h"
@@ -30,13 +37,19 @@ MOID_T *proc_bool;
 MOID_T *proc_char;
 MOID_T *proc_void;
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-add_stand_env: enter tag in standenv symbol table.                            */
-
 #define INSERT_TAG(l, n) {NEXT (n) = *(l); *(l) = (n);}
 
-static void
-add_stand_env (int a, NODE_T * n, char *c, MOID_T * m, int p, GENIE_PROCEDURE * q)
+/*!
+\brief enter tag in standenv symbol table
+\param a
+\param n
+\param c
+\param m
+\param p
+\param q
+**/
+
+static void add_stand_env (int a, NODE_T * n, char *c, MOID_T * m, int p, GENIE_PROCEDURE * q)
 {
   TAG_T *new_one = new_tag ();
   n->info->PROCEDURE_LEVEL = 0;
@@ -53,116 +66,116 @@ add_stand_env (int a, NODE_T * n, char *c, MOID_T * m, int p, GENIE_PROCEDURE * 
   MOID (new_one) = m;
   NEXT (new_one) = NULL;
   ACCESS (new_one) = PRIVATE_SYMBOL;
-  if (a == IDENTIFIER)
-    {
-      INSERT_TAG (&stand_env->identifiers, new_one);
-    }
-  else if (a == OP_SYMBOL)
-    {
-      INSERT_TAG (&stand_env->operators, new_one);
-    }
-  else if (a == PRIO_SYMBOL)
-    {
-      INSERT_TAG (&PRIO (stand_env), new_one);
-    }
-  else if (a == INDICANT)
-    {
-      INSERT_TAG (&stand_env->indicants, new_one);
-    }
-  else if (a == LABEL)
-    {
-      INSERT_TAG (&stand_env->labels, new_one);
-    }
+  if (a == IDENTIFIER) {
+    INSERT_TAG (&stand_env->identifiers, new_one);
+  } else if (a == OP_SYMBOL) {
+    INSERT_TAG (&stand_env->operators, new_one);
+  } else if (a == PRIO_SYMBOL) {
+    INSERT_TAG (&PRIO (stand_env), new_one);
+  } else if (a == INDICANT) {
+    INSERT_TAG (&stand_env->indicants, new_one);
+  } else if (a == LABEL) {
+    INSERT_TAG (&stand_env->labels, new_one);
+  }
 }
 
 #undef INSERT_TAG
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-a68_proc: compose PROC moid from arguments - first result, than arguments.   */
+/*!
+\brief compose PROC moid from arguments - first result, than arguments
+\param m
+\return
+**/
 
-static MOID_T *
-a68_proc (MOID_T * m, ...)
+static MOID_T *a68_proc (MOID_T * m, ...)
 {
   MOID_T *y, **z = &(stand_env->moids);
   PACK_T *p = NULL, *q = NULL;
   va_list attribute;
   va_start (attribute, m);
-  while ((y = va_arg (attribute, MOID_T *)) != NULL)
-    {
-      PACK_T *new_one = new_pack ();
-      MOID (new_one) = y;
-      new_one->text = NULL;
-      NEXT (new_one) = NULL;
-      if (q != NULL)
-	{
-	  NEXT (q) = new_one;
-	}
-      else
-	{
-	  p = new_one;
-	}
-      q = new_one;
+  while ((y = va_arg (attribute, MOID_T *)) != NULL) {
+    PACK_T *new_one = new_pack ();
+    MOID (new_one) = y;
+    new_one->text = NULL;
+    NEXT (new_one) = NULL;
+    if (q != NULL) {
+      NEXT (q) = new_one;
+    } else {
+      p = new_one;
     }
+    q = new_one;
+  }
   va_end (attribute);
   add_mode (z, PROC_SYMBOL, count_pack_members (p), NULL, m, p);
   return (*z);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-a68_idf: enter an identifier in standenv.                                */
+/*!
+\brief enter an identifier in standenv
+\param n
+\param m
+\param q
+**/
 
-static void
-a68_idf (char *n, MOID_T * m, GENIE_PROCEDURE * q)
+static void a68_idf (char *n, MOID_T * m, GENIE_PROCEDURE * q)
 {
   add_stand_env (IDENTIFIER, some_node (TEXT (add_token (&top_token, n))), NULL, m, 0, q);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-a68_mode: enter a MOID in standenv.                                      */
+/*!
+\brief enter a MOID in standenv
+\param p
+\param t
+\param m
+**/
 
-static void
-a68_mode (int p, char *t, MOID_T ** m)
+static void a68_mode (int p, char *t, MOID_T ** m)
 {
   add_mode (&stand_env->moids, STANDARD, p, some_node (TEXT (find_keyword (top_keyword, t))), NULL, NULL);
   *m = stand_env->moids;
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-a68_prio: enter a priority in standenv.                                  */
+/*!
+\brief enter a priority in standenv
+\param p
+\param b
+**/
 
-static void
-a68_prio (char *p, int b)
+static void a68_prio (char *p, int b)
 {
   add_stand_env (PRIO_SYMBOL, some_node (TEXT (add_token (&top_token, p))), NULL, NULL, b, NULL);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-a68_op: enter operator in standenv.                                      */
+/*!
+\brief enter operator in standenv
+\param n
+\param m
+\param q
+**/
 
-static void
-a68_op (char *n, MOID_T * m, GENIE_PROCEDURE * q)
+static void a68_op (char *n, MOID_T * m, GENIE_PROCEDURE * q)
 {
   add_stand_env (OP_SYMBOL, some_node (TEXT (add_token (&top_token, n))), NULL, m, 0, q);
 }
 
-/*-------1---------2---------3---------4---------5---------6---------7---------+
-make_standard_environ: build the standard environ symbol table.               */
+/*!
+\brief build the standard environ symbol table
+**/
 
-void
-make_standard_environ (void)
+void make_standard_environ (void)
 {
   MOID_T *m;
   PACK_T *z;
-/* Primitive A68 moids */
+/* Primitive A68 moids. */
   a68_mode (0, "VOID", &MODE (VOID));
-/* Standard precision */
+/* Standard precision. */
   a68_mode (0, "INT", &MODE (INT));
   a68_mode (0, "REAL", &MODE (REAL));
   a68_mode (0, "COMPLEX", &MODE (COMPLEX));
   a68_mode (0, "COMPL", &MODE (COMPL));
   a68_mode (0, "BITS", &MODE (BITS));
   a68_mode (0, "BYTES", &MODE (BYTES));
-/* Multiple precision */
+/* Multiple precision. */
   a68_mode (1, "INT", &MODE (LONG_INT));
   a68_mode (1, "REAL", &MODE (LONG_REAL));
   a68_mode (1, "COMPLEX", &MODE (LONG_COMPLEX));
@@ -174,7 +187,7 @@ make_standard_environ (void)
   a68_mode (2, "COMPLEX", &MODE (LONGLONG_COMPLEX));
   a68_mode (2, "COMPL", &MODE (LONGLONG_COMPL));
   a68_mode (2, "BITS", &MODE (LONGLONG_BITS));
-/* Other */
+/* Other. */
   a68_mode (0, "BOOL", &MODE (BOOL));
   a68_mode (0, "CHAR", &MODE (CHAR));
   a68_mode (0, "STRING", &MODE (STRING));
@@ -182,10 +195,11 @@ make_standard_environ (void)
   a68_mode (0, "CHANNEL", &MODE (CHANNEL));
   a68_mode (0, "PIPE", &MODE (PIPE));
   a68_mode (0, "FORMAT", &MODE (FORMAT));
-/* ROWS */
+  a68_mode (0, "SEMA", &MODE (SEMA));
+/* ROWS. */
   add_mode (&stand_env->moids, ROWS_SYMBOL, 0, NULL, NULL, NULL);
   MODE (ROWS) = stand_env->moids;
-/* REFs */
+/* REFs. */
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (INT), NULL);
   MODE (REF_INT) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (REAL), NULL);
@@ -200,7 +214,7 @@ make_standard_environ (void)
   MODE (REF_FORMAT) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (PIPE), NULL);
   MODE (REF_PIPE) = stand_env->moids;
-/* Multiple precision */
+/* Multiple precision. */
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (LONG_INT), NULL);
   MODE (REF_LONG_INT) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (LONG_REAL), NULL);
@@ -219,7 +233,7 @@ make_standard_environ (void)
   MODE (REF_LONGLONG_BITS) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (LONG_BYTES), NULL);
   MODE (REF_LONG_BYTES) = stand_env->moids;
-/* Other */
+/* Other. */
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (BOOL), NULL);
   MODE (REF_BOOL) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (CHAR), NULL);
@@ -228,7 +242,7 @@ make_standard_environ (void)
   MODE (REF_FILE) = stand_env->moids;
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (REF_FILE), NULL);
   MODE (REF_REF_FILE) = stand_env->moids;
-/* [] REAL and alikes */
+/* [] REAL and alikes. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (REAL), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_REAL) = stand_env->moids;
@@ -243,72 +257,72 @@ make_standard_environ (void)
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROWROW_REAL), NULL);
   MODE (REF_ROWROW_REAL) = stand_env->moids;
   NAME (MODE (REF_ROWROW_REAL)) = MODE (REF_ROW_REAL);
-/* [] INT */
+/* [] INT. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (INT), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_INT) = stand_env->moids;
   SLICE (MODE (ROW_INT)) = MODE (INT);
-/* [] BOOL */
+/* [] BOOL. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (BOOL), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_BOOL) = stand_env->moids;
   SLICE (MODE (ROW_BOOL)) = MODE (BOOL);
-/* [] BITS */
+/* [] BITS. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (BITS), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_BITS) = stand_env->moids;
   SLICE (MODE (ROW_BITS)) = MODE (BITS);
-/* [] LONG BITS */
+/* [] LONG BITS. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (LONG_BITS), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_LONG_BITS) = stand_env->moids;
   SLICE (MODE (ROW_LONG_BITS)) = MODE (LONG_BITS);
-/* [] LONG LONG BITS */
+/* [] LONG LONG BITS. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (LONGLONG_BITS), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_LONGLONG_BITS) = stand_env->moids;
   SLICE (MODE (ROW_LONGLONG_BITS)) = MODE (LONGLONG_BITS);
-/* [] CHAR */
+/* [] CHAR. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (CHAR), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_CHAR) = stand_env->moids;
   SLICE (MODE (ROW_CHAR)) = MODE (CHAR);
-/* [][] CHAR */
+/* [][] CHAR. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (ROW_CHAR), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_ROW_CHAR) = stand_env->moids;
   SLICE (MODE (ROW_ROW_CHAR)) = MODE (ROW_CHAR);
-/* MODE STRING = FLEX [] CHAR */
+/* MODE STRING = FLEX [] CHAR. */
   add_mode (&stand_env->moids, FLEX_SYMBOL, 0, NULL, MODE (ROW_CHAR), NULL);
   stand_env->moids->has_rows = A_TRUE;
   stand_env->moids->deflexed_mode = MODE (ROW_CHAR);
   stand_env->moids->trim = MODE (ROW_CHAR);
   EQUIVALENT (MODE (STRING)) = stand_env->moids;
   DEFLEXED (MODE (STRING)) = MODE (ROW_CHAR);
-/* REF [] CHAR */
+/* REF [] CHAR. */
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, MODE (ROW_CHAR), NULL);
   MODE (REF_ROW_CHAR) = stand_env->moids;
   NAME (MODE (REF_ROW_CHAR)) = MODE (REF_CHAR);
-/* PROC [] CHAR */
+/* PROC [] CHAR. */
   add_mode (&stand_env->moids, PROC_SYMBOL, 0, NULL, MODE (ROW_CHAR), NULL);
   MODE (PROC_ROW_CHAR) = stand_env->moids;
-/* REF STRING = REF FLEX [] CHAR */
+/* REF STRING = REF FLEX [] CHAR. */
   add_mode (&stand_env->moids, REF_SYMBOL, 0, NULL, EQUIVALENT (MODE (STRING)), NULL);
   MODE (REF_STRING) = stand_env->moids;
   NAME (MODE (REF_STRING)) = MODE (REF_CHAR);
   DEFLEXED (MODE (REF_STRING)) = MODE (REF_ROW_CHAR);
   TRIM (MODE (REF_STRING)) = MODE (REF_ROW_CHAR);
-/* [] STRING */
+/* [] STRING. */
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (STRING), NULL);
   stand_env->moids->has_rows = A_TRUE;
   MODE (ROW_STRING) = stand_env->moids;
   SLICE (MODE (ROW_STRING)) = MODE (STRING);
   DEFLEXED (MODE (ROW_STRING)) = MODE (ROW_ROW_CHAR);
-/* PROC STRING */
+/* PROC STRING. */
   add_mode (&stand_env->moids, PROC_SYMBOL, 0, NULL, MODE (STRING), NULL);
   MODE (PROC_STRING) = stand_env->moids;
   DEFLEXED (MODE (PROC_STRING)) = MODE (PROC_ROW_CHAR);
-/* COMPLEX */
+/* COMPLEX. */
   z = NULL;
   add_mode_to_pack (&z, MODE (REAL), add_token (&top_token, "im")->text, NULL);
   add_mode_to_pack (&z, MODE (REAL), add_token (&top_token, "re")->text, NULL);
@@ -320,7 +334,7 @@ make_standard_environ (void)
   add_mode_to_pack (&z, MODE (REF_REAL), add_token (&top_token, "re")->text, NULL);
   add_mode (&stand_env->moids, STRUCT_SYMBOL, count_pack_members (z), NULL, NULL, z);
   NAME (MODE (REF_COMPLEX)) = NAME (MODE (REF_COMPL)) = stand_env->moids;
-/* LONG COMPLEX */
+/* LONG COMPLEX. */
   z = NULL;
   add_mode_to_pack (&z, MODE (LONG_REAL), add_token (&top_token, "im")->text, NULL);
   add_mode_to_pack (&z, MODE (LONG_REAL), add_token (&top_token, "re")->text, NULL);
@@ -332,7 +346,7 @@ make_standard_environ (void)
   add_mode_to_pack (&z, MODE (REF_LONG_REAL), add_token (&top_token, "re")->text, NULL);
   add_mode (&stand_env->moids, STRUCT_SYMBOL, count_pack_members (z), NULL, NULL, z);
   NAME (MODE (REF_LONG_COMPLEX)) = NAME (MODE (REF_LONG_COMPL)) = stand_env->moids;
-/* LONG_LONG COMPLEX */
+/* LONG_LONG COMPLEX. */
   z = NULL;
   add_mode_to_pack (&z, MODE (LONGLONG_REAL), add_token (&top_token, "im")->text, NULL);
   add_mode_to_pack (&z, MODE (LONGLONG_REAL), add_token (&top_token, "re")->text, NULL);
@@ -344,7 +358,7 @@ make_standard_environ (void)
   add_mode_to_pack (&z, MODE (REF_LONGLONG_REAL), add_token (&top_token, "re")->text, NULL);
   add_mode (&stand_env->moids, STRUCT_SYMBOL, count_pack_members (z), NULL, NULL, z);
   NAME (MODE (REF_LONGLONG_COMPLEX)) = NAME (MODE (REF_LONGLONG_COMPL)) = stand_env->moids;
-/* NUMBER */
+/* NUMBER. */
   z = NULL;
   add_mode_to_pack (&z, MODE (INT), NULL, NULL);
   add_mode_to_pack (&z, MODE (LONG_INT), NULL, NULL);
@@ -354,21 +368,27 @@ make_standard_environ (void)
   add_mode_to_pack (&z, MODE (LONGLONG_REAL), NULL, NULL);
   add_mode (&stand_env->moids, UNION_SYMBOL, count_pack_members (z), NULL, NULL, z);
   MODE (NUMBER) = stand_env->moids;
-/* PROC VOID */
+/* SEMA. */
+  z = NULL;
+  add_mode_to_pack (&z, MODE (REF_INT), NULL, NULL);
+  add_mode (&stand_env->moids, STRUCT_SYMBOL, count_pack_members (z), NULL, NULL, z);
+  EQUIVALENT (MODE (SEMA)) = stand_env->moids;
+  MODE (SEMA) = stand_env->moids;
+/* PROC VOID. */
   z = NULL;
   add_mode (&stand_env->moids, PROC_SYMBOL, count_pack_members (z), NULL, MODE (VOID), z);
   MODE (PROC_VOID) = stand_env->moids;
-/* IO: PROC (REF FILE) BOOL */
+/* IO: PROC (REF FILE) BOOL. */
   z = NULL;
   add_mode_to_pack (&z, MODE (REF_FILE), NULL, NULL);
   add_mode (&stand_env->moids, PROC_SYMBOL, count_pack_members (z), NULL, MODE (BOOL), z);
   MODE (PROC_REF_FILE_BOOL) = stand_env->moids;
-/* IO: PROC (REF FILE) VOID */
+/* IO: PROC (REF FILE) VOID. */
   z = NULL;
   add_mode_to_pack (&z, MODE (REF_FILE), NULL, NULL);
   add_mode (&stand_env->moids, PROC_SYMBOL, count_pack_members (z), NULL, MODE (VOID), z);
   MODE (PROC_REF_FILE_VOID) = stand_env->moids;
-/* IO: SIMPLIN and SIMPLOUT */
+/* IO: SIMPLIN and SIMPLOUT. */
   add_mode (&stand_env->moids, IN_TYPE_MODE, 0, NULL, NULL, NULL);
   MODE (SIMPLIN) = stand_env->moids;
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (SIMPLIN), NULL);
@@ -379,7 +399,7 @@ make_standard_environ (void)
   add_mode (&stand_env->moids, ROW_SYMBOL, 1, NULL, MODE (SIMPLOUT), NULL);
   MODE (ROW_SIMPLOUT) = stand_env->moids;
   SLICE (MODE (ROW_SIMPLOUT)) = MODE (SIMPLOUT);
-/* PIPE */
+/* PIPE. */
   z = NULL;
   add_mode_to_pack (&z, MODE (INT), add_token (&top_token, "pid")->text, NULL);
   add_mode_to_pack (&z, MODE (REF_FILE), add_token (&top_token, "write")->text, NULL);
@@ -393,7 +413,7 @@ make_standard_environ (void)
   add_mode_to_pack (&z, MODE (REF_REF_FILE), add_token (&top_token, "read")->text, NULL);
   add_mode (&stand_env->moids, STRUCT_SYMBOL, count_pack_members (z), NULL, NULL, z);
   NAME (MODE (REF_PIPE)) = stand_env->moids;
-/* Identifiers */
+/* Identifiers. */
   a68_idf ("intlengths", MODE (INT), genie_int_lengths);
   a68_idf ("intshorts", MODE (INT), genie_int_shorts);
   a68_idf ("maxint", MODE (INT), genie_max_int);
@@ -451,23 +471,35 @@ make_standard_environ (void)
   a68_idf ("actualstacksize", MODE (INT), genie_stack_pointer);
   m = proc_void = a68_proc (MODE (VOID), NULL);
   a68_idf ("sweepheap", m, genie_sweep_heap);
+  a68_idf ("preemptivesweepheap", m, genie_preemptive_sweep_heap);
   a68_idf ("break", m, genie_break);
   m = a68_proc (MODE (INT), MODE (STRING), NULL);
   a68_idf ("system", m, genie_system);
-/* BITS procedures */
+  m = a68_proc (MODE (STRING), MODE (STRING), NULL);
+  a68_idf ("vmsacronym", m, genie_idle);
+/* BITS procedures. */
   m = a68_proc (MODE (BITS), MODE (ROW_BOOL), NULL);
   a68_idf ("bitspack", m, genie_bits_pack);
   m = a68_proc (MODE (LONG_BITS), MODE (ROW_BOOL), NULL);
   a68_idf ("longbitspack", m, genie_long_bits_pack);
   m = a68_proc (MODE (LONGLONG_BITS), MODE (ROW_BOOL), NULL);
   a68_idf ("longlongbitspack", m, genie_long_bits_pack);
-/* IO procedures */
+/* IO procedures. */
   a68_idf ("errorchar", MODE (CHAR), genie_error_char);
   a68_idf ("expchar", MODE (CHAR), genie_exp_char);
   a68_idf ("flip", MODE (CHAR), genie_flip_char);
   a68_idf ("flop", MODE (CHAR), genie_flop_char);
-  a68_idf ("nullcharacter", MODE (CHAR), genie_null_char);
+  a68_idf ("blankcharacter", MODE (CHAR), genie_blank_char);
+  a68_idf ("blankchar", MODE (CHAR), genie_blank_char);
   a68_idf ("blank", MODE (CHAR), genie_blank_char);
+  a68_idf ("nullcharacter", MODE (CHAR), genie_null_char);
+  a68_idf ("nullchar", MODE (CHAR), genie_null_char);
+  a68_idf ("newlinecharacter", MODE (CHAR), genie_newline_char);
+  a68_idf ("newlinechar", MODE (CHAR), genie_newline_char);
+  a68_idf ("formfeedcharacter", MODE (CHAR), genie_formfeed_char);
+  a68_idf ("formfeedchar", MODE (CHAR), genie_formfeed_char);
+  a68_idf ("tabcharacter", MODE (CHAR), genie_tab_char);
+  a68_idf ("tabchar", MODE (CHAR), genie_tab_char);
   m = a68_proc (MODE (STRING), MODE (NUMBER), MODE (INT), NULL);
   a68_idf ("whole", m, genie_whole);
   m = a68_proc (MODE (STRING), MODE (NUMBER), MODE (INT), MODE (INT), NULL);
@@ -487,12 +519,15 @@ make_standard_environ (void)
   a68_idf ("maketerm", m, genie_make_term);
   m = a68_proc (MODE (BOOL), MODE (CHAR), MODE (REF_INT), MODE (STRING), NULL);
   a68_idf ("charinstring", m, genie_char_in_string);
+  a68_idf ("lastcharinstring", m, genie_last_char_in_string);
+  m = a68_proc (MODE (BOOL), MODE (STRING), MODE (REF_INT), MODE (STRING), NULL);
+  a68_idf ("stringinstring", m, genie_string_in_string);
   m = a68_proc (MODE (STRING), MODE (REF_FILE), NULL);
   a68_idf ("idf", m, genie_idf);
   a68_idf ("term", m, genie_term);
   m = a68_proc (MODE (STRING), NULL);
   a68_idf ("programidf", m, genie_program_idf);
-/* Event routines */
+/* Event routines. */
   m = a68_proc (MODE (VOID), MODE (REF_FILE), MODE (PROC_REF_FILE_BOOL), NULL);
   a68_idf ("onfileend", m, genie_on_file_end);
   a68_idf ("onpageeend", m, genie_on_page_end);
@@ -504,17 +539,20 @@ make_standard_environ (void)
   a68_idf ("onvalueerror", m, genie_on_value_error);
   a68_idf ("onopenerror", m, genie_on_open_error);
   a68_idf ("ontransputerror", m, genie_on_transput_error);
-/* Enquiries on files */
+/* Enquiries on files. */
   a68_idf ("putpossible", MODE (PROC_REF_FILE_BOOL), genie_put_possible);
   a68_idf ("getpossible", MODE (PROC_REF_FILE_BOOL), genie_get_possible);
   a68_idf ("binpossible", MODE (PROC_REF_FILE_BOOL), genie_bin_possible);
   a68_idf ("setpossible", MODE (PROC_REF_FILE_BOOL), genie_set_possible);
   a68_idf ("resetpossible", MODE (PROC_REF_FILE_BOOL), genie_reset_possible);
   a68_idf ("drawpossible", MODE (PROC_REF_FILE_BOOL), genie_draw_possible);
-/* Handling of files */
+  a68_idf ("compressible", MODE (PROC_REF_FILE_BOOL), genie_compressible);
+/* Handling of files. */
   m = a68_proc (MODE (INT), MODE (REF_FILE), MODE (STRING), MODE (CHANNEL), NULL);
   a68_idf ("open", m, genie_open);
   a68_idf ("establish", m, genie_establish);
+  m = a68_proc (MODE (VOID), MODE (REF_FILE), MODE (REF_STRING), NULL);
+  a68_idf ("associate", m, genie_associate);
   m = a68_proc (MODE (INT), MODE (REF_FILE), MODE (CHANNEL), NULL);
   a68_idf ("create", m, genie_create);
   a68_idf ("close", MODE (PROC_REF_FILE_VOID), genie_close);
@@ -545,7 +583,7 @@ make_standard_environ (void)
   a68_idf ("putbin", m, genie_write_bin_file);
   a68_idf ("printbin", m, genie_write_bin_file);
   a68_idf ("writebin", m, genie_write_bin_file);
-/* ALGOL68C type procs */
+/* ALGOL68C type procs. */
   m = proc_int;
   a68_idf ("readint", m, genie_read_int);
   m = a68_proc (MODE (VOID), MODE (INT), NULL);
@@ -608,14 +646,6 @@ make_standard_environ (void)
   a68_idf ("printlongbits", m, genie_print_long_bits);
   m = a68_proc (MODE (VOID), MODE (LONGLONG_BITS), NULL);
   a68_idf ("printlonglongbits", m, genie_print_longlong_bits);
-  m = a68_proc (MODE (BYTES), NULL);
-  a68_idf ("readbytes", m, genie_read_bytes);
-  m = a68_proc (MODE (LONG_BYTES), NULL);
-  a68_idf ("readlongbytes", m, genie_read_long_bytes);
-  m = a68_proc (MODE (VOID), MODE (BYTES), NULL);
-  a68_idf ("printbytes", m, genie_print_bytes);
-  m = a68_proc (MODE (VOID), MODE (LONG_BYTES), NULL);
-  a68_idf ("printlongbytes", m, genie_print_long_bytes);
   m = proc_char = a68_proc (MODE (CHAR), NULL);
   a68_idf ("readchar", m, genie_read_char);
   m = a68_proc (MODE (VOID), MODE (CHAR), NULL);
@@ -624,7 +654,7 @@ make_standard_environ (void)
   m = a68_proc (MODE (VOID), MODE (STRING), NULL);
   a68_idf ("printstring", m, genie_print_string);
 #ifdef HAVE_PLOTUTILS
-/* Drawing */
+/* Drawing. */
   m = a68_proc (MODE (BOOL), MODE (REF_FILE), MODE (STRING), MODE (STRING), NULL);
   a68_idf ("drawdevice", m, genie_make_device);
   a68_idf ("makedevice", m, genie_make_device);
@@ -669,7 +699,7 @@ make_standard_environ (void)
   a68_idf ("drawbackgroundcolorname", m, genie_draw_background_colour_name);
   a68_idf ("drawbackgroundcolourname", m, genie_draw_background_colour_name);
 #endif
-/* RNG procedures */
+/* RNG procedures. */
   m = a68_proc (MODE (VOID), MODE (INT), NULL);
   a68_idf ("firstrandom", m, genie_first_random);
   m = proc_real;
@@ -681,7 +711,7 @@ make_standard_environ (void)
   m = a68_proc (MODE (LONGLONG_REAL), NULL);
   a68_idf ("longlongnextrandom", m, genie_long_next_random);
   a68_idf ("longlongrandom", m, genie_long_next_random);
-/* Priorities */
+/* Priorities. */
   a68_prio ("+:=", 1);
   a68_prio ("-:=", 1);
   a68_prio ("*:=", 1);
@@ -729,11 +759,12 @@ make_standard_environ (void)
   a68_prio ("UP", 8);
   a68_prio ("DOWN", 8);
   a68_prio ("^", 8);
+  a68_prio ("ELEMS", 8);
   a68_prio ("LWB", 8);
   a68_prio ("UPB", 8);
   a68_prio ("I", 9);
   a68_prio ("+*", 9);
-/* INT ops */
+/* INT ops. */
   m = a68_proc (MODE (INT), MODE (INT), NULL);
   a68_op ("+", m, genie_idle);
   a68_op ("-", m, genie_minus_int);
@@ -780,7 +811,7 @@ make_standard_environ (void)
   a68_op ("TIMESAB", m, genie_timesab_int);
   a68_op ("OVERAB", m, genie_overab_int);
   a68_op ("MODAB", m, genie_modab_int);
-/* REAL ops */
+/* REAL ops. */
   m = proc_real_real = a68_proc (MODE (REAL), MODE (REAL), NULL);
   a68_op ("+", m, genie_idle);
   a68_op ("-", m, genie_minus_real);
@@ -842,9 +873,20 @@ make_standard_environ (void)
   a68_idf ("arcsin", m, genie_arcsin_real);
   a68_idf ("arccos", m, genie_arccos_real);
   a68_idf ("arctan", m, genie_arctan_real);
+  a68_idf ("sinh", m, genie_sinh_real);
+  a68_idf ("cosh", m, genie_cosh_real);
+  a68_idf ("tanh", m, genie_tanh_real);
+  a68_idf ("asinh", m, genie_arcsinh_real);
+  a68_idf ("acosh", m, genie_arccosh_real);
+  a68_idf ("atanh", m, genie_arctanh_real);
+  a68_idf ("arcsinh", m, genie_arcsinh_real);
+  a68_idf ("arccosh", m, genie_arccosh_real);
+  a68_idf ("arctanh", m, genie_arctanh_real);
+  a68_idf ("inverseerf", m, genie_inverf_real);
+  a68_idf ("inverseerfc", m, genie_inverfc_real);
   m = proc_real_real_real;
   a68_idf ("arctan2", m, genie_atan2_real);
-/* COMPLEX ops */
+/* COMPLEX ops. */
   m = a68_proc (MODE (COMPLEX), MODE (REAL), MODE (REAL), NULL);
   a68_op ("I", m, genie_icomplex);
   a68_op ("+*", m, genie_icomplex);
@@ -885,7 +927,7 @@ make_standard_environ (void)
   a68_op ("MINUSAB", m, genie_minusab_complex);
   a68_op ("TIMESAB", m, genie_timesab_complex);
   a68_op ("DIVAB", m, genie_divab_complex);
-/* BOOL ops */
+/* BOOL ops. */
   m = a68_proc (MODE (BOOL), MODE (BOOL), NULL);
   a68_op ("NOT", m, genie_not_bool);
   a68_op ("~", m, genie_not_bool);
@@ -902,7 +944,7 @@ make_standard_environ (void)
   a68_op ("^=", m, genie_ne_bool);
   a68_op ("EQ", m, genie_eq_bool);
   a68_op ("NE", m, genie_ne_bool);
-/* CHAR ops */
+/* CHAR ops. */
   m = a68_proc (MODE (BOOL), MODE (CHAR), MODE (CHAR), NULL);
   a68_op ("=", m, genie_eq_char);
   a68_op ("/=", m, genie_ne_char);
@@ -922,7 +964,7 @@ make_standard_environ (void)
   a68_op ("ABS", m, genie_abs_char);
   m = a68_proc (MODE (CHAR), MODE (INT), NULL);
   a68_op ("REPR", m, genie_repr_char);
-/* BITS ops */
+/* BITS ops. */
   m = a68_proc (MODE (INT), MODE (BITS), NULL);
   a68_op ("ABS", m, genie_idle);
   m = a68_proc (MODE (BITS), MODE (INT), NULL);
@@ -957,7 +999,7 @@ make_standard_environ (void)
   a68_op ("DOWN", m, genie_shr_bits);
   m = a68_proc (MODE (BOOL), MODE (INT), MODE (BITS), NULL);
   a68_op ("ELEM", m, genie_elem_bits);
-/* LONG BITS ops */
+/* LONG BITS ops. */
   m = a68_proc (MODE (LONG_INT), MODE (LONG_BITS), NULL);
   a68_op ("ABS", m, genie_idle);
   m = a68_proc (MODE (LONG_BITS), MODE (LONG_INT), NULL);
@@ -997,7 +1039,7 @@ make_standard_environ (void)
   a68_op ("DOWN", m, genie_shr_long_mp);
   m = a68_proc (MODE (BOOL), MODE (INT), MODE (LONG_BITS), NULL);
   a68_op ("ELEM", m, genie_elem_long_bits);
-/* LONG LONG BITS */
+/* LONG LONG BITS. */
   m = a68_proc (MODE (LONGLONG_INT), MODE (LONGLONG_BITS), NULL);
   a68_op ("ABS", m, genie_idle);
   m = a68_proc (MODE (LONGLONG_BITS), MODE (LONGLONG_INT), NULL);
@@ -1033,7 +1075,7 @@ make_standard_environ (void)
   a68_op ("DOWN", m, genie_shr_long_mp);
   m = a68_proc (MODE (BOOL), MODE (INT), MODE (LONGLONG_BITS), NULL);
   a68_op ("ELEM", m, genie_elem_longlong_bits);
-/* BYTES ops */
+/* BYTES ops. */
   m = a68_proc (MODE (BYTES), MODE (STRING), NULL);
   a68_idf ("bytespack", m, genie_bytespack);
   m = a68_proc (MODE (CHAR), MODE (INT), MODE (BYTES), NULL);
@@ -1061,7 +1103,7 @@ make_standard_environ (void)
   a68_op ("LE", m, genie_le_bytes);
   a68_op ("GT", m, genie_gt_bytes);
   a68_op ("GE", m, genie_ge_bytes);
-/* LONG BYTES ops */
+/* LONG BYTES ops. */
   m = a68_proc (MODE (LONG_BYTES), MODE (BYTES), NULL);
   a68_op ("LENG", m, genie_leng_bytes);
   m = a68_proc (MODE (BYTES), MODE (LONG_BYTES), NULL);
@@ -1093,7 +1135,7 @@ make_standard_environ (void)
   a68_op ("LE", m, genie_le_long_bytes);
   a68_op ("GT", m, genie_gt_long_bytes);
   a68_op ("GE", m, genie_ge_long_bytes);
-/* STRING ops */
+/* STRING ops. */
   m = a68_proc (MODE (BOOL), MODE (STRING), MODE (STRING), NULL);
   a68_op ("=", m, genie_eq_string);
   a68_op ("/=", m, genie_ne_string);
@@ -1132,7 +1174,7 @@ make_standard_environ (void)
   a68_op ("*", m, genie_times_int_char);
   m = a68_proc (MODE (STRING), MODE (CHAR), MODE (INT), NULL);
   a68_op ("*", m, genie_times_char_int);
-/* [] CHAR as cross term for STRING */
+/* [] CHAR as cross term for STRING. */
   m = a68_proc (MODE (BOOL), MODE (ROW_CHAR), MODE (ROW_CHAR), NULL);
   a68_op ("=", m, genie_eq_string);
   a68_op ("/=", m, genie_ne_string);
@@ -1156,15 +1198,25 @@ make_standard_environ (void)
   a68_op ("*", m, genie_times_string_int);
   m = a68_proc (MODE (STRING), MODE (INT), MODE (ROW_CHAR), NULL);
   a68_op ("*", m, genie_times_int_string);
-/* ROWS ops */
+/* SEMA ops. */
+  m = a68_proc (MODE (SEMA), MODE (INT), NULL);
+  a68_op ("LEVEL", m, genie_level_sema_int);
+  m = a68_proc (MODE (INT), MODE (SEMA), NULL);
+  a68_op ("LEVEL", m, genie_level_int_sema);
+  m = a68_proc (MODE (VOID), MODE (SEMA), NULL);
+  a68_op ("UP", m, genie_up_sema);
+  a68_op ("DOWN", m, genie_down_sema);
+/* ROWS ops. */
   m = a68_proc (MODE (INT), MODE (ROWS), NULL);
+  a68_op ("ELEMS", m, genie_monad_elems);
   a68_op ("LWB", m, genie_monad_lwb);
   a68_op ("UPB", m, genie_monad_upb);
   m = a68_proc (MODE (INT), MODE (INT), MODE (ROWS), NULL);
+  a68_op ("ELEMS", m, genie_dyad_elems);
   a68_op ("LWB", m, genie_dyad_lwb);
   a68_op ("UPB", m, genie_dyad_upb);
 /* Binding for the multiple-precision library. */
-/* LONG INT */
+/* LONG INT. */
   m = a68_proc (MODE (LONG_INT), MODE (INT), NULL);
   a68_op ("LENG", m, genie_lengthen_int_to_long_mp);
   m = a68_proc (MODE (LONG_INT), MODE (LONG_INT), NULL);
@@ -1220,7 +1272,7 @@ make_standard_environ (void)
   m = a68_proc (MODE (LONG_COMPLEX), MODE (LONG_INT), MODE (LONG_INT), NULL);
   a68_op ("I", m, genie_idle);
   a68_op ("+*", m, genie_idle);
-/* LONG REAL */
+/* LONG REAL. */
   m = a68_proc (MODE (LONG_REAL), MODE (REAL), NULL);
   a68_op ("LENG", m, genie_lengthen_real_to_long_mp);
   m = a68_proc (MODE (REAL), MODE (LONG_REAL), NULL);
@@ -1244,6 +1296,15 @@ make_standard_environ (void)
   a68_idf ("longarcsin", m, genie_asin_long_mp);
   a68_idf ("longarccos", m, genie_acos_long_mp);
   a68_idf ("longarctan", m, genie_atan_long_mp);
+  a68_idf ("longsinh", m, genie_sinh_long_mp);
+  a68_idf ("longcosh", m, genie_cosh_long_mp);
+  a68_idf ("longtanh", m, genie_tanh_long_mp);
+  a68_idf ("longasinh", m, genie_arcsinh_long_mp);
+  a68_idf ("longacosh", m, genie_arccosh_long_mp);
+  a68_idf ("longatanh", m, genie_arctanh_long_mp);
+  a68_idf ("longarcsinh", m, genie_arcsinh_long_mp);
+  a68_idf ("longarccosh", m, genie_arccosh_long_mp);
+  a68_idf ("longarctanh", m, genie_arctanh_long_mp);
   a68_idf ("dsqrt", m, genie_sqrt_long_mp);
   a68_idf ("dcbrt", m, genie_curt_long_mp);
   a68_idf ("dcurt", m, genie_curt_long_mp);
@@ -1256,9 +1317,12 @@ make_standard_environ (void)
   a68_idf ("dasin", m, genie_asin_long_mp);
   a68_idf ("dacos", m, genie_acos_long_mp);
   a68_idf ("datan", m, genie_atan_long_mp);
-  a68_idf ("darcsin", m, genie_asin_long_mp);
-  a68_idf ("darccos", m, genie_acos_long_mp);
-  a68_idf ("darctan", m, genie_atan_long_mp);
+  a68_idf ("dsinh", m, genie_sinh_long_mp);
+  a68_idf ("dcosh", m, genie_cosh_long_mp);
+  a68_idf ("dtanh", m, genie_tanh_long_mp);
+  a68_idf ("dasinh", m, genie_arcsinh_long_mp);
+  a68_idf ("dacosh", m, genie_arccosh_long_mp);
+  a68_idf ("datanh", m, genie_arctanh_long_mp);
   m = a68_proc (MODE (INT), MODE (LONG_REAL), NULL);
   a68_op ("SIGN", m, genie_sign_long_mp);
   m = a68_proc (MODE (LONG_REAL), MODE (LONG_REAL), MODE (LONG_REAL), NULL);
@@ -1299,7 +1363,7 @@ make_standard_environ (void)
   m = a68_proc (MODE (LONG_COMPLEX), MODE (LONG_REAL), MODE (LONG_REAL), NULL);
   a68_op ("I", m, genie_idle);
   a68_op ("+*", m, genie_idle);
-/* LONG COMPLEX */
+/* LONG COMPLEX. */
   m = a68_proc (MODE (LONG_COMPLEX), MODE (COMPLEX), NULL);
   a68_op ("LENG", m, genie_lengthen_complex_to_long_complex);
   m = a68_proc (MODE (COMPLEX), MODE (LONG_COMPLEX), NULL);
@@ -1337,7 +1401,7 @@ make_standard_environ (void)
   a68_op ("MINUSAB", m, genie_minusab_long_complex);
   a68_op ("TIMESAB", m, genie_timesab_long_complex);
   a68_op ("DIVAB", m, genie_divab_long_complex);
-/* LONG LONG INT */
+/* LONG LONG INT. */
   m = a68_proc (MODE (LONGLONG_INT), MODE (LONG_INT), NULL);
   a68_op ("LENG", m, genie_lengthen_long_mp_to_longlong_mp);
   m = a68_proc (MODE (LONG_INT), MODE (LONGLONG_INT), NULL);
@@ -1394,7 +1458,7 @@ make_standard_environ (void)
   m = a68_proc (MODE (LONGLONG_COMPLEX), MODE (LONGLONG_INT), MODE (LONGLONG_INT), NULL);
   a68_op ("I", m, genie_idle);
   a68_op ("+*", m, genie_idle);
-/* LONG LONG REAL */
+/* LONG LONG REAL. */
   m = a68_proc (MODE (LONGLONG_REAL), MODE (LONG_REAL), NULL);
   a68_op ("LENG", m, genie_lengthen_long_mp_to_longlong_mp);
   m = a68_proc (MODE (LONG_REAL), MODE (LONGLONG_REAL), NULL);
@@ -1418,6 +1482,15 @@ make_standard_environ (void)
   a68_idf ("longlongarcsin", m, genie_asin_long_mp);
   a68_idf ("longlongarccos", m, genie_acos_long_mp);
   a68_idf ("longlongarctan", m, genie_atan_long_mp);
+  a68_idf ("longlongsinh", m, genie_sinh_long_mp);
+  a68_idf ("longlongcosh", m, genie_cosh_long_mp);
+  a68_idf ("longlongtanh", m, genie_tanh_long_mp);
+  a68_idf ("longlongasinh", m, genie_arcsinh_long_mp);
+  a68_idf ("longlongacosh", m, genie_arccosh_long_mp);
+  a68_idf ("longlongatanh", m, genie_arctanh_long_mp);
+  a68_idf ("longlongarcsinh", m, genie_arcsinh_long_mp);
+  a68_idf ("longlongarccosh", m, genie_arccosh_long_mp);
+  a68_idf ("longlongarctanh", m, genie_arctanh_long_mp);
   a68_idf ("qsqrt", m, genie_sqrt_long_mp);
   a68_idf ("qcbrt", m, genie_curt_long_mp);
   a68_idf ("qcurt", m, genie_curt_long_mp);
@@ -1430,9 +1503,12 @@ make_standard_environ (void)
   a68_idf ("qasin", m, genie_asin_long_mp);
   a68_idf ("qacos", m, genie_acos_long_mp);
   a68_idf ("qatan", m, genie_atan_long_mp);
-  a68_idf ("qarcsin", m, genie_asin_long_mp);
-  a68_idf ("qarccos", m, genie_acos_long_mp);
-  a68_idf ("qarctan", m, genie_atan_long_mp);
+  a68_idf ("qsinh", m, genie_sinh_long_mp);
+  a68_idf ("qcosh", m, genie_cosh_long_mp);
+  a68_idf ("qtanh", m, genie_tanh_long_mp);
+  a68_idf ("qasinh", m, genie_arcsinh_long_mp);
+  a68_idf ("qacosh", m, genie_arccosh_long_mp);
+  a68_idf ("qatanh", m, genie_arctanh_long_mp);
   m = a68_proc (MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), NULL);
   a68_op ("+", m, genie_add_long_mp);
   a68_op ("-", m, genie_sub_long_mp);
@@ -1471,7 +1547,7 @@ make_standard_environ (void)
   m = a68_proc (MODE (LONGLONG_COMPLEX), MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), NULL);
   a68_op ("I", m, genie_idle);
   a68_op ("+*", m, genie_idle);
-/* LONGLONG COMPLEX */
+/* LONGLONG COMPLEX. */
   m = a68_proc (MODE (LONGLONG_COMPLEX), MODE (LONG_COMPLEX), NULL);
   a68_op ("LENG", m, genie_lengthen_long_complex_to_longlong_complex);
   m = a68_proc (MODE (LONG_COMPLEX), MODE (LONGLONG_COMPLEX), NULL);
@@ -1509,7 +1585,26 @@ make_standard_environ (void)
   a68_op ("MINUSAB", m, genie_minusab_long_complex);
   a68_op ("TIMESAB", m, genie_timesab_long_complex);
   a68_op ("DIVAB", m, genie_divab_long_complex);
-/* Vector and matrix */
+/* Some "terminators" to handle the mapping of very short or very long modes.
+   This allows you to write SHORT REAL z = SHORTEN pi while everything is
+   silently mapped onto REAL. */
+  m = a68_proc (MODE (LONGLONG_INT), MODE (LONGLONG_INT), NULL);
+  a68_op ("LENG", m, genie_idle);
+  m = a68_proc (MODE (LONGLONG_REAL), MODE (LONGLONG_REAL), NULL);
+  a68_op ("LENG", m, genie_idle);
+  m = a68_proc (MODE (LONGLONG_COMPLEX), MODE (LONGLONG_COMPLEX), NULL);
+  a68_op ("LENG", m, genie_idle);
+  m = a68_proc (MODE (LONGLONG_BITS), MODE (LONGLONG_BITS), NULL);
+  a68_op ("LENG", m, genie_idle);
+  m = a68_proc (MODE (INT), MODE (INT), NULL);
+  a68_op ("SHORTEN", m, genie_idle);
+  m = a68_proc (MODE (REAL), MODE (REAL), NULL);
+  a68_op ("SHORTEN", m, genie_idle);
+  m = a68_proc (MODE (COMPLEX), MODE (COMPLEX), NULL);
+  a68_op ("SHORTEN", m, genie_idle);
+  m = a68_proc (MODE (BITS), MODE (BITS), NULL);
+  a68_op ("SHORTEN", m, genie_idle);
+/* Vector and matrix. */
   m = a68_proc (MODE (VOID), MODE (REF_ROW_REAL), MODE (REAL), NULL);
   a68_idf ("vectorset", m, genie_vector_set);
   m = a68_proc (MODE (VOID), MODE (REF_ROW_REAL), MODE (ROW_REAL), MODE (REAL), NULL);
@@ -1524,13 +1619,75 @@ make_standard_environ (void)
   m = a68_proc (MODE (REAL), MODE (ROW_REAL), MODE (ROW_REAL), NULL);
   a68_idf ("vectorinnerproduct", m, genie_vector_inner_product);
   a68_idf ("vectorinproduct", m, genie_vector_inner_product);
-/* GNU scientific library */
+  m = proc_complex_complex;
+  a68_idf ("complexsqrt", m, genie_sqrt_complex);
+  a68_idf ("csqrt", m, genie_sqrt_complex);
+  a68_idf ("complexexp", m, genie_exp_complex);
+  a68_idf ("cexp", m, genie_exp_complex);
+  a68_idf ("complexln", m, genie_ln_complex);
+  a68_idf ("cln", m, genie_ln_complex);
+  a68_idf ("complexsin", m, genie_sin_complex);
+  a68_idf ("csin", m, genie_sin_complex);
+  a68_idf ("complexcos", m, genie_cos_complex);
+  a68_idf ("ccos", m, genie_cos_complex);
+  a68_idf ("complextan", m, genie_tan_complex);
+  a68_idf ("ctan", m, genie_tan_complex);
+  a68_idf ("complexasin", m, genie_arcsin_complex);
+  a68_idf ("casin", m, genie_arcsin_complex);
+  a68_idf ("complexacos", m, genie_arccos_complex);
+  a68_idf ("cacos", m, genie_arccos_complex);
+  a68_idf ("complexatan", m, genie_arctan_complex);
+  a68_idf ("catan", m, genie_arctan_complex);
+  a68_idf ("complexarcsin", m, genie_arcsin_complex);
+  a68_idf ("carcsin", m, genie_arcsin_complex);
+  a68_idf ("complexarccos", m, genie_arccos_complex);
+  a68_idf ("carccos", m, genie_arccos_complex);
+  a68_idf ("complexarctan", m, genie_arctan_complex);
+  a68_idf ("carctan", m, genie_arctan_complex);
+  m = a68_proc (MODE (LONG_COMPLEX), MODE (LONG_COMPLEX), NULL);
+  a68_idf ("longcomplexsqrt", m, genie_sqrt_long_complex);
+  a68_idf ("dcsqrt", m, genie_sqrt_long_complex);
+  a68_idf ("longcomplexexp", m, genie_exp_long_complex);
+  a68_idf ("dcexp", m, genie_exp_long_complex);
+  a68_idf ("longcomplexln", m, genie_ln_long_complex);
+  a68_idf ("dcln", m, genie_ln_long_complex);
+  a68_idf ("longcomplexsin", m, genie_sin_long_complex);
+  a68_idf ("dcsin", m, genie_sin_long_complex);
+  a68_idf ("longcomplexcos", m, genie_cos_long_complex);
+  a68_idf ("dccos", m, genie_cos_long_complex);
+  a68_idf ("longcomplextan", m, genie_tan_long_complex);
+  a68_idf ("dctan", m, genie_tan_long_complex);
+  a68_idf ("longcomplexarcsin", m, genie_asin_long_complex);
+  a68_idf ("dcasin", m, genie_asin_long_complex);
+  a68_idf ("longcomplexarccos", m, genie_acos_long_complex);
+  a68_idf ("dcacos", m, genie_acos_long_complex);
+  a68_idf ("longcomplexarctan", m, genie_atan_long_complex);
+  a68_idf ("dcatan", m, genie_atan_long_complex);
+  m = a68_proc (MODE (LONGLONG_COMPLEX), MODE (LONGLONG_COMPLEX), NULL);
+  a68_idf ("longlongcomplexsqrt", m, genie_sqrt_long_complex);
+  a68_idf ("qcsqrt", m, genie_sqrt_long_complex);
+  a68_idf ("longlongcomplexexp", m, genie_exp_long_complex);
+  a68_idf ("qcexp", m, genie_exp_long_complex);
+  a68_idf ("longlongcomplexln", m, genie_ln_long_complex);
+  a68_idf ("qcln", m, genie_ln_long_complex);
+  a68_idf ("longlongcomplexsin", m, genie_sin_long_complex);
+  a68_idf ("qcsin", m, genie_sin_long_complex);
+  a68_idf ("longlongcomplexcos", m, genie_cos_long_complex);
+  a68_idf ("qccos", m, genie_cos_long_complex);
+  a68_idf ("longlongcomplextan", m, genie_tan_long_complex);
+  a68_idf ("qctan", m, genie_tan_long_complex);
+  a68_idf ("longlongcomplexarcsin", m, genie_asin_long_complex);
+  a68_idf ("qcasin", m, genie_asin_long_complex);
+  a68_idf ("longlongcomplexarccos", m, genie_acos_long_complex);
+  a68_idf ("qcacos", m, genie_acos_long_complex);
+  a68_idf ("longlongcomplexarctan", m, genie_atan_long_complex);
+  a68_idf ("qcatan", m, genie_atan_long_complex);
+/* GNU scientific library. */
 #ifdef HAVE_GSL
   a68_idf ("cgsspeedoflight", MODE (REAL), genie_cgs_speed_of_light);
   a68_idf ("cgsgravitationalconstant", MODE (REAL), genie_cgs_gravitational_constant);
   a68_idf ("cgsplanckconstant", MODE (REAL), genie_cgs_planck_constant_h);
   a68_idf ("cgsplanckconstantbar", MODE (REAL), genie_cgs_planck_constant_hbar);
-  a68_idf ("cgsvacuumpermeability", MODE (REAL), genie_cgs_vacuum_permeability);
   a68_idf ("cgsastronomicalunit", MODE (REAL), genie_cgs_astronomical_unit);
   a68_idf ("cgslightyear", MODE (REAL), genie_cgs_light_year);
   a68_idf ("cgsparsec", MODE (REAL), genie_cgs_parsec);
@@ -1619,7 +1776,6 @@ make_standard_environ (void)
   a68_idf ("cgsrad", MODE (REAL), genie_cgs_rad);
   a68_idf ("cgssolarmass", MODE (REAL), genie_cgs_solar_mass);
   a68_idf ("cgsbohrradius", MODE (REAL), genie_cgs_bohr_radius);
-  a68_idf ("cgsvacuumpermittivity", MODE (REAL), genie_cgs_vacuum_permittivity);
   a68_idf ("cgsnewton", MODE (REAL), genie_cgs_newton);
   a68_idf ("cgsdyne", MODE (REAL), genie_cgs_dyne);
   a68_idf ("cgsjoule", MODE (REAL), genie_cgs_joule);
@@ -1740,63 +1896,9 @@ make_standard_environ (void)
   a68_idf ("numatto", MODE (REAL), genie_num_atto);
   a68_idf ("numzepto", MODE (REAL), genie_num_zepto);
   a68_idf ("numyocto", MODE (REAL), genie_num_yocto);
-  m = proc_complex_complex;
-  a68_idf ("complexsqrt", m, genie_sqrt_complex);
-  a68_idf ("csqrt", m, genie_sqrt_complex);
-  a68_idf ("complexexp", m, genie_exp_complex);
-  a68_idf ("cexp", m, genie_exp_complex);
-  a68_idf ("complexln", m, genie_ln_complex);
-  a68_idf ("cln", m, genie_ln_complex);
-  a68_idf ("complexsin", m, genie_sin_complex);
-  a68_idf ("csin", m, genie_sin_complex);
-  a68_idf ("complexcos", m, genie_cos_complex);
-  a68_idf ("ccos", m, genie_cos_complex);
-  a68_idf ("complextan", m, genie_tan_complex);
-  a68_idf ("ctan", m, genie_tan_complex);
-  a68_idf ("complexasin", m, genie_arcsin_complex);
-  a68_idf ("casin", m, genie_arcsin_complex);
-  a68_idf ("complexacos", m, genie_arccos_complex);
-  a68_idf ("cacos", m, genie_arccos_complex);
-  a68_idf ("complexatan", m, genie_arctan_complex);
-  a68_idf ("catan", m, genie_arctan_complex);
-  a68_idf ("complexarcsin", m, genie_arcsin_complex);
-  a68_idf ("carcsin", m, genie_arcsin_complex);
-  a68_idf ("complexarccos", m, genie_arccos_complex);
-  a68_idf ("carccos", m, genie_arccos_complex);
-  a68_idf ("complexarctan", m, genie_arctan_complex);
-  a68_idf ("carctan", m, genie_arctan_complex);
-  a68_idf ("complexsinh", m, genie_sinh_complex);
-  a68_idf ("csinh", m, genie_sinh_complex);
-  a68_idf ("complexcosh", m, genie_cosh_complex);
-  a68_idf ("ccosh", m, genie_cosh_complex);
-  a68_idf ("complextanh", m, genie_tanh_complex);
-  a68_idf ("ctanh", m, genie_tanh_complex);
-  a68_idf ("complexasinh", m, genie_arcsinh_complex);
-  a68_idf ("casinh", m, genie_arcsinh_complex);
-  a68_idf ("complexacosh", m, genie_arccosh_complex);
-  a68_idf ("cacosh", m, genie_arccosh_complex);
-  a68_idf ("complexatanh", m, genie_arctanh_complex);
-  a68_idf ("catanh", m, genie_arctanh_complex);
-  a68_idf ("complexarcsinh", m, genie_arcsinh_complex);
-  a68_idf ("carcsinh", m, genie_arcsinh_complex);
-  a68_idf ("complexarccosh", m, genie_arccosh_complex);
-  a68_idf ("carccosh", m, genie_arccosh_complex);
-  a68_idf ("complexarctanh", m, genie_arctanh_complex);
-  a68_idf ("carctanh", m, genie_arctanh_complex);
   m = proc_real_real;
-  a68_idf ("sinh", m, genie_sinh_real);
-  a68_idf ("cosh", m, genie_cosh_real);
-  a68_idf ("tanh", m, genie_tanh_real);
-  a68_idf ("asinh", m, genie_arcsinh_real);
-  a68_idf ("acosh", m, genie_arccosh_real);
-  a68_idf ("atanh", m, genie_arctanh_real);
-  a68_idf ("arcsinh", m, genie_arcsinh_real);
-  a68_idf ("arccosh", m, genie_arccosh_real);
-  a68_idf ("arctanh", m, genie_arctanh_real);
   a68_idf ("erf", m, genie_erf_real);
-  a68_idf ("inverseerf", m, genie_inverf_real);
   a68_idf ("erfc", m, genie_erfc_real);
-  a68_idf ("inverseerfc", m, genie_inverfc_real);
   a68_idf ("gamma", m, genie_gamma_real);
   a68_idf ("lngamma", m, genie_lngamma_real);
   a68_idf ("factorial", m, genie_factorial_real);
@@ -1856,6 +1958,15 @@ make_standard_environ (void)
   a68_idf ("getenv", m, genie_getenv);
   m = a68_proc (MODE (VOID), MODE (INT), NULL);
   a68_idf ("waitpid", m, genie_waitpid);
+#ifdef HAVE_HTTP
+  m = a68_proc (MODE (INT), MODE (REF_STRING), MODE (STRING), MODE (STRING), MODE (INT), NULL);
+  a68_idf ("httpcontent", m, genie_http_content);
+  a68_idf ("tcprequest", m, genie_tcp_request);
+#endif
+#ifdef HAVE_REGEX
+  m = a68_proc (MODE (INT), MODE (STRING), MODE (STRING), MODE (REF_INT), MODE (REF_INT), NULL);
+  a68_idf ("grepinstring", m, genie_grep_in_string);
+#endif
 #endif
 #ifdef HAVE_CURSES
   m = proc_void;

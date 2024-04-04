@@ -1,104 +1,118 @@
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
-<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
-<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
-<meta http-equiv="Content-Style-Type" content="text/css">
+<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: blue; text-decoration: none;}
-a:visited {color: blue; text-decoration: none;}
-a:active  {color: blue; text-decoration: none;}
-a:hover   {text-decoration: underline;}
+a:link    {color: navy; text-decoration: underline;}
+a:visited {color: navy; text-decoration: underline;}
+a:active  {color: navy; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 12pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </style>
 </head>
-<body background="bg.jpg">
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td valign=top bgcolor="white">
-<table cellspacing=1 cellpadding=3 border=0>
-<td bgcolor="black">
-<a href="description.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
-</td>
-<td bgcolor="black">
-<a href="numerical.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
-</td>
-<td bgcolor="black">
-<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
-</td>
-<td bgcolor="black">
-<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
-</td>
-</table>
+<body bgcolor="white">
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
 <h2>Drawing using the GNU Plotting Utilities</h2>
-<ul>
-<li><a href="#drawsetup">Setting up a graphics device</a>
-<li><a href="#drawcolour">Specifying colours</a>
-<li><a href="#drawdraw">Drawing objects</a>
-<li><a href="#drawtext">Drawing text</a>
-</ul>
 </td>
-<td bgcolor=white valign=top>
-<img src="logo.jpg" align=right>
+<td width="30%" bgcolor="white" valign=top align=center>
+<img src="logo.gif">
+</td>
+<td width="5%" valign=top bgcolor="white">
+</td>
+<td width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td bgcolor="skyblue">
+&nbsp;&nbsp;<b>Manual</b>
+</td>
+</tr>
+<tr>
+<td bgcolor="powderblue">
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
 </td>
 </table>
 
-
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td width="80%" valign=top bgcolor="white">
-
-<p>On systems that have installed the <a href="http://www.fsf.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a>, Algol68G can be linked with that library to extend the standard prelude. This section contains a list of procedures supported by the current revision of Algol68G.
+<p>On systems that have installed the <a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> (version 2.4.1 or compatible), Algol68G can be linked with that library to extend the standard prelude. This section contains a list of procedures supported by the current revision of Algol68G.
 </p>
-
-<p><a href="http://www.fsf.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> offer a number of routines for drawing. This allows for drawing in <i>X Windows, postscript format</i>, <i>pseudo graphical interface format (pseudo-gif)</i> and <i>portable any-map format (pnm)</i> from Algol 68. Note that Algol68G is not an Algol 68 binding for libplot.
+<p><a href="http://www.gnu.org/software/plotutils/plotutils.html">GNU Plotting Utilities</a> offer a number of routines for drawing. This allows for drawing in <i>X Windows, postscript format</i>, <i>pseudo graphical interface format (pseudo-gif)</i> and <i>portable any-map format (pnm)</i> from Algol 68. Note that Algol68G is not a full Algol 68 binding for libplot.
 </p>
-
 <p>
-A plotter (window, postscript file, etcetera) can be considered as a stream to which plotting commands are written, hence Algol68G considers plotters to be objects of mode <code>REF FILE</code>. This seems consistent with the design of Algol 68 transput as a file is associated with a channel that describes the device, and therefore can be considered as a description of a device driver.
+A plotter (window, postscript file, etcetera) can be considered as a stream to which plotting commands are written. Therefore Algol68G considers plotters to be objects of mode <code>REF FILE</code>. This seems consistent with the design of Algol 68 transput since a file is associated with a channel that describes the device, and therefore can be considered as a description of a device driver.
 </p>
-<p>A plotter must be opened and closed, just like any file. To specify the file to be a drawing device, <i>stand draw channel</i> is declared in the standard environment, that yields <code>TRUE</code> when inspected by <i>draw possible</i>. To specify details on the plotter type and page size, the procedure <i>draw device</i> has to be called. For example:
+<p>A plotter must be opened and closed, just like any file. To specify the file to be a drawing device, <i>stand draw channel</i> is declared in the standard environment, that yields <code>TRUE</code> when inspected by <i>draw possible</i>. To specify details on the plotter type and page size, the procedure <i>draw device</i> has to be called. A sample program is given below.
 </p>
-<pre>
-  FILE window;
-  # 'window' is an X window with 600x400 pixels #
-  draw device (window, "X", "600x400");
-  open (window, "Hello!", stand draw channel);
-  draw erase (window);
-  # Only now does the window appear on the screen #
-  # Goto pixel 0.25x600, 0.5x400 #
-  draw move (window, 0.25, 0.5);
-  # Colour will be 100% red, 0% green, 0% blue #
-  draw colour (window, 1, 0, 0);
-  # Write an aligned text #
-  draw text (window, "c", "c", "Hello!");
-  # Flush the drawing command buffer (only needed for real-time plotters like X) #
-  draw show (window);
-  # Give audience a chance to read the message #
-  VOID (read char);
-  close (window);
-  # The window disappears from the screen #
-</pre>
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+# 'window' is an X window with 600x400 pixels #
+FILE window;
+draw device (window, "X", "600x400");
+open (window, "Hello!", stand draw channel);
+# 'draw erase' makes the window appear on the screen #
+draw erase (window);
+# Goto pixel 0.25x600, 0.5x400 #
+draw move (window, 0.25, 0.5);
+# Colour will be 100% red, 0% green, 0% darkred #
+draw colour (window, 1, 0, 0);
+# Write an aligned text #
+draw text (window, "c", "c", "Hello world!");
+# Flush the drawing command buffer - 
+  only needed for real-time plotters like X #
+draw show (window);
+# Give audience a chance to read the message #
+VOID (read char);
+# Make the window disappear from the screen #
+close (window);
+</pre></font>
+</td>
+</table>
 
 <p>Implemented drawing routines are part of the standard environment.
 </p>
 
 <br>
-<h3><a name="drawsetup">Setting up a graphics device</a></h3>
+<h3><a name="drawsetup"></a>Setting up a graphics device</h3>
 <p>
 <dl>
 <dt><code>PROC draw device = (REF FILE file, STRING type, STRING params) VOID</code>
-<dt><code>PROC make device = (REF FILE file, STRING type, STRING params) VOID</code>
+<dt><code>PROC make device = (REF FILE file, STRING type, STRING params) BOOL</code>
 <dd>Sets parameters for plotter <i>file</i>. Parameter <i>type</i> sets the plotter type. Algol68G supports <i>"X"</i> for <i>X Window System</i>, <i>"ps"</i> for <i>postscript, "gif"</i> for <i>pseudo graphical interface format</i> and <i>pnm</i> for <i>portable any-map format</i>. <i>X</i> plotters write graphics to an <i>X</i> Window System display rather than to an output stream. Error messages from libplot are written to the Algol68G log file. A runtime error results if the plotter could not be opened. Argument <i>params</i> is interpreted as an image size. For <i>X, gif</i> and <i>pnm</i> the syntax reads "<i>x pixels</i> x <i>y pixels</i>", for instance "<i>500</i>x<i>500</i>". For <i>postscript</i>, image size is the size of the page on which the graphics display will be positioned. Any ISO page size in the range "a0" - "a4" or ANSI page size in the range "a" - "e" may be specified. Recognised aliases are "letter" for "a" and "tabloid" for "b". Other valid page sizes are "legal", "ledger", and "b5". The graphics display will be a square region centred on the specified page and occupying its full width, with allowance being made for margins.
+<br>
+<br>
+This routine returns <code>TRUE</code> if it succeeds.
 <br>
 <br>
 <dt><code>PROC draw erase = (REF FILE file) VOID</code>
@@ -123,17 +137,17 @@ A plotter (window, postscript file, etcetera) can be considered as a stream to w
 <br>
 <dt><code>PROC draw linestyle = (REF FILE file, [] CHAR style) VOID</code>
 <dd>Sets the line style for all lines subsequently drawn on the graphics display. The supported line styles are "solid", "dotted", "dotdashed", "shortdashed", "longdashed", "dotdotdashed", "dotdotdotdashed", and "disconnected". The first seven correspond to the following dash patterns:
-<pre>
+<font color=black><pre>
 <code>
-"solid"           --------------------------------
-"dotted"          - - - - - - - -
+"solid" 	  --------------------------------
+"dotted"	  - - - - - - - -
 "dotdashed"       ---- - ---- - ---- -
 "shortdashed"     ---- ---- ---- ----
 "longdashed"      ------- ------- -------
 "dotdotdashed"    ---- - - ---- - -
 "dotdotdotdashed" ---- - - - ---- - - -
 </code>
-</pre>
+</pre></font>
 In the preceding patterns, each hyphen stands for one line thickness. This is the case for sufficiently thick lines, at least. So for sufficiently thick lines, the distance over which a dash pattern repeats is scaled proportionately to the line thickness. The "disconnected" line style is special. A "disconnected" path is rendered as a set of filled circles, each of which has diameter equal to the nominal line thickness. One of these circles is centred on each of the juncture points of the path (i.e., the endpoints of the line segments or arcs from which it is constructed). Circles with "disconnected" line style are invisible. Disconnected circles are not filled. All line styles are supported by all plotters.
 <br>
 <br>
@@ -142,11 +156,12 @@ In the preceding patterns, each hyphen stands for one line thickness. This is th
 </dl>
 
 <br>
-<h3><a name="drawcolour">Specifying colours</a></h3>
+<h3><a name="drawcolour"></a>Specifying colours</h3>
+<p>
 <dl>
-<dt><code>PROC draw background colour = (REF FILE file, REAL red, green, blue) VOID</code>
-<br><code>PROC draw background color = (REF FILE file, REAL red, green, blue) VOID</code>
-<dd>Sets the background colour for plotter <i>file</i>'s graphics display, using fractional intensities in a 48-bit RGB colour model. The arguments <i>red, green</i> and <i>blue</i> specify the red, green and blue intensities of the background colour. Each is a real value in the range 0 .. 1. The choice (0, 0, 0) signifies black, and the choice (1, 1, 1) signifies white. This procedure affects only plotters that produce bitmaps, i. e. , X plotters and pnm plotters. Its effect is that when the draw erase procedure is called for this plotter, its display will be filled with the specified colour.
+<dt><code>PROC draw background colour = (REF FILE file, REAL red, green, darkred) VOID</code>
+<br><code>PROC draw background color = (REF FILE file, REAL red, green, darkred) VOID</code>
+<dd>Sets the background colour for plotter <i>file</i>'s graphics display, using fractional intensities in a 48-bit RGB colour model. The arguments <i>red, green</i> and <i>darkred</i> specify the red, green and blue intensities of the background colour. Each is a real value in the range 0 .. 1. The choice (0, 0, 0) signifies black, and the choice (1, 1, 1) signifies white. This procedure affects only plotters that produce bitmaps, i. e. , X plotters and pnm plotters. Its effect is that when the draw erase procedure is called for this plotter, its display will be filled with the specified colour.
 <br>
 <br>
 <dt><code>PROC draw background colour name = (REF FILE file, STRING name) VOID</code>
@@ -154,9 +169,9 @@ In the preceding patterns, each hyphen stands for one line thickness. This is th
 <dd>Sets the background colour for plotter <i>file</i>'s graphics display. Argument <i>name</i> is a case insensitive string. Accepted names are essentially those supported by recent revisions of the <i>X</i> Window System. Its effect is that when the draw erase procedure is called for this plotter, its display will be filled with the specified colour.
 <br>
 <br>
-<dt><code>PROC draw colour = (REF FILE file, REAL red, green, blue) VOID</code>
-<br><code>PROC draw color = (REF FILE file, REAL red, green, blue) VOID</code>
-<dd>Sets the foreground colour for plotter <i>file</i>'s graphics display, using fractional intensities in a 48-bit RGB colour model. The arguments <i>red, green</i> and <i>blue</i> specify the red, green and blue intensities of the foreground colour. Each is a real value in the range 0 .. 1. The choice (0, 0, 0) signifies black, and the choice (1, 1, 1) signifies white.
+<dt><code>PROC draw colour = (REF FILE file, REAL red, green, darkred) VOID</code>
+<br><code>PROC draw color = (REF FILE file, REAL red, green, darkred) VOID</code>
+<dd>Sets the foreground colour for plotter <i>file</i>'s graphics display, using fractional intensities in a 48-bit RGB colour model. The arguments <i>red, green</i> and <i>darkred</i> specify the red, green and blue intensities of the foreground colour. Each is a real value in the range 0 .. 1. The choice (0, 0, 0) signifies black, and the choice (1, 1, 1) signifies white.
 <br>
 <br>
 <dt><code>PROC draw colour name = (REF FILE file, STRING name) VOID</code>
@@ -165,7 +180,7 @@ In the preceding patterns, each hyphen stands for one line thickness. This is th
 </dl>
 
 <br>
-<h3><a name="drawdraw">Drawing objects</a></h3>
+<h3><a name="drawdraw"></a>Drawing objects</h3>
 <dl>
 <dt><code>PROC draw point = (REF FILE file, REAL x, y) VOID</code>
 <dd>The arguments specify the co-ordinates (<i>x, y</i>) of a point that will be drawn. The graphics cursor is moved to (<i>x, y</i>). The values of <i>x</i> and <i>y</i> are fractions 0 .. 1 of the page size in respectively the <i>x</i> and <i>y</i> directions.
@@ -181,15 +196,15 @@ the page size in respectively the <i>x</i> and <i>y</i> directions.
 <br>
 <br>
 <dt><code>PROC draw circle = (REF FILE file, REAL x, y, r) VOID</code>
-<dd>The three arguments specifying the centre (<i>x, y</i>) and radius (<i>r</i>) of a circle, and the circle is drawn. The graphics cursor is moved to (<i>x, y</i>). The values of <i>x</i> and <i>y</i> are fractions 0 .. 1 of the page size in respectively the <i>x</i> and <i>y</i> directions. The value of <i>r</i> is a fraction 0 .. 1 of the page size in the <i>y</i> direction.
+<dd>The three arguments specifying the centre (<i>x, y</i>) and radius <i>r</i> of a circle, and the circle is drawn. The graphics cursor is moved to (<i>x, y</i>). The values of <i>x</i> and <i>y</i> are fractions 0 .. 1 of the page size in respectively the <i>x</i> and <i>y</i> directions. The value of <i>r</i> is a fraction 0 .. 1 of the page size in the <i>y</i> direction.
 </dl>
 
 <br>
-<h3><a name="drawtext">Drawing text</a></h3>
+<h3><a name="drawtext"></a>Drawing text</h3>
 <dl>
 <dt><code>PROC draw text = (REF FILE file, CHAR horiz_justify,
 vert_justify, [] CHAR s) VOID</code>
-<dd>The justified string <i>s</i> is drawn according to the specified justifications. If <i>horiz_justify</i> is equal to <code>"l", "c"</code>, or <code>"r"</code>, then the string will be drawn with left, centre or right justification, relative to the current graphics cursor position. If <i>vert_justify</i> is equal to <code>"b", "x", "c"</code>, or <code>"t"</code>, then the bottom, baseline, centre or top of the string will be placed even with the current graphics cursor position. The graphics cursor is moved to the right end of the string if left justification is specified, and to the left end if right justification is specified. The string may contain escape sequences of various sorts (see section <i>Text string format and escape sequences</i> in the <a href="http://www.fsf.org/software/plotutils/plotutils.html">plotutils manual</a>), though it should not contain line feeds or carriage returns; in fact it should include only printable characters. The string may be plotted at a nonzero angle, if <i>draw textangle</i> has been called.
+<dd>The justified string <i>s</i> is drawn according to the specified justifications. If <i>horiz_justify</i> is equal to <code>"l", "c"</code>, or <code>"r"</code>, then the string will be drawn with left, centre or right justification, relative to the current graphics cursor position. If <i>vert_justify</i> is equal to <code>"b", "x", "c"</code>, or <code>"t"</code>, then the bottom, baseline, centre or top of the string will be placed even with the current graphics cursor position. The graphics cursor is moved to the right end of the string if left justification is specified, and to the left end if right justification is specified. The string may contain escape sequences of various sorts (see section <i>Text string format and escape sequences</i> in the <a href="http://www.gnu.org/software/plotutils/plotutils.html">plotutils manual</a>), though it should not contain line feeds or carriage returns; in fact it should include only printable characters. The string may be plotted at a nonzero angle, if <i>draw textangle</i> has been called.
 <br>
 <br>
 <dt><code>PROC draw text angle = (REF FILE file, INT angle) VOID</code>
@@ -197,20 +212,27 @@ vert_justify, [] CHAR s) VOID</code>
 <br>
 <br>
 <dt><code>PROC draw font name = (REF FILE file, [] CHAR name) VOID</code>
-<dd>The case-insensitive string <i>name</i> specifies the name of the font to be used for all text strings subsequently drawn on the graphics display. The font for plotting strings is fully specified by calling <i>draw font name</i>, <i>draw font size</i>, and <i>draw text angle</i>. The default font name depends on the type of plotter. It is "Helvetica" for X plotters, for pnm it is "HersheySerif". If the argument <i>name</i> is NIL or an empty string, or the font is not available, the default font name will be used. Which fonts are available also depends on the type of plotter; for a list of all available fonts, see section <i>Available text fonts</i> in the <a href="http://www.fsf.org/software/plotutils/plotutils.html">plotutils manual</a>.
+<dd>The case-insensitive string <i>name</i> specifies the name of the font to be used for all text strings subsequently drawn on the graphics display. The font for plotting strings is fully specified by calling <i>draw font name</i>, <i>draw font size</i>, and <i>draw text angle</i>. The default font name depends on the type of plotter. It is "Helvetica" for X plotters, for pnm it is "HersheySerif". If the argument <i>name</i> is NIL or an empty string, or the font is not available, the default font name will be used. Which fonts are available also depends on the type of plotter; for a list of all available fonts, see section <i>Available text fonts</i> in the <a href="http://www.gnu.org/software/plotutils/plotutils.html">plotutils manual</a>.
 <br>
 <br>
 <dt><code>PROC draw font size = (REF FILE file, INT size) VOID</code>
 <dd>Argument <i>size</i> is interpreted as the size, in the user co-ordinate system, of the font to be used for all text strings subsequently drawn on the graphics display. A negative value for <i>size</i> sets the size to the default, which depends on the type of plotter. Typically, the default font size is 1/50 times the size (i. e. , minimum dimension) of the display. The font for plotting strings is fully specified by calling <i>draw font name</i>, <i>draw font size</i>, and <i>draw text angle</i>.
 </dl>
 
+<p>
+<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<font color="black">
+<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
+</font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+<small>Documentation for Algol 68 Genie Mark 8</small>
+</font>
 </td>
 </table>
-
-<p style="font-size: 8pt;">
-<font color="black">
-Copyright &copy; 2001-2004 J. Marcel van der Veer.
-</font>
 </p>
 
 </body>

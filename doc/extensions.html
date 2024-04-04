@@ -1,75 +1,182 @@
 <html>
 <head>
-<title>Algol 68 Genie - An Algol 68 subset interpreter</title>
-<meta name="Keywords" content="algol,algol68,68,algol68g,algol-68,algol68-g,interpreter">
-<meta http-equiv="Description" content="a fairly fully featured Algol 68 implementation.">
-<meta http-equiv="Content-Style-Type" content="text/css">
+<title>Algol 68 Genie - An Algol 68 interpreter</title>
+<meta name="Keywords" content="algol,algol68,68,algol-68,algol68g,algol68-g,a68g,a68-g,68g,genie,interpreter">
+<meta http-equiv="Content-Style-Type" content="text/css"; charset=ISO-8859-1">
 <style type="text/css">
-a:link    {color: blue; text-decoration: none;}
-a:visited {color: blue; text-decoration: none;}
-a:active  {color: blue; text-decoration: none;}
-a:hover   {text-decoration: underline;}
+a:link    {color: navy; text-decoration: underline;}
+a:visited {color: navy; text-decoration: underline;}
+a:active  {color: navy; text-decoration: underline;}
 p {font-size: 10pt; font-family: Arial,Helvetica;}
 u {font-size: 10pt; font-family: Arial,Helvetica;}
 dd {font-size: 10pt; font-family: Arial,Helvetica;}
+h1 {font-size: 16pt; font-family: Arial,Helvetica;}
 h2 {font-size: 14pt; font-family: Arial,Helvetica;}
 h3 {font-size: 12pt; font-family: Arial,Helvetica;}
-h4 {font-size: 12pt; font-family: Arial,Helvetica;}
-td {font-size: 10pt; font-family: Arial,Helvetica;}
+h4 {font-size: 10pt; font-family: Arial,Helvetica;}
+td {font-size: 8pt; font-family: Arial,Helvetica;}
 ul {font-size: 10pt; font-family: Arial,Helvetica;}
 body {font-size: 10pt; font-family: Arial,Helvetica;}
 code {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
-pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
+pre {font-size: 8pt; font-family: Fixed,"Courier New",Courier;}
 </style>
 </head>
-<body background="bg.jpg">
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td valign=top bgcolor="white">
-<table cellspacing=1 cellpadding=3 border=0>
-<td bgcolor="black">
-<a href="numerical.html" style="font-size: 10pt; color: white;"><b>Previous</b></a>
+<body bgcolor="white">
+
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
+<h2>Extensions</h2>
+&middot;&nbsp;<a href="#params">Partial parametrization and currying</a><br>
+&middot;&nbsp;<a href="#envunix">UNIX extensions</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#unixgen">General definitions</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#unixproc">Processes</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#unixfetch">Fetching web page contents and sending requests</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#unixregex">Matching regular expressions</a><br>
+&middot;&nbsp;<a href="#curses">Curses support</a><br>
+&middot;&nbsp;<a href="#torrix">An elementary vector library</a><br>
+&middot;&nbsp;<a href="#assert">Assertions as pre- or postconditions</a><br>
+&middot;&nbsp;<a href="#prep">The preprocessor</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#prepcat">Concatenation of lines</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#prepinc">Inclusion of files</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#refine">The refinement preprocessor</a><br>
+&nbsp;&nbsp;&middot;&nbsp;<a href="#prepsw">Switching the preprocessor on or off</a>
 </td>
-<td bgcolor="black">
-<a href="options.html" style="font-size: 10pt; color: white;"><b>Next</b></a>
+<td width="30%" bgcolor="white" valign=top align=center>
+<img src="logo.gif">
 </td>
-<td bgcolor="black">
-<a href="contents.html" style="font-size: 10pt; color: white;"><b>Table of contents</b></a>
+<td width="5%" valign=top bgcolor="white">
 </td>
-<td bgcolor="black">
-<a href="mailto:algol68g@xs4all.nl" style="font-size: 10pt; color: white;"><b>Contact</b></a>
+<td width="15%" valign=top bgcolor="white">
+<!-- Navigation bar -->
+<table border="0" cellspacing="0" width="100%">
+<tr>
+<td bgcolor="skyblue">
+&nbsp;&nbsp;<b>Manual</b>
+</td>
+</tr>
+<tr>
+<td bgcolor="powderblue">
+<br>
+&nbsp;&middot;&nbsp;<a href="contents.html"><small>Contents</small></a><br>
+&nbsp;&middot;&nbsp;<a href="introduction.html"><small>Introduction</small></a><br>
+&nbsp;&middot;&nbsp;<a href="install.html"><small>Installation</small></a><br>
+&nbsp;&middot;&nbsp;<a href="description.html"><small>Description</small></a><br>
+&nbsp;&middot;&nbsp;<a href="drawing.html"><small>Drawing</small></a><br>
+&nbsp;&middot;&nbsp;<a href="numerical.html"><small>Numerical</small></a><br>
+&nbsp;&middot;&nbsp;<a href="extensions.html"><small>Extensions</small></a><br>
+&nbsp;&middot;&nbsp;<a href="synopsis.html"><small>Synopsis</small></a><br>
+&nbsp;&middot;&nbsp;<a href="syntax.html"><small>Syntax</small></a><br>
+&nbsp;&middot;&nbsp;<a href="environ.html"><small>Environment</small></a><br>
+&nbsp;&middot;&nbsp;<a href="examples.html"><small>Example&nbsp;programs</small></a><br>
+&nbsp;&middot;&nbsp;<a href="resources.html"><small>Resources</small></a><br>
+<br>
+&nbsp;&middot;&nbsp;<a href="introduction.html#obtaining"><small>Downloads</small></a>
+</td>
+</tr>
+</table>
+<!-- End navigation bar -->
 </td>
 </table>
-<h2>Auxilliary extensions</h2>
 
-<ul>
-<li><a href="#envunix">UNIX extensions</a>
-<ul>
-<li><a href="#linmode">Modes</a>
-<li><a href="#linproc">Procedures</a>
-</ul>
-<li><a href="#torrix">An elementary vector library</a>
-<li><a href="#assert">Assertions as pre- or postconditions</a>
-<li><a href="#refine">The refinement preprocessor</a>
-</ul>
-</td>
-<td bgcolor=white valign=top>
-<img src="logo.jpg" align=right>
+<h3><a name="params"></a>Partial parametrisation and currying</h3>
+<p>
+Algol68G implements C.H. Lindsey's 
+<a href="resources.html#rr">proposal for partial parametrisation</a>.
+In Algol68G, a
+<a href="syntax.html#primaries">
+call
+</a>
+does not require that all arguments be specified. In case not all of the actual-parameters are specified, a call yields a routine 
+(with identical body but with already specified arguments stored) 
+that requires the unspecified actual-parameters.
+When specification of all required actual-parameters is complete (complete closure) a procedure will actually be evaluated to yield its result.
+<p>
+<small>
+<i>Currying, named after Haskell Curry, is transforming a routine taking multiple arguments into a routine taking a single parameter and yielding a routine taking the remaining parameters. 
+This transformation is for instance used in lambda-calculus.
+Currying gives an imperative language such as Algol 68 a functional sublanguage [<a href="resources.html#ref">Koster 1996</a>].
+</i>
+</small>
+<p>
+Algol68G does not save copies of the stack upon partial parametrisation, as does for example LISP; the yield of a partially parametrised call in an environ <i>E</i>, cannot be newer in scope than <i>E</i>.
+Therefore stored actual-parameters cannot refer to objects in stack frames that no longer exist, and
+dynamic scope checking extends to stored actual-parameters.
+</p>
+<p>
+A routine may be parametrised in several stages. Upon each stage
+the yields of the new actual-parameters are stored
+inside the routine's locale and the scope of the routine becomes the newest of its original scope and the scopes of those yields.
+</p>
+<p>
+Examples of partial parametrisation:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+# Raising a function to a power #
+
+MODE FUN = PROC (REAL) REAL;
+PROC pow = (FUN f, INT n, REAL x) REAL: f(x) ** n;
+OP ** = (FUN f, INT n) FUN: pow (f, n, );
+
+# Example: sin (3 x) = 3 sin (x) - 4 sin^3 (x) (follows from DeMoivre's theorem) #
+
+REAL x = read real;
+print ((new line, sin (3 * x),  3 *  sin (x) - 4 * (sin ** 3) (x)))
+</pre>
+</font>
 </td>
 </table>
+</p>
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<pre>
+# Partial parametrisation applied in handling a linked list #
 
-<table width="100%" border=0 cellspacing=0 cellpadding=12>
-<td width="80%" valign=top bgcolor="white">
+MODE LIST = STRUCT (INT k, REF LIST next);
 
-<h3><a name="envunix">UNIX extensions</a></h3>
+PROC map = (REF LIST l, PROC (INT) INT mapping) VOID:
+     IF l ISNT NIL
+     THEN k OF l := mapping (k OF l);
+          map (next OF l, mapping)
+     FI;
 
-<h4><a name="linmode">Modes</a></h4>
+PROC (REF LIST) VOID zero = map (, (INT n) INT: 0);
+PROC (REF LIST) VOID increment = map (, (INT n) INT: n + 1);
+PROC (REF LIST) VOID list = map (, (INT n) INT: (print (n); n));
+
+HEAP LIST p := (SKIP, NIL);
+zero (p);
+increment (p);
+list (p)
+</pre>
+</font>
+</td>
+</table>
+</p>
+<p>
+<h3><a name="envunix"></a>UNIX extensions</h3>
+<p>
+Algol68G maps to UNIX/Linux as to provide basic means with which a program can
+<ul>
+<li>access command line arguments,
+<li>access environment variables, 
+<li>access system error information,
+<li>start child processes and communicate with them by means of pipes. Algol68G's transput procedures as <code>getf</code> or <code>putf</code> operate on pipes,
+<li>send a request to a HTTP server, fetch web page contents, and
+<li>match regular expressions in a string.
+</ul>
+  
+<h4><a name="unixgen"></a>General definitions</h4>
 <dl>
 <dt><code>MODE PIPE = STRUCT (REF FILE read, write, INT pid)</code>
 <dd>Used to set up communication between processes. See for instance <code>execve child pipe</code>.
 </dl>
 
-<h4><a name="linproc">Procedures</a></h4>
 <dl>
 <dt><code>PROC argc = INT</code>
 <dd>Returns the number of command-line arguments.
@@ -79,81 +186,334 @@ pre {font-size: 10pt; font-family: Fixed,"Courier New",Courier;}
 <dd>Returns command-line argument <var>k</var> or an empty string when <var>k</var> is not valid.
 <br>
 <br>
+<dt><code>PROC get env = (STRING var) STRING</code>
+<dd>Returns the value of environment variable <var>var</var>.
+</dl>
+
+Accessing system error information through <code>errno</code> is of limited interest since Algol 68 Genie may reset it:
+<dl>
+<dt><code>PROC reset errno = VOID</code>
+<dd>Resets the global error variable <var>errno</var>.
+<br>
+<br>
 <dt><code>PROC errno = INT</code>
 <dd>Returns the global error variable <var>errno</var>.
 <br>
 <br>
 <dt><code>PROC strerror = (INT errno) STRING</code>
 <dd>Returns a string describing the error code passed as <var>errno</var>.
-<br>
-<br>
-<dt><code>PROC get env = (STRING var) STRING</code>
-<dd>Returns the value of environment variable <var>var</var>.
-<br>
-<br>
+</dl>
+
+<h4><a name="unixproc"></a>Processes</h4>
+<dl>
 <dt><code>PROC fork = INT</code>
-<dd>Creates a child process that differs from the parent process only in its <code>PID</code> and <code>PPID</code>, and in the fact that resource utilisations are set to 0. File locks and pending signals are not inherited. Under Linux, fork is implemented using copy-on-write pages, so the only penalty incurred by fork is the time and memory required to duplicate the parent's page tables, and to create a unique task structure for the child. On success, the <code>PID</code> of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and <var>errno</var> will be set appropriately.
+<dd>Creates a child process that differs from the parent process only in its <code>PID</code> and <code>PPID</code>, and that resource utilisations are set to zero. File locks and pending signals are not inherited. Under Linux, fork is implemented using copy-on-write pages, so the only penalty incurred by fork is the time and memory required to duplicate the parent's page tables, and to create a unique task structure for the child. On success, the <code>PID</code> of the child process is returned in the parent's thread of execution, and a 0 is returned in the child's thread of execution. On failure, a -1 will be returned in the parent's context, no child process will be created, and <var>errno</var> will be set appropriately.
 <br>
 <br>
 <dt><code>PROC wait pid = (INT pid) VOID</code>
-<dd>Wait until child process <var>pid</var> ends. 
+<dd>Waits until child process <var>pid</var> ends. 
 <br>
 <br>
 <dt><code>PROC execve = (STRING filename, [] STRING argv, [] STRING envp) INT</code>
-<dd>Executes <var>filename</var> that must be either a binary executable, or a script starting with a line of the form <code>#! interpreter [argv]</code>. In the latter case, the interpreter must be a valid path-name for an executable which is not itself a script, which will be invoked as <code>interpreter [arg] filename</code>. Argument <var>argv</var> is a row of argument strings that is passed to the new program. Argument <var>envp</var> is a row of strings, with elements conventionally of the form <code>KEY=VALUE</code>, which are passed as environment to the new program. The argument vector and environment can be accessed by the called program's main function, when it is defined as 
-<code>int main(int argc, char *argv[], char *envp[])</code>. 
+<dd>Executes <var>filename</var> that must be either a binary executable, or a script starting with a line of the form
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><tt>
+#! interpreter [argv]
+</tt></font>
+</td>
+</table>
+<p>
+In the latter case, the interpreter must be a valid path-name for an executable which is not itself a script, which will be invoked as <code>interpreter [arg] filename</code>. Argument <var>argv</var> is a row of argument strings that is passed to the new program. Argument <var>envp</var> is a row of strings, with elements conventionally of the form <code>KEY=VALUE</code>, which are passed as environment to the new program. The argument vector and environment can be accessed by the called program's <code>main</code> function, when it is defined as
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+int main(int argc, char *argv[], char *envp[])
+</tt>
+</font>
+</td>
+</table>
+<p>
 The procedure does not return on success, and the text, data, bss, and stack of the calling process are overwritten by that of the program loaded. The program invoked inherits the calling process's <code>PID</code>, and any open file descriptors that are not set to close on exec. Signals pending on the calling process are cleared. Any signals set to be caught by the calling process are reset to their default behaviour. The <code>SIGCHLD</code> signal (when set to <code>SIG_IGN</code>) may or may not be reset to <code>SIG_DFL</code>.
+<br>
+<br>
+<dt><code>PROC execve child = (STRING filename, [] STRING argv, [] STRING envp) INT</code>
+<dd>Executes a command in a child process. Algol 68 Genie is not superseded by the new process. For details on arguments see <code>execve</code>.
 <br>
 <br>
 <dt><code>PROC execve child pipe = (STRING filename, [] STRING argv, [] STRING envp) PIPE</code>
 <dd>Executes a command in a child process. 
+For details on arguments see <code>execve</code>.
 The child process redirects standard input and standard output to the pipe that is delivered to the parent process.
 Therefore, the parent can write to the <code>write</code> field of the pipe, and this data can be read by the child from standard input.
 The child can write to standard output, and this data can be read by the parent process from the <code>read</code> field of the pipe.
 The files in the pipe are opened.
 The channels assigned to the read - and write end of the pipe are <code>standin channel</code> and <code>standout channel</code>, respectively.
-This procedure calls <code>execve</code> in the child process, for a description of the arguments refer to that procedure.
-<br>
-Example:
-<br>
+This procedure calls <code>execve</code> in the child process, for a description of the arguments refer to that procedure. For example:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+PROC eop handler = (REF FILE f) BOOL:
+     BEGIN put (stand error, ("end of pipe", new line));
+           GO TO end
+     END;
+
+PIPE p = execve child pipe ("/bin/cat", ("/bin/cat", program idf), "");
+IF pid OF p < 0
+THEN put (stand error, ("pipe not valid: ", strerror (errno)));
+     stop
+FI;
+on logical file end (read OF p, eop handler);
+DO STRING line;
+   get (read OF p, (line, newline));
+   put (stand out, ("From pipe: """, line, """", newline))
+OD;
+end: 
+close (read OF p);
+close (write OF p)
+</pre></font>
+</td>
+</table>
+</dl>
+
+<h4><a name="unixfetch"></a>Fetching web page contents and sending requests</h4>
+<dl>
+<dt><code>PROC http content = (REF STRING content, STRING domain, STRING path, INT port) INT</code>
+<dd>Gets content from web page specified by <var>domain</var> and <var>path</var>, and stores it in <var>content</var>. Both <var>domain</var> and <var>path</var> must be properly <code>MIME</code> encoded. The routine connects to server <var>domain</var> using TCP and sends a straightforward <code>GET</code> request for <var>path</var> using HTTP 1.0, and reads the reply from the server. If port number <var>port</var> is 0 the default port number (80) will be used. The procedure returns 0 on success or an appropriate error code upon failure. For example:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
 <pre>
-  PIPE p = execve child pipe ("/bin/cat", ("/bin/cat", program idf), "");
+PROC good page = (REF STRING page) BOOL:
+     IF grep in string("^HTTP/[0-9.]* 200", page, NIL, NIL) = 0
+     THEN TRUE
+     ELSE IF INT start, end;
+             grep in string("^HTTP/[0-9.]* [0-9]+ [a-zA-Z ]*", page, start, end) = 0
+          THEN print (page[start : end])
+          ELSE print ("unknown error retrieving page")
+          FI;
+          FALSE
+     FI;
 
-  IF pid OF p < 0
-  THEN put (stand error, ("pipe not valid", new line));
-       stop
-  FI;
+IF STRING reply;
+   INT rc = http content (reply, "www.gnu.org", "http://www.gnu.org/", 0);
+   rc = 0 AND good page (reply)
+THEN print (reply)
+ELSE print (strerror (rc))
+FI
 
-  PROC eop handler = (REF FILE f) BOOL:
-       BEGIN put (stand error, ("end of pipe", new line));
-             GO TO end
-       END;
-
-  on logical file end (read OF p, eop handler);
-
-  DO STRING line;
-     get (read OF p, (line, newline));
-     put (stand out, ("From pipe: """, line, """", newline))
-  OD;
-
-  end: 
-  close (read OF p);
-  close (write OF p)
 </pre>
+</font>
+</td>
+</table>
+<p>
+<dt><code>PROC tcp request = (REF STRING reply, STRING domain, STRING request, INT port) INT</code>
+<dd>Send request <var>request</var> to server specified by <var>domain</var>, and stores the server's reply in <var>content</var>. Both <var>domain</var> and <var>request</var> must be properly <code>MIME</code> encoded. The routine connects to server <var>domain</var> using TCP. If port number <var>port</var> is 0 the default port number (80) will be used. The procedure returns 0 on success or an appropriate error code upon failure. For example:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+STRING reply;
+IF INT rc = tcp request (reply, "www.kernel.org",
+            "GET / HTTP/1.0" + newline char + "Range: bytes=0-1023" + 2 * newline char, 0);
+   rc = 0
+THEN print (reply)
+ELSE print (strerror (rc))
+FI;
+</pre>
+</font>
+</td>
+</table></dl>
+
+<h4><a name="unixregex"></a>Matching regular expressions</h4>
+<dl>
+<dt><code>PROC grep in string = (STRING pattern, string, REF INT start, end) INT</code>
+<dd>Matches <var>pattern</var> with <var>string</var> and assigns first character position (counting from 1) and last character position of a matching substring to <var>start</var> and <var>end</var> when they are not <code>NIL</code>. The routine yields 0 on match, 1 on no-match, 2 on pattern-error or 3 on out-of-memory error. If the string contains <var>newline character</var>, it is considered as end-of-line ("$") and the following character is considered as start-of-line ("^").
+</dl>
+
+<p><code>grep in string</code> employs extended POSIX syntax for regular expressions. Traditional UNIX regular expression syntax is obsoleted by POSIX (but is still widely used for the purposes of backwards compatibility). POSIX extended regular expressions are similar to traditional UNIX regular expressions. Most characters are treated as literals that match themselves: "a" matches "a", "(bc" matches "(bc", et cetera.  Metacharacters "(", ")", "[", "]", "{", "}", ".", "*", "?", "+", "^" and "$" are used as special symbols that have to be marked by a preceeding "\" when they are to be matched literally.
+
+<p>Definition of metacharacters</a>:</p>
+<dl compact>
+<dt><b>.</b>
+<dd>Matches any single character.
+<dt><b>*</b>
+<dd>Matches the preceeding expression zero or more times. Forexample, "[xyz]*" matches "", "x", "y", "zx", "zyx", and so on.
+<dt>+
+<dd>Matches the preceeding expression one or more times - "ba+" matches "ba", "baa", "baaa" etcetera.
+<dt>?
+<dd>Matches the preceeding expression zero or one times - "ba?" matches "b" or "ba".
+<dt>{<i>x</i>,<i>y</i>}
+<dd>Matches the preceeding expression at least <i>x</i> and not more than <i>y</i> times. For example, "a{3,5}" matches "aaa", "aaaa" or "aaaaa". Note that this is not implemented on all platforms.
+<dt>|
+<dd>The choice (or set union) operator: match either the expression before or the expression after the operator - "abc|def"
+matches "abc" or "def".
+<dt>[ ]
+<dd>Matches characters that contained within [ ]. For example, [abc] matches "a", "b", or "c", and [a-z] matches any lowercase letter. These can be mixed: [abcq-z] matches a, b, c, q, r, s, t, u, v, w, x, y, z, and so does [a-cq-z]. A "-" character is a literal only if it is the first or last character within the brackets: [abc-] or [-abc]. To match an "[" or "]" character, put the closing bracket first in the enclosing square brackets:
+[][ab] matches "]", "[", "a" or "b".
+<dt>[^ ]
+<dd>Matches a single character that is not contained within [ ]. For example, [^abc] matches any character other than "a", "b", or "c". [^a-z] matches any single character that is not a lowercase letter. As with [ ], these can be mixed.
+<dt>^
+<dd>Matches start of the line.
+<dt>$
+<dd>Matches end of the line.</td>
+<dt>( )
+<dd>Matches a subexpression. A subexpression followed by "*" is invalid on most platforms.
+</dl>
+
+<p>Since many ranges of charactes depends on the chosen locale setting (e.g., in some settings letters are organized as
+abc..yzABC..YZ while in some others as aAbBcC..yYzZ) the POSIX standard defines categories of characters as shown
+in the following table:</p>
+<table border=0 cellspacing=0 cellpadding=6>
+<td bgcolor=skyblue><b>Category</b>&nbsp;</td>
+<td bgcolor=skyblue><b>Compare to</b>&nbsp;</td>
+<td bgcolor=skyblue><b>Matches</b>&nbsp;</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:upper:]</td>
+<td bgcolor=powderblue>[A-Z]</td>
+<td bgcolor=powderblue>Uppercase letters</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:lower:]</td>
+<td bgcolor=powderblue>[a-z]</td>
+<td bgcolor=powderblue>Lowercase letters</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:alpha:]</td>
+<td bgcolor=powderblue>[A-Za-z]</td>
+<td bgcolor=powderblue>Upper- and lowercase letters</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:alnum:]</td>
+<td bgcolor=powderblue>[A-Za-z0-9]</td>
+<td bgcolor=powderblue>Digits, upper- and lowercase letters</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:digit:]</td>
+<td bgcolor=powderblue>[0-9]</td>
+<td bgcolor=powderblue>Digits</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:xdigit:]</td>
+<td bgcolor=powderblue>[0-9A-Fa-f]</td>
+<td bgcolor=powderblue>Hexadecimal digits</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:punct:]</td>
+<td bgcolor=powderblue>[.,!?:...]</td>
+<td bgcolor=powderblue>Punctuation marks</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:blank:]</td>
+<td bgcolor=powderblue>[ \t]</td>
+<td bgcolor=powderblue>Space and Tab</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:space:]</td>
+<td bgcolor=powderblue>[ \t\n\r\f\v]</td>
+<td bgcolor=powderblue>Whitespace characters, typographical display features</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:cntrl:]</td>
+<td bgcolor=powderblue>&nbsp;</td>
+<td bgcolor=powderblue>Control characters</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:graph:]</td>
+<td bgcolor=powderblue>[^ \t\n\r\f\v]</td>
+<td bgcolor=powderblue>Printed characters</td>
+</tr>
+<tr>
+<td bgcolor=powderblue>[:print:]</td>
+<td bgcolor=powderblue>[^\t\n\r\f\v]</td>
+<td bgcolor=powderblue>Printed characters and space</td>
+</tr>
+</table>
+
+<p><b>Examples:</b></p>
+<dl>
+<dd>".at" matches any three-character string ending with <i>at</i></dd>
+<dd>"[hc]at" matches <i>hat</i> and <i>cat</i></dd>
+<dd>"[^b]at" matches any three-character string ending with <i>at</i> and not beginning with <i>b</i>.</dd>
+<dd>"^[hc]at" matches <i>hat</i> and <i>cat</i> but only at the beginning of a line</dd>
+<dd>"[hc]at$" matches <i>hat</i> and <i>cat</i> but only at the end of a line</dd>
+<dd>"[hc]+at" matches with "hat", "cat", "hhat", "chat", "hcat", "ccchat" et cetera</dd>
+<dd>"[hc]?at" matches "hat", "cat" and "at"</dd>
+<dd>"([cC]at)|([dD]og)" matches "cat", "Cat", "dog" and "Dog"</dd>
+<dd>[[:upper:]ab] matches uppercase letters and "a", "b"</dd>
+</dl>
+</p>
+
+<br>
+<h3><a name="curses"></a>Curses support</h3>
+On systems that have installed the curses library, Algol68G can link with that library to extend the standard prelude. Curses support is very basic.
+<dl>
+<dt><code>PROC curses start = VOID</code>
+<dd>Starts curses support.
+<br>
+<br>
+<dt><code>PROC curses end = VOID</code>
+<dd>Stops curses support.
+<br>
+<br>
+<dt><code>PROC curses clear = VOID</code>
+<dd>Clears the screen.
+<br>
+<br>
+<dt><code>PROC curses refresh = VOID</code>
+<dd>Refreshes the screen (by writing all changes since the last call to this routine).
+<br>
+<br>
+<dt><code>PROC curses getchar = CHAR</code>
+<dd>Check if a key was pressed on the keyboard. If so, the routine returns the corresponding character, if not, on UNIX it returns <code>null char</code>.
+<br>
+<br>
+<dt><code>PROC curses putchar = (CHAR ch) VOID</code>
+<dd>Writes <i>ch</i> at the current cursor position.
+<br>
+<br>
+<dt><code>PROC curses move = (INT line, column) VOID</code>
+<dd>Sets the cursor position to <i>line</i> and <i>column</i>.
+<br>
+<br>
+<dt><code>PROC curses lines = INT</code>
+<dd>Returns the number of lines on the screen.
+<br>
+<br>
+<dt><code>PROC curses columns = INT</code>
+<dd>Returns the number of columns on the screen.
 </dl>
 
 <br>
-<h3><a name="torrix">An elementary vector library</a></h3>
+<h3><a name="torrix"></a>An elementary vector library</h3>
 <p>Algol68G implements a small vector library that relaxes the limitation that the interpreter poses on speed in arithmetic operations. Using these elementary procedures, more complex operations can be programmed. Consider for instance multiplication of a matrix <var>m</var> times a vector <var>b</var>:
-<ul><code>FOR n TO UPB a DO a[n] := vector inner product(m[n, ], b) OD;</code></ul>
-</p>
-<p>The procedures in the vector library are optimised for speed, although they still perform runtime checks on vector length, initialisation, assignment to <code>NIL</code> and division by zero. Please note that the procedures strictly process vector elements sequentially as in<code>
-PROC vector add = ([] REAL a, b, c) VOID:<br>
-<ul>
-FOR n TO UPB a DO a[n] := b[n] + c[n] OD;
-</ul>
-</code>
-</ul>
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+FOR n TO UPB a 
+DO a[n] := vector inner product(m[n, ], b) 
+OD
+</pre></font>
+</td>
+</table>
+<p>The procedures in the vector library are optimised for speed, although they still perform runtime checks on vector length, initialisation, assignment to <code>NIL</code> and division by zero. Please note that the procedures strictly process vector elements sequentially as in
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+PROC vector add = ([] REAL a, b, c) VOID:
+     FOR n TO UPB a 
+     DO a[n] := b[n] + c[n] 
+     OD
+</pre></font>
+</table>
 <p>
 Therefore, take care when passing overlapping slices as arguments.
 </p>
@@ -194,36 +554,127 @@ Therefore, take care when passing overlapping slices as arguments.
 </p>
 
 <br>
-<h3><a name="assert">Assertions as pre- or postconditions</a></h3>
+<h3><a name="assert"></a>Assertions as pre- or postconditions</h3>
 <p>Algol68G supports an extension called assertions. Assertions can be viewed in two ways. First, they provide a notation for invariants that can be used to code a proof of correctness together with an algorithm. Hardly anyone does this, but assertions make for debugging statements. The syntax for assertions reads
 <p>
 Assertion syntax can be found in the <a href="syntax.html#assertions">syntax summary</a>.
-<p>Under control of the 'assertions' and 'noassertions' pragmat items, the tertiary of an assertion is elaborated at runtime. If the tertiary yields <code>FALSE</code>, a runtime error is produced. Example:
-<pre>
-  OP FACULTY = (INT n) INT:
-     IF ASSERT (n >= 0); n > 0 THEN n * FACULTY (n - 1) ELSE 1 FI;
-</pre>
+<p>Under control of the 'assertions' and 'noassertions' pragmat items, the tertiary of an assertion is elaborated at runtime. If the tertiary yields <code>FALSE</code>, a runtime error is produced. For example,
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><pre>
+OP FACULTY = (INT n) INT:
+   IF ASSERT (n >= 0); 
+      n > 0 
+   THEN n * FACULTY (n - 1) 
+   ELSE 1 
+   FI
+</pre></font>
+</td>
+</table>
+<p>
 will produce an error when <code>FACULTY</code> is called with a negative argument.
 </p>
 
-<br>
-<h3><a name="refine">The refinement preprocessor</a></h3>
-<p>Algol68G is equipped with a refinement preprocessor, which allows programming through stepwise refinement as taught in <a href="algol.html#programmeren">[Koster 1978, 1981]</a>.
-The idea is to facilitate program construction by elaborating the description of the solution to a problem as ever more detailed steps until the description of the solution is complete. (See also <a href="http://www.acm.org/classics/dec95">Wirth's well known lecture</a>). 
+<h3><a name="prep"></a>The preprocessor</h3>
 <p>
-Refinement syntax can be found in the <a href="syntax.html#refinements">syntax summary</a>.
-<p>Refinements cannot be recursive, nor can their definitions be nested. Also, refinement definitions must be unique, and a refinement can only be applied once (refinements are not procedures).
-<p>In the section <i>Sample Algol68G programs</i> is <a href="samples.html#p0">an example</a> of a program constructed through step-wise refinement.
-<p>Algol68G will check whether a program looks like a stepwise refined program. The refinement preprocessor is transparent to programs that are not stepwise refined.
+Algol68G has a basic preprocessor. 
+Currently, the preprocessor supports these features:
+<ul>
+<li>concatenation of lines,
+<li>inclusion of files,
+<li>refinement preprocessor,
+<li>switching the preprocessor on or off.
+</ul>
+<h4><a name="prepcat"></a>Concatenation of lines</h4>
+<p>
+Concatenation of lines is similar to what the C preprocessor does. Any line that ends in a backslash ('\') will be concatenated with the line following it. For example:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><tt>
+STRING s := "spanning two \<br>
+lines"
+</tt></font>
+</td>
+</table>
+<p>
+will become
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00"><tt>
+STRING s := "spanning two lines"
+</tt></font>
+</td>
+</table>
+<p>
+Using a backslash as an escape character causes no interference with Algol 68 source text since when using upper stropping, a backslash is an unworthy character; when using quote stropping a backslash is a times-ten-symbol, but a real-denotation cannot span end-of-line hence no interference occurs. 
+<p>
+Note that when you make use of line concatenation, diagnostics in a concatenated line may be placed in an earlier source line than its actual line in the original source text. In order to preserve line numbering as much as possible, a line is emptied but not deleted if it is joined with a preceeding one. This shows in the listing file as emptied lines.
 </p>
+
+<h4><a name="prepinc"></a>Inclusion of files</h4>
+<p>
+Algol68G supports inclusion of other files in an Algol 68 source text. The inclusion directive reads:
+<p>
+<table border=0 cellpadding=12>
+<td bgcolor="#000000">
+<font color="#00ff00">
+<tt>
+PR read "filename" PR<br>
+PR include "filename" PR
+</tt>
+</font>
+</td>
+</table>
+<p>
+The file with name <i>filename</i> is inserted textually <i>before</i> the line that holds the file inclusion directive. 
+In this way tokens remain in their original lines, which will give more accurate placement of diagnostics. It is therefore recommended that a file inclusion directive be the only text on the line it is in. A file will only be inserted once, on attempted multiple inclusion the file is ignored. Attempted multiple inclusion may for example result from specifying, in an included file, an inclusion directive for an already included file.
+</p>
+
+<h4><a name="refine"></a>The refinement preprocessor</h4>
+<p>
+Algol68G is equipped with a refinement preprocessor, which allows programming through stepwise refinement as taught in <a href="introduction.html#programmeren">[Koster 1978, 1981]</a>.
+The idea is to facilitate program construction by elaborating the description of the solution to a problem as ever more detailed steps until the description of the solution is complete. (See also <a href="http://www.acm.org/classics/dec95">Wirth's well known lecture</a>). 
+
+<p>Refinement syntax can be found in the <a href="syntax.html#refinements">syntax summary</a>. Refinements cannot be recursive, nor can their definitions be nested. Also, refinement definitions must be unique, and a refinement can only be applied once (refinements are not procedures).
+Algol68G will check whether a program looks like a stepwise refined program. The refinement preprocessor is transparent to programs that are not stepwise refined.
+</p>
+
+<h4><a name="prepsw"></a>Switching the preprocessor on or off</h4>
+<p>
+It is possible to switch the preprocessor on or off. The preprocessor is default switched on. If switched off, it will no longer process preprocessor items embedded in pragmats, except for switching the preprocessor on again. Concatenation of lines takes place even if the preprocessor is switched off.
+<ul>
+<dl>
+<dt><code>PR preprocessor PR</code>
+<dd>Switches the preprocessor on if it is switched off.
+<dt><code>PR nopreprocessor PR</code>
+<dd>Switches the preprocessor off if it is switched on.
+</dl>
+</ul>
+</p>
+
+<br>
 
 </td>
 </table>
 
-<p style="font-size: 8pt;">
+<p>
+<br>
+<table width="100%" border=0 cellspacing=0 cellpadding=0>
+<td width="50%" valign=top bgcolor="white">
 <font color="black">
-Copyright &copy; 2001-2004 J. Marcel van der Veer.
+<small>Copyright &copy; 2001-2005 J. Marcel van der Veer.</small>
 </font>
+</td>
+<td width="50%" align=right valign=top bgcolor="white">
+<font color="black">
+<small>Documentation for Algol 68 Genie Mark 8</small>
+</font>
+</td>
+</table>
 </p>
+
 </body>
 </html>
