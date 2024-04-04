@@ -1,4 +1,4 @@
-ALGOL68G - ALGOL 68 GENIE (MARK 16)
+ALGOL68G - ALGOL 68 GENIE (MARK 17)
 
 Algol68G is a nearly fully featured implementation of Algol 68 as defined by 
 the Revised Report.
@@ -19,20 +19,4 @@ this software does not accept responsibility to anyone for the consequences of
 using it or for whether it serves any particular purpose or works at all. See 
 the GNU General Public License for more details. The GNU General Public License 
 does not permit this software to be redistributed in proprietary programs.
-
-Point your browser at <http://www.xs4all.nl/~jmvdveer> to read the documentation.
-
-
-BRIEF INSTALLATION GUIDE
-
-If you are a reasonably experienced Linux user, the following list of commands may 
-suffice to help you on your way. If you do not feel confident to follow this short 
-list, follow the detailed instructions in the documentation. 
-Enter:
-
-tar -xzf algol68g-mk16.tgz
-cd algol68g-mk16
-./configure -O2 --threads
-make
-make install     # if you are superuser, that is, "root" #
 

@@ -265,7 +265,7 @@ void genie_acronym (NODE_T * p)
   len = a68_string_size (p, z);
   u = (char *) malloc ((size_t) (len + 1));
   v = (char *) malloc ((size_t) (len + 1 + 8));
-  a_to_c_string (p, u, z);
+  (void) a_to_c_string (p, u, z);
   if (u != NULL && u[0] != NULL_CHAR && v != NULL) {
     make_acronym (u, v);
     PUSH_REF (p, c_to_a_string (p, v));

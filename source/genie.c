@@ -32,8 +32,8 @@ this program. If not, see <http://www.gnu.org/licenses/>.
 
 void genie_preprocess (NODE_T *, int *);
 
-A68_HANDLE nil_handle = { INITIALISED_MASK, 0, 0, NULL, NULL, NULL };
-A68_REF nil_ref = { INITIALISED_MASK | NIL_MASK, 0, {NULL} };
+A68_HANDLE nil_handle = { INITIALISED_MASK, NULL, 0, NULL, NULL, NULL };
+A68_REF nil_ref = { (STATUS_MASK) (INITIALISED_MASK | NIL_MASK), 0, {NULL} };
 
 ADDR_T frame_pointer = 0, stack_pointer = 0, heap_pointer = 0, handle_pointer = 0, global_pointer = 0, frame_start, frame_end, stack_start, stack_end;
 BOOL_T do_confirm_exit = A68_TRUE;
@@ -114,11 +114,14 @@ void change_masks (NODE_T * p, unsigned mask, BOOL_T set)
 
 void exit_genie (NODE_T * p, int ret)
 {
+#ifdef ENABLE_CURSES
+  genie_curses_end (p);
+#endif
   if (ret == A68_RUNTIME_ERROR && in_monitor) {
     return;
   } else if (ret == A68_RUNTIME_ERROR && MODULE (INFO (p))->options.debug) {
     diagnostics_to_terminal (MODULE (INFO (p))->top_line, A68_RUNTIME_ERROR);
-    single_step (p, BREAKPOINT_ERROR_MASK);
+    single_step (p, (unsigned) BREAKPOINT_ERROR_MASK);
     ret_line_number = LINE_NUMBER (p);
     ret_code = ret;
     longjmp (genie_exit_label, 1);
@@ -481,7 +484,7 @@ void genie (MODULE_T * module)
   }
   io_close_tty_line ();
   if (module->options.trace) {
-    snprintf (output_line, BUFFER_SIZE, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", frame_stack_size / 1024, expr_stack_size / 1024, heap_size / 1024, handle_pool_size / 1024);
+    CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "genie: frame stack %uk, expression stack %uk, heap %uk, handles %uk\n", (unsigned) (frame_stack_size / 1024), (unsigned) (expr_stack_size / 1024), (unsigned) (heap_size / 1024), (unsigned) (handle_pool_size / 1024)) >= 0);
     WRITE (STDOUT_FILENO, output_line);
   }
   install_signal_handlers ();
@@ -526,14 +529,14 @@ void genie (MODULE_T * module)
     } else if (ret_code == A68_RUNTIME_ERROR) {
       if (module->options.backtrace) {
         int printed = 0;
-        snprintf (output_line, BUFFER_SIZE, "\nStack backtrace");
+        CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "\nStack backtrace") >= 0);
         WRITE (STDOUT_FILENO, output_line);
         stack_dump (STDOUT_FILENO, frame_pointer, 16, &printed);
         WRITE (STDOUT_FILENO, "\n");
       }
       if (module->files.listing.opened) {
         int printed = 0;
-        snprintf (output_line, BUFFER_SIZE, "\nStack backtrace");
+        CHECK_RETVAL (snprintf (output_line, (size_t) BUFFER_SIZE, "\nStack backtrace") >= 0);
         WRITE (module->files.listing.fd, output_line);
         stack_dump (module->files.listing.fd, frame_pointer, 32, &printed);
       }

@@ -182,7 +182,7 @@ void renumber_nodes (NODE_T * p, int *n)
 
 NODE_INFO_T *new_node_info (void)
 {
-  NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (NODE_INFO_T));
+  NODE_INFO_T *z = (NODE_INFO_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (NODE_INFO_T));
   MODULE (z) = NULL;
   z->PROCEDURE_LEVEL = 0;
   z->char_in_line = NULL;
@@ -198,7 +198,7 @@ NODE_INFO_T *new_node_info (void)
 
 NODE_T *new_node (void)
 {
-  NODE_T *z = (NODE_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (NODE_T));
+  NODE_T *z = (NODE_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (NODE_T));
   MASK (z) = NULL_MASK;
   z->info = new_node_info ();
   z->reduction = 0;
@@ -238,7 +238,7 @@ NODE_T *new_node (void)
 
 SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
 {
-  SYMBOL_TABLE_T *z = (SYMBOL_TABLE_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (SYMBOL_TABLE_T));
+  SYMBOL_TABLE_T *z = (SYMBOL_TABLE_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (SYMBOL_TABLE_T));
   z->level = symbol_table_count++;
   z->nest = symbol_table_count;
   ATTRIBUTE (z) = 0;
@@ -266,9 +266,9 @@ SYMBOL_TABLE_T *new_symbol_table (SYMBOL_TABLE_T * p)
 \return same
 **/
 
-MOID_T *new_moid ()
+MOID_T *new_moid (void)
 {
-  MOID_T *z = (MOID_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (MOID_T));
+  MOID_T *z = (MOID_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (MOID_T));
   ATTRIBUTE (z) = 0;
   NUMBER (z) = 0;
   DIM (z) = 0;
@@ -283,7 +283,7 @@ MOID_T *new_moid ()
   NODE (z) = NULL;
   PACK (z) = NULL;
   SUB (z) = NULL;
-  z->equivalent_mode = 0;
+  z->equivalent_mode = NULL;
   SLICE (z) = NULL;
   z->deflexed_mode = NULL;
   NAME (z) = NULL;
@@ -298,9 +298,9 @@ MOID_T *new_moid ()
 \return same
 **/
 
-PACK_T *new_pack ()
+PACK_T *new_pack (void)
 {
-  PACK_T *z = (PACK_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (PACK_T));
+  PACK_T *z = (PACK_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (PACK_T));
   MOID (z) = NULL;
   TEXT (z) = NULL;
   NODE (z) = NULL;
@@ -316,9 +316,9 @@ PACK_T *new_pack ()
 \return same
 **/
 
-TAG_T *new_tag ()
+TAG_T *new_tag (void)
 {
-  TAG_T *z = (TAG_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (TAG_T));
+  TAG_T *z = (TAG_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (TAG_T));
   MASK (z) = NULL_MASK;
   SYMBOL_TABLE (z) = NULL;
   MOID (z) = NULL;
@@ -349,9 +349,9 @@ TAG_T *new_tag ()
 \return same
 **/
 
-SOURCE_LINE_T *new_source_line ()
+SOURCE_LINE_T *new_source_line (void)
 {
-  SOURCE_LINE_T *z = (SOURCE_LINE_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (SOURCE_LINE_T));
+  SOURCE_LINE_T *z = (SOURCE_LINE_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (SOURCE_LINE_T));
   z->marker[0] = NULL_CHAR;
   z->string = NULL;
   z->filename = NULL;
@@ -382,7 +382,7 @@ void make_special_mode (MOID_T ** n, int m)
   DEFLEXED (*n) = NULL;
   NAME (*n) = NULL;
   SLICE (*n) = NULL;
-  ROWED (*n) = 0;
+  ROWED (*n) = NULL;
 }
 
 /*!
@@ -524,14 +524,14 @@ SYMBOL_TABLE_T *find_level (NODE_T * n, int i)
 \return same
 **/
 
-double seconds ()
+double seconds (void)
 {
 #if defined ENABLE_UNIX_CLOCK
   struct rusage rus;
   getrusage (RUSAGE_SELF, &rus);
   return ((double) (rus.ru_utime.tv_sec + rus.ru_utime.tv_usec * 1e-6));
 #else
-  return (clock () / (double) CLOCKS_PER_SEC);
+  return ((double) clock () / (double) CLOCKS_PER_SEC);
 #endif
 }
 
@@ -596,7 +596,7 @@ NODE_T *some_node (char *t)
 \brief initialise use of elem-lists
 **/
 
-void init_postulates ()
+void init_postulates (void)
 {
   top_postulate = NULL;
   old_postulate = NULL;
@@ -606,7 +606,7 @@ void init_postulates ()
 \brief make old elem-list available for new use
 **/
 
-void reset_postulates ()
+void reset_postulates (void)
 {
   old_postulate = top_postulate;
   top_postulate = NULL;
@@ -626,7 +626,7 @@ void make_postulate (POSTULATE_T ** p, MOID_T * a, MOID_T * b)
     new_one = old_postulate;
     old_postulate = NEXT (old_postulate);
   } else {
-    new_one = (POSTULATE_T *) get_temp_heap_space (ALIGNED_SIZE_OF (POSTULATE_T));
+    new_one = (POSTULATE_T *) get_temp_heap_space ((size_t) ALIGNED_SIZE_OF (POSTULATE_T));
   }
   new_one->a = a;
   new_one->b = b;
@@ -668,7 +668,6 @@ POSTULATE_T *whether_postulated (POSTULATE_T * p, MOID_T * a)
   }
   return (NULL);
 }
-
 
 /*------------------+
 | Control of C heap |
@@ -730,7 +729,7 @@ TOKEN_T *add_token (TOKEN_T ** p, char *t)
       return (*p);
     }
   }
-  *p = (TOKEN_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (TOKEN_T));
+  *p = (TOKEN_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (TOKEN_T));
   TEXT (*p) = z;
   LESS (*p) = MORE (*p) = NULL;
   return (*p);
@@ -775,7 +774,7 @@ static void add_keyword (KEYWORD_T ** p, int a, char *t)
       p = &MORE (*p);
     }
   }
-  *p = (KEYWORD_T *) get_fixed_heap_space (ALIGNED_SIZE_OF (KEYWORD_T));
+  *p = (KEYWORD_T *) get_fixed_heap_space ((size_t) ALIGNED_SIZE_OF (KEYWORD_T));
   ATTRIBUTE (*p) = a;
   TEXT (*p) = t;
   LESS (*p) = MORE (*p) = NULL;
@@ -828,12 +827,11 @@ KEYWORD_T *find_keyword_from_attribute (KEYWORD_T * p, int a)
   }
 }
 
-
 /*!
 \brief make tables of keywords and non-terminals
 **/
 
-void set_up_tables ()
+void set_up_tables (void)
 {
 /* Entries are randomised to balance the tree. */
   add_keyword (&top_keyword, DIAGONAL_SYMBOL, "DIAG");
@@ -1109,7 +1107,7 @@ double a68g_acosh (double x)
 double a68g_atanh (double x)
 {
   double a = ABS (x);
-  double s = (x < 0 ? -1 : 1);
+  double s = (double) (x < 0 ? -1 : 1);
   if (a >= 1.0) {
     errno = EDOM;
     return (0.0);
@@ -1245,21 +1243,23 @@ int grep_in_string (char *pat, char *str, int *start, int *end)
   widest = 0;
   max_k = 0;
   for (k = 0; k < nmatch; k++) {
-    int dif = matches[k].rm_eo - (int) matches[k].rm_so;
+    int dif = (int) matches[k].rm_eo - (int) matches[k].rm_so;
     if (dif > widest) {
       widest = dif;
       max_k = k;
     }
   }
   if (start != NULL) {
-    (*start) = matches[max_k].rm_so;
+    (*start) = (int) matches[max_k].rm_so;
   }
   if (end != NULL) {
-    (*end) = matches[max_k].rm_eo;
+    (*end) = (int) matches[max_k].rm_eo;
   }
   free (matches);
   return (0);
 #else
+  (void) start;
+  (void) end;
   if (strstr (str, pat) != NULL) {
     return (0);
   } else {

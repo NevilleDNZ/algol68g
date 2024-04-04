@@ -302,15 +302,15 @@ PROPAGATOR_T NAME (NODE_T * p)\
   return (PROPAGATOR (p));\
 }
 
-COMPARE (genie_formula_eq_int, A68_INT, ==);
-COMPARE (genie_formula_ne_int, A68_INT, !=);
-COMPARE (genie_formula_lt_int, A68_INT, <);
-COMPARE (genie_formula_le_int, A68_INT, <=);
-COMPARE (genie_formula_gt_int, A68_INT, >);
-COMPARE (genie_formula_ge_int, A68_INT, >=);
-COMPARE (genie_formula_eq_real, A68_REAL, ==);
-COMPARE (genie_formula_ne_real, A68_REAL, !=);
-COMPARE (genie_formula_lt_real, A68_REAL, <);
-COMPARE (genie_formula_le_real, A68_REAL, <=);
-COMPARE (genie_formula_gt_real, A68_REAL, >);
+COMPARE (genie_formula_eq_int, A68_INT, ==)
+COMPARE (genie_formula_ne_int, A68_INT, !=)
+COMPARE (genie_formula_lt_int, A68_INT, <)
+COMPARE (genie_formula_le_int, A68_INT, <=)
+COMPARE (genie_formula_gt_int, A68_INT, >)
+COMPARE (genie_formula_ge_int, A68_INT, >=)
+COMPARE (genie_formula_eq_real, A68_REAL, ==)
+COMPARE (genie_formula_ne_real, A68_REAL, !=)
+COMPARE (genie_formula_lt_real, A68_REAL, <)
+COMPARE (genie_formula_le_real, A68_REAL, <=)
+COMPARE (genie_formula_gt_real, A68_REAL, >)
 COMPARE (genie_formula_ge_real, A68_REAL, >=)

@@ -1,19 +1,13 @@
-/* ./source/version.h generated on Wed Mar 18 23:47:13 CET 2009 by marcel. */
-
-#if ! defined A68G_VERSION_H
-#define A68G_VERSION_H
-
+/* ./source/version.h generated on Sun Apr 26 13:28:53 CEST 2009 by marcel. */
 #define A68G_NAME "a68g"
-#define REVISION "Mark 16"
-#define RELEASE_DATE "released April 2009"
+#define REVISION "Mark 17"
+#define RELEASE_DATE "released May 2009"
 #define RELEASE_YEAR "2009"
-#define OS_NAME "Linux 2.6.28"
-#define CONFIGURE_DATE ""
-#define CONFIGURE_OPTIONS ""
-#define USERID ""
-#define GCC_VERSION ""
-#define A68_LIBPLOT_VERSION ""
-#define A68_GSL_VERSION ""
-#define A68_PG_VERSION ""
-
-#endif
+#define OS_NAME "Linux 2.6.29"
+#define CONFIGURE_DATE "26 April 2009 13:28"
+#define CONFIGURE_OPTIONS "-O2 --threads"
+#define USERID "marcel"
+#define GCC_VERSION "4.3.0"
+#define A68_LIBPLOT_VERSION "4.2"
+#define A68_GSL_VERSION "1.12"
+#define A68_PG_VERSION "8.3.5"
