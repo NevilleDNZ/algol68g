@@ -45,7 +45,7 @@ static char *bold_postlude[] = {
 };
 
 static char *quote_prelude_start[] = {
-  "'BEGIN' 'MODE' 'ZAHL' = 'LONG' 'INT'",
+  "'BEGIN' 'MODE' 'ZAHL' = 'LONG' 'INT',",
   "               'DOUBLE' = 'LONG' 'REAL',",
   "               'QUAD' = 'LONG' 'LONG' 'REAL';",
   "        START: COMMENCE:",

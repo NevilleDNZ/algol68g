@@ -89,7 +89,7 @@ void append_source_line (char *str, LINE_T ** ref_l, int *line_num, char *filena
   LINE_T *z = new_source_line ();
 // Allow shell command in first line, f.i. "#!/usr/share/bin/a68g".
   if (*line_num == 1) {
-    if (strlen (str) >= 2 && strncmp (str, "#!", 2) == 0) {
+    if (strlen (str) >= 2 && strncmp (str, "#!", strlen ("#!")) == 0) {
       ABEND (strstr (str, "run-script") != NO_TEXT, ERROR_SHELL_SCRIPT, __func__);
       (*line_num)++;
       return;
@@ -202,17 +202,24 @@ BOOL_T skip_comment (LINE_T ** top, char **ch, int delim)
 {
   LINE_T *u = *top;
   char *v = *ch;
+  BOOL_T qstrop = OPTION_STROPPING (&A68_JOB) == QUOTE_STROPPING;
   v++;
   while (u != NO_LINE) {
     while (v[0] != NULL_CHAR) {
       if (is_bold (v, "COMMENT") && delim == BOLD_COMMENT_SYMBOL) {
-        *top = u;
-        *ch = &v[1];
-        return A68_TRUE;
+        char *w = &v[strlen(qstrop ? "'COMMENT'" : "COMMENT")];
+        if (!IS_UPPER(w[0])) {
+          *top = u;
+          *ch = w;
+          return A68_TRUE;
+        }
       } else if (is_bold (v, "CO") && delim == STYLE_I_COMMENT_SYMBOL) {
-        *top = u;
-        *ch = &v[1];
-        return A68_TRUE;
+        char *w = &v[strlen(qstrop ? "'CO'" : "CO")];
+        if (!IS_UPPER(w[0])) {
+          *top = u;
+          *ch = w;
+          return A68_TRUE;
+        }
       } else if (v[0] == '#' && delim == STYLE_II_COMMENT_SYMBOL) {
         *top = u;
         *ch = &v[1];
@@ -237,16 +244,23 @@ BOOL_T skip_pragmat (LINE_T ** top, char **ch, int delim, BOOL_T whitespace)
 {
   LINE_T *u = *top;
   char *v = *ch;
+  BOOL_T qstrop = OPTION_STROPPING (&A68_JOB) == QUOTE_STROPPING;
   while (u != NO_LINE) {
     while (v[0] != NULL_CHAR) {
       if (is_bold (v, "PRAGMAT") && delim == BOLD_PRAGMAT_SYMBOL) {
-        *top = u;
-        *ch = &v[1];
-        return A68_TRUE;
+        char *w = &v[strlen(qstrop ? "'PRAGMAT'" : "PRAGMAT")];
+        if (!IS_UPPER(w[0])) {
+          *top = u;
+          *ch = w;
+          return A68_TRUE;
+        }
       } else if (is_bold (v, "PR") && delim == STYLE_I_PRAGMAT_SYMBOL) {
-        *top = u;
-        *ch = &v[1];
-        return A68_TRUE;
+        char *w = &v[strlen(qstrop ? "'PR'" : "PR")];
+        if (!IS_UPPER(w[0])) {
+          *top = u;
+          *ch = w;
+          return A68_TRUE;
+        }
       } else {
         if (whitespace && !IS_SPACE (v[0]) && v[0] != NEWLINE_CHAR) {
           scan_error (u, v, ERROR_PRAGMENT);
@@ -617,6 +631,31 @@ BOOL_T read_script_file (void)
   return A68_TRUE;
 }
 
+//! @brief match first non-white characters in string.
+
+BOOL_T a68_start(char *u, char *v, char **end)
+{
+  *end = NO_TEXT;
+  while (v[0] != NULL_CHAR) {
+    if (u[0] == NULL_CHAR) {
+      return A68_FALSE;
+    } else if (IS_SPACE (u[0])) {
+      u++;
+    } else {
+      if (u[0] == v[0]) {
+        u++;
+        v++;
+        if (end != NULL) {
+          *end = u;
+        }
+      } else {
+        return A68_FALSE;
+      }
+    }
+  }
+  return A68_TRUE;
+}
+
 //! @brief Read source file and make internal copy.
 
 BOOL_T read_source_file (void)
@@ -625,7 +664,32 @@ BOOL_T read_source_file (void)
   int line_num = 0, k, bytes_read;
   ssize_t l;
   FILE_T f = FILE_SOURCE_FD (&A68_JOB);
-  char **prelude_start, **postlude, *buffer;
+  char **prelude_start, **postlude, *buffer, *text;
+// Read the file into a single buffer, so we save on system calls.
+  line_num = 1;
+  errno = 0;
+  text = (char *) get_temp_heap_space ((unt) (8 + A68_PARSER (source_file_size)));
+  ABEND (errno != 0 || text == NO_TEXT, ERROR_ALLOCATION, __func__);
+  ASSERT (lseek (f, 0, SEEK_SET) >= 0);
+  ABEND (errno != 0, ERROR_ACTION, __func__);
+  errno = 0;
+  bytes_read = (int) io_read (f, text, (size_t) A68_PARSER (source_file_size));
+  ABEND (errno != 0 || bytes_read != A68_PARSER (source_file_size), ERROR_ACTION, __func__);
+// Little test on stropping.
+  char *pr1 = "'PR'QUOTESTROPPING'PR'";
+  char *pr2 = "'PRAGMAT'QUOTESTROPPING'PRAGMAT'";
+  char *end = NO_TEXT;
+  if (a68_start (text, pr1, &end)) {
+    OPTION_STROPPING (&A68_JOB) = QUOTE_STROPPING;
+    buffer = end;
+    A68_PARSER (source_file_size) = strlen (buffer);
+  } else if (a68_start (text, pr2, &end)) {
+    OPTION_STROPPING (&A68_JOB) = QUOTE_STROPPING;
+    buffer = end;
+    A68_PARSER (source_file_size) = strlen (buffer);
+  } else {
+    buffer = text;
+  }
 // Prelude.
   if (OPTION_STROPPING (&A68_JOB) == UPPER_STROPPING) {
     prelude_start = bold_prelude_start;
@@ -637,16 +701,6 @@ BOOL_T read_source_file (void)
     prelude_start = postlude = NO_VAR;
   }
   append_environ (prelude_start, &ref_l, &line_num, "prelude");
-// Read the file into a single buffer, so we save on system calls.
-  line_num = 1;
-  errno = 0;
-  buffer = (char *) get_temp_heap_space ((unt) (8 + A68_PARSER (source_file_size)));
-  ABEND (errno != 0 || buffer == NO_TEXT, ERROR_ALLOCATION, __func__);
-  ASSERT (lseek (f, 0, SEEK_SET) >= 0);
-  ABEND (errno != 0, ERROR_ACTION, __func__);
-  errno = 0;
-  bytes_read = (int) io_read (f, buffer, (size_t) A68_PARSER (source_file_size));
-  ABEND (errno != 0 || bytes_read != A68_PARSER (source_file_size), ERROR_ACTION, __func__);
 // Link all lines into the list.
   k = 0;
   while (k < A68_PARSER (source_file_size)) {
@@ -768,6 +822,7 @@ char *pragment (int type, LINE_T ** ref_l, char **ref_c)
   INIT_BUFFER;
   stop = A68_FALSE;
   while (stop == A68_FALSE) {
+    BOOL_T scan_next = A68_TRUE;
     SCAN_ERROR (c == STOP_CHAR, start_l, start_c, ERROR_UNTERMINATED_PRAGMENT);
 // A ".." or '..' delimited string in a PRAGMAT.
     if (pragmat && (c == QUOTE_CHAR || (c == '\'' && OPTION_STROPPING (&A68_JOB) == UPPER_STROPPING))) {
@@ -796,14 +851,23 @@ char *pragment (int type, LINE_T ** ref_l, char **ref_c)
       }
     } else if (EOL (c)) {
       ADD_ONE_CHAR (NEWLINE_CHAR);
+    } else if (IS_UPPER (c)) {
+      while (IS_UPPER (c)) {
+        ADD_ONE_CHAR (c);
+        c = next_char (ref_l, ref_c, A68_FALSE);
+      }
+      scan_next = FALSE;
     } else if (IS_PRINT (c) || IS_SPACE (c)) {
       ADD_ONE_CHAR (c);
     }
     if (chars_in_buf >= term_s_length) {
 // Check whether we encountered the terminator.
-      stop = (BOOL_T) (strcmp (term_s, &(A68_PARSER (scan_buf)[chars_in_buf - term_s_length])) == 0);
+      char *tok = &(A68_PARSER (scan_buf)[chars_in_buf - term_s_length]);
+      stop = (BOOL_T) (strcmp (term_s, tok) == 0);
     }
-    c = next_char (ref_l, ref_c, A68_FALSE);
+    if (scan_next) {
+      c = next_char (ref_l, ref_c, A68_FALSE);
+    }
   }
   A68_PARSER (scan_buf)[chars_in_buf - term_s_length] = NULL_CHAR;
   z = new_string (term_s, A68_PARSER (scan_buf), term_s, NO_TEXT);
