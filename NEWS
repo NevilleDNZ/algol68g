@@ -1,6 +1,7 @@
-Version 3.5.0-1, February 2024
+Version 3.5.0-2, February/May 2024
 * Write diagnostics to stderr instead of stdout.
 * Minor fix to configuration on Gentoo.
+* Minor fixes.
 
 Version 3.4.0-7, October 2023/January 2024
 * Fix Darwin configuration issue.
