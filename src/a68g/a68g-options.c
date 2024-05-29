@@ -869,6 +869,12 @@ BOOL_T set_options (OPTION_LIST_T *i, BOOL_T cmd_line)
         else if (eq (p, "REDuctions")) {
           OPTION_REDUCTIONS (&A68_JOB) = A68_TRUE;
         }
+// ALGOL60STROPPING sets stropping to quote stropping.
+        else if (eq (p, "ALGOL60stropping")) {
+          OPTION_STROPPING (&A68_JOB) = QUOTE_STROPPING;
+        } else if (eq (p, "ALGOL60-stropping")) {
+          OPTION_STROPPING (&A68_JOB) = QUOTE_STROPPING;
+        }
 // QUOTESTROPPING sets stropping to quote stropping.
         else if (eq (p, "QUOTEstropping")) {
           OPTION_STROPPING (&A68_JOB) = QUOTE_STROPPING;
