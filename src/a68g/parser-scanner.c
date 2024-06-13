@@ -856,7 +856,7 @@ char *pragment (int type, LINE_T ** ref_l, char **ref_c)
         ADD_ONE_CHAR (c);
         c = next_char (ref_l, ref_c, A68_FALSE);
       }
-      scan_next = FALSE;
+      scan_next = A68_FALSE;
     } else if (IS_PRINT (c) || IS_SPACE (c)) {
       ADD_ONE_CHAR (c);
     }
