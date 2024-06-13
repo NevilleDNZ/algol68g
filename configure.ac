@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.5.2, configure.ac
+# Algol 68 Genie 3.5.3, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.5.2], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.5.3], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 AC_MSG_NOTICE([])
@@ -99,7 +99,8 @@ case "$host" in
 # OpenBSD.
 #
 
-*86-*-openbsd* | *86_64-*-openbsd*) 
+# *86-*-openbsd* | *86_64-*-openbsd*) 
+*-openbsd*) 
   AC_DEFINE(BUILD_BSD, 1, [Define this if OpenBSD was detected]) 
   AC_DEFINE(HAVE_IEEE_754, 1, [Define this if IEEE_754 compliant]) 
   bsd_include_dirs=yes
@@ -386,7 +387,7 @@ __mode_t dummy;
 #
 
 AC_MSG_CHECKING([GNU C library])
-AC_RUN_IFELSE([AC_LANG_PROGRAM([], [(void) gnu_get_libc_version();])],
+AC_RUN_IFELSE([AC_LANG_PROGRAM([#include <gnu/libc-version.h>], [(void) gnu_get_libc_version();])],
   [AC_MSG_RESULT(yes)
    AC_DEFINE(HAVE_GNU_C_LIB, 1, [Define this if GNU C library is detected.])
   ],
