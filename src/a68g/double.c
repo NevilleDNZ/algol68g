@@ -1276,7 +1276,7 @@ void genie_shl_double_bits (NODE_T * p)
   if (VALUE (&j) >= 0) {
     for (int n = 0; n < k; n++) {
       UNSIGNED_T carry = ((LW (*w) & D_SIGN) ? 0x1 : 0x0);
-      PRELUDE_ERROR (MODCHK (p, M_LONG_BITS, HW (*w) | D_SIGN), p, ERROR_MATH, M_LONG_BITS);
+      PRELUDE_ERROR (MODCHK (p, M_LONG_BITS, HW (*w) & D_SIGN), p, ERROR_MATH, M_LONG_BITS);
       HW (*w) = (HW (*w) << 1) | carry;
       LW (*w) = (LW (*w) << 1);
     }
