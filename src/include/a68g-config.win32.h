@@ -114,11 +114,11 @@
 #define PACKAGE_BUGREPORT "Marcel van der Veer <algol68g@xs4all.nl>"
 
 // Define to the full name and version of this package.
-#define PACKAGE_STRING "algol68g 3.5.3"
+#define PACKAGE_STRING "algol68g 3.5.4"
 
 // Define to the version of this package.
-#define PACKAGE_VERSION "3.5.3"
+#define PACKAGE_VERSION "3.5.4"
 
 // Version number of package
-#define VERSION "3.5.3"
+#define VERSION "3.5.4"
 
