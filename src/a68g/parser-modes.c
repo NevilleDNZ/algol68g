@@ -522,6 +522,7 @@ void get_mode_from_denotation (NODE_T * p, int sizety)
         MOID (p) = (sizety > 0 ? M_LONG_LONG_REAL : M_REAL);
       }
     } else if (IS (p, BITS_DENOTATION)) {
+#if (A68_LEVEL <= 2)
       if (sizety == 0) {
         MOID (p) = M_BITS;
       } else if (sizety == 1) {
@@ -531,6 +532,15 @@ void get_mode_from_denotation (NODE_T * p, int sizety)
       } else {
         MOID (p) = (sizety > 0 ? M_LONG_LONG_BITS : M_BITS);
       }
+#else
+      if (sizety == 0) {
+        MOID (p) = M_BITS;
+      } else if (sizety == 1) {
+        MOID (p) = M_LONG_BITS;
+      } else {
+        MOID (p) = (sizety > 0 ? M_LONG_BITS : M_BITS);
+      }
+#endif
     } else if (IS (p, LONGETY) || IS (p, SHORTETY)) {
       get_mode_from_denotation (NEXT (p), count_sizety (SUB (p)));
       MOID (p) = MOID (NEXT (p));
