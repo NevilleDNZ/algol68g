@@ -436,7 +436,7 @@ void include_files (LINE_T * top)
 // Search for PR include "filename" PR.
       if (item != NO_TEXT && (streq (item, "INCLUDE") == 0 || streq (item, "READ") == 0)) {
         FILE_T fd;
-        int n, linum, fsize, k, bytes_read, fnwid;
+        int n, line_num, fsize, k, bytes_read, fnwid;
         char *fbuf, delim;
         BUFFER fnb;
         char *fn;
@@ -516,7 +516,7 @@ void include_files (LINE_T * top)
           A68_PARSER (scan_buf) = (char *) get_temp_heap_space ((unt) (8 + A68_PARSER (max_scan_buf_length)));
         }
 // Link all lines into the list.
-        linum = 1;
+        line_num = 1;
         s = u;
         t = PREVIOUS (u);
         k = 0;
@@ -524,7 +524,7 @@ void include_files (LINE_T * top)
 // If file is empty, insert single empty line.
           A68_PARSER (scan_buf)[0] = NEWLINE_CHAR;
           A68_PARSER (scan_buf)[1] = NULL_CHAR;
-          append_source_line (A68_PARSER (scan_buf), &t, &linum, fn);
+          append_source_line (A68_PARSER (scan_buf), &t, &line_num, fn);
         } else
           while (k < fsize) {
             n = 0;
@@ -539,7 +539,7 @@ void include_files (LINE_T * top)
             if (k < fsize) {
               k++;
             }
-            append_source_line (A68_PARSER (scan_buf), &t, &linum, fn);
+            append_source_line (A68_PARSER (scan_buf), &t, &line_num, fn);
           }
 // Conclude and go find another include directive, if any.
         NEXT (t) = s;
@@ -568,7 +568,7 @@ void append_environ (char *str[], LINE_T ** ref_l, int *line_num, char *name)
 {
   for (int k = 0; str[k] != NO_TEXT; k++) {
     int zero_line_num = 0;
-    (*line_num)++;
+    (void) line_num;
     append_source_line (str[k], ref_l, &zero_line_num, name);
   }
 }
