@@ -1,4 +1,4 @@
-Version 3.5.0-3, February/June 2024
+Version 3.5.0-5, February/June 2024
 * Write diagnostics to stderr instead of stdout.
 * Minor fix to configuration on Gentoo, OpenBSD and Fedora.
 * Minor fixes.

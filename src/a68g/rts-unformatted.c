@@ -1060,7 +1060,13 @@ void genie_write_standard (NODE_T * p, MOID_T * mode, BYTE_T * item, A68_REF ref
     add_a_string_transput_buffer (p, UNFORMATTED_BUFFER, item);
   } else if (IS_UNION (mode)) {
     A68_UNION *z = (A68_UNION *) item;
-    genie_write_standard (p, (MOID_T *) (VALUE (z)), &item[A68_UNION_SIZE], ref_file);
+    MOID_T *um = (MOID_T *) (VALUE (z));
+    BYTE_T *ui = &item[A68_UNION_SIZE];
+    if (um == NO_MOID) {
+      diagnostic (A68_RUNTIME_ERROR, p, ERROR_EMPTY_VALUE, mode);
+      exit_genie (p, A68_RUNTIME_ERROR);
+    }
+    genie_write_standard (p, um, ui, ref_file);
   } else if (IS_STRUCT (mode)) {
     for (PACK_T *q = PACK (mode); q != NO_PACK; FORWARD (q)) {
       BYTE_T *elem = &item[OFFSET (q)];
