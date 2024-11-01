@@ -1475,15 +1475,20 @@ void genie_shl_bits (NODE_T * p)
   A68_BITS i; A68_INT j;
   POP_OBJECT (p, &j, A68_INT);
   POP_OBJECT (p, &i, A68_BITS);
-  if (VALUE (&j) >= 0) {
-    UNSIGNED_T z = VALUE (&i);
+  UNSIGNED_T z = VALUE (&i);
+  int n = VALUE (&j);
+  if (n >= 0) {
     for (int k = 0; k < VALUE (&j); k++) {
       PRELUDE_ERROR (!MODULAR_MATH (p) && (z & D_SIGN), p, ERROR_MATH, M_BITS);
       z = z << 1;
     }
     PUSH_VALUE (p, z, A68_BITS);
   } else {
-    PUSH_VALUE (p, VALUE (&i) >> -VALUE (&j), A68_BITS);
+    for (int k = 0; k < -n; k++) {
+//    PRELUDE_ERROR (!MODULAR_MATH (p) && (z & 0x1), p, ERROR_MATH, M_BITS);
+      z = z >> 1;
+    }
+    PUSH_VALUE (p, z, A68_BITS);
   }
 }
 
