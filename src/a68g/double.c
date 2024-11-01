@@ -954,7 +954,8 @@ void n (NODE_T * p) {\
   A68_LONG_INT i, j;\
   POP_OBJECT (p, &j, A68_LONG_INT);\
   POP_OBJECT (p, &i, A68_LONG_INT);\
-  int k = sign_double_int (double_ssub (p, VALUE (&i), VALUE (&j)));\
+  DOUBLE_NUM_T w = double_ssub (p, VALUE (&i), VALUE (&j));\
+  int k = sign_double_int (w);\
   PUSH_VALUE (p, (BOOL_T) (k OP 0), A68_BOOL);\
   }
 
