@@ -194,7 +194,7 @@ DOUBLE_NUM_T double_umul (NODE_T * p, MOID_T * m, DOUBLE_NUM_T u, DOUBLE_NUM_T v
 {
   DOUBLE_NUM_T w;
   m128to128 (p, m, &w, u, v);
-  return w;
+  return abs_double_zero (w);
 }
 
 // Signed integer.
@@ -264,7 +264,7 @@ DOUBLE_NUM_T double_smul (NODE_T * p, DOUBLE_NUM_T u, DOUBLE_NUM_T v)
   if (neg_u != neg_v) {
     w = neg_double_int (w);
   }
-  return w;
+  return abs_double_zero (w);
 }
 
 DOUBLE_NUM_T double_sdiv (NODE_T * p, DOUBLE_NUM_T u, DOUBLE_NUM_T v, int mode)
