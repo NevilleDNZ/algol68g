@@ -1,5 +1,5 @@
 #
-# Algol 68 Genie 3.5.5, configure.ac
+# Algol 68 Genie 3.5.6, configure.ac
 #
 # To configure a68g for the widest range of platforms, issue: 
 #   ./configure --enable-generic
@@ -8,7 +8,7 @@
 #   sudo apt install libncurses-dev libreadline-dev libmpfr libgmp libgsl-dev r-mathlib libplot-dev libghc-postgresql-libpq-dev
 #
 
-AC_INIT([algol68g], [3.5.5], [Marcel van der Veer <algol68g@xs4all.nl>])
+AC_INIT([algol68g], [3.5.6], [Marcel van der Veer <algol68g@xs4all.nl>])
 AC_PREREQ([2.60])
 
 AC_MSG_NOTICE([])

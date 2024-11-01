@@ -382,10 +382,7 @@ PROP_T genie_parallel (NODE_T * p)
       diagnostic (A68_RUNTIME_ERROR, p, ERROR_PARALLEL_CANNOT_CREATE);
       exit_genie (p, A68_RUNTIME_ERROR);
     }
-    if (errno != 0) {
-      diagnostic (A68_RUNTIME_ERROR, p, ERROR_THREAD_FAULT);
-      exit_genie (p, A68_RUNTIME_ERROR);
-    }
+// Do not check errno here as a successful operation does not clear errno.
     PARENT (u) = A68_PAR (main_thread_id);
     ID (u) = A68_PAR (parent_thread_id);
     A68_PAR (context_index)++;

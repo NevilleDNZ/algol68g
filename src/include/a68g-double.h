@@ -51,6 +51,7 @@
 #define CONST_2_UP_112_Q (5192296858534827628530496329220096.0q)
 
 #define IS_ZERO(u) (HW (u) == 0 && LW (u) == 0)
+#define IS_NEG_ZERO(u) (HW (u) == D_SIGN && LW (u) == 0)
 #define EQ(u, v) (HW (u) == HW (v) && LW (u) == LW (v))
 #define GT(u, v) (HW (u) != HW (v) ? HW (u) > HW (v) : LW (u) > LW (v))
 #define GE(u, v) (HW (u) != HW (v) ? HW (u) >= HW (v) : LW (u) >= LW (v))
@@ -149,10 +150,12 @@ static inline DOUBLE_NUM_T dble (DOUBLE_T x)
 
 static inline int sign_double_int (DOUBLE_NUM_T w)
 {
-  if (D_NEG (w)) {
-    return -1;
-  } else if (D_ZERO (w)) {
+  if (D_ZERO (w)) {
     return 0;
+  } else if (IS_NEG_ZERO (w)) {
+    return 0;
+  } else if (D_NEG (w)) {
+    return -1;
   } else {
     return 1;
   }
@@ -175,6 +178,15 @@ static inline DOUBLE_NUM_T abs_double_int (DOUBLE_NUM_T z)
   LW (w) = LW (z);
   HW (w) = HW (z) & (~D_SIGN);
   return w;
+}
+
+static inline DOUBLE_NUM_T abs_double_zero (DOUBLE_NUM_T z)
+{
+  if (IS_NEG_ZERO (z)) {
+    return abs_double_int (z);
+  } else {
+    return z;
+  }
 }
 
 static inline DOUBLE_NUM_T neg_double_int (DOUBLE_NUM_T z)
