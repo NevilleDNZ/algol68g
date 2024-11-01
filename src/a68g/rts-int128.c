@@ -91,7 +91,7 @@ void m128to128 (NODE_T * p, MOID_T * m, DOUBLE_NUM_T * w, DOUBLE_NUM_T u, DOUBLE
   PRELUDE_ERROR (MODCHK (p, m, HW (h) != 0 || LW (h) != 0), p, ERROR_MATH, M_LONG_INT)
 }
 
-DOUBLE_NUM_T double_udiv_deep (NODE_T * p, MOID_T * m, DOUBLE_NUM_T n, DOUBLE_NUM_T d, int mode)
+DOUBLE_NUM_T double_udiv (NODE_T * p, MOID_T * m, DOUBLE_NUM_T n, DOUBLE_NUM_T d, int mode)
 {
 // A bit naive long division.
   DOUBLE_NUM_T q, r;
@@ -168,12 +168,6 @@ DOUBLE_NUM_T double_udiv_deep (NODE_T * p, MOID_T * m, DOUBLE_NUM_T n, DOUBLE_NU
   }
 }
 
-DOUBLE_NUM_T double_udiv (NODE_T * p, MOID_T * m, DOUBLE_NUM_T n, DOUBLE_NUM_T d, int mode)
-{
-  DOUBLE_NUM_T w = double_udiv_deep (p, m, n, d, mode);
-  return abs_double_zero (w);
-}
-
 DOUBLE_NUM_T double_uadd (NODE_T * p, MOID_T * m, DOUBLE_NUM_T u, DOUBLE_NUM_T v)
 {
   DOUBLE_NUM_T w;
@@ -194,7 +188,7 @@ DOUBLE_NUM_T double_umul (NODE_T * p, MOID_T * m, DOUBLE_NUM_T u, DOUBLE_NUM_T v
 {
   DOUBLE_NUM_T w;
   m128to128 (p, m, &w, u, v);
-  return abs_double_zero (w);
+  return w;
 }
 
 // Signed integer.
@@ -220,7 +214,7 @@ DOUBLE_NUM_T double_sadd (NODE_T * p, DOUBLE_NUM_T u, DOUBLE_NUM_T v)
   } else if (neg_v) {
     w = double_ssub (p, u, v);
   }
-  return w;
+  return abs_double_zero (w);
 }
 
 DOUBLE_NUM_T double_ssub (NODE_T * p, DOUBLE_NUM_T u, DOUBLE_NUM_T v)
@@ -247,7 +241,7 @@ DOUBLE_NUM_T double_ssub (NODE_T * p, DOUBLE_NUM_T u, DOUBLE_NUM_T v)
   } else if (neg_v) {
     w = double_sadd (p, u, v);
   }
-  return w;
+  return abs_double_zero (w);
 }
 
 DOUBLE_NUM_T double_smul (NODE_T * p, DOUBLE_NUM_T u, DOUBLE_NUM_T v)
