@@ -1076,7 +1076,7 @@ void genie_double_bits_pack (NODE_T * p)
   A68_ARRAY *arr; A68_TUPLE *tup;
   GET_DESCRIPTOR (arr, tup, &z);
   int size = ROW_SIZE (tup);
-  PRELUDE_ERROR (size < 0 || size > A68_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
+  PRELUDE_ERROR (size < 0 || size > A68_LONG_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_ROW_BOOL);
   DOUBLE_NUM_T w;
   set_lw (w, 0x0);
   if (ROW_SIZE (tup) > 0) {
@@ -1090,7 +1090,7 @@ void genie_double_bits_pack (NODE_T * p)
         bit = 0x1;
       }
       if (VALUE (boo)) {
-        if (n > A68_BITS_WIDTH) {
+        if (n < A68_BITS_WIDTH) {
           LW (w) |= bit;
         } else {
           HW (w) |= bit;
@@ -1211,11 +1211,12 @@ void genie_elem_double_bits (NODE_T * p)
   PRELUDE_ERROR (k < 1 || k > A68_LONG_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
   UNSIGNED_T mask = 0x1, *w;
   if (k <= A68_BITS_WIDTH) {
-    w = &(LW (VALUE (&j)));
-  } else {
     w = &(HW (VALUE (&j)));
+  } else {
+    w = &(LW (VALUE (&j)));
+    k -= A68_BITS_WIDTH;
   }
-  for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
+  for (int n = 0; n < A68_BITS_WIDTH - k; n++) {
     mask = mask << 1;
   }
   PUSH_VALUE (p, (BOOL_T) ((*w & mask) ? A68_TRUE : A68_FALSE), A68_BOOL);
@@ -1232,11 +1233,12 @@ void genie_set_double_bits (NODE_T * p)
   PRELUDE_ERROR (k < 1 || k > A68_LONG_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
   UNSIGNED_T mask = 0x1, *w;
   if (k <= A68_BITS_WIDTH) {
-    w = &(LW (VALUE (&j)));
-  } else {
     w = &(HW (VALUE (&j)));
+  } else {
+    w = &(LW (VALUE (&j)));
+    k -= A68_BITS_WIDTH;
   }
-  for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
+  for (int n = 0; n < A68_BITS_WIDTH - k; n++) {
     mask = mask << 1;
   }
   (*w) |= mask;
@@ -1254,11 +1256,12 @@ void genie_clear_double_bits (NODE_T * p)
   PRELUDE_ERROR (k < 1 || k > A68_LONG_BITS_WIDTH, p, ERROR_OUT_OF_BOUNDS, M_INT);
   UNSIGNED_T mask = 0x1, *w;
   if (k <= A68_BITS_WIDTH) {
-    w = &(LW (VALUE (&j)));
-  } else {
     w = &(HW (VALUE (&j)));
+  } else {
+    w = &(LW (VALUE (&j)));
+    k -= A68_BITS_WIDTH;
   }
-  for (int n = 0; n < (A68_BITS_WIDTH - VALUE (&i)); n++) {
+  for (int n = 0; n < A68_BITS_WIDTH - k; n++) {
     mask = mask << 1;
   }
   (*w) &= ~mask;
